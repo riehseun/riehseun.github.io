@@ -146,62 +146,11 @@ echo 'export PATH=$PATH:~/.jx/bin' >> ~/.bashrc
 
 
 
-# Update YUM with Cloud SDK repo information:
-sudo tee -a /etc/yum.repos.d/google-cloud-sdk.repo << EOM
-[google-cloud-sdk]
-name=Google Cloud SDK
-baseurl=https://packages.cloud.google.com/yum/repos/cloud-sdk-el7-x86_64
-enabled=1
-gpgcheck=1
-repo_gpgcheck=1
-gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
-       https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
-EOM
-
-# The indentation for the 2nd line of gpgkey is important.
-
-# Install the Cloud SDK
-sudo yum install google-cloud-sdk
-
-gcloud init # choose the project and region
-
-sudo yum install kubectl
-
-gcloud container clusters create [CLUSTER_NAME] # You may get errors. Wait until Kubernetes API is enabled for the project. Then try this command again
-
-gcloud container clusters get-credentials [CLUSTER_NAME]
-
-# Delete the cluster after
-gcloud container clusters delete [CLUSTER_NAME]
 
 
-# From this point on, you can just do
-gcloud container clusters create [CLUSTER_NAME]
-
-gcloud container clusters delete [CLUSTER_NAME]
 
 
-# Load balancer and static IP
 
-gcloud container clusters create [CLUSTER_NAME]
-
-# Reverve static IP for "jenkins-master" application
-gcloud compute addresses create [INGRESS_GLOBLA_STATIC_IP_NAME] --global
-
-kubectl apply -f deployment.yaml
-kubectl apply -f service.yaml
-kubectl apply -f ingress.yaml
-
-# Wait about 10 mins until application comes up
-
-kubectl delete ingress [INGRESS_NAME]
-
-gcloud compute addresses delete [INGRESS_GLOBLA_STATIC_IP_NAME] --global
-
-gcloud container clusters delete [CLUSTER_NAME]
-
-
-# Ingress setup
 kubectl create clusterrolebinding cluster-admin-binding --clusterrole cluster-admin --user $(gcloud config get-value account)
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/mandatory.yaml
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/cloud-generic.yaml
