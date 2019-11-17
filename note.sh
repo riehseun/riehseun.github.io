@@ -7,7 +7,7 @@ docker login
 docker push riehseun/jenkins-master
 # Stop and remove all images
 docker stop $(docker ps -a -q)
-docker rm $(docker images -a -q)
+docker rmi -f $(docker images -a -q)
 
 docker tag dd-fe riehseun/dd-fe
 docker run -d -p 8080:8080 riehseun/dd-fe
