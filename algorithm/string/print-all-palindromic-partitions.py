@@ -37,11 +37,38 @@ def get_parlindrom_partitions(string):
 	# possible chunks of string division are 2,3,4,...,len(string). According number of index where division should take places are 1,2,3,...len(String)-1
 	# for each number of index, find all possible partitions
 
+	# case 0 division (4C0)
+	# abcde
+
+	# case 1 division (4C1)
+	# a,bcde
+	# ab,cde
+	# abc,de
+	# abcd,e
+
+	# case 2 divisions (4C2)
+	# a,b,cde
+	# a,bc,de
+	# a,bcd,e
+	# ab,c,de
+	# ab,cd,e
+	# abc,d,e
+
+	# case len(String)-2 divisions (4C1)
+	# a,b,c,de
+	# a,b,cd,e
+	# a,bc,d,e
+	# ab,c,d,e
+
+	# case len(String)-1 divisions (4C0)
+	# a,b,c,d,e
+
 	# for each array containing partitiioned sets of strings, add to result if is_everything_parlindrom() returns True
 	for partition in partitions:
 		if(is_everything_parlindrom(partition)):
 			parlindromic_partitions.append(partition)
 
+print(get_partitions("abcde", []))
 
 def is_everything_parlindrom(string_array):
 	""" takes an array of strings and return true if all elements in the array are parlindroms """
