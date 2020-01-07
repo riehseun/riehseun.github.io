@@ -26,6 +26,8 @@ b-ana-n-a
 b-anana
 """
 
+from itertools import combinations
+
 def get_parlindrom_partitions(string):
 	# breaking the input string into individual chars make it parlindome partition
 	# for all partitioned sets of input string must be parlindrom
@@ -63,12 +65,18 @@ def get_parlindrom_partitions(string):
 	# case len(String)-1 divisions (4C0)
 	# a,b,c,d,e
 
-	# for each array containing partitiioned sets of strings, add to result if is_everything_parlindrom() returns True
-	for partition in partitions:
-		if(is_everything_parlindrom(partition)):
-			parlindromic_partitions.append(partition)
+	# for each array containing partitioned sets of strings, add to result if is_everything_parlindrom() returns True
+	for index in range(1, len(String)-1):
+		combination_array = compute_combination(string, index)
+		if(is_everything_parlindrom(combination_array)):
+			parlindromic_partitions.append('-'.join(combination_array))
 
-print(get_partitions("abcde", []))
+def compute_combination(string, number):
+	"""takes a string and return an array containing combinations of chars of that string """
+	combination_array = []
+	for c in list(combinations(string.split(), number)):
+		combination_array.append(c)
+	return combination_array
 
 def is_everything_parlindrom(string_array):
 	""" takes an array of strings and return true if all elements in the array are parlindroms """
@@ -99,10 +107,15 @@ def is_parlindrom(string):
 	# passing above test means string is symmetric
 	return True
 
+print (compute_combination("abcde", 2))
+
+assert (is_everything_parlindrom(["naban", "a"]) == True)
+assert (is_everything_parlindrom(["naban", "nabanan"]) == False)
+
 assert (is_parlindrom("naban") == True)
 assert (is_parlindrom("n") == True)
 assert (is_parlindrom("nabanan") == False)
 assert (is_parlindrom("nanana") == False)
 
-assert (is_everything_parlindrom(["naban", "a"]) == True)
-assert (is_everything_parlindrom(["naban", "nabanan"]) == False)
+
+
