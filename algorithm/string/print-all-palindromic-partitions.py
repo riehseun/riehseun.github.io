@@ -66,9 +66,10 @@ def get_parlindrom_partitions(string):
 	# a,b,c,d,e
 
 	# for each array containing partitioned sets of strings, add to result if is_everything_parlindrom() returns True
-	for index in range(1, len(string)-1):
+	for index in range(1, len(string)):
 		combination_array = compute_combination(string, index)
-		print(is_everything_parlindrom(combination_array))
+		# print(is_everything_parlindrom(combination_array))
+		print(combination_array)
 		if(is_everything_parlindrom(combination_array)):
 			parlindromic_partitions.append('-'.join(combination_array))
 	return parlindromic_partitions
@@ -76,38 +77,39 @@ def get_parlindrom_partitions(string):
 def compute_combination(string, number):
 	"""takes a string and return an array containing combinations of chars of that string """
 	combination_array = []
+	if (number == 1):
+		for index in range(1, len(string)):
+			combination_array.append([string[:index],string[index:]])
+	else:
+		# come up with indexes where partitions can happen
+		index_poistion = ""
+		for digit in range(0, len(string)-1):
+			index_poistion += str(digit)
+		# print(index_poistion)
 
-	# come up with indexes where partitions can happen
-	index_poistion = ""
-	for digit in range(0, len(string)-1):
-		index_poistion += str(digit)
-	#print(index_poistion)
+		for division_index_tuple in combinations(list(index_poistion), number):
+			# print (division_index_tuple)
+			temp_string_array = []
 
-	for division_index_tuple in combinations(list(index_poistion), number):
-		print (division_index_tuple)
-		temp_string_array = []
+			for index in division_index_tuple:
+				current_val = int(index)
+				current_index = division_index_tuple.index(index)
 
-		for index in division_index_tuple:
-			current_val = int(index)
-			current_index = division_index_tuple.index(index)
-
-			# if current index is first index
-			if (current_index == 0):
-				# if single char
-				if (current_val == 0):
-					temp_string_array.append(string[current_val])
+				# if current index is first index
+				if (current_index == 0):
+					next_index = 1
+					next_val = int(division_index_tuple[next_index])
+					temp_string_array.append(string[:next_val])
+				elif (current_index < len(division_index_tuple)-1):
+					next_index = current_index + 1
+					next_val = int(division_index_tuple[next_index])
+					temp_string_array.append(string[current_val:next_val])
+				# if current index is last index
 				else:
-					temp_string_array.append(string[:current_val])
-			elif (current_index < len(division_index_tuple)-1):
-				next_index = current_index + 1
-				next_val = int(division_index_tuple[next_index])
-				temp_string_array.append(string[current_val:next_val])
-			# if current index is last index
-			else:
-				temp_string_array.append(string[current_val:])
+					temp_string_array.append(string[current_val:])
 
-		print (temp_string_array)
-		combination_array.append(temp_string_array)
+			# print (temp_string_array)
+			combination_array.append(temp_string_array)
 	return combination_array
 
 def is_everything_parlindrom(string_array):
@@ -142,7 +144,10 @@ def is_parlindrom(string):
 # print (get_parlindrom_partitions("IDeserve"))
 # print (get_parlindrom_partitions("banana"))
 
-print (compute_combination("IDeserve", 5))
+print (compute_combination("IDeserve", 7))
+# print (compute_combination("IDeserve", 5))
+print (compute_combination("IDeserve", 2))
+print (compute_combination("IDeserve", 1))
 
 assert (is_everything_parlindrom(["naban", "a"]) == True)
 assert (is_everything_parlindrom(["naban", "nabanan"]) == False)
