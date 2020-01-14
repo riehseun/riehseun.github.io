@@ -144,10 +144,10 @@ def is_parlindrom(string):
 # print (get_parlindrom_partitions("IDeserve"))
 # print (get_parlindrom_partitions("banana"))
 
-print (compute_combination("IDeserve", 7))
+# print (compute_combination("IDeserve", 7))
 # print (compute_combination("IDeserve", 5))
-print (compute_combination("IDeserve", 2))
-print (compute_combination("IDeserve", 1))
+# print (compute_combination("IDeserve", 2))
+# print (compute_combination("IDeserve", 1))
 
 assert (is_everything_parlindrom(["naban", "a"]) == True)
 assert (is_everything_parlindrom(["naban", "nabanan"]) == False)
@@ -157,6 +157,3 @@ assert (is_parlindrom("naban") == True)
 assert (is_parlindrom("n") == True)
 assert (is_parlindrom("nabanan") == False)
 assert (is_parlindrom("nanana") == False)
-
-
-
