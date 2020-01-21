@@ -36,81 +36,8 @@ def get_parlindrom_partitions(string):
 	# placeholder for the result
 	parlindromic_partitions = []
 
-	# possible chunks of string division are 2,3,4,...,len(string). According number of index where division should take places are 1,2,3,...len(String)-1
-	# for each number of index, find all possible partitions
-
-	# case 0 division (4C0)
-	# abcde
-
-	# case 1 division (4C1)
-	# a,bcde
-	# ab,cde
-	# abc,de
-	# abcd,e
-
-	# case 2 divisions (4C2)
-	# a,b,cde
-	# a,bc,de
-	# a,bcd,e
-	# ab,c,de
-	# ab,cd,e
-	# abc,d,e
-
-	# case len(String)-2 divisions (4C1)
-	# a,b,c,de
-	# a,b,cd,e
-	# a,bc,d,e
-	# ab,c,d,e
-
-	# case len(String)-1 divisions (4C0)
-	# a,b,c,d,e
-
-	# for each array containing partitioned sets of strings, add to result if is_everything_parlindrom() returns True
-	for index in range(1, len(string)):
-		combination_array = compute_combination(string, index)
-		# print(is_everything_parlindrom(combination_array))
-		print(combination_array)
-		if(is_everything_parlindrom(combination_array)):
-			parlindromic_partitions.append('-'.join(combination_array))
-	return parlindromic_partitions
-
-def compute_combination(string, number):
-	"""takes a string and return an array containing combinations of chars of that string """
-	combination_array = []
-	if (number == 1):
-		for index in range(1, len(string)):
-			combination_array.append([string[:index],string[index:]])
-	else:
-		# come up with indexes where partitions can happen
-		index_poistion = ""
-		for digit in range(0, len(string)-1):
-			index_poistion += str(digit)
-		# print(index_poistion)
-
-		for division_index_tuple in combinations(list(index_poistion), number):
-			# print (division_index_tuple)
-			temp_string_array = []
-
-			for index in division_index_tuple:
-				current_val = int(index)
-				current_index = division_index_tuple.index(index)
-
-				# if current index is first index
-				if (current_index == 0):
-					next_index = 1
-					next_val = int(division_index_tuple[next_index])
-					temp_string_array.append(string[:next_val])
-				elif (current_index < len(division_index_tuple)-1):
-					next_index = current_index + 1
-					next_val = int(division_index_tuple[next_index])
-					temp_string_array.append(string[current_val:next_val])
-				# if current index is last index
-				else:
-					temp_string_array.append(string[current_val:])
-
-			# print (temp_string_array)
-			combination_array.append(temp_string_array)
-	return combination_array
+	# Generate 2^len(string)-1 binaries where 0 = don't partition and 1 = partition. Store them into an array. Then split strings based on 1s'
+	# Create an array of size 2^len(strong)-1 of empty strings. For half of element, add 0. For the other half, add 1. Use recursion to apply this rule
 
 def is_everything_parlindrom(string_array):
 	""" takes an array of strings and return true if all elements in the array are parlindroms """
