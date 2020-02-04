@@ -44,14 +44,17 @@ def get_parlindrom_partitions(string):
 
 	print(binary_array)
 
-	char_array = []
-	for char in string:
-		char_array.append(char)
-
 	for binary in binary_array:
+		start_index_to_split = 0
+		string_partition = []
 		for digit in binary:
-			while digit != 1:
+			if (digit == 1):
+				string_partition.append(string[start_index_to_split:indexOf(digit)])
+				start_index_to_split = indexOf(digit) + 1
+		if (is_everything_parlindrom(string_partition)):
+			parlindromic_partitions.append(string_partition)
 
+	return parlindromic_partitions
 
 def generate_binary_string(array, start_index, number):
 	""" takes a number and array. generate binaries into array """
