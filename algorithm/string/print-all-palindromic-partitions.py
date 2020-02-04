@@ -38,6 +38,23 @@ def get_parlindrom_partitions(string):
 
 	# Generate 2^len(string)-1 binaries where 0 = don't partition and 1 = partition. Store them into an array. Then split strings based on 1s'
 	# Create an array of size 2^len(strong)-1 of empty strings. For half of element, add 0. For the other half, add 1. Use recursion to apply this rule
+	binary_array = []
+	for i in range(2^len(string)-1):
+		binary_array.append("")
+
+	for i in range(2^len(string)-1):
+		if (i<(2^len(string)-1)/2):
+			binary_array[i] += "0"
+		else:
+			binary_array[i] += "1"
+
+def generate_binary_string(number, array):
+	""" takes a number and array. generate binaries into array """
+	for i in range(2^len(string)-1):
+		if (i<(2^len(string)-1)/2):
+			binary_array[i] += "0"
+		else:
+			binary_array[i] += "1"
 
 def is_everything_parlindrom(string_array):
 	""" takes an array of strings and return true if all elements in the array are parlindroms """
