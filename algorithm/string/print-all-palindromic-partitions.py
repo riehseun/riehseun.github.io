@@ -42,7 +42,7 @@ def get_parlindrom_partitions(string):
 	for i in range(2^len(string)-1):
 		binary_array.append("")
 
-	generate_binary_string(len(string), binary_array)
+	print(generate_binary_string(len(string), binary_array))
 
 def generate_binary_string(number, array):
 	""" takes a number and array. generate binaries into array """
@@ -86,7 +86,7 @@ def is_parlindrom(string):
 	return True
 
 # print (get_parlindrom_partitions("IDeserve"))
-# print (get_parlindrom_partitions("banana"))
+print (get_parlindrom_partitions("banana"))
 
 # print (compute_combination("IDeserve", 7))
 # print (compute_combination("IDeserve", 5))
