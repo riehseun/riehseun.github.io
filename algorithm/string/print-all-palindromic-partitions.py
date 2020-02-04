@@ -50,7 +50,7 @@ def get_parlindrom_partitions(string):
 		for digit in binary:
 			if (digit == 1):
 				string_partition.append(string[start_index_to_split:indexOf(digit)])
-				start_index_to_split = indexOf(digit) + 1
+				start_index_to_split = indexOf(digit)
 		if (is_everything_parlindrom(string_partition)):
 			parlindromic_partitions.append(string_partition)
 
