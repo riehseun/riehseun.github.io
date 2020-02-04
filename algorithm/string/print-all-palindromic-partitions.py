@@ -46,13 +46,15 @@ def get_parlindrom_partitions(string):
 
 def generate_binary_string(number, array):
 	""" takes a number and array. generate binaries into array """
+	if (number <= 0):
+		return array
+
 	for i in range(2^number-1):
 		if (i<(2^number-1)/2):
 			array[i] += "0"
 		else:
 			array[i] += "1"
 	generate_binary_string(number-1, array)
-	return array
 
 def is_everything_parlindrom(string_array):
 	""" takes an array of strings and return true if all elements in the array are parlindroms """
