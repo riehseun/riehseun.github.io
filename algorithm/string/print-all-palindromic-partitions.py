@@ -51,6 +51,7 @@ def generate_binary_string(number, array):
 			array[i] += "0"
 		else:
 			array[i] += "1"
+	generate_binary_string(number-1, array)
 	return array
 
 def is_everything_parlindrom(string_array):
