@@ -36,7 +36,7 @@ def get_parlindrom_partitions(string):
 	# placeholder for the result
 	parlindromic_partitions = []
 
-	# Generate 2^len(string)-1 binaries where 0 = don't partition and 1 = partition. Store them into an array. Then split strings based on 1s'
+	# Generate 2^len(string) binaries where 0 = don't partition and 1 = partition. Store them into an array. Then split strings based on 1s'
 	# Create an array of size 2^len(strong)-1 of empty strings. For half of element, add 0. For the other half, add 1. Use recursion to apply this rule
 	binary_array = []
 	for i in range(2^len(string)-1):
