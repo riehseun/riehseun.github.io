@@ -26,8 +26,6 @@ b-ana-n-a
 b-anana
 """
 
-from itertools import combinations
-
 def get_parlindrom_partitions(string):
 	# breaking the input string into individual chars make it parlindome partition
 	# for all partitioned sets of input string must be parlindrom
@@ -42,19 +40,34 @@ def get_parlindrom_partitions(string):
 	for i in range(2^len(string)-1):
 		binary_array.append("")
 
-	print(generate_binary_string(len(string), binary_array))
+	generate_binary_string(binary_array, 0, len(string))
 
-def generate_binary_string(number, array):
+	print(binary_array)
+
+	char_array = []
+	for char in string:
+		char_array.append(char)
+
+	for binary in binary_array:
+		for digit in binary:
+			while digit != 1:
+
+
+def generate_binary_string(array, start_index, number):
 	""" takes a number and array. generate binaries into array """
 	if (number <= 0):
 		return array
 
-	for i in range(2^number-1):
-		if (i<(2^number-1)/2):
+	number_of_binaries_to_generate = 2^number
+
+	for (i=start_index; i<number_of_binaries_to_generate; i++):
+		if (i<number_of_binaries_to_generate/2):
 			array[i] += "0"
 		else:
 			array[i] += "1"
-	generate_binary_string(number-1, array)
+
+	generate_binary_string(array, 0, number-1) # generate for first half
+	generate_binary_string(array, number_of_binaries_to_generate/2, number-1) # generate for second half
 
 def is_everything_parlindrom(string_array):
 	""" takes an array of strings and return true if all elements in the array are parlindroms """
@@ -87,11 +100,6 @@ def is_parlindrom(string):
 
 # print (get_parlindrom_partitions("IDeserve"))
 print (get_parlindrom_partitions("banana"))
-
-# print (compute_combination("IDeserve", 7))
-# print (compute_combination("IDeserve", 5))
-# print (compute_combination("IDeserve", 2))
-# print (compute_combination("IDeserve", 1))
 
 assert (is_everything_parlindrom(["naban", "a"]) == True)
 assert (is_everything_parlindrom(["naban", "nabanan"]) == False)
