@@ -45,6 +45,7 @@ def get_parlindrom_partitions(string):
 	print(binary_array)
 	print(len(binary_array))
 
+	count = 0
 	for binary in binary_array:
 		start_index_to_split = 0
 		string_partition = []
@@ -53,10 +54,14 @@ def get_parlindrom_partitions(string):
 				# print(string[start_index_to_split:index])
 				string_partition.append(string[start_index_to_split:index])
 				start_index_to_split = index
+		# append left over substring after the last split
+		string_partition.append(string[start_index_to_split:len(binary)])
+		count = count + 1
 		print(string_partition)
 		if (is_everything_parlindrom(string_partition)):
 			parlindromic_partitions.append(string_partition)
 
+	print(count)
 	return parlindromic_partitions
 
 def generate_binary_string(array, start_index, number):
@@ -106,7 +111,7 @@ def is_parlindrom(string):
 	# passing above test means string is symmetric
 	return True
 
-# print (get_parlindrom_partitions("IDeserve"))
+print (get_parlindrom_partitions("IDeserve"))
 print (get_parlindrom_partitions("banana"))
 
 assert (is_everything_parlindrom(["naban", "a"]) == True)
