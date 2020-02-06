@@ -26,6 +26,7 @@ b-ana-n-a
 b-anana
 """
 
+import math
 def get_parlindrom_partitions(string):
 	# breaking the input string into individual chars make it parlindome partition
 	# for all partitioned sets of input string must be parlindrom
@@ -37,20 +38,22 @@ def get_parlindrom_partitions(string):
 	# Generate 2^len(string) binaries where 0 = don't partition and 1 = partition. Store them into an array. Then split strings based on 1s'
 	# Create an array of size 2^len(strong)-1 of empty strings. For half of element, add 0. For the other half, add 1. Use recursion to apply this rule
 	binary_array = []
-	for i in range(2^len(string)-1):
+	for i in range(0, int(math.pow(2, len(string)))):
 		binary_array.append("")
 
 	generate_binary_string(binary_array, 0, len(string))
-
 	print(binary_array)
+	print(len(binary_array))
 
 	for binary in binary_array:
 		start_index_to_split = 0
 		string_partition = []
-		for digit in binary:
-			if (digit == 1):
-				string_partition.append(string[start_index_to_split:indexOf(digit)])
-				start_index_to_split = indexOf(digit)
+		for index, value in enumerate(binary):
+			if (value == "1"):
+				# print(string[start_index_to_split:index])
+				string_partition.append(string[start_index_to_split:index])
+				start_index_to_split = index
+		print(string_partition)
 		if (is_everything_parlindrom(string_partition)):
 			parlindromic_partitions.append(string_partition)
 
@@ -61,16 +64,18 @@ def generate_binary_string(array, start_index, number):
 	if (number <= 0):
 		return array
 
-	number_of_binaries_to_generate = 2^number
+	number_of_binaries_to_generate = math.pow(2, number)
+	number_of_binaries_to_generate = int(number_of_binaries_to_generate)
 
-	for (i=start_index; i<number_of_binaries_to_generate; i++):
-		if (i<number_of_binaries_to_generate/2):
+	for i in range(start_index, start_index + number_of_binaries_to_generate):
+		if (i<start_index + int(number_of_binaries_to_generate/2)):
 			array[i] += "0"
 		else:
 			array[i] += "1"
 
-	generate_binary_string(array, 0, number-1) # generate for first half
-	generate_binary_string(array, number_of_binaries_to_generate/2, number-1) # generate for second half
+	generate_binary_string(array, start_index, number-1) # generate for first half
+	start_index =  start_index + int(number_of_binaries_to_generate/2)
+	generate_binary_string(array, start_index, number-1) # generate for second half
 
 def is_everything_parlindrom(string_array):
 	""" takes an array of strings and return true if all elements in the array are parlindroms """
