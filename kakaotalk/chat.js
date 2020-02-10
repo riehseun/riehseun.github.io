@@ -138,6 +138,11 @@ window.onload = function() {
                         mom_image_src = mom_image_src2018
                         aunt_image_src = aunt_image_src2018
                         sokcho_image_src = sokcho_image_src2017
+                    } else if (year == "2020") {
+                        my_image_src = my_image_src2018
+                        mom_image_src = mom_image_src2018
+                        aunt_image_src = aunt_image_src2018
+                        sokcho_image_src = sokcho_image_src2017
                     }
                     when = first_part_array[0] + ", " + first_part_array[1] + ", " + first_part_array[2]
                     // If my message
