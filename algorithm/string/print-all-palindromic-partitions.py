@@ -35,13 +35,13 @@ def get_parlindrom_partitions(string):
 	# placeholder for the result
 	parlindromic_partitions = []
 
-	# Generate 2^len(string) binaries where 0 = don't partition and 1 = partition. Store them into an array. Then split strings based on 1s'
+	# Generate 2^(len(string)-1)) binaries where 0 = don't partition and 1 = partition. Store them into an array. Then split strings based on 1s'
 	# Create an array of size 2^len(strong)-1 of empty strings. For half of element, add 0. For the other half, add 1. Use recursion to apply this rule
 	binary_array = []
-	for i in range(0, int(math.pow(2, len(string)))):
+	for i in range(0, int(math.pow(2, len(string)-1))):
 		binary_array.append("")
 
-	generate_binary_string(binary_array, 0, len(string))
+	generate_binary_string(binary_array, 0, len(string)-1)
 	print(binary_array)
 	print(len(binary_array))
 
@@ -52,10 +52,10 @@ def get_parlindrom_partitions(string):
 		for index, value in enumerate(binary):
 			if (value == "1"):
 				# print(string[start_index_to_split:index])
-				string_partition.append(string[start_index_to_split:index])
-				start_index_to_split = index
+				string_partition.append(string[start_index_to_split:int(index+1)])
+				start_index_to_split = int(index+1)
 		# append left over substring after the last split
-		string_partition.append(string[start_index_to_split:len(binary)])
+		string_partition.append(string[start_index_to_split:len(string)])
 		count = count + 1
 		print(string_partition)
 		if (is_everything_parlindrom(string_partition)):
@@ -65,7 +65,7 @@ def get_parlindrom_partitions(string):
 	return parlindromic_partitions
 
 def generate_binary_string(array, start_index, number):
-	""" takes a number and array. generate binaries into array """
+	""" takes array of empty string, start_index, number of digits to generate"""
 	if (number <= 0):
 		return array
 
