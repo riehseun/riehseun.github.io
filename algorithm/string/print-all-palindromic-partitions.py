@@ -24,6 +24,11 @@ b-a-n-ana
 b-a-nan-a
 b-ana-n-a
 b-anana
+
+Usage:
+
+    python3 words.py &lt;URL&gt;
+
 """
 
 import math
