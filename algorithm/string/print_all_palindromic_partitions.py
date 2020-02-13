@@ -31,7 +31,9 @@ Usage:
 
 """
 
+
 import math
+
 
 def get_parlindrom_partitions(string):
 	"""	Produces a list of parlindrom partitions of input string
@@ -69,6 +71,7 @@ def get_parlindrom_partitions(string):
 
 	return parlindromic_partitions
 
+
 def generate_binary_string(array, start_index, number):
 	""" populates input list with binaries where 0 represents - don't partition and 1 represents - partition
 
@@ -97,6 +100,7 @@ def generate_binary_string(array, start_index, number):
 	start_index =  start_index + int(number_of_binaries_to_generate/2) # updates start_index so that it starts from the beginning of second half
 	generate_binary_string(array, start_index, number-1) # recurse appending 0's and 1's for second half (sub-list)
 
+
 def is_everything_parlindrom(string_array):
 	""" check if every element in the input list is parlindrom
 
@@ -111,6 +115,7 @@ def is_everything_parlindrom(string_array):
 		if (is_parlindrom(string) == False):
 			return False
 	return True
+
 
 def is_parlindrom(string):
 	""" check if string is parlindrom
@@ -136,12 +141,15 @@ def is_parlindrom(string):
 
 	return True # passing above tests mean that string is symmetric, thus parlindrom
 
+
 print (get_parlindrom_partitions("IDeserve"))
 print (get_parlindrom_partitions("banana"))
+
 
 assert (is_everything_parlindrom(["naban", "a"]) == True)
 assert (is_everything_parlindrom(["naban", "nabanan"]) == False)
 assert (is_everything_parlindrom(["I", "D", "ese", "r", "v", "e"]) == True)
+
 
 assert (is_parlindrom("naban") == True)
 assert (is_parlindrom("n") == True)

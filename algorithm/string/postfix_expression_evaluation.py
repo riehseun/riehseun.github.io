@@ -27,6 +27,7 @@ Usage:
 
 """
 
+
 def evaulte(list_of_string):
 	"""evlautes postfix expression
 
@@ -68,5 +69,6 @@ def evaulte(list_of_string):
 				return "Invalid Operator"
 
 	return stack.pop()
+
 
 assert(evaulte(["5", "1", "2", "+", "4", "*", "+", "3", "-"]) == 14)
