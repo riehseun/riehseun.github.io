@@ -29,33 +29,22 @@ def is_string_breakable(string, word_dictionary):
     """
 
     substrings = get_sub_strings(string, word_dictionary)
-    if (len(substrings) == 0):
+    if (len(substrings) == 0): # if no item in the list, it means no substring from dictionary can be made of out of input string
         return False
-    if (len(substrings) == 1 and substrings[0] == string):
+    if (len(substrings) == 1 and substrings[0] == string): # if there is only one item left and if it matches the input string, we find a positive case
         return True
     else:
-        for word in substrings:
-            """break input string by word. apply get_sub_strings() on those two parts. recurse until substrings list is empty
-            if broken part equals one of words, case True
-            if substring list is empty, case False
-            """
+        for word in substrings: # break input string by a substring, apply recursion on two broken parts. all resurse function must return true to be a positive case
             front_part = string.split(word)[0]
             back_part = string.split(word)[1]
-            # print("\n")
-            # print("front -> " + front_part)
-            # print("back -> " + back_part)
-            # print("\n")
             if (front_part != "" and back_part != ""):
-                if (is_string_breakable(front_part, word_dictionary) * is_string_breakable(back_part, word_dictionary)):
-                    # print("exit : True")
+                if (is_string_breakable(front_part, word_dictionary) * is_string_breakable(back_part, word_dictionary)): # if division at middle
                     return True
-            elif (front_part != "" and back_part == ""):
+            elif (front_part != "" and back_part == ""): # if division at front
                 if (is_string_breakable(front_part, word_dictionary)):
-                    # print("exit : True")
                     return True
-            elif (front_part == "" and back_part != ""):
+            elif (front_part == "" and back_part != ""): # if division at back
                 if (is_string_breakable(back_part, word_dictionary)):
-                    # print("exit : True")
                     return True
 
     return False
@@ -73,6 +62,7 @@ def get_sub_strings(string, word_dictionary):
 
 
     """
+
     substrings = []
 
     for word in word_dictionary:
@@ -90,4 +80,3 @@ assert(is_string_breakable("listprogrammingheap", word_dictionary) == False)
 assert(is_string_breakable("love", word_dictionary) == False)
 assert(is_string_breakable("dynamiclinkedlearnstackstrees", word_dictionary) == True)
 assert(is_string_breakable("dynamichelllearnstackstrees", word_dictionary) == False)
-
