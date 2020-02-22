@@ -27,9 +27,17 @@ def is_string_breakable(string, word_dictionary):
 		a bool indicating whether input string is breakable or not
 
 	"""
-	substrings = get_sub_strings(string, word_dictionary)
+	retVal = True
 
-	if (len(substrings) > 0):
+	substrings = get_sub_strings(string, word_dictionary)
+	if (len(substrings) == 0):
+		retVal = False
+	elif (len(substrings) == 1):
+	  	if (substrings == string):
+			retVal = True
+		else
+			retVal = False
+	else
 		for word in substrings:
 			"""break input string by word. apply get_sub_strings() on those two parts. recurse until substrings list is empty
 			if broken part equals one of words, case True
@@ -45,15 +53,15 @@ def is_string_breakable(string, word_dictionary):
 			if (front_part != ""):
 			    if (front_part not in word_dictionary):
 					print("checking front: " + front_part)
-					get_sub_strings(front_part, word_dictionary)
+					is_string_breakable(front_part, word_dictionary)
 
 
 			if (back_part != ""):
 			    if (back_part not in word_dictionary):
 					print("checking back: " + back_part)
-					get_sub_strings(back_part, word_dictionary)
-	else:
-		return False
+					is_string_breakable(back_part, word_dictionary)
+
+	return retVal
 
 
 def get_sub_strings(string, word_dictionary):
