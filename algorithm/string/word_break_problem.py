@@ -27,16 +27,12 @@ def is_string_breakable(string, word_dictionary):
         a bool indicating whether input string is breakable or not
 
     """
-    retVal = True
 
     substrings = get_sub_strings(string, word_dictionary)
     if (len(substrings) == 0):
-        retVal = False
-    elif (len(substrings) == 1):
-        if (substrings[0] == string):
-            retVal = True
-        else:
-            retVal = False
+        return False
+    if (len(substrings) == 1 and substrings[0] == string):
+        return True
     else:
         for word in substrings:
             """break input string by word. apply get_sub_strings() on those two parts. recurse until substrings list is empty
@@ -45,14 +41,24 @@ def is_string_breakable(string, word_dictionary):
             """
             front_part = string.split(word)[0]
             back_part = string.split(word)[1]
+            # print("\n")
+            # print("front -> " + front_part)
+            # print("back -> " + back_part)
+            # print("\n")
             if (front_part != "" and back_part != ""):
-                return is_string_breakable(front_part, word_dictionary) * is_string_breakable(back_part, word_dictionary)
+                if (is_string_breakable(front_part, word_dictionary) * is_string_breakable(back_part, word_dictionary)):
+                    # print("exit : True")
+                    return True
             elif (front_part != "" and back_part == ""):
-                return is_string_breakable(front_part, word_dictionary)
+                if (is_string_breakable(front_part, word_dictionary)):
+                    # print("exit : True")
+                    return True
             elif (front_part == "" and back_part != ""):
-                return is_string_breakable(back_part, word_dictionary)
+                if (is_string_breakable(back_part, word_dictionary)):
+                    # print("exit : True")
+                    return True
 
-    return retVal
+    return False
 
 
 def get_sub_strings(string, word_dictionary):
@@ -77,8 +83,11 @@ def get_sub_strings(string, word_dictionary):
 
 word_dictionary = ["arrays", "dynamic", "heaps", "IDeserve", "learn", "learning", "linked", "list", "platform", "programming", "stacks", "trees"]
 assert(is_string_breakable("IDeservelearningplatform", word_dictionary) == True)
+assert(is_string_breakable("IDeservelearningplatforms", word_dictionary) == False)
 assert(is_string_breakable("dynamic", word_dictionary) == True)
 assert(is_string_breakable("arraysprogramminglist", word_dictionary) == True)
 assert(is_string_breakable("listprogrammingheap", word_dictionary) == False)
 assert(is_string_breakable("love", word_dictionary) == False)
+assert(is_string_breakable("dynamiclinkedlearnstackstrees", word_dictionary) == True)
+assert(is_string_breakable("dynamichelllearnstackstrees", word_dictionary) == False)
 
