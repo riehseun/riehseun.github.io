@@ -47,11 +47,11 @@ def run(count, source_word, destination_word, dictionary):
 			return run(new_count, new_word, destination_word, dictionary)
 
 	elif (len(source_word) < len(destination_word)): # insert char
-		missing = desination_word.replace(source_word, "")
+		missing = destination_word.replace(source_word, "")
 		new_word1 = missing[0] + source_word # try adding char at front
 		new_word2 = source_word + missing[0] # try adding char at back
 		new_word = ""
-		if (len(desination_word.replace(new_word1, "")) < len(missing)): # if adding char at front is correct, length of string that is mismatching must decrease
+		if (len(destination_word.replace(new_word1, "")) < len(missing)): # if adding char at front is correct, length of string that is mismatching must decrease
 			new_word = new_word1
 		else:
 			new_word = new_word2
@@ -75,5 +75,6 @@ def run(count, source_word, destination_word, dictionary):
 
 
 assert(run(0, "AICC", "ICC", ["BCCI","AICC","ICC","CCI","MCC","MCA", "ACC"]) == 1)
+assert(run(0, "ICC", "AICC", ["BCCI","AICC","ICC","CCI","MCC","MCA", "ACC"]) == 1)
 assert(run(0, "AICC", "MCA", ["BCCI","AICC","ICC","CCI","MCC","MCA", "ACC"]) == 3)
 assert(run(0, "AICC", "BCCI", ["BCCI","AICC","ICC","CCI","MCC","MCA", "ACC"]) == -1)
