@@ -1366,7 +1366,7 @@ gcloud container clusters delete [CLUSTER_NAME]</code></pre>
                         <h2 class="card-title">Setting up Jenkins agent on Linux</h2>
                         <p class="card-text">Agents are necessary to distribute work load</p>
                         <ul>
-                            <li>You can specify #of executors, directory of workspace, way to launch the agent Frin tge node configuration</li>
+                            <li>You can specify #of executors, directory of workspace, way to launch the agent</li>
                         </ul>
                     </div>
                     <div class="card-footer text-muted"></div>
@@ -3051,8 +3051,8 @@ class JobDSLUtils {
                             <li>Isolation</li>
                             <li>Application portability and ease of delievery</li>
                         </ul>
-                        <p class="card-text">containters are highly configured processes (it is not lightweight). They leverage kernal features to isolate processes and shared OS kernal at the same time. cgroupd controls resources it can consume and namespaces control what process can see</p>
-                        <p class="card-text">each layer represents each instruction in Dockerfile. all layers except the last one is read-only. docker image is consisted with a series of layers</p>
+                        <p class="card-text">Containters are highly configured processes (it is not lightweight). They leverage kernal features to isolate processes and shared OS kernal at the same time. cgroupd controls resources it can consume and namespaces control what process can see</p>
+                        <p class="card-text">Each layer represents each instruction in Dockerfile. all layers except the last one is read-only. docker image is consisted with a series of layers</p>
                     </div>
                     <div class="card-footer text-muted"></div>
                 </div>
@@ -3061,12 +3061,10 @@ class JobDSLUtils {
                 <div class="card mb-4" id="docker-1">
                     <div class="card-body">
                         <h2 class="card-title">Setting up Docker registry on Linux</h2>
-                        <p class="card-text"></p>
-                        <ul>
-                            <li>docker pull registry:2</li>
-                            <li>docker save -o registry_2.tar registry:2</li>
-                            <li>docker load -i registry.tar</li>
-                            <li>docker run -d --net=host -p 5000:5000 -v []/docker-registry-data:[]/registry --name registry --restart always registry:2</li>
+<pre><code class="bash">docker pull registry:2
+docker save -o registry_2.tar registry:2
+docker load -i registry.tar
+docker run -d --net=host -p 5000:5000 -v []/docker-registry-data:[]/registry --name registry --restart always registry:2</code></pre>
                         </ul>
                         <p class="card-text">Docker lifecycle</p>
                         <ul>
@@ -3081,12 +3079,10 @@ class JobDSLUtils {
                 <div class="card mb-4" id="docker-2">
                     <div class="card-body">
                         <h2 class="card-title">Building Docker images on Linux</h2>
-                        <p class="card-text"></p>
-                        <ul>
-                            <li>docker build -f [DockerfileName] -t [DockerImageName] : builds Dockerfile and create new image </li>
-                            <li>docker ps -a : see all containers in all states</li>
-                            <li>docker run -d [image] : run container in background</li>
-                            <li>--publish 80:8080 : flag to map container port to host port</li>
+<pre><code class="bash">docker build -f [DockerfileName] -t [DockerImageName] : builds Dockerfile and create new image
+docker ps -a : see all containers in all states
+docker run -d [image] : run container in background
+--publish 80:8080 : flag to map container port to host port</code></pre>
                             <!-- <li>cd docker-ssh-slave && docker rmi jenkins/ssh-slave #This is to ensure that we remove the image with same name if it exists</li>
                             <li>docker load -i openjdk_8-jdk.tar #Before doing this, you must obtain openjdk_8-jdk.tar file from the Internet</li>
                             <li>#Prepare your &#34;Dockerfile&#34;</li>
@@ -3163,21 +3159,19 @@ ENTRYPOINT ["setup-sshd"]
                     <div class="card-body">
                         <h2 class="card-title">Setting up Dockerhost</h2>
                         <p class="card-text">This is to show how to construct a Jenkins "build server" where all work would be done inside docker container (for RedHat 7 distribution)</p>
-                        <ul>
-                            <li>sudo subscription-manager repos-enable rhel-7-server-extras-rpms</li>
-                            <li>sudo yum update</li>
-                            <li>sudo yum list docker\*</li>
-                            <li>sudo yum install docker.x86_64</li>
-                            <li>sudo groupadd docker</li>
-                            <li>sudo usermod -aG docker [your_username_or_service_account]</li>
-                            <li>sudo systemctl enable docker</li>
-                            <li>sudo chkconfig docker on</li>
-                            <li>sudo systemctl start docker</li>
-                            <li>From &#34;/lib/systemd/system/docker.service&#34;, add this line &#34;-H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock&#34;</li>
-                            <li>sudo systemctl daemon-reload</li>
-                            <li>sudo service docker restart</li>
-                            <li>curl http://localhost:4243/version</li>
-                        </ul>
+<pre><code class="bash">sudo subscription-manager repos-enable rhel-7-server-extras-rpms
+sudo yum update
+sudo yum list docker\*
+sudo yum install docker.x86_64
+sudo groupadd docker
+sudo usermod -aG docker [your_username_or_service_account]
+sudo systemctl enable docker
+sudo chkconfig docker on
+sudo systemctl start docker
+From &#34;/lib/systemd/system/docker.service&#34;, add this line &#34;-H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock&#34;
+sudo systemctl daemon-reload<
+sudo service docker restart
+>curl http://localhost:4243/version</code></pre>
                     </div>
                     <div class="card-footer text-muted"></div>
                 </div>
@@ -3286,16 +3280,14 @@ ENTRYPOINT ["jenkins-slave"]</code></pre>
                     <div class="card-body">
                         <h2 class="card-title">Build and push images</h2>
                         <p class="card-text">Replace [dockerhub_user] with appropriate username</p>
-
-                        <ul>
-                            <li>docker build -f Dockerfile-jenkins-master -t [dockerhub_user]/jenkins-master .</li>
-                            <li>docker images</li>
-                            <li>docker login</li>
-                            <li>docker push [dockerhub_user]/jenkins-master</li>
-                            <li>docker build -f Dockerfile-jenkins-slave-jnlp1 -t [dockerhub_user]/jenkins-slave-jnlp1 .</li>
-                            <li>docker push [dockerhub_user]/jenkins-slave-jnlp1</li>
-                            <li>docker build -f Dockerfile-jenkins-slave-jnlp2 -t [dockerhub_user]/jenkins-slave-jnlp2 .</li>
-                            <li>docker push [dockerhub_user]/jenkins-slave-jnlp2</li>
+<pre><code class="bash">docker build -f Dockerfile-jenkins-master -t [dockerhub_user]/jenkins-master .</li>
+docker images
+docker login
+docker push [dockerhub_user]/jenkins-master
+docker build -f Dockerfile-jenkins-slave-jnlp1 -t [dockerhub_user]/jenkins-slave-jnlp1 .
+docker push [dockerhub_user]/jenkins-slave-jnlp1
+docker build -f Dockerfile-jenkins-slave-jnlp2 -t [dockerhub_user]/jenkins-slave-jnlp2 .
+docker push [dockerhub_user]/jenkins-slave-jnlp2</code></pre>
                         </ul>
                     </div>
                     <div class="card-footer text-muted">
