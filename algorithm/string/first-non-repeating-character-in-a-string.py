@@ -5,7 +5,7 @@ Input : ADBCGHIEFKJLADTVDERFSWVGHQWCNOPENSMSJWIERTFB
 Output: K
 
 Usage:
-	first-non-repeating-character-in-a-string.py
+	python first-non-repeating-character-in-a-string.py
 """
 
 
