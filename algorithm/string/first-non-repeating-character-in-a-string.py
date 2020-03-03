@@ -5,24 +5,19 @@ Input : ADBCGHIEFKJLADTVDERFSWVGHQWCNOPENSMSJWIERTFB
 Output: K
 
 Usage:
-
 	first-non-repeating-character-in-a-string.py
-
 """
 
 
 def run(string):
 	"""
-
 	Find the first non repeating character in string
 
 	Args:
-		string : an input string
+		string -- an input string
 
 	Returns:
-		first non repeating character in string
-
-
+		string[i] -- first non repeating character in string
 	"""
 
 	for i in range(0, len(string)):
