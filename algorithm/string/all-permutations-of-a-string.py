@@ -9,8 +9,13 @@ Usage:
 """
 
 
-def run(string, permutations, index):
-	print(string)
+def run(string, index):
+	result_array = []
+	compute_permutation(string, result_array, index)
+	return result_array
+
+
+def compute_permutation(string, permutations, index):
 	"""
 	Given a string, find all the permutations of the string
 
@@ -21,39 +26,46 @@ def run(string, permutations, index):
 	permutations -- list containing all the permutations of the input string
 	"""
 
+	# base case
 	if (len(string) == 0):
 		return permutations
 
+	# calculate factorial
 	n = len(string)
 	n_factorial = 1
 	while (n > 0):
 		n_factorial *= n
 		n -= 1
 
+	# if first interation, populate result array with empty string
 	if (len(permutations) == 0):
 		m = n_factorial
 		while (m > 0):
 			permutations.append("")
 			m -=1
 
-	# print(permutations)
-	# print(permutations[0])
-
 	range_for_each_char = int(n_factorial / len(string))
-	# print(range_for_each_char)
 	start_index = index
 	end_index = index + range_for_each_char
-	print(str(start_index) + " to " + str(end_index))
+
 	for char in string:
 		for k in range(start_index, end_index):
-			# print(k)
 			permutations[k] += char
 		start_index += range_for_each_char
 		end_index += range_for_each_char
-	print(permutations)
 
 	for i in range(0, len(string)): # there are len(string) sub-problems
-		run(string.replace(string[i], ""), permutations, (i+1)*range_for_each_char)
+		compute_permutation(string.replace(string[i], ""), permutations, index+i*range_for_each_char)
 
 
-print(run("abcd", [], 0))
+def is_there_duplicate_item(array):
+	if (len(array) == len(set(array))):
+		return False
+	else:
+		return True
+
+
+assert(is_there_duplicate_item(["abcd", "abdc", "acdb", "adcb"]) == False)
+assert(is_there_duplicate_item(["abcd", "abdc", "acdb", "acdb"]) == True)
+assert(is_there_duplicate_item(run("abcd", 0)) == False)
+
