@@ -42,12 +42,11 @@ def run(string, permutations, index):
 	range_for_each_char = int(n_factorial / len(string))
 	# print(range_for_each_char)
 	start_index = index
-	end_index = range_for_each_char
+	end_index = index + range_for_each_char
 	print(str(start_index) + " to " + str(end_index))
 	for char in string:
 		for k in range(start_index, end_index):
-
-			print(k)
+			# print(k)
 			permutations[k] += char
 		start_index += range_for_each_char
 		end_index += range_for_each_char
