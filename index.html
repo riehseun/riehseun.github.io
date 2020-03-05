@@ -344,7 +344,7 @@
                         <ul class="list-unstyled mb-0">
                             <!-- <li><a href="#docker-0">What is Docker</a></li> -->
                             <li><a href="#docker-1">1. Setting up Docker registry</a></li>
-                            <li><a href="#docker-2">2. Building Docker images</a></li>
+                            <li><a href="#docker-2">2. Useful Docker commands</a></li>
                             <li><a href="#docker-3">3. Writing Dockerfile</a></li>
                             <li><a href="#docker-4">4. Setting up Dockerhost</a></li>
                             <li><a href="#docker-5">5. Create base image</a></li>
@@ -3053,19 +3053,6 @@ class JobDSLUtils {
                         </ul>
                         <p class="card-text">Containters are highly configured processes (it is not lightweight). They leverage kernal features to isolate processes and shared OS kernal at the same time. cgroupd controls resources it can consume and namespaces control what process can see</p>
                         <p class="card-text">Each layer represents each instruction in Dockerfile. all layers except the last one is read-only. docker image is consisted with a series of layers</p>
-                    </div>
-                    <div class="card-footer text-muted"></div>
-                </div>
-
-
-                <div class="card mb-4" id="docker-1">
-                    <div class="card-body">
-                        <h2 class="card-title">Setting up Docker registry on Linux</h2>
-<pre><code class="bash">docker pull registry:2
-docker save -o registry_2.tar registry:2
-docker load -i registry.tar
-docker run -d --net=host -p 5000:5000 -v []/docker-registry-data:[]/registry --name registry --restart always registry:2</code></pre>
-                        </ul>
                         <p class="card-text">Docker lifecycle</p>
                         <ul>
                             <li>CREATED -> (docker run) -> RUNNING -> (docker rm) -> REMOVE</li>
@@ -3075,14 +3062,36 @@ docker run -d --net=host -p 5000:5000 -v []/docker-registry-data:[]/registry --n
                     </div>
                     <div class="card-footer text-muted"></div>
                 </div>
+                <div class="card mb-4" id="docker-1">
+                    <div class="card-body">
+                        <h2 class="card-title">Setting up Docker registry on Linux</h2>
+<pre><code class="bash">docker pull registry:2
+docker save -o registry_2.tar registry:2
+docker load -i registry.tar
+docker run -d --net=host -p 5000:5000 -v []/docker-registry-data:[]/registry --name registry --restart always registry:2</code></pre>
+                        </ul>
+                    </div>
+                    <div class="card-footer text-muted"></div>
+                </div>
 
                 <div class="card mb-4" id="docker-2">
                     <div class="card-body">
-                        <h2 class="card-title">Building Docker images on Linux</h2>
-<pre><code class="bash">docker build -f [DockerfileName] -t [DockerImageName] : builds Dockerfile and create new image
-docker ps -a : see all containers in all states
-docker run -d [image] : run container in background
---publish 80:8080 : flag to map container port to host port</code></pre>
+                        <h2 class="card-title">Useful Docker commands</h2>
+<pre><code class="bash">docker build -f [DockerfileName] -t [DockerImageName] # builds Dockerfile and create new image
+docker ps -a # see all containers in all states
+docker run -d [image] # run container in background
+--publish 80:8080 # flag to map container port to host port
+docker stop $(docker ps --latest --quiet) && docker rm $(docker ps -a -f status=exited -q) && docker ps -a # Stop all images, remove all images, and show images
+
+# Assuming docker-compose.yml exists
+docker-compose up # Create images and run
+
+# Recreate images and run
+docker-compose stop $CONTAINER
+docker-compose rm -f $CONTAINER
+docker volume prune -f
+docker-compose create $CONTAINER
+docker-compose start $CONTAINER</code></pre>
                             <!-- <li>cd docker-ssh-slave && docker rmi jenkins/ssh-slave #This is to ensure that we remove the image with same name if it exists</li>
                             <li>docker load -i openjdk_8-jdk.tar #Before doing this, you must obtain openjdk_8-jdk.tar file from the Internet</li>
                             <li>#Prepare your &#34;Dockerfile&#34;</li>
@@ -3174,7 +3183,7 @@ sudo service docker restart
 >curl http://localhost:4243/version</code></pre>
                     </div>
                     <div class="card-footer text-muted"></div>
-                </div>
+                </div>-
 
                 <div class="card mb-4" id="docker-5">
                     <div class="card-body">
