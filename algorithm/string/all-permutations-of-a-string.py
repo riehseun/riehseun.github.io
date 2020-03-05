@@ -10,6 +10,7 @@ Usage:
 
 
 def run(string, permutations, index):
+	print(string)
 	"""
 	Given a string, find all the permutations of the string
 
@@ -39,20 +40,21 @@ def run(string, permutations, index):
 	# print(permutations[0])
 
 	range_for_each_char = int(n_factorial / len(string))
-	print(range_for_each_char)
+	# print(range_for_each_char)
 	start_index = index
 	end_index = range_for_each_char
+	print(str(start_index) + " to " + str(end_index))
 	for char in string:
 		for k in range(start_index, end_index):
-			# print(str(start_index) + " to " + str(end_index))
-			# print(k)
+
+			print(k)
 			permutations[k] += char
 		start_index += range_for_each_char
 		end_index += range_for_each_char
 	print(permutations)
 
 	for i in range(0, len(string)): # there are len(string) sub-problems
-		return run(string.replace(string[i], ""), permutations, (i+1)*range_for_each_char)
+		run(string.replace(string[i], ""), permutations, (i+1)*range_for_each_char)
 
 
 print(run("abcd", [], 0))
