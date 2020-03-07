@@ -16,9 +16,12 @@ def run(operand1, operand2):
 	Returns:
 	result -- integer representing the result of multiplication
 	"""
+	print(operand1 + " -- " + operand2)
 
 	# error case
 	if (len(operand1) < 2 or len(operand1) < 2):
+		print(operand1)
+		print(operand2)
 		return -1
 
 	# split both operands by half
@@ -35,15 +38,18 @@ def run(operand1, operand2):
 		one = one * 100
 		three = three * 10
 		result = one + two + three
-		return str(result)
+		return result
 
 	one = run(firsthalf_operand1, firsthalf_operand2)
 	two = run(secondhalf_operand1, secondhalf_operand2)
-	three = (int(firsthalf_operand1) + int(secondhalf_operand1)) * (int(firsthalf_operand2) + int(secondhalf_operand2))
-	one = one * math.pow(10, int(len(operand1)))
-	three = three * math.pow(10, int(len(operand1)/2))
-	result = one + two + three
-	return str(result)
+	three = run(str(int(firsthalf_operand1) + int(secondhalf_operand1)), str(int(firsthalf_operand2) + int(secondhalf_operand2)))
+
+	# return one * math.pow(10, len(operand1)) + two + three * math.pow(10, int(len(operand1)/2))
+	print(one)
+	print(two)
+	print(three)
+	return one  + two + three
 
 
-run("3141592653589793238462643383279502884197169399375105820974944592", "2718281828459045235360287471352662497757247093699959574966967627")
+print(run("5678", "1234"))
+# print(run("3141592653589793238462643383279502884197169399375105820974944592", "2718281828459045235360287471352662497757247093699959574966967627"))
