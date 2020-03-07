@@ -16,40 +16,52 @@ def run(operand1, operand2):
 	Returns:
 	result -- integer representing the result of multiplication
 	"""
-	print(operand1 + " -- " + operand2)
 
 	# error case
 	if (len(operand1) < 2 or len(operand1) < 2):
-		print(operand1)
-		print(operand2)
-		return -1
+		print("OUCH")
+		return
 
 	# split both operands by half
 	firsthalf_operand1 = operand1[:int(len(operand1)/2)]
 	secondhalf_operand1 = operand1[int(len(operand1)/2):len(operand1)]
-	firsthalf_operand2 = operand1[:int(len(operand2)/2)]
-	secondhalf_operand2 = operand1[int(len(operand2)/2):len(operand2)]
+	firsthalf_operand2 = operand2[:int(len(operand2)/2)]
+	secondhalf_operand2 = operand2[int(len(operand2)/2):len(operand2)]
 
 	result = 0
 	if (len(operand1) == 2 and len(operand2) == 2):
-		one = int(firsthalf_operand1) * int(firsthalf_operand2)
-		two = int(secondhalf_operand1) * int(secondhalf_operand2)
-		three = (int(firsthalf_operand1) + int(secondhalf_operand1)) * (int(firsthalf_operand2) + int(secondhalf_operand2))
-		one = one * 100
-		three = three * 10
-		result = one + two + three
-		return result
+		ac = int(firsthalf_operand1) * int(firsthalf_operand2)
+		bd = int(secondhalf_operand1) * int(secondhalf_operand2)
+		ad = int(firsthalf_operand1) * int(secondhalf_operand2)
+		bc = int(secondhalf_operand1) * int(firsthalf_operand2)
+		return (ac * 100) + bd + (ad + bc) * 10
 
-	one = run(firsthalf_operand1, firsthalf_operand2)
-	two = run(secondhalf_operand1, secondhalf_operand2)
-	three = run(str(int(firsthalf_operand1) + int(secondhalf_operand1)), str(int(firsthalf_operand2) + int(secondhalf_operand2)))
+	ac = run(firsthalf_operand1, firsthalf_operand2)
+	bd = run(secondhalf_operand1, secondhalf_operand2)
+	ad = run(firsthalf_operand1, secondhalf_operand2)
+	bc = run(secondhalf_operand1, firsthalf_operand2)
 
-	# return one * math.pow(10, len(operand1)) + two + three * math.pow(10, int(len(operand1)/2))
-	print(one)
-	print(two)
-	print(three)
-	return one  + two + three
+	# print(int((ac * math.pow(10, len(operand1)))))
+	#print(int((ac * math.pow(10, len(operand1)))))
+	#print(str(ac) + " -- " + str(math.pow(10, len(operand1))))
+	#print(int((ac * math.pow(10, len(operand1)))))
+	#print(str(ac * 10000000000000000))
+	#print(math.pow(10, len(operand1)))
+	ac_in_str = str(ac)
+	for i in range(0, len(operand1)):
+		ac_in_str += "0"
+	ad_plus_bc_in_str = str(ad+bc)
+	for i in range(0, int(len(operand1)/2)):
+		ad_plus_bc_in_str += "0"
+
+	result = int(ac_in_str) + bd + int(ad_plus_bc_in_str)
+	return result
 
 
-print(run("5678", "1234"))
-# print(run("3141592653589793238462643383279502884197169399375105820974944592", "2718281828459045235360287471352662497757247093699959574966967627"))
+assert(run("5678", "1234") == 7006652)
+assert(run("12345678", "12345678") == 152415765279684)
+assert(run("74639573", "94756283") == 7072568502187159)
+assert(run("8475637284756461", "7483726374837363") == 63429350291486860416277938452343)
+assert(run("3141592653589793238462643383279502884197169399375105820974944592", "2718281828459045235360287471352662497757247093699959574966967627") == 8539734222673567065463550869546574495034888535765114961879601127067743044893204848617875072216249073013374895871952806582723184)
+
+
