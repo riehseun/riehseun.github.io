@@ -16,7 +16,7 @@ def run(s1, s2):
 	s1 -- second input string
 
 	Returns:
-	s3 -- longest common subsequence between s1 and s2
+	subsequence -- longest common subsequence between s1 and s2
 	"""
 	subsequence = ""
 	for char in s1:
