@@ -28,14 +28,12 @@ def run(integer_array, filepath):
 	Retunrs:
 	Integer representing the number of inversion
 	"""
+
 	if filepath != "":
 		with open(filepath, 'r') as line:
 			integer_array = line.read().split("\n")
 
-	# print(len(integer_array))
-
-	# base case (only two element in each array)
-
+	# base case (only one or two elements in each array)
 	if len(integer_array) == 1:
 		return integer_array
 
@@ -46,32 +44,55 @@ def run(integer_array, filepath):
 			integer_array[1] = temp
 		return integer_array
 
-
 	first_half = integer_array[:int(len(integer_array)/2)]
 	second_half = integer_array[int(len(integer_array)/2):len(integer_array)]
 
 	sorted_first_half = run(first_half, "")
 	sorted_second_half = run(second_half, "")
 
-	print(sorted_first_half)
-	print(sorted_second_half)
-	# integer_array = sorted_first_half + sorted_second_half
-	sorted_integer_array = []
 	i = 0
 	j = 0
-	while i < len(first_half) and j < len(second_half):
-		if int(first_half[i]) < int(second_half[j]):
-			sorted_integer_array.append(first_half[i])
-			i += 1
+	sorted_integer_array = []
+	num_inversion = 0
+	for k in range(0, len(integer_array)):
+		if int(sorted_first_half[i]) < int(sorted_second_half[j]):
+			sorted_integer_array.append(sorted_first_half[i])
+			if i < len(sorted_first_half)-1:
+				i += 1
+			# if finished with one array, just push elements of other sorted array
+			else:
+				for index in range(j, len(sorted_second_half)):
+					sorted_integer_array.append(sorted_second_half[index])
+				break
 		else:
-			sorted_integer_array.append(second_half[j])
-			j += 1
+			sorted_integer_array.append(sorted_second_half[j])
+			# count inversion
+			num_inversion += len(sorted_first_half[j+1:len(sorted_first_half)])
 
-	integer_array = sorted_integer_array
-	return integer_array
+			if j < len(sorted_second_half)-1:
+				j += 1
+			# if finished with one array, just push elements of other sorted array
+			else:
+				for index in range(i, len(first_half)):
+					sorted_integer_array.append(sorted_first_half[index])
+				break
+
+	# return sorted_integer_array
+	return num_inversion
 
 
+# def sort_list(filepath):
+# 	with open(filepath, 'r') as line:
+# 		integer_array = line.read().split("\n")
+# 	integer_array = list(map(int, integer_array))
 
-print(run([], "simple.txt"))
-# print(run([], "test.txt"))
-# print(run([], "algorithm-inversion.txt"))
+# 	print(integer_array.sort())
+# 	return integer_array.sort()
+
+
+# print(run([], "simple.txt"))
+print(run([], "test.txt"))
+print(run([], "algorithm-inversion.txt"))
+# print(sort_list("algorithm-inversion.txt"))
+
+
