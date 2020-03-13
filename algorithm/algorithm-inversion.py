@@ -77,22 +77,10 @@ def run(integer_array, filepath):
 					sorted_integer_array.append(sorted_first_half[index])
 				break
 
-	# return sorted_integer_array
-	return num_inversion
-
-
-# def sort_list(filepath):
-# 	with open(filepath, 'r') as line:
-# 		integer_array = line.read().split("\n")
-# 	integer_array = list(map(int, integer_array))
-
-# 	print(integer_array.sort())
-# 	return integer_array.sort()
+	return sorted_integer_array
+	# return num_inversion
 
 
 # print(run([], "simple.txt"))
-print(run([], "test.txt"))
+# print(run([], "test.txt"))
 print(run([], "algorithm-inversion.txt"))
-# print(sort_list("algorithm-inversion.txt"))
-
-
