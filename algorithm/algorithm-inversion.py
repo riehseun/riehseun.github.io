@@ -26,7 +26,7 @@ def run(integer_array, filepath):
 	file -- string representing location of files containing lots of number
 
 	Retunrs:
-	Integer representing the number of inversion
+	Tuple of list representing sorted array and an integer representing the number of inversion
 	"""
 
 	if filepath != "":
@@ -75,7 +75,7 @@ def run(integer_array, filepath):
 		else:
 			sorted_integer_array.append(sorted_second_half[j])
 			# count inversion
-			num_inversion += len(sorted_first_half[j+1:len(sorted_first_half)])
+			num_inversion += len(sorted_first_half[i:len(sorted_first_half)])
 
 			if j < len(sorted_second_half)-1:
 				j += 1
@@ -86,10 +86,6 @@ def run(integer_array, filepath):
 				break
 
 	return (sorted_integer_array, num_inversion)
-	# return num_inversion
 
 
-# print(run([], "simple.txt"))
-# print(run([], "test.txt"))
 print(run([], "algorithm-inversion.txt")[1])
-# run([], "algorithm-inversion.txt")
