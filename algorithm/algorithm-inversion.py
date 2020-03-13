@@ -35,25 +35,33 @@ def run(integer_array, filepath):
 
 	# base case (only one or two elements in each array)
 	if len(integer_array) == 1:
-		return integer_array
+		num_inversion = 0
+		return (integer_array, num_inversion)
 
 	if len(integer_array) == 2:
+		num_inversion = 0
 		if int(integer_array[0]) > int(integer_array[1]):
 			temp = integer_array[0]
 			integer_array[0] = integer_array[1]
 			integer_array[1] = temp
-		return integer_array
+			num_inversion = 1
+		return (integer_array, num_inversion)
 
 	first_half = integer_array[:int(len(integer_array)/2)]
 	second_half = integer_array[int(len(integer_array)/2):len(integer_array)]
 
-	sorted_first_half = run(first_half, "")
-	sorted_second_half = run(second_half, "")
+	result_from_first_half = run(first_half, "")
+	result_from_second_half = run(second_half, "")
+
+	sorted_first_half = result_from_first_half[0]
+	sorted_second_half = result_from_second_half[0]
+	num_inversion_first_half = result_from_first_half[1]
+	num_inversion_second_half = result_from_second_half[1]
 
 	i = 0
 	j = 0
 	sorted_integer_array = []
-	num_inversion = 0
+	num_inversion = num_inversion_first_half + num_inversion_second_half
 	for k in range(0, len(integer_array)):
 		if int(sorted_first_half[i]) < int(sorted_second_half[j]):
 			sorted_integer_array.append(sorted_first_half[i])
@@ -77,10 +85,11 @@ def run(integer_array, filepath):
 					sorted_integer_array.append(sorted_first_half[index])
 				break
 
-	return sorted_integer_array
+	return (sorted_integer_array, num_inversion)
 	# return num_inversion
 
 
 # print(run([], "simple.txt"))
 # print(run([], "test.txt"))
-print(run([], "algorithm-inversion.txt"))
+print(run([], "algorithm-inversion.txt")[1])
+# run([], "algorithm-inversion.txt")
