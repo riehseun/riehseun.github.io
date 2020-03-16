@@ -26,6 +26,7 @@ def run(integer_array, filepath):
 	pivot = choose_pivot(integer_array)
 
 	partitioned_integer_array = partition(integer_array, pivot)
+	print(partitioned_integer_array)
 
 	partition_index = partitioned_integer_array.index(pivot)
 	first_partition = partitioned_integer_array[0:partition_index]
