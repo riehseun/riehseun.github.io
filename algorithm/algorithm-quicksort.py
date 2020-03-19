@@ -4,7 +4,6 @@
 
 
 import sys
-sys.setrecursionlimit(1500)
 
 
 def run(integer_array, start_index, end_index, comparison):
@@ -77,7 +76,7 @@ def choose_pivot(integer_array, start_index, end_index):
     Tuple of an integer and an index representing the pivot
     """
 
-    return integer_array[start_index]
+    # return integer_array[start_index]
 
     return integer_array[end_index-1]
 
@@ -118,6 +117,7 @@ def openfile(file_path):
     return integer_array
 
 
+# sys.setrecursionlimit(1500)
 # print(choose_pivot([3,8,2,5,1,4,7,6], 0, len([3,8,2,5,1,4,7,6])))
 # array = openfile("test.txt")
 array = openfile("test1.txt")
