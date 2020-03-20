@@ -35,7 +35,9 @@ def run(integer_array, start_index, end_index, comparison):
     run(integer_array, start_index, partition_index, comparison)
     run(integer_array, partition_index+1, len(integer_array), comparison)
 
+    print(sum(comparison))
     return sum(comparison)
+    # return integer_array
 
 
 def partition(integer_array, start_index, end_index, pivot, comparison):
@@ -78,11 +80,11 @@ def choose_pivot(integer_array, start_index, end_index):
 
     # return integer_array[start_index]
 
-    return integer_array[end_index-1]
+    # return integer_array[end_index-1]
 
     middle = 0
     if len(integer_array) % 2 == 0:
-        middle = int(end_index - start_index / 2)
+        middle = int((end_index - start_index) / 2)
     else:
         middle = int(len(integer_array) / 2)
 
@@ -117,11 +119,12 @@ def openfile(file_path):
     return integer_array
 
 
-# sys.setrecursionlimit(1500)
+# print(sys.getrecursionlimit())
+sys.setrecursionlimit(2000)
 # print(choose_pivot([3,8,2,5,1,4,7,6], 0, len([3,8,2,5,1,4,7,6])))
 # array = openfile("test.txt")
-array = openfile("test1.txt")
+# array = openfile("test1.txt")
 # array = [5,8,4,7,6]
 # array = [3,8,2,5,1,4,7,6]
-# array = openfile("algorithm-quicksort.txt")
+array = openfile("algorithm-quicksort.txt")
 print(run(array, 0, len(array), []))
