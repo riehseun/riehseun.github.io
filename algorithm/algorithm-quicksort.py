@@ -3,9 +3,6 @@
 """
 
 
-# import sys
-
-
 def run(integer_array, start_index, end_index, comparison):
     """
     Implements quicksort and computes # of comparison in partition subroutine
@@ -19,14 +16,16 @@ def run(integer_array, start_index, end_index, comparison):
     """
 
     # base case
-    if end_index - start_index < 2:
+    if end_index - istart_index < 2:
         # return (integer_array, num_comparison)
         return
+
 
     pivot = choose_pivot(integer_array, start_index, end_index)
     partition(integer_array, start_index, end_index, pivot, comparison)
     partition_index = integer_array.index(pivot)
 
+    print(sum(comparison))
     # first_partition = partitioned_integer_array[0:partition_index]
     # second_partition = partitioned_integer_array[partition_index:len(partitioned_integer_array)]
     # print(first_partition)
@@ -120,13 +119,12 @@ def openfile(file_path):
 
 
 # print(sys.getrecursionlimit())
-# sys.setrecursionlimit(2000)
 # print(choose_pivot([3,8,2,5,1,4,7,6], 0, len([3,8,2,5,1,4,7,6])))
 # array = openfile("test.txt")
 # array = openfile("test1.txt")
 # array = [5,8,4,7,6]
 
 array = openfile("algorithm-quicksort.txt")
-array = [54044,14108,79294,29649,25260,60660,2995,53777,49689,9083,16122,90436,4615,40660,25675,58943,92904]
-array = [3,8,2,5,1,4,7,6]
+# array = [54044,14108,79294,29649,25260,60660,2995,53777,49689,9083,16122,90436,4615,40660,25675,58943,92904]
+# array = [3,8,2,5,1,4,7,6]
 print(run(array, 0, len(array), []))
