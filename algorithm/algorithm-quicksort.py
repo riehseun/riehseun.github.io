@@ -16,7 +16,7 @@ def run(integer_array, start_index, end_index, comparison):
     """
 
     # base case
-    if end_index - istart_index < 2:
+    if end_index - start_index < 2:
         # return (integer_array, num_comparison)
         return
 
@@ -53,7 +53,7 @@ def partition(integer_array, start_index, end_index, pivot, comparison):
 
     i = start_index
     for j in range(start_index, end_index):
-        if int(integer_array[j]) < int(pivot) and int(integer_array[j]) != int(pivot):
+        if integer_array[j] < pivot and integer_array[j] != pivot:
             temp = integer_array[i]
             integer_array[i] = integer_array[j]
             integer_array[j] = temp
@@ -118,6 +118,14 @@ def openfile(file_path):
     return integer_array
 
 
+def list_of_string_to_integer(input_list):
+    """
+
+    """
+    for i in range(0, len(input_list)):
+        input_list[i] = int(input_list[i])
+
+
 # print(sys.getrecursionlimit())
 # print(choose_pivot([3,8,2,5,1,4,7,6], 0, len([3,8,2,5,1,4,7,6])))
 # array = openfile("test.txt")
@@ -125,6 +133,7 @@ def openfile(file_path):
 # array = [5,8,4,7,6]
 
 array = openfile("algorithm-quicksort.txt")
+list_of_string_to_integer(array)
 # array = [54044,14108,79294,29649,25260,60660,2995,53777,49689,9083,16122,90436,4615,40660,25675,58943,92904]
 # array = [3,8,2,5,1,4,7,6]
 print(run(array, 0, len(array), []))
