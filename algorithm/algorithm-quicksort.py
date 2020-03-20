@@ -3,7 +3,7 @@
 """
 
 
-import sys
+# import sys
 
 
 def run(integer_array, start_index, end_index, comparison):
@@ -35,7 +35,7 @@ def run(integer_array, start_index, end_index, comparison):
     run(integer_array, start_index, partition_index, comparison)
     run(integer_array, partition_index+1, len(integer_array), comparison)
 
-    print(sum(comparison))
+
     return sum(comparison)
     # return integer_array
 
@@ -120,11 +120,13 @@ def openfile(file_path):
 
 
 # print(sys.getrecursionlimit())
-sys.setrecursionlimit(2000)
+# sys.setrecursionlimit(2000)
 # print(choose_pivot([3,8,2,5,1,4,7,6], 0, len([3,8,2,5,1,4,7,6])))
 # array = openfile("test.txt")
 # array = openfile("test1.txt")
 # array = [5,8,4,7,6]
-# array = [3,8,2,5,1,4,7,6]
+
 array = openfile("algorithm-quicksort.txt")
+array = [54044,14108,79294,29649,25260,60660,2995,53777,49689,9083,16122,90436,4615,40660,25675,58943,92904]
+array = [3,8,2,5,1,4,7,6]
 print(run(array, 0, len(array), []))
