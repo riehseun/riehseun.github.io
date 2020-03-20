@@ -15,27 +15,20 @@ def run(integer_array, start_index, end_index, comparison):
     Tuple of list representing sorted array and an integer representing the number of comparison in partition subroutine
     """
 
-    # base case
-    if end_index - start_index < 2:
-        # return (integer_array, num_comparison)
+    # base case: there is only 1 element in the array to sort
+    if end_index <= start_index:
         return
-
 
     pivot = choose_pivot(integer_array, start_index, end_index)
     partition(integer_array, start_index, end_index, pivot, comparison)
     partition_index = integer_array.index(pivot)
 
-    print(sum(comparison))
-    # first_partition = partitioned_integer_array[0:partition_index]
-    # second_partition = partitioned_integer_array[partition_index:len(partitioned_integer_array)]
-    # print(first_partition)
-    # print(second_partition)
+    run(integer_array, start_index, partition_index-1, comparison)
+    run(integer_array, partition_index+1, len(integer_array)-1, comparison)
 
-    run(integer_array, start_index, partition_index, comparison)
-    run(integer_array, partition_index+1, len(integer_array), comparison)
-
-
-    return sum(comparison)
+    # print(len(comparison))
+    #print(integer_array)
+    #return sum(comparison)
     # return integer_array
 
 
@@ -51,9 +44,9 @@ def partition(integer_array, start_index, end_index, pivot, comparison):
     a list after the partition around pivot
     """
 
-    i = start_index
-    for j in range(start_index, end_index):
-        if integer_array[j] < pivot and integer_array[j] != pivot:
+    i = start_index + 1
+    for j in range(start_index + 1, end_index+1):
+        if integer_array[j] < pivot:
             temp = integer_array[i]
             integer_array[i] = integer_array[j]
             integer_array[j] = temp
@@ -62,6 +55,9 @@ def partition(integer_array, start_index, end_index, pivot, comparison):
     temp = integer_array[integer_array.index(pivot)]
     integer_array[integer_array.index(pivot)] = integer_array[i]
     integer_array[i] = temp
+    # temp = integer_array[start_index]
+    # integer_array[start_index] = integer_array[i-1]
+    # integer_array[i-1] = temp
 
     comparison.append(end_index - start_index)
 
@@ -77,9 +73,9 @@ def choose_pivot(integer_array, start_index, end_index):
     Tuple of an integer and an index representing the pivot
     """
 
-    # return integer_array[start_index]
+    return integer_array[start_index]
 
-    # return integer_array[end_index-1]
+    return integer_array[end_index-1]
 
     middle = 0
     if len(integer_array) % 2 == 0:
@@ -126,14 +122,21 @@ def list_of_string_to_integer(input_list):
         input_list[i] = int(input_list[i])
 
 
+array_test1 = [5,8,4,7,6]
+partition(array_test1, 0, len(array_test1)-1, 5, [])
+assert(array_test1 == [4,5,8,7,6])
+array_test2 = [3,8,2,5,1,4,7,6]
+partition(array_test2, 0, len(array_test2)-1, 3, [])
+assert(array_test2 == [1,2,3,5,8,4,7,6])
+
+
 # print(sys.getrecursionlimit())
 # print(choose_pivot([3,8,2,5,1,4,7,6], 0, len([3,8,2,5,1,4,7,6])))
-# array = openfile("test.txt")
-# array = openfile("test1.txt")
-# array = [5,8,4,7,6]
-
-array = openfile("algorithm-quicksort.txt")
-list_of_string_to_integer(array)
+# array = openfile("algorithm-quicksort.txt")
 # array = [54044,14108,79294,29649,25260,60660,2995,53777,49689,9083,16122,90436,4615,40660,25675,58943,92904]
 # array = [3,8,2,5,1,4,7,6]
-print(run(array, 0, len(array), []))
+# array = [3,8,2,5,1,4,7,6,10,9]
+# list_of_string_to_integer(array)
+# print(run(array, 0, len(array)-1, []))
+
+
