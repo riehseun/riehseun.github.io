@@ -52,12 +52,12 @@ def partition(integer_array, start_index, end_index, pivot, comparison):
             integer_array[j] = temp
             i += 1
 
-    temp = integer_array[integer_array.index(pivot)]
-    integer_array[integer_array.index(pivot)] = integer_array[i]
-    integer_array[i] = temp
-    # temp = integer_array[start_index]
-    # integer_array[start_index] = integer_array[i-1]
-    # integer_array[i-1] = temp
+    # temp = integer_array[integer_array.index(pivot)]
+    # integer_array[integer_array.index(pivot)] = integer_array[i]
+    # integer_array[i] = temp
+    temp = integer_array[start_index]
+    integer_array[start_index] = integer_array[i-1]
+    integer_array[i-1] = temp
 
     comparison.append(end_index - start_index)
 
@@ -73,9 +73,9 @@ def choose_pivot(integer_array, start_index, end_index):
     Tuple of an integer and an index representing the pivot
     """
 
-    return integer_array[start_index]
+    # return integer_array[start_index]
 
-    return integer_array[end_index-1]
+    return integer_array[end_index]
 
     middle = 0
     if len(integer_array) % 2 == 0:
@@ -135,8 +135,9 @@ assert(array_test2 == [1,2,3,5,8,4,7,6])
 # array = openfile("algorithm-quicksort.txt")
 # array = [54044,14108,79294,29649,25260,60660,2995,53777,49689,9083,16122,90436,4615,40660,25675,58943,92904]
 # array = [3,8,2,5,1,4,7,6]
-# array = [3,8,2,5,1,4,7,6,10,9]
-# list_of_string_to_integer(array)
-# print(run(array, 0, len(array)-1, []))
+array = [3,8,2,5,1,4,7,6,10,9]
+list_of_string_to_integer(array)
+print(run(array, 0, len(array)-1, []))
+print(array)
 
-
+# Increase stack size?
