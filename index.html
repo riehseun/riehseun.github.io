@@ -2809,18 +2809,16 @@ jobs.each { job ->
         <div class="card-body">
             <h2 class="card-title">Docker</h2>
             <ul class="list-unstyled mb-0">
-                <li><a href="#docker-1">1. Docker basicr</a></li>
-                <li><a href="#docker-2">2. Setting up Docker registry on linux</a></li>
-                <li><a href="#docker-3">3. Useful Docker commands</a></li>
-                <li><a href="#docker-4">4. Writing Dockerfile</a></li>
+                <li><a href="#docker-1">1. Docker basic</a></li>
+                <li><a href="#docker-2">2. Useful Docker commands</a></li>
+                <li><a href="#docker-3">3. Writing Dockerfile</a></li>
+<!--                 <li><a href="#docker-4">4. Setting up Docker registry on linux</a></li>
                 <li><a href="#docker-5">5. Setting up Dockerhost</a></li>
                 <li><a href="#docker-6">6. Create base image</a></li>
-                <li><a href="#docker-7">7. Kernel</a></li>
-                <li><a href="#docker-8">8. Docker Engine</a></li>
                 <li><a href="#docker-9">9. Installing Docker on Redhat</a></li>
                 <li><a href="#docker-10">10. Writing Dockerfile for Jenkins master</a></li>
                 <li><a href="#docker-11">11. Writing Dockerfile for Jenkins agent</a></li>
-                <li><a href="#docker-12">12. Build and push images</a></li>
+                <li><a href="#docker-12">12. Build and push images</a></li> -->
             </ul>
         </div>
     </div>
@@ -2843,24 +2841,26 @@ jobs.each { job ->
                 <li>RUNNING -> (docker stop) -> STOPPED, STOPPED -> (docker restart) -> RUNNING</li>
                 <li>RUNNING -> (docker pause) -> PAUSED, PAUSED -> (docker unpause) -> RUNNING</li>
             </ul>
-        </div>
-        <div class="card-footer text-muted"></div>
-    </div>
-    <div class="card mb-4" id="docker-2">
-        <div class="card-body">
-            <h2 class="card-title">2. Setting up Docker registry on Linux</h2>
-<pre><code class="bash">docker pull registry:2
-docker save -o registry_2.tar registry:2
-docker load -i registry.tar
-docker run -d --net=host -p 5000:5000 -v []/docker-registry-data:[]/registry --name registry --restart always registry:2</code></pre>
+            <p class="card-text">Kernel</p>
+            <ul>
+                <li>Namespaces - isolation (like hypervisor for VMs) like pid, net, mnt, ipc, user</li>
+                <li>Control groups - Setting the resource limits (for each container, for example)</li>
+                <li>Containers, although isolated, shared the single OS Kernel</li>
+                <li>Containers get their own namespaces</li>
+            </ul>
+            <p class="card-text">Docker Enginel</p>
+            <ul>
+                <li>Docker Engine - client-server implementation where they run on the same host and communicate via REST API</li>
+                <li>Docker client - provides docker CLI</li>
+                <li>Docker server - daemon named dockerd, responds to client request</li>
             </ul>
         </div>
         <div class="card-footer text-muted"></div>
     </div>
 
-    <div class="card mb-4" id="docker-3">
+    <div class="card mb-4" id="docker-2">
         <div class="card-body">
-            <h2 class="card-title">3. Useful Docker commands</h2>
+            <h2 class="card-title">2. Useful Docker commands</h2>
 <pre><code class="bash">docker build -f [DockerfileName] -t [DockerImageName] # builds Dockerfile and create new image
 docker ps -a # see all containers in all states
 docker run -d [image] # run container in background
@@ -2880,28 +2880,14 @@ docker-compose start $CONTAINER
 
 docker inspect [container_name] # display container information
 docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' # get the container IP</code></pre>
-                <!-- <li>cd docker-ssh-slave && docker rmi jenkins/ssh-slave #This is to ensure that we remove the image with same name if it exists</li>
-                <li>docker load -i openjdk_8-jdk.tar #Before doing this, you must obtain openjdk_8-jdk.tar file from the Internet</li>
-                <li>#Prepare your &#34;Dockerfile&#34;</li>
-                <li>docker build . -t jenkins/ssh-slave #This command actually builds the docker image</li>
-                <li>docker run -u 0 -dit jenkins/ssh-slave</li>
-                <li>docker exec -u 0 -it $(docker ps --latest --quiet) bash #After this command, you should test the image</li>
-                <li>exit #exit the image when done the testing</li>
-                <li>docker stop $(docker ps --latest --quiet) && docker rm $(docker ps -a -f status=exited -q)</li>
-                <li>docker save -o jenkins-ssh-slave.tar jenkins/ssh-slave</li>
-                <li>scp jenkins-ssh-slave.tar [your_username]@[your_docker_registry_server_ip]:/[your_registry_directory]</li>
-                <li>ssh [your_username]@[your_docker_registry_server_ip]</li>
-                <li>cd [your_registry_directory] && docker load -i jenkins-ssh-slave.tar</li>
-                <li>docker tag jenkins/ssh-slave [your_image_name]:5000/jenkns/ssh-slave #To push your image to registry, you must tag it first</li>
-                <li>docker push [your_image_name]:5000/jenkns/ssh-slave</li> -->
             </ul>
         </div>
         <div class="card-footer text-muted"></div>
     </div>
 
-    <div class="card mb-4" id="docker-4">
+    <div class="card mb-4" id="docker-3">
         <div class="card-body">
-            <h2 class="card-title">4. Writing Dockerfile</h2>
+            <h2 class="card-title">3. Writing Dockerfile</h2>
             <ul>
                 <li>FROM - pulls base image</li>
                 <li>WORKDIR - sets current working directory in container</li>
@@ -2914,7 +2900,26 @@ docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}
                 <li>ENTRYPOINT - allows configuring container that will run as an executable</li>
                 <li>USER - set UID when running the image</li>
             </ul>
-            <!-- <p class="card-text">An example of Dockerfile could look like the following</strong></p>
+        </div>
+        <div class="card-footer text-muted"></div>
+    </div>
+
+    <!-- <li>cd docker-ssh-slave && docker rmi jenkins/ssh-slave #This is to ensure that we remove the image with same name if it exists</li>
+    <li>docker load -i openjdk_8-jdk.tar #Before doing this, you must obtain openjdk_8-jdk.tar file from the Internet</li>
+    <li>#Prepare your &#34;Dockerfile&#34;</li>
+    <li>docker build . -t jenkins/ssh-slave #This command actually builds the docker image</li>
+    <li>docker run -u 0 -dit jenkins/ssh-slave</li>
+    <li>docker exec -u 0 -it $(docker ps --latest --quiet) bash #After this command, you should test the image</li>
+    <li>exit #exit the image when done the testing</li>
+    <li>docker stop $(docker ps --latest --quiet) && docker rm $(docker ps -a -f status=exited -q)</li>
+    <li>docker save -o jenkins-ssh-slave.tar jenkins/ssh-slave</li>
+    <li>scp jenkins-ssh-slave.tar [your_username]@[your_docker_registry_server_ip]:/[your_registry_directory]</li>
+    <li>ssh [your_username]@[your_docker_registry_server_ip]</li>
+    <li>cd [your_registry_directory] && docker load -i jenkins-ssh-slave.tar</li>
+    <li>docker tag jenkins/ssh-slave [your_image_name]:5000/jenkns/ssh-slave #To push your image to registry, you must tag it first</li>
+    <li>docker push [your_image_name]:5000/jenkns/ssh-slave</li> -->
+
+    <!-- <p class="card-text">An example of Dockerfile could look like the following</strong></p>
             <pre><code class="groovy">
 FROM openjdk:8-jdk
 LABEL MAINTAINER="Seungmoon Rieh &lt;seungmoon.rieh@gmail.com&gt;"
@@ -2946,13 +2951,21 @@ COPY setup-sshd /usr/local/bin/setup-sshd
 
 EXPOSE 22
 
-ENTRYPOINT ["setup-sshd"]
-            </code></pre> -->
+ENTRYPOINT ["setup-sshd"]</code></pre> -->
+
+    <!-- <div class="card mb-4" id="docker-4">
+        <div class="card-body">
+            <h2 class="card-title">4. Setting up Docker registry on Linux</h2>
+<pre><code class="bash">docker pull registry:2
+docker save -o registry_2.tar registry:2
+docker load -i registry.tar
+docker run -d --net=host -p 5000:5000 -v []/docker-registry-data:[]/registry --name registry --restart always registry:2</code></pre>
+            </ul>
         </div>
         <div class="card-footer text-muted"></div>
-    </div>
+    </div> -->
 
-    <div class="card mb-4" id="docker-5">
+    <!-- <div class="card mb-4" id="docker-5">
         <div class="card-body">
             <h2 class="card-title">5. Setting up Dockerhost</h2>
             <p class="card-text">This is to show how to construct a Jenkins "build server" where all work would be done inside docker container (for RedHat 7 distribution)</p>
@@ -2971,49 +2984,9 @@ sudo service docker restart
 >curl http://localhost:4243/version</code></pre>
         </div>
         <div class="card-footer text-muted"></div>
-    </div>-
+    </div> -->
 
-    <div class="card mb-4" id="docker-6">
-        <div class="card-body">
-            <h2 class="card-title">6. Create base image</h2>
-            <p class="card-text"></p>
-            <ul>
-                <li>Choose parent image</li>
-                <li>Pick OS packages</li>
-                <li>Build virtual environment</li>
-            </ul>
-        </div>
-        <div class="card-footer text-muted"></div>
-    </div>
-
-    <div class="card mb-4" id="docker-7">
-        <div class="card-body">
-            <h2 class="card-title">7. Kernel</h2>
-            <p class="card-text"></p>
-            <ul>
-                <li>Namespaces - isolation (like hypervisor for VMs) like pid, net, mnt, ipc, user</li>
-                <li>Control groups - Setting the resource limits (for each container, for example)</li>
-                <li>Containers, although isolated, shared the single OS Kernel</li>
-                <li>Containers get their own namespaces</li>
-            </ul>
-        </div>
-        <div class="card-footer text-muted"></div>
-    </div>
-
-    <div class="card mb-4" id="docker-8">
-        <div class="card-body">
-            <h2 class="card-title">8. Docker Engine</h2>
-            <p class="card-text"></p>
-            <ul>
-                <li>Docker Engine - client-server implementation where they run on the same host and communicate via REST API</li>
-                <li>Docker client - provides docker CLI</li>
-                <li>Docker server - daemon named dockerd, responds to client request</li>
-            </ul>
-        </div>
-        <div class="card-footer text-muted"></div>
-    </div>
-
-    <div class="card mb-4" id="docker-9">
+    <!-- <div class="card mb-4" id="docker-9">
         <div class="card-body">
             <h2 class="card-title">9. Installing Docker on Redhat</h2>
             <p class="card-text"></p>
@@ -3030,9 +3003,9 @@ sudo service docker restart
         <div class="card-footer text-muted">
             Reference: <a href="https://www.cyberciti.biz/faq/install-use-setup-docker-on-rhel7-centos7-linux/">install-use-setup-docker-on-rhel7-centos7-linux</a>
         </div>
-    </div>
+    </div> -->
 
-    <div class="card mb-4" id="docker-10">
+    <!-- <div class="card mb-4" id="docker-10">
         <div class="card-body">
             <h2 class="card-title">10. Writing Dockerfile for Jenkins master</h2>
             <p class="card-text">Dockerfile-jenkins-master</p>
@@ -3090,7 +3063,7 @@ docker push [dockerhub_user]/jenkins-slave-jnlp2</code></pre>
         <div class="card-footer text-muted">
             Reference: <a href="https://rancher.com/blog/2018/2018-11-27-scaling-jenkins/">Deploying and Scaling Jenkins on Kubernetes</a>
         </div>
-    </div>
+    </div> -->
     <!-- Docker END -->
 
 
