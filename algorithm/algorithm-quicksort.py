@@ -1,6 +1,10 @@
 """
-    Usage: python algorithm-quicksort.py
+Usage: python algorithm-quicksort.py
 """
+
+
+import resource
+import sys
 
 
 def run(integer_array, start_index, end_index, comparison):
@@ -130,12 +134,13 @@ partition(array_test2, 0, len(array_test2)-1, 3, [])
 assert(array_test2 == [1,2,3,5,8,4,7,6])
 
 
-# print(sys.getrecursionlimit())
+resource.setrlimit(resource.RLIMIT_STACK, (resource.RLIM_INFINITY, resource.RLIM_INFINITY))
+sys.setrecursionlimit(10000)
 # print(choose_pivot([3,8,2,5,1,4,7,6], 0, len([3,8,2,5,1,4,7,6])))
-# array = openfile("algorithm-quicksort.txt")
+array = openfile("algorithm-quicksort.txt")
 # array = [54044,14108,79294,29649,25260,60660,2995,53777,49689,9083,16122,90436,4615,40660,25675,58943,92904]
 # array = [3,8,2,5,1,4,7,6]
-array = [3,8,2,5,1,4,7,6,10,9]
+# array = [3,8,2,5,1,4,7,6,10,9]
 list_of_string_to_integer(array)
 print(run(array, 0, len(array)-1, []))
 print(array)
