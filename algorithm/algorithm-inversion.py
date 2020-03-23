@@ -1,6 +1,7 @@
 """
-	Usage: python algorithm-inversion.py
+Usage: python algorithm-inversion.py
 """
+
 
 def run(integer_array, filepath):
 	"""
