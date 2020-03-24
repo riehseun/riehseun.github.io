@@ -3,8 +3,8 @@ Usage: python algorithm-quicksort.py
 """
 
 
-import resource
-import sys
+#import threading
+#import sys
 
 
 def run(integer_array, start_index, end_index, comparison):
@@ -27,12 +27,12 @@ def run(integer_array, start_index, end_index, comparison):
     partition(integer_array, start_index, end_index, pivot, comparison)
     partition_index = integer_array.index(pivot)
 
-    run(integer_array, start_index, partition_index-1, comparison)
-    run(integer_array, partition_index+1, len(integer_array)-1, comparison)
+    a = run(integer_array, start_index, partition_index-1, comparison)
+    b = run(integer_array, partition_index+1, len(integer_array)-1, comparison)
 
     # print(len(comparison))
     #print(integer_array)
-    #return sum(comparison)
+    return sum(comparison)
     # return integer_array
 
 
@@ -56,9 +56,6 @@ def partition(integer_array, start_index, end_index, pivot, comparison):
             integer_array[j] = temp
             i += 1
 
-    # temp = integer_array[integer_array.index(pivot)]
-    # integer_array[integer_array.index(pivot)] = integer_array[i]
-    # integer_array[i] = temp
     temp = integer_array[start_index]
     integer_array[start_index] = integer_array[i-1]
     integer_array[i-1] = temp
@@ -77,7 +74,7 @@ def choose_pivot(integer_array, start_index, end_index):
     Tuple of an integer and an index representing the pivot
     """
 
-    # return integer_array[start_index]
+    return integer_array[start_index]
 
     return integer_array[end_index]
 
@@ -128,21 +125,116 @@ def list_of_string_to_integer(input_list):
 
 array_test1 = [5,8,4,7,6]
 partition(array_test1, 0, len(array_test1)-1, 5, [])
+# print(array_test1)
 assert(array_test1 == [4,5,8,7,6])
 array_test2 = [3,8,2,5,1,4,7,6]
 partition(array_test2, 0, len(array_test2)-1, 3, [])
+# print(array_test2)
 assert(array_test2 == [1,2,3,5,8,4,7,6])
+array_test3 = [9,8,2,5,1,4,7,6,10,3]
+partition(array_test3, 0, len(array_test3)-1, 9, [])
+# print(array_test3)
+assert(array_test3 == [3,8,2,5,1,4,7,6,9,10])
 
 
-resource.setrlimit(resource.RLIMIT_STACK, (resource.RLIM_INFINITY, resource.RLIM_INFINITY))
-sys.setrecursionlimit(10000)
+#threading.stack_size(0x2000000)
+#sys.setrecursionlimit(10000)
+
 # print(choose_pivot([3,8,2,5,1,4,7,6], 0, len([3,8,2,5,1,4,7,6])))
 array = openfile("algorithm-quicksort.txt")
 # array = [54044,14108,79294,29649,25260,60660,2995,53777,49689,9083,16122,90436,4615,40660,25675,58943,92904]
 # array = [3,8,2,5,1,4,7,6]
 # array = [3,8,2,5,1,4,7,6,10,9]
 list_of_string_to_integer(array)
-print(run(array, 0, len(array)-1, []))
-print(array)
+# print(run(array, 0, len(array)-1, []))
+# print(array)
 
-# Increase stack size?
+
+
+def sort(array, comparison):
+    """Sort the array by using quicksort."""
+
+    less = []
+    equal = []
+    greater = []
+
+    if len(array) > 1:
+        # pivot = array[0]
+        # pivot = array[len(array)-1]
+        pivot = choose_pivot(array, 0, len(array)-1)
+        for x in array:
+            if x < pivot:
+                less.append(x)
+            elif x == pivot:
+                equal.append(x)
+            elif x > pivot:
+                greater.append(x)
+        comparison.append(len(array)-1)
+        # Don't forget to return something!
+        return sort(less, comparison)+equal+sort(greater, comparison)  # Just use the + operator to join lists
+    # Note that you want equal ^^^^^ not pivot
+    else:  # You need to handle the part at the end of the recursion - when you only have one element in your array, just return the array.
+        return array
+
+# comparison = []
+# print(sort(array, comparison))
+# print(sum(comparison))
+
+def partition(arr,low,high):
+    i = ( low-1 )         # index of smaller element
+    pivot = arr[high]     # pivot
+
+    for j in range(low , high):
+
+        # If current element is smaller than or
+        # equal to pivot
+        if   arr[j] <= pivot:
+
+            # increment index of smaller element
+            i = i+1
+            arr[i],arr[j] = arr[j],arr[i]
+
+    arr[i+1],arr[high] = arr[high],arr[i+1]
+    # return ( i+1 )
+    return arr[0]
+
+def quickSort(arr,low,high):
+    if low < high:
+
+        # pi is partitioning index, arr[p] is now
+        # at right place
+        pi = partition(arr,low,high)
+
+        # Separately sort elements before
+        # partition and after partition
+        quickSort(arr, low, pi-1)
+        quickSort(arr, pi+1, high)
+
+# quickSort(array,0,len(array)-1)
+# print(array)
+
+
+def partition1(array, begin, end):
+    pivot = begin
+    for i in xrange(begin+1, end+1):
+        if array[i] <= array[begin]:
+            pivot += 1
+            array[i], array[pivot] = array[pivot], array[i]
+    array[pivot], array[begin] = array[begin], array[pivot]
+    return pivot
+
+
+
+def quicksort1(array, begin=0, end=None):
+    if end is None:
+        end = len(array) - 1
+    def _quicksort1(array, begin, end):
+        if begin >= end:
+            return
+        pivot = partition1(array, begin, end)
+        _quicksort1(array, begin, pivot-1)
+        _quicksort1(array, pivot+1, end)
+    return _quicksort1(array, begin, end)
+
+quicksort1(array)
+print(array)
