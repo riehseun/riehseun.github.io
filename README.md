@@ -1,1 +1,1 @@
-DevOps Blog - Seungmoon Rieh
+# Blog
