@@ -498,7 +498,9 @@ sudo systemctl status ssh</code></pre>
             <ul class="list-unstyled mb-0">
                 <li><a href="#git-1">1. Git flow</a></li>
                 <li><a href="#git-2">2. Useful git commands</a></li>
-                <li><a href="#git-3">3. Git mechanism</a></li>
+                <li><a href="#git-3">3. Git concets</a></li>
+                <li><a href="#git-4">4. Squashing commits</a></li>
+                <li><a href="#git-5">5. Fork vs Clone</a></li>
             </ul>
         </div>
     </div>
@@ -547,22 +549,51 @@ git push origin -d &lt;tag&gt; # delete a tag from remote repository/code></code
 git fetch --prune # remove local branches the do not exist in remote
 git branch -a # display local and remote branches</code></pre>
 
-<pre><code class="bash">git reset --hard [commitHash] & git push -f origin [branch] # revert to previous commit in the remote
+<pre><code class="bash">git reset --hard &lt;commit_hash&gt; & git push -f origin [branch] # revert to previous commit in the remote
 git fetch --all && git reset --hard origin/[branch_name] # force overwrite local with remote</code></pre>
 
 <pre><code class="bash">branch=feature; for i in $(git branch | grep $branch); do git branch -D $branch/${i##/*}; done # delete all feature branches in the local
 branch=feature; for i in $(git branch -a | grep remotes/origin/$branch); do git push origin --delete $branch/${i##/*} | sort -u; done # delete all feature branches in the remote</code></pre>
-
         </div>
         <div class="card-footer text-muted"></div>
     </div>
 
     <div class="card mb-4" id="git-3">
         <div class="card-body">
-            <h2 class="card-title">3. Git mechanism</h2>
+            <h2 class="card-title">3. Git concepts</h2>
             <p class="card-text"></p>
 <pre><code class="bash">git add # move files from "untracked/modified" state to "staged" state
 git commit # move files from "staged" state to "committed" state</code></pre>
+
+<pre><code class="bash">git fetch # gather commits from remote that don't exist in local
+git merge # integrate commits to your branch
+git pull # git fetch + git merge</code></pre>
+
+<pre><code class="bash">branch # a version of code
+git cherry-pick # get a commit from one branch and integrate to another branch
+HEAD # last commit of current branch</code></pre>
+        </div>
+        <div class="card-footer text-muted"></div>
+    </div>
+
+    <div class="card mb-4" id="git-4">
+        <div class="card-body">
+            <h2 class="card-title">4. Squashing commits</h2>
+            <p class="card-text">When there are too many commits, it may be hard for other people to review your pull requests. Squashing commits comes handy</p>
+<pre><code class="bash">git log --oneline # search your commit history and pick the one you want to squash commits from
+git rebase -i &lt;commit_hash&gt;
+# nano editor will open. Use reword/pick/squash to specify what you want to do for each commit. Ctrl-O &amp; Ctrl-T will write your changes
+git log --oneline # observe that commits have been squashed
+git push -f origin &lt;branch&gt; # finally push the changes to your branch</code></pre>
+        </div>
+        <div class="card-footer text-muted"></div>
+    </div>
+
+    <div class="card mb-4" id="git-5">
+        <div class="card-body">
+            <h2 class="card-title">5. Fork vs Clone</h2>
+            <p class="card-text">Fork - server side copy of repository</p>
+            <p class="card-text">Clone - local copy of repository in a server (include history and branches)</p>
         </div>
         <div class="card-footer text-muted"></div>
     </div>
