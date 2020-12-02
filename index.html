@@ -3400,16 +3400,31 @@ journalctl -u docker.service</code></pre>
 # SQL_SERVER="changeme.database.windows.net"
 # SQL_DBNAME="mydrivingDB"
 
+# Install sqlcmd
+curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
+curl https://packages.microsoft.com/config/ubuntu/20.10/prod.list | sudo tee /etc/apt/sources.list.d/msprod.list # Carefully watch out the ubuntu version you are using
+sudo apt-get update
+sudo apt-get install mssql-tools unixodbc-dev
+
 docker pull mcr.microsoft.com/mssql/server
 sudo docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=changeMe0!" -p 1433:1433 --name sql1 -h changeme.database.windows.net -d mcr.microsoft.com/mssql/server:2019-latest # Password must include uppercase, lowercase, number, and special character
 sudo docker exec -it sql1 "bash"
 /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "changeMe0!" # This should lead to sqlcmd command prompt
 CREATE DATABASE mydrivingDB
+
+# Find container IP of MSSQL container
+SQL_CONTAINER_IP=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' sql1)
+# Test connecting to SQL server outside the container
+/opt/mssql-tools/bin/sqlcmd -S $SQL_CONTAINER_IP,1433 -U SA -P "changeMe0!"
+QUIT
+
+# Assume there is an app running under container name &lt;container_name&gt;. How to connect to SQL DB from the app
+docker run --network host -e SQLFQDN=$SQL_CONTAINER_IP,1433 -e SQLUSER=sqladmin -e SQLPASS=changeMe0! -e SQLDB=mydrivingDB &lt;container_name&gt;
 </code></pre>
 
         </div>
         <div class="card-footer text-muted">
-            Reference: <a href="https://docs.microsoft.com/en-us/sql/linux/quickstart-install-connect-docker?view=sql-server-ver15&pivots=cs1-bash">Run SQL Server container images with Docker</a>
+            Reference: <a href="https://docs.microsoft.com/en-us/sql/linux/quickstart-install-connect-docker?view=sql-server-ver15&pivots=cs1-bash">Run SQL Server container images with Docker</a> | <a href="https://docs.microsoft.com/en-us/sql/linux/sql-server-linux-setup-tools?view=sql-server-ver15">Install sqlcmd and bcp the SQL Server command-line tools on Linux</a>
         </div>
     </div>
 
