@@ -587,7 +587,7 @@
                 <li><a href="#virtualbox-1">1. How to load a linux VDI into Virtual Box</a></li>
                 <li><a href="#virtualbox-2">2. Port mapping (8080) from Virtual machine to local machine</a></li>
                 <li><a href="#virtualbox-3">3. Enabling copy and paste between local machine and VM</a></li>
-                <li><a href="#virtualbox-4">4. Enabling ssh from local machine to virtual machine</a></li>
+                <li><a href="#virtualbox-4">4. Install dependencies</a></li>
             </ul>
         </div>
     </div>
@@ -651,12 +651,20 @@
 
     <div class="card mb-4" id="virtualbox-4">
         <div class="card-body">
-            <h2 class="card-title">4. Enabling ssh from local machine to virtual machine (Ubuntu)</h2>
-<pre><code class="bash"># Execute the following from virtual machine
+            <h2 class="card-title">4. Install dependencies (Ubuntu)</h2>
+<pre><code class="bash"># Enabling ssh from local machine to virtual machine
 sudo apt update
 sudo apt upgrade
 sudo apt install openssh-server
 sudo systemctl status ssh</code></pre>
+
+<pre><code class="bash"># Install docker
+# Create a file at /etc/apt/sources.list.d/docker.list
+# And add this line: deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable
+sudo apt-get install apt-transport-https ca-certificates curl gnupg-agent software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo apt update
+sudo apt-get install docker-ce docker-ce-cli containerd.io</code></pre>
         </div>
         <div class="card-footer text-muted"></div>
     </div>
@@ -3329,7 +3337,7 @@ jobs.each { job ->
     <div class="card mb-4" id="docker-2">
         <div class="card-body">
             <h2 class="card-title">2. Useful Docker commands</h2>
-<pre><code class="bash">docker build -f [DockerfileName] -t [DockerImageName] # builds Dockerfile and create new image
+<pre><code class="bash">docker build -f [DockerfileName] -t [DockerImageName] . # builds Dockerfile and create new image
 docker ps -a # see all containers in all states
 docker run -d [image] # run container in background
 docker stop $(docker ps --latest --quiet) && docker rm $(docker ps -a -f status=exited -q) && docker ps -a # Stop all images, remove all images, and show images
