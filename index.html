@@ -1152,7 +1152,7 @@ jupyter kernelspec uninstall [unwanted-kernel]</code></pre>
             <h2 class="card-title">Groovy</h2>
             <p class="card-text"></p>
             <ul class="list-unstyled mb-0">
-                <li><a href="#groovy-1">1. Groovy Basic</a></li>
+                <li><a href="#groovy-1">1. Groovy Basic (used in Jenkins pipeline)</a></li>
             </ul>
         </div>
     </div>
@@ -1160,7 +1160,7 @@ jupyter kernelspec uninstall [unwanted-kernel]</code></pre>
 
     <div class="card mb-4" id="groovy-1">
         <div class="card-body">
-            <h2 class="card-title">1. Groovy Basic</h2>
+            <h2 class="card-title">1. Groovy Basic (used in Jenkins pipeline)</h2>
 <pre><code class="groovy">// Groovy common imports
 import com.cloudbees.groovy.cps.NonCPS
 import groovy.json.JsonBuilder
@@ -3879,7 +3879,6 @@ spec:
             <p class="card-text">To see the labels generated for each Pod, run "kubectl get pods --show-labels"</p>
             <p class="card-text">To update iamge from nginx:1.14.2 to nginx:1.16.1, run "kubectl set image deployment/nginx-deployment nginx=nginx:1.16.1 --record"</p>
             <p class="card-text">To get details of Deployment, run "kubectl describe deployments"</p>
-
         </div>
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployment</a>
@@ -3903,8 +3902,30 @@ spec:
     <div class="card mb-4" id="kubernetes-6">
         <div class="card-body">
             <h2 class="card-title">6. Jobs</h2>
-            <p class="card-text"></p>
+            <p class="card-text">A Job creates one more more Pods. Deleting a Job will clean up Pods it created</p>
+            <p class="card-text">Example</p>
+<pre><code class="yaml">apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pi
+spec:
+  template:
+    spec:
+      containers:
+      - name: pi
+        image: perl
+        command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+      restartPolicy: Never
+  backoffLimit: 4</code></pre>
+            <p class="card-text">To list all the Pods that belong to a Job, run "pods=$(kubectl get pods --selector=job-name=pi --output=jsonpath='{.items[*].metadata.name}') && echo $pods"</p>
+            <p class="card-text">Three types of tasks suitable to run as a Job</p>
+            <ul>
+                <li>Non-parallel Jobs - normally only one Pod is started. Job is complete as soon as its Pod terminates successfully</li>
+                <li>Parallel Jobs with a fixed completion count - Job is complete when there is one successful Pod for each value in the range 1 to <strong>.spec.completions</strong>, which would have a non-zero positive value</li>
+                <li>Parallel Jobs with a work queue - when any pod from the Job terminates with success, no new Pods are created. Once at least one Pod is terminated with success and all Pods are terminated, Job succeeds</li>
+            </ul>
         </div>
+
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/job/">Jobs</a>
         </div>
@@ -3913,7 +3934,27 @@ spec:
     <div class="card mb-4" id="kubernetes-7">
         <div class="card-body">
             <h2 class="card-title">7. Cron Job</h2>
-            <p class="card-text"></p>
+            <p class="card-text">Creates Jobs on a repeating schedule</p>
+            <p class="card-text">Example</p>
+<pre><code class="yaml">apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: hello
+spec:
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: hello
+            image: busybox
+            imagePullPolicy: IfNotPresent
+            command:
+            - /bin/sh
+            - -c
+            - date; echo Hello from the Kubernetes cluster
+          restartPolicy: OnFailure</code></pre>
         </div>
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/">CronJob</a>
