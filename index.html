@@ -3743,9 +3743,9 @@ docker push [dockerhub_user]/jenkins-slave-jnlp2</code></pre>
                 <li><a href="#kubernetes-2">2. Pods</a></li>
                 <li><a href="#kubernetes-3">3. Multi-container pod design</a></li>
                 <li><a href="#kubernetes-4">4. Deployments</a></li>
-                <li><a href="#kubernetes-5">5. Setup Kubernetes Node</a></li>
-                <li><a href="#kubernetes-6">6. Write Deployment for Jenkins</a></li>
-                <li><a href="#kubernetes-7">7. Write Service for Jenkins</a></li>
+                <li><a href="#kubernetes-5">5. Rollover and rollback</a></li>
+                <li><a href="#kubernetes-6">6. Jobs</a></li>
+                <li><a href="#kubernetes-7">7. Cron Job</a></li>
                 <li><a href="#kubernetes-8">8. Deploy Jenkins master</a></li>
                 <li><a href="#kubernetes-9">9. Deploy Jenkins agent</a></li>
             </ul>
@@ -3785,6 +3785,7 @@ docker push [dockerhub_user]/jenkins-slave-jnlp2</code></pre>
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/reference/using-api/api-concepts/">Kubernetes API Concepts</a>
         </div>
+    </div>
 
     <div class="card mb-4" id="kubernetes-2">
         <div class="card-body">
@@ -3842,9 +3843,80 @@ docker push [dockerhub_user]/jenkins-slave-jnlp2</code></pre>
                 <li>Rollback to an earlier Deployment version</li>
                 <li>Scale up the Deployments</li>
             </ul>
+            <p class="card-text">Example</p>
+<pre><code class="yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.14.2
+        ports:
+        - containerPort: 80</code></pre>
+            <ul>
+                <li><strong>.metadata.name</strong> indicates Deployment name ".metadata.name" to be created</li>
+                <li><strong>.spec.replicas</strong> indicates three replicated Pods</li>
+                <li><strong>.spec.selector</strong> tells how Deployment finds which Pods to manage</li>
+                <li><strong>.template.metadata.labels</strong> indicates Pods label</li>
+            </ul>
+
+            <p class="card-text">To create Deployment, run "kubectl apply -f nginx-deployment.yaml"</p>
+            <p class="card-text">To check Deployment, run "kubectl get deployments"</p>
+            <p class="card-text">To check Deployment rollout status, run "kubectl rollout status deployment/nginx-deployment"</p>
+            <p class="card-text">To see the ReplicaSet created by Deployment, run "kubectl get rs"</p>
+            <p class="card-text">To see the labels generated for each Pod, run "kubectl get pods --show-labels"</p>
+            <p class="card-text">To update iamge from nginx:1.14.2 to nginx:1.16.1, run "kubectl set image deployment/nginx-deployment nginx=nginx:1.16.1 --record"</p>
+            <p class="card-text">To get details of Deployment, run "kubectl describe deployments"</p>
+
         </div>
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployment</a>
+        </div>
+    </div>
+
+    <div class="card mb-4" id="kubernetes-5">
+        <div class="card-body">
+            <h2 class="card-title">5. Rollover and rollback</h2>
+            <p class="card-text">If Deployment is updated, ReplicaSet whose labels match <Strong>.spec.selector</Strong> but whose template does not match <strong>.spec.template</strong> are scaled down. New ReplicaSet is eventually scaled to <strong>.spec.replicas</strong></p>
+            <p class="card-text">To check revisions of Deployment, run "kubectl rollout history deployment.v1.apps/nginx-deployment"</p>
+            <p class="card-text">To see details of each revision, run "kubectl rollout history deployment.v1.apps/nginx-deployment --revision=2"</p>
+            <p class="card-text">To roll back to previous version, run "kubectl rollout undo deployment.v1.apps/nginx-deployment"</p>
+            <p class="card-text">To roll back to a specific version, run "kubectl rollout undo deployment.v1.apps/nginx-deployment --to-revision=2"</p>
+        </div>
+        <div class="card-footer text-muted">
+            Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployment</a>
+        </div>
+    </div>
+
+    <div class="card mb-4" id="kubernetes-6">
+        <div class="card-body">
+            <h2 class="card-title">6. Jobs</h2>
+            <p class="card-text"></p>
+        </div>
+        <div class="card-footer text-muted">
+            Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/job/">Jobs</a>
+        </div>
+    </div>
+
+    <div class="card mb-4" id="kubernetes-7">
+        <div class="card-body">
+            <h2 class="card-title">7. Cron Job</h2>
+            <p class="card-text"></p>
+        </div>
+        <div class="card-footer text-muted">
+            Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/">CronJob</a>
         </div>
     </div>
 
@@ -3908,7 +3980,7 @@ kubectl get pods --all-namespaces</code></pre>
         </div>
     </div> -->
 
-    <div class="card mb-4" id="kubernetes-5">
+    <!-- <div class="card mb-4" id="kubernetes-5">
         <div class="card-body">
             <h2 class="card-title">5. Setup Kubernetes Node</h2>
             <p class="card-text">Do this on each node. Replace [k8s-node-name] with appropriate node name</p>
@@ -3948,9 +4020,9 @@ systemctl enable docker.service && systemctl start docker.service</code></pre>
         <div class="card-footer text-muted">
             Reference: <a href="https://www.linuxtechi.com/install-kubernetes-1-7-centos7-rhel7">How to Install Kubernetes (k8s) 1.7 on CentOS 7 / RHEL 7</a>
         </div>
-    </div>
+    </div> -->
 
-    <div class="card mb-4" id="kubernetes-6">
+    <!-- <div class="card mb-4" id="kubernetes-6">
         <div class="card-body">
             <h2 class="card-title">6. Write Deployment for Jenkins</h2>
             <p class="card-text">"deployment.yaml". Replace [dockerhub_user] with appropriate username</p>
@@ -4025,7 +4097,7 @@ app: jenkins</code></pre>
         <div class="card-footer text-muted">
             Reference: <a href="https://rancher.com/blog/2018/2018-11-27-scaling-jenkins/">Deploying and Scaling Jenkins on Kubernetes</a>
         </div>
-    </div>
+    </div> -->
 
     <div class="card mb-4" id="kubernetes-8">
         <div class="card-body">
