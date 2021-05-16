@@ -3793,6 +3793,8 @@ docker push [dockerhub_user]/jenkins-slave-jnlp2</code></pre>
     <div class="card mb-4" id="kubernetes-1">
         <div class="card-body">
             <h2 class="card-title">1. Kubernetes API</h2>
+
+            <h3 class="card-title">Standard API terminology</h2>
             <p class="card-text">Most K8s resource types are objects, which have unique name to allow idempotent creation</p>
             <ul>
                 <li>Resource type - name used in the URLs (pods, namespaces, services)</li>
@@ -3812,6 +3814,20 @@ docker push [dockerhub_user]/jenkins-slave-jnlp2</code></pre>
                 <li>GET /apis/GROUP/VERSION/namespaces/NAMESPACE/RESOURCETYPE/NAME</li>
             </ul>
             <p class="card-text">Retrive all namespaces with "GET /api/v1/namespaces" and particular namespace with "GET /api/v1/namespaces/NAME"</p>
+            <p class="card-text">K8s uses "list" to return a collection of resource and "get" to return a single resource</p>
+            <p class="card-text">Some resources have sub-resource(s)</p>
+            <ul>
+                <li>GET /apis/GROUP/VERSION/RESOURCETYPE/NAME/SUBRESOURCE</li>
+                <li>GET /apis/GROUP/VERSION/namespaces/NAMESPACE/RESOURCETYPE/NAME/SUBRESOURCE</li>
+            </ul>
+
+            <h3 class="card-title">Efficient detection of changes</h2>
+            <p class="card-text"><strong>watch</strong> - detects incremental changes in cluster state. Use "resourceVersion" to store the state of resources</p>
+            <ul>
+                <li>GET /api/v1/namespaces/test/pods - list all pods in given namespace</li>
+                <li>GET /api/v1/namespaces/test/pods?watch=1&resourceVersion=10245 - starting resource version 10245, get notification for create/delete/update</li>
+            </ul>
+            <p class="card-text">K8s server can only store history for a limted time. Clusters using etcd3 preserve changes for the last 5 mins by default. Clients are expected to handle http status code "410 Gone"</p>
         </div>
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/reference/using-api/api-concepts/">Kubernetes API Concepts</a>
