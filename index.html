@@ -3794,7 +3794,7 @@ docker push [dockerhub_user]/jenkins-slave-jnlp2</code></pre>
         <div class="card-body">
             <h2 class="card-title">1. Kubernetes API</h2>
 
-            <h3 class="card-title">Standard API terminology</h2>
+            <h3 class="card-title">Standard API terminology</h3>
             <p class="card-text">Most K8s resource types are objects, which have unique name to allow idempotent creation</p>
             <ul>
                 <li>Resource type - name used in the URLs (pods, namespaces, services)</li>
@@ -3821,13 +3821,43 @@ docker push [dockerhub_user]/jenkins-slave-jnlp2</code></pre>
                 <li>GET /apis/GROUP/VERSION/namespaces/NAMESPACE/RESOURCETYPE/NAME/SUBRESOURCE</li>
             </ul>
 
-            <h3 class="card-title">Efficient detection of changes</h2>
+            <h3 class="card-title">Efficient detection of changes</h3>
             <p class="card-text"><strong>watch</strong> - detects incremental changes in cluster state. Use "resourceVersion" to store the state of resources</p>
             <ul>
                 <li>GET /api/v1/namespaces/test/pods - list all pods in given namespace</li>
                 <li>GET /api/v1/namespaces/test/pods?watch=1&resourceVersion=10245 - starting resource version 10245, get notification for create/delete/update</li>
             </ul>
             <p class="card-text">K8s server can only store history for a limted time. Clusters using etcd3 preserve changes for the last 5 mins by default. Clients are expected to handle http status code "410 Gone"</p>
+
+            <h3 class="card-title">Retrieving large results sets in chunks</h3>
+            <p class="card-text">Break single large collection requests into small chunks by parameters "limit" and "continue"</p>
+            <ul>
+                <li>GET /api/v1/pods?limit=500 - retrive all pods in cluster, up to 500</li>
+                <li>GET /api/v1/pods?limit=500&continue=ENCODED_CONTINUE_TOKEN - continue from the previous call to get 501-1000 pods</li>
+            </ul>
+
+            <h3 class="card-title">Receiving resources as Tables</h3>
+            <ul>
+                <li>GET /api/v1/pods<br>
+                    Accept: application/json;as=Table;g=meta.k8s.io;v=v1beta1<br>
+                    - retrive all pods in cluster in table format</li>
+            </ul>
+            <p class="card-text">Because there are resource types that don't support Table response, client should handle both Table/non-Table case by using content-type</p>
+            <ul>
+                <li>Accept: application/json;as=Table;g=meta.k8s.io;v=v1beta1, application/json</li>
+            </ul>
+
+            <h3 class="card-title">Receiving resources as Protobuf</h3>
+            <p class="card-text">This is for better performance at scale</p>
+            <ul>
+                <li>GET /api/v1/pods
+                    Accept: application/vnd.kubernetes.protobuf<br>
+                    - retrive all pods in cluster in Protobuf format</li>
+            </ul>
+            <p class="card-text">Similar to Table response, multiple content-types are needed in the "Accept" header to support resource types that don't have Protobuf support</p>
+            <ul>
+                <li>Accept: application/vnd.kubernetes.protobuf, application/json</li>
+            </ul>
         </div>
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/reference/using-api/api-concepts/">Kubernetes API Concepts</a>
