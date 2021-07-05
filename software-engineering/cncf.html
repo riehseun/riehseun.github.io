@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="Seungmoon's DevOps Engineering Blog">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="Python, Groovy, Kubernetes, Docker, Jenkins, Terraform, Bash">
+
+<title>Seungmoon Rieh</title>
+
+<!-- Third Party CSS -->
+<link href="../vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<link href="../vendor/highlight/styles/monokai-sublime.css" rel="stylesheet">
+
+<!-- CSS -->
+<link href="../img/seungmoonrieh.jpg" rel="icon">
+<link href="../css/site.css" rel="stylesheet">
+
+<!-- Third Party JavaScript -->
+<script src="../vendor/jquery/jquery.min.js"></script>
+<script src="../vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="../vendor/highlight/highlight.pack.js"></script>
+
+<!-- JavaScript -->
+<script src="../js/site.js"></script>
+
+
+</head>
+
+
+<body>
+
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+<div class="container">
+<a class="navbar-brand" href="index.html">Seungmoon Rieh</a>
+<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+</button>
+<div class="collapse navbar-collapse" id="navbarResponsive">
+    <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+            <div class="btn-group">
+                <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Deploy</button>
+                <div class="dropdown-menu">
+                    <a class="dropdown-item" href="#kubernetes">Kubernetes</a>
+                </div>
+            </div>
+        </li>
+    </ul>
+</div> <!-- /.collapse navbar-collapse -->
+</div> <!-- /.container -->
+</nav> <!-- /.navbar navbar-expand-lg navbar-dark bg-dark fixed-top -->
+
+
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+    <h1 class="my-4">Software Engineering</h1>
+
+
+
+    <!-- Kubernetes BEGIN -->
+    <div class="card mb-4" id="kubernetes">
+        <div class="card-body">
+            <h2 class="card-title">Kubernetes</h2>
+            <ul class="list-unstyled mb-0">
+                <!-- <li><a href="#kubernetes-0">What is Kubernetes</a></li> -->
+                <li><a href="#kubernetes-1">1. Kubernetes API</a></li>
+                <li><a href="#kubernetes-2">2. Pods</a></li>
+                <li><a href="#kubernetes-3">3. Multi-container pod design</a></li>
+                <li><a href="#kubernetes-4">4. Deployments</a></li>
+                <li><a href="#kubernetes-5">5. Rollover and rollback</a></li>
+                <li><a href="#kubernetes-6">6. Jobs</a></li>
+                <li><a href="#kubernetes-7">7. Cron Job</a></li>
+                <li><a href="#kubernetes-8">8. Labels, Selectors, and Annotations</a></li>
+                <li><a href="#kubernetes-9">9. Deploy Jenkins agent</a></li>
+                <li><a href="#kubernetes-10">10. ConfigMaps</a></li>
+                <li><a href="#kubernetes-11">11. SecurityContext</a></li>
+                <li><a href="#kubernetes-12">12. Managing Resources for Containers</a></li>
+                <li><a href="#kubernetes-13">13. Secrets</a></li>
+                <li><a href="#kubernetes-14">14. Managing service accounts</a></li>
+                <li><a href="#kubernetes-15">15. Liveness and Readiness Probes</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- <div class="card mb-4" id="kubernetes-0">
+        <div class="card-body">
+            <h2 class="card-title">What is Kubernetes</h2>
+            <p class="card-text">Container management technology that orchestrates microservice apps</p>
+            <ul>
+                <li>Master(s) - contorl the cluster, has an interface, exposes the REST API, and consumes JSON. Persistenly store cluster state and config (uses "etcd" key-value store). Kube-controler-manager makes sure if current state matches the desired state. Kube-scheduler watches API server for new pods and assigns works to nodes.</li>
+                <li>Nodes - Kublet registres node with cluster, watches API server, instantiates pods, and reports back to master. It also exposes endpoint on port 10255. Container Enginer performs container management (Docker/Rocket). Kube-proxy manages networking, load-balances across all pods in a service</li>
+                <li>Pods - A container run inside a pod. Pod is also a unit of scaling. Pod is "Atomic" and exists in a single node</li>
+                <li>Services - Pods will have unique IPs so Services are needed to perform load-balancing and traffic management role. Services will find their pods to own by "labels"</li>
+                <li>Deployments - YAML or JSON file to be deployed. Versioned/Spec-once, deploy-many/simple rollback-rollforward. Deployed via API Server</li>
+                <li>Desired State and Declarative Model - Manifest file written in YAML or JSON, which described desired state (how you want to clusters to look)</li>
+            </ul>
+        </div>
+        <div class="card-footer text-muted">
+            Posted on January 27, 2019 by
+            <a href="#">Seungmoon Rieh</a>
+        </div>
+    </div> -->
+
+    <div class="card mb-4" id="kubernetes-1">
+        <div class="card-body">
+            <h2 class="card-title">1. Kubernetes API</h2>
+
+            <h3 class="card-title">Standard API terminology</h3>
+            <p class="card-text">Most K8s resource types are objects, which have unique name to allow idempotent creation</p>
+            <ul>
+                <li>Resource type - name used in the URLs (pods, namespaces, services)</li>
+                <li>Kind - JSON representation of resource types</li>
+                <li>Collection - list of instances of a resource type</li>
+                <li>Resource - single instance of the resource type</li>
+            </ul>
+            <p class="card-text">All resource types are either <strong>cluster-scoped</strong> or <strong>namespace-scoped</strong></p>
+            <p class="card-text">cluster-scoped</p>
+            <ul>
+                <li>GET /apis/GROUP/VERSION/RESOURCETYPE</li>
+                <li>GET /apis/GROUP/VERSION/RESOURCETYPE/NAME</li>
+            </ul>
+            <p class="card-text">namespace-scoped</p>
+            <ul>
+                <li>GET /apis/GROUP/VERSION/namespaces/NAMESPACE/RESOURCETYPE</li>
+                <li>GET /apis/GROUP/VERSION/namespaces/NAMESPACE/RESOURCETYPE/NAME</li>
+            </ul>
+            <p class="card-text">Retrive all namespaces with "GET /api/v1/namespaces" and particular namespace with "GET /api/v1/namespaces/NAME"</p>
+            <p class="card-text">K8s uses "list" to return a collection of resource and "get" to return a single resource</p>
+            <p class="card-text">Some resources have sub-resource(s)</p>
+            <ul>
+                <li>GET /apis/GROUP/VERSION/RESOURCETYPE/NAME/SUBRESOURCE</li>
+                <li>GET /apis/GROUP/VERSION/namespaces/NAMESPACE/RESOURCETYPE/NAME/SUBRESOURCE</li>
+            </ul>
+
+            <h3 class="card-title">Efficient detection of changes</h3>
+            <p class="card-text"><strong>watch</strong> - detects incremental changes in cluster state. Use "resourceVersion" to store the state of resources</p>
+            <ul>
+                <li>GET /api/v1/namespaces/test/pods - list all pods in given namespace</li>
+                <li>GET /api/v1/namespaces/test/pods?watch=1&resourceVersion=10245 - starting resource version 10245, get notification for create/delete/update</li>
+            </ul>
+            <p class="card-text">K8s server can only store history for a limted time. Clusters using etcd3 preserve changes for the last 5 mins by default. Clients are expected to handle http status code "410 Gone"</p>
+
+            <h3 class="card-title">Retrieving large results sets in chunks</h3>
+            <p class="card-text">Break single large collection requests into small chunks by parameters "limit" and "continue"</p>
+            <ul>
+                <li>GET /api/v1/pods?limit=500 - retrive all pods in cluster, up to 500</li>
+                <li>GET /api/v1/pods?limit=500&continue=ENCODED_CONTINUE_TOKEN - continue from the previous call to get 501-1000 pods</li>
+            </ul>
+
+            <h3 class="card-title">Receiving resources as Tables</h3>
+            <ul>
+                <li>GET /api/v1/pods<br>
+                    Accept: application/json;as=Table;g=meta.k8s.io;v=v1beta1<br>
+                    - retrive all pods in cluster in table format</li>
+            </ul>
+            <p class="card-text">Because there are resource types that don't support Table response, client should handle both Table/non-Table case by using content-type</p>
+            <ul>
+                <li>Accept: application/json;as=Table;g=meta.k8s.io;v=v1beta1, application/json</li>
+            </ul>
+
+            <h3 class="card-title">Receiving resources as Protobuf</h3>
+            <p class="card-text">This is for better performance at scale</p>
+            <ul>
+                <li>GET /api/v1/pods
+                    Accept: application/vnd.kubernetes.protobuf<br>
+                    - retrive all pods in cluster in Protobuf format</li>
+            </ul>
+            <p class="card-text">Similar to Table response, multiple content-types are needed in the "Accept" header to support resource types that don't have Protobuf support</p>
+            <ul>
+                <li>Accept: application/vnd.kubernetes.protobuf, application/json</li>
+            </ul>
+
+            <h3 class="card-title">Resource deletion</h3>
+            <p class="card-text">Takes place in two phases 1. finalization 2. removal</p>
+
+            <h3 class="card-title">Dry-run</h3>
+            <p class="card-text">dry-run executes the request up until persisting objects in storage. The reponse body should be as close as possible to the actual run. Authorization of dry and non-dry runs are identical</p>
+            <ul>
+                <li>POST /api/v1/namespaces/test/pods?dryRun=All<br>
+                    Content-Type: application/json<br>
+                    Accept: application/json<br>
+                    - ALL: every stage runs normal except the final stage of persisting objects in storage</li>
+            </ul>
+        </div>
+        <div class="card-footer text-muted">
+            Reference: <a href="https://kubernetes.io/docs/reference/using-api/api-concepts/">Kubernetes API Concepts</a>
+        </div>
+    </div>
+
+    <div class="card mb-4" id="kubernetes-2">
+        <div class="card-body">
+            <h2 class="card-title">2. Pods</h2>
+            <p class="card-text">Single instance of running process in the cluster. Its the smallest deployable unit</p>
+            <ul>
+                <li>Can have one or more containers</li>
+                <li>Deploy Pod by writing manifest file and giving it to API Server (rarely create individual pod directory in Kubernetes)</li>
+                <li>Each pod has its own single IP</li>
+                <li>Each container in a pod can talk via their own unique port</li>
+                <li>Can be created by workload resources such as Deployment or Job</li>
+            </ul>
+            <p class="card-text">Pods are created, assinged a unique ID (UUID), and scheduled to nodes. They can never be rescheduled to different nodes</p>
+        </div>
+        <div class="card-footer text-muted">
+            Reference: <a href="https://kubernetes.io/docs/concepts/workloads/pods/">Pod</a>
+        </div>
+    </div>
+
+    <!-- <div class="card mb-4" id="kubernetes-2">
+        <div class="card-body">
+            <h2 class="card-title">2. Services</h2>
+            <p class="card-text">Expose an application running on Pods as network service</p>
+            <ul>
+                <li>Let you access the application both from inside and outside</li>
+                <li>IP, DNS, Port of Service never change</li>
+                <li>Services are discovered by DNS</li>
+            </ul>
+        </div>
+        <div class="card-footer text-muted">
+            Reference: <a href="https://kubernetes.io/docs/concepts/services-networking/service/">Service</a>
+        </div>
+    </div> -->
+
+    <div class="card mb-4" id="kubernetes-3">
+        <div class="card-body">
+            <h2 class="card-title">3. Multi-container pod design</h2>
+            <p class="card-text">Each pod can have multiple containers (which would run on the same node). This make communication between containers more faster and secure, allow them to share volumns and file systems</p>
+
+            <p class="card-text"><strong>Sidecar</strong></p>
+            <p class="card-text">Enhance/extend existing functionality of container</p>
+            <p class="card-text">For example, an app container can stream logs to a particular location while the sidecar container mounts the logs to some other directory</p>
+            <p class="card-text"><strong>Ambassador</strong>
+            <p class="card-text">Serves as a proxy to external worlds (this for for legacy apps, ConfigMap should be used for new apps)</p>
+            <p class="card-text">For example, when connecting to a DB server and that server config changes across different environments, the ambassador container can act as a TCP proxy to the database, which can be connected via localhost. The sysadmin can use config maps and secrets with the proxy container to inject the correct connection and auth information</p>
+            <p class="card-text"><strong>Adaptor</strong>
+            <p class="card-text">Help standarized heterogeneous system</p>
+            <p class="card-text">For example, when there are multiple applications running on separate containers that are outputing logs in different formats, the adaptor container can standardize logs</p>
+        </div>
+        <div class="card-footer text-muted">
+            Reference: <a href="https://betterprogramming.pub/understanding-kubernetes-multi-container-pod-patterns-577f74690aee">Understanding Kubernetes Multi-Container Pod Patterns</a>
+        </div>
+    </div>
+
+    <div class="card mb-4" id="kubernetes-4">
+        <div class="card-body">
+            <h2 class="card-title">4. Deployments</h2>
+            <p class="card-text">Provides declarative updates for Pods and ReplicaSets (It wraps Replica Set, which in turn wraps pods)</p>
+            <p class="card-text">Usecase</p>
+            <ul>
+                <li>Create a Deployment to rollout a ReplicaSet, which then creates Pods in the background</li>
+                <li>Declare the new state of Pods by updating the PodTemplateSpec of the Deployment</li>
+                <li>Rollback to an earlier Deployment version</li>
+                <li>Scale up the Deployments</li>
+            </ul>
+            <p class="card-text">Example</p>
+<pre><code class="yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.14.2
+        ports:
+        - containerPort: 80</code></pre>
+            <ul>
+                <li><strong>.metadata.name</strong> indicates Deployment name ".metadata.name" to be created</li>
+                <li><strong>.spec.replicas</strong> indicates three replicated Pods</li>
+                <li><strong>.spec.selector</strong> tells how Deployment finds which Pods to manage</li>
+                <li><strong>.template.metadata.labels</strong> indicates Pods label</li>
+            </ul>
+
+            <p class="card-text">To create Deployment, run "kubectl apply -f nginx-deployment.yaml"</p>
+            <p class="card-text">To check Deployment, run "kubectl get deployments"</p>
+            <p class="card-text">To check Deployment rollout status, run "kubectl rollout status deployment/nginx-deployment"</p>
+            <p class="card-text">To see the ReplicaSet created by Deployment, run "kubectl get rs"</p>
+            <p class="card-text">To see the labels generated for each Pod, run "kubectl get pods --show-labels"</p>
+            <p class="card-text">To update iamge from nginx:1.14.2 to nginx:1.16.1, run "kubectl set image deployment/nginx-deployment nginx=nginx:1.16.1 --record"</p>
+            <p class="card-text">To get details of Deployment, run "kubectl describe deployments"</p>
+        </div>
+        <div class="card-footer text-muted">
+            Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployment</a>
+        </div>
+    </div>
+
+    <div class="card mb-4" id="kubernetes-5">
+        <div class="card-body">
+            <h2 class="card-title">5. Rollover and rollback</h2>
+            <p class="card-text">If Deployment is updated, ReplicaSet whose labels match <Strong>.spec.selector</Strong> but whose template does not match <strong>.spec.template</strong> are scaled down. New ReplicaSet is eventually scaled to <strong>.spec.replicas</strong></p>
+            <p class="card-text">To check revisions of Deployment, run "kubectl rollout history deployment.v1.apps/nginx-deployment"</p>
+            <p class="card-text">To see details of each revision, run "kubectl rollout history deployment.v1.apps/nginx-deployment --revision=2"</p>
+            <p class="card-text">To roll back to previous version, run "kubectl rollout undo deployment.v1.apps/nginx-deployment"</p>
+            <p class="card-text">To roll back to a specific version, run "kubectl rollout undo deployment.v1.apps/nginx-deployment --to-revision=2"</p>
+        </div>
+        <div class="card-footer text-muted">
+            Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployment</a>
+        </div>
+    </div>
+
+    <div class="card mb-4" id="kubernetes-6">
+        <div class="card-body">
+            <h2 class="card-title">6. Jobs</h2>
+            <p class="card-text">A Job creates one more more Pods. Deleting a Job will clean up Pods it created</p>
+            <p class="card-text">Example</p>
+<pre><code class="yaml">apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pi
+spec:
+  template:
+    spec:
+      containers:
+      - name: pi
+        image: perl
+        command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+      restartPolicy: Never
+  backoffLimit: 4</code></pre>
+            <p class="card-text">To list all the Pods that belong to a Job, run "pods=$(kubectl get pods --selector=job-name=pi --output=jsonpath='{.items[*].metadata.name}') && echo $pods"</p>
+            <p class="card-text">Three types of tasks suitable to run as a Job</p>
+            <ul>
+                <li>Non-parallel Jobs - normally only one Pod is started. Job is complete as soon as its Pod terminates successfully</li>
+                <li>Parallel Jobs with a fixed completion count - Job is complete when there is one successful Pod for each value in the range 1 to <strong>.spec.completions</strong>, which would have a non-zero positive value</li>
+                <li>Parallel Jobs with a work queue - when any pod from the Job terminates with success, no new Pods are created. Once at least one Pod is terminated with success and all Pods are terminated, Job succeeds</li>
+            </ul>
+        </div>
+
+        <div class="card-footer text-muted">
+            Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/job/">Jobs</a>
+        </div>
+    </div>
+
+    <div class="card mb-4" id="kubernetes-7">
+        <div class="card-body">
+            <h2 class="card-title">7. Cron Job</h2>
+            <p class="card-text">Creates Jobs on a repeating schedule</p>
+            <p class="card-text">Example</p>
+<pre><code class="yaml">apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: hello
+spec:
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: hello
+            image: busybox
+            imagePullPolicy: IfNotPresent
+            command:
+            - /bin/sh
+            - -c
+            - date; echo Hello from the Kubernetes cluster
+          restartPolicy: OnFailure</code></pre>
+        </div>
+        <div class="card-footer text-muted">
+            Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/">CronJob</a>
+        </div>
+    </div>
+
+    <div class="card mb-4" id="kubernetes-8">
+        <div class="card-body">
+            <h2 class="card-title">8. Labels, Selectors, and Annotations</h2>
+            <p class="card-text">Labels - key/value pairs enabling users to map their own structures to system objects in loosely coupled fashion</p>
+            <p class="card-text">Selectors - equality-based allows filtering by label keys and values while set-based allows filtering keys according to a set of values</p>
+            <p class="card-text">Annotations - allows attaching arbitrary non-identifying metadata to objects (while Labels are used to select objects, annotations are for recording metadata)</p>
+        </div>
+        <div class="card-footer text-muted">
+            Reference: <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/">Labels and Selectors</a> | <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/">Annotations</a>
+        </div>
+    </div>
+
+    <div class="card mb-4" id="kubernetes-9">
+        <div class="card-body">
+            <h2 class="card-title">9. PersistentVolumeClaims</h2>
+            <p class="card-text">A PersistentVolumn (PV) - a piece of storage in the cluster</p>
+            <p class="card-text">A PersistentVolumnClaim (PVC) - a request for storage by a user (Pods consume node resources and PVCs comsume PV resources)</p>
+        </div>
+        <div class="card-footer text-muted">
+            Reference: <a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/">PersistentVolumeClaims</a>
+        </div>
+    </div>
+
+    <div class="card mb-4" id="kubernetes-10">
+        <div class="card-body">
+            <h2 class="card-title">10. ConfigMaps</h2>
+            <p class="card-text">API object used to store non-confidential data in key-value pairs. It decouples environment specific configuration from container images</p>
+        </div>
+        <div class="card-footer text-muted">
+            Reference: <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMaps</a>
+        </div>
+    </div>
+
+    <div class="card mb-4" id="kubernetes-11">
+        <div class="card-body">
+            <h2 class="card-title">11. SecurityContext</h2>
+            <p class="card-text">Defines privilege and access control settings for a Pod or Container</p>
+        </div>
+        <div class="card-footer text-muted">
+            Reference: <a href="https://kubernetes.io/docs/tasks/configure-pod-container/security-context/">Configure a Security Context for a Pod or Container</a>
+        </div>
+    </div>
+
+    <div class="card mb-4" id="kubernetes-12">
+        <div class="card-body">
+            <h2 class="card-title">12. Managing Resources for Containers</h2>
+            <p class="card-text">Example</p>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: frontend
+spec:
+  containers:
+  - name: app
+    image: images.my-company.example/app:v4
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "250m"
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+  - name: log-aggregator
+    image: images.my-company.example/log-aggregator:v6
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "250m"
+      limits:
+        memory: "128Mi"
+        cpu: "500m"</code></pre>
+        </div>
+        <div class="card-footer text-muted">
+            Reference: <a href="https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/">Managing Resources for Containers</a>
+        </div>
+    </div>
+
+    <div class="card mb-4" id="kubernetes-13">
+        <div class="card-body">
+            <h2 class="card-title">13. Secrets</h2>
+            <p class="card-text">A secret can be used in a Pod in three ways</p>
+            <ul>
+                <li>As files in a volume mounted on one or more of its containers</li>
+                <li>As container environment variable</li>
+                <li>By the kubelet when pulling images for the Pod</li>
+            </ul>
+            <p class="card-text">Opaque Secrets - default Secret type</p>
+            <p class="card-text">Service account token Secrets - used to store token that identifies a service account</p>
+            <p class="card-text">Docker config Secrets - used to store a serialized JSON that follows the same format rule as "~/docker/config.json"</p>
+            <p class="card-text">Basic authentication Secrets - used to store credentials needed to basic auth (username/password)</p>
+            <p class="card-text">SSH authentication Secrets - used to store data for SSH auth</p>
+            <p class="card-text">TLS Secrets - used to store a certificate and its associated key that are typically used for TLS</p>
+            <p class="card-text">Bootstrap token Secrets - used during the node bootstrap process</p>
+        </div>
+        <div class="card-footer text-muted">
+            Reference: <a href="https://kubernetes.io/docs/concepts/configuration/secret/">Secrets</a>
+        </div>
+    </div>
+
+    <div class="card mb-4" id="kubernetes-14">
+        <div class="card-body">
+            <h2 class="card-title">14. Managing service accounts</h2>
+            <p class="card-text"></p>
+        </div>
+        <div class="card-footer text-muted">
+            Reference: <a href="https://kubernetes.io/docs/reference/access-authn-authz/service-accounts-admin/">Managing Service Accounts</a>
+        </div>
+    </div>
+
+    <div class="card mb-4" id="kubernetes-15">
+        <div class="card-body">
+            <h2 class="card-title">15. Liveness and Readiness Probes</h2>
+            <p class="card-text"></p>
+        </div>
+        <div class="card-footer text-muted">
+            Reference: <a href="https://blog.colinbreck.com/kubernetes-liveness-and-readiness-probes-how-to-avoid-shooting-yourself-in-the-foot/">Kubernetes Liveness and Readiness Probes: How to Avoid Shooting Yourself in the Foot</a>
+        </div>
+    </div>
+
+    <!-- <div class="card mb-4" id="kubernetes-4">
+        <div class="card-body">
+            <h2 class="card-title">4. Setup Kubernetes Master</h2>
+
+<pre><code class="groovy">sudo -i
+
+hostnamectl set-hostname 'k8s-master'
+exec bash
+setenforce 0
+sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+
+firewall-cmd --permanent --add-port=6443/tcp
+firewall-cmd --permanent --add-port=2379-2380/tcp
+firewall-cmd --permanent --add-port=10250/tcp
+firewall-cmd --permanent --add-port=10251/tcp
+firewall-cmd --permanent --add-port=10252/tcp
+firewall-cmd --permanent --add-port=10255/tcp
+firewall-cmd --reload
+modprobe br_netfilter
+echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
+
+cat &lt;&lt;EOF &gt; /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+exclude=kube*
+EOF
+
+yum install kubeadm docker -y
+systemctl restart docker && systemctl enable docker
+yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+systemctl restart kubelet && systemctl enable kubelet
+kubeadm init
+
+mkdir -p $HOME/.kube
+cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+chown $(id -u):$(id -g) $HOME/.kube/config
+
+export kubever=$(kubectl version | base64 | tr -d '\n')
+kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$kubever"
+
+kubectl get nodes
+kubectl get pods --all-namespaces</code></pre>
+
+<pre><code class="groovy"># From /etc/hosts
+[ip] k8s-master
+[ip] k8s-node1
+[ip] k8s-node2
+[ip] k8s-node3</code></pre>
+
+        </div>
+        <div class="card-footer text-muted">
+            Reference: <a href="https://www.linuxtechi.com/install-kubernetes-1-7-centos7-rhel7">How to Install Kubernetes (k8s) 1.7 on CentOS 7 / RHEL 7</a>
+        </div>
+    </div> -->
+
+    <!-- <div class="card mb-4" id="kubernetes-5">
+        <div class="card-body">
+            <h2 class="card-title">5. Setup Kubernetes Node</h2>
+            <p class="card-text">Do this on each node. Replace [k8s-node-name] with appropriate node name</p>
+
+<pre><code class="groovy">sudo -i
+
+hostnamectl set-hostname '[k8s-node-name]'
+setenforce 0
+sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+firewall-cmd --permanent --add-port=10250/tcp
+firewall-cmd --permanent --add-port=10255/tcp
+firewall-cmd --permanent --add-port=30000-32767/tcp
+firewall-cmd --permanent --add-port=6783/tcp
+firewall-cmd  --reload
+echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
+
+cat <<EOF > /etc/yum.repos.d/kubernetes.repo
+[kubernetes]
+name=Kubernetes
+baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+exclude=kube*
+EOF
+
+yum  install kubeadm docker -y
+systemctl restart docker && systemctl enable docker
+yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
+systemctl restart kubelet && systemctl enable kubelet
+systemctl enable docker.service && systemctl start docker.service</code></pre>
+
+<pre><code class="groovy">kubeadm join --token [k8s-master-token] --discovery-token-unsafe-skip-ca-verification [k8s-master-ip]:6443</code></pre>
+
+        </div>
+        <div class="card-footer text-muted">
+            Reference: <a href="https://www.linuxtechi.com/install-kubernetes-1-7-centos7-rhel7">How to Install Kubernetes (k8s) 1.7 on CentOS 7 / RHEL 7</a>
+        </div>
+    </div> -->
+
+    <!-- <div class="card mb-4" id="kubernetes-6">
+        <div class="card-body">
+            <h2 class="card-title">6. Write Deployment for Jenkins</h2>
+            <p class="card-text">"deployment.yaml". Replace [dockerhub_user] with appropriate username</p>
+
+<pre><code class="groovy">apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+name: jenkins
+spec:
+replicas: 1
+template:
+metadata:
+labels:
+app: jenkins
+spec:
+containers:
+- name: jenkins
+image: [dockerhub_user]/jenkins-master
+env:
+- name: JAVA_OPTS
+value: -Djenkins.install.runSetupWizard=false
+ports:
+- name: http-port
+containerPort: 8080
+- name: jnlp-port
+containerPort: 50000
+volumeMounts:
+- name: jenkins-home
+mountPath: /var/jenkins_home
+volumes:
+- name: jenkins-home
+emptyDir: {}</code></pre>
+
+        </div>
+        <div class="card-footer text-muted">
+            Reference: <a href="https://rancher.com/blog/2018/2018-11-27-scaling-jenkins/">Deploying and Scaling Jenkins on Kubernetes</a>
+        </div>
+    </div>
+
+    <div class="card mb-4" id="kubernetes-7">
+        <div class="card-body">
+            <h2 class="card-title">7. Write Service for Jenkins</h2>
+            <p class="card-text">"service.yaml"</p>
+
+<pre><code class="groovy">apiVersion: v1
+kind: Service
+metadata:
+=name: jenkins
+spec:
+type: LoadBalancer
+ports:
+- port: 80
+targetPort: 8080
+selector:
+app: jenkins
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+name: jenkins-jnlp
+spec:
+type: ClusterIP
+ports:
+- port: 50000
+targetPort: 50000
+selector:
+app: jenkins</code></pre>
+
+        </div>
+        <div class="card-footer text-muted">
+            Reference: <a href="https://rancher.com/blog/2018/2018-11-27-scaling-jenkins/">Deploying and Scaling Jenkins on Kubernetes</a>
+        </div>
+    </div> -->
+
+    <!-- <div class="card mb-4" id="kubernetes-8">
+        <div class="card-body">
+            <h2 class="card-title">8. Deploy Jenkins master</h2>
+            <p class="card-text">Do this from Kubernetes master</p>
+
+            <ul>
+                <li>kubectl apply -f deployment.yaml</li>
+                <li>kubectl create -f service.yaml</li>
+                <li>kubectl get service</li>
+            </ul>
+        </div>
+        <div class="card-footer text-muted"></div>
+    </div>
+
+    <div class="card mb-4" id="kubernetes-9">
+        <div class="card-body">
+            <h2 class="card-title">9. Deploy Jenkins agent</h2>
+            <p class="card-text">Do this from Kubernetes master</p>
+
+            <ul>
+                <li>kubectl cluster-info | grep master</li>
+                <li>kubectl get pods | grep jenkins</li>
+                <li>kubectl describe pod</li>
+            </ul>
+        </div>
+        <div class="card-footer text-muted"></div>
+    </div>
+ -->    <!-- Kubernetes END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+
+<footer class="py-5 bg-dark">
+    <div class="container">
+        <p class="m-0 text-center text-white">Copyright &copy; Seungmoon Rieh 2020</p>
+    </div>
+</footer>
+
+
+</body>
+
+</html>
