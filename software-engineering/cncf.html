@@ -243,11 +243,36 @@
     <div class="card mb-4" id="kubernetes-3">
         <div class="card-body">
             <h2 class="card-title">3. Multi-container pod design</h2>
-            <p class="card-text">Each pod can have multiple containers (which would run on the same node). This make communication between containers more faster and secure, allow them to share volumns and file systems</p>
+            <p class="card-text">Each pod can have multiple containers (which would run on the same node). This make communication between containers faster and securer, and allow them to share volumns and file systems</p>
 
             <p class="card-text"><strong>Sidecar</strong></p>
             <p class="card-text">Enhance/extend existing functionality of container</p>
             <p class="card-text">For example, an app container can stream logs to a particular location while the sidecar container mounts the logs to some other directory</p>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: sidecar-pod
+spec:
+  volumes:
+  - name: logs
+    emptyDir: {}
+  containers:
+  - name: app-container
+    image: alpine
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do date >> /var/log/app.log; sleep 2;done"]
+    volumeMounts:
+    - name: logs
+      mountPath: /var/log
+  - name: log-exporter-sidecar
+    image: nginx
+    ports:
+      - containerPort: 80
+    volumeMounts:
+    - name: logs
+      mountPath: /usr/share/nginx/html</code></pre>
+            <p class="card-text">"app-container" streams logs to /var/log/app.log while "log-exporter-sidecar" mounts those logs into /usr/share/nginx/html</p>
+
             <p class="card-text"><strong>Ambassador</strong>
             <p class="card-text">Serves as a proxy to external worlds (this for for legacy apps, ConfigMap should be used for new apps)</p>
             <p class="card-text">For example, when connecting to a DB server and that server config changes across different environments, the ambassador container can act as a TCP proxy to the database, which can be connected via localhost. The sysadmin can use config maps and secrets with the proxy container to inject the correct connection and auth information</p>
