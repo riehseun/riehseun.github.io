@@ -276,9 +276,67 @@ spec:
             <p class="card-text"><strong>Ambassador</strong>
             <p class="card-text">Serves as a proxy to external worlds (this for for legacy apps, ConfigMap should be used for new apps)</p>
             <p class="card-text">For example, when connecting to a DB server and that server config changes across different environments, the ambassador container can act as a TCP proxy to the database, which can be connected via localhost. The sysadmin can use config maps and secrets with the proxy container to inject the correct connection and auth information</p>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: ambassador-pod
+  labels:
+    app: ambassador-app
+spec:
+  volumes:
+  - name: shared
+    emptyDir: {}
+  containers:
+  - name: app-container-poller
+    image: yauritux/busybox-curl
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do curl 127.0.0.1:81 > /usr/share/nginx/html/index.html; sleep 10; done"]
+    volumeMounts:
+    - name: shared
+      mountPath: /usr/share/nginx/html
+  - name: app-container-server
+    image: nginx
+    ports:
+      - containerPort: 80
+    volumeMounts:
+    - name: shared
+      mountPath: /usr/share/nginx/html
+  - name: ambassador-container
+    image: bharamicrosystems/nginx-forward-proxy
+    ports:
+      - containerPort: 81</code></pre>
+            <p class="card-text">"app-container-poller" call on port 81 and send stuff to /usr/share/nginx/html/index.html. "app-container-server" listens on  port 80. These two containers share the same mount point. Lastly, "ambassador-container" listens on port 81, so that when users curl on 80 they get response from html page</p>
+
             <p class="card-text"><strong>Adaptor</strong>
             <p class="card-text">Help standarized heterogeneous system</p>
             <p class="card-text">For example, when there are multiple applications running on separate containers that are outputing logs in different formats, the adaptor container can standardize logs</p>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: adapter-pod
+  labels:
+    app: adapter-app
+spec:
+  volumes:
+  - name: logs
+    emptyDir: {}
+  containers:
+  - name: app-container
+    image: alpine
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do date >> /var/log/app.log; sleep 2;done"]
+    volumeMounts:
+    - name: logs
+      mountPath: /var/log
+  - name: log-adapter
+    image: alpine
+    command: ["/bin/sh"]
+    args: ["-c", "tail -f /var/log/app.log|sed -e 's/^/Date /' > /var/log/out.log"]
+    volumeMounts:
+    - name: logs
+      mountPath: /var/log</code></pre>
+            <p class="card-text">"app-container" outputs stream of dates in log file while "log-adapter" appends a word to those stream of dates</p>
+
         </div>
         <div class="card-footer text-muted">
             Reference: <a href="https://betterprogramming.pub/understanding-kubernetes-multi-container-pod-patterns-577f74690aee">Understanding Kubernetes Multi-Container Pod Patterns</a>
