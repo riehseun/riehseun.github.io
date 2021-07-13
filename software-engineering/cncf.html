@@ -210,9 +210,30 @@
     <div class="card mb-4" id="kubernetes-2">
         <div class="card-body">
             <h2 class="card-title">2. Pods</h2>
-            <p class="card-text">Single instance of running process in the cluster. Its the smallest deployable unit</p>
+            <p class="card-text">Its the smallest deployable unit</p>
             <ul>
-                <li>Can have one or more containers</li>
+                <li>Can contain an init container tha runs during Pod startup</li>
+                <li>Similar to Docker containers with shared namespace and volumn</li>
+                <li>Pod gets created by resources such as Deployment, Job, or StatefulSet</li>
+                <li>Controller for those resources handles Pod replication, rollout, and failure</li>
+                <li>Controllers create Pod from Pod Template</li>
+<pre><code class="yaml">apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hello
+spec:
+  template:
+    # This is the pod template
+    spec:
+      containers:
+      - name: hello
+        image: busybox
+        command: ['sh', '-c', 'echo "Hello, Kubernetes!" && sleep 3600']
+      restartPolicy: OnFailure
+    # The pod template ends here</code></pre>
+                <li>Modifying the Pod Template will make StatefulSet to create new Pods, which then will replace old Pods</li>
+                <li>Every container in a Pod share the same IP address and port. These containers can communicate to each other using localhost</li>
+
                 <li>Deploy Pod by writing manifest file and giving it to API Server (rarely create individual pod directory in Kubernetes)</li>
                 <li>Each pod has its own single IP</li>
                 <li>Each container in a pod can talk via their own unique port</li>
