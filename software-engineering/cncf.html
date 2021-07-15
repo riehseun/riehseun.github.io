@@ -266,6 +266,60 @@ spec:
                 <li>Initialized - all init containers are started</li>
                 <li>Ready - Pod can serve requests</li>
             </ul>
+            <p class="card-text">Pod readiness</p>
+            <ul>
+                <li>"spec" of Pod has "readinessGates", that allows additional conditions to be specified</li>
+            </ul>
+<pre><code class="yaml">kind: Pod
+...
+spec:
+  readinessGates:
+    - conditionType: "www.example.com/feature-1"
+status:
+  conditions:
+    - type: Ready                              # a built in PodCondition
+      status: "False"
+      lastProbeTime: null
+      lastTransitionTime: 2018-01-01T00:00:00Z
+    - type: "www.example.com/feature-1"        # an extra PodCondition
+      status: "False"
+      lastProbeTime: null
+      lastTransitionTime: 2018-01-01T00:00:00Z
+  containerStatuses:
+    - containerID: docker://abcd...
+      ready: true
+...</code></pre>
+            <p class="card-text">Container probe</p>
+            <ul>
+                <li>Kubelet performs diagnostic on a container periodically (this is call Probe)</li>
+                <li>Kubelet calls Handler, which is implemented by the container</li>
+                <li>ExecAction Handler - executes a command inside container. Diagnostic successful if command exits with 0</li>
+                <li>TCPSocketAction Handler - TCP check on IP address on specified port. Diagnostic successful if port is open</li>
+                <li>HTTPGetAction Handler - HTTP GET check on IP address on specified port and path. Diagnostic successful if  200 &le; response &lt; 400</li>
+            </ul>
+            <p class="card-text">livenessProbe</p>
+            <ul>
+                <li>Indicates whether the container is running. If liveenss probe fails, the kubelet kills the container, and container is subject to its restart policy</li>
+            </ul>
+            <p class="card-text">readinessProbe</p>
+            <ul>
+                <li>Indicates whether the container is ready to respond to requests. If readiness probe fails, then endpoint controller removes Pod IP address from Service endpoints that match the Pod</li>
+                <li>Used when container needs to load large data, configuration files</li>
+            </ul>
+            <p class="card-text">startupProbe</p>
+            <ul>
+                <li>Indicates whether the application within the container has started. If starup probe fails, the kubelet kills the container, and container is subject to its restart policy</li>
+                <li>Used when containers take long time to come into service</li>
+            </ul>
+            <p class="card-text">Pod Termination</p>
+            <ul>
+                <li>Kubelet tool to delete Pod, with default graceful period of 30 seconds</li>
+                <li>Control plane removes shutting-down Pods from Endpoints</li>
+                <li>Resources no longer trest shutting-down Pods valid</li>
+                <li>When the grace period expires, kubelet triggeres forcible shutdown (contrainer runtime sends SIGKILL to any running processes in containers)</li>
+                <li>API server deletes Pod's object</li>
+            </ul>
+
         </div>
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/">Pod Lifecycle</a>
