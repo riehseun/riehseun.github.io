@@ -337,32 +337,56 @@ status:
     <div class="card mb-4" id="kubernetes-2">
         <div class="card-body">
             <h2 class="card-title">2.2. Init Containers</h2>
-            <p class="card-text">Its the smallest deployable unit</p>
+            <p class="card-text">Specialized containers that run before app containers in Pod</p>
             <ul>
-                <li>Can contain an init container tha runs during Pod startup</li>
-                <li>Similar to Docker containers with shared namespace and volumn</li>
-                <li>Pod gets created by resources such as Deployment, Job, or StatefulSet</li>
-                <li>Controller for those resources handles Pod replication, rollout, and failure</li>
-                <li>Controllers create Pod from Pod Template</li>
-<pre><code class="yaml">apiVersion: batch/v1
-kind: Job
-metadata:
-  name: hello
-spec:
-  template:
-    # This is the pod template
-    spec:
-      containers:
-      - name: hello
-        image: busybox
-        command: ['sh', '-c', 'echo "Hello, Kubernetes!" && sleep 3600']
-      restartPolicy: OnFailure
-    # The pod template ends here</code></pre>
-                <li>Modifying the Pod Template will make StatefulSet to create new Pods, which then will replace old Pods</li>
-                <li>Every container in a Pod share the same IP address and port. These containers can communicate to each other using localhost</li>
-                <li>Any container in a Pod can enable privileged mode to use OS admin level capabilities</li>
-                <li>Static Pods are managed directly by kubelet without API server. Kubelet though will create mirror Pods on API server for each static Pod</li>
+                <li>Init containers always run to completion</li>
+                <li>Each init container must succeed before next one can run</li>
+                <li>If init container fails, kubelet repeatly restarts the container</li>
+                <li>Init containers do not support lifecycle, livenessProbe, readinessProbe, startupProbe because they must run to completion before Pod can be ready</li>
+                <li>Init containers can have custom code and no need to use FROM</li>
+                <li>Init containers can be given access to Secret (unlike app containers)</li>
+                <li>If Pod restarts, all init containers must run again</li>
+                <li>Init container code must be idempotent (because they can be re-run)</li>
             </ul>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp-pod
+  labels:
+    app: myapp
+spec:
+  containers:
+  - name: myapp-container
+    image: busybox:1.28
+    command: ['sh', '-c', 'echo The app is running! && sleep 3600']
+  initContainers:
+  - name: init-myservice
+    image: busybox:1.28
+    command: ['sh', '-c', "until nslookup myservice.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for myservice; sleep 2; done"]
+  - name: init-mydb
+    image: busybox:1.28
+    command: ['sh', '-c', "until nslookup mydb.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for mydb; sleep 2; done"]</code></pre>
+            <p class="card-text">Init containters would be waiting to discover Services named myservice and mydb. </p>
+<pre><code class="yaml">---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myservice
+spec:
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 9376
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mydb
+spec:
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 9377</code></pre>
         </div>
 
         <div class="card-footer text-muted">
