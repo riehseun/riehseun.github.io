@@ -497,6 +497,50 @@ profiles:
         </div>
     </div>
 
+    <div class="card mb-4" id="kubernetes-2">
+        <div class="card-body">
+            <h2 class="card-title">2.2. Disruptions</h2>
+            <p class="card-text">There are involuntary disruptions</p>
+            <ul>
+                <li>Hardware failure</li>
+                <li>Kernal panic</li>
+                <li>Cloud provider issue</li>
+                <li>Network issue</li>
+                <li>Pod eviction due to Node having out of resource</li>
+            </ul>
+            <p class="card-text">There are voluntary disruptions. Application owners can</p>
+            <ul>
+                <li>Delete the Deployment</li>
+                <li>Update the Deployment, causing a restart</li>
+                <li>Directly delete Pods by accident</li>
+            </ul>
+            <p class="card-text">Cluster admins can</p>
+            <ul>
+                <li>Drain a Node for repair or scale down</li>
+                <li>Remove a Pod from a Node to fit in something else</li>
+            </ul>
+            <p class="card-text">Pod description budgets (PDB)</p>
+            <ul>
+                <li>Limits the number of Pods down simultaneously from voluntary disruptions</li>
+            </ul>
+            <p class="card-text">Consider the following scenario where Pod-a, Pod-b, Pod-c are subject to PDB (whose requirement is that at least 2 out of 3 Pods must be available) while Pod-x is not</p>
+            <img class="img-fluid" class="card-img-top" src="../img/kubernetes/kubernetes-2-e.png" alt="Card image cap">
+            <p class="card-text">Now the cluster admin drains Node 1, which will cause Pod-a and Pod-x to start terminating</p>
+            <img class="img-fluid" class="card-img-top" src="../img/kubernetes/kubernetes-2-f.png" alt="Card image cap">
+            <p class="card-text">Deployment notices that Pods are terminating, and to reinstate the desired state, it creates replacement Pods (Pod-d and Pod-y)</p>
+            <img class="img-fluid" class="card-img-top" src="../img/kubernetes/kubernetes-2-g.png" alt="Card image cap">
+            <p class="card-text">The cluster admin now attempts to drain Node 2 and Node 3. However, the drain command will block because of PDB</p>
+            <img class="img-fluid" class="card-img-top" src="../img/kubernetes/kubernetes-2-h.png" alt="Card image cap">
+            <p class="card-text">At this point, there are three availabe Pods that are subject to PDB</p>
+            <img class="img-fluid" class="card-img-top" src="../img/kubernetes/kubernetes-2-i.png" alt="Card image cap">
+            <p class="card-text">The cluster admin now attempts to drain Node 2. Either one of Pod-b or Pod-d will be evicted but both cannot be eviced due to PDB. Assuming Pod-b got evicted, the Deployment will create a replacement Pod-e. But since there are not enough resources in Node 2 and 3, the drain will block</p>
+            <img class="img-fluid" class="card-img-top" src="../img/kubernetes/kubernetes-2-j.png" alt="Card image cap">
+        </div>
+
+        <div class="card-footer text-muted">
+            Reference: <a href="https://kubernetes.io/docs/concepts/workloads/pods/disruptions/">Disruptions</a>
+        </div>
+
     <!-- <div class="card mb-4" id="kubernetes-2">
         <div class="card-body">
             <h2 class="card-title">2. Services</h2>
