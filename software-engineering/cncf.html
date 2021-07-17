@@ -392,6 +392,109 @@ spec:
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/concepts/workloads/pods/init-containers/">Init Containers</a>
         </div>
+
+        <div class="card mb-4" id="kubernetes-2">
+        <div class="card-body">
+            <h2 class="card-title">2.3. Pod Topology Spread Constraints</h2>
+            <img class="img-fluid" class="card-img-top" src="../img/kubernetes/kubernetes-2-a.png" alt="Card image cap">
+<pre><code class="yaml">kind: Pod
+apiVersion: v1
+metadata:
+  name: mypod
+  labels:
+    foo: bar
+spec:
+  topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: zone
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        foo: bar
+  containers:
+  - name: pause
+    image: k8s.gcr.io/pause:3.1</code></pre>
+            <p class="card-text">If a new Pod goes to Zone A, then the skew will be 3-1=2, which will exceed the maxSkew of 1. Thus, it can only go to Zone B such that</p>
+            <img class="img-fluid" class="card-img-top" src="../img/kubernetes/kubernetes-2-b.png" alt="Card image cap">
+
+            <img class="img-fluid" class="card-img-top" src="../img/kubernetes/kubernetes-2-c.png" alt="Card image cap">
+<pre><code class="yaml">kind: Pod
+apiVersion: v1
+metadata:
+  name: mypod
+  labels:
+    foo: bar
+spec:
+  topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: zone
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        foo: bar
+  - maxSkew: 1
+    topologyKey: node
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        foo: bar
+  containers:
+  - name: pause
+    image: k8s.gcr.io/pause:3.1</code></pre>
+            <p class="card-text">A new Pod can only go to Zone B to meet the maxSkew of 1 in the first constraint. However at the same time, it can only go to Node 2 to meet the maxSkew of 1 in the second constraint. Because whenUnsatisfiable is DoNotSchedule in both constraints, new Pod cannot be scheduled. (it would be scheduled if whenUnsatisfiable is ScheduleAnyway)</p>
+
+            <img class="img-fluid" class="card-img-top" src="../img/kubernetes/kubernetes-2-d.png" alt="Card image cap">
+<pre><code class="yaml">kind: Pod
+apiVersion: v1
+metadata:
+  name: mypod
+  labels:
+    foo: bar
+spec:
+  topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: zone
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        foo: bar
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: zone
+            operator: NotIn
+            values:
+            - zoneC
+  containers:
+  - name: pause
+    image: k8s.gcr.io/pause:3.1</code></pre>
+            <p class="card-text">This will exclude Zone C from the constraint such that a new Pod goes to Zone B rather than Zone C</p>
+
+            <h3 class="card-title">Cluster-Level Default Constraints</h2>
+<pre><code class="yaml">apiVersion: kubescheduler.config.k8s.io/v1beta1
+kind: KubeSchedulerConfiguration
+
+profiles:
+  - pluginConfig:
+      - name: PodTopologySpread
+        args:
+          defaultConstraints:
+            - maxSkew: 1
+              topologyKey: topology.kubernetes.io/zone
+              whenUnsatisfiable: ScheduleAnyway
+          defaultingType: List</code></pre>
+            <ul>
+                <li>Pod Affinity - can place any number of Pods into qualifying topology domains</li>
+                <li>Pod Anti-Affinity - can only place one Pod into a single topology domain</li>
+            </ul>
+
+        </div>
+
+        <div class="card-footer text-muted">
+            Reference: <a href="https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/">Pod Topology Spread Constraints</a>
+        </div>
     </div>
 
     <!-- <div class="card mb-4" id="kubernetes-2">
