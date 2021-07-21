@@ -672,42 +672,60 @@ spec:
                 <li>Scale up the Deployments</li>
                 <li>Clean up old ReplicaSets</li>
             </ul>
-            <p class="card-text">Example</p>
+            <p class="card-text">Create a Deployment</p>
 <pre><code class="yaml">apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-deployment
+  name: nginx-deployment # Deployment named ".metadata.name" is created
   labels:
     app: nginx
 spec:
-  replicas: 3
+  replicas: 3 # Three replicated Pods
   selector:
     matchLabels:
-      app: nginx
+      app: nginx # How Deployment finds which Pods to manage
   template:
     metadata:
       labels:
-        app: nginx
+        app: nginx # Pod label
     spec:
-      containers:
+      containers: # nginx container runs nginx image version 1.14.2
       - name: nginx
         image: nginx:1.14.2
         ports:
         - containerPort: 80</code></pre>
             <ul>
-                <li><strong>.metadata.name</strong> indicates Deployment name ".metadata.name" to be created</li>
-                <li><strong>.spec.replicas</strong> indicates three replicated Pods</li>
-                <li><strong>.spec.selector</strong> tells how Deployment finds which Pods to manage</li>
-                <li><strong>.template.metadata.labels</strong> indicates Pods label</li>
+                <li>To create Deployment, run
+<pre><code class="bash">kubectl apply -f nginx-deployment.yaml</pre></code></li>
+                <li>To check Deployment, run
+<pre><code class="bash">kubectl get deployments</code></pre></li>
+<img class="img-fluid" class="card-img-top" src="../img/kubernetes/kubernetes-4-a.png" alt="Card image cap">
+                <ul>
+                    <li>NAME - names of Deployments in the namespace</li>
+                    <li>READY - how many replicas of the application are available to users</li>
+                    <li>UP TO DATE - number of replicas updated to achieve the desired state</li>
+                    <li>AVAILABLE - how many replicas of the application are available to users</li>
+                    <li>AGE - amount of time the appliation has been running</li>
+                </ul>
+                <li>To check Deployment rollout status, run
+<pre><code class="bash">kubectl rollout status deployment/nginx-deployment</code></pre></li>
+                <li>To see the ReplicaSet created by Deployment, run
+<pre><code class="bash">kubectl get rs</code></pre></li>
+<img class="img-fluid" class="card-img-top" src="../img/kubernetes/kubernetes-4-a.png" alt="Card image cap">
+                <ul>
+                    <li>NAME - names of ReplicaSets in the namespace</li>
+                    <li>DESIRED - desired number of replicas in the application</li>
+                    <li>CURRENT - how many applications are currently running</li>
+                    <li>READY - how many replicas of the application are available to users</li>
+                    <li>AGE - amount of time the appliation has been running</li>
+                </ul>
+                <li>To see the labels generated for each Pod, run
+<pre><code class="bash">kubectl get pods --show-labels</code></pre></li>
+                <li>To update iamge from nginx:1.14.2 to nginx:1.16.1, run
+<pre><code class="bash">kubectl set image deployment/nginx-deployment nginx=nginx:1.16.1 --record</code></pre></li>
+                <li>To get details of Deployment, run
+<pre><code class="bash">kubectl describe deployments</code></pre></li>
             </ul>
-
-            <p class="card-text">To create Deployment, run "kubectl apply -f nginx-deployment.yaml"</p>
-            <p class="card-text">To check Deployment, run "kubectl get deployments"</p>
-            <p class="card-text">To check Deployment rollout status, run "kubectl rollout status deployment/nginx-deployment"</p>
-            <p class="card-text">To see the ReplicaSet created by Deployment, run "kubectl get rs"</p>
-            <p class="card-text">To see the labels generated for each Pod, run "kubectl get pods --show-labels"</p>
-            <p class="card-text">To update iamge from nginx:1.14.2 to nginx:1.16.1, run "kubectl set image deployment/nginx-deployment nginx=nginx:1.16.1 --record"</p>
-            <p class="card-text">To get details of Deployment, run "kubectl describe deployments"</p>
         </div>
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployment</a>
