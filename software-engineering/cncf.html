@@ -694,9 +694,9 @@ spec:
         ports:
         - containerPort: 80</code></pre>
             <ul>
-                <li>To create Deployment, run
+                <li>To create Deployment
 <pre><code class="bash">kubectl apply -f nginx-deployment.yaml</pre></code></li>
-                <li>To check Deployment, run
+                <li>To check Deployment
 <pre><code class="bash">kubectl get deployments</code></pre></li>
 <img class="img-fluid" class="card-img-top" src="../img/kubernetes/kubernetes-4-a.png" alt="Card image cap">
                 <ul>
@@ -706,9 +706,9 @@ spec:
                     <li>AVAILABLE - how many replicas of the application are available to users</li>
                     <li>AGE - amount of time the appliation has been running</li>
                 </ul>
-                <li>To check Deployment rollout status, run
+                <li>To check Deployment rollout status
 <pre><code class="bash">kubectl rollout status deployment/nginx-deployment</code></pre></li>
-                <li>To see the ReplicaSet created by Deployment, run
+                <li>To see the ReplicaSet created by Deployment
 <pre><code class="bash">kubectl get rs</code></pre></li>
 <img class="img-fluid" class="card-img-top" src="../img/kubernetes/kubernetes-4-a.png" alt="Card image cap">
                 <ul>
@@ -718,30 +718,34 @@ spec:
                     <li>READY - how many replicas of the application are available to users</li>
                     <li>AGE - amount of time the appliation has been running</li>
                 </ul>
-                <li>To see the labels generated for each Pod, run
+                <li>To see the labels generated for each Pod
 <pre><code class="bash">kubectl get pods --show-labels</code></pre></li>
                 <li>To update iamge from nginx:1.14.2 to nginx:1.16.1, run one of the following
 <pre><code class="bash">kubectl --record deployment.apps/nginx-deployment set image deployment.v1.apps/nginx-deployment nginx=nginx:1.16.1</code></pre>
 <pre><code class="bash">kubectl set image deployment/nginx-deployment nginx=nginx:1.16.1 --record</code></pre></li>
-                <li>To see the rollout status, run
+                <li>To see the rollout status
 <pre><code class="bash">kubectl rollout status deployment/nginx-deployment</code></pre></li>
             </ul>
             <p class="card-text">Deployment ensures that at least 75% of Pods are up while they are being updated. It also ensures that at most 125% of the desired number of Pods are up</p>
 
-        </div>
-        <div class="card-footer text-muted">
-            Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployment</a>
-        </div>
-    </div>
+            <p class="card-text">Rollover</p>
+            <ul>
+                <li>Everytime a new Deployment is observed by Deployment Controller, a ReplicaSet is created to bring up the desired Pods</li>
+                <li>If Deployment is updated, the existing ReplicaSet that control Pods whose labels match ".spec.selector" but whose template does not match ".spec.template" are scaled down</li>
+                <li>Eventually, new ReplicaSet is scaled to ".spec.replicas" and all old ReplicaSets is scaled to 0</li>
+            </ul>
 
-    <div class="card mb-4" id="kubernetes-5">
-        <div class="card-body">
-            <h2 class="card-title">5. Rollover and rollback</h2>
-            <p class="card-text">If Deployment is updated, ReplicaSet whose labels match <Strong>.spec.selector</Strong> but whose template does not match <strong>.spec.template</strong> are scaled down. New ReplicaSet is eventually scaled to <strong>.spec.replicas</strong></p>
-            <p class="card-text">To check revisions of Deployment, run "kubectl rollout history deployment.v1.apps/nginx-deployment"</p>
-            <p class="card-text">To see details of each revision, run "kubectl rollout history deployment.v1.apps/nginx-deployment --revision=2"</p>
-            <p class="card-text">To roll back to previous version, run "kubectl rollout undo deployment.v1.apps/nginx-deployment"</p>
-            <p class="card-text">To roll back to a specific version, run "kubectl rollout undo deployment.v1.apps/nginx-deployment --to-revision=2"</p>
+            <p class="card-text">Rollback</p>
+            <ul>
+                <li>Check the revisions of Deployment</li>
+<pre><code class="bash">kubectl rollout history deployment.v1.apps/nginx-deployment</code></pre>
+                <li>To see the details of each revision</li>
+<pre><code class="bash">kubectl rollout history deployment.v1.apps/nginx-deployment --revision=2</code></pre>
+                <li></li>
+                <li></li>
+                <li></li>
+            </ul>
+
         </div>
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployment</a>
