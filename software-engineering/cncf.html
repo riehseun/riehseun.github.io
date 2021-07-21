@@ -672,21 +672,21 @@ spec:
                 <li>Clean up old ReplicaSets</li>
             </ul>
             <p class="card-text">Create a Deployment</p>
-<pre><code class="yaml">apiVersion: apps/v1
-kind: Deployment
-metadata:
+<pre><code class="yaml">apiVersion: apps/v1 # Mandatory field
+kind: Deployment # Mandatory field
+metadata: # Mandatory field
   name: nginx-deployment # Deployment named ".metadata.name" is created
   labels:
     app: nginx
 spec:
-  replicas: 3 # Three replicated Pods
-  selector:
+  replicas: 3 # Three replicated Pods. If this field does not exist, it will default to 1
+  selector: # Required field for "spec". This specifies the label selector of Pod targeted by this Deployment
     matchLabels:
       app: nginx # How Deployment finds which Pods to manage
-  template:
+  template: # Required field for "spec". This is a Pod template, which has the same schema as Pod
     metadata:
       labels:
-        app: nginx # Pod label
+        app: nginx # Pod label. This must match ".spec.selector"
     spec:
       containers: # nginx container runs nginx image version 1.14.2
       - name: nginx
@@ -741,9 +741,36 @@ spec:
 <pre><code class="bash">kubectl rollout history deployment.v1.apps/nginx-deployment</code></pre>
                 <li>To see the details of each revision</li>
 <pre><code class="bash">kubectl rollout history deployment.v1.apps/nginx-deployment --revision=2</code></pre>
-                <li></li>
-                <li></li>
-                <li></li>
+                <li>Rollback to a specific version</li>
+<pre><code class="bash">kubectl rollout undo deployment.v1.apps/nginx-deployment --to-revision=2</code></pre>
+            </ul>
+
+            <p class="card-text">Scaling</p>
+            <ul>
+                <li>Scale a Deployment</li>
+<pre><code class="bash">kubectl scale deployment.v1.apps/nginx-deployment --replicas=10</code></pre>
+                <li>Setup autoscaler for Deployment and choose the minimum and maximum number of Pods</li>
+<pre><code class="bash">kubectl autoscale deployment.v1.apps/nginx-deployment --min=10 --max=15 --cpu-percent=80</code></pre>
+                <li>Rollback to a specific version</li>
+<pre><code class="bash">kubectl rollout undo deployment.v1.apps/nginx-deployment --to-revision=2</code></pre>
+            </ul>
+
+            <p class="card-text">Proportional scaling</p>
+            <ul>
+                <li>Deployment Controller balances additional replicas in the existing ReplicaSets</li>
+            </ul>
+
+            <p class="card-text">Pause and resume Deployment</p>
+            <ul>
+                <li>Can apply multiple fixes in between pausing and resuming without triggering unnecessary rollouts</li>
+                <li>To pause the Deployment</li>
+<pre><code class="bash">kubectl rollout pause deployment.v1.apps/nginx-deployment</code></pre>
+                <li>Can update the image</li>
+<pre><code class="bash">kubectl set image deployment.v1.apps/nginx-deployment nginx=nginx:1.16.1</code></pre>
+                <li>Can update the resources</li>
+<pre><code class="bash">kubectl set resources deployment.v1.apps/nginx-deployment -c=nginx --limits=cpu=200m,memory=512Mi</code></pre>
+                <li>To resume the Deployment</li>
+<pre><code class="bash">kubectl rollout resume deployment.v1.apps/nginx-deployment</code></pre>
             </ul>
 
         </div>
