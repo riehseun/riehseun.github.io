@@ -77,11 +77,12 @@
                 <li><a href="#kubernetes-2">2. Pods</a></li>
                 <li><a href="#kubernetes-3">3. Multi-container pod design</a></li>
                 <li><a href="#kubernetes-4">4. Deployments</a></li>
-                <li><a href="#kubernetes-5">5. Rollover and rollback</a></li>
-                <li><a href="#kubernetes-6">6. Jobs</a></li>
-                <li><a href="#kubernetes-7">7. Cron Job</a></li>
-                <li><a href="#kubernetes-8">8. Labels, Selectors, and Annotations</a></li>
-                <li><a href="#kubernetes-9">9. Deploy Jenkins agent</a></li>
+                <li><a href="#kubernetes-5">5. ReplicaSet</a></li>
+                <li><a href="#kubernetes-6">6. StatefulSet</a></li>
+                <li><a href="#kubernetes-7">7. Job</a></li>
+                <li><a href="#kubernetes-8">8. Cron Job</a></li>
+                <li><a href="#kubernetes-9">9. Labels, Selectors, and Annotations</a></li>
+
                 <li><a href="#kubernetes-10">10. ConfigMaps</a></li>
                 <li><a href="#kubernetes-11">11. SecurityContext</a></li>
                 <li><a href="#kubernetes-12">12. Managing Resources for Containers</a></li>
@@ -778,6 +779,75 @@ spec:
             Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployment</a>
         </div>
     </div>
+
+    <div class="card mb-4" id="kubernetes-5">
+        <div class="card-body">
+            <h2 class="card-title">5. ReplicaSet</h2>
+            <p class="card-text">Generally, ReplicaSet should not be manipulated. Rather, Deployment should be used.</p>
+            <p class="card-text">ReplicaSet is mapped to Pod by Pod's metadata.ownerReferences field.</p>
+<pre><code class="yaml">apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: frontend
+  labels:
+    app: guestbook
+    tier: frontend
+spec:
+  # modify replicas according to your case
+  replicas: 3
+  selector:
+    matchLabels:
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        tier: frontend
+    spec:
+      containers:
+      - name: php-redis
+        image: gcr.io/google_samples/gb-frontend:v3</code></pre>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: pod1
+  labels:
+    tier: frontend
+spec:
+  containers:
+  - name: hello1
+    image: gcr.io/google-samples/hello-app:2.0
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod2
+  labels:
+    tier: frontend
+spec:
+  containers:
+  - name: hello2
+    image: gcr.io/google-samples/hello-app:1.0</code></pre>
+            <p class="card-text">These Pods do not have Controller as their owner reference. And they match the selector of frontend ReplicaSet (right above). This means these Pods will be acquired by that ReplicaSet. Moreover, if the frontend ReplicaSet is already deployed, creating these two additional Pods cause them to immediately terminate because the ReplicaSet exceeds the desired count.</p>
+            <p class="card-text">Delete ReplicaSet and its Pods.</p>
+<pre><code class="bash">kubectl proxy --port=8080
+curl -X DELETE  'localhost:8080/apis/apps/v1/namespaces/default/replicasets/frontend' \
+> -d '{"kind":"DeleteOptions","apiVersion":"v1","propagationPolicy":"Foreground"}' \
+> -H "Content-Type: application/json"</code></pre>
+            <p class="card-text">Delete just a ReplicaSet</p>
+<pre><code class="bash">kubectl proxy --port=8080
+curl -X DELETE  'localhost:8080/apis/apps/v1/namespaces/default/replicasets/frontend' \
+> -d '{"kind":"DeleteOptions","apiVersion":"v1","propagationPolicy":"Orphan"}' \
+> -H "Content-Type: application/json"</code></pre>
+            <p class="card-text">Scale-down a ReplicaSet</p>
+            <ul>
+                <li>Pending Pods are scaled-down first</li>
+                <li>If controller.kubernetes.io/pod-deletion-cost annotation is set, Pods with lower value are scaled-down second</li>
+                <li>Pods on Nodes with more replicas are scaled-down thrid</li>
+                <li>Pods created recently are scaled-down fourth</li>
+            </ul>
+        </div>
 
     <div class="card mb-4" id="kubernetes-6">
         <div class="card-body">
