@@ -854,7 +854,7 @@ curl -X DELETE  'localhost:8080/apis/apps/v1/namespaces/default/replicasets/fron
         </div>
     </div>
 
-    <div class="card mb-4" id="kubernetes-6">
+<!--     <div class="card mb-4" id="kubernetes-6">
         <div class="card-body">
             <h2 class="card-title">6. Jobs</h2>
             <p class="card-text">A Job creates one more more Pods. Deleting a Job will clean up Pods it created</p>
@@ -883,6 +883,90 @@ spec:
 
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/job/">Jobs</a>
+        </div>
+    </div> -->
+
+    <div class="card mb-4" id="kubernetes-6">
+        <div class="card-body">
+            <h2 class="card-title">6. StatefulSet</h2>
+            <p class="card-text">Similar to Deployment, but guarantees ordering and uniqueness of Pods.</p>
+            <p class="card-text">Usecase</p>
+            <ul>
+                <li>Stable, unique network identifier</li>
+                <li>Stable, persistent storage</li>
+                <li>Ordered, graceful deployment and scaling</li>
+                <li>Ordered, automated rolling updates</li>
+            </ul>
+            <p class="card-text">Limitations</p>
+            <ul>
+                <li>Storage for a Pod must be provisioned by PersistentVolumns Provsioner</li>
+                <li>Deleting StatefulSet does not delete volumns associated with it</li>
+                <li>StatefulSet requires Headless Service for the network identity of the Pods</li>
+                <li>StatefulSet does not guarantee on the termination of Pods when Statefulset gets deleted</li>
+            </ul>
+            <p class="card-text">Example</p>
+            <ul>
+                <li>Headless service named "nginx" is used to control the network domain</li>
+                <li>3 replicas of nginx container will be launched in unique Pods</li>
+                <li>volumeClaimTemplates will provide stable storage using PersistentVolumns</li>
+            </ul>
+<pre><code class="yaml">apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  ports:
+  - port: 80
+    name: web
+  clusterIP: None
+  selector:
+    app: nginx
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: web
+spec:
+  selector:
+    matchLabels:
+      app: nginx # has to match .spec.template.metadata.labels
+  serviceName: "nginx"
+  replicas: 3 # by default is 1
+  template:
+    metadata:
+      labels:
+        app: nginx # has to match .spec.selector.matchLabels
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: nginx
+        image: k8s.gcr.io/nginx-slim:0.8
+        ports:
+        - containerPort: 80
+          name: web
+        volumeMounts:
+        - name: www
+          mountPath: /usr/share/nginx/html
+  volumeClaimTemplates:
+  - metadata:
+      name: www
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "my-storage-class"
+      resources:
+        requests:
+          storage: 1Gi</code></pre>
+            <ul>
+                <li>Three Pods will be deployed in the order web-0, web-1, web-2</li>
+                <li>web-1 will not be deployed until web-0 is Running and Ready</li>
+                <li>When scaling down, web-1 will not be terminated until web-2 is fully shutdown</li>
+            </ul>
+        </div>
+
+    <div class="card-footer text-muted">
+            Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/">StatefulSet</a>
         </div>
     </div>
 
