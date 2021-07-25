@@ -732,8 +732,8 @@ spec:
             <p class="card-text">Rollover</p>
             <ul>
                 <li>Everytime a new Deployment is observed by Deployment Controller, a ReplicaSet is created to bring up the desired Pods</li>
-                <li>If Deployment is updated, the existing ReplicaSet that control Pods whose labels match ".spec.selector" but whose template does not match ".spec.template" are scaled down</li>
-                <li>Eventually, new ReplicaSet is scaled to ".spec.replicas" and all old ReplicaSets is scaled to 0</li>
+                <li>If Deployment is updated, the existing ReplicaSet that control Pods whose labels match <code>.spec.selector</code> but whose template does not match <code>.spec.template</code> are scaled down</li>
+                <li>Eventually, new ReplicaSet is scaled to <code>.spec.replicas</code> and all old ReplicaSets is scaled to 0</li>
             </ul>
 
             <p class="card-text">Rollback</p>
@@ -956,12 +956,30 @@ spec:
         command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
       restartPolicy: Never
   backoffLimit: 4</code></pre>
-            <p class="card-text">To list all the Pods that belong to a Job, run "pods=$(kubectl get pods --selector=job-name=pi --output=jsonpath='{.items[*].metadata.name}') && echo $pods"</p>
+            <p class="card-text">To list all the Pods that belong to a Job</p>
+<pre><code class="bash">run pods=$(kubectl get pods --selector=job-name=pi --output=jsonpath='{.items[*].metadata.name}') && echo $pods"</code></pre>
             <p class="card-text">Three types of tasks suitable to run as a Job</p>
             <ul>
-                <li>Non-parallel Jobs - normally only one Pod is started. Job is complete as soon as its Pod terminates successfully. Can leave both ".spec.completions" and ".spec.parallelism" unset (they will default to 1)</li>
-                <li>Parallel Jobs with a fixed completion count - Job is complete when there is one successful Pod for each value in the range 1 to ".spec.completions".</li>
-                <li>Parallel Jobs with a work queue - when any Pod from the Job terminates with success, no new Pods are created. Once at least one Pod is terminated with success and all Pods are terminated, Job succeeds. Must leave ".spec.completions" unset and set ".spec.parallelism" to a non-negative integer</li>
+                <li>Non-parallel Jobs - normally only one Pod is started. Job is complete as soon as its Pod terminates successfully. Can leave both <code>.spec.completions</code> and <code>.spec.parallelism</code> unset (they will default to 1)</li>
+                <li>Parallel Jobs with a fixed completion count - Job is complete when there is one successful Pod for each value in the range 1 to <code>.spec.completions</code></li>
+                <li>Parallel Jobs with a work queue - when any Pod from the Job terminates with success, no new Pods are created. Once at least one Pod is terminated with success and all Pods are terminated, Job succeeds. Must leave <code>.spec.completions</code> unset and set <code>.spec.parallelism</code> to a non-negative integer</li>
+            </ul>
+            <p class="card-text">Requested parallelism <code>.spec.parallelism</code> is set to 1 if not specified. Setting it to 0 makes Job effective paused</p>
+            <ul>
+                <li>Fixed completion count Jobs - actual number of Pods running in parallel will not exceed the number of remaining completions. Higher value of <code>.spec.parallelism</code> is ignored</li>
+                <li>Work queue Jobs - no new Pods are started after any Pod has succeeded</li>
+            </ul>
+            <p class="card-text">Pod and container failure</p>
+            <ul>
+                <li>If container fails and <code>.spec.template.spec.restartPolicy = "OnFailure"</code>, Pod stays on the node but container re-runs. You can avoid this by <code>.spec.template.spec.restartPolicy = "Never"</code></li>
+                <li>If Pod fails, then Job Controller starts a new Pod</li>
+                <li><code>.spec.backoffLimit</code> is specifiy number fo retries before marking Job as failure (default is 6)</li>
+            </ul>
+            <p class="card-text">Job termination and cleaup</p>
+            <ul>
+                <li></li>
+                <li></li>
+                <li></li>
             </ul>
         </div>
 
