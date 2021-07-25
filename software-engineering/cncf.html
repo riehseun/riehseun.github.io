@@ -854,38 +854,6 @@ curl -X DELETE  'localhost:8080/apis/apps/v1/namespaces/default/replicasets/fron
         </div>
     </div>
 
-<!--     <div class="card mb-4" id="kubernetes-6">
-        <div class="card-body">
-            <h2 class="card-title">6. Jobs</h2>
-            <p class="card-text">A Job creates one more more Pods. Deleting a Job will clean up Pods it created</p>
-            <p class="card-text">Example</p>
-<pre><code class="yaml">apiVersion: batch/v1
-kind: Job
-metadata:
-  name: pi
-spec:
-  template:
-    spec:
-      containers:
-      - name: pi
-        image: perl
-        command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
-      restartPolicy: Never
-  backoffLimit: 4</code></pre>
-            <p class="card-text">To list all the Pods that belong to a Job, run "pods=$(kubectl get pods --selector=job-name=pi --output=jsonpath='{.items[*].metadata.name}') && echo $pods"</p>
-            <p class="card-text">Three types of tasks suitable to run as a Job</p>
-            <ul>
-                <li>Non-parallel Jobs - normally only one Pod is started. Job is complete as soon as its Pod terminates successfully</li>
-                <li>Parallel Jobs with a fixed completion count - Job is complete when there is one successful Pod for each value in the range 1 to <strong>.spec.completions</strong>, which would have a non-zero positive value</li>
-                <li>Parallel Jobs with a work queue - when any pod from the Job terminates with success, no new Pods are created. Once at least one Pod is terminated with success and all Pods are terminated, Job succeeds</li>
-            </ul>
-        </div>
-
-        <div class="card-footer text-muted">
-            Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/job/">Jobs</a>
-        </div>
-    </div> -->
-
     <div class="card mb-4" id="kubernetes-6">
         <div class="card-body">
             <h2 class="card-title">6. StatefulSet</h2>
@@ -972,7 +940,39 @@ spec:
 
     <div class="card mb-4" id="kubernetes-7">
         <div class="card-body">
-            <h2 class="card-title">7. Cron Job</h2>
+            <h2 class="card-title">7. Jobs</h2>
+            <p class="card-text">A Job creates one more more Pods. It reliably runs one Pod to completion. Deleting a Job will clean up Pods it created. Suspending a Job will delete its active Pods</p>
+            <p class="card-text">Example</p>
+<pre><code class="yaml">apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pi
+spec:
+  template:
+    spec:
+      containers:
+      - name: pi
+        image: perl
+        command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+      restartPolicy: Never
+  backoffLimit: 4</code></pre>
+            <p class="card-text">To list all the Pods that belong to a Job, run "pods=$(kubectl get pods --selector=job-name=pi --output=jsonpath='{.items[*].metadata.name}') && echo $pods"</p>
+            <p class="card-text">Three types of tasks suitable to run as a Job</p>
+            <ul>
+                <li>Non-parallel Jobs - normally only one Pod is started. Job is complete as soon as its Pod terminates successfully. Can leave both ".spec.completions" and ".spec.parallelism" unset (they will default to 1)</li>
+                <li>Parallel Jobs with a fixed completion count - Job is complete when there is one successful Pod for each value in the range 1 to ".spec.completions".</li>
+                <li>Parallel Jobs with a work queue - when any Pod from the Job terminates with success, no new Pods are created. Once at least one Pod is terminated with success and all Pods are terminated, Job succeeds. Must leave ".spec.completions" unset and set ".spec.parallelism" to a non-negative integer</li>
+            </ul>
+        </div>
+
+        <div class="card-footer text-muted">
+            Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/job/">Jobs</a>
+        </div>
+    </div>
+
+    <div class="card mb-4" id="kubernetes-8">
+        <div class="card-body">
+            <h2 class="card-title">8. Cron Job</h2>
             <p class="card-text">Creates Jobs on a repeating schedule</p>
             <p class="card-text">Example</p>
 <pre><code class="yaml">apiVersion: batch/v1beta1
@@ -1000,9 +1000,9 @@ spec:
         </div>
     </div>
 
-    <div class="card mb-4" id="kubernetes-8">
+    <div class="card mb-4" id="kubernetes-9">
         <div class="card-body">
-            <h2 class="card-title">8. Labels, Selectors, and Annotations</h2>
+            <h2 class="card-title">9. Labels, Selectors, and Annotations</h2>
             <p class="card-text">Labels - key/value pairs enabling users to map their own structures to system objects in loosely coupled fashion</p>
             <p class="card-text">Selectors - equality-based allows filtering by label keys and values while set-based allows filtering keys according to a set of values</p>
             <p class="card-text">Annotations - allows attaching arbitrary non-identifying metadata to objects (while Labels are used to select objects, annotations are for recording metadata)</p>
@@ -1012,7 +1012,7 @@ spec:
         </div>
     </div>
 
-    <div class="card mb-4" id="kubernetes-9">
+    <!-- <div class="card mb-4" id="kubernetes-9">
         <div class="card-body">
             <h2 class="card-title">9. PersistentVolumeClaims</h2>
             <p class="card-text">A PersistentVolumn (PV) - a piece of storage in the cluster</p>
@@ -1117,7 +1117,8 @@ spec:
         <div class="card-footer text-muted">
             Reference: <a href="https://blog.colinbreck.com/kubernetes-liveness-and-readiness-probes-how-to-avoid-shooting-yourself-in-the-foot/">Kubernetes Liveness and Readiness Probes: How to Avoid Shooting Yourself in the Foot</a>
         </div>
-    </div>
+    </div> -->
+
 
     <!-- <div class="card mb-4" id="kubernetes-4">
         <div class="card-body">
