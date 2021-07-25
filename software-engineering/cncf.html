@@ -1036,9 +1036,53 @@ spec:
     <div class="card mb-4" id="kubernetes-9">
         <div class="card-body">
             <h2 class="card-title">9. Labels, Selectors, and Annotations</h2>
-            <p class="card-text">Labels - key/value pairs enabling users to map their own structures to system objects in loosely coupled fashion</p>
-            <p class="card-text">Selectors - equality-based allows filtering by label keys and values while set-based allows filtering keys according to a set of values</p>
+            <p class="card-text">Labels - key/value pairs enabling users to map their own structures to system objects (for example, Pods) in loosely coupled fashion. Labels do not need to be unique.</p>
+<pre><code class="yaml">"metadata": {
+  "labels": {
+    "key1" : "value1",
+    "key2" : "value2"
+  }
+}</code></pre>
+            <p class="card-text">Example, Pods with two labels <code>environment: production</code> and <code>app: nginx</code></p>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: label-demo
+  labels:
+    environment: production
+    app: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.14.2
+    ports:
+    - containerPort: 80</code></pre>
+            <p class="card-text">Selectors - equality-based allows filtering by label keys and values while set-based allows filtering keys according to a set of values. For example,</p>
+<pre><code class="bash">kubectl get pods -l environment=production,tier=frontend # equality based
+kubectl get pods -l 'environment in (production),tier in (frontend)' # set based</code></pre>
+            <p class="card-text">Service and Replication Controller only support equality-based selector</p>
+<pre><code class="yaml">selector:
+    component: redis</code></pre>
+            <p class="card-text">Job, Deployment, ReplicaSet, DaemonSet also support set-based selector</p>
+<pre><code class="yaml">selector:
+  matchLabels:
+    component: redis
+  matchExpressions:
+    - {key: tier, operator: In, values: [cache]}
+    - {key: environment, operator: NotIn, values: [dev]}</code></pre>
             <p class="card-text">Annotations - allows attaching arbitrary non-identifying metadata to objects (while Labels are used to select objects, annotations are for recording metadata)</p>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: annotations-demo
+  annotations:
+    imageregistry: "https://hub.docker.com/"
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.14.2
+    ports:
+    - containerPort: 80</code></pre>
         </div>
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/">Labels and Selectors</a> | <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/">Annotations</a>
