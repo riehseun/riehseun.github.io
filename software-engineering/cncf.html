@@ -266,7 +266,7 @@ spec:
             </ul>
             <p class="card-text">Container restart policy</p>
             <ul>
-                <li>"spec" of Pod has "restartPolicy", which has Always, OnFailure, Never. Default is Always</li>
+                <li><code>spec</code> of Pod has <code>restartPolicy</code>, which has Always, OnFailure, Never. Default is Always</li>
             </ul>
             <p class="card-text">Pod condition</p>
             <ul>
@@ -277,7 +277,7 @@ spec:
             </ul>
             <p class="card-text">Pod readiness</p>
             <ul>
-                <li>"spec" of Pod has "readinessGates", that allows additional conditions to be specified</li>
+                <li><code>spec</code> of Pod has <code>readinessGates</code>, that allows additional conditions to be specified</li>
             </ul>
 <pre><code class="yaml">kind: Pod
 ...
@@ -942,6 +942,7 @@ spec:
         <div class="card-body">
             <h2 class="card-title">7. Jobs</h2>
             <p class="card-text">A Job creates one more more Pods. It reliably runs one Pod to completion. Deleting a Job will clean up Pods it created. Suspending a Job will delete its active Pods</p>
+            <p class="card-text">A Job is better than bare Pod because it can automatically replace failed Pod with new one. While Replication Controller manages Pods that are not expected to terminate, Job manages Pods that are expected to terminate</p>
             <p class="card-text">Example</p>
 <pre><code class="yaml">apiVersion: batch/v1
 kind: Job
@@ -977,10 +978,24 @@ spec:
             </ul>
             <p class="card-text">Job termination and cleaup</p>
             <ul>
-                <li></li>
-                <li></li>
-                <li></li>
+                <li>Delete the Job, all the Pods created by that Job are deleted too</li>
+                <li>Setting <code>.spec.activeDeadlineSeconds</code> will make Job fail and terminate all running Pods once <code>activeDeadlineSeconds</code> is reached</li>
             </ul>
+<pre><code class="yaml">apiVersion: batch/v1
+kind: JobapiVersion: batch/v1
+kind: Job
+metadata:
+  name: pi-with-timeout
+spec:
+  backoffLimit: 5
+  activeDeadlineSeconds: 100
+  template:
+    spec:
+      containers:
+      - name: pi
+        image: perl
+        command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+      restartPolicy: Never</code></pre>
         </div>
 
         <div class="card-footer text-muted">
@@ -991,7 +1006,7 @@ spec:
     <div class="card mb-4" id="kubernetes-8">
         <div class="card-body">
             <h2 class="card-title">8. Cron Job</h2>
-            <p class="card-text">Creates Jobs on a repeating schedule</p>
+            <p class="card-text">It can create Jobs on a repeating schedule or any individual tasks</p>
             <p class="card-text">Example</p>
 <pre><code class="yaml">apiVersion: batch/v1beta1
 kind: CronJob
