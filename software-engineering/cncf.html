@@ -1105,7 +1105,43 @@ spec:
     <div class="card mb-4" id="kubernetes-14">
         <div class="card-body">
             <h2 class="card-title">14. Volumes</h2>
+            <p class="card-text">Docker images are the root of filesystem hierarchy. Volumes mount at specific path within the image.</p>
+            <p class="card-text">ConfigMap allows injecting configration data into Pods. <code>log-config</code> ConfigMap is mounted as a volume at path <code>/etc/config/log_level</code> with Pod called <code>configmap-pod</code></p>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: configmap-pod
+spec:
+  containers:
+    - name: test
+      image: busybox
+      volumeMounts:
+        - name: config-vol
+          mountPath: /etc/config
+  volumes:
+    - name: config-vol
+      configMap:
+        name: log-config
+        items:
+          - key: log_level
+            path: log_level</code></pre>
+        <p class="card-text"><code>emptyDir</code> is created when Pod is assigned to Node. When Pod is removed from Node, data is deleted permanently</p>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pd
+spec:
+  containers:
+  - image: k8s.gcr.io/test-webserver
+    name: test-container
+    volumeMounts:
+    - mountPath: /cache
+      name: cache-volume
+  volumes:
+  - name: cache-volume
+    emptyDir: {}</code></pre>
         </div>
+
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/concepts/storage/volumes/">Volumes</a>
         </div>
@@ -1114,6 +1150,60 @@ spec:
     <div class="card mb-4" id="kubernetes-15">
         <div class="card-body">
             <h2 class="card-title">15. Persistent Volumes</h2>
+            <p class="card-text">PersistentVolume (PV) is a piece of storage in a cluster. It is similar to Node. PersistentVolumeClaim (PVC) a request for storage by a user. It is similar to Pod. PVC comsume PV resources. While Pod can request CPU and memory, PVC can request specific size and access mode.</p>
+            <h3>Binding</h3>
+            <p class="card-text">If PV was dynamically provisioned for a PVC, those PV and PVC will bind together. Otherwise, users will get at least what they asked for but volumes maybe at the excess.</p>
+            <h3>Storage Object in Use Protection</h3>
+            <p class="card-text">If user deletes PVC, deletion is postponed until PVC is not in use by any Pods. If admin deletes PV, deletion is postponed until PV is not bound to PVC.</p>
+            <h3>Reserving PV</h3>
+<pre><code class="yaml">apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: foo-pv
+spec:
+  storageClassName: ""
+  claimRef:
+    name: foo-pvc
+    namespace: foo
+  ...</code></pre>
+            <h3>PV</h3>
+<pre><code class="yaml">apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv0003
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem # Filesystem - default, Block - raw block device
+  accessModes:
+    - ReadWriteOnce # ReadWriteOnce, ReadWriteMany, ReadOnlyMany. Once - mounted by single Node, Many - mounted by many Nodes
+  persistentVolumeReclaimPolicy: Recycle # Retain, Recycle, Delete
+  storageClassName: slow
+  mountOptions:
+    - hard
+    - nfsvers=4.1
+  nfs:
+    path: /tmp
+    server: 172.17.0.2</code></pre>
+            <h3>PVC</h3>
+<pre><code class="yaml">apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: myclaim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 8Gi
+  storageClassName: slow
+  selector:
+    matchLabels: # volumn must have a label with this value
+      release: "stable"
+    matchExpressions: # a list of requirements
+      - {key: environment, operator: In, values: [dev]}</code></pre>
+
         </div>
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/">Persistent Volumes</a>
