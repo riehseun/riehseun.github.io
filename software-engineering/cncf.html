@@ -89,10 +89,9 @@
                 <li><a href="#kubernetes-14">14. Volumes</a></li>
                 <li><a href="#kubernetes-15">15. Persistent Volumes</a></li>
                 <li><a href="#kubernetes-16">16. Volume Snapshots</a></li>
-                <li><a href="#kubernetes-17">17. Storage Classes</a></li>
-                <li><a href="#kubernetes-18">18. Dynamic Volume Provisioning/a></li>
-                <li><a href="#kubernetes-19">19. Storage Capacity</a></li>
-                <li><a href="#kubernetes-20">20. Ephemeral Volumes</a></li>
+                <li><a href="#kubernetes-17">17. Dynamic Volume Provisioning</a></li>
+                <li><a href="#kubernetes-18">18. Storage Capacity</a></li>
+                <li><a href="#kubernetes-19">19. Ephemeral Volumes</a></li>
 
 
                 <!-- <li><a href="#kubernetes-11">11. SecurityContext</a></li>
@@ -1151,11 +1150,11 @@ spec:
         <div class="card-body">
             <h2 class="card-title">15. Persistent Volumes</h2>
             <p class="card-text">PersistentVolume (PV) is a piece of storage in a cluster. It is similar to Node. PersistentVolumeClaim (PVC) a request for storage by a user. It is similar to Pod. PVC comsume PV resources. While Pod can request CPU and memory, PVC can request specific size and access mode.</p>
-            <h3>Binding</h3>
+            <h3 class="card-title">Binding</h3>
             <p class="card-text">If PV was dynamically provisioned for a PVC, those PV and PVC will bind together. Otherwise, users will get at least what they asked for but volumes maybe at the excess.</p>
-            <h3>Storage Object in Use Protection</h3>
+            <h3 class="card-title">Storage Object in Use Protection</h3>
             <p class="card-text">If user deletes PVC, deletion is postponed until PVC is not in use by any Pods. If admin deletes PV, deletion is postponed until PV is not bound to PVC.</p>
-            <h3>Reserving PV</h3>
+            <h3 class="card-title">Reserving PV</h3>
 <pre><code class="yaml">apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -1166,7 +1165,7 @@ spec:
     name: foo-pvc
     namespace: foo
   ...</code></pre>
-            <h3>PV</h3>
+            <h3 class="card-title">PV</h3>
 <pre><code class="yaml">apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -1185,7 +1184,7 @@ spec:
   nfs:
     path: /tmp
     server: 172.17.0.2</code></pre>
-            <h3>PVC</h3>
+            <h3 class="card-title">PVC</h3>
 <pre><code class="yaml">apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -1203,6 +1202,23 @@ spec:
       release: "stable"
     matchExpressions: # a list of requirements
       - {key: environment, operator: In, values: [dev]}</code></pre>
+            <h3 class="card-title">Claims as Volumns</h3>
+            <p class="card-text">Pods access storage by using Claim as volume. Claim must exist in the same namespace as Pod. The cluster finds Claim in Pods's namespace and uses it to get PV.</p>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  containers:
+    - name: myfrontend
+      image: nginx
+      volumeMounts:
+      - mountPath: "/var/www/html"
+        name: mypd
+  volumes:
+    - name: mypd
+      persistentVolumeClaim:
+        claimName: myclaim</code></pre>
 
         </div>
         <div class="card-footer text-muted">
@@ -1213,6 +1229,31 @@ spec:
     <div class="card mb-4" id="kubernetes-16">
         <div class="card-body">
             <h2 class="card-title">16. Volume Snapshots</h2>
+            <p class="card-text"><code>VolumeSnapshotContent</code> - snapshot taken from a volumn. <code>VolumeSnapshot</code> - request for a snapshot by a user. <code>VolumeSnapshot</code> is only available for CSI (Container Storage Interface) drivers. </p>
+            <h3 class="card-title">VS</h3>
+<pre><code class="yaml">apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshot
+metadata:
+  name: new-snapshot-test
+spec:
+  volumeSnapshotClassName: csi-hostpath-snapclass
+  source:
+    persistentVolumeClaimName: pvc-test # name of PVC data source for the snapshot</code></pre>
+            <h3 class="card-title">VSC</h3>
+<pre><code class="yaml">apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshotContent
+metadata:
+  name: snapcontent-72d9a349-aacd-42d2-a240-d775650d2455
+spec:
+  deletionPolicy: Delete
+  driver: hostpath.csi.k8s.io
+  source:
+    volumeHandle: ee0cfb94-f8d4-11e9-b2d8-0242ac110002 # unique identifier creatd on the storage (returned by CSI driver druing volume creation)
+  volumeSnapshotClassName: csi-hostpath-snapclass
+  volumeSnapshotRef:
+    name: new-snapshot-test
+    namespace: default
+    uid: 72d9a349-aacd-42d2-a240-d775650d2455</code></pre>
         </div>
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/concepts/storage/volume-snapshots/">Volume Snapshots</a>
@@ -1221,34 +1262,55 @@ spec:
 
     <div class="card mb-4" id="kubernetes-17">
         <div class="card-body">
-            <h2 class="card-title">17. Storage Classes</h2>
-        </div>
-        <div class="card-footer text-muted">
-            Reference: <a href="https://kubernetes.io/docs/concepts/storage/storage-classes/">Storage Classes</a>
-        </div>
-    </div>
-
-    <div class="card mb-4" id="kubernetes-18">
-        <div class="card-body">
-            <h2 class="card-title">18. Dynamic Volume Provisioning</h2>
+            <h2 class="card-title">17. Dynamic Volume Provisioning</h2>
+            <p class="card-text">To enable dynamic provisioning, cluster admin must pre-create StorageClass object for users.</p>
+<pre><code class="yaml"> # Create storage class "slow" that provisions persistent disks like standard disk.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: slow
+provisioner: kubernetes.io/gce-pd
+parameters:
+  type: pd-standard</code></pre>
+<pre><code class="yaml"> # Create storage class "fast" that provisions persistent disks like SSD.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: fast
+provisioner: kubernetes.io/gce-pd
+parameters:
+  type: pd-ssd</code></pre>
+            <p class="card-text">Users request dynamically provisioned storage by including a storage class in their <code>PersistentVolumeClaim</code>. When this claim is deleted, the volume gets destroyed.</p>
+<pre><code class="yaml">apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: claim1
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: fast
+  resources:
+    requests:
+      storage: 30Gi</code></pre>
+            <p class="card-text">Cluster admin can make Claims to use dynamic provisioning by default. This is done by marking a specific StorageClass as default by adding <code>storageclass.kubernetes.io/is-default-class</code> annotation to it.</p>
         </div>
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/concepts/storage/dynamic-provisioning/">Dynamic Volume Provisioning</a>
         </div>
     </div>
 
-    <div class="card mb-4" id="kubernetes-19">
+    <div class="card mb-4" id="kubernetes-18">
         <div class="card-body">
-            <h2 class="card-title">19. Storage Capacity</h2>
+            <h2 class="card-title">18. Storage Capacity</h2>
         </div>
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/concepts/storage/storage-capacity/">Storage Capacity</a>
         </div>
     </div>
 
-    <div class="card mb-4" id="kubernetes-14">
+    <div class="card mb-4" id="kubernetes-19">
         <div class="card-body">
-            <h2 class="card-title">20. Ephemeral Volumes</h2>
+            <h2 class="card-title">19. Ephemeral Volumes</h2>
         </div>
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/">Ephemeral Volumes</a>
