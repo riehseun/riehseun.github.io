@@ -1300,7 +1300,95 @@ spec:
     <div class="card mb-4" id="kubernetes-18">
         <div class="card-body">
             <h2 class="card-title">18. ConfigMap</h2>
-            <p class="card-text">Provides configuration data, which is separate from application code</p>
+            <p class="card-text">Provides configuration data, which is separate from application code. Data stored in configMap cannot exceed 1MB.</p>
+            <h3 class="card-title">ConfigMap and Pod</h3>
+            <p class="card-text">ConfigMap and Pod must be in the same namespace. There are four ways to use ConfigMap.</p>
+            <ul>
+                <li>Container commands (and args)</li>
+                <li>Environment variables</li>
+                <li>Add a file in read-only volume</li>
+                <li>Code inside Pod that uses K8s API to read ConfigMap</li>
+            </ul>
+<pre><code class="yaml">apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: game-demo
+data:
+  # property-like keys; each key maps to a simple value
+  player_initial_lives: "3"
+  ui_properties_file_name: "user-interface.properties"
+
+  # file-like keys
+  game.properties: |
+    enemy.types=aliens,monsters
+    player.maximum-lives=5
+  user-interface.properties: |
+    color.good=purple
+    color.bad=yellow
+    allow.textmode=true</code></pre>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: configmap-demo-pod
+spec:
+  containers:
+    - name: demo
+      image: alpine
+      command: ["sleep", "3600"]
+      env:
+        # Define the environment variable
+        - name: PLAYER_INITIAL_LIVES # Notice that the case is different here
+                                     # from the key name in the ConfigMap.
+          valueFrom:
+            configMapKeyRef:
+              name: game-demo           # The ConfigMap this value comes from.
+              key: player_initial_lives # The key to fetch.
+        - name: UI_PROPERTIES_FILE_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: game-demo
+              key: ui_properties_file_name
+      volumeMounts:
+      - name: config
+        mountPath: "/config"
+        readOnly: true
+  volumes:
+    # You set volumes at the Pod level, then mount them into containers inside that Pod
+    - name: config
+      configMap:
+        # Provide the name of the ConfigMap you want to mount.
+        name: game-demo
+        # An array of keys from the ConfigMap to create as files
+        items:
+        - key: "game.properties"
+          path: "game.properties"
+        - key: "user-interface.properties"
+          path: "user-interface.properties"</code></pre>
+
+        <h3 class="card-title">Using ConfigMap as file</h3>
+        <ul>
+            <li>Create a ConfigMap</li>
+            <li>Update Pod to add a volume under <code>.spec.volumes[]</code> whose name can be anything. Make this field <code>spec.volumes[].configMap.name</code> reference ConfigMap object.</li>
+            <li>Add <code>.spec.containers[].volumeMounts[]</code> to each container that needs configMap. Set <code>.spec.containers[].volumeMounts[].readOnly = true</code>. Specify <code>.spec.containers[].volumeMounts[].mountPath</code> to your ConfigMap location.</li>
+            <li>Look for ConfigMap from the image. Each key in ConfigMap <code>data</code> becomes filename under <code>mountPath</code></li>
+        </ul>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  containers:
+  - name: mypod
+    image: redis
+    volumeMounts:
+    - name: foo
+      mountPath: "/etc/foo"
+      readOnly: true
+  volumes:
+  - name: foo
+    configMap:
+      name: myconfigmap</code></pre>
+
         </div>
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a>
