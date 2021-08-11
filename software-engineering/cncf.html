@@ -91,6 +91,8 @@
                 <li><a href="#kubernetes-16">16. Volume Snapshots</a></li>
                 <li><a href="#kubernetes-17">17. Dynamic Volume Provisioning</a></li>
                 <li><a href="#kubernetes-18">18. ConfigMap</a></li>
+                <li><a href="#kubernetes-19">19. SecurityContext</a></li>
+                <li><a href="#kubernetes-20">20. Application Resource Requirement</a></li>
 
                 <!-- <li><a href="#kubernetes-11">11. SecurityContext</a></li>
                 <li><a href="#kubernetes-12">12. Managing Resources for Containers</a></li>
@@ -1367,10 +1369,10 @@ spec:
 
         <h3 class="card-title">Using ConfigMap as file</h3>
         <ul>
-            <li>Create a ConfigMap</li>
+            <li>Create a ConfigMap.</li>
             <li>Update Pod to add a volume under <code>.spec.volumes[]</code> whose name can be anything. Make this field <code>spec.volumes[].configMap.name</code> reference ConfigMap object.</li>
             <li>Add <code>.spec.containers[].volumeMounts[]</code> to each container that needs configMap. Set <code>.spec.containers[].volumeMounts[].readOnly = true</code>. Specify <code>.spec.containers[].volumeMounts[].mountPath</code> to your ConfigMap location.</li>
-            <li>Look for ConfigMap from the image. Each key in ConfigMap <code>data</code> becomes filename under <code>mountPath</code></li>
+            <li>Look for ConfigMap from the image. Each key in ConfigMap <code>data</code> becomes filename under <code>mountPath</code>.</li>
         </ul>
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
@@ -1395,20 +1397,112 @@ spec:
         </div>
     </div>
 
-    <div class="card mb-4" id="kubernetes-">
+    <div class="card mb-4" id="kubernetes-19">
         <div class="card-body">
             <h2 class="card-title">SecurityContext</h2>
-            <p class="card-text"></p>
+            <p class="card-text">Defines provilege and access control for Pod and Container.</p>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: security-context-demo
+spec:
+  securityContext:
+    runAsUser: 1000 # All processes run with user ID 1000 in containers. (if omitted, defaults to root(0))
+    runAsGroup: 3000 # Any file created in containers is owned by user 1000 and group 3000.
+    fsGroup: 2000 # All processes of containers are also part of supplementary group 2000.
+  volumes:
+  - name: sec-ctx-vol
+    emptyDir: {}
+  containers:
+  - name: sec-ctx-demo
+    image: busybox
+    command: [ "sh", "-c", "sleep 1h" ]
+    volumeMounts:
+    - name: sec-ctx-vol
+      mountPath: /data/demo
+    securityContext:
+      allowPrivilegeEscalation: false</code></pre>
+
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: security-context-demo-2
+spec:
+  securityContext:
+    runAsUser: 1000
+  containers:
+  - name: sec-ctx-demo-2
+    image: gcr.io/google-samples/node-hello:1.0
+    securityContext:
+      runAsUser: 2000 # This overrides setting made at Pod level.
+      allowPrivilegeEscalation: false</code></pre>
+
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: security-context-demo-4
+spec:
+  containers:
+  - name: sec-ctx-4
+    image: gcr.io/google-samples/node-hello:1.0
+    securityContext:
+      capabilities:
+        add: ["NET_ADMIN", "SYS_TIME"] # Linux capabilities.</code></pre>
+
         </div>
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/tasks/configure-pod-container/security-context/">Configure a Security Context for a Pod or Container</a>
         </div>
     </div>
 
-    <div class="card mb-4" id="kubernetes-">
+    <div class="card mb-4" id="kubernetes-20">
         <div class="card-body">
             <h2 class="card-title">Application Resource Requirement</h2>
-            <p class="card-text"></p>
+            <p class="card-text"><code>Mib</code> indicates the momory size based on 2's power.</p>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: memory-demo
+  namespace: mem-example
+spec:
+  containers:
+  - name: memory-demo-ctr
+    image: polinux/stress
+    resources:
+      limits:
+        memory: "200Mi" # Containers cannot exceed this.
+      requests:
+        memory: "100Mi" # Containers are gunaranteed to have this much.
+    command: ["stress"]
+    args: ["--vm", "1", "--vm-bytes", "150M", "--vm-hang", "1"] # Attempt to allocate 150MiB of memory. Containers can exceed the memory requests as long as Node has memory available.</code></pre>
+            <p class="card-text">If containers allocate more memory than its limit, they will eventually terminate.</p>
+
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: cpu-demo
+  namespace: cpu-example
+spec:
+  containers:
+  - name: cpu-demo-ctr
+    image: vish/stress
+    resources:
+      limits:
+        cpu: "1"
+      requests:
+        cpu: "0.5"
+    args:
+    - -cpus
+    - "2"</code></pre>
+            <p class="card-text">If specify limit but no request, K8s automatically assigns CPU request that matches the limit.</p>
+
+            <h3 class="card-title">If no CPU/memory limit</h2>
+            <ul>
+                <li>Container can use all the CPU/memory in the Node. (until it invokes OOM killer)</li>
+                <li>Or, container is running in namespace with a default CPU/memory limit.</li>
+            </ul>
+
+
         </div>
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/tasks/configure-pod-container/assign-memory-resource/">Assign Memory Resources to Containers and Pods</a> | <a href="https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/">Assign CPU Resources to Containers and Pods</a>
