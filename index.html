@@ -3604,9 +3604,13 @@ docker run -i -t &lt;Image ID or NAME&gt;:&lt;Tag&gt; /bin/bash # run an image a
 docker stop $(docker ps --latest --quiet) && docker rm $(docker ps -a -f status=exited -q) && docker ps -a # Stop all images, remove all images, and show images
 docker exec -it [container_name] bash # login to the container
 docker exec -it $(docker ps --latest --quiet) bash # login to the latest container
-docker rm $(docker ps -a -f status=exited -q) # remove all exited containers
-docker rmi &lt;Image ID&gt; # remove an image
 docker run -v [dir1]:[dir2] -u 0 -dit [container_name] # map directories
+
+docker rm -f $(docker ps -a -q) # remove all exited containers
+docker rm -vf $(docker ps -a -q) # remove all exited containers including its volumes
+
+docker rmi &lt;Image ID&gt; # remove an image
+docker rmi -f $(docker images -a -q) # remove all images
 
 --publish 80:8080 # flag to map container port to host port
 
