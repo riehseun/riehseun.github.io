@@ -1550,9 +1550,71 @@ spec:
                 </tr>
             </table>
 
-            <h3 class="card-title">Opaque secrets</h3>
+            <h3 class="card-title">Opaque Secret</h3>
 <pre><code class="yaml">kubectl create secret generic empty-secret
 kubectl get secret empty-secret</code></pre>
+            <h3 class="card-title">Service account token Secret</h3>
+<pre><code class="yaml">apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-sa-sample
+  annotations:
+    kubernetes.io/service-account.name: "sa-name" # Existing service account name
+type: kubernetes.io/service-account-token
+data:
+  # You can include additional key value pairs as you do with Opaque Secrets
+  extra: YmFyCg==</code></pre>
+
+            <h3 class="card-title">Docker config Secret</h3>
+            <p class="card-text">~/.dockercfg is legacy, ~/.docker/config.json is the new format.</p>
+<pre><code class="yaml">apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-dockercfg
+type: kubernetes.io/dockercfg
+data:
+  .dockercfg: | # This would be ".dockerconfigjson" for ~/.docker/config.json
+        "&lt;base64 encoded ~/.dockercfg file&gt;" # Or &lt;base64 encoded ~/.docker/config.json&gt;</code></pre>
+
+            <h3 class="card-title">Basic authentication Secret</h3>
+            <p class="card-text">~/.dockercfg is legacy, ~/.docker/config.json is the new format.</p>
+<pre><code class="yaml">apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-basic-auth
+type: kubernetes.io/basic-auth
+stringData:
+  username: admin
+  password: t0p-Secret</code></pre>
+
+            <h3 class="card-title">SSH authentication Secret</h3>
+<pre><code class="yaml">apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-ssh-auth
+type: kubernetes.io/ssh-auth
+data:
+  # the data is abbreviated in this example
+  ssh-privatekey: |
+          MIIEpQIBAAKCAQEAulqb/Y ...</code></pre>
+
+          <h3 class="card-title">TLS secrets</h3>
+<pre><code class="yaml">apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-tls
+type: kubernetes.io/tls
+data:
+  # the data is abbreviated in this example
+  tls.crt: |
+        MIIC2DCCAcCgAwIBAgIBATANBgkqh ...
+  tls.key: |
+        MIIEpgIBAAKCAQEA7yn3bRHQ5FHMQ ...</code></pre>
+
+        <h3 class="card-title">Editing a Secrets</h3>
+<pre><code class="yaml">kubectl edit secrets mysecret</code></pre>
+
+
 
         </div>
         <div class="card-footer text-muted">
