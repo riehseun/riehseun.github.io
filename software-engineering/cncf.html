@@ -93,6 +93,8 @@
                 <li><a href="#kubernetes-18">18. ConfigMap</a></li>
                 <li><a href="#kubernetes-19">19. SecurityContext</a></li>
                 <li><a href="#kubernetes-20">20. Application Resource Requirement</a></li>
+                <li><a href="#kubernetes-21">21. Secret</a></li>
+                <li><a href="#kubernetes-22">22. Service Account</a></li>
 
                 <!-- <li><a href="#kubernetes-11">11. SecurityContext</a></li>
                 <li><a href="#kubernetes-12">12. Managing Resources for Containers</a></li>
@@ -1509,7 +1511,7 @@ spec:
         </div>
     </div>
 
-    <div class="card mb-4" id="kubernetes-">
+    <div class="card mb-4" id="kubernetes-21">
         <div class="card-body">
             <h2 class="card-title">Secret</h2>
             <p class="card-text">Similar to ConfigMap but specifically for confidential data. Secret can be used in three ways.</p>
@@ -1683,10 +1685,38 @@ immutable: true</code></pre>
         </div>
     </div>
 
-    <div class="card mb-4" id="kubernetes-">
+    <div class="card mb-4" id="kubernetes-22">
         <div class="card-body">
-            <h2 class="card-title">ServiceAccount</h2>
-            <p class="card-text"></p>
+            <h2 class="card-title">Service Account</h2>
+            <p class="card-text">When creating Pod, when service account is not specified, it is automatically assigned <code>default</code> service account in the same namespace.</p>
+
+            <p class="card-text">Opt-out of automatic service account assignment.</h3>
+<pre><code class="yaml">apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: build-robot
+automountServiceAccountToken: false
+...</code></pre>
+
+            <p class="card-text">Opt-out of automatic service account assignment for a specific Pod.</h3>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  serviceAccountName: build-robot
+  automountServiceAccountToken: false
+  ...</code></pre>
+
+            <p class="card-text">Manually create service account API token.</h3>
+<pre><code class="yaml">apiVersion: v1
+kind: Secret
+metadata:
+  name: build-robot-secret
+  annotations:
+    kubernetes.io/service-account.name: build-robot
+type: kubernetes.io/service-account-token</code></pre>
+
         </div>
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/">Configure Service Accounts for Pods</a>
