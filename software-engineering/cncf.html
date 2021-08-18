@@ -96,9 +96,9 @@
                 <li><a href="#kubernetes-21">21. Secret</a></li>
                 <li><a href="#kubernetes-22">22. Service Account</a></li>
                 <li><a href="#kubernetes-23">23. LivenesProbe and ReadinessProbe</a></li>
-                <li><a href="#kubernetes-24">24. </a></li>
-                <li><a href="#kubernetes-25">25. </a></li>
-                <li><a href="#kubernetes-26">26. </a></li>
+                <li><a href="#kubernetes-24">24. Container logging</a></li>
+                <li><a href="#kubernetes-25">25. Monitoring</a></li>
+                <li><a href="#kubernetes-26">26. Application inspection and debugging</a></li>
                 <li><a href="#kubernetes-27">27. </a></li>
                 <li><a href="#kubernetes-28">28. </a></li>
                 <li><a href="#kubernetes-29">29. </a></li>
@@ -1783,9 +1783,9 @@ spec:
         </div>
     </div>
 
-    <div class="card mb-4" id="kubernetes-">
+    <div class="card mb-4" id="kubernetes-24">
         <div class="card-body">
-            <h2 class="card-title">Container logging</h2>
+            <h2 class="card-title">24. Container logging</h2>
             <h3 class="card-title">Pod with two sidecar containers</h3>
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
@@ -1902,19 +1902,70 @@ spec:
         </div>
     </div>
 
-    <div class="card mb-4" id="kubernetes-">
+    <div class="card mb-4" id="kubernetes-25">
         <div class="card-body">
-            <h2 class="card-title">Monitoring</h2>
-            <p class="card-text"></p>
+            <h2 class="card-title">25. Monitoring</h2>
+            <h3 class="card-title">Enable Node Problem Detector</h3>
+
+<pre><code class="yaml">apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-problem-detector-v0.1
+  namespace: kube-system
+  labels:
+    k8s-app: node-problem-detector
+    version: v0.1
+    kubernetes.io/cluster-service: "true"
+spec:
+  selector:
+    matchLabels:
+      k8s-app: node-problem-detector
+      version: v0.1
+      kubernetes.io/cluster-service: "true"
+  template:
+    metadata:
+      labels:
+        k8s-app: node-problem-detector
+        version: v0.1
+        kubernetes.io/cluster-service: "true"
+    spec:
+      hostNetwork: true
+      containers:
+      - name: node-problem-detector
+        image: k8s.gcr.io/node-problem-detector:v0.1
+        securityContext:
+          privileged: true
+        resources:
+          limits:
+            cpu: "200m"
+            memory: "100Mi"
+          requests:
+            cpu: "20m"
+            memory: "20Mi"
+        volumeMounts:
+        - name: log
+          mountPath: /log
+          readOnly: true
+        - name: config # Overwrite the config/ directory with ConfigMap volume
+          mountPath: /config
+          readOnly: true
+      volumes:
+      - name: log
+        hostPath:
+          path: /var/log/
+      - name: config # Define ConfigMap volume
+        configMap:
+          name: node-problem-detector-config</code></pre>
+
         </div>
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/monitor-node-health/">Monitor Node Health</a>
         </div>
     </div>
 
-    <div class="card mb-4" id="kubernetes-">
+    <div class="card mb-4" id="kubernetes-26">
         <div class="card-body">
-            <h2 class="card-title">Application inspection and debugging</h2>
+            <h2 class="card-title">26. Application inspection and debugging</h2>
             <p class="card-text"></p>
         </div>
         <div class="card-footer text-muted">
