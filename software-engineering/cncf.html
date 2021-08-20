@@ -1966,7 +1966,55 @@ spec:
     <div class="card mb-4" id="kubernetes-26">
         <div class="card-body">
             <h2 class="card-title">26. Application inspection and debugging</h2>
-            <p class="card-text"></p>
+<pre><code class="bash">kubectl get pods
+kubectl get pod &lt;POD-NAME&gt; -o yaml
+kubectl describe pod &lt;POD-NAME&gt;
+kubectl get events
+kubectl get events --namespace=&lt;MY-NAMESPACE&gt;
+kubectl get nodes
+kubectl describe node &lt;NODE-NAME&gt;
+kubectl get node &lt;NODE-NAME&gt; -o yaml</code></pre>
+
+            <h3 class="card-title">List all the pods which belong to a StatefulSet, which have a label app=myapp.</h3>
+<pre><code class="bash">kubectl get pods -l app=myapp</code></pre>
+
+            <h3 class="card-title">Debug init container.</h3>
+<pre><code class="bash">kubectl get pod nginx --template '{{.status.initContainerStatuses}}'
+kubectl logs &lt;POD-NAME&gt; -c &lt;INIT-CONTAINER-NAME&gt;</code></pre>
+
+            <h3 class="card-title">Check node capacity.</h3>
+<pre><code class="bash">kubectl get nodes -o yaml | egrep '\sname:|cpu:|memory:'
+kubectl get nodes -o json | jq '.items[] | {name: .metadata.name, cap: .status.capacity}'</code></pre>
+
+            <h3 class="card-title">Examine pod log.</h3>
+<pre><code class="bash">kubectl logs &lt;POD-NAME&gt; &lt;CONTAINER-NAME&gt;
+# If container has previously crashed.
+kubectl logs --previous &lt;POD-NAME&gt; &lt;CONTAINER-NAME&gt;</code></pre>
+
+            <h3 class="card-title">Debug running Pod.</h3>
+<pre><code class="bash">kubectl exec &lt;POD-NAME&gt; -- cat /path/to/log/your_log.log
+kubectl exec -it &lt;POD-NAME&gt; -- sh</code></pre>
+
+            <h3 class="card-title">Debug using ephemeral container.</h3>
+<pre><code class="bash">kubectl run &lt;POD-NAME&gt; --image=&lt;IMAGE-NAME-TO-PULL-FOR-THIS-POD&gt; --restart=Never
+# Add debug container
+kubectl debug -it &lt;POD-NAME&gt; --image=&lt;IMAGE-NAME&gt; --target=&lt;POD-NAME&gt;</code></pre>
+
+            <h3 class="card-title">Debug using copy of Pod.</h3>
+<pre><code class="bash">kubectl run &lt;POD-NAME&gt; --image=&lt;IMAGE-NAME&gt; --restart=Never -- sleep 1d
+kubectl debug &lt;POD-NAME&gt; -it --image=&lt;NEW-CONTAINER-NAME-FOR-DEBUGGING&gt; --share-processes --copy-to=&lt;POD-NAME&gt;-debug</code></pre>
+
+            <h3 class="card-title">Copying Pod while changing its command.</h3>
+<pre><code class="bash">kubectl run --image=&lt;IMAGE-NAME&gt; &lt;POD-NAME&gt; -- false
+kubectl debug &lt;POD-NAME&gt; -it --copy-to=&lt;POD-NAME&gt; -debug --container=&lt;POD-NAME&gt;-- sh</code></pre>
+
+            <h3 class="card-title">Copying Pod while changing container image.</h3>
+<pre><code class="bash">kubectl run &lt;POD-NAME&gt; --image=&lt;IMAGE-NAME&gt; --restart=Never -- sleep 1d
+kubectl debug &lt;POD-NAME&gt; --copy-to=&lt;POD-NAME&gt;-debug --set-image=*=&lt;IMAGE-NAME&gt;</code></pre>
+
+            <h3 class="card-title">Debug via shell on Node.</h3>
+<pre><code class="bash">kubectl debug node/mynode -it --image=&lt;IMAGE-NAME&gt;</code></pre>
+
         </div>
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-application-introspection/">Application Introspection and Debugging | <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-stateful-set/">Debug a StatefulSet</a> | <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-init-containers/">Debug Init Containers</a> | <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-pod-replication-controller/">Debug Pods and ReplicationControllers</a> | <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-running-pod/">Debug Running Pods</a> | <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-service/">Debug Services</a> | <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/determine-reason-pod-failure/">Determine the Reason for Pod Failure</a>
