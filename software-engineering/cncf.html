@@ -1997,7 +1997,7 @@ kubectl exec -it &lt;POD-NAME&gt; -- sh</code></pre>
 
             <h3 class="card-title">Debug using ephemeral container.</h3>
 <pre><code class="bash">kubectl run &lt;POD-NAME&gt; --image=&lt;IMAGE-NAME-TO-PULL-FOR-THIS-POD&gt; --restart=Never
-# Add debug container
+# Add debug container.
 kubectl debug -it &lt;POD-NAME&gt; --image=&lt;IMAGE-NAME&gt; --target=&lt;POD-NAME&gt;</code></pre>
 
             <h3 class="card-title">Debug using copy of Pod.</h3>
@@ -2014,6 +2014,36 @@ kubectl debug &lt;POD-NAME&gt; --copy-to=&lt;POD-NAME&gt;-debug --set-image=*=&l
 
             <h3 class="card-title">Debug via shell on Node.</h3>
 <pre><code class="bash">kubectl debug node/mynode -it --image=&lt;IMAGE-NAME&gt;</code></pre>
+
+            <h3 class="card-title">Debug Deployment</h3>
+<pre><code class="bash"># Create Deployment.
+kubectl create deployment &lt;DEPLOYMENT-NAME&gt;
+# Scale Deployment to 3 replicas.
+kubectl scale deployment &lt;DEPLOYMENT-NAME&gt; --replicas=3
+# Confirm Pods are running.
+kubectl get pods -l &lt;DEPLOYMENT-NAME&gt;
+# Get list of Pod IP addresses.
+kubectl get pods -l &lt;DEPLOYMENT-NAME&gt; -o go-template='{{range .items}}{{.status.podIP}}{{"\n"}}{{end}}'</code></pre>
+
+            <h3 class="card-title">Debug Service</h3>
+<pre><code class="bash"># From Pod within the same namespace.
+nslookup &lt;SERVICE-NAME&gt;
+nslookup &lt;SERVICE-NAME&gt;.default
+nslookup &lt;SERVICE-NAME&gt;.default.svc.cluster.local
+# Within the Pod, check.
+cat /etc/resolv.conf
+nslookup kubernetes.default
+# Within the Node.
+nslookup &lt;SERVICE-NAME&gt;.default.svc.cluster.local &lt;CLUSTER-DNS-SERVICE-IP&gt;
+# Check if Service is defined correctly.
+kubectl get service &lt;SERVICE-NAME&gt; -o json
+# Check if Service has endpoint.
+kubectl get pods -l app=&lt;SERVICE-NAME&gt;
+# Check if kube-proxy is running.
+ps auxw | grep kube-proxy</code></pre>
+
+            <h3 class="card-title">Determin reasons for Pod failure</h3>
+<pre><code class="bash">kubectl get pod termination-demo -o go-template="{{range .status.containerStatuses}}{{.lastState.terminated.message}}{{end}}"</code></pre>
 
         </div>
         <div class="card-footer text-muted">
