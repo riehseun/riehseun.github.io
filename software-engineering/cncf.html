@@ -99,7 +99,7 @@
                 <li><a href="#kubernetes-24">24. Container logging</a></li>
                 <li><a href="#kubernetes-25">25. Monitoring</a></li>
                 <li><a href="#kubernetes-26">26. Application inspection and debugging</a></li>
-                <li><a href="#kubernetes-27">27. </a></li>
+                <li><a href="#kubernetes-27">27. Service</a></li>
                 <li><a href="#kubernetes-28">28. </a></li>
                 <li><a href="#kubernetes-29">29. </a></li>
                 <li><a href="#kubernetes-30">30. </a></li>
@@ -2051,10 +2051,40 @@ ps auxw | grep kube-proxy</code></pre>
         </div>
     </div>
 
-    <div class="card mb-4" id="kubernetes-">
+    <div class="card mb-4" id="kubernetes-27">
         <div class="card-body">
-            <h2 class="card-title">Service</h2>
-            <p class="card-text"></p>
+            <h2 class="card-title">27. Service</h2>
+            <p class="card-text">Service is an abstraction for logical set of Pods. The set of Pods targeted by Service is determined by selector.</p>
+<pre><code class="yaml"># Suppose there are Pods where each of them listens to port 9376 and has label "app=MyApp".
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  selector:
+    app: MyApp
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 9376
+# Service named "my-service" targets TCP port 9376 on any Pod with label "app=MyApp".</code></pre>
+
+            <h3 class="card-title">Service without selectors</h3>
+            <ul>
+                <li>Ex. External database in production, but your own database in test environment.</li>
+                <li>Ex. Point Service to another Service in different namespace.</li>
+            </ul>
+<pre><code class="yaml">apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 9376
+# Service needs to be manually mapped to network address and port</code></pre>
+
         </div>
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/concepts/services-networking/service/">Service</a>
