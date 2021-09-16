@@ -100,7 +100,7 @@
                 <li><a href="#kubernetes-25">25. Monitoring</a></li>
                 <li><a href="#kubernetes-26">26. Application inspection and debugging</a></li>
                 <li><a href="#kubernetes-27">27. Service</a></li>
-                <li><a href="#kubernetes-28">28. </a></li>
+                <li><a href="#kubernetes-28">28. Connecting Applications with Services</a></li>
                 <li><a href="#kubernetes-29">29. </a></li>
                 <li><a href="#kubernetes-30">30. </a></li>
 
@@ -2086,6 +2086,50 @@ spec:
 # Service needs to be manually mapped to network address and port</code></pre>
 
             <h3 class="card-title">Virtual IPs and service proxies</h3>
+            <p class="card-text">Every Node runs <code>kube-proxy</code>, which implementes virtual IP. ConfigMap is used to configure <code>kube-proxy</code>.</p>
+            <h4 class="card-title">iptables proxy mode</h4>
+            <p class="card-text"><code>kube-proxy</code> watches for Kubernetes control plane for addition and removal of Service and Endpoint objects. It installs iptable rules and redirect traffics to Service's backend sets (for Service) or backend Pod. (for EndPoint) It chooses backend at random.</p>
+
+            <h3 class="card-title">Publishing Service</h3>
+            <ul>
+                <li><code>ClusterIP</code> is the default <code>ServiceTypes</code>. Expose Service on cluster-internal IP. Service beomes only reachable from within the cluster.</li>
+                <li><code>NodePort</code> exposes Service on each Node's IP at a static port. <code>ClusterIP</code> is automatically created.</li>
+                <li><code>LoadBalancer</code> exposes Service externally using cloud provider's load balancer. <code>ClusterIP</code> and <code>NodePort</code> are automatically created.</li>
+            </ul>
+            <h4 class="card-title">NodePort</h4>
+<pre><code class="yaml">apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  type: NodePort
+  selector:
+    app: MyApp
+  ports:
+      # By default and for convenience, the `targetPort` is set to the same value as the `port` field.
+    - port: 80
+      targetPort: 80
+      # Optional field
+      # By default and for convenience, the Kubernetes control plane will allocate a port from a range (default: 30000-32767)
+      nodePort: 30007</code></pre>
+            <h4 class="card-title">LoadBalancer</h4>
+<pre><code class="yaml">apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  selector:
+    app: MyApp
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 9376
+  clusterIP: 10.0.171.239
+  type: LoadBalancer
+status:
+  loadBalancer:
+    ingress:
+    - ip: 192.0.2.127</code></pre>
 
         </div>
         <div class="card-footer text-muted">
@@ -2093,20 +2137,10 @@ spec:
         </div>
     </div>
 
-    <div class="card mb-4" id="kubernetes-">
+    <div class="card mb-4" id="kubernetes-28">
         <div class="card-body">
-            <h2 class="card-title">DNS for Services and Pods</h2>
-            <p class="card-text"></p>
-        </div>
-        <div class="card-footer text-muted">
-            Reference: <a href="https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/">Service</a>
-        </div>
-    </div>
-
-    <div class="card mb-4" id="kubernetes-">
-        <div class="card-body">
-            <h2 class="card-title">Connecting Applications with Services</h2>
-            <p class="card-text"></p>
+            <h2 class="card-title">28. Connecting Applications with Services</h2>
+            <p class="card-text">Docker: containers can talk to other containers only if they are on the same machine. Containers must be allowed ports on machine's own IP address. Kubernetes: Pods can talk to other Pods regardless of Nodes. Every Pod gets cluster-private IP address and all Pods in a cluster can see each other.</p>
         </div>
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/concepts/services-networking/connect-applications-service/">Connecting Applications with Services</a>
