@@ -101,7 +101,7 @@
                 <li><a href="#kubernetes-26">26. Application inspection and debugging</a></li>
                 <li><a href="#kubernetes-27">27. Service</a></li>
                 <li><a href="#kubernetes-28">28. Connecting Applications with Services</a></li>
-                <li><a href="#kubernetes-29">29. </a></li>
+                <li><a href="#kubernetes-29">29. Network Policies</a></li>
                 <li><a href="#kubernetes-30">30. </a></li>
 
             </ul>
@@ -2146,16 +2146,219 @@ status:
             <p class="card-text">There is a DNS cluster addon Service that automatically assigns DNS names to other Services.</p>
 <pre><code class="bash">kubectl get services kube-dns --namespace=kube-system</code></pre>
 
+            <h3 class="card-title">Securing the Service</h3>
+<pre><code class="bash"># Create a public private key pair
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /d/tmp/nginx.key -out /d/tmp/nginx.crt -subj "/CN=my-nginx/O=my-nginx"
+# Convert the keys to base64 encoding
+cat /d/tmp/nginx.crt | base64
+cat /d/tmp/nginx.key | base64
+
+make keys KEY=/tmp/nginx.key CERT=/tmp/nginx.crt
+kubectl create secret tls nginxsecret --key /tmp/nginx.key --cert /tmp/nginx.crt
+kubectl create configmap nginxconfigmap --from-file=default.conf</code></pre>
+<pre><code class="yaml">apiVersion: "v1"
+kind: "Secret"
+metadata:
+  name: "nginxsecret"
+  namespace: "default"
+type: kubernetes.io/tls
+data:
+  tls.crt: &lt;encrypted key output from above&gt;
+  tls.key: &lt;encrypted key output from above&gt;</code></pre>
+<pre><code class="yaml">apiVersion: v1
+kind: Service
+metadata:
+  name: my-nginx
+  labels:
+    run: my-nginx
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    targetPort: 80
+    protocol: TCP
+    name: http
+  - port: 443
+    protocol: TCP
+    name: https
+  selector:
+    run: my-nginx
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-nginx
+spec:
+  selector:
+    matchLabels:
+      run: my-nginx
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: my-nginx
+    spec:
+      volumes:
+      - name: secret-volume
+        secret:
+          secretName: nginxsecret
+      - name: configmap-volume
+        configMap:
+          name: nginxconfigmap
+      containers:
+      - name: nginxhttps
+        image: bprashanth/nginxhttps:1.0
+        ports:
+        - containerPort: 443
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: /etc/nginx/ssl
+          name: secret-volume
+        - mountPath: /etc/nginx/conf.d
+          name: configmap-volume</code></pre>
+
+            <p class="card-text">Can reach the nginx server from any node.</p>
+<pre><code class="bash">kubectl get pods -o yaml | grep -i podip
+    podIP: 10.244.3.5
+node $ curl -k https://10.244.3.5
+...
+&lt;h1&gt;Welcome to nginx!&lt;/h1&gt;</code></pre>
+
+            <p class="card-text">Setup Pod such that</p>
+<pre><code class="yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: curl-deployment
+spec:
+  selector:
+    matchLabels:
+      app: curlpod
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: curlpod
+    spec:
+      volumes:
+      - name: secret-volume
+        secret:
+          secretName: nginxsecret
+      containers:
+      - name: curlpod
+        command:
+        - sh
+        - -c
+        - while true; do sleep 1; done
+        image: radial/busyboxplus:curl
+        volumeMounts:
+        - mountPath: /etc/nginx/ssl
+          name: secret-volume</code></pre>
+
         </div>
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/concepts/services-networking/connect-applications-service/">Connecting Applications with Services</a>
         </div>
     </div>
 
-    <div class="card mb-4" id="kubernetes-">
+    <div class="card mb-4" id="kubernetes-29">
         <div class="card-body">
             <h2 class="card-title">Network Policies</h2>
-            <p class="card-text"></p>
+            <p class="card-text">Pods are non-isolated by default and accept traffics from any source. Pods become isolated by Network Policy; they reject any connections that are not allowed by any NetworkPolicy.</p>
+<pre><code class="yaml">apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: test-network-policy
+  namespace: default
+spec:
+  podSelector: # Empty podSelector selects all pods in the namespace.
+    matchLabels:
+      role: db # Selects pods with the label "role=db"
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - ipBlock:
+        cidr: 172.17.0.0/16
+        except:
+        - 172.17.1.0/24
+    - namespaceSelector:
+        matchLabels:
+          project: myproject
+    - podSelector:
+        matchLabels:
+          role: frontend
+    ports:
+    - protocol: TCP
+      port: 6379
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 10.0.0.0/24
+    ports:
+    - protocol: TCP
+      port: 5978</code></pre>
+
+            <h3 class="card-title">Default deny all ingress traffic</h3>
+<pre><code class="yaml">---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress</code></pre>
+
+            <h3 class="card-title">Default allow all ingress traffic</h3>
+<pre><code class="yaml">---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-all-ingress
+spec:
+  podSelector: {}
+  ingress:
+  - {}
+  policyTypes:
+  - Ingress</code></pre>
+
+            <h3 class="card-title">Default deny all egress traffic</h3>
+<pre><code class="yaml">---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-egress
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress</code></pre>
+
+            <h3 class="card-title">Default allow all egress traffic</h3>
+<pre><code class="yaml">---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-all-egress
+spec:
+  podSelector: {}
+  egress:
+  - {}
+  policyTypes:
+  - Egress</code></pre>
+
+            <h3 class="card-title">Default allow all egress traffic</h3>
+<pre><code class="yaml">---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress</code></pre>
+
         </div>
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/concepts/services-networking/network-policies/">Network Policies</a>
