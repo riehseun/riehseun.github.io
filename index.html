@@ -4168,15 +4168,14 @@ app: jenkins</code></pre>
             <h2 class="card-title">Linux</h2>
             <p class="card-text"></p>
             <ul class="list-unstyled mb-0">
-                <li><a href="#linux-1">1. CD Command</a></li>
-                <li><a href="#linux-2">2. Date</a></li>
-                <li><a href="#linux-3">3. SSH</a></li>
-                <li><a href="#linux-4">4. Linux</a></li>
+                <li><a href="#linux-1">1. Linux and shell Scripting</a></li>
+                <li><a href="#linux-2">2. CD Command</a></li>
+                <li><a href="#linux-3">3. Date</a></li>
+                <li><a href="#linux-4">4. SSH</a></li>
                 <li><a href="#linux-5">5. PS</a></li>
                 <li><a href="#linux-6">6. Archive</a></li>
                 <li><a href="#linux-7">7. Administration</a></li>
                 <li><a href="#linux-8">8. System</a></li>
-                <li><a href="#linux-9">9. Shell Scripting</a></li>
                 <li><a href="#linux-10">10. Color</a></li>
                 <li><a href="#linux-11">11. Python Integration</a></li>
                 <li><a href="#linux-12">12. Cron</a></li>
@@ -4190,34 +4189,263 @@ app: jenkins</code></pre>
     <div class="card mb-4" id="linux-1">
         <div class="card-body">
 
-            <h2 class="card-title">1. CD Command</h2>
-            <p class="card-text">1.1. CDPATH</p>
+            <h2 class="card-title">1. Linux and shell Scripting</h2>
+
+            <p class="card-text">1.1. Function</p>
+<pre><code class="bash"># $1, $2, $3, so on are used to read in arguments passed to shell script and functions.
+function &lt;function_name&gt;() {
+    local &lt;argument1&gt;=$1
+    local &lt;argument2&gt;=$2
+    local &lt;argument3&gt;=$3
+    ...
+
+    echo &lt;ret_val&gt; # This is the return statement.
+
+    exit 1 # This exits the script execution.
+}</code></pre>
+
+            <p class="card-text">1.2. Read user inputs</p>
+<pre><code class="bash">read USER_INPUT1 ; export USER_INPUT1
+read -s USER_INPUT1 ; export USER_INPUT1 # Makes echoing user input unavailable.</code></pre>
+
+            <p class="card-text">1.3. Suppress output of push and pop commands</p>
+<pre><code class="bash">pushd () {
+    command pushd "$@" > /dev/null
+}
+
+popd () {
+    command pushd "$@" > /dev/null
+}
+
+# Suppress output or error.
+cat file.txt > /dev/null # suppress output
+cat invalid-file-name.txt 2> /dev/null # suppress error</code></pre>
+
+            <p class="card-text">1.4. Curl</p>
+<pre><code class="bash"># Options
+# v – verbose output
+# s – suppress output
+# u - to pass in credentials
+# o – to write output to a destination
+# w '%{http_code}' – to get the http status code
+curl [options] [URL] -X [GET/POST/PUT/DELETE] -H [Headers] -d [Data]
+
+# Posting a JSON data.
+echo $JSON_DATA | curl [options] [URL] -X [GET/POST/PUT/DELETE] -H [Headers] -d @-
+curl [options] [URL] -X [GET/POST/PUT/DELETE] -H [Headers] -d'{ "field": "value" }'
+
+# Constructing JSON payload.
+curl -u $username:$password -X POST "$url/$path" \
+--data-urlencode 'json={
+    "": "0",
+    "field": {
+        "field1": "'$value1'",
+        "field2": "'$value2'",
+        "field3": "'$value3'"
+    }
+}' -H "field: $value"</code></pre>
+
+            <p class="card-text">1.5. Conditional</p>
+<pre><code class="bash"># Variable equals to an integer 200.
+if [ "$variable" -eq 200 ]; then
+
+fi
+
+# Variable is null.
+if [ -z "$variable" ]; then
+
+fi
+
+# One of two variables is null.
+if [ -z "$var1" -o -z "$var1" ]; then
+
+fi
+
+# Variable equals to a string.
+if [ "$variable" == "string" ]; then
+    # $variable equals string
+fi
+
+# Complex conditions.
+if [[ -z "$variable1" && "variable2" != "something" ]] && [[ "$variable3" == "value1" || "$variable4" == "value2" ]]; then
+
+fi</code></pre>
+
+            <p class="card-text">1.6. Current and parent directory (scripts can execute from different path, so absolute path is needed)</p>
+<pre><code class="bash">CURRENT_DIR=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+PARENT_DIR="$(dirname "$CURRENT_DIR")"</code></pre>
+
+            <p class="card-text">1.7. Loop</p>
+<pre><code class="bash"># Loop through array.
+for i in "${array[@]}"
+do
+    # do something with $i
+done
+
+# Loop through number.
+for i in $(seq 1 $END)
+do
+    echo $i
+done
+
+# Loop through directory.
+for filename in path/*.txt
+do
+    [ -e "$filename" ] || continue
+done</code></pre>
+
+            <p class="card-text">1.8. Array</p>
+<pre><code class="bash"># Declare an array.
+array=("item1" "item2" "item3")
+# Add to an array.
+array+=("item4")
+
+# Assessing array element.
+element=${array[0]}</code></pre>
+
+            <p class="card-text">1.9. File</p>
+<pre><code class="bash"> # Check if file exists.
+if [ ! -f /path/file ]
+then
+    echo "File does not exist"
+fi
+
+# Check if a string exists in a file.
+if grep -Fxq "$string" $file
+then
+    # String found
+else
+    # String not found
+fi</code></pre>
+
+            <p class="card-text">1.10. sed</p>
+<pre><code class="bash"># Match pattern and update in place.
+sed -i "s/string_to_match/string_to_replace_with/"
+
+# Add a line after a match.
+sed -i "/string_to_match.*/a $string_to_insert/"
+
+# If adding 5 leading spaces to "string_to_insert".
+sed -i "/string_to_match.*/a /    / $string_to_insert/"
+
+# Remove a block of texts from a file.
+sed -i "/begin/./end/d $file</code></pre>
+
+            <p class="card-text">1.11. Sting</p>
+<pre><code class="bash"># Remove two characters from the beginning for the string.
+string=${string:2}
+
+# Remove prefix from a string.
+string=${string#"prefix_to_remove"}
+
+# Remove path from a file.
+string=${string##*/}
+
+# Find and replace.
+${string/$match/$replace}
+
+# Find and replace for all occurance.
+${string//$match/$replace}</code></pre>
+
+            <p class="card-text">1.12. jq</p>
+<pre><code class="bash"># Make JSON output pretty
+echo $json | jq -r '.'
+
+# Sort the JSON fields by key
+echo $json | jq --sort-keys
+
+# Replace values of multiple fields
+echo $json | jq .field1.field2.field3 = value1 | field4.field5.field6 = value2</code></pre>
+
+            <p class="card-text">1.13. yq</p>
+<pre><code class="bash">https://mikefarah.gitbook.io/yq/</code></pre>
+
+            <p class="card-text">1.14. grep</p>
+<pre><code class="bash"># Options
+Use option -v to # Find all except the match
+Use option -c to # Get number of lines with match
+Use option -i to # Ignore case
+Use option -r to # Find matches recursively in files in directory
+grep [options] pattern [files]
+</code></pre>
+
+            <p class="card-text">1.15. find</p>
+<pre><code class="bash">find [pathnames] [conditions]
+
+# Find files containing mail in "/etc".
+find /etc -name "*mail*"
+
+# Find files greater than 100M.
+find / -type f -size +100M
+
+# Find files modified in last two days.
+find . –mtime -2
+
+# List files greater than 100M.
+find / -type f -name *.tar.gz -size +100M -exec ls -l {} \;
+
+# Delete files greater than 100M.
+find / -type f -name *.tar.gz -size +100M -exec rm -f {} \;
+
+# Loop through results from "find".
+find / type -f -name $filename 2> /dev/null | while read line; do
+    # Do something with $line
+done</code></pre>
+
+            <p class="card-text">1.16. Convert uppercase to/from lowercase</p>
+<pre><code class="bash">tr a-z A-Z < file.txt # convert to uppercase
+tr A-Z a-z < file.txt # convert to lowercase</code></pre>
+
+            <p class="card-text">1.17. Cut</p>
+<pre><code class="bash">cut -d: -f 1 file.txt # Display 1st field from colon delimited file
+cut -d: -f 1,3 file.txt # Display 1st and 3rd field from colon delimited file
+cut -d: -f1 /etc/passwd # Displays unix login names for all users in the system
+free | tr -s ' ' | sed '/^Mem/!d' | cut -d" " -f2 # Displays total memory available on the system</code></pre>
+
+            <p class="card-text">1.18. Write a block of texts to a file</p>
+<pre><code class="bash">cat &lt;&lt;EOF&gt;&gt; $file
+{
+    "key": "value"
+}
+EOF</code></pre>
+
+        </div>
+        <div class="card-footer text-muted">
+
+        </div>
+    </div>
+
+    <div class="card mb-4" id="linux-2">
+        <div class="card-body">
+
+            <h2 class="card-title">2. CD Command</h2>
+            <p class="card-text">2.1. CDPATH</p>
 <pre><code class="bash">export CDPATH=/etc
 cd security
 /etc/security</code></pre>
             <p class="card-text">To make this permanent, add "export CDPATH=/etc" to "~/.bash_profile" (also do "source ~/.bash_profile")</p>
 
-            <p class="card-text">1.2. alias</p>
+            <p class="card-text">2.2. alias</p>
 <pre><code class="bash">alias ..5=../../../../../
 cd one/two/three/four/five/six
 cd ..5
 pwd
 one</code></pre>
 
-            <p class="card-text">1.3. mkdircd</p>
+            <p class="card-text">2.3. mkdircd</p>
 <pre><code class="bash">mkdircd /one/two/three
 pwd
 one/two/three</code></pre>
 
-            <p class="card-text">1.4. "cd -" toogle between last two directories </p>
+            <p class="card-text">2.4. "cd -" toogle between last two directories </p>
 
-            <p class="card-text">1.5. "dirs" - display directory stack. "pushd" - push directory into stack. "popd" - pop directory from stack and cd to it</p>
+            <p class="card-text">2.5. "dirs" - display directory stack. "pushd" - push directory into stack. "popd" - pop directory from stack and cd to it</p>
 <pre><code class="bash"># Example: create tmp, do the work, and remove tmp
 mkdir tmp && pushd
 # do some work
 popd && rm -rf tmp</code></pre>
 
-            <p class="card-text">1.6. shopt -s cdspell</p>
+            <p class="card-text">2.6. shopt -s cdspell</p>
 <pre><code class="bash">shopt -s cdspell
 cd /etc/mall
 pwd
@@ -4229,29 +4457,29 @@ pwd
         </div>
     </div>
 
-    <div class="card mb-4" id="linux-2">
+    <div class="card mb-4" id="linux-3">
         <div class="card-body">
 
-            <h2 class="card-title">2. Date</h2>
-            <p class="card-text">2.1. System date and time</p>
+            <h2 class="card-title">3. Date</h2>
+            <p class="card-text">3.1. System date and time</p>
 <pre><code class="bash">date -s "01/31/2009 22:19:53"</code></pre>
 
-            <p class="card-text">2.2. Set hardware date and time based on system date and time</p>
+            <p class="card-text">3.2. Set hardware date and time based on system date and time</p>
 <pre><code class="bash">hwclock --systohc –utc</code></pre>
 
-            <p class="card-text">2.3. Format date and time</p>
+            <p class="card-text">3.3. Format date and time</p>
 <pre><code class="bash">date
 date --date='1970-01-01 00:00:01 UTC +5 hours' +%s
 date '+Current Date: %m/%d/%y%nCurrent Time:%H:%M:%S'
 date +"%d/%m/%Y"
 date +"%A,%B %d %Y"</code></pre>
 
-            <p class="card-text">2.4. Past date and time</p>
+            <p class="card-text">3.4. Past date and time</p>
 <pre><code class="bash">date --date="1 day ago"
 date --date="1 year ago"
 date --date="yesterday"</code></pre>
 
-            <p class="card-text">2.5. Future date and time</p>
+            <p class="card-text">3.5. Future date and time</p>
 <pre><code class="bash">date --date="1 day"
 date --date="1 year"
 date --date="tomorrow"</code></pre>
@@ -4262,72 +4490,29 @@ date --date="tomorrow"</code></pre>
         </div>
     </div>
 
-    <div class="card mb-4" id="linux-3">
+    <div class="card mb-4" id="linux-4">
         <div class="card-body">
 
-            <h2 class="card-title">3. SSH</h2>
-            <p class="card-text">3.1. "ssh -V" : check ssh version</p>
+            <h2 class="card-title">4. SSH</h2>
+            <p class="card-text">4.1. "ssh -V" : check ssh version</p>
 
-            <p class="card-text">3.2. Login to remote</p>
+            <p class="card-text">4.2. Login to remote</p>
 <pre><code class="bash">ssh -l [username] [ip]</code></pre>
 
-            <p class="card-text">3.3. Debug ssh client session</p>
+            <p class="card-text">4.3. Debug ssh client session</p>
 <pre><code class="bash">ssh -v l [username] [ip]</code></pre>
 
-            <p class="card-text">3.4. Creating public and private key pair. First, have <strong>Git</strong> installed in your machine</p>
+            <p class="card-text">4.4. Creating public and private key pair. First, have <strong>Git</strong> installed in your machine</p>
 <pre><code class="bash">ssh-keygen</code></pre>
             <img class="img-fluid" class="card-img-top" src="img/linux/linux-3-a.png" alt="Card image cap" style="max-width:500px">
             <p class="card-text">You can choose to have passphrase as well (which you need to remember when sshing into a remote machine)</p>
             <p class="card-text">Make sure to give 600 to id_rsa and 644 to id_rsa.pub and known_hosts</p>
 
-            <p class="card-title">3.5. Refresh known_hosts</p>
+            <p class="card-title">4.5. Refresh known_hosts</p>
 <pre><code class="bash">ssh-keyscan -H [IP_ADDRESS] ~/.ssh/known_hosts</code></pre>
 
-            <p class="card-title">3.6. Change SSH password</p>
+            <p class="card-title">4.6. Change SSH password</p>
 <pre><code class="bash">Login via SSH first. Type "passwd" and enter the existing and new passwords</code></pre>
-
-        </div>
-        <div class="card-footer text-muted">
-            Reference: Linux 101 Hacks, Remesh Natarajan, www.thegeekstuff.com
-        </div>
-    </div>
-
-    <div class="card mb-4" id="linux-4">
-        <div class="card-body">
-
-            <h2 class="card-title">4. Linux</h2>
-            <p class="card-text">4.1. "grep [options] pattern [files]"</p>
-            <p class="card-text">Use option -v to find all except the match</p>
-            <p class="card-text">Use option -c to get # of line with match</p>
-            <p class="card-text">Use option -i to ignore case</p>
-            <p class="card-text">Use option -r to find matches recursively in files in directory</p>
-
-            <p class="card-text">4.2. "find [pathnames] [conditions]"</p>
-<pre><code class="bash">find /etc -name "*mail*" # find files containing mail in /etc</code></pre>
-<pre><code class="bash">find / -type f -size +100M # find files greater than 100M</code></pre>
-<pre><code class="bash">find . –mtime -2 # find files modified in last two days</code></pre>
-<pre><code class="bash">find / -type f -name *.tar.gz -size +100M -exec ls -l {} \; # list files greater than 100M</code></pre>
-<pre><code class="bash">find / -type f -name *.tar.gz -size +100M -exec rm -f {} \; # delete files greater than 100M</code></pre>
-
-            <p class="card-text">4.3. Suppress output or error</p>
-<pre><code class="bash">cat file.txt > /dev/null # suppress output</code></pre>
-<pre><code class="bash">cat invalid-file-name.txt 2> /dev/null # suppress error</code></pre>
-
-            <p class="card-text">4.4. Convert uppercase to/from lowercase</p>
-<pre><code class="bash">tr a-z A-Z < file.txt # convert to uppercase</code></pre>
-<pre><code class="bash">tr A-Z a-z < file.txt # convert to lowercase</code></pre>
-
-            <p class="card-text">4.5. Cut</p>
-<pre><code class="bash">cut -d: -f 1 file.txt # Display 1st field from colon delimited file</code></pre>
-<pre><code class="bash">cut -d: -f 1,3 file.txt # Display 1st and 3rd field from colon delimited file</code></pre>
-<pre><code class="bash">cut -d: -f1 /etc/passwd # Displays unix login names for all users in the system</code></pre>
-<pre><code class="bash">free | tr -s ' ' | sed '/^Mem/!d' | cut -d" " -f2 # Displays total memory available on the system</code></pre>
-
-            <p class="card-text">4.6. Diff</p>
-<pre><code class="bash">diff -w file_old.txt file_new.txt</code></pre>
-
-            <p class="card-text">4.7. Reboot the machine</p>
-<pre><code class="bash">sudo reboot</code></pre>
 
         </div>
         <div class="card-footer text-muted">
@@ -4464,154 +4649,15 @@ kill -9 [pid]</code></pre>
             <p class="card-text">8.9. stat</p>
 <pre><code class="bash">netstat -tulnp | grep 8443 # find processes running on port 8443</code></pre>
 <pre><code class="bash">stat -c "%a &n" * # display stats of files</code></pre>
+
+            <p class="card-text">1.18. Diff</p>
+<pre><code class="bash">diff -w file_old.txt file_new.txt</code></pre>
+
+            <p class="card-text">1.19. Reboot the machine</p>
+<pre><code class="bash">sudo reboot</code></pre>
         </div>
         <div class="card-footer text-muted">
             Reference: Linux 101 Hacks, Remesh Natarajan, www.thegeekstuff.com
-        </div>
-    </div>
-
-    <div class="card mb-4" id="linux-9">
-        <div class="card-body">
-
-            <h2 class="card-title">9. Shell Scripting</h2>
-
-            <p class="card-text">9.1. Read user inputs</p>
-<pre><code class="bash">read USER_INPUT1 ; export USER_INPUT1
-read -s USER_INPUT1 ; export USER_INPUT1 # make echoing user input unavailable</code></pre>
-
-            <p class="card-text">9.2. Arguments</p>
-<pre><code class="bash"># $1, $2, $3, etc are used to read in arguments passed to shell script and functions</code></pre>
-
-            <p class="card-text">9.3. Suppress output of pushd and popd commands</p>
-<pre><code class="bash">pushd () {
-    command pushd "$@" > /dev/null
-}
-
-popd () {
-    command pushd "$@" > /dev/null
-}</code></pre>
-
-            <p class="card-text">9.4. Curl</p>
-            <p class="card-text">v – verbose output</p>
-            <p class="card-text">s – suppress output</p>
-            <p class="card-text">u - to pass in credentials</p>
-            <p class="card-text">o – to write output to a destination</p>
-            <p class="card-text">w '%{http_code}' – to get the http status code</p>
-<pre><code class="bash">curl [options] [URL] -X [GET/POST/PUT/DELETE] -H [Headers] -d [Data]</code></pre>
-<pre><code class="bash">echo $JSON_DATA | curl [options] [URL] -X [GET/POST/PUT/DELETE] -H [Headers] -d @- # if posting json data</code></pre>
-
-            <p class="card-text">9.5. Function</p>
-<pre><code class="bash">function &lt;function_name]&gt;() {
-    local &lt;argument1&gt;=$1
-    local &lt;argument2&gt;=$2
-    local &lt;argument3&gt;=$3
-    ...
-
-    echo &lt;ret_val&gt; # this is the return statement
-}</code></pre>
-
-            <p class="card-text">9.6. Conditional</p>
-<pre><code class="bash">if [ "$variable" -eq 200 ]; then
-    # do something
-else
-    # do other thing
-fi</code></pre>
-
-<pre><code class="bash">if [ -z "$variable" ]; then
-    # variable is null
-fi</code></pre>
-
-<pre><code class="bash">if [ -z "$var1" -o -z "$var1" ]; then
-    # var1 or var2 is null
-fi</code></pre>
-
-<pre><code class="bash">if [ "$variable" == "string" ]; then
-    # variable equals string
-fi</code></pre>
-
-<pre><code class="bash">if [[ -z "$variable1" && "variable2" != "something" ]] && [[ "$variable3" == "value1" || "$variable4" == "value2" ]]; then
-    # variable equals string
-fi</code></pre>
-
-            <p class="card-text">9.7. Current and parent directory (scripts can execute from different path, so absolute path is needed)</p>
-<pre><code class="bash">SCRIPT_DIR=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
-PARENT_DIR="$(dirname "$SCRIPT_DIR")"</code></pre>
-
-            <p class="card-text">9.8. Loop</p>
-<pre><code class="bash"># Loop through array.
-for i in "${array[@]}"
-do
-    # do something with $i
-done</code></pre>
-
-<pre><code class="bash"># Loop through number.
-for i in $(seq 1 $END)
-do
-    echo $i
-done</code></pre>
-
-<pre><code class="bash"># Loop through directory.
-for filename in path/*.txt
-do
-    [ -e "$filename" ] || continue
-done</code></pre>
-
-            <p class="card-text">9.9. Array</p>
-<pre><code class="bash"># Declare an array.
-array=("item1" "item2" "item3")
-# Add to an array.
-array+=("item4")</code></pre>
-
-<pre><code class="bash"># Assessing array element.
-element=${array[0]}</code></pre>
-
-            <p class="card-text">9.10. File</p>
-<pre><code class="bash"> # Check if file exists.
-if [ ! -f /path/file ]
-then
-    echo "File does not exist"
-fi
-# Check if a string exists in a file.
-if grep -Fxq "$string" $file
-then
-    # String found
-else
-    # String not found
-fi</code></pre>
-
-            <p class="card-text">9.11. sed</p>
-<pre><code class="bash"># Match pattern and update in place.
-sed -i "s/string_to_match/string_to_replace_with/"
-# Add a line after a match.
-sed -i "/string_to_match.*/a $string_to_insert/"
-# If adding 5 leading spaces to "string_to_insert".
-sed -i "/string_to_match.*/a /    / $string_to_insert/"
-# Remove a block of texts from a file.
-sed -i "/begin/./end/d $file</code></pre>
-
-            <p class="card-text">9.12. Sting</p>
-<pre><code class="bash"># Remove two characters from the beginning for the string.
-string=${string:2}
-# Remove prefix from a string.
-string=${string#"prefix_to_remove"}
-# Remove path from a file.
-string=${string##*/}
-# Find and replace.
-${string/$match/$replace}
-# Find and replace for all occurance.
-${string//$match/$replace}</code></pre>
-
-            <p class="card-text">9.13. jq</p>
-<pre><code class="bash">echo $json | jq -r '.' # Make JSON output pretty
-echo $json | jq --sort-keys # Sort the JSON fields by key
-echo $json | jq .field1.field2.field3 = value1 | field4.field5.field6 = value2 # Replace values of multiple fields</code></pre>
-
-            <p class="card-text">9.14. yq</p>
-<pre><code class="bash">https://mikefarah.gitbook.io/yq/</code></pre>
-
-        </div>
-        <div class="card-footer text-muted">
-
         </div>
     </div>
 
@@ -4668,7 +4714,7 @@ printf "\033[106mI am Light Cyan\033[0m\n"</code></pre>
             <p class="card-text">11.1. Virtual python environment</p>
 <pre><code class="bash">virtualenv -p python3 .env # create python3 virtual environment at .env directory
 source .env/bin/activate
-pip install -r [python_dependencies]</code></pre>
+pip3 install -r requirements.txt # Assuming python dependencies are under "requirements.txt"</code></pre>
 
             <p class="card-text">11.2. Execute python</p>
 <pre><code class="bash">python [your_script.py] [--options] [arguments]</code></pre>
@@ -4685,15 +4731,13 @@ pip install -r [python_dependencies]</code></pre>
             <h2 class="card-title">12. Cron</h2>
 
             <p class="card-text">minute (0 - 59) | hour (0 - 23) | day of the month (1 - 31) | month (1 - 12) | day of the week (0 - 6) [Sunday to Saturday]</p>
-<pre><code class="bash">22 5 * * 6 # 5:22AM every Saturday</code></pre>
-<pre><code class="bash">*/5 * * * * # every 5 minutes</code></pre>
-            <ul>
-                <li>yearly - 0 0 1 1 *</li>
-                <li>monthly - 0 0 1 * *</li>
-                <li>weekly - 0 0 * * 0</li>
-                <li>daily - 0 0 * * *</li>
-                <li>hourly - 0 * * * *</li>
-            </ul>
+<pre><code class="bash">22 5 * * 6 # 5:22AM every Saturday
+*/5 * * * * # Every 5 minutes
+0 0 1 1 * # Yearly
+0 0 1 * * # Monthly
+0 0 * * 0 # Weekly
+0 0 * * * # Daily
+0 * * * * # Hourly</code></pre>
         </div>
         <div class="card-footer text-muted">
 
