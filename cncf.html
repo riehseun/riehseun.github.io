@@ -102,8 +102,19 @@
                 <li><a href="#kubernetes-27">27. Service</a></li>
                 <li><a href="#kubernetes-28">28. Connecting Applications with Services</a></li>
                 <li><a href="#kubernetes-29">29. Network Policies</a></li>
-                <li><a href="#kubernetes-30">30. </a></li>
-
+                <li><a href="#kubernetes-30">30. RBAC</a></li>
+                <li><a href="#kubernetes-"></a></li>
+                <li><a href="#kubernetes-"></a></li>
+                <li><a href="#kubernetes-"></a></li>
+                <li><a href="#kubernetes-"></a></li>
+                <li><a href="#kubernetes-"></a></li>
+                <li><a href="#kubernetes-"></a></li>
+                <li><a href="#kubernetes-"></a></li>
+                <li><a href="#kubernetes-"></a></li>
+                <li><a href="#kubernetes-"></a></li>
+                <li><a href="#kubernetes-"></a></li>
+                <li><a href="#kubernetes-"></a></li>
+                <li><a href="#kubernetes-"></a></li>
             </ul>
         </div>
     </div>
@@ -2365,10 +2376,43 @@ spec:
         </div>
     </div>
 
-    <div class="card mb-4" id="kubernetes-">
+    <div class="card mb-4" id="kubernetes-30">
         <div class="card-body">
-            <h2 class="card-title"></h2>
+            <h2 class="card-title">RBAC</h2>
+            <p class="card-text">To enable RBAC, start the API server with such that</p>
+<pre><code class="bash">kube-apiserver --authorization-mode=Example,RBAC --other-options --more-options</code></pre>
+            <p class="card-text">RBAC API declares four objects: Role, ClusterRole, RoleBinding, CLusterRoleBinding</p>
+
+            <h3 class="card-title">Role</h3>
+            <p class="card-text">Role sets permission with a particular namespace.</p>
+<pre><code class="yaml">apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: default
+  name: pod-reader
+rules:
+- apiGroups: [""] # "" indicates the core API group
+  resources: ["pods"]
+  verbs: ["get", "watch", "list"]</code></pre>
+
+            <h3 class="card-title">ClusterRole</h3>
+            <p class="card-text">ClusterRole is a cluster-wide, non-namespaced resource.</p>
+<pre><code class="yaml">apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  # "namespace" omitted since ClusterRoles are not namespaced
+  name: secret-reader
+rules:
+- apiGroups: [""]
+  #
+  # at the HTTP level, the name of the resource for accessing Secret
+  # objects is "secrets"
+  resources: ["secrets"]
+  verbs: ["get", "watch", "list"]</code></pre>
+
         </div>
+
+
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/reference/access-authn-authz/rbac/">Using RBAC Authorization</a>
         </div>
