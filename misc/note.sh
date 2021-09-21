@@ -253,3 +253,26 @@ kubectl create clusterrolebinding cluster-admin-binding --clusterrole cluster-ad
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/mandatory.yaml
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/cloud-generic.yaml
 kubectl get pods --all-namespaces -l app.kubernetes.io/name=ingress-nginx --watch
+
+
+
+
+
+
+
+
+ENV PORT=80 \
+    SQL_USER="sqladmin" \
+    SQL_PASSWORD="changeme" \
+    SQL_SERVER="changeme.database.windows.net" \
+    SQL_DBNAME="mydrivingDB"
+
+docker run -e 'ACCEPT_EULA=Y' -e 'SA_PASSWORD=changeme' -p 1433:1433 -d mcr.microsoft.com/mssql/server:2017-latest
+
+docker run --network tripnet -e SQLFQDN=changeme.database.windows.net -e SQLUSER=sqladmin -e SQLPASS=changeme -e SQLDB=mydrivingDB openhack/data-load:v1
+
+
+
+docker run -d -p 8080:80 --name poi -e "SQL_PASSWORD=changeme" -e "SQL_SERVER=changeme.database.windows.net" -e "ASPNETCORE_ENVIRONMENT=Local" tripinsights/poi:1.0
+
+az acr login --name registryjrm1796

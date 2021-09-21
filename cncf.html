@@ -103,7 +103,7 @@
                 <li><a href="#kubernetes-28">28. Connecting Applications with Services</a></li>
                 <li><a href="#kubernetes-29">29. Network Policies</a></li>
                 <li><a href="#kubernetes-30">30. RBAC</a></li>
-                <li><a href="#kubernetes-"></a></li>
+                <li><a href="#kubernetes-31">31. Create cluster with kubeadm</a></li>
                 <li><a href="#kubernetes-"></a></li>
                 <li><a href="#kubernetes-"></a></li>
                 <li><a href="#kubernetes-"></a></li>
@@ -2447,6 +2447,33 @@ roleRef:
   name: secret-reader
   apiGroup: rbac.authorization.k8s.io</code></pre>
 
+            <h3 class="card-title">Aggregated ClusterRole</h3>
+            <p class="card-text">Aggregate serveral ClusterRoles into one ClusterRole.</p>
+<pre><code class="yaml">apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: aggregate-cron-tabs-edit
+  labels:
+    # Add these permissions to the "admin" and "edit" default roles.
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
+    rbac.authorization.k8s.io/aggregate-to-edit: "true"
+rules:
+- apiGroups: ["stable.example.com"]
+  resources: ["crontabs"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: aggregate-cron-tabs-view
+  labels:
+    # Add these permissions to the "view" default role.
+    rbac.authorization.k8s.io/aggregate-to-view: "true"
+rules:
+- apiGroups: ["stable.example.com"]
+  resources: ["crontabs"]
+  verbs: ["get", "list", "watch"]</code></pre>
+
         </div>
 
 
@@ -2455,9 +2482,43 @@ roleRef:
         </div>
     </div>
 
-    <div class="card mb-4" id="kubernetes-">
+    <div class="card mb-4" id="kubernetes-31">
         <div class="card-body">
-            <h2 class="card-title"></h2>
+            <h2 class="card-title">Create cluster with kubeadm</h2>
+            <p class="card-text">Control plan is the node where <code>etcd</code> and <code>API server</code> run. Initialize the control plane node,</p>
+<pre><code class="bash">kubeadm init &lt;args&gt;</code></pre>
+<pre><code class="bash"># To make kubectl work for your non-root user
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+# If you are root user
+export KUBECONFIG=/etc/kubernetes/admin.conf</code></pre>
+
+            <h3 class="card-title">Install a Pod network add-on</h3>
+<pre><code class="bash">kubectl apply -f &lt;add-on.yaml&gt;
+# Confirm it is working by checking if CoreDNS is running.
+kubectl get pods --all-namespaces</code></pre>
+
+            <h3 class="card-title">Join a Node</h3>
+<pre><code class="bash"># Get token.
+kubeadm token list
+
+# Get --discovery-token-ca-cert-hash.
+openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | \
+   openssl dgst -sha256 -hex | sed 's/^.* //'
+
+kubeadm join --token &lt;token&gt; &lt;control-plane-host&gt;:&lt;control-plane-port&gt; --discovery-token-ca-cert-hash sha256:&lt;hash&gt;</code></pre>
+
+            <h3 class="card-title">Remove a Node</h3>
+<pre><code class="bash">kubectl drain &lt;node name&gt; --delete-emptydir-data --force --ignore-daemonsets
+# Reset the state installed by kubeadm.
+kubeadm reset
+# Reset iptables.
+iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
+# Reset IPVS tables.
+ipvsadm -C
+kubectl delete node &lt;node name&gt;</code></pre>
+
         </div>
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/">Creating a cluster with kubeadm</a>
