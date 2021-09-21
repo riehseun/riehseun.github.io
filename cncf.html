@@ -104,9 +104,9 @@
                 <li><a href="#kubernetes-29">29. Network Policies</a></li>
                 <li><a href="#kubernetes-30">30. RBAC</a></li>
                 <li><a href="#kubernetes-31">31. Create cluster with kubeadm</a></li>
-                <li><a href="#kubernetes-"></a></li>
-                <li><a href="#kubernetes-"></a></li>
-                <li><a href="#kubernetes-"></a></li>
+                <li><a href="#kubernetes-32">32. Create HA cluster with kubeadm</a></li>
+                <li><a href="#kubernetes-33">33. Upgrade kubeadm clusters</a></li>
+                <li><a href="#kubernetes-34">34. Operating etcd clusters</a></li>
                 <li><a href="#kubernetes-"></a></li>
                 <li><a href="#kubernetes-"></a></li>
                 <li><a href="#kubernetes-"></a></li>
@@ -2273,7 +2273,7 @@ spec:
 
     <div class="card mb-4" id="kubernetes-29">
         <div class="card-body">
-            <h2 class="card-title">Network Policies</h2>
+            <h2 class="card-title">29. Network Policies</h2>
             <p class="card-text">Pods are non-isolated by default and accept traffics from any source. Pods become isolated by Network Policy; they reject any connections that are not allowed by any NetworkPolicy.</p>
 <pre><code class="yaml">apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -2378,7 +2378,7 @@ spec:
 
     <div class="card mb-4" id="kubernetes-30">
         <div class="card-body">
-            <h2 class="card-title">RBAC</h2>
+            <h2 class="card-title">30. RBAC</h2>
             <p class="card-text">To enable RBAC, start the API server with such that</p>
 <pre><code class="bash">kube-apiserver --authorization-mode=Example,RBAC --other-options --more-options</code></pre>
             <p class="card-text">RBAC API declares four objects: Role, ClusterRole, RoleBinding, CLusterRoleBinding</p>
@@ -2484,7 +2484,7 @@ rules:
 
     <div class="card mb-4" id="kubernetes-31">
         <div class="card-body">
-            <h2 class="card-title">Create cluster with kubeadm</h2>
+            <h2 class="card-title">31. Create cluster with kubeadm</h2>
             <p class="card-text">Control plan is the node where <code>etcd</code> and <code>API server</code> run. Initialize the control plane node,</p>
 <pre><code class="bash">kubeadm init &lt;args&gt;</code></pre>
 <pre><code class="bash"># To make kubectl work for your non-root user
@@ -2525,27 +2525,224 @@ kubectl delete node &lt;node name&gt;</code></pre>
         </div>
     </div>
 
-    <div class="card mb-4" id="kubernetes-">
+    <div class="card mb-4" id="kubernetes-32">
         <div class="card-body">
-            <h2 class="card-title"></h2>
+            <h2 class="card-title">32. Create HA cluster with kubeadm</h2>
+
+            <h3 class="card-title">Create a load balancer for kube-apiserver</h3>
+            <p class="card-text">Place control plane nodes behind a TCP forwarding load balancer. Address of load balancer must match the address of kubeadm's <code>ControlPlaneEndpoint</code>. Then add control planes to the load balancer and test.</p>
+<pre><code class="bash"># Connection refused error is expected since apiserver is not running yet. However, timeout means a real problem.
+nc -v LOAD_BALANCER_IP PORT</code></pre>
+
+            <h3 class="card-title">Option #1. Stacked control plane and etcd nodes</h3>
+<pre><code class="bash"># 1. Initialize the control plane.
+sudo kubeadm init --control-plane-endpoint "LOAD_BALANCER_DNS:LOAD_BALANCER_PORT" --upload-certs
+
+# 2. Apply a CIN plugin. (For example, Weave Net)
+kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+
+# 3. Verify control plane.
+kubectl get pod -n kube-system -w
+
+# 4. Join Nodes (Use outputs from step #1)</code></pre>
+
+            <h3 class="card-title">Option #2. External etcd nodes</h3>
+<pre><code class="bash"># 1. Setup etcd cluster.
+# 1.1. Do this on every host where etcd should be running.
+cat << EOF > /etc/systemd/system/kubelet.service.d/20-etcd-service-manager.conf
+[Service]
+ExecStart=
+#  Replace "systemd" with the cgroup driver of your container runtime. The default value in the kubelet is "cgroupfs".
+ExecStart=/usr/bin/kubelet --address=127.0.0.1 --pod-manifest-path=/etc/kubernetes/manifests --cgroup-driver=systemd
+Restart=always
+EOF
+
+systemctl daemon-reload
+systemctl restart kubelet
+
+# 1.2. Ensure kubectl is running.
+systemctl status kubelet
+
+# 1.3. Create configuration file for kubeadm.
+# Update HOST0, HOST1, and HOST2 with the IPs or resolvable names of your hosts.
+export HOST0=10.0.0.6
+export HOST1=10.0.0.7
+export HOST2=10.0.0.8
+
+# Create temp directories to store files that will end up on other hosts.
+mkdir -p /tmp/${HOST0}/ /tmp/${HOST1}/ /tmp/${HOST2}/
+
+ETCDHOSTS=(${HOST0} ${HOST1} ${HOST2})
+NAMES=("infra0" "infra1" "infra2")
+
+for i in "${!ETCDHOSTS[@]}"; do
+HOST=${ETCDHOSTS[$i]}
+NAME=${NAMES[$i]}
+cat << EOF > /tmp/${HOST}/kubeadmcfg.yaml
+apiVersion: "kubeadm.k8s.io/v1beta3"
+kind: ClusterConfiguration
+etcd:
+    local:
+        serverCertSANs:
+        - "${HOST}"
+        peerCertSANs:
+        - "${HOST}"
+        extraArgs:
+            initial-cluster: ${NAMES[0]}=https://${ETCDHOSTS[0]}:2380,${NAMES[1]}=https://${ETCDHOSTS[1]}:2380,${NAMES[2]}=https://${ETCDHOSTS[2]}:2380
+            initial-cluster-state: new
+            name: ${NAME}
+            listen-peer-urls: https://${HOST}:2380
+            listen-client-urls: https://${HOST}:2379
+            advertise-client-urls: https://${HOST}:2379
+            initial-advertise-peer-urls: https://${HOST}:2380
+EOF
+done
+
+# 1.4. Generate the certificate authority. (This will create two files /etc/kubernetes/pki/etcd/ca.crt and /etc/kubernetes/pki/etcd/ca.key)
+kubeadm init phase certs etcd-ca
+
+# 1.5. Create certificates for each member.
+
+kubeadm init phase certs etcd-server --config=/tmp/${HOST2}/kubeadmcfg.yaml
+kubeadm init phase certs etcd-peer --config=/tmp/${HOST2}/kubeadmcfg.yaml
+kubeadm init phase certs etcd-healthcheck-client --config=/tmp/${HOST2}/kubeadmcfg.yaml
+kubeadm init phase certs apiserver-etcd-client --config=/tmp/${HOST2}/kubeadmcfg.yaml
+cp -R /etc/kubernetes/pki /tmp/${HOST2}/
+# cleanup non-reusable certificates
+find /etc/kubernetes/pki -not -name ca.crt -not -name ca.key -type f -delete
+
+kubeadm init phase certs etcd-server --config=/tmp/${HOST1}/kubeadmcfg.yaml
+kubeadm init phase certs etcd-peer --config=/tmp/${HOST1}/kubeadmcfg.yaml
+kubeadm init phase certs etcd-healthcheck-client --config=/tmp/${HOST1}/kubeadmcfg.yaml
+kubeadm init phase certs apiserver-etcd-client --config=/tmp/${HOST1}/kubeadmcfg.yaml
+cp -R /etc/kubernetes/pki /tmp/${HOST1}/
+find /etc/kubernetes/pki -not -name ca.crt -not -name ca.key -type f -delete
+
+kubeadm init phase certs etcd-server --config=/tmp/${HOST0}/kubeadmcfg.yaml
+kubeadm init phase certs etcd-peer --config=/tmp/${HOST0}/kubeadmcfg.yaml
+kubeadm init phase certs etcd-healthcheck-client --config=/tmp/${HOST0}/kubeadmcfg.yaml
+kubeadm init phase certs apiserver-etcd-client --config=/tmp/${HOST0}/kubeadmcfg.yaml
+# No need to move the certs because they are for HOST0
+
+# clean up certs that should not be copied off this host
+find /tmp/${HOST2} -name ca.key -type f -delete
+find /tmp/${HOST1} -name ca.key -type f -delete
+
+# 1.6. Copy certificates and kubeadm configs.
+USER=ubuntu
+HOST=${HOST1}
+scp -r /tmp/${HOST}/* ${USER}@${HOST}:
+ssh ${USER}@${HOST}
+USER@HOST $ sudo -Es
+root@HOST $ chown -R root:root pki
+root@HOST $ mv pki /etc/kubernetes/
+
+# 1.7. Create the static pod manifests.
+root@HOST0 $ kubeadm init phase etcd local --config=/tmp/${HOST0}/kubeadmcfg.yaml
+root@HOST1 $ kubeadm init phase etcd local --config=/tmp/${HOST1}/kubeadmcfg.yaml
+root@HOST2 $ kubeadm init phase etcd local --config=/tmp/${HOST2}/kubeadmcfg.yaml
+
+# 2. Create a file called kubeadm-config.yaml.
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: ClusterConfiguration
+kubernetesVersion: stable
+controlPlaneEndpoint: "LOAD_BALANCER_DNS:LOAD_BALANCER_PORT"
+etcd:
+    external:
+        endpoints:
+        - https://ETCD_0_IP:2379
+        - https://ETCD_1_IP:2379
+        - https://ETCD_2_IP:2379
+        caFile: /etc/kubernetes/pki/etcd/ca.crt
+        certFile: /etc/kubernetes/pki/apiserver-etcd-client.crt
+        keyFile: /etc/kubernetes/pki/apiserver-etcd-client.key
+
+# Rest steps are similar to Option #1</code></pre>
+
+
         </div>
         <div class="card-footer text-muted">
-            Reference: <a href="https://v1-18.docs.kubernetes.io/docs/tasks/administer-cluster/highly-available-master/">Set up High-Availability Kubernetes Masters</a> | <a href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/setup-ha-etcd-with-kubeadm/">Set up a High Availability etcd cluster with kubeadm</a> | <a href="https://kubernetes.io/docs/tasks/administer-cluster/highly-available-control-plane/">Set up a High-Availability Control Plane</a>
+            Reference: <a href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/high-availability/">Creating Highly Available clusters with kubeadm</a> | <a href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/setup-ha-etcd-with-kubeadm/">Set up a High Availability etcd cluster with kubeadm</a>
         </div>
     </div>
 
-    <div class="card mb-4" id="kubernetes-">
+    <div class="card mb-4" id="kubernetes-33">
         <div class="card-body">
-            <h2 class="card-title"></h2>
+            <h2 class="card-title">33. Upgrade kubeadm clusters</h2>
+
+            <h3 class="card-title">Upgrade kubeadm</h3>
+<pre><code class="bash"># Ubuntu
+# replace x in 1.22.x-00 with the latest patch version
+apt-get update && \
+apt-get install -y --allow-change-held-packages kubeadm=1.22.x-00
+
+# RHEL
+# replace x in 1.22.x-0 with the latest patch version
+yum install -y kubeadm-1.22.x-0 --disableexcludes=kubernetes
+
+# Verify.
+kubeadm version
+kubeadm upgrade plan</code></pre>
+
+            <h3 class="card-title">Drain the Node</h3>
+<pre><code class="bash"># replace &lt;node-to-drain&gt; with the name of your node you are draining
+kubectl drain &lt;node-to-drain&gt; --ignore-daemonsets</code></pre>
+
+            <h3 class="card-title">Upgrade kubelet and kubectl</h3>
+<pre><code class="bash"># Ubuntu
+# replace x in 1.22.x-00 with the latest patch version
+apt-get update && \
+apt-get install -y --allow-change-held-packages kubelet=1.22.x-00 kubectl=1.22.x-00
+
+# RHEL
+# replace x in 1.22.x-0 with the latest patch version
+yum install -y kubelet-1.22.x-0 kubectl-1.22.x-0 --disableexcludes=kubernetes
+
+# Restart the kubelet.
+sudo systemctl daemon-reload
+sudo systemctl restart kubelet</code></pre>
+
+            <h3 class="card-title">Uncardon the Node</h3>
+<pre><code class="bash"># replace &lt;node-to-drain&gt; with the name of your node you are draining
+kubectl uncordon &lt;node-to-drain&gt; --ignore-daemonsets</code></pre>
+
         </div>
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/">Upgrading kubeadm clusters</a>
         </div>
     </div>
 
-    <div class="card mb-4" id="kubernetes-">
+    <div class="card mb-4" id="kubernetes-34">
         <div class="card-body">
-            <h2 class="card-title"></h2>
+            <h2 class="card-title">34. Operating etcd clusters.</h2>
+            <p class="card-text">etcd is storage for all cluster data. A five member etcd cluster is recommended for production. Access to etcd is equivalent to root permission to the cluster and ideally only API server should have it. </p>
+<pre><code class="bash"># To start API server with five member etcd cluster.
+etcd --listen-client-urls=http://$IP1:2379,http://$IP2:2379,http://$IP3:2379,http://$IP4:2379,http://$IP5:2379 --advertise-client-urls=http://$IP1:2379,http://$IP2:2379,http://$IP3:2379,http://$IP4:2379,http://$IP5:2379</code></pre>
+
+            <h3 class="card-title">Replace a failed etcd member</h3>
+<pre><code class="bash"># Assume three members: member1=http://10.0.0.1, member2=http://10.0.0.2, and member3=http://10.0.0.3. When member1 fails, replace it with member4=http://10.0.0.4.
+
+# Get the member ID of the failed member1.
+etcdctl --endpoints=http://10.0.0.2,http://10.0.0.3 member list
+# This outputs something like.
+8211f1d0f64f3269, started, member1, http://10.0.0.1:2380, http://10.0.0.1:2379
+91bc3c398fb3c146, started, member2, http://10.0.0.2:2380, http://10.0.0.2:2379
+fd422379fda50e48, started, member3, http://10.0.0.3:2380, http://10.0.0.3:2379
+
+# Remove the failed member.
+etcdctl member remove 8211f1d0f64f3269
+
+# Add a new member.
+etcdctl member add member4 --peer-urls=http://10.0.0.4:2380
+
+# Start the newly added member
+export ETCD_NAME="member4"
+export ETCD_INITIAL_CLUSTER="member2=http://10.0.0.2:2380,member3=http://10.0.0.3:2380,member4=http://10.0.0.4:2380"
+export ETCD_INITIAL_CLUSTER_STATE=existing
+etcd [flags]
+
+# Update t--etcd-servers flag for the Kubernetes API servers.
+# Restart the Kubernetes API servers.</code></pre>
         </div>
         <div class="card-footer text-muted">
             Reference: <a href="https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/">Operating etcd clusters for Kubernetes</a>
