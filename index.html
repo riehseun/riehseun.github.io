@@ -73,6 +73,7 @@
                 <div class="dropdown-menu">
                     <a class="dropdown-item" href="#terraform">Terraform</a>
                     <a class="dropdown-item" href="#salt">Salt</a>
+                    <a class="dropdown-item" href="#vault">Vault</a>
                 </div>
             </div>
         </li>
@@ -1111,7 +1112,9 @@ A list of strings containing words from the document
 
             <p class="card-text">8. Programming convention</p>
 
-<pre><code class="python"># Good
+<pre><code class="python"># Use ''.startswith() and ''.endswith() instead of string slicing.
+
+# Good
 if foo is not None:
 
 # Bad
@@ -1121,11 +1124,9 @@ if not foo is None:
 def f(x): return 2*x
 
 # Bad
-f = lambda x: 2*x</code></pre>
+f = lambda x: 2*x
 
-            <p class="card-text">Use ''.startswith() and ''.endswith() instead of string slicing</p>
-
-<pre><code class="python"># Good
+# Good
 if isinstance(obj, int):
 
 # Bad
@@ -1797,6 +1798,42 @@ command     = "ansible-playbook -u ${var.ssh_user} --private-key ~/.ssh/id_rsa .
 
             <p class="card-text">Check minion configuration</p>
 <pre><code class="python">/etc/salt/minion.d/minion.conf</code></pre>
+
+        </div>
+        <div class="card-footer text-muted"></div>
+    </div>
+    <!-- Salt END -->
+
+
+    <!-- Vault BEGIN -->
+    <div class="card mb-4" id="vault">
+        <div class="card-body">
+            <h2 class="card-title">Vault</h2>
+            <ul class="list-unstyled mb-0">
+                <li><a href="#vault-1">1. Getting started with vault</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="card mb-4" id="vault-1">
+        <div class="card-body">
+            <h2 class="card-title">1. Getting started with Vault</h2>
+
+<pre><code class="bash"># Assuming Ubuntu machine.
+
+# Install Vault.
+curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+sudo apt-get update && sudo apt-get install vault
+
+# Setup Vault URL.
+export VAULT_ADDR=https://&lt;YOUR_VAULT_URL&gt;
+
+# Login to Vault (Need to enter token you can get by logging into Vault UI)
+vault login
+
+# Read password.
+vault kv get -field &lt;CREDENTIAL_NAME&gt; &lt;PATH/TO/CREDENTIAL&gt;</code></pre>
 
         </div>
         <div class="card-footer text-muted"></div>
@@ -7134,7 +7171,14 @@ fi
 # Read file line by line.
 while IFS= read -r line; do
     # Do something with $line
-done < $file</code></pre>
+done < $file
+
+# Write a block of texts to a file
+cat &lt;&lt;EOF&gt;&gt; $file
+{
+    "key": "value"
+}
+EOF</code></pre>
 
             <p class="card-text">1.10. sed</p>
 <pre><code class="bash"># Match pattern and update in place.
@@ -7275,12 +7319,15 @@ cut -d: -f 1,3 file.txt # Display 1st and 3rd field from colon delimited file
 cut -d: -f1 /etc/passwd # Displays unix login names for all users in the system
 free | tr -s ' ' | sed '/^Mem/!d' | cut -d" " -f2 # Displays total memory available on the system</code></pre>
 
-            <p class="card-text">1.18. Write a block of texts to a file</p>
-<pre><code class="bash">cat &lt;&lt;EOF&gt;&gt; $file
+            <p class="card-text">1.18. envsubst</p>
+<pre><code class="json"># Example json to be updated by envsubst.
 {
-    "key": "value"
-}
-EOF</code></pre>
+    "field1": ${value1},
+    "field2": ${value2},
+    "field3": ${value3}
+}</code></pre>
+
+<pre><code class="bash">data=$(value1="some_value1" value2="some_value2" value3="some_value3" envsubst '${value1}, ${value2}, ${value3}' < $file_name)</code></pre>
 
         </div>
         <div class="card-footer text-muted">
