@@ -6999,20 +6999,23 @@ app: jenkins</code></pre>
 # Function description #
 ########################
 function &lt;function_name&gt;() {
-    # $1, $2, $3, so on are used to read in arguments passed to shell script and functions.
-    local &lt;argument1&gt;=$1 # Description about the first argument.
-    local &lt;argument2&gt;=$2 # Description about the second argument.
-    local &lt;argument3&gt;=$3 # Description about the thrid argument.
-    ...
+  # $1, $2, $3, so on are used to read in arguments passed to shell script and functions.
+  local &lt;argument1&gt;=$1 # Description about the first argument.
+  local &lt;argument2&gt;=$2 # Description about the second argument.
+  local &lt;argument3&gt;=$3 # Description about the thrid argument.
+  ...
 
-    echo &lt;ret_val&gt; # This is the return statement.
+  echo &lt;ret_val&gt; # This is the return statement.
 
-    exit 1 # This exits the script execution.
+  exit 1 # This exits the script execution.
 }
 
 # When calling a function, wrapping a variable inside quotes will make sure that the entire content is passed.
 # Example
-my_function $arg1 $arg2 $arg_large_string_with_spaces</code></pre>
+my_function $arg1 $arg2 "$arg_large_string_with_spaces"
+
+# Name of script itself can be accessed by $0
+echo "Usage: $0"</code></pre>
 
             <p class="card-text">1.2. Read user inputs</p>
 <pre><code class="bash">read USER_INPUT1 ; export USER_INPUT1
@@ -7020,24 +7023,24 @@ read -s USER_INPUT1 ; export USER_INPUT1 # Makes echoing user input unavailable.
 
 read input
 if [[ $input == "y" ]]; then
-    # Do something.
+  # Do something.
 fi
 
 # Provide user guide on how to run the script.
 if [ -z "ENV_VAR_SET_BY_USER_ACTION" ]; then
-    echo "Usage: $0 keyword1"
-    echo "Usage: $0 keyword2"
-    echo "Usage: $0 keyword3"
-    exit 1
+  echo "Usage: $0 keyword1"
+  echo "Usage: $0 keyword2"
+  echo "Usage: $0 keyword3"
+  exit 1
 fi</code></pre>
 
             <p class="card-text">1.3. Suppress output of push and pop commands</p>
 <pre><code class="bash">pushd () {
-    command pushd "$@" > /dev/null
+  command pushd "$@" > /dev/null
 }
 
 popd () {
-    command pushd "$@" > /dev/null
+  command pushd "$@" > /dev/null
 }
 
 # Suppress output or error.
@@ -7060,20 +7063,20 @@ curl [options] [URL] -X [GET/POST/PUT/DELETE] -H [Headers] -d'{ "field": "value"
 # Constructing JSON payload.
 curl -u $username:$password -X POST "$url/$path" \
 --data-urlencode 'json={
-    "": "0",
-    "field": {
-        "field1": "'$value1'",
-        "field2": "'$value2'",
-        "field3": "'$value3'"
-    }
+  "": "0",
+  "field": {
+    "field1": "'$value1'",
+    "field2": "'$value2'",
+    "field3": "'$value3'"
+  }
 }' -H "field: $value"
 
 # Constructing XML payload.
 cat &gt; data.xml &lt;&lt;EOF
 &lt;element&gt;
-    &lt;subelement1&gt;$value1&lt;/subelement1&gt;
-    &lt;subelement2&gt;$value2&lt;/subelement2&gt;
-    &lt;subelement3&gt;$value3&lt;/subelement3&gt;
+  &lt;subelement1&gt;$value1&lt;/subelement1&gt;
+  &lt;subelement2&gt;$value2&lt;/subelement2&gt;
+  &lt;subelement3&gt;$value3&lt;/subelement3&gt;
 &lt;/element&gt;
 EOF
 
@@ -7124,27 +7127,24 @@ PARENT_DIR="$(dirname "$CURRENT_DIR")"</code></pre>
 
             <p class="card-text">1.7. Loop</p>
 <pre><code class="bash"># Loop through array.
-for i in "${array[@]}"
-do
-    # Do something with $i
+for i in "${array[@]}"; do
+  echo "${i}"
 done
 
 # Loop through number.
-for i in $(seq 1 $END)
-do
-    echo $i
+for i in $(seq 1 $END); do
+  echo "${i}"
 done
 
 # Loop through a string separated by space.
 string="a b c d e"
 for i in $(echo $string); do
-    # Do something with $i
+  echo "${i}"
 done
 
 # Loop through directory.
-for filename in path/*.txt
-do
-    [ -e "$filename" ] || continue
+for filename in path/*.txt; do
+  [ -e "$filename" ] || continue
 done</code></pre>
 
             <p class="card-text">1.8. Array</p>
@@ -7158,28 +7158,26 @@ element=${array[0]}</code></pre>
 
             <p class="card-text">1.9. File</p>
 <pre><code class="bash"> # Check if file exists.
-if [ ! -f /path/file ]
-then
-    echo "File does not exist"
+if [ ! -f /path/file ]; then
+  echo "File does not exist"
 fi
 
 # Check if a string exists in a file.
-if grep -Fxq "$string" $file
-then
-    # String found
+if grep -Fxq "$string" $file; then
+  # String found
 else
-    # String not found
+  # String not found
 fi
 
 # Read file line by line.
 while IFS= read -r line; do
-    # Do something with $line
+  echo "${line}"
 done < $file
 
 # Write a block of texts to a file
 cat &lt;&lt;EOF&gt;&gt; $file
 {
-    "key": "value"
+  "key": "value"
 }
 EOF</code></pre>
 
