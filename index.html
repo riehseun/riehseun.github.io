@@ -3874,8 +3874,17 @@ docker run --network host -e SQLFQDN=$SQL_CONTAINER_IP,1433 -e SQLUSER=sqladmin 
             <p class="card-text">Docker images are stored in <strong>/var/lib/docker/overlay2</strong></p>
 <pre><code class="bash">docker system prune -a # Clean up container, network, image, build cache
 docker volumes prune # Remove unused volumes</code></pre>
+
+            <p class="card-text">Find an artifact (For example, log4j) in <strong>/var/lib/docker/overlay2</strong> that matches running images</p>
+<pre><code class="bash">find /var/lib/docker/overlay2 -name "log4j-core-2" > overlay.txt
+sed -i 's\merged.*/merged/' overlay.txt
+sed -i 's\diff.*/diff/' overlay.txt
+docker inspect $(docker ps -qa) | jq -r 'map([.Name, .GraphDriver.Data.MergedDir]) | .[] | "\(.[0])\t\(.[1])"' > docker-mappings.txt
+grep -Fwf overlay.txt docker-mappings.txt</code></pre>
         </div>
-        <div class="card-footer text-muted"></div>
+        <div class="card-footer text-muted">
+          Reference: <a href="https://fabianlee.org/2021/04/08/docker-determining-container-responsible-for-largest-overlay-directories/">Docker: determining container responsible for largest overlay directories</a>
+        </div>
     </div>
 
 
