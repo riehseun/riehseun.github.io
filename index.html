@@ -3792,26 +3792,53 @@ jobs.each { job ->
     <div class="card mb-4" id="docker-2">
       <div class="card-body">
         <h2 class="card-title">2. Useful Docker commands</h2>
-<pre><code class="bash">docker build -f [DockerfileName] -t [DockerImageName] . # builds Dockerfile and create new image
-docker ps -a # see all containers in all states
-docker run -i -t &lt;Image ID or NAME&gt;:&lt;Tag&gt; /bin/bash # run an image as container
-docker stop $(docker ps --latest --quiet) && docker rm $(docker ps -a -f status=exited -q) && docker ps -a # Stop all images, remove all images, and show images
-docker exec -it [container_name] bash # login to the container
-docker exec -u 0 -it [container_name] bash # login to the container as root user
-docker exec -it $(docker ps --latest --quiet) bash # login to the latest container
-docker run -v [dir1]:[dir2] -u 0 -dit [container_name] # map directories
+<pre><code class="bash"># Builds Dockerfile and create new image.
+docker build -f [DockerfileName] -t [DockerImageName] .
 
-docker rm -f $(docker ps -a -q) # Remove all exited containers
-docker rm -vf $(docker ps -a -q) # Remove all exited containers including its volumes
+# See all containers in all states.
+docker ps -a
 
-docker rmi &lt;Image ID&gt; # Remove an image
-docker rmi -f $(docker images -a -q) # Remove all images
+# Run an image as container.
+docker run -i -t &lt;Image ID or NAME&gt;:&lt;Tag&gt; /bin/bash
 
-docker image tag [IMAGE_ID] [TAG_NAME] # tag an image
+# Stop all images, remove all images, and show images.
+docker stop $(docker ps --latest --quiet) && docker rm $(docker ps -a -f status=exited -q) && docker ps -a
 
-docker system prune -a --volumes # Remove all unused containers, volumes, networks and images
+# Restart a container
+docker restart &lt;Image ID or NAME&gt;
 
---publish 80:8080 # flag to map container port to host port
+# Login to the container.
+docker exec -it [container_name] bash
+
+# Login to the container as root user.
+docker exec -u 0 -it [container_name] bash
+
+# Login to the latest container.
+docker exec -it $(docker ps --latest --quiet) bash
+
+# Map directories.
+docker run -v [dir1]:[dir2] -u 0 -dit [container_name]
+
+# Remove all exited containers.
+docker rm -f $(docker ps -a -q)
+
+# Remove all exited containers including its volumes.
+docker rm -vf $(docker ps -a -q)
+
+# Remove an image.
+docker rmi &lt;Image ID&gt;
+
+# Remove all images.
+docker rmi -f $(docker images -a -q)
+
+# Tag an image.
+docker image tag [IMAGE_ID] [TAG_NAME]
+
+# Remove all unused containers, volumes, networks and images.
+docker system prune -a --volumes
+
+# Flag to map container port to host port.
+--publish 80:8080
 
 # Assuming docker-compose.yml exists
 docker-compose up # Create images and run
