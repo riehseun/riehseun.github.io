@@ -3969,7 +3969,7 @@ grep -Fwf overlay.txt docker-mappings.txt</code></pre>
 
     <div class="card mb-4" id="docker-8">
       <div class="card-body">
-        <h2 class="card-title">7. Docker service</h2>
+        <h2 class="card-title">8. Docker service</h2>
 <pre><code class="bash">docker service ls
 docker service rm &lt;service name&gt;
 docker service rm inspect --pretty &lt;service id&gt;</code></pre>
@@ -7418,9 +7418,19 @@ ENV_VAR=:$ENV_VAR:
 ENV_VAR=${ENV_VAR//:$directory_to_remove:/:}
 ENV_VAR=${ENV_VAR#:}; ENV_VAR=${ENV_VAR%:}</code></pre>
 
+            <h3 class="card-title">Increment a snapshot version</h3>
+<pre><code class="bash"># build.gradle
+version=$(grep version\( build.gradle | cut -d- -f1 | cut -d\' -f2)
+[[ -n $grep version\( build.gradle | grep SNAPSHOT) ]] && version=$(echo $version | awk -F\. '{print $1"."$2"."(#3-1)}')
+echo $version</code></pre>
+<pre><code class="bash"># maven-metadata.xml (in Nexus)
+url=&lt;nexus_url&gt;/repository/&lt;repo_name&gt;/&lt;group_id&gt;/&lt;artifact_id&gt;/maven_metadata.xml
+current_version=$(curl -k $url | grep -Po '(?&lt;=&lt;version&gt;)([0-9\.]+(-SNAPSHOT)?)' | sort --version-sort r | head -n 1)</code></pre>
+incremented_version=$(echo $current_version | awk -F. -v OFS=. 'NF==1{pring ++$NF}; NF&gt;1{if(length($NF+1)&gt;length($NF))$(NF-1)++;$NF=sprintf("%0*d", length($NF), ($NF+1)%(10^length($NF))); print}')
+echo $incremented_version
         </div>
         <div class="card-footer text-muted">
-          Reference: <a href="https://google.github.io/styleguide/shellguide.html">Shell Style Guide</a>
+
         </div>
     </div>
 
