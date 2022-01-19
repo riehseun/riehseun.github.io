@@ -3964,13 +3964,19 @@ docker exec -it $(docker ps --latest --quiet) bash
 docker run -v [dir1]:[dir2] -u 0 -dit [container_name]
 
 # Remove all exited containers.
-docker rm -f $(docker ps -a -q)
+docker rm -f $(docker ps -a -f status=exited -q)
 
 # Remove all exited containers including its volumes.
-docker rm -vf $(docker ps -a -q)
+docker rm -vf $(docker ps -a -f status=exited -q)
 
 # Remove an image.
 docker rmi &lt;Image ID&gt;
+
+# Remove dangling (tagged with &lt;none&gt;) images.
+docker image prune -f
+
+# Remove unused (including dangling) images.
+docker image prune -f -a
 
 # Remove all images.
 docker rmi -f $(docker images -a -q)
