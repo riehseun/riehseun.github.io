@@ -1592,6 +1592,7 @@ String variable = sh returnStdout: true, script: 'some bash command'</code></pre
         <ul class="list-unstyled mb-0">
           <li><a href="#java-1">Search for JAR</a></li>
           <li><a href="#java-2">Work with WAR</a></li>
+          <li><a href="#java-3">JDK</a></li>
         </ul>
       </div>
     </div>
@@ -1622,6 +1623,17 @@ jar -xvf &lt;name&gt;.war
 
 # Create a WAR file.
 jar -cvf &lt;name&gt;.war &lt;directory&gt;</code></pre>
+      </div>
+      <div class="card-footer text-muted">
+
+      </div>
+    </div>
+
+    <div class="card mb-4" id="java-3">
+      <div class="card-body">
+        <h2 class="card-title">JDK</h2>
+<pre><code class="bash"># Check JDK location.
+which java</code></pre>
       </div>
       <div class="card-footer text-muted">
 
@@ -3943,13 +3955,13 @@ docker push &lt;registry_name&gt;/&lt;image_name&gt;:&lt;tag&gt;
 docker ps -a
 
 # Run an image as container.
-docker run -i -t &lt;Image ID or NAME&gt;:&lt;Tag&gt; /bin/bash
+docker run -i -t &lt;image_name&gt;:&lt;tag&gt; /bin/bash
 
 # Stop all images, remove all images, and show images.
 docker stop $(docker ps --latest --quiet) && docker rm $(docker ps -a -f status=exited -q) && docker ps -a
 
 # Restart a container
-docker restart &lt;Image ID or NAME&gt;
+docker restart &lt;image_name&gt;
 
 # Login to the container.
 docker exec -it [container_name] bash
@@ -3967,10 +3979,10 @@ docker run -v [dir1]:[dir2] -u 0 -dit [container_name]
 docker rm -f $(docker ps -a -f status=exited -q)
 
 # Remove all exited containers including its volumes.
-docker rm -vf $(docker ps -a -f status=exited -q)
+docker rm -vf $(docker ps -a -f status=exited -q)</code></pre>
 
-# Remove an image.
-docker rmi &lt;Image ID&gt;
+<pre><code class="bash"># Remove an image.
+docker rmi &lt;Image_id&gt;
 
 # Remove dangling (tagged with &lt;none&gt;) images.
 docker image prune -f
@@ -3979,9 +3991,12 @@ docker image prune -f
 docker image prune -f -a
 
 # Remove all images.
-docker rmi -f $(docker images -a -q)
+docker rmi -f $(docker images -a -q)</code></pre>
 
-# Tag an image.
+<pre><code class="bash"># Export an image.
+docker save &lt;image_name&gt;:&lt;tag&gt; | gzip > my_image.tar.gz</code></pre>
+
+<pre><code class="bash"># Tag an image.
 docker image tag [IMAGE_ID] [TAG_NAME]
 
 # Remove all unused containers, volumes, networks and images.
@@ -7676,8 +7691,12 @@ date --date="tomorrow"</code></pre>
         <h3 class="card-title">Change SSH password</h3>
 <pre><code class="bash">Login via SSH first. Type "passwd" and enter the existing and new passwords</code></pre>
 
-        <h3 class="card-title">SCP local to remote</h3>
-<pre><code class="bash">scp -r &lt;folder&gt; &lt;username&gt;@&lt;IP-or-hostname&gt;:&lt;directory&gt;</code></pre>
+        <h3 class="card-title">SCP</h3>
+<pre><code class="bash"># Local to remote.
+scp -r &lt;folder&gt; &lt;username&gt;@&lt;IP-or-hostname&gt;:&lt;directory&gt;
+
+# Remote to local.
+scp &lt;username&gt;@&lt;IP-or-hostname&gt;:&lt;file&gt; &lt;directory&gt;</code></pre>
 
         <h3 class="card-title">SSH tunnel via port-forwarding</h3>
 <pre><code class="bash">ssh -i &lt;host-private-key&gt; -L &lt;host-port&gt;:&lt;vm-ip&gt;:&lt;vm-port&gt; &lt;vm-username&gt;@&lt;vm-ip&gt; -N</code></pre>
@@ -7915,8 +7934,15 @@ chmod 640 $file</code></pre>
 ln -s file1 link1
 ls -l file1 link1</code></pre>
 
-        <h3 class="card-title">Remove a file starting with dash</h3>
+        <h3 class="card-title">Remove a file starting with dash.</h3>
 <pre><code class="bash">rm ./ -file</code></pre>
+
+        <h3 class="card-title">Split and merge files.</h3>
+<pre><code class="bash"># Split file.tar.gz by 1000000000 (this produces xaa, xab, xac, ...)
+split -b 1000000000 file.tar.gz
+
+# Merge splitted files.
+cat x* > file.tar.gz</code></pre>
       </div>
       <div class="card-footer text-muted">
 
