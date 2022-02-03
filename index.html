@@ -4400,6 +4400,7 @@ docker push [dockerhub_user]/jenkins-slave-jnlp2</code></pre>
 
         <ul class="list-unstyled mb-0">
           <li><a href="#kubernetes-1">1. Kubectl</a></li>
+          <li><a href="#kubernetes-2">2. AKS</a></li>
         </ul>
 
         <ul>
@@ -7016,13 +7017,39 @@ kubectl get ns
 kubectl get ns --insecure-skip-tls-verify
 
 kubectl get pods -n &lt;namespace&gt;
+
+# Inspace all namespaces.
 kubectl get pods --all-namespaces
+kubectl get rolebinding --all-namespaces
+kubectl get clusterrolebinding --all-namespaces
+kubectl get serviceaccount --all-namespaces
+kubectl get rolebindings,clusterrolebindings \
+  --all-namespaces  \
+  -o custom-columns='KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,SERVICE_ACCOUNTS:subjects[?(@.kind=="ServiceAccount")].name'
 
 # List all images.
 kubectl get pods --all-namespaces -o jsonpath="{.items[*].spec.containers[*].image}" | tr -s '[[:space:]]' '\n' | sort | uniq -c</code></pre>
       </div>
       <div class="card-footer text-muted">
         Reference: <a href="https://kubernetes.io/docs/reference/kubectl/cheatsheet/">kubectl Cheat Sheet</a>
+      </div>
+    </div>
+
+    <div class="card mb-4" id="kubernetes-2">
+      <div class="card-body">
+        <h2 class="card-title">2. AKS</h2>
+<pre><code class="bash"># Add a cluster information to kube config.
+az aks get-credentials -n cluster-name -g resource-group
+
+# Show my current account information.
+az account show
+
+# Show details of AKS cluster
+az aks list --resource-group resource-group
+az aks list --resource-group resource-group --query id</code></pre>
+      </div>
+      <div class="card-footer text-muted">
+
       </div>
     </div>
 
@@ -7894,8 +7921,10 @@ tar xvf /tmp/file.tar # extract tar</code></pre>
         <p class="card-text">8.5. kill [options] [pids|commands]</p>
 
         <p class="card-text">8.6. Disk usage</p>
-<pre><code class="bash">du -sh ~</code></pre>
-<pre><code class="bash">du --max-depth=1 /[folder] | sort -n -r # find size of folders</code></pre>
+<pre><code class="bash">du -sh ~
+
+# Find size of folders.
+du --max-depth=1 &lt;directory&gt; | sort -n -r</code></pre>
 
         <p class="card-text">8.7. lsof</p>
 <pre><code class="bash">lsof | more # view all open files in system</code></pre>
