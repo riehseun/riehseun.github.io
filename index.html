@@ -3941,7 +3941,9 @@ jobs.each { job ->
   <div class="card mb-4" id="docker-2">
     <div class="card-body">
       <h2 class="card-title">2. Docker useful commands</h2>
-<pre><code class="bash"># Builds Dockerfile and create new image.
+<pre><code class="bash">docker info
+
+# Builds Dockerfile and create new image.
 docker build -f &lt;Dockerfile_name&gt; -t &lt;Docker_image_name&gt; .
 
 # Tag and push image
@@ -3960,20 +3962,12 @@ docker restart &lt;image_name&gt;
 # Login to the container.
 docker exec -it &lt;container_name&gt; bash
 
-# Run an image as container.
-docker run -i -t &lt;image_name&gt;:&lt;tag&gt; /bin/bash
-
-# Clean up container's file system after container exists.
-docker run -rm
-
-# Set environment variable.
-docker run -e
-
-# Have the container up and running
-docker run -dit
-
-# NVIDIA container runtime (GPU accelerated containers)
-docker run --runtime=nvidia</code></pre>
+docker run -rm \ # Clean up container's file system after container exists.
+           --env VAR=value\ # Set environment variable.
+           -dit \ # Have the container up and running.
+           --runtime=nvidia \ # NVIDIA container runtime. (GPU accelerated containers)
+           --name=&lt;container_name&gt; \
+           &lt;image_name&gt;:&lt;tag&gt; /bin/bash</code></pre>
 
 <pre><code class="bash"># Login to the container as root user.
 docker exec -u 0 -it &lt;container_name&gt; bash
@@ -4137,7 +4131,9 @@ sudo journalctl -fu docker
 
 # "failed to start daemon: error while opening volume store metadata datavase: timeout"
 ps axf | grep docker
-# Then "kill -9 &lt;problematic docker process&gt;"</code></pre>
+# Then "kill -9 &lt;problematic docker process&gt;"
+
+sudo systemctl restart docker</code></pre>
     </div>
     <div class="card-footer text-muted">
       Reference: <a href="https://medium.com/better-programming/understanding-docker-container-exit-codes-5ee79a1d58f6#id_token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImZkYjQwZTJmOTM1M2M1OGFkZDY0OGI2MzYzNGU1YmJmNjNlNGY1MDIiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJuYmYiOjE2MTM1NzM4MTAsImF1ZCI6IjIxNjI5NjAzNTgzNC1rMWs2cWUwNjBzMnRwMmEyamFtNGxqZGNtczAwc3R0Zy5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsInN1YiI6IjEwNDg0MzY5NzAyODQxMjQzODc2MyIsImVtYWlsIjoic2V1bmdtb29ucmllaEBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYXpwIjoiMjE2Mjk2MDM1ODM0LWsxazZxZTA2MHMydHAyYTJqYW00bGpkY21zMDBzdHRnLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwibmFtZSI6IlNldW5nbW9vbiBSaWVoIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS8tYnpBOWplbjNkTzgvQUFBQUFBQUFBQUkvQUFBQUFBQUFBQUEvQU1adXVjbTZIUlo0aFdsS2h5R25LRFo4VTdaVC1FaHZady9zOTYtYy9waG90by5qcGciLCJnaXZlbl9uYW1lIjoiU2V1bmdtb29uIiwiZmFtaWx5X25hbWUiOiJSaWVoIiwiaWF0IjoxNjEzNTc0MTEwLCJleHAiOjE2MTM1Nzc3MTAsImp0aSI6IjY1NGE2YzQ1MGNkODMyNDJmNDI2ZDU1MjA5MGQzNDkxMTRhMzBlNDMifQ.HwDGYYQfaBy1ngNtOE1bGM97e5hkt2-uDqVtp54YFG_LUV7TzGDx3EDPojGNAV3SIRJ_BovhzKCHBuso8UclCntHjpQ0T1QjB6hJg_i8i9cU_7eJRMlM1SKxkEIBAxua_APLJwzI0f3eTUAnScg7AwRI3tu_TJ9Ip5T3u5F-7uheXbivqqEol0Z6GcaVZv3kHDdG-SzvDZ5h1NylmvQGyJOpoKXebyC6SIJzUZogicMWGnn6mAxt7dL87q-4wMM0T5k2FPhS2EXJLqTvSiIOtWMQ-FJ8UB7nzQJDT6eNrpHHCaokSeoQKTlLBA0M4iSPjMghru1LnXBy5FoJHJtNUg">Understanding Docker Container Exit Codes</a>
@@ -4200,7 +4196,8 @@ distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
 curl -s -L https://nvidia.github.io/nvidia-container-runtime/$distribution/nvidia-container-runtime.list | sudo tee /etc/apt/sources.list.d/nvidia-container-runtime.list
 sudo apt-get update
 
-sudo apt-get install -y nvidia-docker2
+sudo apt-get install -y nvidia-container-runtime
+
 # Add the following to /etc/docker/daemon.json
 "runtimes": {
   "nvidia": {
@@ -4208,8 +4205,23 @@ sudo apt-get install -y nvidia-docker2
     "runtimeArgs": []
   }
 }
+sudo pkill -SIGHUP dockerd
+
+# Also create and populate override.conf
+sudo mkdir -p /etc/systemd/system/docker.service.d
+sudo tee /etc/systemd/system/docker.service.d/override.conf &lt;&lt;EOF
+[Service]
+ExecStart=
+ExecStart=/usr/bin/dockerd
+EOF
+
+# Reload daemon and restart docker
 sudo systemctl daemon-reload
 sudo systemctl restart docker
+
+docker info | grep -i runtime
+# should show "nvidia runc"
+
 </code></pre>
     </div>
     <div class="card-footer text-muted">
