@@ -3896,6 +3896,7 @@ jobs.each { job ->
         <li><a href="#docker-6">6. Configure Docker in Ubuntu</a></li>
         <li><a href="#docker-7">7. Docker storage</a></li>
         <li><a href="#docker-8">8. Docker service</a></li>
+        <li><a href="#docker-9">9. GPU accelerated docker</a></li>
       </ul>
     </div>
   </div>
@@ -3967,6 +3968,9 @@ docker run -rm
 
 # Set environment variable.
 docker run -e
+
+# Have the container up and running
+docker run -dit
 
 # NVIDIA container runtime (GPU accelerated containers)
 docker run --runtime=nvidia</code></pre>
@@ -4126,6 +4130,14 @@ docker run --network host -e SQLFQDN=$SQL_CONTAINER_IP,1433 -e SQLUSER=sqladmin 
         <li>Code 139 - container received SIGSEGV (segmentation fault)</li>
         <li>Code 143 - container received SIGTERM (docker stop)</li>
       </ul>
+<pre><code class="bash"># "sudo systemctl start docker" fails
+systemctl status docker.service
+sudo dockerd --debug
+sudo journalctl -fu docker
+
+# "failed to start daemon: error while opening volume store metadata datavase: timeout"
+ps axf | grep docker
+# Then "kill -9 &lt;problematic docker process&gt;"</code></pre>
     </div>
     <div class="card-footer text-muted">
       Reference: <a href="https://medium.com/better-programming/understanding-docker-container-exit-codes-5ee79a1d58f6#id_token=eyJhbGciOiJSUzI1NiIsImtpZCI6ImZkYjQwZTJmOTM1M2M1OGFkZDY0OGI2MzYzNGU1YmJmNjNlNGY1MDIiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJuYmYiOjE2MTM1NzM4MTAsImF1ZCI6IjIxNjI5NjAzNTgzNC1rMWs2cWUwNjBzMnRwMmEyamFtNGxqZGNtczAwc3R0Zy5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsInN1YiI6IjEwNDg0MzY5NzAyODQxMjQzODc2MyIsImVtYWlsIjoic2V1bmdtb29ucmllaEBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYXpwIjoiMjE2Mjk2MDM1ODM0LWsxazZxZTA2MHMydHAyYTJqYW00bGpkY21zMDBzdHRnLmFwcHMuZ29vZ2xldXNlcmNvbnRlbnQuY29tIiwibmFtZSI6IlNldW5nbW9vbiBSaWVoIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS8tYnpBOWplbjNkTzgvQUFBQUFBQUFBQUkvQUFBQUFBQUFBQUEvQU1adXVjbTZIUlo0aFdsS2h5R25LRFo4VTdaVC1FaHZady9zOTYtYy9waG90by5qcGciLCJnaXZlbl9uYW1lIjoiU2V1bmdtb29uIiwiZmFtaWx5X25hbWUiOiJSaWVoIiwiaWF0IjoxNjEzNTc0MTEwLCJleHAiOjE2MTM1Nzc3MTAsImp0aSI6IjY1NGE2YzQ1MGNkODMyNDJmNDI2ZDU1MjA5MGQzNDkxMTRhMzBlNDMifQ.HwDGYYQfaBy1ngNtOE1bGM97e5hkt2-uDqVtp54YFG_LUV7TzGDx3EDPojGNAV3SIRJ_BovhzKCHBuso8UclCntHjpQ0T1QjB6hJg_i8i9cU_7eJRMlM1SKxkEIBAxua_APLJwzI0f3eTUAnScg7AwRI3tu_TJ9Ip5T3u5F-7uheXbivqqEol0Z6GcaVZv3kHDdG-SzvDZ5h1NylmvQGyJOpoKXebyC6SIJzUZogicMWGnn6mAxt7dL87q-4wMM0T5k2FPhS2EXJLqTvSiIOtWMQ-FJ8UB7nzQJDT6eNrpHHCaokSeoQKTlLBA0M4iSPjMghru1LnXBy5FoJHJtNUg">Understanding Docker Container Exit Codes</a>
@@ -4176,6 +4188,32 @@ docker service rm inspect --pretty &lt;service id&gt;</code></pre>
     </div>
     <div class="card-footer text-muted">
 
+    </div>
+  </div>
+
+  <div class="card mb-4" id="docker-9">
+    <div class="card-body">
+      <h2 class="card-title">9. GPU accelerated docker</h2>
+<pre><code class="bash"># Ubuntu
+curl -s -L https://nvidia.github.io/nvidia-container-runtime/gpgkey | sudo apt-key add -
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+curl -s -L https://nvidia.github.io/nvidia-container-runtime/$distribution/nvidia-container-runtime.list | sudo tee /etc/apt/sources.list.d/nvidia-container-runtime.list
+sudo apt-get update
+
+sudo apt-get install nvidia-container-runtime
+
+sudo mkdir -p /etc/systemd/system/docker.service.d
+sudo tee /etc/systemd/system/docker.service.d/override.conf &lt;&lt;EOF
+[Service]
+ExecStart=
+ExecStart=/usr/bin/dockerd --host=fd:// --add-runtime=nvidia=/usr/bin/nvidia-container-runtime
+EOF
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+</code></pre>
+    </div>
+    <div class="card-footer text-muted">
+      Reference: <a href="https://github.com/NVIDIA/nvidia-container-runtime">nvidia-container-runtime</a>
     </div>
   </div>
 
