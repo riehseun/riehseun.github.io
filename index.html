@@ -4200,14 +4200,14 @@ distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
 curl -s -L https://nvidia.github.io/nvidia-container-runtime/$distribution/nvidia-container-runtime.list | sudo tee /etc/apt/sources.list.d/nvidia-container-runtime.list
 sudo apt-get update
 
-sudo apt-get install nvidia-container-runtime
-
-sudo mkdir -p /etc/systemd/system/docker.service.d
-sudo tee /etc/systemd/system/docker.service.d/override.conf &lt;&lt;EOF
-[Service]
-ExecStart=
-ExecStart=/usr/bin/dockerd --host=fd:// --add-runtime=nvidia=/usr/bin/nvidia-container-runtime
-EOF
+sudo apt-get install -y nvidia-docker2
+# Add the following to /etc/docker/daemon.json
+"runtimes": {
+  "nvidia": {
+    "path": "/usr/bin/nvidia-container-runtime",
+    "runtimeArgs": []
+  }
+}
 sudo systemctl daemon-reload
 sudo systemctl restart docker
 </code></pre>
@@ -8054,7 +8054,7 @@ zip -9 var-log-files-9.zip /var/log/* # level 9 - highest compression</code></pr
 <pre><code class="bash">zip -P mysecurepwd var-log-protected.zip /var/log/*</code></pre>
 
       <h3 class="card-title">tar</h3>
-<pre><code class="bash">tar [options] [tar-archive-name] [other-file-names]
+<pre><code class="bash">tar &lt;options&gt; &lt;tar-archive-name&gt; &lt;other-file-names&gt;
 # Options
 # c - create an archive
 # v - verbose mode
@@ -8073,28 +8073,31 @@ tar xvf /tmp/file.tar # extract tar</code></pre>
   <div class="card mb-4" id="linux-7">
     <div class="card-body">
       <h2 class="card-title">7. Administration</h2>
-      <p class="card-text">7.1. Disk</p>
-      <p class="card-text">n – new partition creation</p>
-      <p class="card-text">d – delete existing partition</p>
-      <p class="card-text">p - print partition table</p>
-      <p class="card-text">w – write changes to the partition table</p>
-      <p class="card-text">q – quit fdisk utility</p>
-<pre><code class="bash">fdisk /dev/sda # invoke fdisk (first step to create /dev/sda1 primary partition)</code></pre>
-<pre><code class="bash">mke2fs /dev/sda1 # format disk so it can be used</code></pre>
-<pre><code class="bash">mount /dev/sda1 /home/database # mount partition to directory</code></pre>
-<pre><code class="bash">tune2fs -l /dev/sda1 # view the filesystem</code></pre>
 
-      <p class="card-text">7.2. User and group</p>
-<pre><code class="bash">useradd rieh # add a user</code></pre>
-<pre><code class="bash">passwd rieh # change user password</code></pre>
-<pre><code class="bash">groupadd developers # add a group</code></pre>
-<pre><code class="bash">usermod -g developers jsmith # add user to group</code></pre>
+      <h3 class="card-text">Disk</h3>
+<pre><code class="bash"># Options
+# n – new partition creation
+# d – delete existing partition
+# p - print partition table
+# w – write changes to the partition table
+# q – quit fdisk utility</code></pre>
 
-      <p class="card-text">7.3. Owndership and permission</p>
-<pre><code class="bash">chmod -fR [permission] [directory/file] # change permission on file/directory</code></pre>
-<pre><code class="bash">chown -fR [user/group]:[user/group] [directory/file] # change ownership of file/directory</code></pre>
+<pre><code class="bash">fdisk /dev/sda # invoke fdisk (first step to create /dev/sda1 primary partition)
+mke2fs /dev/sda1 # format disk so it can be used
+mount /dev/sda1 /home/database # mount partition to directory
+tune2fs -l /dev/sda1 # view the filesystem</code></pre>
 
-      <p class="card-text">7.4. Access control</p>
+      <h3 class="card-text">User and group</h3>
+<pre><code class="bash">useradd rieh # add a user
+passwd rieh # change user password
+groupadd developers # add a group
+usermod -g developers jsmith # add user to group</code></pre>
+
+      <h3 class="card-text">Owndership and permission</h3>
+<pre><code class="bash">chmod -fR [permission] [directory/file] # change permission on file/directory
+chown -fR [user/group]:[user/group] [directory/file] # change ownership of file/directory</code></pre>
+
+      <h3 class="card-text">Access control</h3>
 <pre><code class="bash">/etc/security/access.conf # Add user(s) or groups(s) to this file to grant access to the machine</code></pre>
     </div>
     <div class="card-footer text-muted">
@@ -8105,45 +8108,62 @@ tar xvf /tmp/file.tar # extract tar</code></pre>
   <div class="card mb-4" id="linux-8">
     <div class="card-body">
       <h2 class="card-title">8. System</h2>
+<pre><code class="bash"># Latency - speed
+# Throughput - volume</code></pre>
 
-      <p class="card-text">8.1. free [options]</p>
-      <p class="card-text">m - displays values in MB</p>
-      <p class="card-text">t - displays sum of physical and swap memory</p>
-      <p class="card-text">o - hide buffers/cache line</p>
+      <h3 class="card-text">free</h3>
+<pre><code class="bash">free &lt;options&gt;
+# Options
+# m - displays values in MB
+# t - displays sum of physical and swap memory
+# o - hide buffers/cache line</code></pre>
 
-      <p class="card-text">8.2. top [options]</p>
+      <h3 class="card-text">top</h3>
+<pre><code class="bash"># us - cpu time spent in user mode
+# sy - cpu time spent in kernel mode
+# ni - cpu tmie spent in niced executing processes
+# id - cpu time spent idle
+# wa - cpu time spent waiting for I/O
+# hi - cpu time spent on hardware inputs
+# si - cpu time spent on software inputs
 
-      <p class="card-text">8.3. ps [options]</p>
+# VIRT - virtual memory (budget)
+# RES - physical memory (money)</code></pre>
+
+      <h3 class="card-text">ps [options]</h3>
 <pre><code class="bash">ps aux | more # display all processes running in system</code></pre>
 
-      <p class="card-text">8.4. df [options] [name]</p>
+      <h3 class="card-text">df [options] [name]</h3>
 <pre><code class="bash">df –h # human readable format</code></pre>
 
-      <p class="card-text">8.5. kill [options] [pids|commands]</p>
+      <h3 class="card-text">kill [options] [pids|commands]</h3>
 
-      <p class="card-text">8.6. Disk usage</p>
+      <h3 class="card-text">Disk usage</h3>
 <pre><code class="bash">du -sh ~
 
 # Find size of folders.
-du --max-depth=1 &lt;directory&gt; | sort -n -r</code></pre>
+du --max-depth=1 &lt;directory&gt; | sort -n -r
 
-      <p class="card-text">8.7. lsof</p>
-<pre><code class="bash">lsof | more # view all open files in system</code></pre>
-<pre><code class="bash">lsof -i -P -n | grep LISTEN # find pid and kill them
+# If there is a discrepancy from du to reality.
+lsof | grep &lt;directory&gt; | grep deleted</code></pre>
+
+      <h3 class="card-text">lsof</h3>
+<pre><code class="bash">lsof | more # view all open files in system
+lsof -i -P -n | grep LISTEN # find pid and kill them
 kill -9 [pid]</code></pre>
 
-      <p class="card-text">8.8. sar</p>
-<pre><code class="bash">sar –u # Display CPU statistics</code></pre>
-<pre><code class="bash">sar –d # Display disk IO statistics</code></pre>
+      <h3 class="card-text">sar</h3>
+<pre><code class="bash">sar –u # Display CPU statistics
+sar –d # Display disk IO statistics</code></pre>
 
-      <p class="card-text">8.9. stat</p>
-<pre><code class="bash">netstat -tulnp | grep 8443 # find processes running on port 8443</code></pre>
-<pre><code class="bash">stat -c "%a &n" * # display stats of files</code></pre>
+      <h3 class="card-text">stat</h3>
+<pre><code class="bash">netstat -tulnp | grep 8443 # find processes running on port 8443
+stat -c "%a &n" * # display stats of files</code></pre>
 
-      <p class="card-text">1.18. Diff</p>
+      <h3 class="card-text">Diff</h3>
 <pre><code class="bash">diff -w file_old.txt file_new.txt</code></pre>
 
-      <p class="card-text">1.19. Reboot the machine</p>
+      <h3 class="card-text">Reboot the machine</h3>
 <pre><code class="bash">sudo reboot</code></pre>
     </div>
     <div class="card-footer text-muted">
