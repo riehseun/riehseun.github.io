@@ -7099,6 +7099,29 @@ portForward:
   namespace: my_namespace
   port: 8080
   localPort: 9000</code></pre>
+
+<pre><code class="bash"># Build docker locally.
+build:
+  artifacts:
+  - image: gcr.io/k8s-skaffold/example
+  local:
+    useDockerCLI: false
+    useBuildkit: false</code></pre>
+
+<pre><code class="bash"># Split registry, repository, tag
+build:
+  artifacts:
+  - image: gcr.io/k8s-skaffold/example
+deploy:
+  helm:
+    releases:
+      - name: my-chart
+        chartPath: helm
+        artifactOverrides:
+          imageKey: gcr.io/k8s-skaffold/example
+        imageStrategy:
+          helm:
+            explicitRegistry: true</code></pre>
       </div>
       <div class="card-footer text-muted">
         Reference: <a href="https://skaffold.dev/docs/references/yaml">skaffold.yaml</a>
