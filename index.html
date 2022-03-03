@@ -5758,37 +5758,37 @@ loadBalancer:
 <pre><code class="yaml">apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-name: test-network-policy
-namespace: default
+  name: test-network-policy
+  namespace: default
 spec:
-podSelector: # Empty podSelector selects all pods in the namespace.
-  matchLabels:
-    role: db # Selects pods with the label "role=db"
-policyTypes:
-- Ingress
-- Egress
-ingress:
-- from:
-  - ipBlock:
-      cidr: 172.17.0.0/16
-      except:
-      - 172.17.1.0/24
-  - namespaceSelector:
-      matchLabels:
-        project: myproject
-  - podSelector:
-      matchLabels:
-        role: frontend
-  ports:
-  - protocol: TCP
-    port: 6379
-egress:
-- to:
-  - ipBlock:
-      cidr: 10.0.0.0/24
-  ports:
-  - protocol: TCP
-    port: 5978</code></pre>
+  podSelector: # Empty podSelector selects all pods in the namespace.
+    matchLabels:
+      role: db # Selects pods with the label "role=db"
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - ipBlock:
+            cidr: 172.17.0.0/16
+            except:
+            - 172.17.1.0/24
+        - namespaceSelector:
+            matchLabels:
+              project: myproject
+        - podSelector:
+            matchLabels:
+              role: frontend
+      ports:
+      - protocol: TCP
+        port: 6379
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 10.0.0.0/24
+      ports:
+        - protocol: TCP
+          port: 5978</code></pre>
 
         <h3 class="card-title">Default deny all ingress traffic</h3>
 <pre><code class="yaml">---
@@ -7075,6 +7075,9 @@ kubectl get serviceaccount --all-namespaces
 kubectl get rolebindings,clusterrolebindings \
   --all-namespaces  \
   -o custom-columns='KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,SERVICE_ACCOUNTS:subjects[?(@.kind=="ServiceAccount")].name'
+# Find all resources in a namespace.
+kubectl api-resources --verbs=list --namespaced -o name \
+  | xargs -n 1 kubectl get --show-kind --ignore-not-found -l &lt;label&gt;=&lt;value&gt; -n &lt;namespace&gt;
 
 # List all images.
 kubectl get pods --all-namespaces -o jsonpath="{.items[*].spec.containers[*].image}" | tr -s '[[:space:]]' '\n' | sort | uniq -c
