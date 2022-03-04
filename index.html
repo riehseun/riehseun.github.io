@@ -7137,6 +7137,7 @@ kubectl port-forward &lt;pod_name&gt; &lt;localhost_port&gt;:&lt;container_port&
           <li>templates/ - k8s manifest files.</li>
         </ul>
 
+        <p class="card-text">Helm command</p>
 <pre><code class="bash"># List helm releases.
 helm list -n &lt;namespace&gt;
 helm ls --all-namespaces
@@ -7144,11 +7145,96 @@ helm ls --all-namespaces
 # Check helm release.
 helm status &lt;release_name&gt;</code></pre>
 
+        <p class="card-text">Helm syntax</p>
 <pre><code class="yaml"># Lowercase the result, then wrap it in double quotes.
 value: {{ include "mytpl" . | lower | quote }}
 
 # Being a new line and indent 8 spaces.
 {{ Values.myValue | nindent 8 }}</code></pre>
+
+        <p class="card-text">Conditions</p>
+<pre><code class="yaml">apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+data:
+  myvalue: "Hello World"
+  drink: {{ .Values.favorite.drink | default "tea" | quote }}
+  food: {{ .Values.favorite.food | upper | quote }}*
+**{{- if eq .Values.favorite.drink "coffee" }}
+  mug: "true"*
+**{{- end }}</code></pre>
+
+<pre><code class="yaml"># Result
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clunky-cat-configmap
+data:
+  myvalue: "Hello World"
+  drink: "coffee"
+  food: "PIZZA"
+  mug: "true"</code></pre>
+
+        <p class="card-text">Variable scoping</p>
+<pre><code class="yaml">apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+data:
+  myvalue: "Hello World"
+  {{- with .Values.favorite }}
+  drink: {{ .drink | default "tea" | quote }}
+  food: {{ .food | upper | quote }}
+  {{- end }}
+
+# Use "$" to access objects from parent scope.
+{{- with .Values.favorite }}
+drink: {{ .drink | default "tea" | quote }}
+food: {{ .food | upper | quote }}
+release: {{ $.Release.Name }}
+{{- end }}</code></pre>
+
+        <p class="card-text">Loop</p>
+<pre><code class="yaml"># Assume "values.yaml"
+favorite:
+  drink: coffee
+  food: pizza
+pizzaToppings:
+  - mushrooms
+  - cheese
+  - peppers
+  - onions</code></pre>
+
+<pre><code class="yaml">apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+data:
+  myvalue: "Hello World"
+  {{- with .Values.favorite }}
+  drink: {{ .drink | default "tea" | quote }}
+  food: {{ .food | upper | quote }}
+  toppings: |-
+    {{- range $.Values.pizzaToppings }}
+    - {{ . | title | quote }}
+    {{- end }}
+  {{- end }}</code></pre>
+
+<pre><code class="yaml"># Result
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: edgy-dragonfly-configmap
+data:
+  myvalue: "Hello World"
+  drink: "coffee"
+  food: "PIZZA"
+  toppings: |-
+    - "Mushrooms"
+    - "Cheese"
+    - "Peppers"
+    - "Onions"</code></pre>
 
         <p class="card-text">Predefined values</p>
 <pre><code class="bash">Release.Name
