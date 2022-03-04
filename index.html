@@ -7077,6 +7077,8 @@ kubectl get ns
 # If "Unable to connect to the server: x509: certificate signed by unknown authority"
 kubectl get ns --insecure-skip-tls-verify
 kubectl delete namespace &lt;namespace&gt;
+# Delete a label
+kubectl label namespaces &lt;namespace&gt; &lt;label&gt;-
 
 # Error from server (InternalError): an error on the server ("") has prevented the request from succeeding
 # => check proxy setting
@@ -7251,7 +7253,9 @@ kubectl get delete &lt;crd1&gt; &lt;crd2&gt; &lt;crd3&gt; ...
 
 # Reason: resources created manually but getting upgraded by helm
 # Solution:
-kubectl patch namespace &lt;namespace&gt; --patch-file &lt;updated_yaml_to_use&gt;</code></pre>
+kubectl patch namespace &lt;namespace&gt; --patch-file &lt;updated_yaml_to_use&gt;
+kubectl annotate &lt;kind&gt; &lt;name&gt; meta.helm.sh/release-namespace=&lt;helm_will_tell_you_what_to_put_here&gt; # For example, kind can be "namespace", name can be "namespace name".
+kubectl annotate &lt;kind&gt; &lt;name&gt; meta.helm.sh/release-names=&lt;helm_will_tell_you_what_to_put_here&gt;</code></pre>
 
 <pre><code class="bash"># "updated_yaml_to_use" should look like.
 apiVersion: v1
@@ -7260,9 +7264,9 @@ metadata:
   name: infosec-aquasec
   labels:
     app.kubernetes.io/part-of: {{ Release.Name }}
-    helm.sh/chart: {{ Chart.Name }}-{{ Chart.Version }}
     app.kubernetes.io/instance: {{ Release.Name }}
-    app.kubernetes.io/managed-by: {{ Release.Service }}</code></pre>
+    app.kubernetes.io/managed-by: {{ Release.Service }}
+    helm.sh/chart: {{ Chart.Name }}-{{ Chart.Version }}</code></pre>
 
       </div>
       <div class="card-footer text-muted">
