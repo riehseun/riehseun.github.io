@@ -7781,19 +7781,20 @@ gcloud container clusters delete [CLUSTER_NAME]</code></pre>
 # Function description #
 ########################
 function &lt;function_name&gt;() {
-# $1, $2, $3, so on are used to read in arguments passed to shell script and functions.
-local &lt;argument1&gt;=$1 # Description about the first argument.
-local &lt;argument2&gt;=$2 # Description about the second argument.
-local &lt;argument3&gt;=$3 # Description about the thrid argument.
-...
+  # $1, $2, $3, so on are used to read in arguments passed to shell script and
+  # functions.
+  local &lt;argument1&gt;=$1 # Description about the first argument.
+  local &lt;argument2&gt;=$2 # Description about the second argument.
+  local &lt;argument3&gt;=$3 # Description about the thrid argument.
+  ...
 
-echo &lt;ret_val&gt; # This is the return statement.
+  echo &lt;ret_val&gt; # This is the return statement.
 
-exit 1 # This exits the script execution.
+  exit 1 # This exits the script execution.
 }
 
-# When calling a function, wrapping a variable inside quotes will make sure that the entire content is passed.
-# Example
+# When calling a function, wrapping a variable inside quotes will make sure that
+# the entire content is passed. For example,
 my_function $arg1 $arg2 "$arg_large_string_with_spaces"</code></pre>
 
       <h3 class="card-title">Read user inputs</h3>
@@ -7803,25 +7804,25 @@ read -s USER_INPUT1 ; export USER_INPUT1
 
 read input
 if [[ "${input}" == "y" ]]; then
-echo "${input}"
+  echo "${input}"
 fi
 
 # Provide user guide on how to run the script.
 if [ -z "${ENV_VAR_SET_BY_USER_ACTION}" ]; then
-echo "Usage: $0 keyword1"
-echo "Usage: $0 keyword2"
-echo "Usage: $0 keyword3"
-exit 1
+  echo "Usage: $0 keyword1"
+  echo "Usage: $0 keyword2"
+  echo "Usage: $0 keyword3"
+  exit 1
 fi</code></pre>
 
       <h3 class="card-title">Suppress outputs</h3>
 <pre><code class="bash"># Supress outputs of pushd and popd commands.
 pushd () {
-command pushd "$@" > /dev/null
+  command pushd "$@" > /dev/null
 }
 
 popd () {
-command popd "$@" > /dev/null
+  command popd "$@" > /dev/null
 }
 
 # Suppress output of bash command.
@@ -7829,7 +7830,7 @@ cat file.txt > /dev/null # suppress output
 
 # Suppress error.
 err() {
-echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*" >&2
+  echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*" >&2
 }</code></pre>
 
       <h3 class="card-title">curl</h3>
@@ -7839,11 +7840,20 @@ echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*" >&2
 # u - to pass in credentials
 # o – to write output to a destination
 # w '%{http_code}' – to get the http status code
-curl [options] [URL] -X [GET/POST/PUT/DELETE] -H [Headers] -d [Data]
+curl &lt;options&gt; &lt;url&gt; \
+    -X &lt;GET/POST/PUT/DELETE&gt; \
+    -H &lt;headers&gt; \
+    -d &lt;data&gt;
 
 # Posting a JSON data.
-echo $JSON_DATA | curl [options] [URL] -X [GET/POST/PUT/DELETE] -H [Headers] -d @-
-curl [options] [URL] -X [GET/POST/PUT/DELETE] -H [Headers] -d'{ "field": "value" }'
+echo $JSON_DATA | curl &lt;options&gt; &lt;URL&gt; \
+                        -X &lt;GET/POST/PUT/DELETE&gt; \
+                        -H &lt;Headers&gt; \
+                        -d @-
+curl &lt;options&gt; &lt;URL&gt; \
+    -X &lt;GET/POST/PUT/DELETE&gt; \
+    -H &lt;Headers&gt; \
+    -d'{ "field": "value" }'
 
 # Constructing JSON payload.
 curl -u "${username}":"${password}" -X POST "${url}/${path}" \
@@ -7859,9 +7869,9 @@ curl -u "${username}":"${password}" -X POST "${url}/${path}" \
 # Constructing XML payload.
 cat &gt; data.xml &lt;&lt;EOF
 &lt;element&gt;
-&lt;subelement1&gt;$value1&lt;/subelement1&gt;
-&lt;subelement2&gt;$value2&lt;/subelement2&gt;
-&lt;subelement3&gt;$value3&lt;/subelement3&gt;
+  &lt;subelement1&gt;$value1&lt;/subelement1&gt;
+  &lt;subelement2&gt;$value2&lt;/subelement2&gt;
+  &lt;subelement3&gt;$value3&lt;/subelement3&gt;
 &lt;/element&gt;
 EOF
 
@@ -7873,7 +7883,12 @@ curl -u "${username}":"${password}" \
 rm -f data.xml
 
 # Example
-http_status_code=$(curl -u "${username}":"${password}" -w "%{http_code}" -o "${log_output_location}" -s -H "Content-Type:application/json" -d '{"field1": "'${variable1}'", "field2": "'${variable2}'"}' "${url}/${path}")</code></pre>
+http_status_code=$(curl -u "${username}":"${password}" \
+                        -w "%{http_code}" \
+                        -o "${log_output_location}" \
+                        -s -H "Content-Type:application/json" \
+                        -d '{"field": "'${variable}'"}' \
+                        "${url}/${path}")</code></pre>
 
       <h3 class="card-title">wget</h3>
 <pre><code class="bash">wget --user &lt;username&gt; --password &lt;password&gt; &lt;url&gt;</code></pre>
@@ -7905,7 +7920,8 @@ if [ "${variable}" == "{string}" ]; then
 fi
 
 # Complex conditions.
-if [[ -z "${variable1}" && "{variable2}" != "something" ]] && [[ "${variable3}" == "value1" || "${variable4}" == "value2" ]]; then
+if [[ -z "${variable1}" && "{variable2}" != "something" ]] \
+    && [[ "${variable3}" == "value1" || "${variable4}" == "value2" ]]; then
 
 fi</code></pre>
 
@@ -7917,23 +7933,23 @@ PARENT_DIR="$(dirname "${CURRENT_DIR}")"</code></pre>
       <h3 class="card-title">Loop</h3>
 <pre><code class="bash"># Loop through array.
 for i in "${array[@]}"; do
-echo "${i}"
+  echo "${i}"
 done
 
 # Loop through number.
 for i in $(seq 1 "${END}"); do
-echo "${i}"
+  echo "${i}"
 done
 
 # Loop through a string separated by space.
 string="a b c d e"
 for i in $(echo "${string}"); do
-echo "${i}"
+  echo "${i}"
 done
 
 # Loop through directory.
 for filename in path/*.txt; do
-[ -e "${filename}" ] || continue
+  [ -e "${filename}" ] || continue
 done</code></pre>
 
       <h3 class="card-title">Array</h3>
@@ -7948,25 +7964,25 @@ element=${array[0]}</code></pre>
       <h3 class="card-title">File</h3>
 <pre><code class="bash"> # Check if file exists.
 if [ ! -f /path/file ]; then
-echo "File does not exist"
+  echo "File does not exist"
 fi
 
 # Check if a string exists in a file.
 if grep -Fxq "${string}" "${file}"; then
-# String found
+  # String found
 else
-# String not found
+  # String not found
 fi
 
 # Read file line by line.
 while IFS= read -r line; do
-echo "${line}"
+  echo "${line}"
 done < "${file}"
 
 # Write a block of texts to a file
 cat &lt;&lt;EOF&gt;&gt; "${file}"
 {
-"key": "value"
+  "key": "value"
 }
 EOF</code></pre>
 
@@ -8064,7 +8080,7 @@ Use option -v to # Find all except the match
 Use option -c to # Get number of lines with match
 Use option -i to # Ignore case
 Use option -r to # Find matches recursively in files in directory
-grep [options] pattern [files]
+grep &lt;options&gt; pattern &lt;files&gt;
 
 # Check if a string exists in a file.
 if greq -q $string $file; then
@@ -8073,7 +8089,7 @@ fi
 </code></pre>
 
       <h3 class="card-title">find</h3>
-<pre><code class="bash">find [pathnames] [conditions]
+<pre><code class="bash">find &lt;pathnames&gt; &lt;conditions&gt;
 
 # Find files containing mail in "/etc".
 find /etc -name "*mail*"
@@ -8096,9 +8112,12 @@ find / type -f -name $filename 2> /dev/null | while read line; do
 done</code></pre>
 
       <h3 class="card-title">Uppercase and lowercase</h3>
-<pre><code class="bash">tr a-z A-Z < file.txt # Convert to uppercase.
-tr A-Z a-z < file.txt # Convert to lowercase.
-lowercase=$(echo "$string" | tr '[:upper:]' '[:lower:]') # Convert a string to lowercase.
+<pre><code class="bash"># Convert to uppercase.
+tr a-z A-Z < file.txt
+# Convert to lowercase.
+tr A-Z a-z < file.txt
+# Convert a string to lowercase.
+lowercase=$(echo "$string" | tr '[:upper:]' '[:lower:]')
 
 var="Test"
 
@@ -8109,10 +8128,14 @@ uppercase=${var^^}
 echo $uppercase  # TEST</code></pre>
 
       <h3 class="card-title">Cut</h3>
-<pre><code class="bash">cut -d: -f 1 file.txt # Display 1st field from colon delimited file
-cut -d: -f 1,3 file.txt # Display 1st and 3rd field from colon delimited file
-cut -d: -f1 /etc/passwd # Displays unix login names for all users in the system
-free | tr -s ' ' | sed '/^Mem/!d' | cut -d" " -f2 # Displays total memory available on the system</code></pre>
+<pre><code class="bash"># Display 1st field from colon delimited file.
+cut -d: -f 1 file.txt
+# Display 1st and 3rd field from colon delimited file.
+cut -d: -f 1,3 file.txt
+# Displays unix login names for all users in the system.
+cut -d: -f1 /etc/passwd
+# Displays total memory available on the system.
+free | tr -s ' ' | sed '/^Mem/!d' | cut -d" " -f2 </code></pre>
 
       <h3 class="card-title">envsubst</h3>
 <pre><code class="json"># Example json to be updated by envsubst.
@@ -8176,7 +8199,7 @@ one/two/three</code></pre>
       <h3 class="card-title">"dirs" - display directory stack. "pushd" - push directory into stack. "popd" - pop directory from stack and cd to it</h3>
 <pre><code class="bash"># Example: create tmp, do the work, and remove tmp
 mkdir tmp && pushd
-# do some work
+# Do some work.
 popd && rm -rf tmp</code></pre>
 
       <h3 class="card-title">shopt -s cdspell</h3>
@@ -8340,8 +8363,8 @@ groupadd developers # add a group
 usermod -g developers jsmith # add user to group</code></pre>
 
       <h3 class="card-text">Owndership and permission</h3>
-<pre><code class="bash">chmod -fR [permission] [directory/file] # change permission on file/directory
-chown -fR [user/group]:[user/group] [directory/file] # change ownership of file/directory</code></pre>
+<pre><code class="bash">chmod -fR &lt;permission&gt; &lt;directory/file&gt; # change permission on file/directory
+chown -fR &lt;user/group&gt;:&lt;user/group&gt; &lt;directory/file&gt; # change ownership of file/directory</code></pre>
 
       <h3 class="card-text">Access control</h3>
 <pre><code class="bash">/etc/security/access.conf # Add user(s) or groups(s) to this file to grant access to the machine</code></pre>
@@ -8398,7 +8421,7 @@ lsof | grep &lt;directory&gt; | grep deleted</code></pre>
       <h3 class="card-text">lsof</h3>
 <pre><code class="bash">lsof | more # view all open files in system
 lsof -i -P -n | grep LISTEN # find pid and kill them
-kill -9 [pid]</code></pre>
+kill -9 &lt;pid&gt;</code></pre>
 
       <h3 class="card-text">sar</h3>
 <pre><code class="bash">sar –u # Display CPU statistics
@@ -8472,7 +8495,7 @@ source .env/bin/activate
 pip3 install -r requirements.txt # Assuming python dependencies are under "requirements.txt"</code></pre>
 
       <p class="card-text">11.2. Execute python</p>
-<pre><code class="bash">python [your_script.py] [--options] [arguments]</code></pre>
+<pre><code class="bash">python &lt;your_script.py&gt; &lt;--options&gt; &lt;arguments&gt;</code></pre>
     </div>
     <div class="card-footer text-muted">
 
@@ -8483,7 +8506,7 @@ pip3 install -r requirements.txt # Assuming python dependencies are under "requi
     <div class="card-body">
       <h2 class="card-title">12. Cron</h2>
 
-      <p class="card-text">minute (0 - 59) | hour (0 - 23) | day of the month (1 - 31) | month (1 - 12) | day of the week (0 - 6) [Sunday to Saturday]</p>
+      <p class="card-text">minute (0 - 59) | hour (0 - 23) | day of the month (1 - 31) | month (1 - 12) | day of the week (0 - 6) # Sunday to Saturday</p>
 <pre><code class="bash">22 5 * * 6 # 5:22AM every Saturday
 */5 * * * * # Every 5 minutes
 0 0 1 1 * # Yearly
