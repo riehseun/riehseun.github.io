@@ -7042,6 +7042,20 @@ etcd [flags]
       </div>
     </div>
 
+    <div class="card mb-4" id="kubernetes-">
+      <div class="card-body">
+        <h2 class="card-title">Namespace</h2>
+<pre><code class="yaml">apiVersion: v1
+kind: Namespace
+metadata:
+  name: my_namespace
+  ...</code></pre>
+      </div>
+      <div class="card-footer text-muted">
+
+      </div>
+    </div>
+
 
     <div class="card mb-4" id="kubernetes-1">
       <div class="card-body">
@@ -7125,6 +7139,7 @@ kubectl port-forward &lt;pod_name&gt; &lt;localhost_port&gt;:&lt;container_port&
 
 <pre><code class="bash"># List helm releases.
 helm list -n &lt;namespace&gt;
+helm ls --all-namespaces
 
 # Check helm release.
 helm status &lt;release_name&gt;</code></pre>
@@ -7138,8 +7153,30 @@ value: {{ include "mytpl" . | lower | quote }}
         <p class="card-text">Predefined values</p>
 <pre><code class="bash">Release.Name
 Release.Namespace
-Release.Service
+Release.Service # Always "Helm"
 Chart</code></pre>
+
+        <p class="card-text">Common issues</p>
+<pre><code class="bash"># Error: rendered manifests contain a resource that already exists
+# Reason: deployment was initially done by helm, but deleted by kubectl
+# Solution:
+kubectl get crd
+kubectl get delete &lt;crd1&gt; &lt;crd2&gt; &lt;crd3&gt; ...
+
+# Reason: resources created manually but getting upgraded by helm
+# Solution:
+kubectl patch namespace &lt;namespace&gt; --patch-file &lt;updated_yaml_to_use&gt;</code></pre>
+
+<pre><code class="bash"># "updated_yaml_to_use" should look like.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: infosec-aquasec
+  labels:
+    app.kubernetes.io/part-of: {{ Release.Name }}
+    helm.sh/chart: {{ Chart.Name }}-{{ Chart.Version }}
+    app.kubernetes.io/instance: {{ Release.Name }}
+    app.kubernetes.io/managed-by: {{ Release.Service }}</code></pre>
 
       </div>
       <div class="card-footer text-muted">
