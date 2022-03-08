@@ -1454,13 +1454,13 @@ import groovy.json.JsonSlurperClassic
 
 <pre><code class="groovy">// Groovy map example.
 Map map = [
-  key: [
-      subkey1: "value"
-      subkey2: [
-          subsubkey1: "value",
-          subsubkey2: "value"
-      ]
-  ]
+    key: [
+        subkey1: "value"
+        subkey2: [
+            subsubkey1: "value",
+            subsubkey2: "value"
+        ]
+    ]
 ]
 
 // Initialize a map.
@@ -1468,7 +1468,7 @@ Map map = [:]
 
 // Loop through a map.
 map.each {
-  // do something with "it" (for example, "it.key" and "it.value")
+    // do something with "it" (for example, "it.key" and "it.value")
 }
 
 // Find the value by key in a map.
@@ -1509,14 +1509,14 @@ jsonString = new JsonBuilder(jsonObject).toPrettyString()
 
 // Create a JSON string.
 String json = new JsonBuilder([
-  field1: value1,
-  field2: value2,
-  field3: value3
+    field1: value1,
+    field2: value2,
+    field3: value3
 ]).toString()</code></pre>
 
 <pre><code class="groovy">// Loop through a list.
 for (i in list) {
-  // do something with "i"
+    // do something with "i"
 }
 
 // Convert String to a list.
@@ -1529,23 +1529,23 @@ def val = (a == null) ? b : c
 // Break the outerloop in a nested loop.
 loop:
 for (foo in foos) {
-  for (var in vars) {
-      if (condition) {
-          break loop
-      }
-  }
+    for (var in vars) {
+        if (condition) {
+            break loop
+        }
+    }
 }</code></pre>
 
 <pre><code class="groovy">// Switch
 switch(variable) {
-  case "value1":
-      // Do something.
-      break
-  case "value2":
-      // Do something.
-      break
-  default:
-      // Do something.
+    case "value1":
+        // Do something.
+        break
+    case "value2":
+        // Do something.
+        break
+    default:
+        // Do something.
 }</code></pre>
 
 <pre><code class="groovy">// Pipeline methods
@@ -1561,20 +1561,20 @@ env.getProperty("string_parameter") // Get the value of a parameter to a Jenkins
 
 <pre><code class="groovy">// Http request plugin
 httpRequest(
-  authentication: credentialObjectId,
-  contentYpe: "APPLICATION_JSON",
-  httpMode: "GET",
-  customHeaders: "",
-  url: "",
-  ignoreSslErrors: true
+    authentication: credentialObjectId,
+    contentYpe: "APPLICATION_JSON",
+    httpMode: "GET",
+    customHeaders: "",
+    url: "",
+    ignoreSslErrors: true
 )
 
 // Downloads a file
 httpRequest(
-  url "",
-  responseHandle: "NONE",
-  outputFile: "",
-  timeout: ""
+    url "",
+    responseHandle: "NONE",
+    outputFile: "",
+    timeout: ""
 )</code></pre>
 
 <pre><code class="groovy">// Bash integration
@@ -1589,7 +1589,8 @@ String variable = sh returnStdout: true, script: 'some bash command'</code></pre
     <div class="card-body">
       <h2 class="card-title">2. DSL (domain specific language)</h2>
       <h3 class="card-title">How to create Jenkins job</h3>
-
+      <p class="card-text">Create jobs by executing "Jenkinsfile" from a seeder job.</p>
+      <p class="card-text">Define the job.</p>
 <pre><code class="groovy">pipelineJob("pathToJob") {
     def releaseRef = "master" // Or can be "refs/tags/&lt;version&gt;"
     logRotator {
@@ -1617,7 +1618,9 @@ String variable = sh returnStdout: true, script: 'some bash command'</code></pre
                     }
                     branch('*/master') // Or can be "refs/tags/&lt;version&gt;"
                     extensions {
-                        honorRefspec(true)
+                        cloneOptions {
+                            honorRefspec(true)
+                        }
                     }
                 }
             }
@@ -1625,6 +1628,52 @@ String variable = sh returnStdout: true, script: 'some bash command'</code></pre
         }
     }
 }</code></pre>
+
+      <p class="card-text">Write the script that the Job runs.</p>
+<pre><code class="groovy">@Library('name-of-your-lib@version') _
+import path.to.utils.Utils
+
+// This logic runs on Jenkins master.
+node () {
+    timestamps { // Enable time stamps on console output.
+        wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'XTerm']) {
+            stage("Name of your stage") {
+                ...
+            }
+        }
+    }
+}
+
+// This logic runs on Jenkins agent with the match label.
+node (label) {
+    timestamps {
+        try {
+            wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'XTerm']) {
+                withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'nameOfCredentialObject', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                    dir() { // Change directory.
+                        stage("Name of your stage") {
+                            ...
+                        }
+                    }
+                }
+            }
+        }
+    }
+}</code></pre>
+
+      <p class="card-text">Library should look like this.</p>
+<pre><code class="groovy">package path.to.utils
+
+public class Utils implements Serializable {
+
+    def context
+
+    public Utils(def context) {
+        this.context = context
+    }
+
+    ...
+</code></pre>
 
     </div>
     <div class="card-footer text-muted">
