@@ -1425,10 +1425,10 @@ np.random.normal(mu, sigma, 1000)</code></pre>
       <p class="card-text"></p>
       <ul class="list-unstyled mb-0">
         <li><a href="#groovy-1">1. Groovy Basic (used in Jenkins pipeline)</a></li>
+        <li><a href="#groovy-2">2. DSL (domain specific language)</a></li>
       </ul>
     </div>
   </div>
-
 
   <div class="card mb-4" id="groovy-1">
     <div class="card-body">
@@ -1450,9 +1450,9 @@ import groovy.json.JsonSlurperClassic
 
 // "NonCPS" annotation
 // This annotation will tell Groovy not to Serialize the method. During the code execution, unserialized code may not be interruptable.
-// This annotation is used for example when a method is called instande a constructor, when working with file stream, etc.
+// This annotation is used for example when a method is called instande a constructor, when working with file stream, etc.</code></pre>
 
-// Groovy map example.
+<pre><code class="groovy">// Groovy map example.
 Map map = [
   key: [
       subkey1: "value"
@@ -1480,10 +1480,9 @@ if (dict.containsKey()) {
 }
 
 // Add to a map/dictionary.
-dict.put("key", "value")
+dict.put("key", "value")</code></pre>
 
-
-// Find files in the current directory.
+<pre><code class="groovy">// Find files in the current directory.
 findFiles(glob: '*.yaml')
 
 // Check if file exists.
@@ -1495,10 +1494,9 @@ file.exists()
 writeFile(file: "fileName", text: fileContent)
 
 // Read a file into a variable.
-readFile "fileName"
+readFile "fileName"</code></pre>
 
-
-// Convert YAML to JSON.
+<pre><code class="groovy">// Convert YAML to JSON.
 def absolutePath = "absolute path of the YAML file"
 def fileInYaml = readYaml file: absolutePath
 def fileInJson = new JsonBuilder(fileInYaml).toPrettyString()
@@ -1514,20 +1512,18 @@ String json = new JsonBuilder([
   field1: value1,
   field2: value2,
   field3: value3
-]).toString()
+]).toString()</code></pre>
 
-
-// Loop through a list.
+<pre><code class="groovy">// Loop through a list.
 for (i in list) {
   // do something with "i"
 }
 
 // Convert String to a list.
 String myListInString = "['first', 'second', 'third']"
-def myList = myListInString[1..-2].split(', ')
+def myList = myListInString[1..-2].split(', ')</code></pre>
 
-
-// In-line if/else: If a is null, b is assgiend. Else, c is assigned.
+<pre><code class="groovy">// In-line if/else: If a is null, b is assgiend. Else, c is assigned.
 def val = (a == null) ? b : c
 
 // Break the outerloop in a nested loop.
@@ -1538,10 +1534,9 @@ for (foo in foos) {
           break loop
       }
   }
-}
+}</code></pre>
 
-
-// Switch
+<pre><code class="groovy">// Switch
 switch(variable) {
   case "value1":
       // Do something.
@@ -1551,10 +1546,9 @@ switch(variable) {
       break
   default:
       // Do something.
-}
+}</code></pre>
 
-
-// Pipeline methods
+<pre><code class="groovy">// Pipeline methods
 stage("stage name")
 dir("directory name")
 withEnv(["ENV_VAR_NAME1=${variable1}", "ENV_VAR_NAME2=${variable2}"])
@@ -1563,10 +1557,9 @@ withCredentials([usernamePassword(credentialsId: credentialObjectId, passwordVar
 String credentialId = scm.getUserRemoteConfigs()[0].getCredentialsId()
 sshagent([credentialId])
 
-env.getProperty("string_parameter") // Get the value of a parameter to a Jenkins Job
+env.getProperty("string_parameter") // Get the value of a parameter to a Jenkins Job</code></pre>
 
-
-// Http request plugin
+<pre><code class="groovy">// Http request plugin
 httpRequest(
   authentication: credentialObjectId,
   contentYpe: "APPLICATION_JSON",
@@ -1582,11 +1575,57 @@ httpRequest(
   responseHandle: "NONE",
   outputFile: "",
   timeout: ""
-)
+)</code></pre>
 
-
-// Bash integration
+<pre><code class="groovy">// Bash integration
 String variable = sh returnStdout: true, script: 'some bash command'</code></pre>
+    </div>
+    <div class="card-footer text-muted">
+
+    </div>
+  </div>
+
+  <div class="card mb-4" id="groovy-2">
+    <div class="card-body">
+      <h2 class="card-title">2. DSL (domain specific language)</h2>
+      <h3 class="card-title">How to create Jenkins job</h3>
+
+<pre><code class="groovy">pipelineJob("pathToJob") {
+    def releaseRef = "master" // Or can be "refs/tags/&lt;version&gt;"
+    logRotator {
+        numToKeep(10) // Keep only 10 builds in the history.
+    }
+    parameters {
+        StringParam('parameterName', 'defaultValue', 'description')
+        ...
+    }
+    environmentVariables {
+        keepSystemVariables(true)
+        keepBuildVariables(true)
+        envs (
+            'NAME_OF_ENV_VAR': 'VALUE_OF_ENV_VAR'
+        )
+    }
+    description("Description of Jenkins job")
+    definition {
+        cpsSCM  {
+            scm {
+                git {
+                    remote {
+                        url('gitCloneUrl')
+                        credentials('nameOfCredentialObject')
+                    }
+                    branch('*/master') // Or can be "refs/tags/&lt;version&gt;"
+                    extensions {
+                        honorRefspec(true)
+                    }
+                }
+            }
+            scriptPath('pathToPipelineScript')
+        }
+    }
+}</code></pre>
+
     </div>
     <div class="card-footer text-muted">
 
@@ -7771,8 +7810,14 @@ gcloud container clusters delete [CLUSTER_NAME]</code></pre>
 
   <div class="card mb-4" id="linux-1">
     <div class="card-body">
-
       <h2 class="card-title">1. Shell Scripting</h2>
+
+      <h3 class="card-title">When to use</h3>
+      <ul>
+        <li>Little data manipulation</li>
+        <li>Performance doesn't matter much</li>
+        <li>Roughly less than 100 lines of codes</li>
+      </ul>
 
       <h3 class="card-title">Script header</h3>
 <pre><code class="bash">#!/bin/bash
@@ -7789,24 +7834,30 @@ gcloud container clusters delete [CLUSTER_NAME]</code></pre>
 
       <h3 class="card-title">Function</h3>
 <pre><code class="bash">########################
-# Function description #
+# Function description
+# Arguments:
+#   ...
+# Returns
+#   ...
 ########################
 function &lt;function_name&gt;() {
-  # $1, $2, $3, so on are used to read in arguments passed to shell script and
+  # ${1}, ${2}, ${3}, so on are used to read in arguments passed to shell script and
   # functions.
-  local &lt;argument1&gt;=$1 # Description about the first argument.
-  local &lt;argument2&gt;=$2 # Description about the second argument.
-  local &lt;argument3&gt;=$3 # Description about the thrid argument.
+  local &lt;first_argument&gt;=${1}
+  local &lt;second_argument&gt;=${2}
+  local &lt;third_argument&gt;=${3}
   ...
 
-  echo &lt;ret_val&gt; # This is the return statement.
+  # This is the return statement.
+  echo &lt;ret_val&gt;
 
-  exit 1 # This exits the script execution.
+  # This exits the script execution.
+  exit 1
 }
 
 # When calling a function, wrapping a variable inside quotes will make sure that
 # the entire content is passed. For example,
-my_function $arg1 $arg2 "$arg_large_string_with_spaces"</code></pre>
+my_function ${arg1} ${arg2} "${arg_large_string_with_spaces}"</code></pre>
 
       <h3 class="card-title">Read user inputs</h3>
 <pre><code class="bash">read USER_INPUT1 ; export USER_INPUT1
@@ -7820,9 +7871,9 @@ fi
 
 # Provide user guide on how to run the script.
 if [ -z "${ENV_VAR_SET_BY_USER_ACTION}" ]; then
-  echo "Usage: $0 keyword1"
-  echo "Usage: $0 keyword2"
-  echo "Usage: $0 keyword3"
+  echo "Usage: ${0} keyword1"
+  echo "Usage: ${0} keyword2"
+  echo "Usage: ${0} keyword3"
   exit 1
 fi</code></pre>
 
@@ -7857,7 +7908,7 @@ curl &lt;options&gt; &lt;url&gt; \
     -d &lt;data&gt;
 
 # Posting a JSON data.
-echo $JSON_DATA | curl &lt;options&gt; &lt;URL&gt; \
+echo ${JSON_DATA} | curl &lt;options&gt; &lt;URL&gt; \
                         -X &lt;GET/POST/PUT/DELETE&gt; \
                         -H &lt;Headers&gt; \
                         -d @-
@@ -7880,9 +7931,9 @@ curl -u "${username}":"${password}" -X POST "${url}/${path}" \
 # Constructing XML payload.
 cat &gt; data.xml &lt;&lt;EOF
 &lt;element&gt;
-  &lt;subelement1&gt;$value1&lt;/subelement1&gt;
-  &lt;subelement2&gt;$value2&lt;/subelement2&gt;
-  &lt;subelement3&gt;$value3&lt;/subelement3&gt;
+  &lt;subelement1&gt;${value1}&lt;/subelement1&gt;
+  &lt;subelement2&gt;${value2}&lt;/subelement2&gt;
+  &lt;subelement3&gt;${value3}&lt;/subelement3&gt;
 &lt;/element&gt;
 EOF
 
@@ -7906,22 +7957,22 @@ http_status_code=$(curl -u "${username}":"${password}" \
 
       <h3 class="card-title">Conditional</h3>
 <pre><code class="bash"># Variable equals to an integer 200.
-if [ "${variable}" -eq 200 ]; then
+if [[ "${variable}" -eq 200 ]]; then
 
 fi
 
 # Variable is null.
-if [ -z "${variable}" ]; then
+if [[ -z "${variable}" ]]; then
 
 fi
 
 # Variable is not null.
-if [ -n "${variable}" ]; then
+if [[ -n "${variable}" ]]; then
 
 fi
 
 # One of two variables is null.
-if [ -z "${var1}" -o -z "${var1}" ]; then
+if [[ -z "${var1}" -o -z "${var1}" ]]; then
 
 fi
 
@@ -8038,13 +8089,13 @@ second_element_after_split=${array_of_split_string[1]}</code></pre>
 
       <h3 class="card-title">jq</h3>
 <pre><code class="bash"># Make JSON output pretty
-echo $json | jq -r '.'
+echo ${json} | jq -r '.'
 
 # Sort the JSON fields by key
-echo $json | jq --sort-keys
+echo ${json} | jq --sort-keys
 
 # Replace values of multiple fields
-echo $json | jq .field1.field2.field3 = value1 | field4.field5.field6 = value2</code></pre>
+echo ${json} | jq .field1.field2.field3 = value1 | field4.field5.field6 = value2</code></pre>
 
       <h3 class="card-title">yq</h3>
 <pre><code class="yaml"># Example
@@ -8074,16 +8125,16 @@ b:
 <pre><code class="bash"># Assuming version greater or equal to 3.
 
 # Get all values of 'e'.
-yq r $yaml_file_name "a.b.*.d.e"
+yq r ${yaml_file_name} "a.b.*.d.e"
 
 # Get 'f' that where 'e' equals to a particular value.
-yq r $yaml_file_name "a.b.(d.e==$some_value).d.f"
+yq r ${yaml_file_name} "a.b.(d.e==${some_value}).d.f"
 
 # Add an elemnet under 'b'.
-yq w -i $yaml_file_name a.b[+] $something_to_add
+yq w -i ${yaml_file_name} a.b[+] ${something_to_add}
 
 # Add under second element of 'b'.
-yq w -i $yaml_file_name a.b[1].d.e[+] $something_to_add</code></pre>
+yq w -i ${yaml_file_name} a.b[1].d.e[+] ${something_to_add}</code></pre>
 
       <h3 class="card-title">grep</h3>
 <pre><code class="bash"># Options
@@ -8094,7 +8145,7 @@ Use option -r to # Find matches recursively in files in directory
 grep &lt;options&gt; pattern &lt;files&gt;
 
 # Check if a string exists in a file.
-if greq -q $string $file; then
+if greq -q ${string} ${file}; then
   # Do something.
 fi
 </code></pre>
@@ -8118,8 +8169,8 @@ find / -type f -name *.tar.gz -size +100M -exec ls -l {} \;
 find / -type f -name *.tar.gz -size +100M -exec rm -f {} \;
 
 # Loop through results from "find".
-find / type -f -name $filename 2> /dev/null | while read line; do
-  # Do something with $line
+find / type -f -name ${filename} 2> /dev/null | while read line; do
+  # Do something with ${line}
 done</code></pre>
 
       <h3 class="card-title">Uppercase and lowercase</h3>
@@ -8128,15 +8179,15 @@ tr a-z A-Z < file.txt
 # Convert to lowercase.
 tr A-Z a-z < file.txt
 # Convert a string to lowercase.
-lowercase=$(echo "$string" | tr '[:upper:]' '[:lower:]')
+lowercase=$(echo "${string}" | tr '[:upper:]' '[:lower:]')
 
 var="Test"
 
 lowercase=${var,,}
-echo $lowercase  # test
+echo "${lowercase}" # test
 
 uppercase=${var^^}
-echo $uppercase  # TEST</code></pre>
+echo "${uppercase}" # TEST</code></pre>
 
       <h3 class="card-title">Cut</h3>
 <pre><code class="bash"># Display 1st field from colon delimited file.
@@ -8151,9 +8202,9 @@ free | tr -s ' ' | sed '/^Mem/!d' | cut -d" " -f2 </code></pre>
       <h3 class="card-title">envsubst</h3>
 <pre><code class="json"># Example json to be updated by envsubst.
 {
-  "field1": ${value1},
-  "field2": ${value2},
-  "field3": ${value3}
+  "field1": "${value1}",
+  "field2": "${value2}",
+  "field3": "${value3}"
 }</code></pre>
 
 <pre><code class="bash">data=$(value1="some_value1" value2="some_value2" value3="some_value3" envsubst '${value1}, ${value2}, ${value3}' < $file_name)</code>
@@ -8164,7 +8215,7 @@ free | tr -s ' ' | sed '/^Mem/!d' | cut -d" " -f2 </code></pre>
 export ENV_VAR=$ENV_VAR:/path/to/add</code></pre>
 <pre><code class="bash"># Remove from an environment variable.
 directory_to_remove=/path/to/remove
-ENV_VAR=:$ENV_VAR:
+ENV_VAR=:${ENV_VAR}:
 ENV_VAR=${ENV_VAR//:$directory_to_remove:/:}
 ENV_VAR=${ENV_VAR#:}; ENV_VAR=${ENV_VAR%:}</code></pre>
 
@@ -8178,7 +8229,24 @@ url=&lt;nexus_url&gt;/repository/&lt;repo_name&gt;/&lt;group_id&gt;/&lt;artifact
 current_version=$(curl -k $url | grep -Po '(?&lt;=&lt;version&gt;)([0-9\.]+(-SNAPSHOT)?)' | sort --version-sort r | head -n 1)
 incremented_version=$(echo $current_version | awk -F. -v OFS=. 'NF==1{pring ++$NF}; NF&gt;1{if(length($NF+1)&gt;length($NF))$(NF-1)++;$NF=sprintf("%0*d", length($NF), ($NF+1)%(10^length($NF))); print}')
 echo $incremented_version</code></pre>
+
+      <h3 class="card-title">Case</h3>
+<pre><code class="bash">case "${variable}" in
+  a)
+    # Do something.
+    ;;
+  b)
+    # Do something.
+    ;;
+  *)
+    echo "Unexpected '${variable}'"
+    ;;
+esac</code></pre>
+
+      <h3 class="card-title">Shellcheck</h3>
+      <p>https://www.shellcheck.net</p>
     </div>
+
     <div class="card-footer text-muted">
 
     </div>
