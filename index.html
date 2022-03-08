@@ -7181,7 +7181,7 @@ kubectl get rolebindings,clusterrolebindings \
   -o custom-columns='KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,SERVICE_ACCOUNTS:subjects[?(@.kind=="ServiceAccount")].name'
 # Find all resources in a namespace.
 kubectl api-resources --verbs=list --namespaced -o name \
-  | xargs -n 1 kubectl get --show-kind --ignore-not-found -l &lt;label&gt;=&lt;value&gt; -n &lt;namespace&gt;
+  | xargs -n 1 kubectl get --show-kind --ignore-not-found -n &lt;namespace&gt;
 
 # List all images.
 kubectl get pods --all-namespaces -o jsonpath="{.items[*].spec.containers[*].image}" | tr -s '[[:space:]]' '\n' | sort | uniq -c
@@ -7230,7 +7230,19 @@ kubectl port-forward &lt;pod_name&gt; &lt;localhost_port&gt;:&lt;container_port&
         </ul>
 
         <p class="card-text">Helm command</p>
-<pre><code class="bash"># List helm releases.
+<pre><code class="bash"># Link helm values yaml.
+helm lint -f &lt;values.yaml&gt;
+
+# Dry run.
+helm install -n &lt;namespace&gt; &lt;release_name&gt; --dry-run --debug . -f &lt;values.yaml&gt;
+
+# Deploy.
+helm install -n &lt;namespace&gt; &lt;release_name&gt; . -f &lt;values.yaml&gt;
+
+# Undeploy.
+helm uninstall -n &lt;namespace&gt; &lt;release_name&gt;
+
+# List helm releases.
 helm list -n &lt;namespace&gt;
 helm ls --all-namespaces
 
