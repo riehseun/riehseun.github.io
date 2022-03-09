@@ -4652,7 +4652,7 @@ spec:
 <pre><code class="bash">kubectl rollout status deployment/nginx-deployment</code></pre></li>
           <li>To see the ReplicaSet created by Deployment
 <pre><code class="bash">kubectl get rs</code></pre></li>
-<img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-4-a.png" alt="Card image cap">
+<img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-4-b.png" alt="Card image cap">
           <ul>
             <li>NAME - names of ReplicaSets in the namespace</li>
             <li>DESIRED - desired number of replicas in the application</li>
@@ -4978,7 +4978,6 @@ kubectl delete jobs/&lt;job_name&gt;</code></pre>
           <li>Setting <code>.spec.activeDeadlineSeconds</code> will make Job fail and terminate all running Pods once <code>activeDeadlineSeconds</code> is reached</li>
         </ul>
 <pre><code class="yaml">apiVersion: batch/v1
-kind: JobapiVersion: batch/v1
 kind: Job
 metadata:
   name: pi-with-timeout
@@ -5756,24 +5755,24 @@ status:
 <pre><code class="bash">kubectl get services kube-dns --namespace=kube-system</code></pre>
 
         <h3 class="card-title">Securing the Service</h3>
-  <pre><code class="bash"># Create a public private key pair
-  openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /d/tmp/nginx.key -out /d/tmp/nginx.crt -subj "/CN=my-nginx/O=my-nginx"
-  # Convert the keys to base64 encoding
-  cat /d/tmp/nginx.crt | base64
-  cat /d/tmp/nginx.key | base64
+<pre><code class="bash"># Create a public private key pair
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /d/tmp/nginx.key -out /d/tmp/nginx.crt -subj "/CN=my-nginx/O=my-nginx"
+# Convert the keys to base64 encoding
+cat /d/tmp/nginx.crt | base64
+cat /d/tmp/nginx.key | base64
 
-  make keys KEY=/tmp/nginx.key CERT=/tmp/nginx.crt
-  kubectl create secret tls nginxsecret --key /tmp/nginx.key --cert /tmp/nginx.crt
-  kubectl create configmap nginxconfigmap --from-file=default.conf</code></pre>
-  <pre><code class="yaml">apiVersion: "v1"
-  kind: "Secret"
-  metadata:
-    name: "nginxsecret"
-    namespace: "default"
-  type: kubernetes.io/tls
-  data:
-    tls.crt: &lt;encrypted key output from above&gt;
-    tls.key: &lt;encrypted key output from above&gt;</code></pre>
+make keys KEY=/tmp/nginx.key CERT=/tmp/nginx.crt
+kubectl create secret tls nginxsecret --key /tmp/nginx.key --cert /tmp/nginx.crt
+kubectl create configmap nginxconfigmap --from-file=default.conf</code></pre>
+<pre><code class="yaml">apiVersion: "v1"
+kind: "Secret"
+metadata:
+  name: "nginxsecret"
+  namespace: "default"
+type: kubernetes.io/tls
+data:
+  tls.crt: &lt;encrypted key output from above&gt;
+  tls.key: &lt;encrypted key output from above&gt;</code></pre>
 <pre><code class="yaml">apiVersion: v1
 kind: Service
 metadata:
@@ -5828,10 +5827,10 @@ spec:
 
       <p class="card-text">Can reach the nginx server from any node.</p>
 <pre><code class="bash">kubectl get pods -o yaml | grep -i podip
-      podIP: 10.244.3.5
-  node $ curl -k https://10.244.3.5
-  ...
-  &lt;h1&gt;Welcome to nginx!&lt;/h1&gt;</code></pre>
+    podIP: 10.244.3.5
+node $ curl -k https://10.244.3.5
+...
+&lt;h1&gt;Welcome to nginx!&lt;/h1&gt;</code></pre>
 
               <p class="card-text">Setup Pod such that</p>
 <pre><code class="yaml">apiVersion: apps/v1
@@ -5910,62 +5909,62 @@ spec:
         <h3 class="card-title">Default deny all ingress traffic</h3>
 <pre><code class="yaml">---
 apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
+  kind: NetworkPolicy
 metadata:
 name: default-deny-ingress
 spec:
-podSelector: {}
-policyTypes:
-- Ingress</code></pre>
+  podSelector: {}
+  policyTypes:
+  - Ingress</code></pre>
 
         <h3 class="card-title">Default allow all ingress traffic</h3>
 <pre><code class="yaml">---
 apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
+  kind: NetworkPolicy
 metadata:
 name: allow-all-ingress
 spec:
-podSelector: {}
-ingress:
-- {}
-policyTypes:
-- Ingress</code></pre>
+  podSelector: {}
+  ingress:
+  - {}
+  policyTypes:
+  - Ingress</code></pre>
 
         <h3 class="card-title">Default deny all egress traffic</h3>
 <pre><code class="yaml">---
 apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
+  kind: NetworkPolicy
 metadata:
 name: default-deny-egress
 spec:
-podSelector: {}
-policyTypes:
-- Egress</code></pre>
+  podSelector: {}
+  policyTypes:
+  - Egress</code></pre>
 
         <h3 class="card-title">Default allow all egress traffic</h3>
 <pre><code class="yaml">---
 apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
+  kind: NetworkPolicy
 metadata:
 name: allow-all-egress
 spec:
-podSelector: {}
-egress:
-- {}
-policyTypes:
-- Egress</code></pre>
+  podSelector: {}
+  egress:
+  - {}
+  policyTypes:
+  - Egress</code></pre>
 
         <h3 class="card-title">Default allow all egress traffic</h3>
 <pre><code class="yaml">---
 apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
+  kind: NetworkPolicy
 metadata:
 name: default-deny-all
 spec:
-podSelector: {}
-policyTypes:
-- Ingress
-- Egress</code></pre>
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress</code></pre>
       </div>
       <div class="card-footer text-muted">
         Reference: <a href="https://kubernetes.io/docs/concepts/services-networking/network-policies/">Network Policies</a>
@@ -5980,36 +5979,36 @@ policyTypes:
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
-name: configmap-pod
+  name: configmap-pod
 spec:
-containers:
-  - name: test
-    image: busybox
-    volumeMounts:
-      - name: config-vol
-        mountPath: /etc/config
-volumes:
-  - name: config-vol
-    configMap:
-      name: log-config
-      items:
-        - key: log_level
-          path: log_level</code></pre>
+  containers:
+    - name: test
+      image: busybox
+      volumeMounts:
+        - name: config-vol
+          mountPath: /etc/config
+  volumes:
+    - name: config-vol
+      configMap:
+        name: log-config
+        items:
+          - key: log_level
+            path: log_level</code></pre>
         <p class="card-text"><code>emptyDir</code> is created when Pod is assigned to Node. When Pod is removed from Node, data is deleted permanently</p>
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
-name: test-pd
+  name: test-pd
 spec:
-containers:
-- image: k8s.gcr.io/test-webserver
-  name: test-container
-  volumeMounts:
-  - mountPath: /cache
-    name: cache-volume
-volumes:
-- name: cache-volume
-  emptyDir: {}</code></pre>
+  containers:
+  - image: k8s.gcr.io/test-webserver
+    name: test-container
+    volumeMounts:
+    - mountPath: /cache
+      name: cache-volume
+  volumes:
+  - name: cache-volume
+    emptyDir: {}</code></pre>
 
         <h3 class="card-title">Dynamic Volume Provisioning</h3>
         <p class="card-text">To enable dynamic provisioning, cluster admin must pre-create StorageClass object for users.</p>
