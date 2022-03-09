@@ -6177,56 +6177,56 @@ kind: ConfigMap
 metadata:
   name: game-demo
 data:
-# property-like keys; each key maps to a simple value
-player_initial_lives: "3"
-ui_properties_file_name: "user-interface.properties"
+  # property-like keys; each key maps to a simple value
+  player_initial_lives: "3"
+  ui_properties_file_name: "user-interface.properties"
 
-# file-like keys
-game.properties: |
-  enemy.types=aliens,monsters
-  player.maximum-lives=5
-user-interface.properties: |
-  color.good=purple
-  color.bad=yellow
-  allow.textmode=true</code></pre>
+  # file-like keys
+  game.properties: |
+    enemy.types=aliens,monsters
+    player.maximum-lives=5
+  user-interface.properties: |
+    color.good=purple
+    color.bad=yellow
+    allow.textmode=true</code></pre>
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
   name: configmap-demo-pod
 spec:
-containers:
-  - name: demo
-    image: alpine
-    command: ["sleep", "3600"]
-    env:
-      # Define the environment variable
-      - name: PLAYER_INITIAL_LIVES # Notice that the case is different here
-                                   # from the key name in the ConfigMap.
-        valueFrom:
-          configMapKeyRef:
-            name: game-demo           # The ConfigMap this value comes from.
-            key: player_initial_lives # The key to fetch.
-      - name: UI_PROPERTIES_FILE_NAME
-        valueFrom:
-          configMapKeyRef:
-            name: game-demo
-            key: ui_properties_file_name
-    volumeMounts:
+  containers:
+    - name: demo
+      image: alpine
+      command: ["sleep", "3600"]
+      env:
+        # Define the environment variable
+        - name: PLAYER_INITIAL_LIVES # Notice that the case is different here
+                                     # from the key name in the ConfigMap.
+          valueFrom:
+            configMapKeyRef:
+              name: game-demo           # The ConfigMap this value comes from.
+              key: player_initial_lives # The key to fetch.
+        - name: UI_PROPERTIES_FILE_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: game-demo
+              key: ui_properties_file_name
+      volumeMounts:
+      - name: config
+        mountPath: "/config"
+        readOnly: true
+  volumes:
+    # You set volumes at the Pod level, then mount them into containers inside that Pod
     - name: config
-      mountPath: "/config"
-      readOnly: true
-volumes:
-  # You set volumes at the Pod level, then mount them into containers inside that Pod
-  - name: config
-    configMap:
-      # Provide the name of the ConfigMap you want to mount.
-      name: game-demo
-      # An array of keys from the ConfigMap to create as files
-      items:
-      - key: "game.properties"
-        path: "game.properties"
-      - key: "user-interface.properties"
-        path: "user-interface.properties"</code></pre>
+      configMap:
+        # Provide the name of the ConfigMap you want to mount.
+        name: game-demo
+        # An array of keys from the ConfigMap to create as files
+        items:
+        - key: "game.properties"
+          path: "game.properties"
+        - key: "user-interface.properties"
+          path: "user-interface.properties"</code></pre>
 
       <h3 class="card-title">Using ConfigMap as file</h3>
       <ul>
@@ -6247,10 +6247,10 @@ spec:
     - name: foo
       mountPath: "/etc/foo"
       readOnly: true
-volumes:
-- name: foo
-  configMap:
-    name: myconfigmap</code></pre>
+  volumes:
+  - name: foo
+    configMap:
+      name: myconfigmap</code></pre>
       </div>
       <div class="card-footer text-muted">
         Reference: <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a>
@@ -6310,53 +6310,53 @@ metadata:
     kubernetes.io/service-account.name: "sa-name" # Existing service account name
 type: kubernetes.io/service-account-token
 data:
-# You can include additional key value pairs as you do with Opaque Secrets
-extra: YmFyCg==</code></pre>
+  # You can include additional key value pairs as you do with Opaque Secrets
+  extra: YmFyCg==</code></pre>
 
         <h3 class="card-title">Docker config Secret</h3>
         <p class="card-text">~/.dockercfg is legacy, ~/.docker/config.json is the new format.</p>
 <pre><code class="yaml">apiVersion: v1
 kind: Secret
 metadata:
-name: secret-dockercfg
+  name: secret-dockercfg
 type: kubernetes.io/dockercfg
 data:
-.dockercfg: | # This would be ".dockerconfigjson" for ~/.docker/config.json
-      "&lt;base64 encoded ~/.dockercfg file&gt;" # Or &lt;base64 encoded ~/.docker/config.json&gt;</code></pre>
+  .dockercfg: | # This would be ".dockerconfigjson" for ~/.docker/config.json
+          "&lt;base64 encoded ~/.dockercfg file&gt;" # Or &lt;base64 encoded ~/.docker/config.json&gt;</code></pre>
 
         <h3 class="card-title">Basic authentication Secret</h3>
 <pre><code class="yaml">apiVersion: v1
 kind: Secret
 metadata:
-name: secret-basic-auth
+  name: secret-basic-auth
 type: kubernetes.io/basic-auth
 stringData:
-username: admin
-password: t0p-Secret</code></pre>
+  username: admin
+  password: t0p-Secret</code></pre>
 
         <h3 class="card-title">SSH authentication Secret</h3>
 <pre><code class="yaml">apiVersion: v1
 kind: Secret
 metadata:
-name: secret-ssh-auth
+  name: secret-ssh-auth
 type: kubernetes.io/ssh-auth
 data:
-# the data is abbreviated in this example
-ssh-privatekey: |
+  # the data is abbreviated in this example
+  ssh-privatekey: |
         MIIEpQIBAAKCAQEAulqb/Y ...</code></pre>
 
         <h3 class="card-title">TLS secrets</h3>
 <pre><code class="yaml">apiVersion: v1
 kind: Secret
 metadata:
-name: secret-tls
+  name: secret-tls
 type: kubernetes.io/tls
 data:
-# the data is abbreviated in this example
-tls.crt: |
-      MIIC2DCCAcCgAwIBAgIBATANBgkqh ...
-tls.key: |
-      MIIEpgIBAAKCAQEA7yn3bRHQ5FHMQ ...</code></pre>
+  # the data is abbreviated in this example
+  tls.crt: |
+        MIIC2DCCAcCgAwIBAgIBATANBgkqh ...
+  tls.key: |
+        MIIEpgIBAAKCAQEA7yn3bRHQ5FHMQ ...</code></pre>
 
         <h3 class="card-title">Editing Secret</h3>
 <pre><code class="bash">kubectl edit secrets mysecret</code></pre>
@@ -6365,46 +6365,46 @@ tls.key: |
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
-name: mypod
+  name: mypod
 spec:
-containers:
-- name: mypod
-  image: redis
-  volumeMounts: # Add this to each container that needs Secret.
+  containers:
+  - name: mypod
+    image: redis
+    volumeMounts: # Add this to each container that needs Secret.
+    - name: foo
+      mountPath: "/etc/foo" # Should be an unused directory where you want Secret to appear.
+      readOnly: true
+  volumes:
   - name: foo
-    mountPath: "/etc/foo" # Should be an unused directory where you want Secret to appear.
-    readOnly: true
-volumes:
-- name: foo
-  secret:
-    secretName: mysecret # Name of Secret object.
-    defaultMode: 0400 # Default is 0644 if not specified. All files created by Secret volumn mount will have 0400.
-    items:
-    - key: username
-      path: my-group/my-username # "username" Secret is stored in "/etc/foo/my-group/my-username" instead of "/etc/foo/username".
-      mode: 0777 # Files in /etc/foo/my-group/my-username will have 0777.</code></pre>
+    secret:
+      secretName: mysecret # Name of Secret object.
+      defaultMode: 0400 # Default is 0644 if not specified. All files created by Secret volumn mount will have 0400.
+      items:
+      - key: username
+        path: my-group/my-username # "username" Secret is stored in "/etc/foo/my-group/my-username" instead of "/etc/foo/username".
+        mode: 0777 # Files in /etc/foo/my-group/my-username will have 0777.</code></pre>
 
         <h3 class="card-title">Using Secret as environment variables</h3>
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
-name: secret-env-pod
+  name: secret-env-pod
 spec:
-containers:
-- name: mycontainer
-  image: redis
-  env:
-    - name: SECRET_USERNAME
-      valueFrom:
-        secretKeyRef:
-          name: mysecret
-          key: username
-    - name: SECRET_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: mysecret
-          key: password
-restartPolicy: Never</code></pre>
+  containers:
+  - name: mycontainer
+    image: redis
+    env:
+      - name: SECRET_USERNAME
+        valueFrom:
+          secretKeyRef:
+            name: mysecret
+            key: username
+      - name: SECRET_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: mysecret
+            key: password
+  restartPolicy: Never</code></pre>
         <p class="card-text">Updating Secret will not update environment variables in the containers unless containers are restarted.</p>
 
         <h3 class="card-title">Immutable Secret</h3>
@@ -6412,9 +6412,9 @@ restartPolicy: Never</code></pre>
 <pre><code class="yaml">apiVersion: v1
 kind: Secret
 metadata:
-...
+  ...
 data:
-...
+  ...
 immutable: true</code></pre>
 
         <h3 class="card-title">Risk</h3>
