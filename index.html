@@ -6637,41 +6637,41 @@ rules:
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
-name: counter
+  name: counter
 spec:
-containers:
-- name: count
-  image: busybox
-  args:
-  - /bin/sh
-  - -c
-  - >
-    i=0;
-    while true;
-    do
-      echo "$i: $(date)" >> /var/log/1.log;
-      echo "$(date) INFO $i" >> /var/log/2.log;
-      i=$((i+1));
-      sleep 1;
-    done
-  volumeMounts:
+  containers:
+  - name: count
+    image: busybox
+    args:
+    - /bin/sh
+    - -c
+    - >
+      i=0;
+      while true;
+      do
+        echo "$i: $(date)" >> /var/log/1.log;
+        echo "$(date) INFO $i" >> /var/log/2.log;
+        i=$((i+1));
+        sleep 1;
+      done
+    volumeMounts:
+    - name: varlog
+      mountPath: /var/log
+  - name: count-log-1
+    image: busybox
+    args: [/bin/sh, -c, 'tail -n+1 -f /var/log/1.log']
+    volumeMounts:
+    - name: varlog
+      mountPath: /var/log
+  - name: count-log-2
+    image: busybox
+    args: [/bin/sh, -c, 'tail -n+1 -f /var/log/2.log']
+    volumeMounts:
+    - name: varlog
+      mountPath: /var/log
+  volumes:
   - name: varlog
-    mountPath: /var/log
-- name: count-log-1
-  image: busybox
-  args: [/bin/sh, -c, 'tail -n+1 -f /var/log/1.log']
-  volumeMounts:
-  - name: varlog
-    mountPath: /var/log
-- name: count-log-2
-  image: busybox
-  args: [/bin/sh, -c, 'tail -n+1 -f /var/log/2.log']
-  volumeMounts:
-  - name: varlog
-    mountPath: /var/log
-volumes:
-- name: varlog
-  emptyDir: {}</code></pre>
+    emptyDir: {}</code></pre>
         <p class="card-text">Access two separate log streams.</h3>
 <pre><code class="bash">kubectl logs counter count-log-1
 kubectl logs counter count-log-2</code></pre>
@@ -6680,68 +6680,68 @@ kubectl logs counter count-log-2</code></pre>
 <pre><code class="yaml">apiVersion: v1
 kind: ConfigMap
 metadata:
-name: fluentd-config
+  name: fluentd-config
 data:
-fluentd.conf: |
-  &lt;source&gt;
-    type tail
-    format none
-    path /var/log/1.log
-    pos_file /var/log/1.log.pos
-    tag count.format1
-  &lt;/source&gt;
+  fluentd.conf: |
+    &lt;source&gt;
+      type tail
+      format none
+      path /var/log/1.log
+      pos_file /var/log/1.log.pos
+      tag count.format1
+    &lt;/source&gt;
 
-  &lt;source&gt;
-    type tail
-    format none
-    path /var/log/2.log
-    pos_file /var/log/2.log.pos
-    tag count.format2
-  &lt;/source&gt;
+    &lt;source&gt;
+      type tail
+      format none
+      path /var/log/2.log
+      pos_file /var/log/2.log.pos
+      tag count.format2
+    &lt;/source&gt;
 
-  &lt;match **&gt;
-    type google_cloud
-  &lt;/match&gt;</code></pre>
+    &lt;match **&gt;
+      type google_cloud
+    &lt;/match&gt;</code></pre>
 
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
-name: counter
+  name: counter
 spec:
-containers:
-- name: count
-  image: busybox
-  args:
-  - /bin/sh
-  - -c
-  - >
-    i=0;
-    while true;
-    do
-      echo "$i: $(date)" >> /var/log/1.log;
-      echo "$(date) INFO $i" >> /var/log/2.log;
-      i=$((i+1));
-      sleep 1;
-    done
-  volumeMounts:
+  containers:
+  - name: count
+    image: busybox
+    args:
+    - /bin/sh
+    - -c
+    - >
+      i=0;
+      while true;
+      do
+        echo "$i: $(date)" >> /var/log/1.log;
+        echo "$(date) INFO $i" >> /var/log/2.log;
+        i=$((i+1));
+        sleep 1;
+      done
+    volumeMounts:
+    - name: varlog
+      mountPath: /var/log
+  - name: count-agent
+    image: k8s.gcr.io/fluentd-gcp:1.30
+    env:
+    - name: FLUENTD_ARGS
+      value: -c /etc/fluentd-config/fluentd.conf
+    volumeMounts:
+    - name: varlog
+      mountPath: /var/log
+    - name: config-volume
+      mountPath: /etc/fluentd-config
+  volumes:
   - name: varlog
-    mountPath: /var/log
-- name: count-agent
-  image: k8s.gcr.io/fluentd-gcp:1.30
-  env:
-  - name: FLUENTD_ARGS
-    value: -c /etc/fluentd-config/fluentd.conf
-  volumeMounts:
-  - name: varlog
-    mountPath: /var/log
+    emptyDir: {}
   - name: config-volume
-    mountPath: /etc/fluentd-config
-volumes:
-- name: varlog
-  emptyDir: {}
-- name: config-volume
-  configMap:
-    name: fluentd-config</code></pre>
+    configMap:
+      name: fluentd-config</code></pre>
       </div>
       <div class="card-footer text-muted">
         Reference: <a href="https://kubernetes.io/docs/concepts/cluster-administration/logging/">Logging Architecture</a>
@@ -6756,52 +6756,52 @@ volumes:
 <pre><code class="yaml">apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-name: node-problem-detector-v0.1
-namespace: kube-system
-labels:
-  k8s-app: node-problem-detector
-  version: v0.1
-  kubernetes.io/cluster-service: "true"
-spec:
-selector:
-  matchLabels:
+  name: node-problem-detector-v0.1
+  namespace: kube-system
+  labels:
     k8s-app: node-problem-detector
     version: v0.1
     kubernetes.io/cluster-service: "true"
-template:
-  metadata:
-    labels:
+spec:
+  selector:
+    matchLabels:
       k8s-app: node-problem-detector
       version: v0.1
       kubernetes.io/cluster-service: "true"
-  spec:
-    hostNetwork: true
-    containers:
-    - name: node-problem-detector
-      image: k8s.gcr.io/node-problem-detector:v0.1
-      securityContext:
-        privileged: true
-      resources:
-        limits:
-          cpu: "200m"
-          memory: "100Mi"
-        requests:
-          cpu: "20m"
-          memory: "20Mi"
-      volumeMounts:
+  template:
+    metadata:
+      labels:
+        k8s-app: node-problem-detector
+        version: v0.1
+        kubernetes.io/cluster-service: "true"
+    spec:
+      hostNetwork: true
+      containers:
+      - name: node-problem-detector
+        image: k8s.gcr.io/node-problem-detector:v0.1
+        securityContext:
+          privileged: true
+        resources:
+          limits:
+            cpu: "200m"
+            memory: "100Mi"
+          requests:
+            cpu: "20m"
+            memory: "20Mi"
+        volumeMounts:
+        - name: log
+          mountPath: /log
+          readOnly: true
+        - name: config # Overwrite the config/ directory with ConfigMap volume
+          mountPath: /config
+          readOnly: true
+      volumes:
       - name: log
-        mountPath: /log
-        readOnly: true
-      - name: config # Overwrite the config/ directory with ConfigMap volume
-        mountPath: /config
-        readOnly: true
-    volumes:
-    - name: log
-      hostPath:
-        path: /var/log/
-    - name: config # Define ConfigMap volume
-      configMap:
-        name: node-problem-detector-config</code></pre>
+        hostPath:
+          path: /var/log/
+      - name: config # Define ConfigMap volume
+        configMap:
+          name: node-problem-detector-config</code></pre>
       </div>
       <div class="card-footer text-muted">
         Reference: <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/monitor-node-health/">Monitor Node Health</a>
