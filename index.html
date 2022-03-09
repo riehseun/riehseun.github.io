@@ -4989,22 +4989,22 @@ spec:
 <pre><code class="yaml">apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-name: hello
+  name: hello
 spec:
-schedule: "*/1 * * * *"
-jobTemplate:
-  spec:
-    template:
-      spec:
-        containers:
-        - name: hello
-          image: busybox
-          imagePullPolicy: IfNotPresent
-          command:
-          - /bin/sh
-          - -c
-          - date; echo Hello from the Kubernetes cluster
-        restartPolicy: OnFailure</code></pre>
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: hello
+            image: busybox
+            imagePullPolicy: IfNotPresent
+            command:
+            - /bin/sh
+            - -c
+            - date; echo Hello from the Kubernetes cluster
+          restartPolicy: OnFailure</code></pre>
       </div>
       <div class="card-footer text-muted">
         Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/">CronJob</a>
@@ -5659,9 +5659,9 @@ apiVersion: v1
 kind: Service
 metadata:
   name: my-service
-  spec:
-selector:
-  app: MyApp
+spec:
+  selector:
+    app: MyApp
   ports:
     - protocol: TCP
       port: 80
@@ -5700,35 +5700,35 @@ spec:
 kind: Service
 metadata:
   name: my-service
-  spec:
+spec:
   type: NodePort
-selector:
-  app: MyApp
-ports:
-    # By default and for convenience, the `targetPort` is set to the same value as the `port` field.
-  - port: 80
-    targetPort: 80
-    # Optional field
-    # By default and for convenience, the Kubernetes control plane will allocate a port from a range (default: 30000-32767)
-    nodePort: 30007</code></pre>
+  selector:
+    app: MyApp
+  ports:
+      # By default and for convenience, the `targetPort` is set to the same value as the `port` field.
+    - port: 80
+      targetPort: 80
+      # Optional field
+      # By default and for convenience, the Kubernetes control plane will allocate a port from a range (default: 30000-32767)
+      nodePort: 30007</code></pre>
         <h4 class="card-title">LoadBalancer</h4>
 <pre><code class="yaml">apiVersion: v1
 kind: Service
 metadata:
-name: my-service
+  name: my-service
 spec:
-selector:
-  app: MyApp
-ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 9376
-clusterIP: 10.0.171.239
-type: LoadBalancer
+  selector:
+    app: MyApp
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 9376
+  clusterIP: 10.0.171.239
+  type: LoadBalancer
 status:
-loadBalancer:
-  ingress:
-  - ip: 192.0.2.127</code></pre>
+  loadBalancer:
+    ingress:
+    - ip: 192.0.2.127</code></pre>
 
         <h2 class="card-title">Connecting Applications with Services</h2>
         <p class="card-text">Docker: containers can talk to other containers only if they are on the same machine. Containers must be allowed ports on machine's own IP address. Kubernetes: Pods can talk to other Pods regardless of Nodes. Every Pod gets cluster-private IP address and all Pods in a cluster can see each other.</p>
@@ -5756,57 +5756,57 @@ loadBalancer:
   data:
     tls.crt: &lt;encrypted key output from above&gt;
     tls.key: &lt;encrypted key output from above&gt;</code></pre>
-  <pre><code class="yaml">apiVersion: v1
-  kind: Service
-  metadata:
-    name: my-nginx
-    labels:
+<pre><code class="yaml">apiVersion: v1
+kind: Service
+metadata:
+  name: my-nginx
+  labels:
+    run: my-nginx
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    targetPort: 80
+    protocol: TCP
+    name: http
+  - port: 443
+    protocol: TCP
+    name: https
+  selector:
+    run: my-nginx
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-nginx
+spec:
+  selector:
+    matchLabels:
       run: my-nginx
-  spec:
-    type: NodePort
-    ports:
-    - port: 8080
-      targetPort: 80
-      protocol: TCP
-      name: http
-    - port: 443
-      protocol: TCP
-      name: https
-    selector:
-      run: my-nginx
-  ---
-  apiVersion: apps/v1
-  kind: Deployment
-  metadata:
-    name: my-nginx
-  spec:
-    selector:
-      matchLabels:
+  replicas: 1
+  template:
+    metadata:
+      labels:
         run: my-nginx
-    replicas: 1
-    template:
-      metadata:
-        labels:
-          run: my-nginx
-      spec:
-        volumes:
-        - name: secret-volume
-          secret:
-            secretName: nginxsecret
-        - name: configmap-volume
-          configMap:
-            name: nginxconfigmap
-        containers:
-        - name: nginxhttps
-          image: bprashanth/nginxhttps:1.0
-          ports:
-          - containerPort: 443
-          - containerPort: 80
-          volumeMounts:
-          - mountPath: /etc/nginx/ssl
-            name: secret-volume
-          - mountPath: /etc/nginx/conf.d
-            name: configmap-volume</code></pre>
+    spec:
+      volumes:
+      - name: secret-volume
+        secret:
+          secretName: nginxsecret
+      - name: configmap-volume
+        configMap:
+          name: nginxconfigmap
+      containers:
+      - name: nginxhttps
+        image: bprashanth/nginxhttps:1.0
+        ports:
+        - containerPort: 443
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: /etc/nginx/ssl
+          name: secret-volume
+        - mountPath: /etc/nginx/conf.d
+          name: configmap-volume</code></pre>
 
       <p class="card-text">Can reach the nginx server from any node.</p>
 <pre><code class="bash">kubectl get pods -o yaml | grep -i podip
@@ -5817,33 +5817,33 @@ loadBalancer:
 
               <p class="card-text">Setup Pod such that</p>
 <pre><code class="yaml">apiVersion: apps/v1
-  kind: Deployment
-  metadata:
-    name: curl-deployment
-  spec:
-    selector:
-      matchLabels:
+kind: Deployment
+metadata:
+  name: curl-deployment
+spec:
+  selector:
+    matchLabels:
+      app: curlpod
+  replicas: 1
+  template:
+    metadata:
+      labels:
         app: curlpod
-    replicas: 1
-    template:
-      metadata:
-        labels:
-          app: curlpod
-      spec:
-        volumes:
-        - name: secret-volume
-          secret:
-            secretName: nginxsecret
-        containers:
-        - name: curlpod
-          command:
-          - sh
-          - -c
-          - while true; do sleep 1; done
-          image: radial/busyboxplus:curl
-          volumeMounts:
-          - mountPath: /etc/nginx/ssl
-            name: secret-volume</code></pre>
+    spec:
+      volumes:
+      - name: secret-volume
+        secret:
+          secretName: nginxsecret
+      containers:
+      - name: curlpod
+        command:
+        - sh
+        - -c
+        - while true; do sleep 1; done
+        image: radial/busyboxplus:curl
+        volumeMounts:
+        - mountPath: /etc/nginx/ssl
+          name: secret-volume</code></pre>
       </div>
       <div class="card-footer text-muted">
         Reference: <a href="https://kubernetes.io/docs/concepts/services-networking/service/">Service</a> | <a href="https://kubernetes.io/docs/concepts/services-networking/connect-applications-service/">Connecting Applications with Services</a>
@@ -5999,30 +5999,30 @@ volumes:
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-name: slow
+  name: slow
 provisioner: kubernetes.io/gce-pd
 parameters:
-type: pd-standard</code></pre>
+  type: pd-standard</code></pre>
 <pre><code class="yaml"> # Create storage class "fast" that provisions persistent disks like SSD.
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-name: fast
+  name: fast
 provisioner: kubernetes.io/gce-pd
 parameters:
-type: pd-ssd</code></pre>
+  type: pd-ssd</code></pre>
         <p class="card-text">Users request dynamically provisioned storage by including a storage class in their <code>PersistentVolumeClaim</code>. When this claim is deleted, the volume gets destroyed.</p>
 <pre><code class="yaml">apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-name: claim1
+  name: claim1
 spec:
-accessModes:
-  - ReadWriteOnce
-storageClassName: fast
-resources:
-  requests:
-    storage: 30Gi</code></pre>
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: fast
+  resources:
+    requests:
+      storage: 30Gi</code></pre>
         <p class="card-text">Cluster admin can make Claims to use dynamic provisioning by default. This is done by marking a specific StorageClass as default by adding <code>storageclass.kubernetes.io/is-default-class</code> annotation to it.</p>
       </div>
       <div class="card-footer text-muted">
@@ -6042,50 +6042,50 @@ resources:
 <pre><code class="yaml">apiVersion: v1
 kind: PersistentVolume
 metadata:
-name: foo-pv
+  name: foo-pv
 spec:
-storageClassName: ""
-claimRef:
-  name: foo-pvc
-  namespace: foo
+  storageClassName: ""
+  claimRef:
+    name: foo-pvc
+    namespace: foo
 ...</code></pre>
         <h3 class="card-title">PV</h3>
 <pre><code class="yaml">apiVersion: v1
 kind: PersistentVolume
 metadata:
-name: pv0003
+  name: pv0003
 spec:
-capacity:
-  storage: 5Gi
-volumeMode: Filesystem # Filesystem - default, Block - raw block device
-accessModes:
-  - ReadWriteOnce # ReadWriteOnce, ReadWriteMany, ReadOnlyMany. Once - mounted by single Node, Many - mounted by many Nodes
-persistentVolumeReclaimPolicy: Recycle # Retain, Recycle, Delete
-storageClassName: slow
-mountOptions:
-  - hard
-  - nfsvers=4.1
-nfs:
-  path: /tmp
-  server: 172.17.0.2</code></pre>
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem # Filesystem - default, Block - raw block device
+  accessModes:
+    - ReadWriteOnce # ReadWriteOnce, ReadWriteMany, ReadOnlyMany. Once - mounted by single Node, Many - mounted by many Nodes
+  persistentVolumeReclaimPolicy: Recycle # Retain, Recycle, Delete
+  storageClassName: slow
+  mountOptions:
+    - hard
+    - nfsvers=4.1
+  nfs:
+    path: /tmp
+    server: 172.17.0.2</code></pre>
         <h3 class="card-title">PVC</h3>
 <pre><code class="yaml">apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-name: myclaim
+  name: myclaim
 spec:
-accessModes:
-  - ReadWriteOnce
-volumeMode: Filesystem
-resources:
-  requests:
-    storage: 8Gi
-storageClassName: slow
-selector:
-  matchLabels: # volumn must have a label with this value
-    release: "stable"
-  matchExpressions: # a list of requirements
-    - {key: environment, operator: In, values: [dev]}</code></pre>
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 8Gi
+  storageClassName: slow
+  selector:
+    matchLabels: # volumn must have a label with this value
+      release: "stable"
+    matchExpressions: # a list of requirements
+      - {key: environment, operator: In, values: [dev]}</code></pre>
         <h3 class="card-title">Claims as Volumns</h3>
         <p class="card-text">Pods access storage by using Claim as volume. Claim must exist in the same namespace as Pod. The cluster finds Claim in Pods's namespace and uses it to get PV.</p>
 <pre><code class="yaml">apiVersion: v1
@@ -6158,7 +6158,7 @@ spec:
 <pre><code class="yaml">apiVersion: v1
 kind: ConfigMap
 metadata:
-name: game-demo
+  name: game-demo
 data:
 # property-like keys; each key maps to a simple value
 player_initial_lives: "3"
@@ -6221,15 +6221,15 @@ volumes:
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
-name: mypod
+  name: mypod
 spec:
-containers:
-- name: mypod
-  image: redis
-  volumeMounts:
-  - name: foo
-    mountPath: "/etc/foo"
-    readOnly: true
+  containers:
+  - name: mypod
+    image: redis
+    volumeMounts:
+    - name: foo
+      mountPath: "/etc/foo"
+      readOnly: true
 volumes:
 - name: foo
   configMap:
@@ -6288,9 +6288,9 @@ kubectl get secret empty-secret</code></pre>
 <pre><code class="yaml">apiVersion: v1
 kind: Secret
 metadata:
-name: secret-sa-sample
-annotations:
-  kubernetes.io/service-account.name: "sa-name" # Existing service account name
+  name: secret-sa-sample
+  annotations:
+    kubernetes.io/service-account.name: "sa-name" # Existing service account name
 type: kubernetes.io/service-account-token
 data:
 # You can include additional key value pairs as you do with Opaque Secrets
@@ -8764,8 +8764,8 @@ unset `env | grep proxy | cut -d= -f1`</code></pre>
 
 <pre><code class="bash"># To enable proxy for apt package manager, create /etc/apt/apt/conf.d/proxy.conf and add
 Acquire {
-HTTP::proxy "&lt;PROXY_URL_AND_PORT&gt;"
-HTTPS::proxy "&lt;PROXY_URL_AND_PORT&gt;"
+  HTTP::proxy "&lt;PROXY_URL_AND_PORT&gt;"
+  HTTPS::proxy "&lt;PROXY_URL_AND_PORT&gt;"
 }
 
 # Then run
