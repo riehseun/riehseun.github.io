@@ -888,6 +888,11 @@ git checkout HEAD &lt;file&gt; # Discard changes in a particualr file. / Restore
 git fetch --all && git reset --hard origin/&lt;branch_name&gt; # Force overwrite local with remote.
 git checkout &lt;target_branch&gt; && git cherry-pick &lt;commit_hash&gt; && git checkout &lt;source_branch&gt; && git reset --hard HEAD~1 # &lt;commit_hash&gt; should come from &lt;source_branch&gt;. Last two steps are to clean up the &lt;source_branch&gt;</code></pre>
 <!-- probably should use "git branch | grep -v "master" | xargs git branch -D "-->
+
+<pre><code class="bash"># Compare two branches.
+git diff &lt;branch_1&gt; &lt;branch_2&gt;
+# Compare a specific file between two branches.
+git diff &lt;branch_1&gt; &lt;branch_2&gt; -- &lt;file&gt;</code></pre>
     </div>
     <div class="card-footer text-muted">
 
@@ -7169,29 +7174,42 @@ etcd [flags]
       <div class="card-body">
         <h2 class="card-title">1. Kubectl</h2>
 <pre><code class="bash"># Cluster
-kubectl cluster-info
+kubectl cluster-info</code></pre>
 
-# Config
+<pre><code class="bash"># Config
 kubectl config view
 kubectl config set-cluster &lt;cluster_name&gt;
 kubectl config get-contexts
 kubectl config current-context
 kubectl config use-context &lt;context_name&gt;
 kubectl config set-context --current --namespace=&lt;namespace&gt;
-kubectl config view | grep namespace
+kubectl config view | grep namespace</code></pre>
 
-# Namespace
+<pre><code class="bash"># Namespace
 kubectl get ns
 # If "Unable to connect to the server: x509: certificate signed by unknown authority"
 kubectl get ns --insecure-skip-tls-verify
 kubectl delete namespace &lt;namespace&gt;
 # Delete a label
-kubectl label namespaces &lt;namespace&gt; &lt;label&gt;-
+kubectl label namespaces &lt;namespace&gt; &lt;label&gt;-</code></pre>
 
-# Error from server (InternalError): an error on the server ("") has prevented the request from succeeding
-# => check proxy setting
+<pre><code class="bash"># Error from server (InternalError): an error on the server ("") has prevented the request from succeeding
+# => check proxy setting</code></pre>
 
-# Inspace all namespaces.
+<pre><code class="bash"># When a namespace is stuck on Terminating.
+kubectl get namesapce &lt;stuck_namespace&gt; -o json > temp.json
+
+# Update "temp.json" such that "finalizers" array is empty. For example,
+"spec": {
+  "finalizers": [
+
+  ]
+}
+
+kubectl replace --raw "/api/v1/namespaces/&lt;stuck_namespace&gt;/finalize" -f ./temp.json
+kubectl get ns</code></pre>
+
+<pre><code class="bash"># Inspace all namespaces.
 kubectl get pods --all-namespaces
 kubectl get rolebinding --all-namespaces
 kubectl get clusterrolebinding --all-namespaces
@@ -7201,31 +7219,31 @@ kubectl get rolebindings,clusterrolebindings \
   -o custom-columns='KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,SERVICE_ACCOUNTS:subjects[?(@.kind=="ServiceAccount")].name'
 # Find all resources in a namespace.
 kubectl api-resources --verbs=list --namespaced -o name \
-  | xargs -n 1 kubectl get --show-kind --ignore-not-found -n &lt;namespace&gt;
+  | xargs -n 1 kubectl get --show-kind --ignore-not-found -n &lt;namespace&gt;</code></pre>
 
-# List all images.
+<pre><code class="bash"># List all images.
 kubectl get pods --all-namespaces -o jsonpath="{.items[*].spec.containers[*].image}" | tr -s '[[:space:]]' '\n' | sort | uniq -c
 
 kubectl get pods -n &lt;namespace&gt;
 
 kubectl get pod &lt;pod_name&gt; --output=yaml
 # View Pod-Node assignment.
-kubectl get pods -n &lt;namespace&gt; -o wide
+kubectl get pods -n &lt;namespace&gt; -o wide</code></pre>
 
-# Show PVC on all namespaces.
+<pre><code class="bash"># Show PVC on all namespaces.
 kubectl get pvc -A
 
 # Show PVC on current namespace.
-kubectl get pvc
+kubectl get pvc</code></pre>
 
-# Inspect pods.
+<pre><code class="bash"># Inspect pods.
 kubectl logs &lt;pod_name&gt;
-kubectl logs &lt;pod_name&gt; -c &lt;container_name&gt;
+kubectl logs &lt;pod_name&gt; -c &lt;container_name&gt;</code></pre>
 
 # Find containers in a pod.
 kubectl get pods &lt;pod_name&gt; -o jsonpath='{.spec.containers[*].name}'
 
-# Remove a node.
+<pre><code class="bash"># Remove a node.
 kubectl get nodes
 kubectl drain &lt;node_name&gt;
 kubectl drain &lt;node_name&gt; --ignore-daemonsets --delete-local-data
@@ -7259,6 +7277,9 @@ helm install -n &lt;namespace&gt; &lt;release_name&gt; --dry-run --debug . -f &l
 # Deploy.
 helm install -n &lt;namespace&gt; &lt;release_name&gt; . -f &lt;values.yaml&gt;
 
+# Upgrade.
+helm upgrade -n &lt;namespace&gt; &lt;release_name&gt; . -f &lt;values.yaml&gt;
+
 # Undeploy.
 helm uninstall -n &lt;namespace&gt; &lt;release_name&gt;
 
@@ -7267,7 +7288,10 @@ helm list -n &lt;namespace&gt;
 helm ls --all-namespaces
 
 # Check helm release.
-helm status &lt;release_name&gt;</code></pre>
+helm status &lt;release_name&gt;
+
+# Get helm values of previous deployment.
+helm get values &lt;release_name&gt; -n &lt;namespace&gt;</code></pre>
 
         <p class="card-text">Helm syntax</p>
 <pre><code class="yaml"># Lowercase the result, then wrap it in double quotes.
