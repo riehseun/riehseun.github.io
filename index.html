@@ -6714,7 +6714,8 @@ deploy:
       <h2 class="card-title">Azure</h2>
       <ul class="list-unstyled mb-0">
         <li><a href="#azure-1">1. Service Principal</a></li>
-        <li><a href="#azure-2">2. AKS</a></li>
+        <li><a href="#azure-2">2. Account and subscription</a></li>
+        <li><a href="#azure-3">3. AKS</a></li>
       </ul>
     </div>
   </div>
@@ -6723,6 +6724,8 @@ deploy:
     <div class="card-body">
       <h2 class="card-title">1. Service Principal</h2>
       <p class="card-text">Service Principal is a reference to an application. It controls what the app can do or who can access the app. This is also same as the Application ID.</p>
+<pre><code class="bash"># Service principal expiry.
+az ad sp credential list --id &lt;app_id&gt; --query "[].endDate" -o tsv</code></pre>
     </div>
     <div class="card-footer text-muted">
 
@@ -6731,12 +6734,21 @@ deploy:
 
   <div class="card mb-4" id="azure-2">
     <div class="card-body">
-      <h2 class="card-title">2. AKS</h2>
+      <h2 class="card-title">2. Account and subscription</h2>
 
 <pre><code class="bash"># Show my current account information.
 az account show
 # Set your subscription.
 az account set -s &lt;subscription&gt;</code></pre>
+    </div>
+    <div class="card-footer text-muted">
+
+    </div>
+  </div>
+
+  <div class="card mb-4" id="azure-3">
+    <div class="card-body">
+      <h2 class="card-title">3. AKS</h2>
 
 <pre><code class="bash"># Add a cluster information to kube config. "--admin" flag may or may not work depending on your permission in Azure.
 az aks get-credentials -n cluster-name -g resource-group --admin
@@ -6757,8 +6769,6 @@ az aks nodepool list --cluster-name &lt;cluster_name&gt; --resource-group &lt;re
 # Inspect ACR and AKS integration
 az role assignment list --assignee &lt;app_id&gt; --scope &lt;acr_id&gt;</code></pre>
 
-<pre><code class="bash"># Service principal expiry.
-az ad sp credential list --id &lt;app_id&gt; --query "[].endDate" -o tsv</code></pre>
     </div>
     <div class="card-footer text-muted">
 
@@ -6772,20 +6782,112 @@ az ad sp credential list --id &lt;app_id&gt; --query "[].endDate" -o tsv</code><
     <div class="card-body">
       <h2 class="card-title">AWS</h2>
       <ul class="list-unstyled mb-0">
-        <li><a href="#aws-1"></a></li>
-        <li><a href="#aws-2"></a></li>
-        <li><a href="#aws-3"></a></li>
-        <li><a href="#aws-4"></a></li>
+        <li><a href="#aws-1">Codecommit</a></li>
+        <li><a href="#aws-2">Elasticsearch</a></li>
+        <li><a href="#aws-3">ECR</a></li>
+        <li><a href="#aws-4">ECS</a></li>
+        <li><a href="#aws-5">Service discovery</a></li>
+        <li><a href="#aws-6"></a></li>
+        <li><a href="#aws-7"></a></li>
       </ul>
     </div>
   </div>
 
   <div class="card mb-4" id="aws-1">
     <div class="card-body">
+      <h2 class="card-title">Codecommit</h2>
+    </div>
+    <div class="card-footer text-muted">
+<pre><code class="bash">aws codecommit list-repositories
+aws codecommit create-repository --repository-name &lt;repo_name&gt; --repository-description "&lt;repo_description&gt;"
+
+# Clone URL.
+aws codecommit get-repository --repository-name &lt;repo_name&gt; --query "repositoryMetadata.cloneUrlHttp"
+
+git config --global credential.helper '!aws codecommit credential-helper $@'
+git config --global credential.UseHttpPath true
+git config --global user.name "&lt;first_name&gt; &lt;last_name&gt;"
+git config --global user.email "&lt;email&gt;"
+git config --global push.default simple</code></pre>
+    </div>
+  </div>
+
+  <div class="card mb-4" id="aws-2">
+    <div class="card-body">
+      <h2 class="card-title">Elasticsearch</h2>
+    </div>
+    <div class="card-footer text-muted">
+<pre><code class="bash">aws es list-domain-names
+aws es describe-elasticsearch-domain -- domain-name &lt;domain_name&gt; --query "DomainStatus.Endpoints.vpc"</code></pre>
+    </div>
+  </div>
+
+  <div class="card mb-4" id="aws-3">
+    <div class="card-body">
+      <h2 class="card-title">ECR</h2>
+    </div>
+    <div class="card-footer text-muted">
+<pre><code class="bash"># List all repositories.
+aws ecr describe repositories
+
+aws ecr list-images --repository-name &lt;repo_name&gt;</code></pre>
+    </div>
+  </div>
+
+  <div class="card mb-4" id="aws-4">
+    <div class="card-body">
+      <h2 class="card-title">ECS</h2>
+    </div>
+    <div class="card-footer text-muted">
+<pre><code class="bash">aws ecs list-clusters
+aws ecs describe-clusters --cluster &lt;cluster_name&gt;
+aws ecs list-container-instances --cluster &lt;cluster_name&gt;
+
+aws ecs list-task-definitions
+aws ecs describe-task-definition --task-definition &lt;task_definition&gt;
+
+aws ecs list-tasks --cluster &lt;cluster_name&gt;
+aws ecs describe-tasks --cluster &lt;cluster_name&gt; --tasks &lt;task_id&gt;
+aws ecs describe-tasks --cluster &lt;cluster_name&gt; --tasks &lt;task_id&gt; --query "tasks[*].containerInstanceArn"
+
+aws ecs list-services --cluster &lt;cluster_name&gt;
+aws ecs describe-services --cluster &lt;cluster_name&gt; --services &lt;services&gt;
+aws ecs delete-services --cluster &lt;cluster_name&gt; --service &lt;service&gt; --force
+
+aws logs create-log-group
+aws logs describe-log-groups
+aws logs describe-log-streams --log-group-name &lt;log_group_name&gt; --log-stream-name-prefix &lt;prefix&gt;</code></pre>
+    </div>
+  </div>
+
+  <div class="card mb-4" id="aws-5">
+    <div class="card-body">
+      <h2 class="card-title">Service discovery</h2>
+    </div>
+    <div class="card-footer text-muted">
+<pre><code class="bash">aws servicediscovery list-namespaces
+aws servicediscovery create-service --name &lt;application_name&gt; --dns-config 'NamespaceId=&lt;namespace_id&gt;, DnsRecords=[{Type="A", TTL="300"}]' --health-check-custom-config FailureThreshold=1 --region &lt;region&gt;
+aws servicediscovery list-services
+aws servicediscovery get-namespace --id &lt;namespace_id&gt;
+aws servicediscovery delete-service --id &lt;service_id&gt;</code></pre>
+    </div>
+  </div>
+
+  <div class="card mb-4" id="aws-6">
+    <div class="card-body">
       <h2 class="card-title"></h2>
     </div>
     <div class="card-footer text-muted">
+<pre><code class="bash"></code></pre>
+    </div>
+  </div>
 
+  <div class="card mb-4" id="aws-7">
+    <div class="card-body">
+      <h2 class="card-title"></h2>
+    </div>
+    <div class="card-footer text-muted">
+<pre><code class="bash"></code></pre>
     </div>
   </div>
   <!-- AWS END -->
