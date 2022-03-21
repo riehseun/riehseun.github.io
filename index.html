@@ -1502,7 +1502,14 @@ which java
 java -version
 
 # Check available Java in the system.
-update-alternatives --config 'java'</code></pre>
+update-alternatives --config 'java'
+
+# Update JAVA_HOME to the output of "which java".
+export JAVA_HOME=$(dirname $(dirname $(readlink $(readlink $(whichi java)))))
+# Update PATH variable.
+export PATH=$PATH:$JAVA_HOME/bin
+# Update Classpath.
+export CLASSPATH=.:$JAVA_HOME/lib:$JAVA_HOME/jre/lib</code></pre>
     </div>
     <div class="card-footer text-muted">
 
@@ -1887,10 +1894,10 @@ command     = "ansible-playbook -u ${var.ssh_user} --private-key ~/.ssh/id_rsa .
 sudo salt-call saltutil.sync
 
 # Run all states.
-sudo salt-call state.highstate
+sudo salt-call state.highstate # Use "test=True" to run dry-run.
 
 # Run only a specific state.
-sudo salt-call state.apply &lt;state_name&gt;
+sudo salt-call state.apply &lt;state_name&gt; # Use "test=True" to run dry-run.
 
 # Find salt master from a minion.
 sudo salt-call grains.item master</code></pre>
@@ -7913,8 +7920,7 @@ cat x* > file.tar.gz</code></pre>
         <li><a href="#ubuntu-3">3. Gomplate</a></li>
         <li><a href="#ubuntu-4">4. Helm</a></li>
         <li><a href="#ubuntu-5">5. Vault</a></li>
-        <li><a href="#ubuntu-6">6. Java</a></li>
-        <li><a href="#ubuntu-7">7. Sublime</a></li>
+        <li><a href="#ubuntu-6">6. Sublime</a></li>
       </ul>
     </div>
   </div>
@@ -8009,25 +8015,7 @@ vault kv get -field &lt;CREDENTIAL_NAME&gt; &lt;PATH/TO/CREDENTIAL&gt;</code></p
 
   <div class="card mb-4" id="ubuntu-6">
     <div class="card-body">
-      <h2 class="card-title">6. Java</h2>
-
-<pre><code class="bash">sudo apt install default-jre
-java -version
-
-# Assuming ubuntu 18.04
-export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
-echo $JAVA_HOME
-export PATH=$PATH:$JAVA_HOME/bin
-echo $PATH</code></pre>
-    </div>
-    <div class="card-footer text-muted">
-
-    </div>
-  </div>
-
-  <div class="card mb-4" id="ubuntu-7">
-    <div class="card-body">
-      <h2 class="card-title">7. Sublime</h2>
+      <h2 class="card-title">6. Sublime</h2>
 
 <pre><code class="bash">curl -k https://download.sublimetext.com/sublime_text_3_build_3211_x64.tar.bz2 -o sublime.tar.gz
 tar -xvf sublime.tar.gz && rm -rf sublime.tar.gz</code></pre>
