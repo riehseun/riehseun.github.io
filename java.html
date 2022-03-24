@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="Seungmoon's DevOps Engineering Blog">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="Python, Groovy, Kubernetes, Docker, Jenkins, Terraform, Bash">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="cssmonokai-sublime.css" rel="stylesheet">
+<link href="css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.bundle.min.js"></script>
+<script src="js/highlight.pack.js"></script>
+<script type="text/javascript" src="js/include_html.js"></script>
+<script type="text/javascript" src="js/site.js"></script>
+
+</head>
+
+<body>
+
+<include src="header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Software Engineering</h1>
+
+<!-- Java BEGIN -->
+<div class="card mb-4" id="java">
+  <div class="card-body">
+    <h2 class="card-title">Java</h2>
+    <p class="card-text"></p>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#java-1">Search for JAR</a></li>
+      <li><a href="#java-2">Work with WAR</a></li>
+      <li><a href="#java-3">JDK</a></li>
+      <li><a href="#java-4">Maven</a></li>
+      <li><a href="#java-5">Gradle</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="java-1">
+  <div class="card-body">
+    <h2 class="card-title">Search for JAR</h2>
+    <h3 class="card-title">In linux process</h3>
+<pre><code class="bash">ps faux # Shows parent and child processes.
+ps aux | grep java # Shows Java processes.
+ps aux | grep java | awk '{print $2}' # Only show process ids.
+lsof -p &lt;pid&gt; # Show everything about this process.</code></pre>
+
+    <h3 class="card-title">Inside a jar</h3>
+<pre><code class="bash">unzip &lt;name&gt;.jar && cd &lt;name&gt;
+grep -rnw ./ -e '&lt;jar file to find&gt;'</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="java-2">
+  <div class="card-body">
+    <h2 class="card-title">Work with WAR</h2>
+<pre><code class="bash"># Extract a WAR file.
+jar -xvf &lt;name&gt;.war
+
+# Create a WAR file.
+jar -cvf &lt;name&gt;.war &lt;directory&gt;</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="java-3">
+  <div class="card-body">
+    <h2 class="card-title">JDK</h2>
+    <p class="card-text">JRE (Java Runtime Environment) - JVM and "java" command line tool.</p>
+    <p class="card-text">JDK (Java Development Kit) - JRE, javac (compiler), javadoc (documentation generator), jdb (debugger).</p>
+    <p class="card-text">Only JDK is available since Java 9.</p>
+<pre><code class="bash"># Check JDK location.
+which java
+
+# Check Java version.
+java -version
+
+# Check available Java in the system.
+update-alternatives --config 'java'
+
+# Update JAVA_HOME to the output of "which java".
+export JAVA_HOME=$(dirname $(dirname $(readlink $(readlink $(whichi java)))))
+# Update PATH variable.
+export PATH=$PATH:$JAVA_HOME/bin
+# Update Classpath.
+export CLASSPATH=.:$JAVA_HOME/lib:$JAVA_HOME/jre/lib</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="java-4">
+  <div class="card-body">
+    <h2 class="card-title">Maven</h2>
+<pre><code class="bash"># Build.
+mvn package
+
+# Build without testing.
+mvn package -Dmaven.test.skip</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="java-5">
+  <div class="card-body">
+    <h2 class="card-title">Gradle</h2>
+<pre><code class="bash"></code></pre>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+<!-- Java END -->
+
+
+<!-- Hadoop BEGIN -->
+<div class="card mb-4" id="hadoop">
+  <div class="card-body">
+    <h2 class="card-title">Hadoop</h2>
+    <p class="card-text"></p>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#hadoop-1">Start with Hadoop</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="hadoop-1">
+  <div class="card-body">
+    <h2 class="card-title">Start with Hadoop</h2>
+<pre><code class="bash"># First, open etc/hadoop/hadoop-env.sh and add JAVA_HOME environment variable.
+# If permission error, do the following.
+cd ~/.ssh && ssh-keygen -t rsa -p""
+cat id_rsa.pub >> authorized_keys
+
+# Start Hadoop service.
+sbin/start-dfs.sh
+
+# If needed, add to the path.
+export PATH=$PATH:$HADOOP_HOME/bin
+
+# Note that copying/pasting hadoop commands into the terminal may not work.
+# Check hadoop version.
+hadoop version
+
+# Create a directory /tmp/test
+hadoop fs -mkdir -p /tmp/test
+hadoop fs -ls /tmp/test
+hadoop fs -du -s /tmp/test
+hadoop fs -df -h
+
+# Create a file.
+hadoop fs -touchz /tmp/test/file
+
+# Empty out the trash.
+hadoop fs -expunge</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+<!-- Hadoop END -->
+
+
+<!-- Spark BEGIN -->
+<div class="card mb-4" id="spark">
+  <div class="card-body">
+    <h2 class="card-title">Spark</h2>
+    <p class="card-text"></p>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#spark-1">Start with Spark</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="spark-1">
+  <div class="card-body">
+    <h2 class="card-title">Start with Spark</h2>
+<pre><code class="bash">bin/spark-shell
+# Read a file from local file system.
+val data = sc.textFile("tmp/test/file")
+val num = Array(1,2,3,4,5,6,7,8,9)
+val NewData = sc.parallelize(num)
+NewData.count()
+# Type Ctrl-D to exit.</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+<!-- Spark END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="footer.html"></include>
+
+</body>
+
+</html>

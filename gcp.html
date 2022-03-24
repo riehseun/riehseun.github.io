@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="Seungmoon's DevOps Engineering Blog">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="Python, Groovy, Kubernetes, Docker, Jenkins, Terraform, Bash">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="cssmonokai-sublime.css" rel="stylesheet">
+<link href="css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.bundle.min.js"></script>
+<script src="js/highlight.pack.js"></script>
+<script type="text/javascript" src="js/include_html.js"></script>
+<script type="text/javascript" src="js/site.js"></script>
+
+</head>
+
+<body>
+
+<include src="header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Software Engineering</h1>
+
+<!-- GCP BEGIN -->
+<div class="card mb-4" id="gcp">
+  <div class="card-body">
+    <h2 class="card-title">GCP</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#gcp-1">1. How to provision GKE using Redhat7</a></li>
+      <li><a href="#gcp-2">2. Load Balancer and Static IP</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="gcp-1">
+  <div class="card-body">
+    <h2 class="card-title">1. How to provision GKE using Redhat7</h2>
+
+<pre><code class="bash"># Update YUM with Cloud SDK repo information:
+sudo tee -a /etc/yum.repos.d/google-cloud-sdk.repo << EOM
+[google-cloud-sdk]
+name=Google Cloud SDK
+baseurl=https://packages.cloud.google.com/yum/repos/cloud-sdk-el7-x86_64
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
+https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+EOM
+
+# Install the Cloud SDK
+sudo yum install google-cloud-sdk
+
+# Choose the project and region
+gcloud init
+
+sudo yum install kubectl
+
+# You may get errors. Wait until Kubernetes API is enabled for the project. Then try this command again
+gcloud container clusters create [CLUSTER_NAME]
+
+gcloud container clusters get-credentials [CLUSTER_NAME]
+
+# Delete the cluster after
+gcloud container clusters delete [CLUSTER_NAME]</code></pre>
+
+    <p class="card-text">From this point on, you can just do the following to provision/delete cluster</p>
+
+<pre><code class="bash">gcloud container clusters create [CLUSTER_NAME]
+
+gcloud container clusters delete [CLUSTER_NAME]</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://cloud.google.com/sdk/docs/quickstart-redhat-centos">Quickstart for Red Hat and Centos</a> | <a href="https://cloud.google.com/kubernetes-engine/docs/quickstart">Quickstart</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="gcp-2">
+  <div class="card-body">
+    <h2 class="card-title">2. Load Balancer and Static IP</h2>
+    <p class="card-text">Provisioning GKE, Load balancer, Static IP, and Jenkins application</p>
+
+<pre><code class="bash"># Load balancer and static IP
+
+gcloud container clusters create [CLUSTER_NAME]
+
+# Reverve static IP for "jenkins-master" application
+gcloud compute addresses create [INGRESS_GLOBLA_STATIC_IP_NAME] --global
+
+kubectl apply -f deployment.yaml
+kubectl apply -f service.yaml
+kubectl apply -f ingress.yaml
+
+# Wait about 10 mins until application comes up
+
+# To delete ingress, IP, and cluster
+kubectl delete ingress [INGRESS_NAME]
+
+gcloud compute addresses delete [INGRESS_GLOBLA_STATIC_IP_NAME] --global
+
+gcloud container clusters delete [CLUSTER_NAME]</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://cloud.google.com/kubernetes-engine/docs/tutorials/http-balancer">Setting up HTTP Load Balancing with Ingress</a>
+  </div>
+</div>
+<!-- GCP END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="footer.html"></include>
+
+</body>
+
+</html>
