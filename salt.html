@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="Seungmoon's DevOps Engineering Blog">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="Python, Groovy, Kubernetes, Docker, Jenkins, Terraform, Bash">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="cssmonokai-sublime.css" rel="stylesheet">
+<link href="css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.bundle.min.js"></script>
+<script src="js/highlight.pack.js"></script>
+<script type="text/javascript" src="js/include_html.js"></script>
+<script type="text/javascript" src="js/site.js"></script>
+
+</head>
+
+<body>
+
+<include src="header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Software Engineering</h1>
+
+<!-- Salt BEGIN -->
+<div class="card mb-4" id="salt">
+  <div class="card-body">
+    <h2 class="card-title">Salt</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#salt-1">1. Salt API</a></li>
+      <li><a href="#salt-2">2. Salt Formula</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="salt-1">
+  <div class="card-body">
+    <h2 class="card-title">1. Salt API</h2>
+
+    <p class="card-text">Test to see if Salt API is callable</p>
+<pre><code class="python">salt -a pam \* test.ping</code></pre>
+
+    <p class="card-text">Add credential(s) to call Salt API</p>
+<pre><code class="python">/etc/salt/master.d/auth.conf</code></pre>
+
+    <p class="card-text">Restart Salt master</p>
+<pre><code class="python">sudo service salt-master restart</code></pre>
+
+    <p class="card-text">Check logs</p>
+<pre><code class="python">/var/log/salt/master</code></pre>
+
+    <p class="card-text">Check minion configuration</p>
+<pre><code class="python">/etc/salt/minion.d/minion.conf</code></pre>
+
+    <p class="card-text">Salt call</p>
+<pre><code class="python"># Sync salt modules from master to minion.
+sudo salt-call saltutil.sync
+
+# Run all states.
+sudo salt-call state.highstate # Use "test=True" to run dry-run.
+
+# Run only a specific state.
+sudo salt-call state.apply &lt;state_name&gt; # Use "test=True" to run dry-run.
+
+# Find salt master from a minion.
+sudo salt-call grains.item master</code></pre>
+
+    <p class="card-text">Salt grains</p>
+<pre><code class="python"># Grains location.
+/etc/salt/grains</code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="salt-2">
+  <div class="card-body">
+    <h2 class="card-title">2. Salt Formula</h2>
+<pre><code class="python"># Set environment variable.
+&lt;state_name&gt;
+  environ.setenv:
+    - name: name
+    - value: value
+    - update_minion: True
+
+# Copy files within the minion.
+&lt;state_name&gt;
+  file.copy:
+    - name:
+    - source:
+    - force: True # Overwrite the file even if it exists.
+    - preserve: True # Retain user/group ownership.
+
+# Delete file/directory if exists.
+&lt;state_name&gt;
+  file.absent:
+    - name: file or directory
+
+# Install a group of packages.
+# Groups can be inspected by the following commands.
+# yum groups list
+# yum groups info "&lt;group_name&gt;"
+&lt;state_name&gt;
+  pkg.group_installed:
+    - name: 'group name'</code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+<!-- Salt END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="footer.html"></include>
+
+</body>
+
+</html>

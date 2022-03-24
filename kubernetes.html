@@ -1,0 +1,3010 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="Seungmoon's DevOps Engineering Blog">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="Python, Groovy, Kubernetes, Docker, Jenkins, Terraform, Bash">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="cssmonokai-sublime.css" rel="stylesheet">
+<link href="css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.bundle.min.js"></script>
+<script src="js/highlight.pack.js"></script>
+<script type="text/javascript" src="js/include_html.js"></script>
+<script type="text/javascript" src="js/site.js"></script>
+
+</head>
+
+<body>
+
+<include src="header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Software Engineering</h1>
+
+<!-- Kubernetes BEGIN -->
+<div class="card mb-4" id="kubernetes">
+  <div class="card-body">
+    <h2 class="card-title">Kubernetes</h2>
+
+    <ul class="list-unstyled mb-0">
+      <li><a href="#kubernetes-1">1. Kubectl</a></li>
+      <li><a href="#kubernetes-2">2. Helm</a></li>
+      <li><a href="#kubernetes-3">3. Skaffold</a></li>
+      <li><a href="#kubernetes-4">4. Datadog and kube state metric</a></li>
+      <li><a href="#kubernetes-5">5. Kured</a></li>
+    </ul>
+
+    <ul>
+      <li>Namespace - virtual cluster within the cluster.</li>
+      <li>Deployment - declarative updates for Pod and ReplicaSet including rollouts and rollbacks.</li>
+      <li>ReplicationController - no longer used.</li>
+      <li>ReplicaSet - creates Pods. (should not be manipulated, Deployment should be used instead)</li>
+      <li>StatefulSet - similar to Deployment, but provides uniqueness and ordering of Pods.</li>
+      <li>DaemonSet - exactly one Pod per Node. Deleting it clean up Pods.</li>
+      <li>Job - create short living Pods. Deleting it clean up Pods.</li>
+      <li>Cron Job - create Jobs on repeating schedule.</li>
+      <li>Pod - smallest deployable unit.
+        <ul>
+          <li>Init container - runs before app containers.</li>
+        </ul>
+      </li>
+    </ul>
+
+    <ul>
+      <li>Ingress Controller - specification of Ingress.</li>
+      <li>Ingress - provides external access to Service. (Need ingress controller)</li>
+      <li>Service - manages traffic to Pods.</li>
+      <ul>
+        <li>Cluster IP - Service is accessible only within the cluster.</li>
+        <li>Node Port - expose Service at each Node's IP and port.</li>
+        <li>LoadBalancer - expose Service using external load balancer.</li>
+        <li>External Name - map Service to an existing DNS FQDN.</li>
+      </ul>
+      <li>Network Policy - denie/allows traffic to/from Pods.</li>
+    </ul>
+
+    <ul>
+      <li>Storage Class - configuration for storage.</li>
+      <li>Persistent Volumes - piece of storage, simialr to Node.</li>
+      <li>Persistent Volumes Claim - request for storage, simialr to Pod. Can request size and access mode. Pods mount this.</li>
+      <li>Volume Snapshot Class - simialr to Storage Class but for Volume Snapshot.</li>
+      <li>Volume Snapshot Content - snapshot taken from a volume.</li>
+      <li>Volume Snapshot - request for a snapshot.</li>
+      <li>ConfigMap - configuration data separate from app code. Must be in the same namespace with Pod.</li>
+      <li>Secret - similar to ConfigMap but specifically for confidential data.</li>
+      <li>emptyDir - temp storage created when Pod is assigned to Node. Deleted when Pod is removed.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-">
+  <div class="card-body">
+    <h2 class="card-title">Namespace</h2>
+<pre><code class="yaml">apiVersion: v1
+kind: Namespace
+metadata:
+  name: my-namespace
+  labels:
+    name: my-namespace
+  ...</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-">
+  <div class="card-body">
+    <h2 class="card-title">Deployments</h2>
+    <p class="card-text">Provides declarative updates for Pods and ReplicaSets. Deployment Controller change an actual state to a desired state at a controlled rate</p>
+    <p class="card-text">Usecase</p>
+    <ul>
+      <li>Create a Deployment to rollout a ReplicaSet, which creates Pods in the background</li>
+      <li>Declare the new state of Pods by updating the PodTemplateSpec of the Deployment</li>
+      <li>Rollback to an earlier Deployment version</li>
+      <li>Scale up the Deployments</li>
+      <li>Clean up old ReplicaSets</li>
+    </ul>
+    <p class="card-text">Create a Deployment</p>
+<pre><code class="yaml">apiVersion: apps/v1 # Mandatory field
+kind: Deployment # Mandatory field
+metadata: # Mandatory field
+  name: nginx-deployment # Deployment named ".metadata.name" is created
+  labels:
+    app: nginx
+spec:
+  replicas: 3 # Three replicated Pods. If this field does not exist, it will default to 1
+  selector: # Required field for "spec". This specifies the label selector of Pod targeted by this Deployment
+    matchLabels:
+      app: nginx # How Deployment finds which Pods to manage
+  template: # Required field for "spec". This is a Pod template, which has the same schema as Pod
+    metadata:
+      labels:
+        app: nginx # Pod label. This must match ".spec.selector"
+  spec:
+    containers: # nginx container runs nginx image version 1.14.2
+    - name: nginx
+      image: nginx:1.14.2
+      ports:
+      - containerPort: 80</code></pre>
+    <ul>
+      <li>To create Deployment
+<pre><code class="bash">kubectl apply -f nginx-deployment.yaml</pre></code></li>
+      <li>To check Deployment
+<pre><code class="bash">kubectl get deployments</code></pre></li>
+<img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-4-a.png" alt="Card image cap">
+      <ul>
+        <li>NAME - names of Deployments in the namespace</li>
+        <li>READY - how many replicas of the application are available to users</li>
+        <li>UP TO DATE - number of replicas updated to achieve the desired state</li>
+        <li>AVAILABLE - how many replicas of the application are available to users</li>
+        <li>AGE - amount of time the appliation has been running</li>
+      </ul>
+      <li>To check Deployment rollout status
+<pre><code class="bash">kubectl rollout status deployment/nginx-deployment</code></pre></li>
+      <li>To see the ReplicaSet created by Deployment
+<pre><code class="bash">kubectl get rs</code></pre></li>
+<img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-4-b.png" alt="Card image cap">
+      <ul>
+        <li>NAME - names of ReplicaSets in the namespace</li>
+        <li>DESIRED - desired number of replicas in the application</li>
+        <li>CURRENT - how many applications are currently running</li>
+        <li>READY - how many replicas of the application are available to users</li>
+        <li>AGE - amount of time the appliation has been running</li>
+      </ul>
+      <li>To see the labels generated for each Pod
+<pre><code =>kubectl get pods --show-labels</code></pre></li>
+      <li>To update iamge from nginx:1.14.2 to nginx:1.16.1, run one of the following
+<pre><code class="bash">kubectl --record deployment.apps/nginx-deployment set image deployment.v1.apps/nginx-deployment nginx=nginx:1.16.1</code></pre>
+<pre><code class="bash">kubectl set image deployment/nginx-deployment nginx=nginx:1.16.1 --record</code></pre></li>
+      <li>To see the rollout status
+<pre><code class="bash">kubectl rollout status deployment/nginx-deployment</code></pre></li>
+    </ul>
+    <p class="card-text">Deployment ensures that at least 75% of Pods are up while they are being updated. It also ensures that at most 125% of the desired number of Pods are up</p>
+
+    <p class="card-text">Rollover</p>
+    <ul>
+      <li>Everytime a new Deployment is observed by Deployment Controller, a ReplicaSet is created to bring up the desired Pods</li>
+      <li>If Deployment is updated, the existing ReplicaSet that control Pods whose labels match <code>.spec.selector</code> but whose template does not match <code>.spec.template</code> are scaled down</li>
+      <li>Eventually, new ReplicaSet is scaled to <code>.spec.replicas</code> and all old ReplicaSets is scaled to 0</li>
+    </ul>
+
+    <p class="card-text">Rollback</p>
+    <ul>
+      <li>Check the revisions of Deployment</li>
+<pre><code class="bash">kubectl rollout history deployment.v1.apps/nginx-deployment</code></pre>
+      <li>To see the details of each revision</li>
+<pre><code class="bash">kubectl rollout history deployment.v1.apps/nginx-deployment --revision=2</code></pre>
+      <li>Rollback to a specific version</li>
+<pre><code class="bash">kubectl rollout undo deployment.v1.apps/nginx-deployment --to-revision=2</code></pre>
+    </ul>
+
+    <p class="card-text">Scaling</p>
+    <ul>
+      <li>Scale a Deployment</li>
+<pre><code class="bash">kubectl scale deployment.v1.apps/nginx-deployment --replicas=10</code></pre>
+      <li>Setup autoscaler for Deployment and choose the minimum and maximum number of Pods</li>
+<pre><code class="bash">kubectl autoscale deployment.v1.apps/nginx-deployment --min=10 --max=15 --cpu-percent=80</code></pre>
+      <li>Rollback to a specific version</li>
+<pre><code class="bash">kubectl rollout undo deployment.v1.apps/nginx-deployment --to-revision=2</code></pre>
+    </ul>
+
+    <p class="card-text">Proportional scaling</p>
+    <ul>
+      <li>Deployment Controller balances additional replicas in the existing ReplicaSets</li>
+    </ul>
+
+    <p class="card-text">Pause and resume Deployment</p>
+    <ul>
+      <li>Can apply multiple fixes in between pausing and resuming without triggering unnecessary rollouts</li>
+      <li>To pause the Deployment</li>
+<pre><code class="bash">kubectl rollout pause deployment.v1.apps/nginx-deployment</code></pre>
+      <li>Can update the image</li>
+<pre><code class="bash">kubectl set image deployment.v1.apps/nginx-deployment nginx=nginx:1.16.1</code></pre>
+      <li>Can update the resources</li>
+<pre><code class="bash">kubectl set resources deployment.v1.apps/nginx-deployment -c=nginx --limits=cpu=200m,memory=512Mi</code></pre>
+      <li>To resume the Deployment</li>
+<pre><code class="bash">kubectl rollout resume deployment.v1.apps/nginx-deployment</code></pre>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployment</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-">
+  <div class="card-body">
+    <h2 class="card-title">ReplicaSet</h2>
+    <p class="card-text">Generally, ReplicaSet should not be manipulated. Rather, Deployment should be used.</p>
+    <p class="card-text">ReplicaSet is mapped to Pod by Pod's metadata.ownerReferences field.</p>
+<pre><code class="yaml">apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: frontend
+  labels:
+    app: guestbook
+    tier: frontend
+spec:
+  # modify replicas according to your case
+  replicas: 3
+  selector:
+    matchLabels:
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        tier: frontend
+    spec:
+      containers:
+      - name: php-redis
+        image: gcr.io/google_samples/gb-frontend:v3</code></pre>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: pod1
+  labels:
+    tier: frontend
+spec:
+  containers:
+  - name: hello1
+    image: gcr.io/google-samples/hello-app:2.0
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod2
+  labels:
+    tier: frontend
+spec:
+  containers:
+  - name: hello2
+    image: gcr.io/google-samples/hello-app:1.0</code></pre>
+    <p class="card-text">These Pods do not have Controller as their owner reference. And they match the selector of frontend ReplicaSet (right above). This means these Pods will be acquired by that ReplicaSet. Moreover, if the frontend ReplicaSet is already deployed, creating these two additional Pods cause them to immediately terminate because the ReplicaSet exceeds the desired count.</p>
+    <p class="card-text">Delete ReplicaSet and its Pods.</p>
+<pre><code class="bash">kubectl proxy --port=8080
+curl -X DELETE  'localhost:8080/apis/apps/v1/namespaces/default/replicasets/frontend' \
+> -d '{"kind":"DeleteOptions","apiVersion":"v1","propagationPolicy":"Foreground"}' \
+> -H "Content-Type: application/json"</code></pre>
+    <p class="card-text">Delete just a ReplicaSet</p>
+<pre><code class="bash">kubectl proxy --port=8080
+curl -X DELETE  'localhost:8080/apis/apps/v1/namespaces/default/replicasets/frontend' \
+> -d '{"kind":"DeleteOptions","apiVersion":"v1","propagationPolicy":"Orphan"}' \
+> -H "Content-Type: application/json"</code></pre>
+    <p class="card-text">Scale-down a ReplicaSet</p>
+    <ul>
+      <li>Pending Pods are scaled-down first</li>
+      <li>If controller.kubernetes.io/pod-deletion-cost annotation is set, Pods with lower value are scaled-down second</li>
+      <li>Pods on Nodes with more replicas are scaled-down thrid</li>
+      <li>Pods created recently are scaled-down fourth</li>
+    </ul>
+  </div>
+
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/">ReplicaSet</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-">
+  <div class="card-body">
+    <h2 class="card-title">StatefulSet</h2>
+    <p class="card-text">Similar to Deployment, but guarantees ordering and uniqueness of Pods.</p>
+    <p class="card-text">Usecase</p>
+    <ul>
+      <li>Stable, unique network identifier</li>
+      <li>Stable, persistent storage</li>
+      <li>Ordered, graceful deployment and scaling</li>
+      <li>Ordered, automated rolling updates</li>
+    </ul>
+    <p class="card-text">Limitations</p>
+    <ul>
+      <li>Storage for a Pod must be provisioned by PersistentVolumns Provsioner</li>
+      <li>Deleting StatefulSet does not delete volumns associated with it</li>
+      <li>StatefulSet requires Headless Service for the network identity of the Pods</li>
+      <li>StatefulSet does not guarantee on the termination of Pods when Statefulset gets deleted</li>
+    </ul>
+    <p class="card-text">Example</p>
+    <ul>
+      <li>Headless service named "nginx" is used to control the network domain</li>
+      <li>3 replicas of nginx container will be launched in unique Pods</li>
+      <li>volumeClaimTemplates will provide stable storage using PersistentVolumns</li>
+    </ul>
+<pre><code class="yaml">apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  ports:
+  - port: 80
+    name: web
+  clusterIP: None
+  selector:
+    app: nginx
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: web
+spec:
+  selector:
+    matchLabels:
+      app: nginx # has to match .spec.template.metadata.labels
+  serviceName: "nginx"
+  replicas: 3 # by default is 1
+  template:
+    metadata:
+      labels:
+        app: nginx # has to match .spec.selector.matchLabels
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: nginx
+        image: k8s.gcr.io/nginx-slim:0.8
+        ports:
+        - containerPort: 80
+          name: web
+        volumeMounts:
+        - name: www
+          mountPath: /usr/share/nginx/html
+  volumeClaimTemplates:
+  - metadata:
+      name: www
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "my-storage-class"
+      resources:
+        requests:
+          storage: 1Gi</code></pre>
+    <ul>
+      <li>Three Pods will be deployed in the order web-0, web-1, web-2</li>
+      <li>web-1 will not be deployed until web-0 is Running and Ready</li>
+      <li>When scaling down, web-1 will not be terminated until web-2 is fully shutdown</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/">StatefulSet</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-">
+  <div class="card-body">
+    <h2 class="card-title">DaemonSet</h2>
+    <p class="card-text">DaemonSet ensures that as Nodes are added Pods are added them, and as Nodes are removed Pods are garbage collected.</p>
+<pre><code class="yaml">apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluentd-elasticsearch
+  namespace: kube-system
+  labels:
+    k8s-app: fluentd-logging
+spec:
+  selector:
+    matchLabels:
+      name: fluentd-elasticsearch
+  template:
+    metadata:
+      labels:
+        name: fluentd-elasticsearch
+    spec:
+      tolerations:
+      # this toleration is to have the daemonset runnable on master nodes
+      # remove it if your masters can't run pods
+      - key: node-role.kubernetes.io/master
+        operator: Exists
+        effect: NoSchedule
+      containers:
+      - name: fluentd-elasticsearch
+        image: quay.io/fluentd_elasticsearch/fluentd:v2.5.2
+        resources:
+          limits:
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
+        volumeMounts:
+        - name: varlog
+          mountPath: /var/log
+        - name: varlibdockercontainers
+          mountPath: /var/lib/docker/containers
+          readOnly: true
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: varlog
+        hostPath:
+          path: /var/log
+      - name: varlibdockercontainers
+        hostPath:
+          path: /var/lib/docker/containers</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/">DaemonSet</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-">
+  <div class="card-body">
+    <h2 class="card-title">Jobs</h2>
+    <p class="card-text">A Job creates one more more Pods. It reliably runs one Pod to completion. Deleting a Job will clean up Pods it created. Suspending a Job will delete its active Pods</p>
+    <p class="card-text">A Job is better than bare Pod because it can automatically replace failed Pod with new one. While Replication Controller manages Pods that are not expected to terminate, Job manages Pods that are expected to terminate</p>
+    <p class="card-text">Example</p>
+<pre><code class="yaml">apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pi
+spec:
+  template:
+    spec:
+      containers:
+      - name: pi
+        image: perl
+        command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+      restartPolicy: Never
+  backoffLimit: 4</code></pre>
+    <p class="card-text">To list all the Pods that belong to a Job</p>
+<pre><code class="bash">run pods=$(kubectl get pods --selector=job-name=pi --output=jsonpath='{.items[*].metadata.name}') && echo $pods"</code></pre>
+    <p class="card-text">Three types of tasks suitable to run as a Job</p>
+    <ul>
+      <li>Non-parallel Jobs - normally only one Pod is started. Job is complete as soon as its Pod terminates successfully. Can leave both <code>.spec.completions</code> and <code>.spec.parallelism</code> unset (they will default to 1)</li>
+      <li>Parallel Jobs with a fixed completion count - Job is complete when there is one successful Pod for each value in the range 1 to <code>.spec.completions</code></li>
+      <li>Parallel Jobs with a work queue - when any Pod from the Job terminates with success, no new Pods are created. Once at least one Pod is terminated with success and all Pods are terminated, Job succeeds. Must leave <code>.spec.completions</code> unset and set <code>.spec.parallelism</code> to a non-negative integer</li>
+    </ul>
+    <p class="card-text">Requested parallelism <code>.spec.parallelism</code> is set to 1 if not specified. Setting it to 0 makes Job effective paused</p>
+    <ul>
+      <li>Fixed completion count Jobs - actual number of Pods running in parallel will not exceed the number of remaining completions. Higher value of <code>.spec.parallelism</code> is ignored</li>
+      <li>Work queue Jobs - no new Pods are started after any Pod has succeeded</li>
+    </ul>
+    <p class="card-text">Pod and container failure</p>
+    <ul>
+      <li>If container fails and <code>.spec.template.spec.restartPolicy = "OnFailure"</code>, Pod stays on the node but container re-runs. You can avoid this by <code>.spec.template.spec.restartPolicy = "Never"</code></li>
+      <li>If Pod fails, then Job Controller starts a new Pod</li>
+      <li><code>.spec.backoffLimit</code> is specifiy number fo retries before marking Job as failure (default is 6)</li>
+    </ul>
+    <p class="card-text">Job termination and cleaup</p>
+    <ul>
+      <li>Delete the Job, all the Pods created by that Job are deleted too</li>
+<pre><code class="bash">kubectl get jobs
+kubectl delete jobs/&lt;job_name&gt;</code></pre>
+      <li>Setting <code>.spec.activeDeadlineSeconds</code> will make Job fail and terminate all running Pods once <code>activeDeadlineSeconds</code> is reached</li>
+    </ul>
+<pre><code class="yaml">apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pi-with-timeout
+spec:
+  backoffLimit: 5
+  activeDeadlineSeconds: 100
+  template:
+    spec:
+      containers:
+      - name: pi
+        image: perl
+        command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
+      restartPolicy: Never</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/job/">Jobs</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-">
+  <div class="card-body">
+    <h2 class="card-title">Cron Job</h2>
+    <p class="card-text">It can create Jobs on a repeating schedule or any individual tasks</p>
+    <p class="card-text">Example</p>
+<pre><code class="yaml">apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: hello
+spec:
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: hello
+            image: busybox
+            imagePullPolicy: IfNotPresent
+            command:
+            - /bin/sh
+            - -c
+            - date; echo Hello from the Kubernetes cluster
+          restartPolicy: OnFailure</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/">CronJob</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-">
+  <div class="card-body">
+    <h2 class="card-title">Pods</h2>
+    <p class="card-text">Its the smallest deployable unit</p>
+    <ul>
+      <li>Can contain an init container tha runs during Pod startup</li>
+      <li>Similar to Docker containers with shared namespace and volumn</li>
+      <li>Pod gets created by resources such as Deployment, Job, or StatefulSet</li>
+      <li>Controller for those resources handles Pod replication, rollout, and failure</li>
+      <li>Controllers create Pod from Pod Template</li>
+<pre><code class="yaml">apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hello
+spec:
+  template:
+    # This is the pod template
+    spec:
+      containers:
+      - name: hello
+        image: busybox
+        command: ['sh', '-c', 'echo "Hello, Kubernetes!" && sleep 3600']
+      restartPolicy: OnFailure
+    # The pod template ends here</code></pre>
+        <li>Modifying the Pod Template will make StatefulSet to create new Pods, which then will replace old Pods</li>
+        <li>Every container in a Pod share the same IP address and port. These containers can communicate to each other using localhost</li>
+        <li>Any container in a Pod can enable privileged mode to use OS admin level capabilities</li>
+        <li>Static Pods are managed directly by kubelet without API server. Kubelet though will create mirror Pods on API server for each static Pod</li>
+      </ul>
+
+      <h3 class="card-title">Pod Lifecycle</h3>
+      <ul>
+        <li>Pods are created, assinged a unique ID (UUID), and scheduled to nodes. They can never be rescheduled to different nodes</li>
+      </ul>
+      <p class="card-text">Pod lifecycle</p>
+      <ul>
+        <li>Pending - containers have not been setup yet</li>
+        <li>Running - Pod is bounded to a node. Containers are created but still running</li>
+        <li>Succeeded (Completed when <strong>restartPloicy:Never</strong>) - Containers are terminated with success</li>
+        <li>Failed (CrashLoopBackoff when Pod fails or exits unexpectedly) - At least one container is terminated with failure</li>
+        <li>Unknown - Pod status cannot be obtained. Most often error communicating with the node</li>
+      </ul>
+      <p class="card-text">Container lifecycle</p>
+      <ul>
+        <li>Waiting - running operations to complete startup</li>
+        <li>Running - executing without issues</li>
+        <li>Terminated - either ran to completion or failed</li>
+      </ul>
+      <p class="card-text">Container restart policy</p>
+      <ul>
+        <li><code>spec</code> of Pod has <code>restartPolicy</code>, which has Always, OnFailure, Never. Default is Always</li>
+      </ul>
+      <p class="card-text">Pod condition</p>
+      <ul>
+        <li>PodScheduled - Pod is scheduled to a node</li>
+        <li>ContainersReady - all containers in Pod are ready</li>
+        <li>Initialized - all init containers are started</li>
+        <li>Ready - Pod can serve requests</li>
+      </ul>
+      <p class="card-text">Pod readiness</p>
+      <ul>
+        <li><code>spec</code> of Pod has <code>readinessGates</code>, that allows additional conditions to be specified</li>
+      </ul>
+<pre><code class="yaml">kind: Pod
+...
+spec:
+  readinessGates:
+    - conditionType: "www.example.com/feature-1"
+status:
+  conditions:
+    - type: Ready                              # a built in PodCondition
+      status: "False"
+      lastProbeTime: null
+      lastTransitionTime: 2018-01-01T00:00:00Z
+    - type: "www.example.com/feature-1"        # an extra PodCondition
+      status: "False"
+      lastProbeTime: null
+      lastTransitionTime: 2018-01-01T00:00:00Z
+  containerStatuses:
+    - containerID: docker://abcd...
+      ready: true
+...</code></pre>
+      <p class="card-text">Container probe</p>
+      <ul>
+        <li>Kubelet performs diagnostic on a container periodically (this is call Probe)</li>
+        <li>Kubelet calls Handler, which is implemented by the container</li>
+        <li>ExecAction Handler - executes a command inside container. Diagnostic successful if command exits with 0</li>
+        <li>TCPSocketAction Handler - TCP check on IP address on specified port. Diagnostic successful if port is open</li>
+        <li>HTTPGetAction Handler - HTTP GET check on IP address on specified port and path. Diagnostic successful if  200 &le; response &lt; 400</li>
+      </ul>
+      <p class="card-text">livenessProbe</p>
+      <ul>
+        <li>Indicates whether the container is running. If liveness probe fails, the kubelet kills the container, and container is subject to its restart policy</li>
+      </ul>
+      <p class="card-text">readinessProbe</p>
+      <ul>
+        <li>Indicates whether the container is ready to respond to requests. If readiness probe fails, then endpoint controller removes Pod IP address from Service endpoints that match the Pod</li>
+        <li>Used when container needs to load large data, configuration files</li>
+      </ul>
+      <p class="card-text">startupProbe</p>
+      <ul>
+        <li>Indicates whether the application within the container has started. If starup probe fails, the kubelet kills the container, and container is subject to its restart policy</li>
+        <li>Used when containers take long time to come into service</li>
+      </ul>
+      <p class="card-text">Pod Termination</p>
+      <ul>
+        <li>Kubelet tool to delete Pod, with default graceful period of 30 seconds</li>
+        <li>Control plane removes shutting-down Pods from Endpoints</li>
+        <li>Resources no longer trest shutting-down Pods valid</li>
+        <li>When the grace period expires, kubelet triggeres forcible shutdown (contrainer runtime sends SIGKILL to any running processes in containers)</li>
+        <li>API server deletes Pod's object</li>
+      </ul>
+
+      <h3 class="card-title">Labels, Selectors, and Annotations</h3>
+      <p class="card-text">Labels - key/value pairs enabling users to map their own structures to system objects (for example, Pods) in loosely coupled fashion. Labels do not need to be unique.</p>
+<pre><code class="yaml">"metadata": {
+  "labels": {
+    "key1" : "value1",
+    "key2" : "value2"
+  }
+}</code></pre>
+      <p class="card-text">Example, Pods with two labels <code>environment: production</code> and <code>app: nginx</code></p>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: label-demo
+  labels:
+    environment: production
+    app: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.14.2
+    ports:
+    - containerPort: 80</code></pre>
+      <p class="card-text">Selectors - equality-based allows filtering by label keys and values while set-based allows filtering keys according to a set of values. For example,</p>
+<pre><code class="bash">kubectl get pods -l environment=production,tier=frontend # equality based
+kubectl get pods -l 'environment in (production),tier in (frontend)' # set based</code></pre>
+      <p class="card-text">Service and Replication Controller only support equality-based selector</p>
+<pre><code class="yaml">selector:
+  component: redis</code></pre>
+      <p class="card-text">Job, Deployment, ReplicaSet, DaemonSet also support set-based selector</p>
+<pre><code class="yaml">selector:
+matchLabels:
+  component: redis
+matchExpressions:
+  - {key: tier, operator: In, values: [cache]}
+  - {key: environment, operator: NotIn, values: [dev]}</code></pre>
+      <p class="card-text">Annotations - allows attaching arbitrary non-identifying metadata to objects (while Labels are used to select objects, annotations are for recording metadata)</p>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: annotations-demo
+  annotations:
+    imageregistry: "https://hub.docker.com/"
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.14.2
+    ports:
+    - containerPort: 80</code></pre>
+
+      <h3 class="card-title">Init Containers</h3>
+      <p class="card-text">Specialized containers that run before app containers in Pod</p>
+      <ul>
+        <li>Init containers always run to completion</li>
+        <li>Each init container must succeed before next one can run</li>
+        <li>If init container fails, kubelet repeatly restarts the container</li>
+        <li>Init containers do not support lifecycle, livenessProbe, readinessProbe, startupProbe because they must run to completion before Pod can be ready</li>
+        <li>Init containers can have custom code and no need to use FROM</li>
+        <li>Init containers can be given access to Secret (unlike app containers)</li>
+        <li>If Pod restarts, all init containers must run again</li>
+        <li>Init container code must be idempotent (because they can be re-run)</li>
+      </ul>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp-pod
+  labels:
+    app: myapp
+spec:
+  containers:
+  - name: myapp-container
+    image: busybox:1.28
+    command: ['sh', '-c', 'echo The app is running! && sleep 3600']
+  initContainers:
+  - name: init-myservice
+    image: busybox:1.28
+    command: ['sh', '-c', "until nslookup myservice.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for myservice; sleep 2; done"]
+  - name: init-mydb
+    image: busybox:1.28
+    command: ['sh', '-c', "until nslookup mydb.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for mydb; sleep 2; done"]</code></pre>
+      <p class="card-text">Init containters would be waiting to discover Services named myservice and mydb. </p>
+<pre><code class="yaml">---
+apiVersion: v1
+kind: Service
+metadata:
+  name: myservice
+spec:
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 9376
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mydb
+spec:
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 9377</code></pre>
+
+      <h3 class="card-title">Pod Topology Spread Constraints</h3>
+      <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-a.png" alt="Card image cap">
+<pre><code class="yaml">kind: Pod
+apiVersion: v1
+metadata:
+  name: mypod
+  labels:
+    foo: bar
+spec:
+  topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: zone
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        foo: bar
+  containers:
+  - name: pause
+    image: k8s.gcr.io/pause:3.1</code></pre>
+      <p class="card-text">If a new Pod goes to Zone A, then the skew will be 3-1=2, which will exceed the maxSkew of 1. Thus, it can only go to Zone B such that</p>
+      <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-b.png" alt="Card image cap">
+
+      <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-c.png" alt="Card image cap">
+<pre><code class="yaml">kind: Pod
+apiVersion: v1
+metadata:
+  name: mypod
+  labels:
+    foo: bar
+spec:
+  topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: zone
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        foo: bar
+  - maxSkew: 1
+    topologyKey: node
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        foo: bar
+  containers:
+  - name: pause
+    image: k8s.gcr.io/pause:3.1</code></pre>
+      <p class="card-text">A new Pod can only go to Zone B to meet the maxSkew of 1 in the first constraint. However at the same time, it can only go to Node 2 to meet the maxSkew of 1 in the second constraint. Because whenUnsatisfiable is DoNotSchedule in both constraints, new Pod cannot be scheduled. (it would be scheduled if whenUnsatisfiable is ScheduleAnyway)</p>
+
+      <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-d.png" alt="Card image cap">
+<pre><code class="yaml">kind: Pod
+apiVersion: v1
+metadata:
+  name: mypod
+  labels:
+    foo: bar
+spec:
+  topologySpreadConstraints:
+  - maxSkew: 1
+    topologyKey: zone
+    whenUnsatisfiable: DoNotSchedule
+    labelSelector:
+      matchLabels:
+        foo: bar
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: zone
+            operator: NotIn
+            values:
+            - zoneC
+  containers:
+  - name: pause
+    image: k8s.gcr.io/pause:3.1</code></pre>
+      <p class="card-text">This will exclude Zone C from the constraint such that a new Pod goes to Zone B rather than Zone C</p>
+
+      <h4 class="card-title">Cluster-Level Default Constraints</h4>
+<pre><code class="yaml">apiVersion: kubescheduler.config.k8s.io/v1beta1
+kind: KubeSchedulerConfiguration
+
+profiles:
+  - pluginConfig:
+      - name: PodTopologySpread
+        args:
+          defaultConstraints:
+            - maxSkew: 1
+              topologyKey: topology.kubernetes.io/zone
+              whenUnsatisfiable: ScheduleAnyway
+          defaultingType: List</code></pre>
+      <ul>
+        <li>Pod Affinity - can place any number of Pods into qualifying topology domains</li>
+        <li>Pod Anti-Affinity - can only place one Pod into a single topology domain</li>
+      </ul>
+
+      <h3 class="card-title">Multi-container pod design</h3>
+      <p class="card-text">Each pod can have multiple containers (which would run on the same node). This make communication between containers faster and securer, and allow them to share volumns and file systems</p>
+
+      <p class="card-text"><strong>Sidecar</strong></p>
+      <p class="card-text">Enhance/extend existing functionality of container</p>
+      <p class="card-text">For example, an app container can stream logs to a particular location while the sidecar container mounts the logs to some other directory</p>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: sidecar-pod
+spec:
+  volumes:
+  - name: logs
+    emptyDir: {}
+  containers:
+  - name: app-container
+    image: alpine
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do date >> /var/log/app.log; sleep 2;done"]
+    volumeMounts:
+    - name: logs
+      mountPath: /var/log
+  - name: log-exporter-sidecar
+    image: nginx
+    ports:
+      - containerPort: 80
+    volumeMounts:
+    - name: logs
+      mountPath: /usr/share/nginx/html</code></pre>
+      <p class="card-text">"app-container" streams logs to /var/log/app.log while "log-exporter-sidecar" mounts those logs into /usr/share/nginx/html</p>
+
+      <p class="card-text"><strong>Ambassador</strong></p>
+      <p class="card-text">Serves as a proxy to external worlds (this for for legacy apps, ConfigMap should be used for new apps)</p>
+      <p class="card-text">For example, when connecting to a DB server and that server config changes across different environments, the ambassador container can act as a TCP proxy to the database, which can be connected via localhost. The sysadmin can use config maps and secrets with the proxy container to inject the correct connection and auth information</p>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: ambassador-pod
+  labels:
+    app: ambassador-app
+spec:
+  volumes:
+  - name: shared
+    emptyDir: {}
+  containers:
+  - name: app-container-poller
+    image: yauritux/busybox-curl
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do curl 127.0.0.1:81 > /usr/share/nginx/html/index.html; sleep 10; done"]
+    volumeMounts:
+    - name: shared
+      mountPath: /usr/share/nginx/html
+  - name: app-container-server
+    image: nginx
+    ports:
+      - containerPort: 80
+    volumeMounts:
+    - name: shared
+      mountPath: /usr/share/nginx/html
+  - name: ambassador-container
+    image: bharamicrosystems/nginx-forward-proxy
+    ports:
+      - containerPort: 81</code></pre>
+      <p class="card-text">"app-container-poller" call on port 81 and send stuff to /usr/share/nginx/html/index.html. "app-container-server" listens on  port 80. These two containers share the same mount point. Lastly, "ambassador-container" listens on port 81, so that when users curl on 80 they get response from html page</p>
+
+      <p class="card-text"><strong>Adaptor</strong></p>
+      <p class="card-text">Help standarized heterogeneous system</p>
+      <p class="card-text">For example, when there are multiple applications running on separate containers that are outputing logs in different formats, the adaptor container can standardize logs</p>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: adapter-pod
+  labels:
+    app: adapter-app
+spec:
+  volumes:
+  - name: logs
+    emptyDir: {}
+  containers:
+  - name: app-container
+    image: alpine
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do date >> /var/log/app.log; sleep 2;done"]
+    volumeMounts:
+    - name: logs
+      mountPath: /var/log
+  - name: log-adapter
+    image: alpine
+    command: ["/bin/sh"]
+    args: ["-c", "tail -f /var/log/app.log|sed -e 's/^/Date /' > /var/log/out.log"]
+    volumeMounts:
+    - name: logs
+      mountPath: /var/log</code></pre>
+      <p class="card-text">"app-container" outputs stream of dates in log file while "log-adapter" appends a word to those stream of dates</p>
+
+      <h3 class="card-title">Disruptions</h3>
+      <p class="card-text">There are involuntary disruptions</p>
+      <ul>
+        <li>Hardware failure</li>
+        <li>Kernal panic</li>
+        <li>Cloud provider issue</li>
+        <li>Network issue</li>
+        <li>Pod eviction due to Node having out of resource</li>
+      </ul>
+      <p class="card-text">There are voluntary disruptions. Application owners can</p>
+      <ul>
+        <li>Delete the Deployment</li>
+        <li>Update the Deployment, causing a restart</li>
+        <li>Directly delete Pods by accident</li>
+      </ul>
+      <p class="card-text">Cluster admins can</p>
+      <ul>
+        <li>Drain a Node for repair or scale down</li>
+        <li>Remove a Pod from a Node to fit in something else</li>
+      </ul>
+      <p class="card-text">Pod description budgets (PDB)</p>
+      <ul>
+        <li>Limits the number of Pods down simultaneously from voluntary disruptions</li>
+      </ul>
+      <p class="card-text">Consider the following scenario where Pod-a, Pod-b, Pod-c are subject to PDB (whose requirement is that at least 2 out of 3 Pods must be available) while Pod-x is not</p>
+      <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-e.png" alt="Card image cap">
+      <p class="card-text">Now the cluster admin drains Node 1, which will cause Pod-a and Pod-x to start terminating</p>
+      <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-f.png" alt="Card image cap">
+      <p class="card-text">Deployment notices that Pods are terminating, and to reinstate the desired state, it creates replacement Pods (Pod-d and Pod-y)</p>
+      <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-g.png" alt="Card image cap">
+      <p class="card-text">The cluster admin now attempts to drain Node 2 and Node 3. However, the drain command will block because of PDB</p>
+      <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-h.png" alt="Card image cap">
+      <p class="card-text">At this point, there are three availabe Pods that are subject to PDB</p>
+      <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-i.png" alt="Card image cap">
+      <p class="card-text">The cluster admin now attempts to drain Node 2. Either one of Pod-b or Pod-d will be evicted but both cannot be eviced due to PDB. Assuming Pod-b got evicted, the Deployment will create a replacement Pod-e. But since there are not enough resources in Node 2 and 3, the drain will block</p>
+      <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-j.png" alt="Card image cap">
+
+      <h3 class="card-title">Application Resource Requirement</h3>
+      <p class="card-text"><code>Mib</code> indicates the momory size based on 2's power.</p>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: memory-demo
+  namespace: mem-example
+spec:
+  containers:
+  - name: memory-demo-ctr
+    image: polinux/stress
+    resources:
+      limits:
+        memory: "200Mi" # Containers cannot exceed this.
+      requests:
+        memory: "100Mi" # Containers are gunaranteed to have this much.
+    command: ["stress"]
+    args: ["--vm", "1", "--vm-bytes", "150M", "--vm-hang", "1"] # Attempt to allocate 150MiB of memory. Containers can exceed the memory requests as long as Node has memory available.</code></pre>
+      <p class="card-text">If containers allocate more memory than its limit, they will eventually terminate.</p>
+
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: cpu-demo
+  namespace: cpu-example
+spec:
+  containers:
+  - name: cpu-demo-ctr
+    image: vish/stress
+    resources:
+      limits:
+        cpu: "1"
+      requests:
+        cpu: "0.5"
+    args:
+    - -cpus
+    - "2"</code></pre>
+      <p class="card-text">If specify limit but no request, K8s automatically assigns CPU request that matches the limit.</p>
+
+      <h4 class="card-title">If no CPU/memory limit</h4>
+      <ul>
+        <li>Container can use all the CPU/memory in the Node. (until it invokes OOM killer)</li>
+        <li>Or, container is running in namespace with a default CPU/memory limit.</li>
+      </ul>
+
+      <h3 class="card-title">LivenesProbe and ReadinessProbe</h3>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    test: liveness
+  name: liveness-exec
+spec:
+  containers:
+  - name: liveness
+    image: k8s.gcr.io/busybox
+    args:
+    - /bin/sh
+    - -c
+    - touch /tmp/healthy; sleep 30; rm -rf /tmp/healthy; sleep 600
+    livenessProbe: # kubelet executes command "cat /tmp/healthy" in the target container. If 0 is returned, then container is healthy. Otherwise, kubelet kills the container and restarts it.
+      exec:
+        command:
+        - cat
+        - /tmp/healthy
+      initialDelaySeconds: 5 # kubelet should wait 5 seconds before performing the first probe.
+      periodSeconds: 5 # kubelet should perform liveness probe every 5 seconds.</code></pre>
+
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    test: liveness
+  name: liveness-http
+spec:
+  containers:
+  - name: liveness
+    image: k8s.gcr.io/liveness
+    args:
+    - /server
+    livenessProbe: # kubelet sends HTTP GET request to the server running in the container and listening on port 8080. If status code between 200 and 400 is returned, then container is healthy. Otherwise, kubelet kills the container and restarts it.
+      httpGet:
+        path: /healthz
+        port: 8080
+        httpHeaders:
+        - name: Custom-Header
+          value: Awesome
+      initialDelaySeconds: 3 # kubelet should wait 3 seconds before performing the first probe.
+      periodSeconds: 3 # kubelet should perform liveness probe every 3 seconds.</code></pre>
+
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: goproxy
+  labels:
+    app: goproxy
+spec:
+  containers:
+  - name: goproxy
+    image: k8s.gcr.io/goproxy:0.1
+    ports:
+    - containerPort: 8080
+    readinessProbe:
+      tcpSocket:
+        port: 8080
+      initialDelaySeconds: 5
+      periodSeconds: 10
+    livenessProbe:
+      tcpSocket:
+        port: 8080
+      initialDelaySeconds: 15
+      periodSeconds: 20</code></pre>
+
+      <h3 class="card-title">Service Account</h3>
+      <p class="card-text">When creating Pod, when service account is not specified, it is automatically assigned <code>default</code> service account in the same namespace.</p>
+
+      <p class="card-text">Opt-out of automatic service account assignment.</h3>
+<pre><code class="yaml">apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: build-robot
+  namespace: my-namespace
+  automountServiceAccountToken: false
+...</code></pre>
+
+      <p class="card-text">Opt-out of automatic service account assignment for a specific Pod.</h3>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  serviceAccountName: build-robot
+  automountServiceAccountToken: false
+  ...</code></pre>
+
+      <p class="card-text">Manually create service account API token.</h3>
+<pre><code class="yaml">apiVersion: v1
+kind: Secret
+metadata:
+  name: build-robot-secret
+  annotations:
+    kubernetes.io/service-account.name: build-robot
+type: kubernetes.io/service-account-token</code></pre>
+
+      <h3 class="card-title">SecurityContext</h3>
+      <p class="card-text">Defines provilege and access control for Pod and Container.</p>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: security-context-demo
+spec:
+  securityContext:
+    runAsUser: 1000 # All processes run with user ID 1000 in containers. (if omitted, defaults to root(0))
+    runAsGroup: 3000 # Any file created in containers is owned by user 1000 and group 3000.
+    fsGroup: 2000 # All processes of containers are also part of supplementary group 2000.
+  volumes:
+  - name: sec-ctx-vol
+    emptyDir: {}
+  containers:
+  - name: sec-ctx-demo
+    image: busybox
+    command: [ "sh", "-c", "sleep 1h" ]
+    volumeMounts:
+    - name: sec-ctx-vol
+      mountPath: /data/demo
+    securityContext:
+      allowPrivilegeEscalation: false</code></pre>
+
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: security-context-demo-2
+spec:
+  securityContext:
+    runAsUser: 1000
+  containers:
+  - name: sec-ctx-demo-2
+    image: gcr.io/google-samples/node-hello:1.0
+    securityContext:
+      runAsUser: 2000 # This overrides setting made at Pod level.
+      allowPrivilegeEscalation: false</code></pre>
+
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: security-context-demo-4
+spec:
+  containers:
+  - name: sec-ctx-4
+    image: gcr.io/google-samples/node-hello:1.0
+    securityContext:
+      capabilities:
+        add: ["NET_ADMIN", "SYS_TIME"] # Linux capabilities.</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/concepts/workloads/pods/">Pods | <a href="https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/">Pod Lifecycle</a> | <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/">Labels and Selectors</a> | <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/">Annotations</a> | <a href="https://kubernetes.io/docs/concepts/workloads/pods/init-containers/">Init Containers</a> | <a href="https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/">Pod Topology Spread Constraints</a> | <a href="https://betterprogramming.pub/understanding-kubernetes-multi-container-pod-patterns-577f74690aee">Understanding Kubernetes Multi-Container Pod Patterns</a> | <a href="https://kubernetes.io/docs/concepts/workloads/pods/disruptions/">Disruptions</a> | <a href="https://kubernetes.io/docs/tasks/configure-pod-container/assign-memory-resource/">Assign Memory Resources to Containers and Pods</a> | <a href="https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/">Assign CPU Resources to Containers and Pods</a> | <a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/">Configure Liveness, Readiness and Startup Probes</a> | <a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/">Configure Service Accounts for Pods</a> | <a href="https://kubernetes.io/docs/tasks/configure-pod-container/security-context/">Configure a Security Context for a Pod or Container</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-">
+  <div class="card-body">
+    <h2 class="card-title">Service</h2>
+    <p class="card-text">Service is an abstraction for logical set of Pods. The set of Pods targeted by Service is determined by selector.</p>
+<pre><code class="yaml"># Suppose there are Pods where each of them listens to port 9376 and has label "app=MyApp".
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  selector:
+    app: MyApp
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 9376
+# Service named "my-service" targets TCP port 9376 on any Pod with label "app=MyApp".</code></pre>
+
+    <h3 class="card-title">Service without selectors</h3>
+    <ul>
+      <li>Ex. External database in production, but your own database in test environment.</li>
+      <li>Ex. Point Service to another Service in different namespace.</li>
+    </ul>
+<pre><code class="yaml">apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 9376
+# Service needs to be manually mapped to network address and port</code></pre>
+
+    <h3 class="card-title">Virtual IPs and service proxies</h3>
+    <p class="card-text">Every Node runs <code>kube-proxy</code>, which implementes virtual IP. ConfigMap is used to configure <code>kube-proxy</code>.</p>
+    <h4 class="card-title">iptables proxy mode</h4>
+    <p class="card-text"><code>kube-proxy</code> watches for Kubernetes control plane for addition and removal of Service and Endpoint objects. It installs iptable rules and redirect traffics to Service's backend sets (for Service) or backend Pod. (for EndPoint) It chooses backend at random.</p>
+
+    <h3 class="card-title">Publishing Service</h3>
+    <ul>
+      <li><code>ClusterIP</code> is the default <code>ServiceTypes</code>. Expose Service on cluster-internal IP. Service beomes only reachable from within the cluster.</li>
+      <li><code>NodePort</code> exposes Service on each Node's IP at a static port. <code>ClusterIP</code> is automatically created.</li>
+      <li><code>LoadBalancer</code> exposes Service externally using cloud provider's load balancer. <code>ClusterIP</code> and <code>NodePort</code> are automatically created.</li>
+    </ul>
+    <h4 class="card-title">NodePort</h4>
+<pre><code class="yaml">apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  type: NodePort
+  selector:
+    app: MyApp
+  ports:
+      # By default and for convenience, the `targetPort` is set to the same value as the `port` field.
+    - port: 80
+      targetPort: 80
+      # Optional field
+      # By default and for convenience, the Kubernetes control plane will allocate a port from a range (default: 30000-32767)
+      nodePort: 30007</code></pre>
+    <h4 class="card-title">LoadBalancer</h4>
+<pre><code class="yaml">apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  selector:
+    app: MyApp
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 9376
+  clusterIP: 10.0.171.239
+  type: LoadBalancer
+status:
+  loadBalancer:
+    ingress:
+    - ip: 192.0.2.127</code></pre>
+
+    <h2 class="card-title">Connecting Applications with Services</h2>
+    <p class="card-text">Docker: containers can talk to other containers only if they are on the same machine. Containers must be allowed ports on machine's own IP address. Kubernetes: Pods can talk to other Pods regardless of Nodes. Every Pod gets cluster-private IP address and all Pods in a cluster can see each other.</p>
+
+    <h3 class="card-title">Accessing the Service</h3>
+    <p class="card-text">There is a DNS cluster addon Service that automatically assigns DNS names to other Services.</p>
+<pre><code class="bash">kubectl get services kube-dns --namespace=kube-system</code></pre>
+
+    <h3 class="card-title">Securing the Service</h3>
+<pre><code class="bash"># Create a public private key pair
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /d/tmp/nginx.key -out /d/tmp/nginx.crt -subj "/CN=my-nginx/O=my-nginx"
+# Convert the keys to base64 encoding
+cat /d/tmp/nginx.crt | base64
+cat /d/tmp/nginx.key | base64
+
+make keys KEY=/tmp/nginx.key CERT=/tmp/nginx.crt
+kubectl create secret tls nginxsecret --key /tmp/nginx.key --cert /tmp/nginx.crt
+kubectl create configmap nginxconfigmap --from-file=default.conf</code></pre>
+<pre><code class="yaml">apiVersion: "v1"
+kind: "Secret"
+metadata:
+  name: "nginxsecret"
+  namespace: "default"
+type: kubernetes.io/tls
+data:
+  tls.crt: &lt;encrypted key output from above&gt;
+  tls.key: &lt;encrypted key output from above&gt;</code></pre>
+<pre><code class="yaml">apiVersion: v1
+kind: Service
+metadata:
+  name: my-nginx
+  labels:
+    run: my-nginx
+spec:
+  type: NodePort
+  ports:
+  - port: 8080
+    targetPort: 80
+    protocol: TCP
+    name: http
+  - port: 443
+    protocol: TCP
+    name: https
+  selector:
+    run: my-nginx
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-nginx
+spec:
+  selector:
+    matchLabels:
+      run: my-nginx
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: my-nginx
+    spec:
+      volumes:
+      - name: secret-volume
+        secret:
+          secretName: nginxsecret
+      - name: configmap-volume
+        configMap:
+          name: nginxconfigmap
+      containers:
+      - name: nginxhttps
+        image: bprashanth/nginxhttps:1.0
+        ports:
+        - containerPort: 443
+        - containerPort: 80
+        volumeMounts:
+        - mountPath: /etc/nginx/ssl
+          name: secret-volume
+        - mountPath: /etc/nginx/conf.d
+          name: configmap-volume</code></pre>
+
+    <p class="card-text">Can reach the nginx server from any node.</p>
+<pre><code class="bash">kubectl get pods -o yaml | grep -i podip
+    podIP: 10.244.3.5
+node $ curl -k https://10.244.3.5
+...
+&lt;h1&gt;Welcome to nginx!&lt;/h1&gt;</code></pre>
+
+    <p class="card-text">Setup Pod such that</p>
+<pre><code class="yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: curl-deployment
+spec:
+  selector:
+    matchLabels:
+      app: curlpod
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: curlpod
+    spec:
+      volumes:
+      - name: secret-volume
+        secret:
+          secretName: nginxsecret
+      containers:
+      - name: curlpod
+        command:
+        - sh
+        - -c
+        - while true; do sleep 1; done
+        image: radial/busyboxplus:curl
+        volumeMounts:
+        - mountPath: /etc/nginx/ssl
+          name: secret-volume</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/concepts/services-networking/service/">Service</a> | <a href="https://kubernetes.io/docs/concepts/services-networking/connect-applications-service/">Connecting Applications with Services</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-">
+  <div class="card-body">
+    <h2 class="card-title">Network Policies</h2>
+    <p class="card-text">Pods are non-isolated by default and accept traffics from any source. Pods become isolated by Network Policy; they reject any connections that are not allowed by any NetworkPolicy.</p>
+<pre><code class="yaml">apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: test-network-policy
+  namespace: default
+spec:
+  podSelector: # Empty podSelector selects all pods in the namespace.
+    matchLabels:
+      role: db # Selects pods with the label "role=db"
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - ipBlock:
+            cidr: 172.17.0.0/16
+            except:
+            - 172.17.1.0/24
+        - namespaceSelector:
+            matchLabels:
+              project: myproject
+        - podSelector:
+            matchLabels:
+              role: frontend
+      ports:
+      - protocol: TCP
+        port: 6379
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 10.0.0.0/24
+      ports:
+        - protocol: TCP
+          port: 5978</code></pre>
+
+    <h3 class="card-title">Default deny all ingress traffic</h3>
+<pre><code class="yaml">---
+apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+metadata:
+name: default-deny-ingress
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress</code></pre>
+
+    <h3 class="card-title">Default allow all ingress traffic</h3>
+<pre><code class="yaml">---
+apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+metadata:
+name: allow-all-ingress
+spec:
+  podSelector: {}
+  ingress:
+  - {}
+  policyTypes:
+  - Ingress</code></pre>
+
+    <h3 class="card-title">Default deny all egress traffic</h3>
+<pre><code class="yaml">---
+apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+metadata:
+name: default-deny-egress
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress</code></pre>
+
+    <h3 class="card-title">Default allow all egress traffic</h3>
+<pre><code class="yaml">---
+apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+metadata:
+name: allow-all-egress
+spec:
+  podSelector: {}
+  egress:
+  - {}
+  policyTypes:
+  - Egress</code></pre>
+
+    <h3 class="card-title">Default allow all egress traffic</h3>
+<pre><code class="yaml">---
+apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+metadata:
+name: default-deny-all
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/concepts/services-networking/network-policies/">Network Policies</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-">
+  <div class="card-body">
+    <h2 class="card-title">Volumes</h2>
+    <p class="card-text">Docker images are the root of filesystem hierarchy. Volumes mount at specific path within the image.</p>
+    <p class="card-text">ConfigMap allows injecting configration data into Pods. <code>log-config</code> ConfigMap is mounted as a volume at path <code>/etc/config/log_level</code> with Pod called <code>configmap-pod</code></p>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: configmap-pod
+spec:
+  containers:
+    - name: test
+      image: busybox
+      volumeMounts:
+        - name: config-vol
+          mountPath: /etc/config
+  volumes:
+    - name: config-vol
+      configMap:
+        name: log-config
+        items:
+          - key: log_level
+            path: log_level</code></pre>
+    <p class="card-text"><code>emptyDir</code> is created when Pod is assigned to Node. When Pod is removed from Node, data is deleted permanently</p>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pd
+spec:
+  containers:
+  - image: k8s.gcr.io/test-webserver
+    name: test-container
+    volumeMounts:
+    - mountPath: /cache
+      name: cache-volume
+  volumes:
+  - name: cache-volume
+    emptyDir: {}</code></pre>
+
+    <h3 class="card-title">Dynamic Volume Provisioning</h3>
+    <p class="card-text">To enable dynamic provisioning, cluster admin must pre-create StorageClass object for users.</p>
+<pre><code class="yaml"> # Create storage class "slow" that provisions persistent disks like standard disk.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: slow
+provisioner: kubernetes.io/gce-pd
+parameters:
+  type: pd-standard</code></pre>
+<pre><code class="yaml"> # Create storage class "fast" that provisions persistent disks like SSD.
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: fast
+provisioner: kubernetes.io/gce-pd
+parameters:
+  type: pd-ssd</code></pre>
+    <p class="card-text">Users request dynamically provisioned storage by including a storage class in their <code>PersistentVolumeClaim</code>. When this claim is deleted, the volume gets destroyed.</p>
+<pre><code class="yaml">apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: claim1
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: fast
+  resources:
+    requests:
+      storage: 30Gi</code></pre>
+    <p class="card-text">Cluster admin can make Claims to use dynamic provisioning by default. This is done by marking a specific StorageClass as default by adding <code>storageclass.kubernetes.io/is-default-class</code> annotation to it.</p>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/concepts/storage/volumes/">Volumes</a> | <a href="https://kubernetes.io/docs/concepts/storage/dynamic-provisioning/">Dynamic Volume Provisioning</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-">
+  <div class="card-body">
+    <h2 class="card-title">Persistent Volumes</h2>
+    <p class="card-text">PersistentVolume (PV) is a piece of storage in a cluster. It is similar to Node. PersistentVolumeClaim (PVC) a request for storage by a user. It is similar to Pod. PVC comsume PV resources. While Pod can request CPU and memory, PVC can request specific size and access mode.</p>
+    <h3 class="card-title">Binding</h3>
+    <p class="card-text">If PV was dynamically provisioned for a PVC, those PV and PVC will bind together. Otherwise, users will get at least what they asked for but volumes maybe at the excess.</p>
+    <h3 class="card-title">Storage Object in Use Protection</h3>
+    <p class="card-text">If user deletes PVC, deletion is postponed until PVC is not in use by any Pods. If admin deletes PV, deletion is postponed until PV is not bound to PVC.</p>
+    <h3 class="card-title">Reserving PV</h3>
+<pre><code class="yaml">apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: foo-pv
+spec:
+  storageClassName: ""
+  claimRef:
+    name: foo-pvc
+    namespace: foo
+...</code></pre>
+    <h3 class="card-title">PV</h3>
+<pre><code class="yaml">apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv0003
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem # Filesystem - default, Block - raw block device
+  accessModes:
+    - ReadWriteOnce # ReadWriteOnce, ReadWriteMany, ReadOnlyMany. Once - mounted by single Node, Many - mounted by many Nodes
+  persistentVolumeReclaimPolicy: Recycle # Retain, Recycle, Delete
+  storageClassName: slow
+  mountOptions:
+    - hard
+    - nfsvers=4.1
+  nfs:
+    path: /tmp
+    server: 172.17.0.2</code></pre>
+    <h3 class="card-title">PVC</h3>
+<pre><code class="yaml">apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: myclaim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 8Gi
+  storageClassName: slow
+  selector:
+    matchLabels: # volumn must have a label with this value
+      release: "stable"
+    matchExpressions: # a list of requirements
+      - {key: environment, operator: In, values: [dev]}</code></pre>
+    <h3 class="card-title">Claims as Volumns</h3>
+    <p class="card-text">Pods access storage by using Claim as volume. Claim must exist in the same namespace as Pod. The cluster finds Claim in Pods's namespace and uses it to get PV.</p>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  containers:
+    - name: myfrontend
+      image: nginx
+      volumeMounts:
+      - mountPath: "/var/www/html"
+        name: mypd
+  volumes:
+    - name: mypd
+      persistentVolumeClaim:
+        claimName: myclaim</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/">Persistent Volumes</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-">
+  <div class="card-body">
+    <h2 class="card-title">Volume Snapshots</h2>
+    <p class="card-text"><code>VolumeSnapshotContent</code> - snapshot taken from a volumn. <code>VolumeSnapshot</code> - request for a snapshot by a user. <code>VolumeSnapshot</code> is only available for CSI (Container Storage Interface) drivers. </p>
+    <h3 class="card-title">VS</h3>
+<pre><code class="yaml">apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshot
+metadata:
+  name: new-snapshot-test
+spec:
+  volumeSnapshotClassName: csi-hostpath-snapclass
+  source:
+    persistentVolumeClaimName: pvc-test # name of PVC data source for the snapshot</code></pre>
+    <h3 class="card-title">VSC</h3>
+<pre><code class="yaml">apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshotContent
+metadata:
+  name: snapcontent-72d9a349-aacd-42d2-a240-d775650d2455
+spec:
+  deletionPolicy: Delete
+  driver: hostpath.csi.k8s.io
+  source:
+    volumeHandle: ee0cfb94-f8d4-11e9-b2d8-0242ac110002 # unique identifier creatd on the storage (returned by CSI driver druing volume creation)
+  volumeSnapshotClassName: csi-hostpath-snapclass
+  volumeSnapshotRef:
+    name: new-snapshot-test
+    namespace: default
+    uid: 72d9a349-aacd-42d2-a240-d775650d2455</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/concepts/storage/volume-snapshots/">Volume Snapshots</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-">
+  <div class="card-body">
+    <h2 class="card-title">ConfigMap</h2>
+    <p class="card-text">Provides configuration data, which is separate from application code. Data stored in configMap cannot exceed 1MB.</p>
+    <h3 class="card-title">ConfigMap and Pod</h3>
+    <p class="card-text">ConfigMap and Pod must be in the same namespace. There are four ways to use ConfigMap.</p>
+    <ul>
+      <li>Container commands (and args)</li>
+      <li>Environment variables</li>
+      <li>Add a file in read-only volume</li>
+      <li>Code inside Pod that uses K8s API to read ConfigMap</li>
+    </ul>
+<pre><code class="yaml">apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: game-demo
+data:
+  # property-like keys; each key maps to a simple value
+  player_initial_lives: "3"
+  ui_properties_file_name: "user-interface.properties"
+
+  # file-like keys
+  game.properties: |
+    enemy.types=aliens,monsters
+    player.maximum-lives=5
+  user-interface.properties: |
+    color.good=purple
+    color.bad=yellow
+    allow.textmode=true</code></pre>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: configmap-demo-pod
+spec:
+  containers:
+    - name: demo
+      image: alpine
+      command: ["sleep", "3600"]
+      env:
+        # Define the environment variable
+        - name: PLAYER_INITIAL_LIVES # Notice that the case is different here
+                                     # from the key name in the ConfigMap.
+          valueFrom:
+            configMapKeyRef:
+              name: game-demo           # The ConfigMap this value comes from.
+              key: player_initial_lives # The key to fetch.
+        - name: UI_PROPERTIES_FILE_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: game-demo
+              key: ui_properties_file_name
+      volumeMounts:
+      - name: config
+        mountPath: "/config"
+        readOnly: true
+  volumes:
+    # You set volumes at the Pod level, then mount them into containers inside that Pod
+    - name: config
+      configMap:
+        # Provide the name of the ConfigMap you want to mount.
+        name: game-demo
+        # An array of keys from the ConfigMap to create as files
+        items:
+        - key: "game.properties"
+          path: "game.properties"
+        - key: "user-interface.properties"
+          path: "user-interface.properties"</code></pre>
+
+    <h3 class="card-title">Using ConfigMap as file</h3>
+    <ul>
+      <li>Create a ConfigMap.</li>
+      <li>Update Pod to add a volume under <code>.spec.volumes[]</code> whose name can be anything. Make this field <code>spec.volumes[].configMap.name</code> reference ConfigMap object.</li>
+      <li>Add <code>.spec.containers[].volumeMounts[]</code> to each container that needs configMap. Set <code>.spec.containers[].volumeMounts[].readOnly = true</code>. Specify <code>.spec.containers[].volumeMounts[].mountPath</code> to your ConfigMap location.</li>
+      <li>Look for ConfigMap from the image. Each key in ConfigMap <code>data</code> becomes filename under <code>mountPath</code>.</li>
+    </ul>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  containers:
+  - name: mypod
+    image: redis
+    volumeMounts:
+    - name: foo
+      mountPath: "/etc/foo"
+      readOnly: true
+  volumes:
+  - name: foo
+    configMap:
+      name: myconfigmap</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-">
+  <div class="card-body">
+    <h2 class="card-title">Secret</h2>
+    <p class="card-text">Similar to ConfigMap but specifically for confidential data. Secret can be used in three ways.</p>
+    <ul>
+      <li>File in a volumn mounted on containers</li>
+      <li>Container envinronment variable</li>
+      <li>By Kubelet when pulling images for Pod</li>
+    </ul>
+    <h3 class="card-title">Secret types</h3>
+    <table>
+      <tr>
+        <td>Opaque</td>
+        <td>arbitrary user-defined data (default Secret type if omitted)</td>
+      </tr>
+      <tr>
+        <td>kubernetes.io/service-account-token</td>
+        <td>service account token</td>
+      </tr>
+      <tr>
+        <td>kubernetes.io/dockercfg</td>
+        <td>~/.dockercfg file</td>
+      </tr>
+      <tr>
+        <td>kubernetes.io/dockerconfigjson</td>
+        <td>~/.docker/config.json file</td>
+      </tr>
+      <tr>
+        <td>kubernetes.io/basic-auth</td>
+        <td>credentials for basic authentication</td>
+      </tr>
+      <tr>
+        <td>kubernetes.io/ssh-auth</td>
+        <td>credentials for SSH authentication</td>
+      </tr>
+      <tr>
+        <td>kubernetes.io/tls</td>
+        <td>data for a TLS client or server</td>
+      </tr>
+    </table>
+
+    <h3 class="card-title">Opaque Secret</h3>
+<pre><code class="bash">kubectl create secret generic empty-secret
+kubectl get secret empty-secret</code></pre>
+    <h3 class="card-title">Service account token Secret</h3>
+<pre><code class="yaml">apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-sa-sample
+  annotations:
+    kubernetes.io/service-account.name: "sa-name" # Existing service account name
+type: kubernetes.io/service-account-token
+data:
+  # You can include additional key value pairs as you do with Opaque Secrets
+  extra: YmFyCg==</code></pre>
+
+    <h3 class="card-title">Docker config Secret</h3>
+    <p class="card-text">~/.dockercfg is legacy, ~/.docker/config.json is the new format.</p>
+<pre><code class="yaml">apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-dockercfg
+type: kubernetes.io/dockercfg
+data:
+  .dockercfg: | # This would be ".dockerconfigjson" for ~/.docker/config.json
+          "&lt;base64 encoded ~/.dockercfg file&gt;" # Or &lt;base64 encoded ~/.docker/config.json&gt;</code></pre>
+
+    <h3 class="card-title">Basic authentication Secret</h3>
+<pre><code class="yaml">apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-basic-auth
+type: kubernetes.io/basic-auth
+stringData:
+  username: admin
+  password: t0p-Secret</code></pre>
+
+    <h3 class="card-title">SSH authentication Secret</h3>
+<pre><code class="yaml">apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-ssh-auth
+type: kubernetes.io/ssh-auth
+data:
+  # the data is abbreviated in this example
+  ssh-privatekey: |
+        MIIEpQIBAAKCAQEAulqb/Y ...</code></pre>
+
+    <h3 class="card-title">TLS secrets</h3>
+<pre><code class="yaml">apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-tls
+type: kubernetes.io/tls
+data:
+  # the data is abbreviated in this example
+  tls.crt: |
+        MIIC2DCCAcCgAwIBAgIBATANBgkqh ...
+  tls.key: |
+        MIIEpgIBAAKCAQEA7yn3bRHQ5FHMQ ...</code></pre>
+
+    <h3 class="card-title">Editing Secret</h3>
+<pre><code class="bash">kubectl edit secrets mysecret</code></pre>
+
+    <h3 class="card-title">Using Secret as File</h3>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  containers:
+  - name: mypod
+    image: redis
+    volumeMounts: # Add this to each container that needs Secret.
+    - name: foo
+      mountPath: "/etc/foo" # Should be an unused directory where you want Secret to appear.
+      readOnly: true
+  volumes:
+  - name: foo
+    secret:
+      secretName: mysecret # Name of Secret object.
+      defaultMode: 0400 # Default is 0644 if not specified. All files created by Secret volumn mount will have 0400.
+      items:
+      - key: username
+        path: my-group/my-username # "username" Secret is stored in "/etc/foo/my-group/my-username" instead of "/etc/foo/username".
+        mode: 0777 # Files in /etc/foo/my-group/my-username will have 0777.</code></pre>
+
+    <h3 class="card-title">Using Secret as environment variables</h3>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: secret-env-pod
+spec:
+  containers:
+  - name: mycontainer
+    image: redis
+    env:
+      - name: SECRET_USERNAME
+        valueFrom:
+          secretKeyRef:
+            name: mysecret
+            key: username
+      - name: SECRET_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: mysecret
+            key: password
+  restartPolicy: Never</code></pre>
+    <p class="card-text">Updating Secret will not update environment variables in the containers unless containers are restarted.</p>
+
+    <h3 class="card-title">Immutable Secret</h3>
+    <p class="card-text">Prevents accidental deletion/update of Secret.</p>
+<pre><code class="yaml">apiVersion: v1
+kind: Secret
+metadata:
+  ...
+data:
+  ...
+immutable: true</code></pre>
+
+    <h3 class="card-title">Risk</h3>
+    <ul>
+      <li>Secret data is stored etcd of API server. Admin should enable encryption-at-rest for cluster data and limit access to etcd.</li>
+      <li>Secret written as base64 in manifest files must not be shared or checked-in. (Base64 encoding is not an encryption method and is the same as plain text)</li>
+      <li>Users who can create Pod using the Secret can also see the Secret.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/concepts/configuration/secret/">Secret</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-">
+  <div class="card-body">
+    <h2 class="card-title">Kubernetes Objects and API</h2>
+    <p class="card-text">Persistent entities that represent the cluster desired state. Each object has <code>spec</code> and <code>status</code></p>
+    <p class="card-text">Namespaces - virtual clusters supported by the same physical cluster.6. Archive</p>
+
+    <h3 class="card-title">Standard API terminology</h3>
+    <p class="card-text">Most K8s resource types are objects, which have unique name to allow idempotent creation (virtual types may not have unique name, for example "permission check")</p>
+    <ul>
+      <li>Resource type - name used in the URLs (pods, namespaces, services)</li>
+      <li>Kind - JSON representation of resource types</li>
+      <li>Collection - list of instances of a resource type</li>
+      <li>Resource - single instance of the resource type</li>
+    </ul>
+    <p class="card-text">All resource types are either <strong>cluster-scoped</strong> or <strong>namespace-scoped</strong>. namespace-scoped resource types will be deleted when the namespace is deleted</p>
+    <p class="card-text">cluster-scoped</p>
+    <ul>
+      <li>GET /apis/GROUP/VERSION/RESOURCETYPE</li>
+      <li>GET /apis/GROUP/VERSION/RESOURCETYPE/NAME</li>
+    </ul>
+    <p class="card-text">namespace-scoped</p>
+    <ul>
+      <li>GET /apis/GROUP/VERSION/namespaces/NAMESPACE/RESOURCETYPE</li>
+      <li>GET /apis/GROUP/VERSION/namespaces/NAMESPACE/RESOURCETYPE/NAME</li>
+      <li>GET /apis/GROUP/VERSION/namespaces/NAMESPACE/RESOURCETYPE/NAME</li>
+    </ul>
+    <p class="card-text">A namespace is a cluster-scoped resource type. Retrive all namespaces with "GET /api/v1/namespaces" and particular namespace with "GET /api/v1/namespaces/NAME"</p>
+    <p class="card-text">K8s uses "list" to return a collection of resource and "get" to return a single resource</p>
+    <p class="card-text">Some resources have sub-resource(s)</p>
+    <ul>
+      <li>GET /apis/GROUP/VERSION/RESOURCETYPE/NAME/SUBRESOURCE</li>
+      <li>GET /apis/GROUP/VERSION/namespaces/NAMESPACE/RESOURCETYPE/NAME/SUBRESOURCE</li>
+    </ul>
+
+    <h3 class="card-title">Efficient detection of changes</h3>
+    <p class="card-text"><strong>watch</strong> - detects incremental changes in cluster state. Use "resourceVersion" to store the state of resources</p>
+    <ul>
+      <li>GET /api/v1/namespaces/test/pods - list all pods in given namespace</li>
+      <li>GET /api/v1/namespaces/test/pods?watch=1&resourceVersion=10245 - starting resource version 10245, receive notifications for create/delete/update as JSON</li>
+    </ul>
+    <p class="card-text">K8s server can only store history for a limted time. Clusters using etcd3 preserve changes for the last 5 mins by default. Clients are expected to handle http status code "410 Gone"</p>
+    <p class="card-text"><strong>bookmarks</strong> - marks that all changes up to given "resourceVersion" has already been sent. (in an attempt to mitigate the short history window problem)</p>
+    <ul>
+      <li>GET /api/v1/namespaces/test/pods?watch=1&resourceVersion=10245&allowWatchBookmarks=true</li>
+    </ul>
+
+    <h3 class="card-title">Retrieving large results sets in chunks</h3>
+    <p class="card-text">Break single large collection requests into small chunks by parameters "limit" and "continue"</p>
+    <ul>
+      <li>GET /api/v1/pods?limit=500 - retrive all pods in cluster, up to 500</li>
+      <li>GET /api/v1/pods?limit=500&continue=ENCODED_CONTINUE_TOKEN - continue from the previous call to get 501-1000 pods</li>
+      <li>GET /api/v1/pods?limit=500&continue=ENCODED_CONTINUE_TOKEN_2 - continue from the previous call to get last set of pods</li>
+    </ul>
+
+    <h3 class="card-title">Receiving resources as Tables</h3>
+    <ul>
+      <li>GET /api/v1/pods<br>
+          Accept: application/json;as=Table;g=meta.k8s.io;v=v1beta1<br>
+          - retrive all pods in cluster in table format</li>
+    </ul>
+    <p class="card-text">Because there are resource types that don't support Table response, client should handle both Table/non-Table case by using content-type</p>
+    <ul>
+      <li>Accept: application/json;as=Table;g=meta.k8s.io;v=v1beta1, application/json</li>
+    </ul>
+
+    <h3 class="card-title">Receiving resources as Protobuf</h3>
+    <p class="card-text">This is for better performance at scale</p>
+    <ul>
+      <li>GET /api/v1/pods
+          Accept: application/vnd.kubernetes.protobuf<br>
+          - retrive all pods in cluster in Protobuf format</li>
+      <li>POST /api/v1/namespaces/test/pods
+          Content-Type: application/vnd.kubernetes.protobuf
+          Accept: application/json
+          - create a pod with Protobuf encoded data, but receive response in JSON</li>
+    </ul>
+    <p class="card-text">Similar to Table response, multiple content-types are needed in the "Accept" header to support resource types that don't have Protobuf support</p>
+    <ul>
+      <li>Accept: application/vnd.kubernetes.protobuf, application/json</li>
+    </ul>
+
+    <h3 class="card-title">Resource deletion</h3>
+    <p class="card-text">Takes place in two phases 1. finalization 2. removal. Finalizers are removed in any order. Once the last finalizer is removed, the resource is removed from etcd.</p>
+
+    <h3 class="card-title">Dry-run</h3>
+    <p class="card-text">dry-run executes the request up until persisting objects in storage. The reponse body should be as close as possible to the actual run. Authorization of dry and non-dry runs are identical</p>
+    <ul>
+      <li>POST /api/v1/namespaces/test/pods?dryRun=All<br>
+          Content-Type: application/json<br>
+          Accept: application/json<br>
+          - ALL: every stage runs normal except the final stage of persisting objects in storage</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/">Understanding Kubernetes Objects</a> | <a href="https://kubernetes.io/docs/reference/using-api/api-concepts/">Kubernetes API Concepts</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-">
+  <div class="card-body">
+    <h2 class="card-title">RBAC</h2>
+    <p class="card-text">To enable RBAC, start the API server with such that</p>
+<pre><code class="bash">kube-apiserver --authorization-mode=Example,RBAC --other-options --more-options</code></pre>
+    <p class="card-text">RBAC API declares four objects: Role, ClusterRole, RoleBinding, CLusterRoleBinding</p>
+
+    <h3 class="card-title">Role</h3>
+    <p class="card-text">Role sets permission with a particular namespace.</p>
+<pre><code class="yaml">apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pod-reader
+  namespace: default
+rules:
+- apiGroups: [""] # "" indicates the core API group
+  resources: ["pods"]
+  verbs: ["get", "watch", "list"]</code></pre>
+
+    <h3 class="card-title">ClusterRole</h3>
+    <p class="card-text">ClusterRole is a cluster-wide, non-namespaced resource.</p>
+<pre><code class="yaml">apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  # "namespace" omitted since ClusterRoles are not namespaced
+  name: secret-reader
+rules:
+  - apiGroups: [""]
+  #
+  # at the HTTP level, the name of the resource for accessing Secret
+  # objects is "secrets"
+    resources: ["secrets"]
+    verbs: ["get", "watch", "list"]</code></pre>
+
+    <h3 class="card-title">RoleBidning</h3>
+    <p class="card-text">RoleBinding grants permissions defined in a Role to users.</p>
+<pre><code class="yaml">apiVersion: rbac.authorization.k8s.io/v1
+# This role binding allows "dave" to read secrets in the "development" namespace.
+# You need to already have a ClusterRole named "secret-reader".
+kind: RoleBinding
+metadata:
+  name: read-secrets
+  #
+  # The namespace of the RoleBinding determines where the permissions are granted.
+  # This only grants permissions within the "development" namespace.
+  namespace: development
+subjects:
+  - kind: User
+    name: dave # Name is case sensitive
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: secret-reader
+  apiGroup: rbac.authorization.k8s.io</code></pre>
+
+    <h3 class="card-title">ClusterRoleBinding</h3>
+    <p class="card-text">ClusterRoleBinding grants permission across the whole cluster.</p>
+<pre><code class="yaml">apiVersion: rbac.authorization.k8s.io/v1
+# This cluster role binding allows anyone in the "manager" group to read secrets in any namespace.
+kind: ClusterRoleBinding
+metadata:
+  name: read-secrets-global
+subjects:
+  - kind: Group
+    name: manager # Name is case sensitive
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: ClusterRole
+  name: secret-reader
+  apiGroup: rbac.authorization.k8s.io</code></pre>
+
+    <h3 class="card-title">Aggregated ClusterRole</h3>
+    <p class="card-text">Aggregate serveral ClusterRoles into one ClusterRole.</p>
+<pre><code class="yaml">apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: aggregate-cron-tabs-edit
+  labels:
+    # Add these permissions to the "admin" and "edit" default roles.
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
+    rbac.authorization.k8s.io/aggregate-to-edit: "true"
+rules:
+  - apiGroups: ["stable.example.com"]
+    resources: ["crontabs"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: aggregate-cron-tabs-view
+  labels:
+    # Add these permissions to the "view" default role.
+    rbac.authorization.k8s.io/aggregate-to-view: "true"
+rules:
+  - apiGroups: ["stable.example.com"]
+    resources: ["crontabs"]
+    verbs: ["get", "list", "watch"]</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/reference/access-authn-authz/rbac/">Using RBAC Authorization</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-">
+  <div class="card-body">
+    <h2 class="card-title">Container logging</h2>
+    <h3 class="card-title">Pod with two sidecar containers</h3>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: counter
+spec:
+  containers:
+  - name: count
+    image: busybox
+    args:
+    - /bin/sh
+    - -c
+    - >
+      i=0;
+      while true;
+      do
+        echo "$i: $(date)" >> /var/log/1.log;
+        echo "$(date) INFO $i" >> /var/log/2.log;
+        i=$((i+1));
+        sleep 1;
+      done
+    volumeMounts:
+    - name: varlog
+      mountPath: /var/log
+  - name: count-log-1
+    image: busybox
+    args: [/bin/sh, -c, 'tail -n+1 -f /var/log/1.log']
+    volumeMounts:
+    - name: varlog
+      mountPath: /var/log
+  - name: count-log-2
+    image: busybox
+    args: [/bin/sh, -c, 'tail -n+1 -f /var/log/2.log']
+    volumeMounts:
+    - name: varlog
+      mountPath: /var/log
+  volumes:
+  - name: varlog
+    emptyDir: {}</code></pre>
+    <p class="card-text">Access two separate log streams.</h3>
+<pre><code class="bash">kubectl logs counter count-log-1
+kubectl logs counter count-log-2</code></pre>
+
+    <h3 class="card-title">Sidecar container with logging agent</h3>
+<pre><code class="yaml">apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluentd-config
+data:
+  fluentd.conf: |
+    &lt;source&gt;
+      type tail
+      format none
+      path /var/log/1.log
+      pos_file /var/log/1.log.pos
+      tag count.format1
+    &lt;/source&gt;
+
+    &lt;source&gt;
+      type tail
+      format none
+      path /var/log/2.log
+      pos_file /var/log/2.log.pos
+      tag count.format2
+    &lt;/source&gt;
+
+    &lt;match **&gt;
+      type google_cloud
+    &lt;/match&gt;</code></pre>
+
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: counter
+spec:
+  containers:
+  - name: count
+    image: busybox
+    args:
+    - /bin/sh
+    - -c
+    - >
+      i=0;
+      while true;
+      do
+        echo "$i: $(date)" >> /var/log/1.log;
+        echo "$(date) INFO $i" >> /var/log/2.log;
+        i=$((i+1));
+        sleep 1;
+      done
+    volumeMounts:
+    - name: varlog
+      mountPath: /var/log
+  - name: count-agent
+    image: k8s.gcr.io/fluentd-gcp:1.30
+    env:
+    - name: FLUENTD_ARGS
+      value: -c /etc/fluentd-config/fluentd.conf
+    volumeMounts:
+    - name: varlog
+      mountPath: /var/log
+    - name: config-volume
+      mountPath: /etc/fluentd-config
+  volumes:
+  - name: varlog
+    emptyDir: {}
+  - name: config-volume
+    configMap:
+      name: fluentd-config</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/concepts/cluster-administration/logging/">Logging Architecture</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-">
+  <div class="card-body">
+    <h2 class="card-title">Monitoring</h2>
+    <h3 class="card-title">Enable Node Problem Detector</h3>
+
+<pre><code class="yaml">apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-problem-detector-v0.1
+  namespace: kube-system
+  labels:
+    k8s-app: node-problem-detector
+    version: v0.1
+    kubernetes.io/cluster-service: "true"
+spec:
+  selector:
+    matchLabels:
+      k8s-app: node-problem-detector
+      version: v0.1
+      kubernetes.io/cluster-service: "true"
+  template:
+    metadata:
+      labels:
+        k8s-app: node-problem-detector
+        version: v0.1
+        kubernetes.io/cluster-service: "true"
+    spec:
+      hostNetwork: true
+      containers:
+      - name: node-problem-detector
+        image: k8s.gcr.io/node-problem-detector:v0.1
+        securityContext:
+          privileged: true
+        resources:
+          limits:
+            cpu: "200m"
+            memory: "100Mi"
+          requests:
+            cpu: "20m"
+            memory: "20Mi"
+        volumeMounts:
+        - name: log
+          mountPath: /log
+          readOnly: true
+        - name: config # Overwrite the config/ directory with ConfigMap volume
+          mountPath: /config
+          readOnly: true
+      volumes:
+      - name: log
+        hostPath:
+          path: /var/log/
+      - name: config # Define ConfigMap volume
+        configMap:
+          name: node-problem-detector-config</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/monitor-node-health/">Monitor Node Health</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-">
+  <div class="card-body">
+    <h2 class="card-title">Application inspection and debugging</h2>
+<pre><code class="bash">kubectl get pods
+kubectl get pod &lt;POD-NAME&gt; -o yaml
+kubectl describe pod &lt;POD-NAME&gt;
+kubectl get events
+kubectl get events --namespace=&lt;MY-NAMESPACE&gt;
+kubectl get nodes
+kubectl describe node &lt;NODE-NAME&gt;
+kubectl get node &lt;NODE-NAME&gt; -o yaml</code></pre>
+
+    <h3 class="card-title">List all the pods which belong to a StatefulSet, which have a label app=myapp.</h3>
+<pre><code class="bash">kubectl get pods -l app=myapp</code></pre>
+
+    <h3 class="card-title">Debug init container.</h3>
+<pre><code class="bash">kubectl get pod nginx --template '{{.status.initContainerStatuses}}'
+kubectl logs &lt;POD-NAME&gt; -c &lt;INIT-CONTAINER-NAME&gt;</code></pre>
+
+    <h3 class="card-title">Check node capacity.</h3>
+<pre><code class="bash">kubectl get nodes -o yaml | egrep '\sname:|cpu:|memory:'
+kubectl get nodes -o json | jq '.items[] | {name: .metadata.name, cap: .status.capacity}'</code></pre>
+
+    <h3 class="card-title">Examine pod log.</h3>
+<pre><code class="bash">kubectl logs &lt;POD-NAME&gt; &lt;CONTAINER-NAME&gt;
+# If container has previously crashed.
+kubectl logs --previous &lt;POD-NAME&gt; &lt;CONTAINER-NAME&gt;</code></pre>
+
+    <h3 class="card-title">Debug running Pod.</h3>
+<pre><code class="bash">kubectl exec &lt;POD-NAME&gt; -- cat /path/to/log/your_log.log
+kubectl exec -it &lt;POD-NAME&gt; -- sh</code></pre>
+
+    <h3 class="card-title">Debug using ephemeral container.</h3>
+<pre><code class="bash">kubectl run &lt;POD-NAME&gt; --image=&lt;IMAGE-NAME-TO-PULL-FOR-THIS-POD&gt; --restart=Never
+# Add debug container.
+kubectl debug -it &lt;POD-NAME&gt; --image=&lt;IMAGE-NAME&gt; --target=&lt;POD-NAME&gt;</code></pre>
+
+    <h3 class="card-title">Debug using copy of Pod.</h3>
+<pre><code class="bash">kubectl run &lt;POD-NAME&gt; --image=&lt;IMAGE-NAME&gt; --restart=Never -- sleep 1d
+kubectl debug &lt;POD-NAME&gt; -it --image=&lt;NEW-CONTAINER-NAME-FOR-DEBUGGING&gt; --share-processes --copy-to=&lt;POD-NAME&gt;-debug</code></pre>
+
+    <h3 class="card-title">Copying Pod while changing its command.</h3>
+<pre><code class="bash">kubectl run --image=&lt;IMAGE-NAME&gt; &lt;POD-NAME&gt; -- false
+kubectl debug &lt;POD-NAME&gt; -it --copy-to=&lt;POD-NAME&gt; -debug --container=&lt;POD-NAME&gt;-- sh</code></pre>
+
+    <h3 class="card-title">Copying Pod while changing container image.</h3>
+<pre><code class="bash">kubectl run &lt;POD-NAME&gt; --image=&lt;IMAGE-NAME&gt; --restart=Never -- sleep 1d
+kubectl debug &lt;POD-NAME&gt; --copy-to=&lt;POD-NAME&gt;-debug --set-image=*=&lt;IMAGE-NAME&gt;</code></pre>
+
+    <h3 class="card-title">Debug via shell on Node.</h3>
+<pre><code class="bash">kubectl debug node/mynode -it --image=&lt;IMAGE-NAME&gt;</code></pre>
+
+    <h3 class="card-title">Debug Deployment</h3>
+<pre><code class="bash"># Create Deployment.
+kubectl create deployment &lt;DEPLOYMENT-NAME&gt;
+# Scale Deployment to 3 replicas.
+kubectl scale deployment &lt;DEPLOYMENT-NAME&gt; --replicas=3
+# Confirm Pods are running.
+kubectl get pods -l &lt;DEPLOYMENT-NAME&gt;
+# Get list of Pod IP addresses.
+kubectl get pods -l &lt;DEPLOYMENT-NAME&gt; -o go-template='{{range .items}}{{.status.podIP}}{{"\n"}}{{end}}'</code></pre>
+
+    <h3 class="card-title">Debug Service</h3>
+<pre><code class="bash"># From Pod within the same namespace.
+nslookup &lt;SERVICE-NAME&gt;
+nslookup &lt;SERVICE-NAME&gt;.default
+nslookup &lt;SERVICE-NAME&gt;.default.svc.cluster.local
+# Within the Pod, check.
+cat /etc/resolv.conf
+nslookup kubernetes.default
+# Within the Node.
+nslookup &lt;SERVICE-NAME&gt;.default.svc.cluster.local &lt;CLUSTER-DNS-SERVICE-IP&gt;
+# Check if Service is defined correctly.
+kubectl get service &lt;SERVICE-NAME&gt; -o json
+# Check if Service has endpoint.
+kubectl get pods -l app=&lt;SERVICE-NAME&gt;
+# Check if kube-proxy is running.
+ps auxw | grep kube-proxy</code></pre>
+
+    <h3 class="card-title">Determin reasons for Pod failure</h3>
+<pre><code class="bash">kubectl get pod termination-demo -o go-template="{{range .status.containerStatuses}}{{.lastState.terminated.message}}{{end}}"</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-application-introspection/">Application Introspection and Debugging | <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-stateful-set/">Debug a StatefulSet</a> | <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-init-containers/">Debug Init Containers</a> | <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-pod-replication-controller/">Debug Pods and ReplicationControllers</a> | <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-running-pod/">Debug Running Pods</a> | <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-service/">Debug Services</a> | <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/determine-reason-pod-failure/">Determine the Reason for Pod Failure</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-">
+  <div class="card-body">
+    <h2 class="card-title">Create cluster with kubeadm</h2>
+    <p class="card-text">Control plan is the node where <code>etcd</code> and <code>API server</code> run. Initialize the control plane node,</p>
+<pre><code class="bash">kubeadm init &lt;args&gt;</code></pre>
+<pre><code class="bash"># To make kubectl work for your non-root user
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+# If you are root user
+export KUBECONFIG=/etc/kubernetes/admin.conf</code></pre>
+
+    <h3 class="card-title">Install a Pod network add-on</h3>
+<pre><code class="bash">kubectl apply -f &lt;add-on.yaml&gt;
+# Confirm it is working by checking if CoreDNS is running.
+kubectl get pods --all-namespaces</code></pre>
+
+    <h3 class="card-title">Join a Node</h3>
+<pre><code class="bash"># Get token.
+kubeadm token list
+
+# Get --discovery-token-ca-cert-hash.
+openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | \
+openssl dgst -sha256 -hex | sed 's/^.* //'
+
+kubeadm join --token &lt;token&gt; &lt;control-plane-host&gt;:&lt;control-plane-port&gt; --discovery-token-ca-cert-hash sha256:&lt;hash&gt;</code></pre>
+
+    <h3 class="card-title">Remove a Node</h3>
+<pre><code class="bash">kubectl drain &lt;node name&gt; --delete-emptydir-data --force --ignore-daemonsets
+# Reset the state installed by kubeadm.
+kubeadm reset
+# Reset iptables.
+iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
+# Reset IPVS tables.
+ipvsadm -C
+kubectl delete node &lt;node name&gt;</code></pre>
+    </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/">Creating a cluster with kubeadm</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-">
+  <div class="card-body">
+    <h2 class="card-title">Create HA cluster with kubeadm</h2>
+
+    <h3 class="card-title">Create a load balancer for kube-apiserver</h3>
+    <p class="card-text">Place control plane nodes behind a TCP forwarding load balancer. Address of load balancer must match the address of kubeadm's <code>ControlPlaneEndpoint</code>. Then add control planes to the load balancer and test.</p>
+<pre><code class="bash"># Connection refused error is expected since apiserver is not running yet. However, timeout means a real problem.
+nc -v LOAD_BALANCER_IP PORT</code></pre>
+
+    <h3 class="card-title">Option #1. Stacked control plane and etcd nodes</h3>
+<pre><code class="bash"># 1. Initialize the control plane.
+sudo kubeadm init --control-plane-endpoint "LOAD_BALANCER_DNS:LOAD_BALANCER_PORT" --upload-certs
+
+# 2. Apply a CIN plugin. (For example, Weave Net)
+kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+
+# 3. Verify control plane.
+kubectl get pod -n kube-system -w
+
+# 4. Join Nodes (Use outputs from step #1)</code></pre>
+
+    <h3 class="card-title">Option #2. External etcd nodes</h3>
+<pre><code class="bash"># 1. Setup etcd cluster.
+# 1.1. Do this on every host where etcd should be running.
+cat << EOF > /etc/systemd/system/kubelet.service.d/20-etcd-service-manager.conf
+[Service]
+ExecStart=
+#  Replace "systemd" with the cgroup driver of your container runtime. The default value in the kubelet is "cgroupfs".
+ExecStart=/usr/bin/kubelet --address=127.0.0.1 --pod-manifest-path=/etc/kubernetes/manifests --cgroup-driver=systemd
+Restart=always
+EOF
+
+systemctl daemon-reload
+systemctl restart kubelet
+
+# 1.2. Ensure kubectl is running.
+systemctl status kubelet
+
+# 1.3. Create configuration file for kubeadm.
+# Update HOST0, HOST1, and HOST2 with the IPs or resolvable names of your hosts.
+export HOST0=10.0.0.6
+export HOST1=10.0.0.7
+export HOST2=10.0.0.8
+
+# Create temp directories to store files that will end up on other hosts.
+mkdir -p /tmp/${HOST0}/ /tmp/${HOST1}/ /tmp/${HOST2}/
+
+ETCDHOSTS=(${HOST0} ${HOST1} ${HOST2})
+NAMES=("infra0" "infra1" "infra2")
+
+for i in "${!ETCDHOSTS[@]}"; do
+HOST=${ETCDHOSTS[$i]}
+NAME=${NAMES[$i]}
+cat << EOF > /tmp/${HOST}/kubeadmcfg.yaml
+apiVersion: "kubeadm.k8s.io/v1beta3"
+kind: ClusterConfiguration
+etcd:
+  local:
+      serverCertSANs:
+      - "${HOST}"
+      peerCertSANs:
+      - "${HOST}"
+      extraArgs:
+          initial-cluster: ${NAMES[0]}=https://${ETCDHOSTS[0]}:2380,${NAMES[1]}=https://${ETCDHOSTS[1]}:2380,${NAMES[2]}=https://${ETCDHOSTS[2]}:2380
+          initial-cluster-state: new
+          name: ${NAME}
+          listen-peer-urls: https://${HOST}:2380
+          listen-client-urls: https://${HOST}:2379
+          advertise-client-urls: https://${HOST}:2379
+          initial-advertise-peer-urls: https://${HOST}:2380
+EOF
+done
+
+# 1.4. Generate the certificate authority. (This will create two files /etc/kubernetes/pki/etcd/ca.crt and /etc/kubernetes/pki/etcd/ca.key)
+kubeadm init phase certs etcd-ca
+
+# 1.5. Create certificates for each member.
+
+kubeadm init phase certs etcd-server --config=/tmp/${HOST2}/kubeadmcfg.yaml
+kubeadm init phase certs etcd-peer --config=/tmp/${HOST2}/kubeadmcfg.yaml
+kubeadm init phase certs etcd-healthcheck-client --config=/tmp/${HOST2}/kubeadmcfg.yaml
+kubeadm init phase certs apiserver-etcd-client --config=/tmp/${HOST2}/kubeadmcfg.yaml
+cp -R /etc/kubernetes/pki /tmp/${HOST2}/
+# cleanup non-reusable certificates
+find /etc/kubernetes/pki -not -name ca.crt -not -name ca.key -type f -delete
+
+kubeadm init phase certs etcd-server --config=/tmp/${HOST1}/kubeadmcfg.yaml
+kubeadm init phase certs etcd-peer --config=/tmp/${HOST1}/kubeadmcfg.yaml
+kubeadm init phase certs etcd-healthcheck-client --config=/tmp/${HOST1}/kubeadmcfg.yaml
+kubeadm init phase certs apiserver-etcd-client --config=/tmp/${HOST1}/kubeadmcfg.yaml
+cp -R /etc/kubernetes/pki /tmp/${HOST1}/
+find /etc/kubernetes/pki -not -name ca.crt -not -name ca.key -type f -delete
+
+kubeadm init phase certs etcd-server --config=/tmp/${HOST0}/kubeadmcfg.yaml
+kubeadm init phase certs etcd-peer --config=/tmp/${HOST0}/kubeadmcfg.yaml
+kubeadm init phase certs etcd-healthcheck-client --config=/tmp/${HOST0}/kubeadmcfg.yaml
+kubeadm init phase certs apiserver-etcd-client --config=/tmp/${HOST0}/kubeadmcfg.yaml
+# No need to move the certs because they are for HOST0
+
+# clean up certs that should not be copied off this host
+find /tmp/${HOST2} -name ca.key -type f -delete
+find /tmp/${HOST1} -name ca.key -type f -delete
+
+# 1.6. Copy certificates and kubeadm configs.
+USER=ubuntu
+HOST=${HOST1}
+scp -r /tmp/${HOST}/* ${USER}@${HOST}:
+ssh ${USER}@${HOST}
+USER@HOST $ sudo -Es
+root@HOST $ chown -R root:root pki
+root@HOST $ mv pki /etc/kubernetes/
+
+# 1.7. Create the static pod manifests.
+root@HOST0 $ kubeadm init phase etcd local --config=/tmp/${HOST0}/kubeadmcfg.yaml
+root@HOST1 $ kubeadm init phase etcd local --config=/tmp/${HOST1}/kubeadmcfg.yaml
+root@HOST2 $ kubeadm init phase etcd local --config=/tmp/${HOST2}/kubeadmcfg.yaml
+
+# 2. Create a file called kubeadm-config.yaml.
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: ClusterConfiguration
+kubernetesVersion: stable
+controlPlaneEndpoint: "LOAD_BALANCER_DNS:LOAD_BALANCER_PORT"
+etcd:
+  external:
+      endpoints:
+      - https://ETCD_0_IP:2379
+      - https://ETCD_1_IP:2379
+      - https://ETCD_2_IP:2379
+      caFile: /etc/kubernetes/pki/etcd/ca.crt
+      certFile: /etc/kubernetes/pki/apiserver-etcd-client.crt
+      keyFile: /etc/kubernetes/pki/apiserver-etcd-client.key
+
+# Rest steps are similar to Option #1</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/high-availability/">Creating Highly Available clusters with kubeadm</a> | <a href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/setup-ha-etcd-with-kubeadm/">Set up a High Availability etcd cluster with kubeadm</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-">
+  <div class="card-body">
+    <h2 class="card-title">Upgrade kubeadm clusters</h2>
+
+    <h3 class="card-title">Upgrade kubeadm</h3>
+<pre><code class="bash"># Ubuntu
+# replace x in 1.22.x-00 with the latest patch version
+apt-get update && \
+apt-get install -y --allow-change-held-packages kubeadm=1.22.x-00
+
+# RHEL
+# replace x in 1.22.x-0 with the latest patch version
+yum install -y kubeadm-1.22.x-0 --disableexcludes=kubernetes
+
+# Verify.
+kubeadm version
+kubeadm upgrade plan</code></pre>
+
+    <h3 class="card-title">Drain the Node</h3>
+<pre><code class="bash"># replace &lt;node-to-drain&gt; with the name of your node you are draining
+kubectl drain &lt;node-to-drain&gt; --ignore-daemonsets</code></pre>
+
+    <h3 class="card-title">Upgrade kubelet and kubectl</h3>
+<pre><code class="bash"># Ubuntu
+# replace x in 1.22.x-00 with the latest patch version
+apt-get update && \
+apt-get install -y --allow-change-held-packages kubelet=1.22.x-00 kubectl=1.22.x-00
+
+# RHEL
+# replace x in 1.22.x-0 with the latest patch version
+yum install -y kubelet-1.22.x-0 kubectl-1.22.x-0 --disableexcludes=kubernetes
+
+# Restart the kubelet.
+sudo systemctl daemon-reload
+sudo systemctl restart kubelet</code></pre>
+
+    <h3 class="card-title">Uncardon the Node</h3>
+<pre><code class="bash"># replace &lt;node-to-drain&gt; with the name of your node you are draining
+kubectl uncordon &lt;node-to-drain&gt; --ignore-daemonsets</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/">Upgrading kubeadm clusters</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-">
+  <div class="card-body">
+    <h2 class="card-title">Operating etcd clusters.</h2>
+    <p class="card-text">etcd is storage for all cluster data. A five member etcd cluster is recommended for production. Access to etcd is equivalent to root permission to the cluster and ideally only API server should have it. </p>
+<pre><code class="bash"># To start API server with five member etcd cluster.
+etcd --listen-client-urls=http://$IP1:2379,http://$IP2:2379,http://$IP3:2379,http://$IP4:2379,http://$IP5:2379 --advertise-client-urls=http://$IP1:2379,http://$IP2:2379,http://$IP3:2379,http://$IP4:2379,http://$IP5:2379</code></pre>
+
+    <h3 class="card-title">Replace a failed etcd member</h3>
+<pre><code class="bash"># Assume three members: member1=http://10.0.0.1, member2=http://10.0.0.2, and member3=http://10.0.0.3. When member1 fails, replace it with member4=http://10.0.0.4.
+
+# Get the member ID of the failed member1.
+etcdctl --endpoints=http://10.0.0.2,http://10.0.0.3 member list
+# This outputs something like.
+8211f1d0f64f3269, started, member1, http://10.0.0.1:2380, http://10.0.0.1:2379
+91bc3c398fb3c146, started, member2, http://10.0.0.2:2380, http://10.0.0.2:2379
+fd422379fda50e48, started, member3, http://10.0.0.3:2380, http://10.0.0.3:2379
+
+# Remove the failed member.
+etcdctl member remove 8211f1d0f64f3269
+
+# Add a new member.
+etcdctl member add member4 --peer-urls=http://10.0.0.4:2380
+
+# Start the newly added member
+export ETCD_NAME="member4"
+export ETCD_INITIAL_CLUSTER="member2=http://10.0.0.2:2380,member3=http://10.0.0.3:2380,member4=http://10.0.0.4:2380"
+export ETCD_INITIAL_CLUSTER_STATE=existing
+etcd [flags]
+
+# Update t--etcd-servers flag for the Kubernetes API servers.
+# Restart the Kubernetes API servers.</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/">Operating etcd clusters for Kubernetes</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-1">
+  <div class="card-body">
+    <h2 class="card-title">1. Kubectl</h2>
+<pre><code class="bash"># Cluster
+kubectl cluster-info</code></pre>
+
+<pre><code class="bash"># Config
+kubectl config view
+kubectl config set-cluster &lt;cluster_name&gt;
+kubectl config get-contexts
+kubectl config current-context
+kubectl config use-context &lt;context_name&gt;
+kubectl config set-context --current --namespace=&lt;namespace&gt;
+kubectl config view | grep namespace</code></pre>
+
+<pre><code class="bash"># Namespace
+kubectl get ns
+# If "Unable to connect to the server: x509: certificate signed by unknown authority"
+kubectl get ns --insecure-skip-tls-verify
+kubectl delete namespace &lt;namespace&gt;
+# Delete a label
+kubectl label namespaces &lt;namespace&gt; &lt;label&gt;-</code></pre>
+
+<pre><code class="bash"># Error from server (InternalError): an error on the server ("") has prevented the request from succeeding
+# => check proxy setting</code></pre>
+
+<pre><code class="bash"># When a namespace is stuck on Terminating.
+kubectl get namesapce &lt;stuck_namespace&gt; -o json > temp.json
+
+# Update "temp.json" such that "finalizers" array is empty. For example,
+"spec": {
+  "finalizers": [
+
+  ]
+}
+
+kubectl replace --raw "/api/v1/namespaces/&lt;stuck_namespace&gt;/finalize" -f ./temp.json
+kubectl get ns</code></pre>
+
+<pre><code class="bash"># Inspace all namespaces.
+kubectl get pods --all-namespaces
+kubectl get rolebinding --all-namespaces
+kubectl get clusterrolebinding --all-namespaces
+kubectl get serviceaccount --all-namespaces
+kubectl get rolebindings,clusterrolebindings \
+  --all-namespaces  \
+  -o custom-columns='KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,SERVICE_ACCOUNTS:subjects[?(@.kind=="ServiceAccount")].name'
+# Find all resources in a namespace.
+kubectl api-resources --verbs=list --namespaced -o name \
+  | xargs -n 1 kubectl get --show-kind --ignore-not-found -n &lt;namespace&gt;</code></pre>
+
+<pre><code class="bash"># List all images.
+kubectl get pods --all-namespaces -o jsonpath="{.items[*].spec.containers[*].image}" | tr -s '[[:space:]]' '\n' | sort | uniq -c
+
+kubectl get pods -n &lt;namespace&gt;
+
+kubectl get pod &lt;pod_name&gt; --output=yaml
+# View Pod-Node assignment.
+kubectl get pods -n &lt;namespace&gt; -o wide
+
+# Get image used in deployment or daemonset.
+kubectl get deployments/ds -n &lt;namespace&gt; -o yaml | grep image</code></pre>
+
+<pre><code class="bash"># Show PVC on all namespaces.
+kubectl get pvc -A
+
+# Show PVC on current namespace.
+kubectl get pvc</code></pre>
+
+<pre><code class="bash"># Inspect pods.
+kubectl logs &lt;pod_name&gt;
+kubectl logs &lt;pod_name&gt; -c &lt;container_name&gt;</code></pre>
+
+# Find containers in a pod.
+kubectl get pods &lt;pod_name&gt; -o jsonpath='{.spec.containers[*].name}'
+
+<pre><code class="bash"># Remove a node.
+kubectl get nodes
+kubectl drain &lt;node_name&gt;
+kubectl drain &lt;node_name&gt; --ignore-daemonsets --delete-local-data
+kubectl delete note &lt;node_name&gt;
+
+# Port forward to access app runnig inside a pod/deployment from localhost.
+kubectl port-forward &lt;pod_name&gt; &lt;localhost_port&gt;:&lt;container_port&gt;</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/reference/kubectl/cheatsheet/">kubectl Cheat Sheet</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-2">
+  <div class="card-body">
+    <h2 class="card-title">2. Helm</h2>
+    <p class="card-text">Helps packaging K8s manifest files.</p>
+    <ul>
+      <li>Chart.yaml - chart information such as apiVersion, chart name, chart version.</li>
+      <li>values.yaml - configuration values for the chart.</li>
+      <li>templates/ - k8s manifest files.</li>
+    </ul>
+
+    <p class="card-text">Helm command</p>
+<pre><code class="bash"># Link helm values yaml.
+helm lint -f &lt;values.yaml&gt;
+
+# Dry run.
+helm install -n &lt;namespace&gt; &lt;release_name&gt; --dry-run --debug . -f &lt;values.yaml&gt;
+
+# Deploy.
+helm install -n &lt;namespace&gt; &lt;release_name&gt; . -f &lt;values.yaml&gt;
+
+# Upgrade.
+helm upgrade -n &lt;namespace&gt; &lt;release_name&gt; . -f &lt;values.yaml&gt;
+
+# Undeploy.
+helm uninstall -n &lt;namespace&gt; &lt;release_name&gt;
+
+# List helm releases.
+helm list -n &lt;namespace&gt;
+helm ls --all-namespaces
+
+# Check helm release.
+helm status &lt;release_name&gt;
+
+# Get helm values of previous deployment.
+helm get values &lt;release_name&gt; -n &lt;namespace&gt;</code></pre>
+
+    <p class="card-text">Helm syntax</p>
+<pre><code class="yaml"># Lowercase the result, then wrap it in double quotes.
+value: {{ include "mytpl" . | lower | quote }}
+
+# Being a new line and indent 8 spaces.
+{{ Values.myValue | nindent 8 }}</code></pre>
+
+    <p class="card-text">Conditions</p>
+<pre><code class="yaml">apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+data:
+  myvalue: "Hello World"
+  drink: {{ .Values.favorite.drink | default "tea" | quote }}
+  food: {{ .Values.favorite.food | upper | quote }}*
+**{{- if eq .Values.favorite.drink "coffee" }}
+  mug: "true"*
+**{{- end }}</code></pre>
+
+<pre><code class="yaml"># Result
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clunky-cat-configmap
+data:
+  myvalue: "Hello World"
+  drink: "coffee"
+  food: "PIZZA"
+  mug: "true"</code></pre>
+
+    <p class="card-text">Variable scoping</p>
+<pre><code class="yaml">apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+data:
+  myvalue: "Hello World"
+  {{- with .Values.favorite }}
+  drink: {{ .drink | default "tea" | quote }}
+  food: {{ .food | upper | quote }}
+  {{- end }}
+
+# Use "$" to access objects from parent scope.
+{{- with .Values.favorite }}
+drink: {{ .drink | default "tea" | quote }}
+food: {{ .food | upper | quote }}
+release: {{ $.Release.Name }}
+{{- end }}</code></pre>
+
+    <p class="card-text">Loop</p>
+<pre><code class="yaml"># Assume "values.yaml"
+favorite:
+  drink: coffee
+  food: pizza
+pizzaToppings:
+  - mushrooms
+  - cheese
+  - peppers
+  - onions</code></pre>
+
+<pre><code class="yaml">apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+data:
+  myvalue: "Hello World"
+  {{- with .Values.favorite }}
+  drink: {{ .drink | default "tea" | quote }}
+  food: {{ .food | upper | quote }}
+  toppings: |-
+    {{- range $.Values.pizzaToppings }}
+    - {{ . | title | quote }}
+    {{- end }}
+  {{- end }}</code></pre>
+
+<pre><code class="yaml"># Result
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: edgy-dragonfly-configmap
+data:
+  myvalue: "Hello World"
+  drink: "coffee"
+  food: "PIZZA"
+  toppings: |-
+    - "Mushrooms"
+    - "Cheese"
+    - "Peppers"
+    - "Onions"</code></pre>
+
+    <p class="card-text">Predefined values</p>
+<pre><code class="bash">Release.Name
+Release.Namespace
+Release.Service # Always "Helm"
+Chart</code></pre>
+
+    <p class="card-text">Common issues</p>
+<pre><code class="bash"># Error: rendered manifests contain a resource that already exists
+# Reason: deployment was initially done by helm, but deleted by kubectl.
+# Solution:
+kubectl get crd
+kubectl get delete &lt;crd1&gt; &lt;crd2&gt; &lt;crd3&gt; ...
+
+# Reason: resources created manually but getting upgraded by helm
+# Solution:
+kubectl patch namespace &lt;namespace&gt; --patch-file &lt;updated_yaml_to_use&gt;
+kubectl annotate &lt;kind&gt; &lt;name&gt; meta.helm.sh/release-namespace=&lt;helm_will_tell_you_what_to_put_here&gt; # For example, kind can be "namespace", name can be "namespace name".
+kubectl annotate &lt;kind&gt; &lt;name&gt; meta.helm.sh/release-names=&lt;helm_will_tell_you_what_to_put_here&gt;</code></pre>
+
+<pre><code class="bash"># "updated_yaml_to_use" should look like.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: infosec-aquasec
+  labels:
+    app.kubernetes.io/part-of: {{ Release.Name }}
+    app.kubernetes.io/instance: {{ Release.Name }}
+    app.kubernetes.io/managed-by: {{ Release.Service }}
+    helm.sh/chart: {{ Chart.Name }}-{{ Chart.Version }}</code></pre>
+
+<pre><code class="bash"># Error: UPGRADE FAILED: another operation (kill/upgrade/rollback) is in progress.
+# Reason: "helm status &lt;release_name&gt;" or "helm history &lt;release_name&gt;" will show that the last helm install is still pending.
+# Solution:
+helm uninstall &lt;release_name&gt;
+</code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://helm.sh/docs/topics/charts">Charts</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-3">
+  <div class="card-body">
+    <h2 class="card-title">3. Skaffold</h2>
+    <p class="card-text">Simple pipeline for CI/CD targeting K8s.</p>
+<pre><code class="bash"># Run skaffold.
+skaffold run -f &lt;skaffold.yaml&gt;</code></pre>
+
+<pre><code class="bash"># This is equivalent to
+# kubectl port-forward deployment/my-deployment 8080:9000
+portForward:
+- resourceType: deployment
+  resourceName: my-deployment
+  namespace: my-namespace
+  port: 8080
+  localPort: 9000</code></pre>
+
+<pre><code class="bash"># Build docker locally.
+build:
+  artifacts:
+  - image: gcr.io/k8s-skaffold/example
+  local:
+    useDockerCLI: false
+    useBuildkit: false</code></pre>
+
+<pre><code class="bash"># Split registry, repository, tag
+build:
+  artifacts:
+  - image: gcr.io/k8s-skaffold/example
+deploy:
+  helm:
+    releases:
+      - name: my-chart
+        chartPath: helm
+        artifactOverrides:
+          imageKey: gcr.io/k8s-skaffold/example
+        imageStrategy:
+          helm:
+            explicitRegistry: true</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://skaffold.dev/docs/references/yaml">skaffold.yaml</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-4">
+  <div class="card-body">
+    <h2 class="card-title">4. Datadog and kube state metric</h2>
+    <p class="card-text">Datadog: collects logs from K8s infrastructure (nodes, API server, etc).</p>
+    <ul>
+      <li>Agent: K8s DeamonSet. Collects logs from each node.</li>
+      <li>Cluster agent: K8s Deployment. Monitors API server. Deployed in a set of 3, 5, ... to achieve redundancy.</li>
+    </ul>
+    <p class="card-text">KSM: listens to K8s API server and generates metrics.</p>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://github.com/kubernetes/kube-state-metrics">kube-state-metrics</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-5">
+  <div class="card-body">
+    <h2 class="card-title">5. Kured</h2>
+    <p class="card-text">KUbernetes REbook Daemon. Performs safe node reboots when needed.</p>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+<!-- Kubernetes END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="footer.html"></include>
+
+</body>
+
+</html>
