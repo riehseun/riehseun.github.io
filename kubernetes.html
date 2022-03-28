@@ -49,6 +49,7 @@
       <li><a href="#kubernetes-3">3. Skaffold</a></li>
       <li><a href="#kubernetes-4">4. Datadog and kube state metric</a></li>
       <li><a href="#kubernetes-5">5. Kured</a></li>
+      <li><a href="#kubernetes-6">6. Pod Identity</a></li>
     </ul>
 
     <ul>
@@ -983,6 +984,7 @@ spec:
 
       <h3 class="card-title">Application Resource Requirement</h3>
       <p class="card-text"><code>Mib</code> indicates the momory size based on 2's power.</p>
+      <p class="card-text">For example, a mebibyte is 1,048,576 (2<sup>20</sup>) bytes while a megabyte is 1,000,000 (10<sup>6</sup>) bytes </p>
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
@@ -2723,17 +2725,22 @@ kubectl get rolebindings,clusterrolebindings \
 kubectl api-resources --verbs=list --namespaced -o name \
   | xargs -n 1 kubectl get --show-kind --ignore-not-found -n &lt;namespace&gt;</code></pre>
 
+
 <pre><code class="bash"># List all images.
 kubectl get pods --all-namespaces -o jsonpath="{.items[*].spec.containers[*].image}" | tr -s '[[:space:]]' '\n' | sort | uniq -c
 
-kubectl get pods -n &lt;namespace&gt;
-
-kubectl get pod &lt;pod_name&gt; --output=yaml
-# View Pod-Node assignment.
-kubectl get pods -n &lt;namespace&gt; -o wide
+# Find containers in a pod.
+kubectl get pods &lt;pod_name&gt; -o jsonpath='{.spec.containers[*].name}'
 
 # Get image used in deployment or daemonset.
 kubectl get deployments/ds -n &lt;namespace&gt; -o yaml | grep image</code></pre>
+
+<pre><code class="bash"># Get all pods in a namespace.
+kubectl get pods -n &lt;namespace&gt;
+kubectl get pod &lt;pod_name&gt; -n &lt;namespace&gt; --output=yaml
+
+# View Pod-Node assignment.
+kubectl get pods -n &lt;namespace&gt; -o wide</code></pre>
 
 <pre><code class="bash"># Show PVC on all namespaces.
 kubectl get pvc -A
@@ -2741,12 +2748,9 @@ kubectl get pvc -A
 # Show PVC on current namespace.
 kubectl get pvc</code></pre>
 
-<pre><code class="bash"># Inspect pods.
+<pre><code class="bash"># Inspect pod logs.
 kubectl logs &lt;pod_name&gt;
 kubectl logs &lt;pod_name&gt; -c &lt;container_name&gt;</code></pre>
-
-# Find containers in a pod.
-kubectl get pods &lt;pod_name&gt; -o jsonpath='{.spec.containers[*].name}'
 
 <pre><code class="bash"># Remove a node.
 kubectl get nodes
@@ -2993,7 +2997,17 @@ deploy:
 <div class="card mb-4" id="kubernetes-5">
   <div class="card-body">
     <h2 class="card-title">5. Kured</h2>
-    <p class="card-text">KUbernetes REbook Daemon. Performs safe node reboots when needed.</p>
+    <p class="card-text">KUbernetes REbook Daemon. DaemonSet that performs safe node reboots when needed.</p>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-6">
+  <div class="card-body">
+    <h2 class="card-title">6. Pod Identity</h2>
+    <p class="card-text"></p>
   </div>
   <div class="card-footer text-muted">
 
