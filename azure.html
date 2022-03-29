@@ -103,25 +103,25 @@ az aks nodepool list --cluster-name &lt;cluster_name&gt; --resource-group &lt;re
 az role assignment list --assignee &lt;app_id&gt; --scope &lt;acr_id&gt;</code></pre>
 
   <h3 class="card-title">Pod identity</h3>
-  <p class="card-text">Operator creates azureIdentity and azureIdentityBinding.</p>
+  <p class="card-text">Pods to be authenticated by AAD.</p>
+  <p class="card-text">Operator creates azureIdentity (with MSI) and azureIdentityBinding. (with Pod label)</p>
 
   <h4 class="card-title">Managed Identity Controller (MIC)</h4>
   <ul>
+    <li>Deployed as Deployment.</li>
     <li>Watches azureIdentityBinding objects and creates azureAssignedIdentity.</li>
-    <li>Watches Pods and assign MSL to Nodes.</li>
+    <li>Watches what Azure Identity is bound to Pod and assign corresponding MSI to Node where that Pod is running.</li>
   </ul>
 
   <h4 class="card-title">Node Managed Identity (NMI)</h4>
   <ul>
-    <li>Deployed as DeamonSets.</li>
-    <li>Resolves pod-name by source ip.</li>
-    <li>Uses pod-name to find which identiy to assgin.</li>
-    <li>Acquires token ob behalf of Pod.</li>
+    <li>Deployed as DeamonSet.</li>
+    <li>Requests ADD token on behalf of Pod.</li>
   </ul>
 
   </div>
   <div class="card-footer text-muted">
-
+    Reference: <a href="https://jonathan18186.medium.com/azure-kubernetes-service-aks-with-azure-active-directory-aad-pod-identity-620cf210361e">Azure Kubernetes Service (AKS) with Azure Active Directory (AAD) Pod Identity</a>
   </div>
 </div>
 
