@@ -50,6 +50,7 @@
       <li><a href="#terraform-5">5. Example: instance.tf</a></li>
       <li><a href="#terraform-6">6. Install Terraform (version 0.11.13) in CentOS</a></li>
       <li><a href="#terraform-7">7. Terraform with GCP - common errors</a></li>
+      <li><a href="#terraform-8">8. Terraform with GCP - example with storage bucket, pubsub, notification</a></li>
     </ul>
   </div>
 </div>
@@ -74,7 +75,7 @@
   <div class="card-body">
     <h2 class="card-title">2. Example: main.tf</h2>
 
-<pre><code class="groovy">provider "google" {
+<pre><code class="bash">provider "google" {
   credentials = "${file("../../googlecloud/credential.json")}"
   project     = "${var.project}"
 }
@@ -110,7 +111,7 @@ module "ue1" {
   <div class="card-body">
     <h2 class="card-title">3. Example: vpc.tf</h2>
 
-<pre><code class="groovy">resource "google_compute_network" "vpc" {
+<pre><code class="bash">resource "google_compute_network" "vpc" {
   name                    = "${format("%s","${var.var_company}-vpc")}"
   auto_create_subnetworks = "false"
   routing_mode            = "GLOBAL"
@@ -163,7 +164,7 @@ resource "google_compute_firewall" "allow-bastion" {
   <div class="card-body">
     <h2 class="card-title">4. Example: network.tf</h2>
 
-<pre><code class="groovy">resource "google_compute_subnetwork" "public_subnet" {
+<pre><code class="bash">resource "google_compute_subnetwork" "public_subnet" {
   name          = "${format("%s","${var.var_company}-${var.var_env}-${var.var_region_name}-pub-net")}"
   ip_cidr_range = "${var.var_ue1_public_subnet}"
   network       = "${var.network_self_link}"
@@ -188,7 +189,7 @@ resource "google_compute_subnetwork" "private_subnet" {
   <div class="card-body">
     <h2 class="card-title">5. Example: instance.tf</h2>
 
-<pre><code class="groovy">resource "google_compute_instance" "vm1" {
+<pre><code class="bash">resource "google_compute_instance" "vm1" {
   name          = "k8s-master"
   machine_type  = "n1-standard-2"
   zone          = "${format("%s","${var.var_region_name}-c")}"
@@ -273,6 +274,40 @@ resource "google_compute_subnetwork" "private_subnet" {
   </div>
   <div class="card-footer text-muted">
 
+  </div>
+</div>
+
+<div class="card mb-4" id="terraform-8">
+  <div class="card-body">
+    <h2 class="card-title">8. Terraform with GCP - example with storage bucket, pubsub, notification</h2>
+
+<pre><code class="bash"># Create a GCS Bucket
+resource "google_storage_bucket" "my_bucket" {
+  name     = var.bucket_name
+  location = var.region
+}
+
+resource "google_pubsub_topic" "example" {
+  name = "example-topic"
+}
+
+resource "google_pubsub_topic_iam_member" "member" {
+  project = google_pubsub_topic.example.project
+  topic = google_pubsub_topic.example.name
+  role = "roles/viewer"
+  member = "user:jane@example.com"
+}
+
+resource "google_storage_notification" "notification" {
+  bucket         = google_storage_bucket.bucket.name
+  payload_format = "JSON_API_V1"
+  topic          = google_pubsub_topic.topic.id
+  event_types    = ["OBJECT_FINALIZE"]
+}</code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://pbhadani.com/posts/first-gcp-resource-with-terraform/">Create a Google Cloud Storage(GCS) Bucket with Terraform</a> | <a href="https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/pubsub_topic">google_pubsub_topic</a> | <a href="https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/pubsub_topic_iam">IAM policy for Cloud Pub/Sub Topic</a> | <a href="https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/storage_notification">google_storage_notification</a>
   </div>
 </div>
 <!-- Terraform END -->
