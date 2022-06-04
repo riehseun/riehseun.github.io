@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="Seungmoon's DevOps Engineering Blog">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="Python, Groovy, Kubernetes, Docker, Jenkins, Terraform, Bash">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link href="css/monokai-sublime.css" rel="stylesheet">
+<link href="css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.bundle.min.js"></script>
+<script src="js/highlight.pack.js"></script>
+<script type="text/javascript" src="js/include_html.js"></script>
+<script type="text/javascript" src="js/site.js"></script>
+
+</head>
+
+<body>
+
+<include src="header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Software Engineering</h1>
+
+<!-- Database BEGIN -->
+<div class="card mb-4" id="database">
+  <div class="card-body">
+    <h2 class="card-title">Database</h2>
+    <p class="card-text"></p>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#database-1">Distributed Systems</a></li>
+      <li><a href="#database-2">DB Basic</a></li>
+      <li><a href="#database-3">SQL vs NoSQL</a></li>
+      <li><a href="#database-4">Data partitioning</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="database-1">
+  <div class="card-body">
+    <h2 class="card-title">Distributed Systems</h2>
+    <h3>Scalability</h3>
+    <p class="card-text">Capability to manage increased demand.</p>
+    <ul>
+      <li>Compute load patterns - Consistent growth, constantly fluctuating loads, cyclical loads, unpredictable bursts.</li>
+      <li>Scale sets - Load balancer distributes requests across VMs. Uses health probe to determine availability of each VM by pinging it.</li>
+      <li>Scaling up (vertical scaling) - Adds more resources to a single instance.</li>
+      <li>Scaling out (horizontal scaling) - Addition more instances.</li>
+    </ul>
+    <h3>Reliability</h3>
+    <p class="card-text">Delivering services even when some components fail.</p>
+    <ul>
+      <li>Redunduncy of both software components and data.</li>
+      <li>Recovery point objective - Maximum duration of acceptable data loss. For example, 30 minutes of data or four hours of data.</li>
+      <li>Recovery time objective - Maximum duration of acceptable downtime.</li>
+    </ul>
+    <h3>Availability</h3>
+    <p class="card-text">Time that systems remain operational.</p>
+    <ul>
+      <li>Reliability means availability, but the opposite is not true.</li>
+    </ul>
+
+    <h3>Strategies to achieve scalability and performance</h3>
+    <ul>
+      <li>Data partitioning - data partitions can be managed and accessed separately</li>
+      <li>Caching - store frequently used data for fast retrieval. could be placed at database or application layer</li>
+      <li>Autoscaling - dynamically allocate resources to match performance requirements</li>
+      <li>Background jobs - tasks such as batch jobs, intensive processing tasks, and long-running processes should run as background jobs, decoupled from applicatio UI to minimize load</li>
+      <li>Messaging - requests can continue to flow-in without error if application can’t keep up</li>
+      <li>Scale units - define units for scaling</li>
+    </ul>
+
+    <h3>CAP</h3>
+    <p class="card-text">it is impossible to acheive all three at the same time. We can only have two out of three.</p>
+    <ul>
+      <li>Consistency: all nodes see the same data at the same time.</li>
+      <li>Availability: system must be accessible even when nodes fail.</li>
+      <li>Partition tolerance: system must operate even when communications between nodes break.</li>
+    </ul>
+
+    <p class="card-text">In distributed system, If there is no partition tolerance, there is no consistency or availability. This means we can only choose between consistency or availability in distributed system.</p>
+    <ul>
+      <li>CA - RDBMS (Non-distributed system)</li>
+      <li>PA - Dynamo, Cassandra, CouchDB (BASE DBs choose availability - respond with local data w/o ensuring its the latest with peers)</li>
+      <li>PC - BigTable, HBase (ACID DBs choose consistency - refuse response if cannot check peers)</li>
+    </ul>
+
+    <h3>Quorum</h3>
+    <p class="card-text">Minimum number of servers where operation succeed to call it overall success. This is to ensure consistency.</p>
+    <ul>
+      <li>Quorum should be more than half the nodes. For example, in 5 nodes cluster, N must be 3</li>
+      <li>Quorum is achieved when R + W > N where R is the minimum read nodes, W is the minimum write nodes, N is the quorum.</li>
+      <li>N=3, W=2, R=2 is an example set up for strong consistency.</li>
+      <li>N=3, W=1, R=3 is fast write but slow read.</li>
+      <li>N=3, W=3, R=1 is slow write but fast read.</li>
+    </ul>
+
+    <h3>Leader and follower</h3>
+    <ul>
+      <li>Only one leader is responsible for data replication and coordination work.</li>
+      <li>At any time, one server is elected as a leader.</li>
+      <li>Followers only accept writes from leader.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/courses/grokking-the-system-design-interview/YQWGjlZZVz9">Key Characteristics of Distributed Systems</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="database-2">
+  <div class="card-body">
+    <h2 class="card-title">DB Basic</h2>
+    <h3>Delete Vs. Truncate</h3>
+    <ul>
+      <li>Truncate - DDL (Data Definition Language), does not require commit to make the change permanent, deleted rows cannot be rolled back, always removes all rows from the table (table structure remains intact)</li>
+      <li>Delete - DML (Data Manipulation Language), requires commit to make the change permanent, "where" clause can be used</li>
+    </ul>
+    <h3>DB indexing</h3>
+    <ul>
+      <li>Applying indexing on a field creates a data structure holding field value and pointer</li>
+      <li>Data structure gets sorted so that search time can be O(logn) with binary search</li>
+      <li>Fields with lots of duplicate values degrade benefits of indexing</li>
+      <li>Degrade write performance having to index data each time write happens.</li>
+    </ul>
+    <h3>Data types</h3>
+    <ul>
+      <li>Structured - relational data</li>
+      <li>Semi-structured - ymal, json, xml</li>
+      <li>Unstructured - photo, video, audio, text</li>
+    </ul>
+    <h3>Transaction (ACID)</h3>
+    <ul>
+      <li>Atomicity - either all is done or none is done</li>
+      <li>Consistency - data is consistent before and after transaction</li>
+      <li>Isolation - trasaction doesn't get affected by other transactions</li>
+      <li>Durablility - transactions are permanently saved</li>
+    </ul>
+    <h3>Tokenization vs Encryption</h3>
+    <ul>
+      <li>Tokenized data is irreversible (detokenization can only be done by the original tokenization system)</li>
+      <li>Encryption is reversible with the key</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="database-3">
+  <div class="card-body">
+    <h2 class="card-title">SQL vs NoSQL</h2>
+
+    <h3>NoSQL</h3>
+    <ul>
+      <li>Key-value store: array of key-value pairs. (Redis, Voldemort, Dynamo)</li>
+      <li>Document DB: documents are grouped into collections. (CouchDB, MongoDB)</li>
+      <li>Column DB: columns instead of tables, no need to know columns up front, best for large datasets. (Cassandra, HBase)</li>
+      <li>Graph DB: when relations are best represented in graphs. (Neo4J, InfiniteGraph)</li>
+    </ul>
+
+    <h3>When to choose what</h3>
+    <ul>
+      <li>SQL: ACID, data is unchanging.</li>
+      <li>NoSQL: large amount of data with no structure, rapid development.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="database-4">
+  <div class="card-body">
+    <h2 class="card-title">Data partitioning</h2>
+    <p class="card-text">It is cheaper to add more servers than growing the existing server as data increases.</p>
+
+    <h3 class="card-title">Horizontal partitioning</h3>
+    <ul>
+      <li>Also known as range-based paritioning or data sharding.</li>
+      <li>Puts different rows to different tables.</li>
+      <li>May result in unbalanced servers if partitioning sheme is bad.</li>
+    </ul>
+    <h3 class="card-title">Vertical partitioning</h3>
+    <ul>
+      <li>Divides tables into different servers based on features of data.</li>
+      <li>Problem when data experiences additional growth.</li>
+    </ul>
+    <h3 class="card-title">Directory-Based Partitioning</h3>
+    <ul>
+      <li>Lookup service that maps its key to data in DB.</li>
+    </ul>
+
+    <h3 class="card-title">Key/Hash-based partitioning</h3>
+    <ul>
+      <li>Apply hash function to some attribute of data.</li>
+      <li>Uniform allocation of data across servers.</li>
+      <li>Adding new servers mean changing hash function and redistribution of data.</li>
+    </ul>
+    <h3 class="card-title">Consistent hashing (without V-node)</h3>
+    <ul>
+      <li>Example: hash range is 1-100, number of nodes is 4. Then, all data in range 1-25 is stored in server 1 and so on.</li>
+      <li>Apply hash function (MD5) on the key of data to determine which node to place the data.</li>
+      <li>When nodes are added or removed, only the next node is affected. </li>
+    </ul>
+    <h3 class="card-title">Consistent hashing (with V-node)</h3>
+    <ul>
+      <li>Each node gets mutiple hash ranges and these hash ranges are randomly distributed across the nodes.</li>
+      <li>Node carry replicating hash ranges for fault tolerance. (Some nodes may carry more V-nodes than others)</li>
+      <li>Used in Dynamo and Cassandra.</li>
+    </ul>
+
+    <h3 class="card-title">Problems with partitioning</h3>
+    <ul>
+      <li>Joins are inefficient, so denormalization is required. This means dealing with data inconsistency problem.</li>
+      <li>Applying foreign keys in partitioned DB is hard.</li>
+      <li>There could be a lot of load on a single partition.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+<!-- Database END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="footer.html"></include>
+
+</body>
+
+</html>
