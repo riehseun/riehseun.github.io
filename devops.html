@@ -325,8 +325,8 @@
     <p class="card-text">In distributed system, If there is no partition tolerance, there is no consistency or availability. This means we can only choose between consistency or availability in distributed system.</p>
     <ul>
       <li>CA - RDBMS (Non-distributed system)</li>
-      <li>PA - Dynamo, Cassandra, CouchDB</li>
-      <li>PC - BigTable, HBase</li>
+      <li>PA - Dynamo, Cassandra, CouchDB (BASE DBs choose availability - respond with local data w/o ensuring its the latest with peers)</li>
+      <li>PC - BigTable, HBase (ACID DBs choose consistency - refuse response if cannot check peers)</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -492,14 +492,26 @@
       <li>Lookup service that maps its key to data in DB.</li>
     </ul>
 
-    <h3 class="card-title">Key/Hash-based Partitioning</h3>
+    <h3 class="card-title">Key/Hash-based partitioning</h3>
     <ul>
       <li>Apply hash function to some attribute of data.</li>
       <li>Uniform allocation of data across servers.</li>
       <li>Adding new servers mean changing hash function and redistribution of data.</li>
     </ul>
+    <h3 class="card-title">Consistent hashing (without V-node)</h3>
+    <ul>
+      <li>Example: hash range is 1-100, number of nodes is 4. Then, all data in range 1-25 is stored in server 1 and so on.</li>
+      <li>Apply hash function (MD5) on the key of data to determine which node to place the data.</li>
+      <li>When nodes are added or removed, only the next node is affected. </li>
+    </ul>
+    <h3 class="card-title">Consistent hashing (with V-node)</h3>
+    <ul>
+      <li>Each node gets mutiple hash ranges and these hash ranges are randomly distributed across the nodes.</li>
+      <li>Node carry replicating hash ranges for fault tolerance. (Some nodes may carry more V-nodes than others)</li>
+      <li>Used in Dynamo and Cassandra.</li>
+    </ul>
 
-    <h3 class="card-title">Problems with Partitioning</h3>
+    <h3 class="card-title">Problems with partitioning</h3>
     <ul>
       <li>Joins are inefficient, so denormalization is required. This means dealing with data inconsistency problem.</li>
       <li>Applying foreign keys in partitioned DB is hard.</li>
