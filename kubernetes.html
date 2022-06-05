@@ -2683,11 +2683,11 @@ etcd [flags]
 <div class="card mb-4" id="kubernetes-1">
   <div class="card-body">
     <h2 class="card-title">1. Kubectl</h2>
-<pre><code class="bash"># Cluster
-kubectl cluster-info</code></pre>
+    <h3 class="card-title">Cluster</h3>
+<pre><code class="bash">kubectl cluster-info</code></pre>
 
-<pre><code class="bash"># Config
-kubectl config view
+    <h3 class="card-title">Config</h3>
+<pre><code class="bash">kubectl config view
 kubectl config set-cluster &lt;cluster_name&gt;
 kubectl config get-contexts
 kubectl config current-context
@@ -2695,8 +2695,8 @@ kubectl config use-context &lt;context_name&gt;
 kubectl config set-context --current --namespace=&lt;namespace&gt;
 kubectl config view | grep namespace</code></pre>
 
-<pre><code class="bash"># Namespace
-kubectl get ns
+    <h3 class="card-title">Namespace</h3>
+<pre><code class="bash">kubectl get ns
 # If "Unable to connect to the server: x509: certificate signed by unknown authority"
 kubectl get ns --insecure-skip-tls-verify
 kubectl delete namespace &lt;namespace&gt;
@@ -2731,7 +2731,7 @@ kubectl get rolebindings,clusterrolebindings \
 kubectl api-resources --verbs=list --namespaced -o name \
   | xargs -n 1 kubectl get --show-kind --ignore-not-found -n &lt;namespace&gt;</code></pre>
 
-
+    <h3 class="card-title">Image/Container</h3>
 <pre><code class="bash"># List all images.
 kubectl get pods --all-namespaces -o jsonpath="{.items[*].spec.containers[*].image}" | tr -s '[[:space:]]' '\n' | sort | uniq -c
 
@@ -2741,6 +2741,7 @@ kubectl get pods &lt;pod_name&gt; -n &lt;namespace&gt; -o jsonpath='{.spec.conta
 # Get image used in deployment or daemonset.
 kubectl get deployments/ds -n &lt;namespace&gt; -o yaml | grep image</code></pre>
 
+    <h3 class="card-title">Pod</h3>
 <pre><code class="bash"># Get all pods in a namespace.
 kubectl get pods -n &lt;namespace&gt;
 kubectl get pod &lt;pod_name&gt; -n &lt;namespace&gt; --output=yaml
@@ -2751,28 +2752,39 @@ kubectl get pods -n &lt;namespace&gt; -o wide</code></pre>
 <pre><code class="bash"># Temporarily disable pod.
 kubectl scale --replicas=0 deployment/&lt;deployment_name&gt;</code></pre>
 
+<pre><code class="bash"># Port forward to access app runnig inside a pod/deployment from localhost.
+kubectl port-forward &lt;pod_name&gt; &lt;localhost_port&gt;:&lt;container_port&gt;</code></pre>
+
+    <h3 class="card-title">PV/PVC</h3>
 <pre><code class="bash"># Show PVC on all namespaces.
 kubectl get pvc -A
 
 # Show PVC on current namespace.
 kubectl get pvc</code></pre>
 
-<pre><code class="bash"># Inspect pod logs.
-kubectl logs &lt;pod_name&gt;
+    <h3 class="card-title">Log</h3>
+<pre><code class="bash">kubectl logs &lt;pod_name&gt;  # Inspect pod logs.
 kubectl logs &lt;pod_name&gt; -p  # Previous pod.
 kubectl logs &lt;pod_name&gt; -c &lt;container_name&gt;</code></pre>
 
-<pre><code class="bash"># Remove a node.
-kubectl get nodes
+    <h3 class="card-title">Node</h3>
+<pre><code class="bash">kubectl get nodes
 kubectl drain &lt;node_name&gt;
 kubectl drain &lt;node_name&gt; --ignore-daemonsets --delete-local-data
-kubectl delete note &lt;node_name&gt;
+kubectl delete note &lt;node_name&gt;</code></pre>
 
-# Port forward to access app runnig inside a pod/deployment from localhost.
-kubectl port-forward &lt;pod_name&gt; &lt;localhost_port&gt;:&lt;container_port&gt;</code></pre>
+<pre><code class="bash"># How to exec into a container as root.
+# 1. Find the node on which the pod is running.
+kubectl get pods -o wide -n &lt;namespace&gt;
+# 2. Describe the pod.
+kubectl describe pod &lt;pod_name&gt; -n &lt;namespace&gt;
+# 3. Get the container ID.
+# 4. SSH into the node.
+# 5. Exec into the pod.
+docker exec -u root -it &lt;container_id&gt;</code></pre>
 
-<pre><code class="bash"># End points.
-kubectl get endpoints -n &lt;namespace&gt;</code></pre>
+    <h3 class="card-title">Endpoints</h3>
+<pre><code class="bash">kubectl get endpoints -n &lt;namespace&gt;</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://kubernetes.io/docs/reference/kubectl/cheatsheet/">kubectl Cheat Sheet</a>
