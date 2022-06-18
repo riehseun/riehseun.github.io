@@ -213,116 +213,132 @@ metadata:
 <div class="card mb-4" id="kubernetes-1b">
   <div class="card-body">
     <h2 class="card-title">Deployments</h2>
-    <p class="card-text">Provides declarative updates for Pods and ReplicaSets. Deployment Controller change an actual state to a desired state at a controlled rate</p>
-    <p class="card-text">Usecase</p>
     <ul>
-      <li>Create a Deployment to rollout a ReplicaSet, which creates Pods in the background</li>
-      <li>Declare the new state of Pods by updating the PodTemplateSpec of the Deployment</li>
-      <li>Rollback to an earlier Deployment version</li>
-      <li>Scale up the Deployments</li>
-      <li>Clean up old ReplicaSets</li>
+      <li>Provides declarative updates for Pods and ReplicaSets.</li>
+      <li>Deployment Controller change an actual state to a desired state at a controlled rate.</li>
+      <li>Deployment ensures that at least 75% of Pods are up while they are being updated.</li>
+      <li>It also ensures that at most 125% of the desired number of Pods are up.</li>
     </ul>
-    <p class="card-text">Create a Deployment</p>
-<pre><code class="yaml">apiVersion: apps/v1 # Mandatory field
-kind: Deployment # Mandatory field
-metadata: # Mandatory field
-  name: nginx-deployment # Deployment named ".metadata.name" is created
+
+    <h3 class="card-title">Usecase</h3>
+    <ul>
+      <li>Create a Deployment to rollout a ReplicaSet, which creates Pods in the background.</li>
+      <li>Declare new state of Pods by updating PodTemplateSpec of Deployment.</li>
+      <li>Rollback to an earlier Deployment version.</li>
+      <li>Scale up the Deployment.</li>
+      <li>Clean up old ReplicaSet.</li>
+    </ul>
+
+    <h3 class="card-title">Create a Deployment</h3>
+<pre><code class="yaml"># apiVersion, kind, metadata are mandatory.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment # Deployment named ".metadata.name" is created.
   labels:
     app: nginx
 spec:
-  replicas: 3 # Three replicated Pods. If this field does not exist, it will default to 1
-  selector: # Required field for "spec". This specifies the label selector of Pod targeted by this Deployment
+  replicas: 3 # Three replicated Pods. If this field does not exist, it will default to 1.
+  selector: # Required field for "spec". This specifies the label selector of Pod targeted by this Deployment.
     matchLabels:
-      app: nginx # How Deployment finds which Pods to manage
-  template: # Required field for "spec". This is a Pod template, which has the same schema as Pod
+      app: nginx # How Deployment finds which Pods to manage.
+  template: # Required field for "spec". This is a Pod template, which has the same schema as Pod.
     metadata:
       labels:
-        app: nginx # Pod label. This must match ".spec.selector"
+        app: nginx # Pod label. This must match ".spec.selector".
   spec:
-    containers: # nginx container runs nginx image version 1.14.2
+    containers: # nginx container runs nginx image version 1.14.2.
     - name: nginx
       image: nginx:1.14.2
       ports:
       - containerPort: 80</code></pre>
-    <ul>
-      <li>To create Deployment
-<pre><code class="bash">kubectl apply -f nginx-deployment.yaml</pre></code></li>
-      <li>To check Deployment
-<pre><code class="bash">kubectl get deployments</code></pre></li>
-<img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-4-a.png" alt="Card image cap">
-      <ul>
-        <li>NAME - names of Deployments in the namespace</li>
-        <li>READY - how many replicas of the application are available to users</li>
-        <li>UP TO DATE - number of replicas updated to achieve the desired state</li>
-        <li>AVAILABLE - how many replicas of the application are available to users</li>
-        <li>AGE - amount of time the appliation has been running</li>
-      </ul>
-      <li>To check Deployment rollout status
-<pre><code class="bash">kubectl rollout status deployment/nginx-deployment</code></pre></li>
-      <li>To see the ReplicaSet created by Deployment
-<pre><code class="bash">kubectl get rs</code></pre></li>
-<img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-4-b.png" alt="Card image cap">
-      <ul>
-        <li>NAME - names of ReplicaSets in the namespace</li>
-        <li>DESIRED - desired number of replicas in the application</li>
-        <li>CURRENT - how many applications are currently running</li>
-        <li>READY - how many replicas of the application are available to users</li>
-        <li>AGE - amount of time the appliation has been running</li>
-      </ul>
-      <li>To see the labels generated for each Pod
-<pre><code =>kubectl get pods --show-labels</code></pre></li>
-      <li>To update iamge from nginx:1.14.2 to nginx:1.16.1, run one of the following
-<pre><code class="bash">kubectl --record deployment.apps/nginx-deployment set image deployment.v1.apps/nginx-deployment nginx=nginx:1.16.1</code></pre>
-<pre><code class="bash">kubectl set image deployment/nginx-deployment nginx=nginx:1.16.1 --record</code></pre></li>
-      <li>To see the rollout status
-<pre><code class="bash">kubectl rollout status deployment/nginx-deployment</code></pre></li>
-    </ul>
-    <p class="card-text">Deployment ensures that at least 75% of Pods are up while they are being updated. It also ensures that at most 125% of the desired number of Pods are up</p>
 
-    <p class="card-text">Rollover</p>
-    <ul>
-      <li>Everytime a new Deployment is observed by Deployment Controller, a ReplicaSet is created to bring up the desired Pods</li>
-      <li>If Deployment is updated, the existing ReplicaSet that control Pods whose labels match <code>.spec.selector</code> but whose template does not match <code>.spec.template</code> are scaled down</li>
-      <li>Eventually, new ReplicaSet is scaled to <code>.spec.replicas</code> and all old ReplicaSets is scaled to 0</li>
+<pre><code class="bash"># Create Deployment.
+kubectl apply -f nginx-deployment.yaml</pre></code>
+
+<pre><code class="bash"># Check Deployment.
+kubectl get deployments</code></pre>
+    <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-4-a.png" alt="Card image cap">
+    <ul class="list-unstyled mb-0">
+      <li>NAME - names of Deployments in the namespace.</li>
+      <li>READY - how many replicas of the application are available to users.</li>
+      <li>UP TO DATE - number of replicas updated to achieve the desired state.</li>
+      <li>AVAILABLE - how many replicas of the application are available to users.</li>
+      <li>AGE - amount of time the appliation has been running.</li>
     </ul>
 
-    <p class="card-text">Rollback</p>
-    <ul>
-      <li>Check the revisions of Deployment</li>
-<pre><code class="bash">kubectl rollout history deployment.v1.apps/nginx-deployment</code></pre>
-      <li>To see the details of each revision</li>
-<pre><code class="bash">kubectl rollout history deployment.v1.apps/nginx-deployment --revision=2</code></pre>
-      <li>Rollback to a specific version</li>
-<pre><code class="bash">kubectl rollout undo deployment.v1.apps/nginx-deployment --to-revision=2</code></pre>
+<pre><code class="bash"># Check Deployment rollout status.
+kubectl rollout status deployment/nginx-deployment</code></pre>
+
+<pre><code class="bash"># Check ReplicaSet created by Deployment.
+kubectl get rs</code></pre>
+    <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-4-b.png" alt="Card image cap">
+    <ul class="list-unstyled mb-0">
+      <li>NAME - names of ReplicaSets in the namespace.</li>
+      <li>DESIRED - desired number of replicas in the application.</li>
+      <li>CURRENT - how many applications are currently running.</li>
+      <li>READY - how many replicas of the application are available to users.</li>
+      <li>AGE - amount of time the appliation has been running.</li>
     </ul>
 
-    <p class="card-text">Scaling</p>
+<pre><code># Check the labels generated for each Pod.
+kubectl get pods --show-labels</code></pre>
+
+<pre><code class="bash"># To update iamge from nginx:1.14.2 to nginx:1.16.1, run one of the following.
+kubectl --record deployment.apps/nginx-deployment set image deployment.v1.apps/nginx-deployment nginx=nginx:1.16.1
+kubectl set image deployment/nginx-deployment nginx=nginx:1.16.1 --record</code></pre>
+
+<pre><code class="bash"># Check the rollout status.
+kubectl rollout status deployment/nginx-deployment</code></pre></li>
+
+    <h3 class="card-title">Rollover</h3>
     <ul>
-      <li>Scale a Deployment</li>
-<pre><code class="bash">kubectl scale deployment.v1.apps/nginx-deployment --replicas=10</code></pre>
-      <li>Setup autoscaler for Deployment and choose the minimum and maximum number of Pods</li>
-<pre><code class="bash">kubectl autoscale deployment.v1.apps/nginx-deployment --min=10 --max=15 --cpu-percent=80</code></pre>
-      <li>Rollback to a specific version</li>
-<pre><code class="bash">kubectl rollout undo deployment.v1.apps/nginx-deployment --to-revision=2</code></pre>
+      <li>Everytime a new Deployment is observed by Deployment Controller, a ReplicaSet is created to bring up the desired Pods.</li>
+      <li>If Deployment is updated, the existing ReplicaSet that control Pods whose labels match <code>.spec.selector</code> but whose template does not match <code>.spec.template</code> are scaled down.</li>
+      <li>Eventually, new ReplicaSet is scaled to <code>.spec.replicas</code> and all old ReplicaSets is scaled to 0.</li>
     </ul>
 
-    <p class="card-text">Proportional scaling</p>
+    <h3 class="card-title">Rollback</h3>
+<pre><code class="bash"># Check the revisions of Deployment.
+kubectl rollout history deployment.v1.apps/nginx-deployment</code></pre>
+
+<pre><code class="bash"># To see the details of each revision.
+kubectl rollout history deployment.v1.apps/nginx-deployment --revision=2</code></pre>
+
+<pre><code class="bash"># Rollback to a specific version.
+kubectl rollout undo deployment.v1.apps/nginx-deployment --to-revision=2</code></pre>
+
+    <h3 class="card-title">Scaling</h3>
+<pre><code class="bash"># Scale a Deployment.
+kubectl scale deployment.v1.apps/nginx-deployment --replicas=10</code></pre>
+
+<pre><code class="bash"># Setup autoscaler for Deployment and choose the minimum and maximum number of Pods.
+kubectl autoscale deployment.v1.apps/nginx-deployment --min=10 --max=15 --cpu-percent=80</code></pre>
+
+<pre><code class="bash"># Rollback to a specific version.
+kubectl rollout undo deployment.v1.apps/nginx-deployment --to-revision=2</code></pre>
+
+    <h3 class="card-title">Proportional scaling</h3>
     <ul>
       <li>Deployment Controller balances additional replicas in the existing ReplicaSets</li>
     </ul>
 
-    <p class="card-text">Pause and resume Deployment</p>
+    <h3 class="card-title">Pause and resume Deployment</h3>
     <ul>
       <li>Can apply multiple fixes in between pausing and resuming without triggering unnecessary rollouts</li>
-      <li>To pause the Deployment</li>
-<pre><code class="bash">kubectl rollout pause deployment.v1.apps/nginx-deployment</code></pre>
-      <li>Can update the image</li>
-<pre><code class="bash">kubectl set image deployment.v1.apps/nginx-deployment nginx=nginx:1.16.1</code></pre>
-      <li>Can update the resources</li>
-<pre><code class="bash">kubectl set resources deployment.v1.apps/nginx-deployment -c=nginx --limits=cpu=200m,memory=512Mi</code></pre>
-      <li>To resume the Deployment</li>
-<pre><code class="bash">kubectl rollout resume deployment.v1.apps/nginx-deployment</code></pre>
     </ul>
+<pre><code class="bash"># To pause the Deployment.
+kubectl rollout pause deployment.v1.apps/nginx-deployment</code></pre>
+
+<pre><code class="bash"># Can update the image.
+kubectl set image deployment.v1.apps/nginx-deployment nginx=nginx:1.16.1</code></pre>
+
+<pre><code class="bash"># Can update the resources.
+kubectl set resources deployment.v1.apps/nginx-deployment -c=nginx --limits=cpu=200m,memory=512Mi</code></pre>
+
+<pre><code class="bash"># To resume the Deployment.
+kubectl rollout resume deployment.v1.apps/nginx-deployment</code></pre>
+
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployment</a>
