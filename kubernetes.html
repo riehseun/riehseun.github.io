@@ -348,8 +348,11 @@ kubectl rollout resume deployment.v1.apps/nginx-deployment</code></pre>
 <div class="card mb-4" id="kubernetes-1c">
   <div class="card-body">
     <h2 class="card-title">ReplicaSet</h2>
-    <p class="card-text">Generally, ReplicaSet should not be manipulated. Rather, Deployment should be used.</p>
-    <p class="card-text">ReplicaSet is mapped to Pod by Pod's metadata.ownerReferences field.</p>
+    <ul>
+      <li>Generally, ReplicaSet should not be manipulated. Rather, Deployment should be used.</li>
+      <li>ReplicaSet is mapped to Pod by Pod's metadata.ownerReferences field.</li>
+    </ul>
+
 <pre><code class="yaml">apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
@@ -371,7 +374,9 @@ spec:
       containers:
       - name: php-redis
         image: gcr.io/google_samples/gb-frontend:v3</code></pre>
-<pre><code class="yaml">apiVersion: v1
+
+<pre><code class="yaml"># These Pods do not have Controller as their owner reference. And they match the selector of frontend ReplicaSet (right above). This means these Pods will be acquired by that ReplicaSet. Moreover, if the frontend ReplicaSet is already deployed, creating these two additional Pods cause them to immediately terminate because the ReplicaSet exceeds the desired count.
+apiVersion: v1
 kind: Pod
 metadata:
   name: pod1
@@ -394,18 +399,21 @@ spec:
   containers:
   - name: hello2
     image: gcr.io/google-samples/hello-app:1.0</code></pre>
-    <p class="card-text">These Pods do not have Controller as their owner reference. And they match the selector of frontend ReplicaSet (right above). This means these Pods will be acquired by that ReplicaSet. Moreover, if the frontend ReplicaSet is already deployed, creating these two additional Pods cause them to immediately terminate because the ReplicaSet exceeds the desired count.</p>
-    <p class="card-text">Delete ReplicaSet and its Pods.</p>
-<pre><code class="bash">kubectl proxy --port=8080
+
+    <p class="card-text"></p>
+
+<pre><code class="bash"># Delete ReplicaSet and its Pods.
+kubectl proxy --port=8080
 curl -X DELETE  'localhost:8080/apis/apps/v1/namespaces/default/replicasets/frontend' \
 > -d '{"kind":"DeleteOptions","apiVersion":"v1","propagationPolicy":"Foreground"}' \
 > -H "Content-Type: application/json"</code></pre>
-    <p class="card-text">Delete just a ReplicaSet</p>
-<pre><code class="bash">kubectl proxy --port=8080
+
+<pre><code class="bash"># Delete just a ReplicaSet.
+kubectl proxy --port=8080
 curl -X DELETE  'localhost:8080/apis/apps/v1/namespaces/default/replicasets/frontend' \
 > -d '{"kind":"DeleteOptions","apiVersion":"v1","propagationPolicy":"Orphan"}' \
 > -H "Content-Type: application/json"</code></pre>
-    <p class="card-text">Scale-down a ReplicaSet</p>
+    <h3 class="card-title">Scale-down a ReplicaSet</h3>
     <ul>
       <li>Pending Pods are scaled-down first</li>
       <li>If controller.kubernetes.io/pod-deletion-cost annotation is set, Pods with lower value are scaled-down second</li>
@@ -422,27 +430,33 @@ curl -X DELETE  'localhost:8080/apis/apps/v1/namespaces/default/replicasets/fron
 <div class="card mb-4" id="kubernetes-1d">
   <div class="card-body">
     <h2 class="card-title">StatefulSet</h2>
-    <p class="card-text">Similar to Deployment, but guarantees ordering and uniqueness of Pods.</p>
-    <p class="card-text">Usecase</p>
     <ul>
-      <li>Stable, unique network identifier</li>
-      <li>Stable, persistent storage</li>
-      <li>Ordered, graceful deployment and scaling</li>
-      <li>Ordered, automated rolling updates</li>
+      <li>Similar to Deployment, but guarantees ordering and uniqueness of Pods.</li>
     </ul>
-    <p class="card-text">Limitations</p>
+
+    <h3 class="card-title">Usecases</h3>
     <ul>
-      <li>Storage for a Pod must be provisioned by PersistentVolumns Provsioner</li>
-      <li>Deleting StatefulSet does not delete volumns associated with it</li>
-      <li>StatefulSet requires Headless Service for the network identity of the Pods</li>
-      <li>StatefulSet does not guarantee on the termination of Pods when Statefulset gets deleted</li>
+      <li>Stable, unique network identifier.</li>
+      <li>Stable, persistent storage.</li>
+      <li>Ordered, graceful deployment and scaling.</li>
+      <li>Ordered, automated rolling updates.</li>
     </ul>
-    <p class="card-text">Example</p>
+
+    <h3 class="card-title">Limitations</h3>
     <ul>
-      <li>Headless service named "nginx" is used to control the network domain</li>
-      <li>3 replicas of nginx container will be launched in unique Pods</li>
-      <li>volumeClaimTemplates will provide stable storage using PersistentVolumns</li>
+      <li>Storage for a Pod must be provisioned by PersistentVolumns Provsioner.</li>
+      <li>Deleting StatefulSet does not delete volumns associated with it.</li>
+      <li>StatefulSet requires Headless Service for the network identity of the Pods.</li>
+      <li>StatefulSet does not guarantee on the termination of Pods when Statefulset gets deleted.</li>
     </ul>
+
+    <h3 class="card-title">Example</h3>
+    <ul>
+      <li>Headless service named "nginx" is used to control the network domain.</li>
+      <li>3 replicas of nginx container will be launched in unique Pods.</li>
+      <li>volumeClaimTemplates will provide stable storage using PersistentVolumns.</li>
+    </ul>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Service
 metadata:
@@ -491,11 +505,13 @@ spec:
       resources:
         requests:
           storage: 1Gi</code></pre>
+
     <ul>
       <li>Three Pods will be deployed in the order web-0, web-1, web-2</li>
       <li>web-1 will not be deployed until web-0 is Running and Ready</li>
       <li>When scaling down, web-1 will not be terminated until web-2 is fully shutdown</li>
     </ul>
+
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/">StatefulSet</a>
@@ -505,7 +521,10 @@ spec:
 <div class="card mb-4" id="kubernetes-1e">
   <div class="card-body">
     <h2 class="card-title">DaemonSet</h2>
-    <p class="card-text">DaemonSet ensures that as Nodes are added Pods are added them, and as Nodes are removed Pods are garbage collected.</p>
+    <ul>
+      <li>DaemonSet ensures that as Nodes are added Pods are added them, and as Nodes are removed Pods are garbage collected.</li>
+    </ul>
+
 <pre><code class="yaml">apiVersion: apps/v1
 kind: DaemonSet
 metadata:
@@ -551,6 +570,7 @@ spec:
       - name: varlibdockercontainers
         hostPath:
           path: /var/lib/docker/containers</code></pre>
+
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/">DaemonSet</a>
@@ -560,9 +580,15 @@ spec:
 <div class="card mb-4" id="kubernetes-1f">
   <div class="card-body">
     <h2 class="card-title">Jobs</h2>
-    <p class="card-text">A Job creates one more more Pods. It reliably runs one Pod to completion. Deleting a Job will clean up Pods it created. Suspending a Job will delete its active Pods</p>
-    <p class="card-text">A Job is better than bare Pod because it can automatically replace failed Pod with new one. While Replication Controller manages Pods that are not expected to terminate, Job manages Pods that are expected to terminate</p>
-    <p class="card-text">Example</p>
+    <ul>
+      <li>A Job creates one more more Pods.</li>
+      <li>It reliably runs one Pod to completion.</li>
+      <li>Deleting a Job will clean up Pods it created.</li>
+      <li>Suspending a Job will delete its active Pods.</li>
+      <li>A Job is better than bare Pod because it can automatically replace failed Pod with new one.</li>
+      <li>While Replication Controller manages Pods that are not expected to terminate, Job manages Pods that are expected to terminate.</li>
+    </ul>
+
 <pre><code class="yaml">apiVersion: batch/v1
 kind: Job
 metadata:
@@ -576,32 +602,36 @@ spec:
         command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
       restartPolicy: Never
   backoffLimit: 4</code></pre>
-    <p class="card-text">To list all the Pods that belong to a Job</p>
-<pre><code class="bash">run pods=$(kubectl get pods --selector=job-name=pi --output=jsonpath='{.items[*].metadata.name}') && echo $pods"</code></pre>
-    <p class="card-text">Three types of tasks suitable to run as a Job</p>
+
+<pre><code class="bash"># To list all the Pods that belong to a Job.
+run pods=$(kubectl get pods --selector=job-name=pi --output=jsonpath='{.items[*].metadata.name}') && echo $pods"</code></pre>
+
+    <h3 class="card-title">Three types of tasks suitable to run as a Job</h3>
     <ul>
-      <li>Non-parallel Jobs - normally only one Pod is started. Job is complete as soon as its Pod terminates successfully. Can leave both <code>.spec.completions</code> and <code>.spec.parallelism</code> unset (they will default to 1)</li>
-      <li>Parallel Jobs with a fixed completion count - Job is complete when there is one successful Pod for each value in the range 1 to <code>.spec.completions</code></li>
-      <li>Parallel Jobs with a work queue - when any Pod from the Job terminates with success, no new Pods are created. Once at least one Pod is terminated with success and all Pods are terminated, Job succeeds. Must leave <code>.spec.completions</code> unset and set <code>.spec.parallelism</code> to a non-negative integer</li>
+      <li>Non-parallel Jobs - normally only one Pod is started. Job is complete as soon as its Pod terminates successfully. Can leave both <code>.spec.completions</code> and <code>.spec.parallelism</code> unset. (they will default to 1)</li>
+      <li>Parallel Jobs with a fixed completion count - Job is complete when there is one successful Pod for each value in the range 1 to <code>.spec.completions</code>.</li>
+      <li>Parallel Jobs with a work queue - when any Pod from the Job terminates with success, no new Pods are created. Once at least one Pod is terminated with success and all Pods are terminated, Job succeeds. Must leave <code>.spec.completions</code> unset and set <code>.spec.parallelism</code> to a non-negative integer.</li>
     </ul>
-    <p class="card-text">Requested parallelism <code>.spec.parallelism</code> is set to 1 if not specified. Setting it to 0 makes Job effective paused</p>
+
+    <p class="card-text">Requested parallelism <code>.spec.parallelism</code> is set to 1 if not specified. Setting it to 0 makes Job effective paused.</p>
     <ul>
-      <li>Fixed completion count Jobs - actual number of Pods running in parallel will not exceed the number of remaining completions. Higher value of <code>.spec.parallelism</code> is ignored</li>
-      <li>Work queue Jobs - no new Pods are started after any Pod has succeeded</li>
+      <li>Fixed completion count Jobs - actual number of Pods running in parallel will not exceed the number of remaining completions. Higher value of <code>.spec.parallelism</code> is ignored.</li>
+      <li>Work queue Jobs - no new Pods are started after any Pod has succeeded.</li>
     </ul>
-    <p class="card-text">Pod and container failure</p>
+
+    <h3 class="card-title">Pod and container failure</h3>
     <ul>
-      <li>If container fails and <code>.spec.template.spec.restartPolicy = "OnFailure"</code>, Pod stays on the node but container re-runs. You can avoid this by <code>.spec.template.spec.restartPolicy = "Never"</code></li>
-      <li>If Pod fails, then Job Controller starts a new Pod</li>
-      <li><code>.spec.backoffLimit</code> is specifiy number fo retries before marking Job as failure (default is 6)</li>
+      <li>If container fails and <code>.spec.template.spec.restartPolicy = "OnFailure"</code>, Pod stays on the node but container re-runs. You can avoid this by <code>.spec.template.spec.restartPolicy = "Never".</code></li>
+      <li>If Pod fails, then Job Controller starts a new Pod.</li>
+      <li><code>.spec.backoffLimit</code> is specifiy number fo retries before marking Job as failure. (default is 6)</li>
     </ul>
-    <p class="card-text">Job termination and cleaup</p>
-    <ul>
-      <li>Delete the Job, all the Pods created by that Job are deleted too</li>
-<pre><code class="bash">kubectl get jobs
+
+    <h3 class="card-title">Job termination and cleaup</h3>
+<pre><code class="bash"># Delete the Job, all the Pods created by that Job are deleted too.
+kubectl get jobs
 kubectl delete jobs/&lt;job_name&gt;</code></pre>
-      <li>Setting <code>.spec.activeDeadlineSeconds</code> will make Job fail and terminate all running Pods once <code>activeDeadlineSeconds</code> is reached</li>
-    </ul>
+    <p class="card-text">Setting <code>.spec.activeDeadlineSeconds</code> will make Job fail and terminate all running Pods once <code>activeDeadlineSeconds</code> is reached.</p>
+
 <pre><code class="yaml">apiVersion: batch/v1
 kind: Job
 metadata:
@@ -616,6 +646,7 @@ spec:
         image: perl
         command: ["perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)"]
       restartPolicy: Never</code></pre>
+
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/job/">Jobs</a>
@@ -625,8 +656,10 @@ spec:
 <div class="card mb-4" id="kubernetes-1g">
   <div class="card-body">
     <h2 class="card-title">Cron Job</h2>
-    <p class="card-text">It can create Jobs on a repeating schedule or any individual tasks</p>
-    <p class="card-text">Example</p>
+    <ul>
+      <li>It can create Jobs on a repeating schedule or any individual tasks.</li>
+    </ul>
+
 <pre><code class="yaml">apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
@@ -646,6 +679,7 @@ spec:
             - -c
             - date; echo Hello from the Kubernetes cluster
           restartPolicy: OnFailure</code></pre>
+
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/">CronJob</a>
