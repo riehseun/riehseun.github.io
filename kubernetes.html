@@ -689,13 +689,15 @@ spec:
 <div class="card mb-4" id="kubernetes-1h">
   <div class="card-body">
     <h2 class="card-title">Pods</h2>
-    <p class="card-text">Its the smallest deployable unit</p>
     <ul>
-      <li>Can contain an init container tha runs during Pod startup</li>
-      <li>Similar to Docker containers with shared namespace and volumn</li>
-      <li>Pod gets created by resources such as Deployment, Job, or StatefulSet</li>
-      <li>Controller for those resources handles Pod replication, rollout, and failure</li>
-      <li>Controllers create Pod from Pod Template</li>
+      <li>The smallest deployable unit.</li>
+      <li>Can contain an init container that runs during Pod startup.</li>
+      <li>Similar to Docker containers with shared namespace and volumn.</li>
+      <li>Pod gets created by resources such as Deployment, Job, or StatefulSet.</li>
+      <li>Controller for those resources handles Pod replication, rollout, and failure.</li>
+      <li>Controllers create Pod from Pod Template.</li>
+    </ul>
+
 <pre><code class="yaml">apiVersion: batch/v1
 kind: Job
 metadata:
@@ -710,45 +712,49 @@ spec:
         command: ['sh', '-c', 'echo "Hello, Kubernetes!" && sleep 3600']
       restartPolicy: OnFailure
     # The pod template ends here</code></pre>
-        <li>Modifying the Pod Template will make StatefulSet to create new Pods, which then will replace old Pods</li>
-        <li>Every container in a Pod share the same IP address and port. These containers can communicate to each other using localhost</li>
-        <li>Any container in a Pod can enable privileged mode to use OS admin level capabilities</li>
-        <li>Static Pods are managed directly by kubelet without API server. Kubelet though will create mirror Pods on API server for each static Pod</li>
-      </ul>
 
-      <h3 class="card-title">Pod Lifecycle</h3>
-      <ul>
-        <li>Pods are created, assinged a unique ID (UUID), and scheduled to nodes. They can never be rescheduled to different nodes</li>
-      </ul>
-      <p class="card-text">Pod lifecycle</p>
-      <ul>
-        <li>Pending - containers have not been setup yet</li>
-        <li>Running - Pod is bounded to a node. Containers are created but still running</li>
-        <li>Succeeded (Completed when <strong>restartPloicy:Never</strong>) - Containers are terminated with success</li>
-        <li>Failed (CrashLoopBackoff when Pod fails or exits unexpectedly) - At least one container is terminated with failure</li>
-        <li>Unknown - Pod status cannot be obtained. Most often error communicating with the node</li>
-      </ul>
-      <p class="card-text">Container lifecycle</p>
-      <ul>
-        <li>Waiting - running operations to complete startup</li>
-        <li>Running - executing without issues</li>
-        <li>Terminated - either ran to completion or failed</li>
-      </ul>
-      <p class="card-text">Container restart policy</p>
-      <ul>
-        <li><code>spec</code> of Pod has <code>restartPolicy</code>, which has Always, OnFailure, Never. Default is Always</li>
-      </ul>
-      <p class="card-text">Pod condition</p>
-      <ul>
-        <li>PodScheduled - Pod is scheduled to a node</li>
-        <li>ContainersReady - all containers in Pod are ready</li>
-        <li>Initialized - all init containers are started</li>
-        <li>Ready - Pod can serve requests</li>
-      </ul>
-      <p class="card-text">Pod readiness</p>
-      <ul>
-        <li><code>spec</code> of Pod has <code>readinessGates</code>, that allows additional conditions to be specified</li>
-      </ul>
+    <ul>
+      <li>Modifying the Pod Template will make StatefulSet to create new Pods, which then will replace old Pods</li>
+      <li>Every container in a Pod share the same IP address and port. These containers can communicate to each other using localhost</li>
+      <li>Any container in a Pod can enable privileged mode to use OS admin level capabilities</li>
+      <li>Static Pods are managed directly by kubelet without API server. Kubelet though will create mirror Pods on API server for each static Pod</li>
+    </ul>
+
+    <h3 class="card-title">Pod Lifecycle</h3>
+    <ul>
+      <li>Pods are created, assinged a unique ID (UUID), and scheduled to nodes. They can never be rescheduled to different nodes</li>
+      <li>Pending - containers have not been setup yet</li>
+      <li>Running - Pod is bounded to a node. Containers are created but still running</li>
+      <li>Succeeded (Completed when <strong>restartPloicy:Never</strong>) - Containers are terminated with success</li>
+      <li>Failed (CrashLoopBackoff when Pod fails or exits unexpectedly) - At least one container is terminated with failure</li>
+      <li>Unknown - Pod status cannot be obtained. Most often error communicating with the node</li>
+    </ul>
+
+    <h3 class="card-title">Container lifecycle</h3>
+    <ul>
+      <li>Waiting - running operations to complete startup</li>
+      <li>Running - executing without issues</li>
+      <li>Terminated - either ran to completion or failed</li>
+    </ul>
+
+    <h3 class="card-title">Container restart policy</h3>
+    <ul>
+      <li><code>spec</code> of Pod has <code>restartPolicy</code>, which has Always, OnFailure, Never. Default is Always</li>
+    </ul>
+
+    <h3 class="card-title">Pod condition</h3>
+    <ul>
+      <li>PodScheduled - Pod is scheduled to a node</li>
+      <li>ContainersReady - all containers in Pod are ready</li>
+      <li>Initialized - all init containers are started</li>
+      <li>Ready - Pod can serve requests</li>
+    </ul>
+
+    <h3 class="card-title">Pod readiness</h3>
+    <ul>
+      <li><code>spec</code> of Pod has <code>readinessGates</code>, that allows additional conditions to be specified</li>
+    </ul>
+
 <pre><code class="yaml">kind: Pod
 ...
 spec:
@@ -768,46 +774,54 @@ status:
     - containerID: docker://abcd...
       ready: true
 ...</code></pre>
-      <p class="card-text">Container probe</p>
-      <ul>
-        <li>Kubelet performs diagnostic on a container periodically (this is call Probe)</li>
-        <li>Kubelet calls Handler, which is implemented by the container</li>
-        <li>ExecAction Handler - executes a command inside container. Diagnostic successful if command exits with 0</li>
-        <li>TCPSocketAction Handler - TCP check on IP address on specified port. Diagnostic successful if port is open</li>
-        <li>HTTPGetAction Handler - HTTP GET check on IP address on specified port and path. Diagnostic successful if  200 &le; response &lt; 400</li>
-      </ul>
-      <p class="card-text">livenessProbe</p>
-      <ul>
-        <li>Indicates whether the container is running. If liveness probe fails, the kubelet kills the container, and container is subject to its restart policy</li>
-      </ul>
-      <p class="card-text">readinessProbe</p>
-      <ul>
-        <li>Indicates whether the container is ready to respond to requests. If readiness probe fails, then endpoint controller removes Pod IP address from Service endpoints that match the Pod</li>
-        <li>Used when container needs to load large data, configuration files</li>
-      </ul>
-      <p class="card-text">startupProbe</p>
-      <ul>
-        <li>Indicates whether the application within the container has started. If starup probe fails, the kubelet kills the container, and container is subject to its restart policy</li>
-        <li>Used when containers take long time to come into service</li>
-      </ul>
-      <p class="card-text">Pod Termination</p>
-      <ul>
-        <li>Kubelet tool to delete Pod, with default graceful period of 30 seconds</li>
-        <li>Control plane removes shutting-down Pods from Endpoints</li>
-        <li>Resources no longer trest shutting-down Pods valid</li>
-        <li>When the grace period expires, kubelet triggeres forcible shutdown (contrainer runtime sends SIGKILL to any running processes in containers)</li>
-        <li>API server deletes Pod's object</li>
-      </ul>
 
-      <h3 class="card-title">Labels, Selectors, and Annotations</h3>
-      <p class="card-text">Labels - key/value pairs enabling users to map their own structures to system objects (for example, Pods) in loosely coupled fashion. Labels do not need to be unique.</p>
+    <h3 class="card-title">Container probe</h3>
+    <ul>
+      <li>Kubelet performs diagnostic on a container periodically (this is call Probe)</li>
+      <li>Kubelet calls Handler, which is implemented by the container</li>
+      <li>ExecAction Handler - executes a command inside container. Diagnostic successful if command exits with 0</li>
+      <li>TCPSocketAction Handler - TCP check on IP address on specified port. Diagnostic successful if port is open</li>
+      <li>HTTPGetAction Handler - HTTP GET check on IP address on specified port and path. Diagnostic successful if  200 &le; response &lt; 400</li>
+    </ul>
+
+    <h3 class="card-title">livenessProbe</h3>
+    <ul>
+      <li>Indicates whether the container is running. If liveness probe fails, the kubelet kills the container, and container is subject to its restart policy</li>
+    </ul>
+
+    <h3 class="card-title">readinessProbe</h3>
+    <ul>
+      <li>Indicates whether the container is ready to respond to requests. If readiness probe fails, then endpoint controller removes Pod IP address from Service endpoints that match the Pod</li>
+      <li>Used when container needs to load large data, configuration files</li>
+    </ul>
+
+    <h3 class="card-title">startupProbe</h3>
+    <ul>
+      <li>Indicates whether the application within the container has started. If starup probe fails, the kubelet kills the container, and container is subject to its restart policy</li>
+      <li>Used when containers take long time to come into service</li>
+    </ul>
+
+    <h3 class="card-title">Pod Termination</h3>
+    <ul>
+      <li>Kubelet tool to delete Pod, with default graceful period of 30 seconds</li>
+      <li>Control plane removes shutting-down Pods from Endpoints</li>
+      <li>Resources no longer trest shutting-down Pods valid</li>
+      <li>When the grace period expires, kubelet triggeres forcible shutdown (contrainer runtime sends SIGKILL to any running processes in containers)</li>
+      <li>API server deletes Pod's object</li>
+    </ul>
+
+    <h3 class="card-title">Labels, Selectors, and Annotations</h3>
+    <p class="card-text">Labels are key/value pairs enabling users to map their own structures to system objects (for example, Pods) in loosely coupled fashion. Labels do not need to be unique.</p>
+
 <pre><code class="yaml">"metadata": {
   "labels": {
     "key1" : "value1",
     "key2" : "value2"
   }
 }</code></pre>
-      <p class="card-text">Example, Pods with two labels <code>environment: production</code> and <code>app: nginx</code></p>
+
+    <p class="card-text">Example, Pods with two labels <code>environment: production</code> and <code>app: nginx</code></p>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
@@ -821,20 +835,28 @@ spec:
     image: nginx:1.14.2
     ports:
     - containerPort: 80</code></pre>
-      <p class="card-text">Selectors - equality-based allows filtering by label keys and values while set-based allows filtering keys according to a set of values. For example,</p>
+
+    <p class="card-text">Selectors are equality-based allows filtering by label keys and values while set-based allows filtering keys according to a set of values. For example,</p>
+
 <pre><code class="bash">kubectl get pods -l environment=production,tier=frontend # equality based
 kubectl get pods -l 'environment in (production),tier in (frontend)' # set based</code></pre>
-      <p class="card-text">Service and Replication Controller only support equality-based selector</p>
+
+    <p class="card-text">Service and Replication Controller only support equality-based selector</p>
+
 <pre><code class="yaml">selector:
   component: redis</code></pre>
-      <p class="card-text">Job, Deployment, ReplicaSet, DaemonSet also support set-based selector</p>
+
+    <p class="card-text">Job, Deployment, ReplicaSet, DaemonSet also support set-based selector</p>
+
 <pre><code class="yaml">selector:
 matchLabels:
   component: redis
 matchExpressions:
   - {key: tier, operator: In, values: [cache]}
   - {key: environment, operator: NotIn, values: [dev]}</code></pre>
-      <p class="card-text">Annotations - allows attaching arbitrary non-identifying metadata to objects (while Labels are used to select objects, annotations are for recording metadata)</p>
+
+    <p class="card-text">Annotations - allows attaching arbitrary non-identifying metadata to objects (while Labels are used to select objects, annotations are for recording metadata)</p>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
@@ -848,18 +870,19 @@ spec:
     ports:
     - containerPort: 80</code></pre>
 
-      <h3 class="card-title">Init Containers</h3>
-      <p class="card-text">Specialized containers that run before app containers in Pod</p>
-      <ul>
-        <li>Init containers always run to completion</li>
-        <li>Each init container must succeed before next one can run</li>
-        <li>If init container fails, kubelet repeatly restarts the container</li>
-        <li>Init containers do not support lifecycle, livenessProbe, readinessProbe, startupProbe because they must run to completion before Pod can be ready</li>
-        <li>Init containers can have custom code and no need to use FROM</li>
-        <li>Init containers can be given access to Secret (unlike app containers)</li>
-        <li>If Pod restarts, all init containers must run again</li>
-        <li>Init container code must be idempotent (because they can be re-run)</li>
-      </ul>
+    <h3 class="card-title">Init Containers</h3>
+    <p class="card-text">Specialized containers that run before app containers in Pod</p>
+    <ul>
+      <li>Init containers always run to completion.</li>
+      <li>Each init container must succeed before next one can run.</li>
+      <li>If init container fails, kubelet repeatly restarts the container.</li>
+      <li>Init containers do not support lifecycle, livenessProbe, readinessProbe, startupProbe because they must run to completion before Pod can be ready.</li>
+      <li>Init containers can have custom code and no need to use FROM.</li>
+      <li>Init containers can be given access to Secret. (unlike app containers)</li>
+      <li>If Pod restarts, all init containers must run again.</li>
+      <li>Init container code must be idempotent. (because they can be re-run)</li>
+    </ul>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
@@ -878,7 +901,9 @@ spec:
   - name: init-mydb
     image: busybox:1.28
     command: ['sh', '-c', "until nslookup mydb.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for mydb; sleep 2; done"]</code></pre>
-      <p class="card-text">Init containters would be waiting to discover Services named myservice and mydb. </p>
+
+    <p class="card-text">Init containters would be waiting to discover Services named myservice and mydb.</p>
+
 <pre><code class="yaml">---
 apiVersion: v1
 kind: Service
@@ -900,8 +925,9 @@ spec:
     port: 80
     targetPort: 9377</code></pre>
 
-      <h3 class="card-title">Pod Topology Spread Constraints</h3>
-      <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-a.png" alt="Card image cap">
+    <h3 class="card-title">Pod Topology Spread Constraints</h3>
+    <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-a.png" alt="Card image cap">
+
 <pre><code class="yaml">kind: Pod
 apiVersion: v1
 metadata:
@@ -919,10 +945,11 @@ spec:
   containers:
   - name: pause
     image: k8s.gcr.io/pause:3.1</code></pre>
-      <p class="card-text">If a new Pod goes to Zone A, then the skew will be 3-1=2, which will exceed the maxSkew of 1. Thus, it can only go to Zone B such that</p>
-      <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-b.png" alt="Card image cap">
 
-      <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-c.png" alt="Card image cap">
+    <p class="card-text">If a new Pod goes to Zone A, then the skew will be 3-1=2, which will exceed the maxSkew of 1. Thus, it can only go to Zone B such that.</p>
+    <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-b.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-c.png" alt="Card image cap">
+
 <pre><code class="yaml">kind: Pod
 apiVersion: v1
 metadata:
@@ -946,9 +973,10 @@ spec:
   containers:
   - name: pause
     image: k8s.gcr.io/pause:3.1</code></pre>
-      <p class="card-text">A new Pod can only go to Zone B to meet the maxSkew of 1 in the first constraint. However at the same time, it can only go to Node 2 to meet the maxSkew of 1 in the second constraint. Because whenUnsatisfiable is DoNotSchedule in both constraints, new Pod cannot be scheduled. (it would be scheduled if whenUnsatisfiable is ScheduleAnyway)</p>
 
-      <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-d.png" alt="Card image cap">
+    <p class="card-text">A new Pod can only go to Zone B to meet the maxSkew of 1 in the first constraint. However at the same time, it can only go to Node 2 to meet the maxSkew of 1 in the second constraint. Because whenUnsatisfiable is DoNotSchedule in both constraints, new Pod cannot be scheduled. (it would be scheduled if whenUnsatisfiable is ScheduleAnyway)</p>
+    <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-d.png" alt="Card image cap">
+
 <pre><code class="yaml">kind: Pod
 apiVersion: v1
 metadata:
@@ -975,9 +1003,11 @@ spec:
   containers:
   - name: pause
     image: k8s.gcr.io/pause:3.1</code></pre>
-      <p class="card-text">This will exclude Zone C from the constraint such that a new Pod goes to Zone B rather than Zone C</p>
 
-      <h4 class="card-title">Cluster-Level Default Constraints</h4>
+    <p class="card-text">This will exclude Zone C from the constraint such that a new Pod goes to Zone B rather than Zone C.</p>
+
+    <h4 class="card-title">Cluster-Level Default Constraints</h4>
+
 <pre><code class="yaml">apiVersion: kubescheduler.config.k8s.io/v1beta1
 kind: KubeSchedulerConfiguration
 
@@ -990,17 +1020,21 @@ profiles:
               topologyKey: topology.kubernetes.io/zone
               whenUnsatisfiable: ScheduleAnyway
           defaultingType: List</code></pre>
-      <ul>
-        <li>Pod Affinity - can place any number of Pods into qualifying topology domains</li>
-        <li>Pod Anti-Affinity - can only place one Pod into a single topology domain</li>
-      </ul>
 
-      <h3 class="card-title">Multi-container pod design</h3>
-      <p class="card-text">Each pod can have multiple containers (which would run on the same node). This make communication between containers faster and securer, and allow them to share volumns and file systems</p>
+    <ul>
+      <li>Pod Affinity - can place any number of Pods into qualifying topology domains.</li>
+      <li>Pod Anti-Affinity - can only place one Pod into a single topology domain.</li>
+    </ul>
 
-      <p class="card-text"><strong>Sidecar</strong></p>
-      <p class="card-text">Enhance/extend existing functionality of container</p>
-      <p class="card-text">For example, an app container can stream logs to a particular location while the sidecar container mounts the logs to some other directory</p>
+    <h3 class="card-title">Multi-container pod design</h3>
+    <p class="card-text">Each pod can have multiple containers (which would run on the same node). This make communication between containers faster and securer, and allow them to share volumns and file systems.</p>
+
+    <h4 class="card-title">Sidecar</strong></h4>
+    <ul>
+      <li>Enhance/extend existing functionality of container.</li>
+      <li>For example, an app container can stream logs to a particular location while the sidecar container mounts the logs to some other directory.</li>
+    </ul>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
@@ -1024,11 +1058,14 @@ spec:
     volumeMounts:
     - name: logs
       mountPath: /usr/share/nginx/html</code></pre>
-      <p class="card-text">"app-container" streams logs to /var/log/app.log while "log-exporter-sidecar" mounts those logs into /usr/share/nginx/html</p>
+    <p class="card-text">"app-container" streams logs to /var/log/app.log while "log-exporter-sidecar" mounts those logs into /usr/share/nginx/html.</p>
 
-      <p class="card-text"><strong>Ambassador</strong></p>
-      <p class="card-text">Serves as a proxy to external worlds (this for for legacy apps, ConfigMap should be used for new apps)</p>
-      <p class="card-text">For example, when connecting to a DB server and that server config changes across different environments, the ambassador container can act as a TCP proxy to the database, which can be connected via localhost. The sysadmin can use config maps and secrets with the proxy container to inject the correct connection and auth information</p>
+    <h4 class="card-title">Ambassador</h4>
+    <ul>
+      <li>Serves as a proxy to external worlds. (this for for legacy apps, ConfigMap should be used for new apps)</li>
+      <li>For example, when connecting to a DB server and that server config changes across different environments, the ambassador container can act as a TCP proxy to the database, which can be connected via localhost. The sysadmin can use config maps and secrets with the proxy container to inject the correct connection and auth information.</li>
+    </ul>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
@@ -1058,11 +1095,15 @@ spec:
     image: bharamicrosystems/nginx-forward-proxy
     ports:
       - containerPort: 81</code></pre>
-      <p class="card-text">"app-container-poller" call on port 81 and send stuff to /usr/share/nginx/html/index.html. "app-container-server" listens on  port 80. These two containers share the same mount point. Lastly, "ambassador-container" listens on port 81, so that when users curl on 80 they get response from html page</p>
 
-      <p class="card-text"><strong>Adaptor</strong></p>
-      <p class="card-text">Help standarized heterogeneous system</p>
-      <p class="card-text">For example, when there are multiple applications running on separate containers that are outputing logs in different formats, the adaptor container can standardize logs</p>
+    <p class="card-text">"app-container-poller" call on port 81 and send stuff to /usr/share/nginx/html/index.html. "app-container-server" listens on  port 80. These two containers share the same mount point. Lastly, "ambassador-container" listens on port 81, so that when users curl on 80 they get response from html page.</p>
+
+    <h4 class="card-title">Adaptor</h4>
+    <ul>
+      <li>Help standarized heterogeneous system.</li>
+      <li>For example, when there are multiple applications running on separate containers that are outputing logs in different formats, the adaptor container can standardize logs.</li>
+    </ul>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
@@ -1088,48 +1129,49 @@ spec:
     volumeMounts:
     - name: logs
       mountPath: /var/log</code></pre>
-      <p class="card-text">"app-container" outputs stream of dates in log file while "log-adapter" appends a word to those stream of dates</p>
+    <p class="card-text">"app-container" outputs stream of dates in log file while "log-adapter" appends a word to those stream of dates</p>
 
-      <h3 class="card-title">Disruptions</h3>
-      <p class="card-text">There are involuntary disruptions</p>
-      <ul>
-        <li>Hardware failure</li>
-        <li>Kernal panic</li>
-        <li>Cloud provider issue</li>
-        <li>Network issue</li>
-        <li>Pod eviction due to Node having out of resource</li>
-      </ul>
-      <p class="card-text">There are voluntary disruptions. Application owners can</p>
-      <ul>
-        <li>Delete the Deployment</li>
-        <li>Update the Deployment, causing a restart</li>
-        <li>Directly delete Pods by accident</li>
-      </ul>
-      <p class="card-text">Cluster admins can</p>
-      <ul>
-        <li>Drain a Node for repair or scale down</li>
-        <li>Remove a Pod from a Node to fit in something else</li>
-      </ul>
-      <p class="card-text">Pod description budgets (PDB)</p>
-      <ul>
-        <li>Limits the number of Pods down simultaneously from voluntary disruptions</li>
-      </ul>
-      <p class="card-text">Consider the following scenario where Pod-a, Pod-b, Pod-c are subject to PDB (whose requirement is that at least 2 out of 3 Pods must be available) while Pod-x is not</p>
-      <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-e.png" alt="Card image cap">
-      <p class="card-text">Now the cluster admin drains Node 1, which will cause Pod-a and Pod-x to start terminating</p>
-      <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-f.png" alt="Card image cap">
-      <p class="card-text">Deployment notices that Pods are terminating, and to reinstate the desired state, it creates replacement Pods (Pod-d and Pod-y)</p>
-      <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-g.png" alt="Card image cap">
-      <p class="card-text">The cluster admin now attempts to drain Node 2 and Node 3. However, the drain command will block because of PDB</p>
-      <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-h.png" alt="Card image cap">
-      <p class="card-text">At this point, there are three availabe Pods that are subject to PDB</p>
-      <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-i.png" alt="Card image cap">
-      <p class="card-text">The cluster admin now attempts to drain Node 2. Either one of Pod-b or Pod-d will be evicted but both cannot be eviced due to PDB. Assuming Pod-b got evicted, the Deployment will create a replacement Pod-e. But since there are not enough resources in Node 2 and 3, the drain will block</p>
-      <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-j.png" alt="Card image cap">
+    <h3 class="card-title">Disruptions</h3>
+    <p class="card-text">There are involuntary disruptions</p>
+    <ul>
+      <li>Hardware failure</li>
+      <li>Kernal panic</li>
+      <li>Cloud provider issue</li>
+      <li>Network issue</li>
+      <li>Pod eviction due to Node having out of resource</li>
+    </ul>
+    <p class="card-text">There are voluntary disruptions. Application owners can</p>
+    <ul>
+      <li>Delete the Deployment</li>
+      <li>Update the Deployment, causing a restart</li>
+      <li>Directly delete Pods by accident</li>
+    </ul>
+    <p class="card-text">Cluster admins can</p>
+    <ul>
+      <li>Drain a Node for repair or scale down</li>
+      <li>Remove a Pod from a Node to fit in something else</li>
+    </ul>
+    <p class="card-text">Pod description budgets (PDB)</p>
+    <ul>
+      <li>Limits the number of Pods down simultaneously from voluntary disruptions</li>
+    </ul>
+    <p class="card-text">Consider the following scenario where Pod-a, Pod-b, Pod-c are subject to PDB (whose requirement is that at least 2 out of 3 Pods must be available) while Pod-x is not</p>
+    <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-e.png" alt="Card image cap">
+    <p class="card-text">Now the cluster admin drains Node 1, which will cause Pod-a and Pod-x to start terminating</p>
+    <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-f.png" alt="Card image cap">
+    <p class="card-text">Deployment notices that Pods are terminating, and to reinstate the desired state, it creates replacement Pods (Pod-d and Pod-y)</p>
+    <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-g.png" alt="Card image cap">
+    <p class="card-text">The cluster admin now attempts to drain Node 2 and Node 3. However, the drain command will block because of PDB</p>
+    <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-h.png" alt="Card image cap">
+    <p class="card-text">At this point, there are three availabe Pods that are subject to PDB</p>
+    <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-i.png" alt="Card image cap">
+    <p class="card-text">The cluster admin now attempts to drain Node 2. Either one of Pod-b or Pod-d will be evicted but both cannot be eviced due to PDB. Assuming Pod-b got evicted, the Deployment will create a replacement Pod-e. But since there are not enough resources in Node 2 and 3, the drain will block</p>
+    <img class="img-fluid" class="card-img-top" src="img/kubernetes/kubernetes-2-j.png" alt="Card image cap">
 
-      <h3 class="card-title">Application Resource Requirement</h3>
-      <p class="card-text"><code>Mib</code> indicates the momory size based on 2's power.</p>
-      <p class="card-text">For example, a mebibyte is 1,048,576 (2<sup>20</sup>) bytes while a megabyte is 1,000,000 (10<sup>6</sup>) bytes </p>
+    <h3 class="card-title">Application Resource Requirement</h3>
+    <p class="card-text"><code>Mib</code> indicates the momory size based on 2's power.</p>
+    <p class="card-text">For example, a mebibyte is 1,048,576 (2<sup>20</sup>) bytes while a megabyte is 1,000,000 (10<sup>6</sup>) bytes.</p>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
@@ -1146,7 +1188,7 @@ spec:
         memory: "100Mi" # Containers are gunaranteed to have this much.
     command: ["stress"]
     args: ["--vm", "1", "--vm-bytes", "150M", "--vm-hang", "1"] # Attempt to allocate 150MiB of memory. Containers can exceed the memory requests as long as Node has memory available.</code></pre>
-      <p class="card-text">If containers allocate more memory than its limit, they will eventually terminate.</p>
+    <p class="card-text">If containers allocate more memory than its limit, they will eventually terminate.</p>
 
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
@@ -1165,15 +1207,15 @@ spec:
     args:
     - -cpus
     - "2"</code></pre>
-      <p class="card-text">If specify limit but no request, K8s automatically assigns CPU request that matches the limit.</p>
+    <p class="card-text">If specify limit but no request, K8s automatically assigns CPU request that matches the limit.</p>
 
-      <h4 class="card-title">If no CPU/memory limit</h4>
-      <ul>
-        <li>Container can use all the CPU/memory in the Node. (until it invokes OOM killer)</li>
-        <li>Or, container is running in namespace with a default CPU/memory limit.</li>
-      </ul>
+    <h4 class="card-title">If no CPU/memory limit</h4>
+    <ul>
+      <li>Container can use all the CPU/memory in the Node. (until it invokes OOM killer)</li>
+      <li>Or, container is running in namespace with a default CPU/memory limit.</li>
+    </ul>
 
-      <h3 class="card-title">LivenesProbe and ReadinessProbe</h3>
+    <h3 class="card-title">LivenesProbe and ReadinessProbe</h3>
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
@@ -1241,10 +1283,10 @@ spec:
       initialDelaySeconds: 15
       periodSeconds: 20</code></pre>
 
-      <h3 class="card-title">Service Account</h3>
-      <p class="card-text">When creating Pod, when service account is not specified, it is automatically assigned <code>default</code> service account in the same namespace.</p>
+    <h3 class="card-title">Service Account</h3>
+    <p class="card-text">When creating Pod, when service account is not specified, it is automatically assigned <code>default</code> service account in the same namespace.</p>
 
-      <p class="card-text">Opt-out of automatic service account assignment.</h3>
+    <p class="card-text">Opt-out of automatic service account assignment.</h3>
 <pre><code class="yaml">apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -1253,7 +1295,7 @@ metadata:
   automountServiceAccountToken: false
 ...</code></pre>
 
-      <p class="card-text">Opt-out of automatic service account assignment for a specific Pod.</h3>
+    <p class="card-text">Opt-out of automatic service account assignment for a specific Pod.</h3>
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
@@ -1263,7 +1305,7 @@ spec:
   automountServiceAccountToken: false
   ...</code></pre>
 
-      <p class="card-text">Manually create service account API token.</h3>
+    <p class="card-text">Manually create service account API token.</h3>
 <pre><code class="yaml">apiVersion: v1
 kind: Secret
 metadata:
@@ -1272,8 +1314,8 @@ metadata:
     kubernetes.io/service-account.name: build-robot
 type: kubernetes.io/service-account-token</code></pre>
 
-      <h3 class="card-title">SecurityContext</h3>
-      <p class="card-text">Defines provilege and access control for Pod and Container.</p>
+    <h3 class="card-title">SecurityContext</h3>
+    <p class="card-text">Defines provilege and access control for Pod and Container.</p>
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
@@ -1932,6 +1974,7 @@ spec:
       <li>By Kubelet when pulling images for Pod</li>
     </ul>
     <p class="card-text">Encoding scheme is base64 by default.</p>
+
     <h3 class="card-title">Secret types</h3>
     <table>
       <tr>
@@ -1967,6 +2010,7 @@ spec:
     <h3 class="card-title">Opaque Secret</h3>
 <pre><code class="bash">kubectl create secret generic empty-secret
 kubectl get secret empty-secret</code></pre>
+
     <h3 class="card-title">Service account token Secret</h3>
 <pre><code class="yaml">apiVersion: v1
 kind: Secret
@@ -2094,8 +2138,6 @@ immutable: true</code></pre>
     Reference: <a href="https://kubernetes.io/docs/concepts/configuration/secret/">Secret</a>
   </div>
 </div>
-
-
 
 <div class="card mb-4" id="kubernetes-">
   <div class="card-body">
