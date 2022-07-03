@@ -1,8 +1,3 @@
-EMAIL
-seungmoon.rieh@gmail.com
-seungmoon.rieh@mail.utoronto.ca
-seungmoon.rieh@outlook.com
-
 ADDRESSES
 2004.01 - 2004.07 Drewly Apartment
 2004.08 - 2006.06 Romfield Townhouse
@@ -42,6 +37,11 @@ SKILLS
 • git, maven, npm
 
 EXPERIENCE
+Software Engineer - Layer6 AI
+Toronto Dominion Bank (Toronto, ON, Canada), Jul 2021 - Present
+• Automate provisioning and configuration of ML infrastructure
+• Productionalize ML data and model
+
 Software Engineer - Wealth Segment Delivery & Deployment Engineering
 Toronto Dominion Bank (Toronto, ON, Canada), Mar 2019 – Jun 2021
 • Speed up Enterprise DevOps Pipeline, refactor code base, implement new features, and apply bug fixes
@@ -125,10 +125,7 @@ Deep Learning
 TensorFlow Developer
 Mathematics for Machine Learning
 Algorithms (by Standford)
-[Data Structures and Algorithms]
 
-[Azure DevOps AZ-400]
-[Azure Developer AZ-204]
 Azure Fundamentals AZ-900
 
 EDUCATION
