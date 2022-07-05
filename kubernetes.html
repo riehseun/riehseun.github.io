@@ -196,7 +196,7 @@
 <div class="card mb-4" id="kubernetes-1a">
   <div class="card-body">
     <h2 class="card-title">Namespace</h2>
-    <p class="card-text"></p>
+    <p class="card-text">Pods in different namespaces can still communicate each other.</p>
 <pre><code class="yaml">apiVersion: v1
 kind: Namespace
 metadata:
@@ -432,6 +432,8 @@ curl -X DELETE  'localhost:8080/apis/apps/v1/namespaces/default/replicasets/fron
     <h2 class="card-title">StatefulSet</h2>
     <ul>
       <li>Similar to Deployment, but guarantees ordering and uniqueness of Pods.</li>
+      <li>Uniqueness - when a node goes down, a new node needs to be attached to the correct claim.</li>
+      <li>Ordering - When pods are primary and backups, the second backup should take place of primary in case it goes down.</li>
     </ul>
 
     <h3 class="card-title">Limitations</h3>
@@ -440,13 +442,6 @@ curl -X DELETE  'localhost:8080/apis/apps/v1/namespaces/default/replicasets/fron
       <li>Deleting StatefulSet does not delete volumns associated with it.</li>
       <li>StatefulSet requires Headless Service for the network identity of the Pods.</li>
       <li>StatefulSet does not guarantee on the termination of Pods when Statefulset gets deleted.</li>
-    </ul>
-
-    <h3 class="card-title">Example: Elasticsearch</h3>
-    <ul>
-      <li>Each data node is attached to a PVC.</li>
-      <li>Uniqueness - when a node goes down, a new node needs to be attached to the correct claim.</li>
-      <li>Ordering - </li>
     </ul>
 
 <pre><code class="yaml">apiVersion: v1
@@ -1564,7 +1559,25 @@ spec:
 <div class="card mb-4" id="kubernetes-1l">
   <div class="card-body">
     <h2 class="card-title">Network Policy</h2>
-    <p class="card-text">Pods are non-isolated by default and accept traffics from any source. Pods become isolated by Network Policy; they reject any connections that are not allowed by any NetworkPolicy.</p>
+    <p class="card-text"></p>
+    <ul>
+      <li>Pods are non-isolated by default and accept traffics from any source. </li>
+      <li>Pods become isolated by Network Policy; they reject any connections that are not allowed by any NetworkPolicy.</li>
+    </ul>
+
+    <h3 class="card-title">Pod IP</h3>
+    <ul>
+      <li>When a cluster is created, a IP address range is given to the cluster.</li>
+      <li>Subset of that IP is given to the nodes.</li>
+      <li>Pod gets IP from the IPs reserved in that node.</li>
+    </ul>
+
+    <h3 class="card-title">Ingress Vs. Egress</h3>
+    <ul>
+      <li>Ingress - imcoming traffic to Pods.</li>
+      <li>Egress - outgoing traffic from Pods.</li>
+    </ul>
+
 <pre><code class="yaml">apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -2881,6 +2894,12 @@ docker exec -u root -it &lt;container_id&gt;</code></pre>
       <li>Chart.yaml - chart information such as apiVersion, chart name, chart version.</li>
       <li>values.yaml - configuration values for the chart.</li>
       <li>templates/ - k8s manifest files.</li>
+    </ul>
+
+    <h3 class="card-title">Difference from operator</h3>
+    <ul>
+      <li>When users manually changes resources deployed by Helm, Helm does not know the change and the next Helm deployment will fail.</li>
+      <li>When users manually changes resources deployed by Operator, Operator knows the change and the next Operator deployment will succeed.</li>
     </ul>
 
     <h3 class="card-text">Helm command</h3>
