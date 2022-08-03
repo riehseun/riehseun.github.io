@@ -30,9 +30,8 @@ ADDRESSES
 2021.11 - Present 133 Royal Palm Drive, Toronto ON L4J 8K1
 
 SKILLS
-• [Kubernetes], Docker, Jenkins, Salt, Nexus Repository, SonarQube, XL Release, XL Deploy, [Terraform], [Sensu], [Valut], [F5], [Nexus IQ Server], [Veracode]
-• Azure, OpenStack, [VMC], [AWS], [Salesforce]
-, RHEL, JBoss, Ubuntu, [Windows Server]
+• Kubernetes, Docker, Jenkins, [Terraform], Salt, Nexus Repository, SonarQube, XL Release, XL Deploy, [Sensu], [Valut], [F5], [Nexus IQ Server], [Veracode]
+• Azure, AWS, [VMC], [Salesforce]
 • Python, Bash, Groovy
 • git, maven, npm
 
