@@ -158,8 +158,7 @@ sudo salt-call grains.item master</code></pre>
     - upgrade: True
     - no_cache_dir: True
     - require:
-      - pkg: install_rh-python36
-    </code></pre>
+      - pkg: install_rh-python36</code></pre>
 
 <pre><code class="python"># Do not.
 &lt;install_java_alternative&gt;
@@ -184,6 +183,18 @@ sudo salt-call grains.item master</code></pre>
   alternatives.set:
     - name: java
     - path: /usr/java/&lt;jdk_version&gt;/bin/java</code></pre>
+
+<pre><code class="python"># Do not.
+&lt;selinux&gt;
+  cmd.run:
+    - name: restorecon -R -v /docker
+    - onlyif: test -d /docker
+
+# Do.
+&lt;restore_selinux&gt;
+  selinux.fcontext_polocy_applied:
+    - name: /docker
+    - recursive: True</code></pre>
 
   </div>
   <div class="card-footer text-muted">
