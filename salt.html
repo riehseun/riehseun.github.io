@@ -45,6 +45,7 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#salt-1">Salt API</a></li>
       <li><a href="#salt-2">Salt Formula</a></li>
+      <li><a href="#salt-3">Salt best practice</a></li>
     </ul>
   </div>
 </div>
@@ -127,6 +128,62 @@ sudo salt-call grains.item master</code></pre>
   archive.extracted:
     - name: &lt;location_to_extract_the_package&gt;
     - source: &lt;location_of_package&gt;</code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="salt-3">
+  <div class="card-body">
+    <h2 class="card-title">Salt best practice</h2>
+<pre><code class="python"># Assume this state exists already.
+&lt;install_rh-python36&gt;
+  pkg.installed:
+    - name: rh-python36
+
+# Do not.
+&lt;update_pip3&gt;
+  cmd.run:
+    - name: scl enable rh-python36 -- pip install --no-cache-dir --upgrade pip
+    - require:
+      - pkg: install_rh-python36
+
+# Do.
+&lt;update_pip3&gt;
+  pip.installed:
+    - name: pip
+    - bin_env: '/path/to/pip'
+    - upgrade: True
+    - no_cache_dir: True
+    - require:
+      - pkg: install_rh-python36
+    </code></pre>
+
+<pre><code class="python"># Do not.
+&lt;install_java_alternative&gt;
+  cmd.run:
+    - name: alternatives --install /usr/bin/java java /usr/java/&lt;jdk_version&gt;/bin/java 1000
+
+# Do.
+&lt;install_java_alternative&gt;
+  alternatives.install:
+    - name: java
+    - link: /usr/bin/java
+    - path: /usr/java/&lt;jdk_version&gt;/bin/java
+    - priority: 1000</code></pre>
+
+<pre><code class="python"># Do not.
+&lt;set_java_alternative&gt;
+  cmd.run:
+    - name: alternatives --set java /usr/java/&lt;jdk_version&gt;/bin/java
+
+# Do.
+&lt;set_java_alternative&gt;
+  alternatives.set:
+    - name: java
+    - path: /usr/java/&lt;jdk_version&gt;/bin/java</code></pre>
 
   </div>
   <div class="card-footer text-muted">
