@@ -44,37 +44,35 @@
     <h2 class="card-title">Terraform</h2>
     <ul class="list-unstyled mb-0">
       <li><a href="#terraform-1">Terraform with Google Cloud</a></li>
-      <li><a href="#terraform-2">Example: main.tf</a></li>
-      <li><a href="#terraform-3">Example: vpc.tf</a></li>
-      <li><a href="#terraform-4">Example: network.tf</a></li>
-      <li><a href="#terraform-5">Example: instance.tf</a></li>
-      <li><a href="#terraform-6">Install Terraform (version 0.11.13) in CentOS</a></li>
-      <li><a href="#terraform-7">Terraform with GCP - common errors</a></li>
-      <li><a href="#terraform-8">Terraform with GCP - example with storage bucket, pubsub, notification</a></li>
+      <li><a href="#terraform-2">Terraform on GCP - Kubernetes</a></li>
+      <li><a href="#terraform-3">Terraform on GCP - storage</a></li>
+      <li><a href="#terraform-4">Terraform with GCP - common errors</a></li>
+      <li><a href="#terraform-5">Install Terraform (version 0.11.13) in CentOS</a></li>
     </ul>
   </div>
 </div>
 
 <div class="card mb-4" id="terraform-1">
   <div class="card-body">
-    <h2 class="card-title">Terraform with Google Cloud</h2>
+    <h2 class="card-title">Terraform basic</h2>
     <p class="card-text">Commands to compile and provision infrastructure with Terraform</p>
     <ul>
       <li>terraform init</li>
       <li>terraform plan</li>
       <li>terraform apply</li>
-      <li>terraform destroy (this command tears down instances deployed to GCP)</li>
+      <li>terraform destroy (this command tears down instances deployed)</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://medium.com/slalom-technology/a-complete-gcp-environment-with-terraform-c087190366f0">A complete GCP environment with Terraform</a>
+
   </div>
 </div>
 
 <div class="card mb-4" id="terraform-2">
   <div class="card-body">
-    <h2 class="card-title">Example: main.tf</h2>
+    <h2 class="card-title">Terraform on GCP - Kubernetes</h2>
 
+    <h3 class="card-title">Example: main.tf</h3>
 <pre><code class="bash">provider "google" {
   credentials = "${file("../../googlecloud/credential.json")}"
   project     = "${var.project}"
@@ -100,17 +98,7 @@ module "ue1" {
   subnetwork1            = "${module.ue1.public_subnet_name}"
 }</code></pre>
 
-    <p class="card-text">Source code is available at <a href="https://github.com/riehseun/terraform-ansible/blob/master/main/main.tf">main.tf</a></p>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://medium.com/slalom-technology/a-complete-gcp-environment-with-terraform-c087190366f0">A complete GCP environment with Terraform</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="terraform-3">
-  <div class="card-body">
-    <h2 class="card-title">Example: vpc.tf</h2>
-
+    <h3 class="card-title">Example: vpc.tf</h3>
 <pre><code class="bash">resource "google_compute_network" "vpc" {
   name                    = "${format("%s","${var.var_company}-vpc")}"
   auto_create_subnetworks = "false"
@@ -153,17 +141,7 @@ resource "google_compute_firewall" "allow-bastion" {
   target_tags = ["ssh"]
 }</code></pre>
 
-    <p class="card-text">Source code is available at <a href="https://github.com/riehseun/terraform-ansible/blob/master/modules/global/vpc.tf">vpc.tf</a></p>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://medium.com/slalom-technology/a-complete-gcp-environment-with-terraform-c087190366f0">A complete GCP environment with Terraform</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="terraform-4">
-  <div class="card-body">
-    <h2 class="card-title">Example: network.tf</h2>
-
+    <h3 class="card-title">Example: network.tf</h3>
 <pre><code class="bash">resource "google_compute_subnetwork" "public_subnet" {
   name          = "${format("%s","${var.var_company}-${var.var_env}-${var.var_region_name}-pub-net")}"
   ip_cidr_range = "${var.var_ue1_public_subnet}"
@@ -178,17 +156,7 @@ resource "google_compute_subnetwork" "private_subnet" {
   region        = "${var.var_region_name}"
 }</code></pre>
 
-    <p class="card-text">Source code is available at <a href="https://github.com/riehseun/terraform-ansible/blob/master/modules/ue1/network.tf">network.tf</a></p>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://medium.com/slalom-technology/a-complete-gcp-environment-with-terraform-c087190366f0">A complete GCP environment with Terraform</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="terraform-5">
-  <div class="card-body">
-    <h2 class="card-title">Example: instance.tf</h2>
-
+    <h3 class="card-title">Example: instance.tf</h3>
 <pre><code class="bash">resource "google_compute_instance" "vm1" {
   name          = "k8s-master"
   machine_type  = "n1-standard-2"
@@ -242,44 +210,15 @@ resource "google_compute_subnetwork" "private_subnet" {
   }
 }</code></pre>
 
-    <p class="card-text">Source code is available at <a href="https://github.com/riehseun/terraform-ansible/blob/master/modules/ue1/instance.tf">instance.tf</a></p>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://medium.com/slalom-technology/a-complete-gcp-environment-with-terraform-c087190366f0">A complete GCP environment with Terraform</a>
   </div>
 </div>
 
-<div class="card mb-4" id="terraform-6">
+<div class="card mb-4" id="terraform-3">
   <div class="card-body">
-    <h2 class="card-title">Install Terraform (version 0.11.13) in CentOS</h2>
-    <ul>
-      <li>yum install -y zip unzip</li>
-      <li>wget https://releases.hashicorp.com/terraform/0.9.8/terraform_0.11.13_linux_amd64.zip</li>
-      <li>unzip terraform_0.11.13_linux_amd64.zip</li>
-      <li>mv terraform /usr/local/bin/</li>
-      <li>terraform --version</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://linuxacademy.com/community/posts/show/topic/18181-can-somebody-explain-how-to-install-terraform">Linux Academy</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="terraform-7">
-  <div class="card-body">
-    <h2 class="card-title">Terraform with GCP - common errors</h2>
-    <ul>
-      <li><strong>"Invalid JWT: Token must be a short-lived token (60 minutes) and in a reasonable timeframe</strong> - This happens when the date and time of OS is out of sync. Run <strong>date +%T -s "10:13:13"</strong> [10: Hour (hh) 13: Minute (mm) 13: Second (ss)] to update it.</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-
-  </div>
-</div>
-
-<div class="card mb-4" id="terraform-8">
-  <div class="card-body">
-    <h2 class="card-title">\Terraform with GCP - example with storage bucket, pubsub, notification</h2>
+    <h2 class="card-title">Terraform with GCP - storage</h2>
 
 <pre><code class="bash"># Create a GCS Bucket
 resource "google_storage_bucket" "my_bucket" {
@@ -304,10 +243,37 @@ resource "google_storage_notification" "notification" {
   topic          = google_pubsub_topic.topic.id
   event_types    = ["OBJECT_FINALIZE"]
 }</code></pre>
-
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://pbhadani.com/posts/first-gcp-resource-with-terraform/">Create a Google Cloud Storage(GCS) Bucket with Terraform</a> | <a href="https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/pubsub_topic">google_pubsub_topic</a> | <a href="https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/pubsub_topic_iam">IAM policy for Cloud Pub/Sub Topic</a> | <a href="https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/storage_notification">google_storage_notification</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="terraform-4">
+  <div class="card-body">
+    <h2 class="card-title">Terraform with GCP - common errors</h2>
+    <ul>
+      <li><strong>"Invalid JWT: Token must be a short-lived token (60 minutes) and in a reasonable timeframe</strong> - This happens when the date and time of OS is out of sync. Run <strong>date +%T -s "10:13:13"</strong> [10: Hour (hh) 13: Minute (mm) 13: Second (ss)] to update it.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="terraform-5">
+  <div class="card-body">
+    <h2 class="card-title">Install Terraform (version 0.11.13) in CentOS</h2>
+    <ul>
+      <li>yum install -y zip unzip</li>
+      <li>wget https://releases.hashicorp.com/terraform/0.9.8/terraform_0.11.13_linux_amd64.zip</li>
+      <li>unzip terraform_0.11.13_linux_amd64.zip</li>
+      <li>mv terraform /usr/local/bin/</li>
+      <li>terraform --version</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://linuxacademy.com/community/posts/show/topic/18181-can-somebody-explain-how-to-install-terraform">Linux Academy</a>
   </div>
 </div>
 <!-- Terraform END -->
