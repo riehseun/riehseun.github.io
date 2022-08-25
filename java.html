@@ -162,14 +162,70 @@ mvn package -Dmaven.test.skip</code></pre>
     <h2 class="card-title">Hadoop</h2>
     <p class="card-text"></p>
     <ul class="list-unstyled mb-0">
-      <li><a href="#hadoop-1">Start with Hadoop</a></li>
+      <li><a href="#hadoop-1">Hadoop basic</a></li>
+      <li><a href="#hadoop-2">Start with Hadoop</a></li>
     </ul>
   </div>
 </div>
 
 <div class="card mb-4" id="hadoop-1">
   <div class="card-body">
+    <h2 class="card-title">Hadoop basic</h2>
+    <p class="card-text"></p>
+
+    <h3 class="card-title">HDFS (Hadoop Distributed File System)</h3>
+    <ul>
+      <li>Scalability and reliability.</li>
+      <li>Spread files to differnt nodes for parallel access.</li>
+      <li>Partitioning and replication for fault tolerance. (node failure doesn't cause files to become unaccessible)</li>
+      <li>NameNode for metadata (1 node per cluster), DataNode for block storage (each node per cluster)</li>
+    </ul>
+
+    <h3 class="card-title">YARN (Yet Another Resource Negotiator)</h3>
+    <ul>
+      <li>Resource manager for Hadoop.</li>
+      <li>While node manager is in charge of each machine, resource manager decides who gets what.</li>
+      <li>Allows applications to run on the same Hadoop cluster.</li>
+    </ul>
+
+    <h3 class="card-title">MapReduce</h3>
+    <ul>
+      <li>Programming model for Hadoop ecosystem.</li>
+      <li>Relies on YARN.</li>
+      <li>Not good for frequently changing data.</li>
+      <li>Consists of mapping, shuffling, and reducing.</li>
+      <li>Delegates large tasks to lots of nodes and aggregates the result.</li>
+    </ul>
+
+    <h3 class="card-title">Weakness</h3>
+    <ul>
+      <li>Small datasets.</li>
+      <li>Advanced algorithms.</li>
+      <li>Infrastrutural replacement.</li>
+      <li>Task level parallelism.</li>
+      <li>Random data access.</li>
+      <li>Only map-reduce based computation.</li>
+      <li>No interactive shell.</li>
+      <li>Native support for Java only.</li>
+      <li>Relies on reading data from HDFS, which become a bottleneck.</li>
+    </ul>
+
+    <h3 class="card-title">Three layers of Hadoop</h3>
+    <ul>
+      <li>Data management and storage.</li>
+      <li>Data integration and processing.</li>
+      <li>Coordination and workflow management.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="hadoop-2">
+  <div class="card-body">
     <h2 class="card-title">Start with Hadoop</h2>
+    <p class="card-text"></p>
 <pre><code class="bash"># First, open etc/hadoop/hadoop-env.sh and add JAVA_HOME environment variable.
 # If permission error, do the following.
 cd ~/.ssh && ssh-keygen -t rsa -p""
@@ -210,12 +266,85 @@ hadoop fs -expunge</code></pre>
     <h2 class="card-title">Spark</h2>
     <p class="card-text"></p>
     <ul class="list-unstyled mb-0">
-      <li><a href="#spark-1">Start with Spark</a></li>
+      <li><a href="#spark-1">Start basic</a></li>
+      <li><a href="#spark-2">Start with Spark</a></li>
     </ul>
   </div>
 </div>
 
 <div class="card mb-4" id="spark-1">
+  <div class="card-body">
+    <h2 class="card-title">Start basic</h2>
+    <p class="card-text"></p>
+    <h3 class="card-title">Spark</h3>
+    <ul>
+      <li>Resilent distributed datasets (RDD)</li>
+      <li>Driver program creates RDD.</li>
+      <li>Create RDD -> apply transformation -> lazily evaluated and action performed.</li>
+      <ul>
+        <li>Transformations will wait until actions are performed.</li>
+        <li>Errors may show up in action stage, not in transformation stage.</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Narrow transformations</h3>
+    <ul>
+      <li>Take place in worker nodes locally.</li>
+      <li>map: apply function to each element of RDD.</li>
+      <li>flatMap: map then flatten output.</li>
+      <li>filter: keep only elements where function is true.</li>
+      <li>coalesce: reduce number of partitions.</li>
+    </ul>
+
+    <h3 class="card-title">Wide transformations</h3>
+    <ul>
+      <li>Processing depends on data residing in multiple partitions distributed across worker nodes,</li>
+      <li>groupByKey: (K, V) pairs => (K, list of all V)</li>
+    </ul>
+
+    <h3 class="card-title">Actions</h3>
+    <ul>
+      <li>collect: copy all elements to the driver.</li>
+      <li>take(n): copy first n elements.</li>
+      <li>reduce(func): aggregate elements with func.</li>
+      <li>saveAsTextFile(filename): save to local file or HDFS.</li>
+    </ul>
+
+    <h3 class="card-title">Spark SQL</h3>
+    <ul>
+      <li>Enables querying structured and unstructured data through Spark.</li>
+      <li>APIs for Scala, Java, Python to convert result into RDDs.</li>
+      <li>Deploy business intelligence tools over Spark.</li>
+    </ul>
+
+    <h3 class="card-title">Data frames</h3>
+    <ul>
+      <li>Looks just like tables in relational databases.</li>
+      <li>RDDs can be converted to data frames.</li>
+    </ul>
+
+    <h3 class="card-title">Spark streaming</h3>
+    <ul>
+      <li>sources: Kafka, Flume, HDFS, S3, etc.</li>
+    </ul>
+
+    <h3 class="card-title">Spark MLLib</h3>
+    <ul>
+      <li>machine learning library for Spark</li>
+    </ul>
+
+    <h3 class="card-title">Spark GraphX</h3>
+    <ul>
+      <li>API for graph computation.</li>
+      <li>triplets: views that logically join vertex and edge properties.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="spark-2">
   <div class="card-body">
     <h2 class="card-title">Start with Spark</h2>
 <pre><code class="bash">bin/spark-shell
