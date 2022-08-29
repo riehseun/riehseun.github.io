@@ -44,15 +44,13 @@
     <h2 class="card-title">Docker</h2>
     <ul class="list-unstyled mb-0">
       <li><a href="#docker-1">Docker basic</a></li>
-      <li><a href="#docker-2">Docker useful commands</a></li>
-      <li><a href="#docker-3">Writing Dockerfile</a></li>
+      <li><a href="#docker-2">Docker commands</a></li>
+      <li><a href="#docker-3">Dockerfile</a></li>
       <li><a href="#docker-4">Docker Examples</a></li>
       <li><a href="#docker-5">Docker exit codes</a></li>
       <li><a href="#docker-6">Configure Docker in Ubuntu</a></li>
       <li><a href="#docker-7">Docker storage</a></li>
-      <li><a href="#docker-8">Docker service</a></li>
       <li><a href="#docker-9">GPU accelerated docker</a></li>
-      <li><a href="#docker-10">/var/run/docker.sock</a></li>
     </ul>
   </div>
 </div>
@@ -60,45 +58,62 @@
 <div class="card mb-4" id="docker-1">
   <div class="card-body">
     <h2 class="card-title">Docker basic</h2>
-    <p class="card-text">Container - isolated environment to build/run software packages (container image is immutable)</p>
-    <p class="card-text">Container benefits</p>
+    <p class="card-text"></p>
+
     <ul>
-      <li>Efficient use of hardware since they run w/o VM</li>
-      <li>Isolation</li>
-      <li>Application portability and ease of delievery</li>
+      <li>Container is an isolated environment to build/run software packages. (container image is immutable)</li>
+      <li>Containters are highly configured processes (it is not lightweight). They leverage kernal features to isolate processes and shared OS kernal at the same time.</li>
+      <li>"cgroups" controls resources it can consume and namespaces control what process it can see.</li>
     </ul>
-    <p class="card-text">Containters are highly configured processes (it is not lightweight). They leverage kernal features to isolate processes and shared OS kernal at the same time. cgroupd controls resources it can consume and namespaces control what process can see</p>
-    <p class="card-text">Each layer represents each instruction in Dockerfile. all layers except the last one is read-only. docker image is consisted with a series of layers</p>
-    <p class="card-text">Docker lifecycle</p>
+
+    <h3 class="card-title">Container benefits</h3>
     <ul>
-      <li>CREATED -> (docker run) -> RUNNING -> (docker rm) -> REMOVE</li>
-      <li>RUNNING -> (docker stop) -> STOPPED, STOPPED -> (docker restart) -> RUNNING</li>
-      <li>RUNNING -> (docker pause) -> PAUSED, PAUSED -> (docker unpause) -> RUNNING</li>
+      <li>Efficient use of hardware since they run w/o VM.</li>
+      <li>Isolation.</li>
+      <li>Application portability and ease of delievery.</li>
     </ul>
-    <p class="card-text">Kernel</p>
+
+    <h3 class="card-title">Docker lifecycle</h3>
+    <img class="img-fluid" class="card-img-top" src="img/docker/docker3.png" style="width:500px;height:300px" alt="docker3">
+    <br>
+    <br>
+
+    <h3 class="card-title">Kernel</h3>
     <ul>
-      <li>Namespaces - isolation (like hypervisor for VMs) like pid, net, mnt, ipc, user</li>
-      <li>Control groups - setting the resource limits (for each container, for example)</li>
-      <li>Containers, although isolated, shared the single OS Kernel</li>
-      <li>Containers get their own namespaces</li>
+      <li>Namespaces: isolation (like hypervisor for VMs) like pid, net, mnt, ipc, user</li>
+      <li>Control groups: sets the resource limits (for each container, for example)</li>
+      <li>Containers, although isolated, share the single OS Kernel.</li>
+      <li>Containers get their own namespaces.</li>
     </ul>
-    <p class="card-text">Docker Engine</p>
+
+    <h3 class="card-title">Docker Engine</h3>
     <ul>
-      <li>Docker Engine - client-server implementation where they run on the same host and communicate via REST API</li>
-      <li>Docker client - provides docker CLI</li>
-      <li>Docker server - daemon named dockerd, responds to client request</li>
+      <li>Docker Engine: client-server implementation where they run on the same host and communicate via REST API.</li>
+      <li>Docker client: provides docker CLI.</li>
+      <li>Docker server: daemon named dockerd, responds to client request.</li>
+    </ul>
+
+    <h3 class="card-title">/var/run/docker.sock</h3>
+    <ul>
+      <li>Docker deamon listed this unix socket by default.</li>
+      <li>It is used to communicate with Docker deamon from within containers.</li>
+      <li>Containers need to "bind mount" /var/run/docker.sock file</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
-
+    Reference: <a href="Docker Architecture, Life Cycle of Docker Containers and Data Management">https://dev.to/docker/docker-architecture-life-cycle-of-docker-containers-and-data-management-1a9c</a>
   </div>
 </div>
 
 <div class="card mb-4" id="docker-2">
   <div class="card-body">
-    <h2 class="card-title">Docker useful commands</h2>
+    <h2 class="card-title">Docker commands</h2>
     <p class="card-text"></p>
-<pre><code class="bash">docker info
+<pre><code class="bash"># Check docker installation.
+docker info
+
+# See all containers in all states.
+docker ps -a
 
 # Builds Dockerfile and create new image.
 docker build -f &lt;Dockerfile_name&gt; -t &lt;Docker_image_name&gt; .
@@ -107,17 +122,20 @@ docker build -f &lt;Dockerfile_name&gt; -t &lt;Docker_image_name&gt; .
 docker tag &lt;image_name&gt;:&lt;tag&gt; &lt;registry_name&gt;/&lt;image_name&gt;:&lt;tag&gt;
 docker push &lt;registry_name&gt;/&lt;image_name&gt;:&lt;tag&gt;
 
-# See all containers in all states.
-docker ps -a
-
-# Stop all images, remove all images, and show images.
-docker stop $(docker ps --latest --quiet) && docker rm $(docker ps -a -f status=exited -q) && docker ps -a
-
 # Restart a container
-docker restart &lt;image_name&gt;
+docker restart &lt;image_name&gt;</code></pre>
 
-# Login to the container.
-docker exec -it &lt;container_name&gt; bash
+<pre><code class="bash"># Login to the container as root user.
+docker exec -u 0 -it &lt;container_name&gt; bash
+
+# Login to the latest container.
+docker exec -it $(docker ps --latest --quiet) bash
+
+# Flag to map container port to host port.
+--publish 80:8080
+
+# Map directories.-
+docker run -v &lt;host_directory&gt;:&lt;container_directory&gt; -u 0 -dit &lt;container_name&gt;
 
 docker run --rm \ # Clean up container's file system after container exists.
            --env VAR=value\ # Set environment variable.
@@ -127,20 +145,14 @@ docker run --rm \ # Clean up container's file system after container exists.
            --name=&lt;container_name&gt; \
            &lt;image_name&gt;:&lt;tag&gt;</code></pre>
 
-<pre><code class="bash"># Login to the container as root user.
-docker exec -u 0 -it &lt;container_name&gt; bash
-
-# Login to the latest container.
-docker exec -it $(docker ps --latest --quiet) bash
-
-# Map directories.
-docker run -v &lt;host_directory&gt;:&lt;container_directory&gt; -u 0 -dit &lt;container_name&gt;</code></pre>
-
 <pre><code class="bash"># Remove all exited containers.
 docker rm -f $(docker ps -a -f status=exited -q)
 
 # Remove all exited containers including its volumes.
-docker rm -vf $(docker ps -a -f status=exited -q)</code></pre>
+docker rm -vf $(docker ps -a -f status=exited -q)
+
+# Stop all images, remove all images, and show images.
+docker stop $(docker ps --latest --quiet) && docker rm $(docker ps -a -f status=exited -q) && docker ps -a</code></pre>
 
 <pre><code class="bash"># Remove an image.
 docker rmi &lt;Image_id&gt;
@@ -151,11 +163,14 @@ docker image prune -f
 # Remove unused (including dangling) images.
 docker image prune -f -a
 
+# Remove all unused containers, volumes, networks and images.
+docker system prune -a --volumes
+
 # Remove all images.
 docker rmi -f $(docker images -a -q)
 
-# Check if an image exists.
-if [[ "$(docker images -q myimage:mytag 2> /dev/null)" == "" ]]; then
+# Check if an image exists. (replace my_image and my_tage in the code)
+if [[ "$(docker images -q my_image:my_tag 2> /dev/null)" == "" ]]; then
   # if an image exists, do something
 fi</code></pre>
 
@@ -163,37 +178,40 @@ fi</code></pre>
 docker save &lt;image_name&gt;:&lt;tag&gt; | gzip > my_image.tar.gz
 
 # Import an image.
-docker load -i &lt;image_name&gt;.tar.gz</code></pre>
+docker load -i &lt;image_name&gt;.tar.gz
 
-<pre><code class="bash"># Tag an image.
-docker image tag &lt;image_id&gt; &lt;tag_name&gt;
+# Copy file from container to host.
+docker cp &lt;container_id&gt;:/container/path/file /host/path/</code></pre>
 
-# Remove all unused containers, volumes, networks and images.
-docker system prune -a --volumes
+<pre><code class="bash"># Assume docker-compose.yml exists.
 
-# Flag to map container port to host port.
---publish 80:8080
-
-# Assuming docker-compose.yml exists
-docker-compose up # Create images and run
+# Create images and run
+docker-compose up
 
 # Recreate images and run
 docker-compose stop $CONTAINER
 docker-compose rm -f $CONTAINER
 docker volume prune -f
 docker-compose create $CONTAINER
-docker-compose start $CONTAINER
+docker-compose start $CONTAINER</code></pre>
 
-docker inspect &lt;container_name&gt; # display container information
-docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' &lt;container_name&gt; # get the container IP
-docker inspect -f '{{.Name}} - {{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(docker ps -aq) # get All container IPs
+<pre><code class="bash"># Display container information.
+docker inspect &lt;container_name&gt;
 
-# Investigate docker logs
+# Get the container IP.
+docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' &lt;container_name&gt;
+
+# Get All container IPs.
+docker inspect -f '{{.Name}} - {{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(docker ps -aq)
+
+# Investigate docker logs.
 docker logs -f &lt;container_name&gt;
-journalctl -u docker.service
+journalctl -u docker.service</code></pre>
 
-# Copy file from container to host.
-docker cp &lt;container_id&gt;:/container/path/file /host/path/</code></pre>
+<pre><code class="bash"># Docker service.
+docker service ls
+docker service rm &lt;service name&gt;
+docker service rm inspect --pretty &lt;service id&gt;</code></pre>
   </div>
   <div class="card-footer text-muted">
 
@@ -202,29 +220,38 @@ docker cp &lt;container_id&gt;:/container/path/file /host/path/</code></pre>
 
 <div class="card mb-4" id="docker-3">
   <div class="card-body">
-    <h2 class="card-title">Writing Dockerfile</h2>
+    <h2 class="card-title">Dockerfile</h2>
     <p class="card-text"></p>
     <ul>
-      <li>FROM - pulls base image</li>
-      <li>WORKDIR - sets current working directory in container</li>
-      <li>COPY - copies files from host to container</li>
-      <li>RUN - executes commands in container</li>
-      <li>EXPOSE - open ports in container</li>
-      <li>ADD - similar to copy but has extra features such as local-only tar extraction. Should not be used fetch packages from remote URLs due to creating unnecessary layers (use wget and curl instead)</li>
-      <li>ENV - environment variables that can be accessed in running applications</li>
-      <li>ARG - environment variables that can be accessed in only during image creation</li>
-      <li>ENTRYPOINT - allows configuring container that will run as an executable</li>
-      <li>USER - set UID when running the image</li>
+      <li>Each layer represents each instruction in Dockerfile.</li>
+      <li>All layers except the last one is read-only.</li>
+      <li>Docker image is consisted with a series of layers</li>
     </ul>
+
+    <h3 class="card-title">Keywords</h3>
+    <ul>
+      <li>FROM - pulls base image.</li>
+      <li>WORKDIR - sets current working directory in container.</li>
+      <li>COPY - copies files from host to container.</li>
+      <li>RUN - executes commands in containe.r</li>
+      <li>EXPOSE - open ports in container.</li>
+      <li>ADD - similar to copy but has extra features such as local-only tar extraction. Should not be used fetch packages from remote URLs due to creating unnecessary layers. (use wget and curl instead)</li>
+      <li>ENV - environment variables that can be accessed in running applications.</li>
+      <li>ARG - environment variables that can be accessed in only during image creation.</li>
+      <li>ENTRYPOINT - allows configuring container that will run as an executable.</li>
+      <li>USER - set UID when running the image.</li>
+    </ul>
+
+    <h3 class="card-title">Examples</h3>
     <p class="card-text">Remove package manager cache and do not install user recommended packages.</p>
-<pre><code class="bash"># Example apt
+<pre><code class="bash"># Assume Ubuntu
 RUN apt-get update \
     && apt-get install --no-install-recommends \
        &lt;package&gt; \
     && rm -rf /var/lib/apt/list/*</code></pre>
+
     <p class="card-text">Use multi-stage build to remove build dependencies.</p>
-<pre><code class="bash"># Example
-FROM maven:3.6-jdk-8-alpine AS builder
+<pre><code class="bash">FROM maven:3.6-jdk-8-alpine AS builder
 WORKDIR /app
 COPY pom.xml .
 RUN mvn -e -B dependency:resolve
@@ -314,7 +341,7 @@ sudo systemctl restart docker</code></pre>
 "insecure-registries": [&lt;YOUR_REPO_ADDRESS_INCLUDING_PORT_NUMBER&gt;]
 }</code></pre>
     <p class="card-text">If you want to use secure repo with proper certificates, create this directory <strong>/etc/docker/cert.d/&lt;YOUR_REPO_ADDRESS&gt;</strong> and copy certificates to this directory</p>
-    <p class="card-text"><strong>Do docker login &lt;YOUR_REPO_ADDRESS&gt;</strong></p>
+    <p class="card-text">Do <strong>docker login &lt;YOUR_REPO_ADDRESS&gt;</strong></p>
     <p class="card-text">Finally, issue <strong>sudo service docker restart</strong></p>
   </div>
   <div class="card-footer text-muted">
@@ -338,19 +365,6 @@ grep -Fwf overlay.txt docker-mappings.txt</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://fabianlee.org/2021/04/08/docker-determining-container-responsible-for-largest-overlay-directories/">Docker: determining container responsible for largest overlay directories</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="docker-8">
-  <div class="card-body">
-    <h2 class="card-title">Docker service</h2>
-    <p class="card-text"></p>
-<pre><code class="bash">docker service ls
-docker service rm &lt;service name&gt;
-docker service rm inspect --pretty &lt;service id&gt;</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-
   </div>
 </div>
 
@@ -395,21 +409,6 @@ sudo ln -s /usr/libexe/docker/docker-runc-current /usr/bin/docker-runc</code></p
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://github.com/NVIDIA/nvidia-container-runtime">nvidia-container-runtime</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="docker-10">
-  <div class="card-body">
-    <h2 class="card-title">/var/run/docker.sock</h2>
-    <p class="card-text"></p>
-    <ul>
-      <li>Docker deamon listed this unix socket by default.</li>
-      <li>It is used to communicate with Docker deamon from within containers.</li>
-      <li>Containers need to "bind mount" /var/run/docker.sock file</li>
-    </ul>
-
-  <div class="card-footer text-muted">
-    Reference: <a href="https://betterprogramming.pub/about-var-run-docker-sock-3bfd276e12fd">Docker Tips : about /var/run/docker.sock</a>
   </div>
 </div>
 <!-- Docker END -->
