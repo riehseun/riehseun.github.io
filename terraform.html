@@ -795,6 +795,7 @@ aws autoscaling set-desired-capacity --auto-scaling-group-name $(terraform outpu
 # Make requests to check if instances are scaled.
 for i in `seq 1 5`; do curl $(terraform output -raw lb_endpoint); echo;  done
 
+# Clean up infrastructure.
 terraform destroy</code></pre>
 
   </div>
@@ -808,17 +809,156 @@ terraform destroy</code></pre>
     <h2 class="card-title"></h2>
     <p class="card-text"></p>
 
-    <h3 class="card-title"></h3>
-<pre><code class="terraform"></code></pre>
+    <h3 class="card-title">main.tf</h3>
+<pre><code class="terraform">provider "aws" {
+  region = var.region
+}
 
-    <h3 class="card-title"></h3>
-<pre><code class="terraform"></code></pre>
+data "aws_availability_zones" "available" {}
 
-<pre><code class="bash"></code></pre>
+# VPC and subnets.
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "2.77.0"
+
+  name                 = "education"
+  cidr                 = "10.0.0.0/16"
+  azs                  = data.aws_availability_zones.available.names
+  public_subnets       = ["10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"]  # Should avoid public subnets in production.
+  enable_dns_hostnames = true
+  enable_dns_support   = true
+}
+
+# Define subnets that RDS instance can be provisioned in.
+# This is an optional block.
+resource "aws_db_subnet_group" "education" {
+  name       = "education"
+  subnet_ids = module.vpc.public_subnets
+
+  tags = {
+    Name = "Education"
+  }
+}
+
+resource "aws_security_group" "rds" {
+  name   = "education_rds"
+  vpc_id = module.vpc.vpc_id
+
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "education_rds"
+  }
+}
+
+resource "aws_db_parameter_group" "education" {
+  name   = "education"
+  family = "postgres13"  # Must correspond to RDS engine version.
+
+  parameter {
+    name  = "log_connections"
+    value = "1"
+  }
+}
+
+resource "aws_db_instance" "education" {
+  identifier             = "education"
+  instance_class         = "db.t3.micro"
+  allocated_storage      = 5
+  engine                 = "postgres"
+  engine_version         = "13.1"
+  username               = "edu"
+  password               = var.db_password
+  db_subnet_group_name   = aws_db_subnet_group.education.name  # Optional. If not specified, RSD is provisioned in default VPC.
+  vpc_security_group_ids = [aws_security_group.rds.id]
+  parameter_group_name   = aws_db_parameter_group.education.name
+  publicly_accessible    = true  # Should be "false" in production.
+  skip_final_snapshot    = true
+}</code></pre>
+
+    <h3 class="card-title">variables.tf</h3>
+<pre><code class="terraform">variable "region" {
+  default     = "us-east-2"
+  description = "AWS region"
+}
+
+variable "db_password" {
+  description = "RDS root user password"
+  sensitive   = true
+}</code></pre>
+
+    <h3 class="card-title">outputs.tf</h3>
+<pre><code class="terraform">output "rds_hostname" {
+  description = "RDS instance hostname"
+  value       = aws_db_instance.education.address
+  sensitive   = true
+}
+
+output "rds_port" {
+  description = "RDS instance port"
+  value       = aws_db_instance.education.port
+  sensitive   = true
+}
+
+output "rds_username" {
+  description = "RDS instance root username"
+  value       = aws_db_instance.education.username
+  sensitive   = true
+}</code></pre>
+
+<pre><code class="bash">export TF_VAR_db_password="hashicorp"
+terraform init
+terraform apply
+
+# Verify configuration. Enter "hashicorp" when prompted.
+psql -h $(terraform output -raw rds_hostname) -p $(terraform output -raw rds_port) -U $(terraform output -raw rds_username) postgres</code></pre>
+
+    <h3 class="card-title">main.tf (existing)</h3>
+<pre><code class="terraform"># Create read replica such that data is asynchronously copied to the replica to serve read request. (To reduce load on primary DB) Add this to "main.tf".
+resource "aws_db_instance" "education_replica" {
+   name                   = "education-replica"
+   identifier             = "education-replica"
+   replicate_source_db    = aws_db_instance.education.identifier
+   instance_class         = "db.t3.micro"
+   apply_immediately      = true
+   publicly_accessible    = true
+   skip_final_snapshot    = true
+   vpc_security_group_ids = [aws_security_group.rds.id]
+   parameter_group_name   = aws_db_parameter_group.education.name
+}
+
+# Also, add "backup_retention_period = 1" to "aws_db_instance" in "main.tf".
+
+# Also, add this block to "outputs.tf".
+output "rds_replica_connection_parameters" {
+  description = "RDS replica instance connection parameters"
+  value       = "-h ${aws_db_instance.education_replica.address} -p ${aws_db_instance.education_replica.port} -U ${aws_db_instance.education_replica.username} postgres"
+}
+</code></pre>
+
+<pre><code class="bash">terraform apply
+
+# Use new endpoint to connect to read replica. Enter "hashicorp" when prompted.
+psql $(terraform output -raw rds_replica_connection_parameters)
+
+# Clean up infrastructure.
+terraform destroy</code></pre>
 
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://learn.hashicorp.com/tutorials/terraform/rds-upgrade?in=terraform/aws">Upgrade RDS Major Version</a> | Reference: <a href="https://learn.hashicorp.com/tutorials/terraform/aws-rds?in=terraform/aws">Manage AWS RDS Instances</a>
+    Reference: <a href="https://learn.hashicorp.com/tutorials/terraform/aws-rds?in=terraform/aws">Manage AWS RDS Instances</a>
   </div>
 </div>
 
@@ -828,12 +968,121 @@ terraform destroy</code></pre>
     <p class="card-text"></p>
 
     <h3 class="card-title"></h3>
-<pre><code class="terraform"></code></pre>
+<pre><code class="terraform"># Add this block to "main.tf"
+data "aws_default_tags" "current" {}
 
-    <h3 class="card-title"></h3>
-<pre><code class="terraform"></code></pre>
+# Add this field to resource "aws_autoscaling_group" in "main.tf"
+dynamic "tag" {
+  for_each = data.aws_default_tags.current.tags
+  content {
+    key                 = tag.key
+    value               = tag.value
+    propagate_at_launch = true
+  }
+}</code></pre>
 
-<pre><code class="bash"></code></pre>
+<pre><code class="bash">terraform apply -replace aws_autoscaling_group.example
+
+# Check tags of ASG.
+aws ec2 describe-instances --region us-east-2 --filter Name=tag:aws:autoscaling:groupName,Values=$(terraform output asg_id) | jq -r '.Reservations[].Instances[].Tags'</code></pre>
+
+    <h3 class="card-title">Override default tag</h3>
+<pre><code class="terraform"># Add this field to resource "aws_instance" in "main.tf"
+tags = {
+  Service   = "Custom"
+  ManagedBy = "Resource"
+}</code></pre>
+
+<pre><code class="bash">terraform apply
+
+# Check tags of ASG.
+aws ec2 describe-tags --region us-east-2 --filters "Name=resource-id,Values=$(terraform output instance_id)"
+
+# Clean up infrastructure.
+terraform destroy</code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://learn.hashicorp.com/tutorials/terraform/aws-default-tags?in=terraform/aws">Configure Default Tags for AWS Resources</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="terraform-">
+  <div class="card-body">
+    <h2 class="card-title"></h2>
+    <p class="card-text"></p>
+
+    <h3 class="card-title">main.tf</h3>
+<pre><code class="terraform">provider "aws" {
+  region = var.region
+
+  default_tags {
+    tags = {
+      Hashicorp-Learn = "aws-iam-policy"
+    }
+  }
+
+}
+
+resource "random_pet" "pet_name" {
+  length    = 3
+  separator = "-"
+}
+
+resource "aws_iam_user" "new_user" {
+  name = "new_user"
+}
+
+resource "aws_s3_bucket" "bucket" {
+  bucket = "${random_pet.pet_name.id}-bucket"
+
+  tags = {
+    Name        = "My bucket"
+    Environment = "Dev"
+  }
+}
+
+resource "aws_s3_bucket_acl" "bucket" {
+  bucket = aws_s3_bucket.bucket.id
+
+  acl = "private"
+}
+
+# Policy definition.
+resource "aws_iam_policy" "policy" {
+  name        = "${random_pet.pet_name.id}-policy"
+  description = "My test policy"
+  policy = data.aws_iam_policy_document.example.json
+}
+
+# Create JSON of IAM policy document.
+data "aws_iam_policy_document" "example" {
+  statement {
+    actions   = ["s3:ListAllMyBuckets"]
+    resources = ["arn:aws:s3:::*"]
+    effect = "Allow"
+  }
+  statement {
+    actions   = ["s3:*"]
+    resources = [aws_s3_bucket.bucket.arn]
+    effect = "Allow"
+  }
+}
+
+# Apply policy to users.
+resource "aws_iam_user_policy_attachment" "attachment" {
+  user       = aws_iam_user.new_user.name
+  policy_arn = aws_iam_policy.policy.arn
+}</code></pre>
+
+    <h3 class="card-title">outputs.tf</h3>
+<pre><code class="terraform">output "rendered_policy" {
+  value = data.aws_iam_policy_document.example.json
+}</pre></code>
+
+<pre><code class="bash">terraform init
+terraform apply
+terraform destroy</code></pre>
 
   </div>
   <div class="card-footer text-muted">
