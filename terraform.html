@@ -357,7 +357,7 @@ terraform output</code></pre>
 
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://learn.hashicorp.com/">Hashcorp learn</a>
+    Reference: <a href="https://learn.hashicorp.com/collections/terraform/aws-get-started">Get Started - AWS</a>
   </div>
 </div>
 
@@ -612,6 +612,289 @@ terraform destroy</code></pre>
   </div>
   <div class="card-footer text-muted">
     <a href="https://learn.hashicorp.com/tutorials/terraform/module-create?in=terraform/modules">Build and Use a Local Module</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="terraform-">
+  <div class="card-body">
+    <h2 class="card-title"></h2>
+    <p class="card-text"></p>
+
+    <h3 class="card-title">main.tf</h3>
+<pre><code class="terraform">provider "aws" {
+  region = "us-east-2"
+
+  default_tags {
+    tags = {
+      hashicorp-learn = "aws-asg"
+    }
+  }
+}
+
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
+# Create VPC with public subnets. Other resources depend on outputs of this module.
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "2.77.0"
+
+  name = "main-vpc"
+  cidr = "10.0.0.0/16"
+
+  azs                  = data.aws_availability_zones.available.names
+  public_subnets       = ["10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"]
+  enable_dns_hostnames = true
+  enable_dns_support   = true
+}
+
+data "aws_ami" "amazon-linux" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["amzn-ami-hvm-*-x86_64-ebs"]
+  }
+}
+
+# EC2 instance configuration that ASG will use.
+resource "aws_launch_configuration" "terramino" {
+  name_prefix     = "learn-terraform-aws-asg-"
+  image_id        = data.aws_ami.amazon-linux.id
+  instance_type   = "t2.micro"
+  user_data       = file("user-data.sh")  # Each instance will run this script at runtime.
+  security_groups = [aws_security_group.terramino_instance.id]
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+# ASG.
+resource "aws_autoscaling_group" "terramino" {
+  name                 = "terramino"
+  min_size             = 1
+  max_size             = 3
+  desired_capacity     = 1
+  launch_configuration = aws_launch_configuration.terramino.name
+  vpc_zone_identifier  = module.vpc.public_subnets
+
+  tag {
+    key                 = "Name"
+    value               = "HashiCorp Learn ASG - Terramino"
+    propagate_at_launch = true
+  }
+
+  # Ignore changes in "desired_capaciy"
+  # When the instances are scaled manually, "terraform plan" will undesirably scale down the
+  # instances based on the initial configuration.
+  lifecycle {
+    ignore_changes = [desired_capacity, target_group_arns]
+  }
+}
+
+# LB.
+resource "aws_lb" "terramino" {
+  name               = "learn-asg-terramino-lb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.terramino_lb.id]
+  subnets            = module.vpc.public_subnets
+}
+
+# How to handle HTTP requests on port 80.
+resource "aws_lb_listener" "terramino" {
+  load_balancer_arn = aws_lb.terramino.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.terramino.arn
+  }
+}
+
+# Collection of instances LB sends traffic to.
+resource "aws_lb_target_group" "terramino" {
+  name     = "learn-asg-terramino"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = module.vpc.vpc_id
+}
+
+# Link ASG to target group.
+resource "aws_autoscaling_attachment" "terramino" {
+  autoscaling_group_name = aws_autoscaling_group.terramino.id
+  alb_target_group_arn   = aws_lb_target_group.terramino.arn
+}
+
+# Security group for ASG.
+resource "aws_security_group" "terramino_instance" {
+  name = "learn-asg-terramino-instance"
+  ingress {
+    from_port       = 80
+    to_port         = 80
+    protocol        = "tcp"
+    security_groups = [aws_security_group.terramino_lb.id]  # Only accept requests forwarded by LB.
+  }
+
+  egress {
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
+    security_groups = [aws_security_group.terramino_lb.id]
+  }
+
+  vpc_id = module.vpc.vpc_id
+}
+
+# Security group for LB.
+resource "aws_security_group" "terramino_lb" {
+  name = "learn-asg-terramino-lb"
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  vpc_id = module.vpc.vpc_id
+}</code></pre>
+
+    <h3 class="card-title">outputs.tf</h3>
+<pre><code class="terraform">output "lb_endpoint" {
+  value = "https://${aws_lb.terramino.dns_name}"
+}
+
+output "application_endpoint" {
+  value = "https://${aws_lb.terramino.dns_name}/index.php"
+}
+
+output "asg_name" {
+  value = aws_autoscaling_group.terramino.name
+}</code></pre>
+
+<pre><code class="bash">terraform init
+terraform apply
+
+# Get ID of EC2 instance.
+curl $(terraform output -raw lb_endpoint)
+
+# Scale the instances.
+aws autoscaling set-desired-capacity --auto-scaling-group-name $(terraform output -raw asg_name) --desired-capacity 2
+
+# Make requests to check if instances are scaled.
+for i in `seq 1 5`; do curl $(terraform output -raw lb_endpoint); echo;  done
+
+terraform destroy</code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://learn.hashicorp.com/tutorials/terraform/aws-asg?in=terraform/aws">Manage AWS Auto Scaling Groups</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="terraform-">
+  <div class="card-body">
+    <h2 class="card-title"></h2>
+    <p class="card-text"></p>
+
+    <h3 class="card-title"></h3>
+<pre><code class="terraform"></code></pre>
+
+    <h3 class="card-title"></h3>
+<pre><code class="terraform"></code></pre>
+
+<pre><code class="bash"></code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://learn.hashicorp.com/tutorials/terraform/rds-upgrade?in=terraform/aws">Upgrade RDS Major Version</a> | Reference: <a href="https://learn.hashicorp.com/tutorials/terraform/aws-rds?in=terraform/aws">Manage AWS RDS Instances</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="terraform-">
+  <div class="card-body">
+    <h2 class="card-title"></h2>
+    <p class="card-text"></p>
+
+    <h3 class="card-title"></h3>
+<pre><code class="terraform"></code></pre>
+
+    <h3 class="card-title"></h3>
+<pre><code class="terraform"></code></pre>
+
+<pre><code class="bash"></code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://learn.hashicorp.com/tutorials/terraform/aws-iam-policy?in=terraform/aws">Create IAM Policies</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="terraform-">
+  <div class="card-body">
+    <h2 class="card-title"></h2>
+    <p class="card-text"></p>
+
+    <h3 class="card-title"></h3>
+<pre><code class="terraform"></code></pre>
+
+    <h3 class="card-title"></h3>
+<pre><code class="terraform"></code></pre>
+
+<pre><code class="bash"></code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://learn.hashicorp.com/tutorials/terraform/lambda-api-gateway?in=terraform/aws">Deploy Serverless Applications with AWS Lambda and API Gateway</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="terraform-">
+  <div class="card-body">
+    <h2 class="card-title"></h2>
+    <p class="card-text"></p>
+
+    <h3 class="card-title"></h3>
+<pre><code class="terraform"></code></pre>
+
+    <h3 class="card-title"></h3>
+<pre><code class="terraform"></code></pre>
+
+<pre><code class="bash"></code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://learn.hashicorp.com/tutorials/terraform/blue-green-canary-tests-deployments?in=terraform/aws">Use Application Load Balancers for Blue-Green and Canary Deployments</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="terraform-">
+  <div class="card-body">
+    <h2 class="card-title"></h2>
+    <p class="card-text"></p>
+
+    <h3 class="card-title"></h3>
+<pre><code class="terraform"></code></pre>
+
+    <h3 class="card-title"></h3>
+<pre><code class="terraform"></code></pre>
+
+<pre><code class="bash"></code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://learn.hashicorp.com/tutorials/terraform/eks?in=terraform/aws">Provision an EKS Cluster (AWS)</a>
   </div>
 </div>
 <!-- Terraform END -->
