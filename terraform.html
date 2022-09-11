@@ -1095,13 +1095,231 @@ terraform destroy</code></pre>
     <h2 class="card-title"></h2>
     <p class="card-text"></p>
 
-    <h3 class="card-title"></h3>
-<pre><code class="terraform"></code></pre>
+    <h3 class="card-title">hello-world/hello.js</h3>
+<pre><code class="terraform">module.exports.handler = async (event) => {
+  console.log('Event: ', event);
+  let responseMessage = 'Hello, World!';
 
-    <h3 class="card-title"></h3>
-<pre><code class="terraform"></code></pre>
+  return {
+    statusCode: 200,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      message: responseMessage,
+    }),
+  }
+}</code></pre>
 
-<pre><code class="bash"></code></pre>
+    <h3 class="card-title">main.tf</h3>
+<pre><code class="terraform">terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.0.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.1.0"
+    }
+    archive = {
+      source  = "hashicorp/archive"
+      version = "~> 2.2.0"
+    }
+  }
+
+  required_version = "~> 1.0"
+}
+
+provider "aws" {
+  region = var.aws_region
+}
+
+resource "random_pet" "lambda_bucket_name" {
+  prefix = "learn-terraform-functions"
+  length = 4
+}
+
+resource "aws_s3_bucket" "lambda_bucket" {
+  bucket = random_pet.lambda_bucket_name.id
+}
+
+resource "aws_s3_bucket_acl" "bucket_acl" {
+  bucket = aws_s3_bucket.lambda_bucket.id
+  acl    = "private"
+}
+
+# Create a zip archive.
+data "archive_file" "lambda_hello_world" {
+  type = "zip"
+
+  source_dir  = "${path.module}/hello-world"
+  output_path = "${path.module}/hello-world.zip"
+}
+
+# Upload the archive to S3.
+resource "aws_s3_object" "lambda_hello_world" {
+  bucket = aws_s3_bucket.lambda_bucket.id
+
+  key    = "hello-world.zip"
+  source = data.archive_file.lambda_hello_world.output_path
+
+  etag = filemd5(data.archive_file.lambda_hello_world.output_path)
+}
+
+# Configure Lambda to use bucket object.
+resource "aws_lambda_function" "hello_world" {
+  function_name = "HelloWorld"
+
+  s3_bucket = aws_s3_bucket.lambda_bucket.id
+  s3_key    = aws_s3_object.lambda_hello_world.key
+
+  runtime = "nodejs12.x"
+  handler = "hello.handler"
+
+  source_code_hash = data.archive_file.lambda_hello_world.output_base64sha256
+
+  role = aws_iam_role.lambda_exec.arn
+}
+
+# Store log messages from Lambda function.
+resource "aws_cloudwatch_log_group" "hello_world" {
+  name = "/aws/lambda/${aws_lambda_function.hello_world.function_name}"
+
+  retention_in_days = 30
+}
+
+# Allow Lambda to access resources.
+resource "aws_iam_role" "lambda_exec" {
+  name = "serverless_lambda"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Sid    = ""
+      Principal = {
+        Service = "lambda.amazonaws.com"
+      }
+      }
+    ]
+  })
+}
+
+# Attach policy to IAM.
+resource "aws_iam_role_policy_attachment" "lambda_policy" {
+  role       = aws_iam_role.lambda_exec.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+</code></pre>
+
+    <h3 class="card-title">outputs.tf</h3>
+<pre><code class="terraform">output "lambda_bucket_name" {
+  description = "Name of the S3 bucket used to store function code."
+
+  value = aws_s3_bucket.lambda_bucket.id
+}
+
+output "function_name" {
+  description = "Name of the Lambda function."
+
+  value = aws_lambda_function.hello_world.function_name
+}</code></pre>
+
+    <h3 class="card-title">variables.tf</h3>
+<pre><code class="terraform">variable "aws_region" {
+  description = "AWS region for all resources."
+
+  type    = string
+  default = "us-east-1"
+}</code></pre>
+
+    <h3 class="card-title">main.tf (existing)</h3>
+<pre><code class="terraform"># API Gateway is managed service for HTTP. Add these block to "main.tf".
+
+# Define API Gateway name.
+resource "aws_apigatewayv2_api" "lambda" {
+  name          = "serverless_lambda_gw"
+  protocol_type = "HTTP"
+}
+
+# Set up application stage. (Ex. test, staging, prod)
+resource "aws_apigatewayv2_stage" "lambda" {
+  api_id = aws_apigatewayv2_api.lambda.id
+
+  name        = "serverless_lambda_stage"
+  auto_deploy = true
+
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.api_gw.arn
+
+    format = jsonencode({
+      requestId               = "$context.requestId"
+      sourceIp                = "$context.identity.sourceIp"
+      requestTime             = "$context.requestTime"
+      protocol                = "$context.protocol"
+      httpMethod              = "$context.httpMethod"
+      resourcePath            = "$context.resourcePath"
+      routeKey                = "$context.routeKey"
+      status                  = "$context.status"
+      responseLength          = "$context.responseLength"
+      integrationErrorMessage = "$context.integrationErrorMessage"
+      }
+    )
+  }
+}
+
+# Configure API Gateway to use Lambda function.
+resource "aws_apigatewayv2_integration" "hello_world" {
+  api_id = aws_apigatewayv2_api.lambda.id
+
+  integration_uri    = aws_lambda_function.hello_world.invoke_arn
+  integration_type   = "AWS_PROXY"
+  integration_method = "POST"
+}
+
+# Map HTTP requests to Lambda function.
+resource "aws_apigatewayv2_route" "hello_world" {
+  api_id = aws_apigatewayv2_api.lambda.id
+
+  route_key = "GET /hello"
+  target    = "integrations/${aws_apigatewayv2_integration.hello_world.id}"
+}
+
+# Store access logs for API Gateway.
+resource "aws_cloudwatch_log_group" "api_gw" {
+  name = "/aws/api_gw/${aws_apigatewayv2_api.lambda.name}"
+
+  retention_in_days = 30
+}
+
+# Grant API Gateway permission to use Lambda function.
+resource "aws_lambda_permission" "api_gw" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.hello_world.function_name
+  principal     = "apigateway.amazonaws.com"
+
+  source_arn = "${aws_apigatewayv2_api.lambda.execution_arn}/*/*"
+}</code></pre>
+
+    <h3 class="card-title">outputs.tf (existing)</h3>
+<pre><code class="terraform"># Add this block to "outputs.tf".
+
+output "base_url" {
+  description = "Base URL for API Gateway stage."
+
+  value = aws_apigatewayv2_stage.lambda.invoke_url
+}</code></pre>
+
+<pre><code class="bash">terraform apply
+
+# Send request to API Gateway. (This invokes Lambda function)
+curl "$(terraform output -raw base_url)/hello"
+
+# Clean up infrastructure.
+terraform destroy</code></pre>
 
   </div>
   <div class="card-footer text-muted">
@@ -1114,17 +1332,180 @@ terraform destroy</code></pre>
     <h2 class="card-title"></h2>
     <p class="card-text"></p>
 
-    <h3 class="card-title"></h3>
-<pre><code class="terraform"></code></pre>
+    <h3 class="card-title">main.tf</h3>
+<pre><code class="terraform">provider "kubernetes" {
+  host                   = module.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+}
 
-    <h3 class="card-title"></h3>
-<pre><code class="terraform"></code></pre>
+provider "aws" {
+  region = var.region
+}
 
-<pre><code class="bash"></code></pre>
+data "aws_availability_zones" "available" {}
+
+locals {
+  cluster_name = "education-eks-${random_string.suffix.result}"
+}
+
+resource "random_string" "suffix" {
+  length  = 8
+  special = false
+}</code></pre>
+
+    <h3 class="card-title">version.tf</h3>
+<pre><code class="terraform">terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.15.0"
+    }
+
+    random = {
+      source  = "hashicorp/random"
+      version = "3.1.0"
+    }
+  }
+
+  required_version = "~> 1.2.0"
+}</code></pre>
+
+    <h3 class="card-title">vpc.tf</h3>
+<pre><code class="terraform">module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "3.14.2"
+
+  name = "education-vpc"
+
+  cidr = "10.0.0.0/16"
+  azs  = slice(data.aws_availability_zones.available.names, 0, 3)
+
+  private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+  public_subnets  = ["10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"]
+
+  enable_nat_gateway   = true
+  single_nat_gateway   = true
+  enable_dns_hostnames = true
+
+  public_subnet_tags = {
+    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+    "kubernetes.io/role/elb"                      = 1
+  }
+
+  private_subnet_tags = {
+    "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+    "kubernetes.io/role/internal-elb"             = 1
+  }
+}</code></pre>
+
+    <h3 class="card-title">eks-cluster.tf</h3>
+<pre><code class="terraform">module "eks" {
+  source  = "terraform-aws-modules/eks/aws"
+  version = "18.26.6"
+
+  cluster_name    = local.cluster_name
+  cluster_version = "1.22"
+
+  vpc_id     = module.vpc.vpc_id
+  subnet_ids = module.vpc.private_subnets
+
+  eks_managed_node_group_defaults = {
+    ami_type = "AL2_x86_64"
+
+    attach_cluster_primary_security_group = true
+
+    # Disabling and using externally provided security groups
+    create_security_group = false
+  }
+
+  eks_managed_node_groups = {
+    one = {
+      name = "node-group-1"
+
+      instance_types = ["t3.small"]
+
+      min_size     = 1
+      max_size     = 3
+      desired_size = 2
+
+      pre_bootstrap_user_data = <<-EOT
+      echo 'foo bar'
+      EOT
+
+      vpc_security_group_ids = [
+        aws_security_group.node_group_one.id
+      ]
+    }
+
+    two = {
+      name = "node-group-2"
+
+      instance_types = ["t3.medium"]
+
+      min_size     = 1
+      max_size     = 2
+      desired_size = 1
+
+      pre_bootstrap_user_data = <<-EOT
+      echo 'foo bar'
+      EOT
+
+      vpc_security_group_ids = [
+        aws_security_group.node_group_two.id
+      ]
+    }
+  }
+}</code></pre>
+
+    <h3 class="card-title">outputs.tf</h3>
+<pre><code class="terraform">output "cluster_id" {
+  description = "EKS cluster ID"
+  value       = module.eks.cluster_id
+}
+
+output "cluster_endpoint" {
+  description = "Endpoint for EKS control plane"
+  value       = module.eks.cluster_endpoint
+}
+
+output "cluster_security_group_id" {
+  description = "Security group ids attached to the cluster control plane"
+  value       = module.eks.cluster_security_group_id
+}
+
+output "region" {
+  description = "AWS region"
+  value       = var.region
+}
+
+output "cluster_name" {
+  description = "Kubernetes Cluster Name"
+  value       = local.cluster_name
+}
+</code></pre>
+
+    <h3 class="card-title">variables.tf</h3>
+<pre><code class="terraform">variable "region" {
+  description = "AWS region"
+  type        = string
+  default     = "us-east-2"
+}</code></pre>
+
+<pre><code class="bash">terraform init
+terraform apply
+
+# Configure kubectl.
+aws eks --region $(terraform output -raw region) update-kubeconfig --name $(terraform output -raw cluster_name)
+
+kubectl cluster-info
+kubectl get nodes
+
+# Clean up infrastructure.
+terraform destroy</code></pre>
 
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://learn.hashicorp.com/tutorials/terraform/blue-green-canary-tests-deployments?in=terraform/aws">Use Application Load Balancers for Blue-Green and Canary Deployments</a>
+    Reference: <a href="https://learn.hashicorp.com/tutorials/terraform/eks?in=terraform/aws">Provision an EKS Cluster (AWS)</a>
   </div>
 </div>
 
@@ -1133,17 +1514,249 @@ terraform destroy</code></pre>
     <h2 class="card-title"></h2>
     <p class="card-text"></p>
 
-    <h3 class="card-title"></h3>
-<pre><code class="terraform"></code></pre>
+    <h3 class="card-title">main.tf</h3>
+<pre><code class="terraform">provider "aws" {
+  region = var.region
+}
 
-    <h3 class="card-title"></h3>
-<pre><code class="terraform"></code></pre>
+data "aws_availability_zones" "available" {
+  state = "available"
+}
 
-<pre><code class="bash"></code></pre>
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "2.64.0"
+
+  name = "main-vpc"
+  cidr = var.vpc_cidr_block
+
+  azs             = data.aws_availability_zones.available.names
+  private_subnets = slice(var.private_subnet_cidr_blocks, 0, var.private_subnet_count)
+  public_subnets  = slice(var.public_subnet_cidr_blocks, 0, var.public_subnet_count)
+
+  enable_nat_gateway = false
+  enable_vpn_gateway = var.enable_vpn_gateway
+}
+
+module "app_security_group" {
+  source  = "terraform-aws-modules/security-group/aws//modules/web"
+  version = "3.17.0"
+
+  name        = "web-sg"
+  description = "Security group for web-servers with HTTP ports open within VPC"
+  vpc_id      = module.vpc.vpc_id
+
+  #   ingress_cidr_blocks = module.vpc.public_subnets_cidr_blocks
+  ingress_cidr_blocks = ["0.0.0.0/0"]
+}
+
+module "lb_security_group" {
+  source  = "terraform-aws-modules/security-group/aws//modules/web"
+  version = "3.17.0"
+
+  name        = "lb-sg"
+  description = "Security group for load balancer with HTTP ports open within VPC"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress_cidr_blocks = ["0.0.0.0/0"]
+}
+
+data "aws_ami" "amazon_linux" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+  }
+}
+
+resource "random_pet" "app" {
+  length    = 2
+  separator = "-"
+}
+
+# ALB.
+resource "aws_lb" "app" {
+  name               = "main-app-${random_pet.app.id}-lb"
+  internal           = false
+  load_balancer_type = "application"
+  subnets            = module.vpc.public_subnets
+  security_groups    = [module.lb_security_group.this_security_group_id]
+}
+
+resource "aws_lb_listener" "app" {
+  load_balancer_arn = aws_lb.app.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    forward {
+      target_group {
+        arn    = aws_lb_target_group.blue.arn
+        weight = lookup(local.traffic_dist_map[var.traffic_distribution], "blue", 100)
+      }
+
+      target_group {
+        arn    = aws_lb_target_group.green.arn
+        weight = lookup(local.traffic_dist_map[var.traffic_distribution], "green", 0)
+      }
+
+      stickiness {
+        enabled  = false
+        duration = 1
+      }
+    }
+  }
+}</code></pre>
+
+    <h3 class="card-title">blue.tf</h3>
+<pre><code class="terraform">resource "aws_instance" "blue" {
+  count = var.enable_blue_env ? var.blue_instance_count : 0
+
+  ami                    = data.aws_ami.amazon_linux.id
+  instance_type          = "t2.micro"
+  subnet_id              = module.vpc.public_subnets[count.index % length(module.vpc.public_subnets)]
+  vpc_security_group_ids = [module.app_security_group.this_security_group_id]
+  user_data = templatefile("${path.module}/init-script.sh", {
+    file_content = "version 1.0 - #${count.index}"
+  })
+
+  tags = {
+    Name = "version-1.0-${count.index}"
+  }
+}
+
+resource "aws_lb_target_group" "blue" {
+  name     = "blue-tg-${random_pet.app.id}-lb"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = module.vpc.vpc_id
+
+  health_check {
+    port     = 80
+    protocol = "HTTP"
+    timeout  = 5
+    interval = 10
+  }
+}
+
+resource "aws_lb_target_group_attachment" "blue" {
+  count            = length(aws_instance.blue)
+  target_group_arn = aws_lb_target_group.blue.arn
+  target_id        = aws_instance.blue[count.index].id
+  port             = 80
+}</code></pre>
+
+    <h3 class="card-title">green.tf</h3>
+<pre><code class="terraform">resource "aws_instance" "green" {
+  count = var.enable_green_env ? var.green_instance_count : 0
+
+  ami                    = data.aws_ami.amazon_linux.id
+  instance_type          = "t2.micro"
+  subnet_id              = module.vpc.public_subnets[count.index % length(module.vpc.public_subnets)]
+  vpc_security_group_ids = [module.app_security_group.this_security_group_id]
+  user_data = templatefile("${path.module}/init-script.sh.tftpl", {
+    file_content = "version 1.1 - #${count.index}"
+  })
+
+  tags = {
+    Name = "green-${count.index}"
+  }
+}
+
+resource "aws_lb_target_group" "green" {
+  name     = "green-tg-${random_pet.app.id}-lb"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = module.vpc.vpc_id
+
+  health_check {
+    port     = 80
+    protocol = "HTTP"
+    timeout  = 5
+    interval = 10
+  }
+}
+
+resource "aws_lb_target_group_attachment" "green" {
+  count            = length(aws_instance.green)
+  target_group_arn = aws_lb_target_group.green.arn
+  target_id        = aws_instance.green[count.index].id
+  port             = 80
+}</code></pre>
+
+    <h3 class="card-title">variables.tf</h3>
+<pre><code class="terraform">output "lb_dns_name" {
+  value = aws_lb.app.dns_name
+}
+
+variable "enable_green_env" {
+  description = "Enable green environment"
+  type        = bool
+  default     = true
+}
+
+variable "green_instance_count" {
+  description = "Number of instances in green environment"
+  type        = number
+  default     = 2
+}
+
+locals {
+  traffic_dist_map = {
+    blue = {
+      blue  = 100
+      green = 0
+    }
+    blue-90 = {
+      blue  = 90
+      green = 10
+    }
+    split = {
+      blue  = 50
+      green = 50
+    }
+    green-90 = {
+      blue  = 10
+      green = 90
+    }
+    green = {
+      blue  = 0
+      green = 100
+    }
+  }
+}
+
+variable "traffic_distribution" {
+  description = "Levels of traffic distribution"
+  type        = string
+}</code></pre>
+
+<pre><code class="bash">terraform apply -var 'traffic_distribution=blue-90'
+
+# Verify canary's traffic.
+for i in `seq 1 10`; do curl $(terraform output -raw lb_dns_name); done
+
+# Increase traffic to green.
+terraform apply -var 'traffic_distribution=split'
+
+# Verify increased traffic.
+for i in `seq 1 10`; do curl $(terraform output -raw lb_dns_name); done
+
+# Promote green.
+terraform apply -var 'traffic_distribution=green'
+
+# Verify LB traffic.
+for i in `seq 1 5`; do curl $(terraform output -raw lb_dns_name); done
+
+# Scale down blue.
+terraform apply -var 'traffic_distribution=green' -var 'enable_blue_env=false'</code></pre>
 
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://learn.hashicorp.com/tutorials/terraform/eks?in=terraform/aws">Provision an EKS Cluster (AWS)</a>
+    Reference: <a href="https://learn.hashicorp.com/tutorials/terraform/blue-green-canary-tests-deployments?in=terraform/aws">Use Application Load Balancers for Blue-Green and Canary Deployments</a>
   </div>
 </div>
 <!-- Terraform END -->
