@@ -101,7 +101,7 @@ terraform --version</pre></code>
 
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://learn.hashicorp.com/">Hashcorp learn</a> | <a href="https://learn.hashicorp.com/tutorials/terraform/module">Modules</a>
+    Reference: <a href="https://learn.hashicorp.com/collections/terraform/aws-get-started/">Get Started - AWS</a> | <a href="https://learn.hashicorp.com/tutorials/terraform/module">Modules</a>
   </div>
 </div>
 
@@ -313,7 +313,7 @@ resource "google_storage_notification" "notification" {
 export AWS_SECRET_ACCESS_KEY=</code></pre>
 
     <h3 class="card-title">main.tf</h3>
-<pre><code class="bash">terraform {
+<pre><code class="terraform">terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -337,8 +337,8 @@ resource "aws_instance" "app_server" {
   }
 }</code></pre>
 
-<h3 class="card-title">variable.tf</h3>
-<pre><code class="bash">variable "instance_name" {
+    <h3 class="card-title">variable.tf</h3>
+<pre><code class="terraform">variable "instance_name" {
   description = "Value of the Name tag for the EC2 instance"
   type        = string
   default     = "ExampleAppServerInstance"
@@ -366,11 +366,252 @@ terraform output</code></pre>
     <h2 class="card-title"></h2>
     <p class="card-text"></p>
 
+    <h3 class="card-title">main.tf</h3>
+<pre><code class="terraform"># Configure AWS provider.
+provider "aws" {
+  region = "us-west-2"
 
+  default_tags {
+    tags = {
+      hashicorp-learn = "module-use"
+    }
+  }
+}
+
+# Provision networking resources. (VPC, subnets, internet, NAT gateways)
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "3.14.0"
+
+  name = var.vpc_name
+  cidr = var.vpc_cidr
+
+  azs             = var.vpc_azs
+  private_subnets = var.vpc_private_subnets
+  public_subnets  = var.vpc_public_subnets
+
+  enable_nat_gateway = var.vpc_enable_nat_gateway
+
+  tags = var.vpc_tags
+}
+
+# Privision instances.
+module "ec2_instances" {
+  source  = "terraform-aws-modules/ec2-instance/aws"
+  version = "3.5.0"
+  count   = 2
+
+  name = "my-ec2-cluster"
+
+  ami                    = "ami-0c5204531f799e0c6"
+  instance_type          = "t2.micro"
+  vpc_security_group_ids = [module.vpc.default_security_group_id]
+  subnet_id              = module.vpc.public_subnets[0]
+
+  tags = {
+    Terraform   = "true"
+    Environment = "dev"
+  }
+}</code></pre>
+
+    <h3 class="card-title">variable.tf</h3>
+<pre><code class="terraform">variable "vpc_name" {
+  description = "Name of VPC"
+  type        = string
+  default     = "example-vpc"
+}
+
+variable "vpc_cidr" {
+  description = "CIDR block for VPC"
+  type        = string
+  default     = "10.0.0.0/16"
+}
+
+variable "vpc_azs" {
+  description = "Availability zones for VPC"
+  type        = list(string)
+  default     = ["us-west-2a", "us-west-2b", "us-west-2c"]
+}
+
+variable "vpc_private_subnets" {
+  description = "Private subnets for VPC"
+  type        = list(string)
+  default     = ["10.0.1.0/24", "10.0.2.0/24"]
+}
+
+variable "vpc_public_subnets" {
+  description = "Public subnets for VPC"
+  type        = list(string)
+  default     = ["10.0.101.0/24", "10.0.102.0/24"]
+}
+
+variable "vpc_enable_nat_gateway" {
+  description = "Enable NAT gateway for VPC"
+  type        = bool
+  default     = true
+}
+
+variable "vpc_tags" {
+  description = "Tags to apply to resources created by VPC module"
+  type        = map(string)
+  default = {
+    Terraform   = "true"
+    Environment = "dev"
+  }
+}</code></pre>
+
+    <h3 class="card-title">outputs.tf</h3>
+<pre><code class="terraform">output "vpc_public_subnets" {
+  description = "IDs of the VPC's public subnets"
+  value       = module.vpc.public_subnets
+}
+
+output "ec2_instance_public_ips" {
+  description = "Public IP addresses of EC2 instances"
+  value       = module.ec2_instances[*].public_ip
+}</code></pre>
 
   </div>
   <div class="card-footer text-muted">
+    <a href="https://learn.hashicorp.com/tutorials/terraform/module-use?in=terraform/modules">Use Modules from the Registry</a>
+  </div>
+</div>
 
+<div class="card mb-4" id="terraform-">
+  <div class="card-body">
+    <h2 class="card-title"></h2>
+    <p class="card-text"></p>
+
+    <h3 class="card-title">main.tf</h3>
+<pre><code class="terraform"># Create a public S3 bucket which hosts a website.
+# Assuming parent modules has "provider" block, there is no "provider" block in this configuration.
+resource "aws_s3_bucket" "s3_bucket" {
+  bucket = var.bucket_name
+
+  tags = var.tags
+}
+
+resource "aws_s3_bucket_website_configuration" "s3_bucket" {
+  bucket = aws_s3_bucket.s3_bucket.id
+
+  index_document {
+    suffix = "index.html"
+  }
+
+  error_document {
+    key = "error.html"
+  }
+}
+
+resource "aws_s3_bucket_acl" "s3_bucket" {
+  bucket = aws_s3_bucket.s3_bucket.id
+
+  acl = "public-read"
+}
+
+resource "aws_s3_bucket_policy" "s3_bucket" {
+  bucket = aws_s3_bucket.s3_bucket.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "PublicReadGetObject"
+        Effect    = "Allow"
+        Principal = "*"
+        Action    = "s3:GetObject"
+        Resource = [
+          aws_s3_bucket.s3_bucket.arn,
+          "${aws_s3_bucket.s3_bucket.arn}/*",
+        ]
+      },
+    ]
+  })
+}</code></pre>
+
+    <h3 class="card-title">variable.tf</h3>
+<pre><code class="terraform">variable "bucket_name" {
+  description = "Name of the s3 bucket. Must be unique."
+  type        = string
+}
+
+variable "tags" {
+  description = "Tags to set on the bucket."
+  type        = map(string)
+  default     = {}
+}
+</code></pre>
+
+    <h3 class="card-title">outputs.tf</h3>
+<pre><code class="terraform">output "arn" {
+  description = "ARN of the bucket"
+  value       = aws_s3_bucket.s3_bucket.arn
+}
+
+output "name" {
+  description = "Name (id) of the bucket"
+  value       = aws_s3_bucket.s3_bucket.id
+}
+
+output "domain" {
+  description = "Domain name of the bucket"
+  value       = aws_s3_bucket_website_configuration.s3_bucket.website_domain
+}</code></pre>
+
+    <h3 class="card-title">main.tf (at the root)</h3>
+<pre><code class="terraform"># Add this block to an existing "main.tf" at the root.
+module "website_s3_bucket" {
+  source = "./modules/aws-s3-static-website-bucket"
+
+  bucket_name = "<UNIQUE BUCKET NAME>"
+
+  tags = {
+    Terraform   = "true"
+    Environment = "dev"
+  }
+}</code></pre>
+
+    <h3 class="card-title">outputs.tf (at the root)</h3>
+<pre><code class="terraform"># Add this block to an existing "outputs.tf" at the root.
+output "vpc_public_subnets" {
+  description = "IDs of the VPC's public subnets"
+  value       = module.vpc.public_subnets
+}
+
+output "ec2_instance_public_ips" {
+  description = "Public IP addresses of EC2 instances"
+  value       = module.ec2_instances.public_ip
+}
+
+output "website_bucket_arn" {
+  description = "ARN of the bucket"
+  value       = module.website_s3_bucket.arn
+}
+
+output "website_bucket_name" {
+  description = "Name (id) of the bucket"
+  value       = module.website_s3_bucket.name
+}
+
+output "website_bucket_domain" {
+  description = "Domain name of the bucket"
+  value       = module.website_s3_bucket.domain
+}</code></pre>
+
+    <pre><code class="bash">terraform init
+terraform apply
+
+# Upload files to S3 bucket.
+# Website can be accessed at https://&lt;bucket_name&lt;.s3-us-west-2.amazonaws.com/index.html
+aws s3 cp modules/aws-s3-static-website-bucket/www/ s3://$(terraform output -raw website_bucket_name)/ --recursive
+
+# Clean up website and infrastructure.
+aws s3 rm s3://$(terraform output -raw website_bucket_name)/ --recursive
+terraform destroy</code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://learn.hashicorp.com/tutorials/terraform/module-create?in=terraform/modules">Build and Use a Local Module</a>
   </div>
 </div>
 <!-- Terraform END -->
