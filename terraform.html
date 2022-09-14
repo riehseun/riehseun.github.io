@@ -1759,6 +1759,208 @@ terraform apply -var 'traffic_distribution=green' -var 'enable_blue_env=false'</
     Reference: <a href="https://learn.hashicorp.com/tutorials/terraform/blue-green-canary-tests-deployments?in=terraform/aws">Use Application Load Balancers for Blue-Green and Canary Deployments</a>
   </div>
 </div>
+
+<div class="card mb-4" id="terraform-">
+  <div class="card-body">
+    <h2 class="card-title"></h2>
+    <p class="card-text"></p>
+
+    <h3 class="card-title">main.tf</h3>
+<pre><code class="terraform">terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.16"
+    }
+  }
+
+  required_version = ">= 1.2.0"
+}
+
+provider "aws" {
+  region  = "us-east-1"
+}
+
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "3.14.0"
+
+  name = var.vpc_name
+  cidr = var.vpc_cidr  # IP address range to use
+  azs = var.vpc_azs  # Availability zones.
+
+  private_subnets = var.vpc_private_subnets
+
+  tags = var.vpc_tags
+}
+
+resource "aws_security_group" "rds" {
+  name   = "mysql_vpc_sec_group"
+  vpc_id = module.vpc.vpc_id
+
+  ingress {
+    from_port   = 3306  # Port for MySQL
+    to_port     = 3306
+    protocol    = "tcp"
+    cidr_blocks = var.allowed_public_ip
+  }
+
+  egress {
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "mysql_migration"
+  }
+}
+
+resource "aws_db_parameter_group" "mysql_migration" {
+  name   = "mysql-migration"
+  family = "mysql8.0"  # Must correspond to RDS engine version.
+}
+
+resource "aws_db_subnet_group" "mysql_migration" {
+  name       = "mysql_migration"
+  subnet_ids = module.vpc.private_subnets
+
+  tags = {
+    Name = "mysql_migration"
+  }
+}
+
+# MySQL instance.
+resource "aws_db_instance" "mysql_migration" {
+  identifier             = "mysql-migration"
+  instance_class         = "db.t3.micro"
+  allocated_storage      = 5
+  engine                 = "mysql"
+  engine_version         = "8.0.28"
+  username               = "mysqlusername"
+  password               = var.db_password
+  db_subnet_group_name   = aws_db_subnet_group.mysql_migration.name  # Optional. If not specified, RSD is provisioned in default VPC.
+  vpc_security_group_ids = [aws_security_group.rds.id]
+  parameter_group_name   = aws_db_parameter_group.mysql_migration.name
+  publicly_accessible    = false
+  skip_final_snapshot    = true
+
+  # Import data that already exists in S3 bucket.
+  s3_import {
+    source_engine         = "mysql"
+    source_engine_version = "8.0.28"
+    bucket_name           = "my_bucket"
+    bucket_prefix         = ""
+    ingestion_role        = aws_iam_role.mysql_migration.arn
+  }
+}
+
+# Principle assumes an IAM role.
+resource "aws_iam_role" "mysql_migration" {
+  name = "mysql_migration"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Sid    = ""
+      Principal = {
+        Service = "rds.amazonaws.com"
+      }
+      }
+    ]
+  })
+}
+
+# Define policy for migrating data from S3 bucket.
+resource "aws_iam_policy" "policy" {
+  name        = "mysql_migration"
+  description = "Mysql policy"
+
+  # Terraform's "jsonencode" function converts a
+  # Terraform expression result to valid JSON syntax.
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:ListBucket",
+          "s3:GetBucketLocation"
+        ]
+        Resource = "arn:aws:s3:::lane-devops-pairing-exercise-bucket"
+      },
+      {
+        Effect = "Allow",
+        Action = [
+          "s3:GetObject"
+        ],
+        Resource = "arn:aws:s3:::lane-devops-pairing-exercise-bucket/*"
+      }
+    ]
+  })
+}
+
+# Attach policy to IAM role.
+resource "aws_iam_role_policy_attachment" "mysql_policy" {
+  role       = aws_iam_role.mysql_migration.name
+  policy_arn = aws_iam_policy.policy.arn
+}</code></pre>
+
+    <h3 class="card-title">variable.tf</h3>
+<pre><code class="terraform">variable "vpc_name" {
+  description = ""
+  type        = string
+  default     = "mysql_vpc"
+}
+
+variable "vpc_cidr" {
+  description = ""
+  type        = string
+  default     = "10.0.0.0/16"
+}
+
+variable "vpc_azs" {
+  description = ""
+  type        = list(string)
+  default     = ["us-east-1a", "us-east-1b", "us-east-1c"]
+}
+
+variable "vpc_private_subnets" {
+  description = ""
+  type        = list(string)
+  default     = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+}
+
+variable "db_password" {
+  description = ""
+  type        = string
+  default     = "mysql"
+}
+
+variable "allowed_public_ip" {
+  description = ""
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
+variable "vpc_tags" {
+  description = ""
+  type        = map(string)
+  default     = { "name": "mysql_vpc" }
+}
+</code></pre>
+
+    <h3 class="card-title">outputs.tf</h3>
+<pre><code class="terraform"></code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
 <!-- Terraform END -->
 
 </div> <!-- /.col-md-12 -->
