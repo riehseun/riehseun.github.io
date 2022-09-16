@@ -120,6 +120,7 @@ my_set = set()</code></pre>
       <li>Expllore aggressively, only backtrack when necessary.</li>
       <li>O(n+m) using stack.</li>
     </ul>
+
 <pre><code class="python">def dfs(start_node, graph):
     stack = []
     stack.append(start_node)
@@ -135,11 +136,72 @@ my_set = set()</code></pre>
                     explored[next_node] = True
                     stack.append(next_node)</code></pre>
 
+    <h4 class="card-title">Topological ordering</h4>
+    <ul>
+      <li>Label f on nodes of G such that</li>
+      <ul>
+        <li>f(v)'s are the set {1,2,...,n}.</li>
+        <li>(u,v) \in G => f(n) less than or equal to f(v).</li>
+      </ul>
+      <li>Let v a sink vertex of G (every directed graph has a sink vertex).</li>
+      <li>Set f(v) = n.</li>
+      <li>Recurse on G - {v}.</li>
+      <li>If G has directed cycle, then there is no topological ordering.</li>
+      <li>If G does not have directed cycle, then computes topological ordering in O(m+n).</li>
+    </ul>
+
+<pre><code class="python"># DFS_loop(graph G)
+#     mark all nodes unexplored
+#     current_label = n # keep track of ordering
+#     for each vertext v in G
+#         if v not explored
+#             DFS(G,v)
+
+# DFS(graph G, start vertex s)
+#     mark s as explored
+#     for every edge (s, v)
+#         if v is unexplored
+#             mark v explored
+#             DFS (G, v)
+#     set f(s) = current_label
+#     current_label--</code></pre>
+
+    <h4 class="card-title">Strongly connected components</h4>
+    <ul>
+      <li>There exist path u to v and v to u in graph G.</li>
+      <li>Kosaraju's two pass algorithm</li>
+      <ul>
+        <li>Compute SCC in O(m+n).</li>
+        <li>Let G' = G with all arcs reversed.</li>
+        <li>Run DFS_loop on G' (compute magical ordering of nodes)</li>
+        <li>Run DFS_loop on G (compute strongly connected component one by one)</li>
+      </ul>
+    </ul>
+
+<pre><code class="python"># DFS_loop(graph G)
+#     global variable t=0 # number of nodes processed so far
+#     global variable s=null # current source vertex
+#     assumes nodes labelled 1 to n
+#     for i = n to 1
+#         if i not explored
+#             s = i
+#             DFS(G, i)
+
+# DFS(graph G, node i)
+#     mark i as explored
+#     set leader(i) = node s
+#     for each arc (i,j) in G
+#         if j not explored
+#             DFS(G, j)
+#     t++
+#     set f(i) = t # ith finishing time</code></pre>
+
     <h3 class="card-title">BFS</h3>
     <ul>
       <li>Explore ndoes in "layers".</li>
       <li>O(n+m) using queue.</li>
     </ul>
+
 <pre><code class="python">from collections import deque
 
 def bfs(start_node, graph):
@@ -157,6 +219,30 @@ def bfs(start_node, graph):
                     explored[next_node] = True
                     queue.append(next_node)</code></pre>
 
+    <h4 class="card-title">Shortest path</h4>
+    <ul>
+      <li>Compute dist(v), the fewest number of edges on path from s to v.</li>
+      <li>Assumption: every edge has length of 1.</li>
+      <li>Extra code to BFS.</li>
+    </ul>
+
+<pre><code class="python"># initialize dist(v): 0 if v=s, large number if v != s
+# when considering edge (v,w)
+#   if w unexplored, then set dist(w) = dist(v) + 1</code></pre>
+
+    <h4 class="card-title">Undirected connectivity</h4>
+    <ul>
+      <li>Let G(V,E) undirected graph.</li>
+      <li>Connected component = pieces of G.</li>
+      <li>Compute all connected components.</li>
+    </ul>
+
+<pre><code class="python"># initalize: all nodes unexplored
+# assume labelled 1 to n
+# for i = 1 to n
+#     if i not explored # in some previsou BFS
+#         BFS(G, i) # discovers precisely i's connected component</code></pre>
+
   </div>
   <div class="card-footer text-muted">
 
@@ -167,11 +253,136 @@ def bfs(start_node, graph):
   <div class="card-body">
     <h2 class="card-title">Tree</h2>
     <p class="card-text"></p>
+
 <pre><code class="python">class TreeNode(object):
     def __init__(self, val=0, left=None, right=None):
         self.val = val
         self.left = left
         self.right = right</code></pre>
+
+    <h3 class="card-title">Heap (priority queue)</h3>
+    <ul>
+      <li>Perfectly balanced tree.</li>
+      <li>Root element must have the minimum key.</li>
+      <li>Runtime</li>
+      <ul>
+        <li>Insert (add to heap): O(nlogn).</li>
+        <li>Extract (remove an element with minimum key): O(nlogn).</li>
+        <li>Heapify (n batched inserts): O(n).</li>
+        <li>Delete: O(nlogn).</li>
+      </ul>
+    </ul>
+
+<pre><code class="python"># Insert(key k)
+#     stick k at the end of last level
+#     bubble-up k until k's parent <= k</code></pre>
+
+<pre><code class="python"># Extract-Min
+#     delete root
+#     move last node to new root
+#     bubble-down k until k's parent <= k</code></pre>
+
+    <h3 class="card-title">Binary search tree</h3>
+    <ul>
+      <li>Exactly one node per key.</li>
+      <li>Each node has</li>
+      <ul>
+        <li>Left child pointer</li>
+        <li>Right child pointer</li>
+        <li>Parent</li>
+      </ul>
+      <li>All nodes left on node X are less than X.</li>
+      <li>All nodes right on node X are greater than X.</li>
+      <li>Many possible trees for a set of keys.</li>
+      <li>Height could be anywhere from log_{2}^{n} to n.</li>
+      <li>Generally operations are O(height).</li>
+    </ul>
+
+<pre><code class="python"># Search(key k)
+#     start at the root
+#     traverse left (if k < key at current node) or right (if k > key at current node) child pointers as needed
+#     return node with key k or NULL, as appropriate</code></pre>
+
+<pre><code class="python"># Insert(key k)
+#     start at the root
+#     do search (which will return NULL)
+#     rewire final NULL pointer to point to new node with key k</code></pre>
+
+<pre><code class="python"># Min/Max
+#     start at the root
+#     follow left (min case) or right (max case) until the bottom (return last key found)</code></pre>
+
+<pre><code class="python"># Pred(key k)
+#     easy case: if k's left subtree nonempty, return max key in left subtree
+#     otherwise: follow parent pointers until you get to a key less than k</code></pre>
+
+<pre><code class="python"># Inorder traversal
+#     to print out keys in increasing order
+#     let r = root, Tr = right subtree, Tl = left subtree
+#     recurse on Tl
+#         by recursion, prints out keys of TL in increasing order
+#     print out r's key
+#     recurse on Tr
+#         by recursion, prints out keys of TR in increasing order</code></pre>
+
+<pre><code class="python"># Delete(key k)
+#     search for k
+#     if k has no children
+#         delete k
+#     k has one child
+#         delete k, and put child under k's parent
+#     k has two children
+#         compute k's predecessor l
+#             for example, traverse k's (non-NULL) left child pointer, then right child pointers until no longer possible
+#         swap k and l
+#         delete k</code></pre>
+
+<pre><code class="python"># Select(order statistic i)
+#     store a little bit of extra info at each tree node about the tree itself
+#     start at root x, with children y and z
+#     let a = size(y) # a = 0 if x has no left child
+#     if a = i-1
+#         return x's key
+#     if a >= i
+#         recurse to compute ith order statistic on new root y
+#     if a < i-1
+#         recurse to compute (i-a-1)th order statistic on new root z</code></pre>
+
+    <h3 class="card-title">Balanced search tree (sorted array with fast insert & delete)</h3>
+    <ul>
+      <li>Search: O(logn).</li>
+      <li>Select: O(logn).</li>
+      <li>Min/Max: O(logn).</li>
+      <li>Pred/Succ: O(logn).</li>
+      <li>Rank: O(logn).</li>
+      <li>Output in sorted order: O(n).</li>
+      <li>Insert/Delete: O(logn).</li>
+    </ul>
+
+    <h4 class="card-title">Red-Black tree</h4>
+    <ul>
+      <li>Each node red or black.</li>
+      <li>Root is black.</li>
+      <li>No 2 reds in a row. (red node => only black children)</li>
+      <li>Every root-NULL path (unsuccessful search) has the same number of black nodes.</li>
+      <li>Height guarantee.</li>
+      <ul>
+        <li>Every red-black tree with n nodes has height less than or equal to 2log_{2}(n+1)</li>
+      </ul>
+      <li>Rotation.</li>
+      <ul>
+        <li>Locally rebalance subtrees at a node in O(1) time.</li>
+        <li>Left rotation.</li>
+        <li>Right rotation.</li>
+      </ul>
+    </ul>
+
+<pre><code class="python"># Insert(x)
+#     insert x as usual (makes x a leaf)
+#     try coloring x red
+#     if x's parent y is black, done
+#     else y is red, then y has a black parent w</code></pre>
+
   </div>
   <div class="card-footer text-muted">
 
