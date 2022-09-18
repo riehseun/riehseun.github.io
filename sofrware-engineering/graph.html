@@ -63,7 +63,7 @@
 
 graph = {}
 
-for edge in èdges:
+for edge in edges:
 
     if edge[1] not in graph:
         graph[edge[1]] = set()
@@ -115,22 +115,34 @@ for edge in èdges:
 
     <h4 class="card-title">Topological ordering</h4>
     <ul>
-      <li>Traverse nodes in order in a directed graph.</li>
-      <li>Label f on nodes of G such that</li>
+      <li>Approach #1: Remove leaf nodes recursively from the graph while adding leaf nodes to result.</li>
+      <li>Approach #2: Remove root nodes recursively from the graph while adding root nodes to result.</li>
+      <li>Approach #3: Do DFS starting at each node counting the number of steps each starting node takes to finish DFS.</li>
       <ul>
-        <li>f(v)'s are the set {1,2,...,n}.</li>
-        <li>(u,v) in G => f(n) less than or f(v).</li>
+        <li>If starting node has only small number of children or even no children, DFS will finish quickly.</li>
+        <li>If starting node has lots of children, DFS will take time to finish.</li>
       </ul>
-      <li>Let v be the sink vertex of G. (every directed graph has a sink vertex)</li>
-      <li>Set f(v) = n.</li>
-      <li>Recurse on G - {v}.</li>
-      <li>If G has directed cycle, then there is no topological ordering.</li>
-      <li>If G does not have directed cycle, then computes topological ordering in O(m+n).</li>
     </ul>
 
-<!-- <pre><code class="python">def topological_order(start_node, graph):
+<pre><code class="python">def topological_order(graph, num_nodes):
+
+    ordering = []
+
+    for i in range(num_nodes):
+        count = self.dfs(i, graph)
+        # If cycle.
+        if count == -1:
+            return []
+        ordering.append([count, i])
+
+    ordering.sort(key=lambda x:(-x[0]))
+
+    return [item[1] for item in ordering]
+
+def dfs(self, start_node, graph):
     stack = []
     stack.append(start_node)
+    count = 1
 
     explored = {}
     explored[start_node] = True
@@ -141,23 +153,13 @@ for edge in èdges:
             for next_node in graph[node]:
                 if next_node not in explored:
                     explored[next_node] = True
-                    stack.append(next_node)</code></pre> -->
+                    stack.append(next_node)
+                    count += 1
+                else:
+                    if next_node == start_node:
+                        return -1
 
-<pre><code class="python"># DFS_loop(graph G)
-#     mark all nodes unexplored
-#     current_label = n # keep track of ordering
-#     for each vertex v in G
-#         if v not explored
-#             DFS(G,v)
-
-# DFS(graph G, start vertex s)
-#     mark s as explored
-#     for every edge (s, v)
-#         if v is unexplored
-#             mark v explored
-#             DFS (G, v)
-#     set f(s) = current_label
-#     current_label--</code></pre>
+    return count</code></pre>
 
     <h4 class="card-title">Strongly connected components</h4>
     <ul>
