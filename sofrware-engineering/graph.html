@@ -46,6 +46,7 @@
       <li><a href="#graph-1">Graph</a></li>
       <li><a href="#graph-2">DFS</a></li>
       <li><a href="#graph-3">BFS</a></li>
+      <li><a href="#graph-4">DFS or BFS Examples</a></li>
     </ul>
   </div>
 </div>
@@ -287,6 +288,62 @@ for i in range(num_nodes):
                 if next_node not in explored:
                     explored[next_node] = True
                     queue.append(next_node)</code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-4">
+  <div class="card-body">
+    <h2 class="card-title">DFS or BFS Examples</h2>
+    <p class="card-text"></p>
+
+    <h3 class="card-title">Is graph Bipartite?</h3>
+    <ul>
+      <li>Can use either DFS or BFS.</li>
+      <li>Color each node into one of two groups knowing that adjacent nodes cannot belong to a same color.</li>
+    </ul>
+
+<pre><code class="python"># Graph may consist of many disconnected sub-graphs.
+# Search from all starting nodes must yield True.
+# Time O(n), total time O(n*(n+m))
+for node in graph.keys():
+    result = result and bfs(node, graph)
+
+
+# Time O(n+m)
+# Space O(n)
+def bfs(start_node, graph):
+    queue = deque()
+    queue.append(start_node)
+
+    explored = {}
+    explored[start_node] = True
+
+    group = {}
+    # Put the first node in group a.
+    group[start_node] = "a"
+
+    while queue:
+        node = queue.popleft()
+        if node in graph:
+            for next_node in graph[node]:
+                if next_node not in explored:
+                    explored[next_node] = True
+                    queue.append(next_node)
+                    if group[node] == "a":
+                        group[next_node] = "b"
+                    else:
+                        group[next_node] = "a"
+                # If next_node is already explored and it is in the same
+                # group as node, then graph cannot be bipartite.
+                else:
+                    if group[node] == group[next_node]:
+                        return False
+
+    return True</code></pre>
 
   </div>
   <div class="card-footer text-muted">
