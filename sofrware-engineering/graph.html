@@ -48,6 +48,7 @@
       <li><a href="#graph-3">BFS</a></li>
       <li><a href="#graph-4">DFS or BFS Examples</a></li>
       <li><a href="#graph-5">Union-Find</a></li>
+      <li><a href="#graph-6">Dijkstra</a></li>
     </ul>
   </div>
 </div>
@@ -382,6 +383,80 @@ def union(group, node, new_leader):
     for k,v in group.items():
         if v == previous_leader:
             group[k] = new_leader</code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-6">
+  <div class="card-body">
+    <h2 class="card-title">Dijkstra</h2>
+    <p class="card-text"></p>
+
+    <h3 class="card-title">Directed graph</h3>
+    <ul>
+      <li>Find the shortest path from starting node to each node in "positive" weighted graph.</li>
+      <li>Add the starting node to the "visited" set.</li>
+      <li>Initialize the distance to each node to infinity except the starting node whose distance should be zero.</li>
+      <li>For all edges in the graph, consider edges (parent_node, child_node) where parent_node is visited and child_node is unvisited. Pick the edge where the distance to parent + the distance between parent and child is the minimum.</li>
+      <li>Add the child to "visited" set.</li>
+      <li>Update the distance to child such that dist[child] = dist[parent] + distance between parent and child.</li>
+      <li>Continue until all nodes in the graph are explored.</li>
+    </ul>
+
+<pre><code class="python">def dijkstra(start_node, graph, n):
+
+    explored = set()
+    explored.add(start_node)
+
+    # Distance from start_node to itself is 0.
+    # Otherwise, initialize distance to infinity.
+    distance = {}
+    for i in range(1,n+1):
+        if i == start_node:
+            distance[i] = 0
+        else:
+            distance[i] = 6000
+
+    node = start_node
+
+    while True:
+
+        # If there is no more node to explore in the graph.
+        if len(explored) == n:
+            return distance
+
+        # Amongst all edges where one node exists in explored and the other
+        # does not exist in explored, we will visit the node with smallest distance.
+        min_distance = 6000
+        next_node_to_visit = -1
+        for node in explored:
+            if node in graph:
+                for item in graph[node]:
+                    child_node = item[0]
+                    dist = item[1]
+
+                    if distance[node] + dist < min_distance \
+                        and child_node not in explored:
+                        min_distance = distance[node] + dist
+                        next_node_to_visit = child_node
+
+        # If there is no unexplored node amongst all "directed" edges in graph.
+        if next_node_to_visit == -1:
+            return distance
+
+        # Mark the node as visited.
+        explored.add(next_node_to_visit)
+
+        # Update the distance.
+        distance[next_node_to_visit] = min_distance
+
+        # Visit the next node.
+        node = next_node_to_visit
+
+    return distance</code></pre>
 
   </div>
   <div class="card-footer text-muted">
