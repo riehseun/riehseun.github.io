@@ -49,6 +49,7 @@
       <li><a href="#graph-4">DFS or BFS Examples</a></li>
       <li><a href="#graph-5">Union-Find</a></li>
       <li><a href="#graph-6">Dijkstra</a></li>
+      <li><a href="#graph-7">Bellman-Ford</a></li>
     </ul>
   </div>
 </div>
@@ -348,6 +349,12 @@ def bfs(start_node, graph):
     return True</code></pre>
 
     <h3 class="card-title">Find all possible paths in graph</h3>
+    <ul>
+      <li>Can use either DFS or BFS.</li>
+      <li>Append the path to the child node into the stack.</li>
+      <li>When popping out node from the stack, remember the path to that node.</li>
+    </ul>
+
 <pre><code class="python"># Assumption: graph is acyclic!
 def dfs(start_node, graph):
 
@@ -442,7 +449,7 @@ def union(group, node, new_leader):
         if i == start_node:
             distance[i] = 0
         else:
-            distance[i] = 6000
+            distance[i] = math.inf
 
     node = start_node
 
@@ -454,7 +461,7 @@ def union(group, node, new_leader):
 
         # Amongst all edges where one node exists in explored and the other
         # does not exist in explored, we will visit the node with smallest distance.
-        min_distance = 6000
+        min_distance = math.inf
         next_node_to_visit = -1
         for node in explored:
             if node in graph:
@@ -479,6 +486,50 @@ def union(group, node, new_leader):
 
         # Visit the next node.
         node = next_node_to_visit
+
+    return distance</code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-7">
+  <div class="card-body">
+    <h2 class="card-title">Bellman-Ford</h2>
+    <p class="card-text"></p>
+
+    <h3 class="card-title">Directed graph with k stops</h3>
+    <ul>
+      <li>Consider all possible number of stops possible in the graph. (It should be n-1)</li>
+      <li>Consider all directed edges in graph.</li>
+      <li>Use dynamic programming to compute the minimum distance from the starting_node to every other node for each number of stops.</li>
+      <li>Update the minimum distance as dist[child][k] = min(dist[child][k], dist[parent][k-1] + distance between parent and child)</li>
+    </ul>
+
+<pre><code class="python">def bellman_ford(start_node, graph, n):
+
+    # Initiallize 2D array.
+    # (number of nodes in graph, number of stops possible in graph)
+    distance = {}
+    for i in range(n):
+        distance[i] = {}
+        for j in range(n):
+            distance[i][j] = math.inf
+
+    # Distance from start_node in zero stops is 0.
+    distance[start_node][0] = 0
+
+    # Consider all possible number of stops j.
+    # Time O(nm)
+    # Space O(nm)
+    for j in range(n-1):
+        for item in graph:
+            parent = item[0]
+            child = item[1]
+            dist = item[2]
+            distance[child][j+1] = min(distance[child][j+1], distance[parent][j] + dist)
 
     return distance</code></pre>
 
