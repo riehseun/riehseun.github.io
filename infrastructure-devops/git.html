@@ -132,57 +132,111 @@ git reset origin/master</code></pre>
 git clone --bare --quiet &lt;git_clone_url_to_copy_from&gt;
 git push --mirror --quiet &lt;git_clone_url_to_copy_into&gt;</code></pre>
 
-<pre><code class="bash">git config --list # Show the current git config.
-git config --global user.name &lt;name&gt; # Add name.
-git config --global user.email &lt;email&gt; # Add email.</code></pre>
+<pre><code class="bash"># Show the current git config.
+git config --list
 
-<pre><code class="bash">git status # Show files that have added, modified, and deleted.
-git add -A # Move files to "staged".
-git commit -am &lt;message&gt; # Move files to "commited".
-git push origin &lt;branch&gt; # Apply your changes to a particular branch on remote repository.</code></pre>
+# Add name.
+git config --global user.name &lt;name&gt;
 
-<pre><code class="bash">git pull origin &lt;branch&gt; # Pull code from a particular branch on remote repository into your local workspace.
-git checkout -b &lt;branch&gt; # Create a new branch whose code base will be your local workspace.
-git checkout &lt;branch&gt; # Check out code base from a particular branch.</code></pre>
+# Add email.
+git config --global user.email &lt;email&gt;</code></pre>
 
-<pre><code class="bash">git branch -d &lt;branch&gt; # Delete a particular branch from your local.
-git push origin -d &lt;branch&gt; # Delete a particular branch from remote repository.
-git tag -d &lt;tag&gt; # Delete a tag from your local.
-git push origin -d &lt;tag&gt; # Delete a tag from remote repository.</code></pre>
+<pre><code class="bash"># Show files that have added, modified, and deleted.
+git status
 
-<pre><code class="bash">git fetch # Update tracking of remote branches.
-git fetch --prune # Remove local branches that do not exist in remote.
-git branch -a # Display local and remote branches.
-git clean -f # Remove all untracked files.</code></pre>
+# Move files to "staged".
+git add -A
+
+# Move files to "commited".
+git commit -am &lt;message&gt;
+
+# Apply your changes to a particular branch on remote repository.
+git push origin &lt;branch&gt;</code></pre>
+
+<pre><code class="bash"># Pull code from a particular branch on remote repository into your local workspace.
+git pull origin &lt;branch&gt;
+
+# Create a new branch whose code base will be your local workspace.
+git checkout -b &lt;branch&gt;
+
+# Check out code base from a particular branch.
+git checkout &lt;branch&gt;</code></pre>
+
+<pre><code class="bash"># Delete a particular branch from your local.
+git branch -d &lt;branch&gt;
+
+# Delete a particular branch from remote repository.
+git push origin -d &lt;branch&gt;
+
+# Delete a tag from your local.
+git tag -d &lt;tag&gt;
+
+# Delete a tag from remote repository.
+git push origin -d &lt;tag&gt;</code></pre>
+
+<pre><code class="bash"># Update tracking of remote branches.
+git fetch
+
+# Remove local branches that do not exist in remote.
+git fetch --prune
+
+# Display local and remote branches.
+git branch -a
+
+# Remove all untracked files.
+git clean -f</code></pre>
 
 <pre><code class="bash"># Compare two branches.
 git diff &lt;branch_1&gt; &lt;branch_2&gt;
+
 # Compare a specific file between two branches.
 git diff &lt;branch_1&gt; &lt;branch_2&gt; -- &lt;file&gt;</code></pre>
 
-<h3 class="card-title">Revert</h3>
+<h3 class="card-title">Revert changes in local branch</h3>
 
-<pre><code class="bash">git reflog # Show lost commit.
-git reset --hard &lt;commit_hash&gt; # Revert to a deleted commit. (Assuming &lt;commit_hash&gt; was retrieved from the output of "git reflog")
-git reset --hard &lt;commit_hash&gt; && git push -f origin &lt;branch&gt; # Revert to previous commit in the remote.
-git checkout HEAD &lt;file&gt; # Discard changes in a particualr file. / Restore a deleted file.
-git fetch --all && git reset --hard origin/&lt;branch_name&gt; # Force overwrite local with remote.
-git checkout &lt;target_branch&gt; && git cherry-pick &lt;commit_hash&gt; && git checkout &lt;source_branch&gt; && git reset --hard HEAD~1 # &lt;commit_hash&gt; should come from &lt;source_branch&gt;. Last two steps are to clean up the &lt;source_branch&gt;</code></pre>
+<pre><code class="bash"># Show lost commits.
+git reflog
+
+# Revert to a deleted commit. (Assuming &lt;commit_hash&gt; was retrieved from the output of "git reflog")
+git reset --hard &lt;commit_hash&gt;
+
+# Revert to previous commit in the remote.
+git reset --hard &lt;commit_hash&gt; && git push -f origin &lt;branch&gt;
+
+# Discard changes in a particualr file. / Restore a deleted file.
+git checkout HEAD &lt;file&gt;
+
+# Force overwrite local with remote.
+git fetch --all && git reset --hard origin/&lt;branch_name&gt;
+
+# &lt;commit_hash&gt; should come from &lt;source_branch&gt;. Last two steps are to clean up the &lt;source_branch&gt;
+git checkout &lt;target_branch&gt; && git cherry-pick &lt;commit_hash&gt; && git checkout &lt;source_branch&gt; && git reset --hard HEAD~1 </code></pre>
 <!-- probably should use "git branch | grep -v "master" | xargs git branch -D "-->
 
-<pre><code class="bash"># Revert a merged PR.
-# Checkout a branch from master. Ex. git checkout -b revert
-git revert -m 1 &lt;commit_hash_of_PR_to_revert&gt;  # This reverts a particular commit
-git revert -m 1 &lt;commit_hash&gt;..HEAD  # This reverts everything up to but not including commit_hash
-git push origin revert
-# Then, raise a PR from revert to master</code></pre>
+<h3 class="card-title">Revert a merged PR</h3>
 
-<pre><code class="bash"># Revert a single file.
-git checkout &lt;commit_hash_of_file_to_revert_to&gt; -- &lt;file_including_path&gt;
+<pre><code class="bash"># Checkout a branch from master. Ex. git checkout -b revert
+
+# This reverts a particular commit
+git revert -m 1 &lt;commit_hash_of_PR_to_revert&gt;
+
+# This reverts everything up to but not including commit_hash
+git revert -m 1 &lt;commit_hash&gt;..HEAD
+
+# Then push the reverted changes to the branch.
+git push origin revert
+
+# Finally, raise a PR from revert to master</code></pre>
+
+<h3 class="card-title">Revert a single file</h3>
+
+<pre><code class="bash">git checkout &lt;commit_hash_of_file_to_revert_to&gt; -- &lt;file_including_path&gt;
 git commit -am &lt;commit_message&gt;
 git push origin &lt;branch_name&gt;</code></pre>
 
-<pre><code class="bash"># Moving uncommited changes to a new branch. (For example, when accidently made changes to the master branch)
+<h3 class="card-title">Moving uncommited changes to a new branch</h3>
+
+<pre><code class="bash"># For example, when accidently made changes to the master branch.
 git stash
 git checkout -b &lt;branch_name&gt;
 git stash apply</code></pre>
