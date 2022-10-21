@@ -44,24 +44,29 @@
     <h2 class="card-title">Elasticsearch</h2>
     <p class="card-text"></p>
     <ul class="list-unstyled mb-0">
-      <li><a href="#elasticsearch-1">Indices</a></li>
+      <li><a href="#elasticsearch-1">Elasticsearch</a></li>
       <li><a href="#elasticsearch-2">Endpoint</a></li>
-      <li><a href="#elasticsearch-3">ECK</a></li>
-      <li><a href="#elasticsearch-4">Node role</a></li>
+      <li><a href="#elasticsearch-3">Node role</a></li>
+      <li><a href="#elasticsearch-4">Multizone cluster with helm chart</a></li>
     </ul>
   </div>
 </div>
 
 <div class="card mb-4" id="elasticsearch-1">
   <div class="card-body">
-    <h2 class="card-title">Indices</h2>
+    <h2 class="card-title">Elasticsearch</h2>
+    <ul>
+      <li>Automatically handles partitioning documents into shards, which are stored on multiple nodes.</li>
+    </ul>
+
+    <h3 class="card-title">Indices</h3>
 
 <p class="card-text">SQL -> Database -> Table -> Row/Column</p>
 <p class="card-text">Elasticsearch -> Index -> Type -> Document/Property</p>
 
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://www.elastic.co/blog/what-is-an-elasticsearch-index">What is an Elasticsearch Index?</a>
+    Reference: <a href="https://www.elastic.co/blog/what-is-an-elasticsearch-index">What is an Elasticsearch Index?</a> | <a href="https://www.instaclustr.com/blog/understanding-and-configuring-elasticsearch-node-types/">Elasticsearch Basics</a>
   </div>
 </div>
 
@@ -69,27 +74,30 @@
   <div class="card-body">
     <h2 class="card-title">Endpoint</h2>
 
+    <h3 class="card-title">General</h3>
 <pre><code class="bash"># Check cluster health.
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;:9200/_cluster/health?pretty
 
 # View available API endpoints.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;:9200/_cat</code></pre>
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;:9200/_cat
 
+# Create an API key.
+curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;:9200/_security/api_key --header "Content-Type: application/json" --date '{}'
+apiKey=&lt;encoded_api_key_from_above&gt;</code></pre>
+
+    <h3 class="card-title">License</h3>
 <pre><code class="bash"># Check license.
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;:9200/_license
 
 # Update licese. (With the license in "license.json" file)
 curl -k -u &lt;username&gt;:&lt;password&gt; -X PUT https://&lt;endpoint&gt;:9200/_license -H "Content-Type: appliction/json" -d @license.json</code></pre>
 
-<pre><code class="bash"># Create an API key.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;:9200/_security/api_key --header "Content-Type: application/json" --date '{}'
+    <h3 class="card-title">Index</h3>
+<pre><code class="bash"># List all indices.
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;:9200/_cat/indices
 
 # Create an index.
-apiKey=&lt;encoded_api_key_from_above&gt;
-curl -k -H "Authorization: ApiKey $apiKey" -X PUT https://&lt;endpoint&gt;:9200/collections
-
-# List all indices.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;:9200/_cat/indices
+curl -k -H "Authorization: ApiKey $apiKey" -X PUT https://&lt;endpoint&gt;:9200/&lt;index_name&gt;
 
 # Get an index.
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;:9200/&lt;index_name&gt;
@@ -97,12 +105,16 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;:920
 # Check types.
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;:9200/&lt;index_name&gt;/_mapping</code></pre>
 
+    <h3 class="card-title">Document</h3>
 <pre><code class="bash"># Create a document.
-apiKey=&lt;encoded_api_key_from_above&gt;
-curl -k -H "Authorization: ApiKey $apiKey" -H "Content-Type: application/json" -X PUT https://&lt;endpoint&gt;:9200/collections/_doc/1 -d '&lt;JSON&gt;'
+curl -k -H "Authorization: ApiKey $apiKey" -H "Content-Type: application/json" -X PUT https://&lt;endpoint&gt;:9200/&lt;index_name&gt;/_doc/&lt;document_id&gt; -d '&lt;JSON&gt;'
 
 # Check a document.
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;:9200/&lt;index_name&gt;/_doc/&lt;document_id&gt;</code></pre>
+
+    <h3 class="card-title">Snapshot</h3>
+<pre><code class="bash"># List snapshot repositories.
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;:9200/_snapshot</code></pre>
 
   </div>
   <div class="card-footer text-muted">
@@ -112,39 +124,12 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;:920
 
 <div class="card mb-4" id="elasticsearch-3">
   <div class="card-body">
-    <h2 class="card-title">ECK</h2>
-
-    <h3 class="card-title">Client nodes</h3>
-    <ul>
-      <li>Deployment with autoscaler.</li>
-      <li>Acts as reverse proxy.</li>
-      <li>Queries master nodes.</li>
-    </ul>
-
-    <h3 class="card-title">Master nodes</h3>
-    <ul>
-      <li>Deployment with fixed replicas. (At least 3 for HA)</li>
-      <li>Holds metadata: data nodes, location, sharding, data replication.</li>
-    </ul>
-
-    <h3 class="card-title">Data nodes</h3>
-    <ul>
-      <li>StatefulSets where each instance has PVC.</li>
-      <li>Splits indices into shards and replicate information between nodes. (To prevent data loss)</li>
-    </ul>
-
-  </div>
-  <div class="card-footer text-muted">
-
-  </div>
-</div>
-
-<div class="card mb-4" id="elasticsearch-4">
-  <div class="card-body">
     <h2 class="card-title">Node role</h2>
 
     <h3 class="card-title">Master</h3>
     <ul>
+      <li>Deployment with fixed replicas. (At least 3 for HA)</li>
+      <li>Holds metadata: data nodes, location, sharding, data replication.</li>
       <li>Creates/deletes index.</li>
       <li>Tracks nodes in the cluster.</li>
       <li>It is good idea to have nodes that are dedicated to master role only.</li>
@@ -152,15 +137,21 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;:920
 
     <h3 class="card-title">Data</h3>
     <ul>
-      <li>data_hot: most recent and frequently searched data, fast read and write.</li>
-      <li>data_warm: typically holds data from recent weeks, updates are infrequent.</li>
-      <li>data_cold</li>
-      <li>data_frozen</li>
+      <li>StatefulSets where each instance has PVC.</li>
+      <li>Splits indices into shards and replicate information between nodes. (To prevent data loss)</li>
+      <li>Types
+        <ul>
+          <li>data_hot: most recent and frequently searched data, fast read and write. (High compute, low storage)</li>
+          <li>data_warm: typically holds data from recent weeks, updates are infrequent. (Medium compute, medium storage)</li>
+          <li>data_cold: data is still searchable but node is optimized for lower storage cost than search speed. (Low compute, high storage)</li>
+          <li>data_frozen: data is queried very rarely. Requires snapshot repository. (Minimal compute, enough storage to handle snapshots)</li>
+        </ul>
+      </li>
     </ul>
 
     <h3 class="card-title">Ingest</h3>
     <ul>
-      <li>Executes pre-processing pipeline.</li>
+      <li>Pre-precess documents before they are indexed. (Can be used instead of Logstash)</li>
     </ul>
 
   </div>
@@ -168,6 +159,112 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;:920
     Reference: <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-node.html">Node</a>
   </div>
 </div>
+
+<div class="card mb-4" id="elasticsearch-4">
+  <div class="card-body">
+    <h2 class="card-title">Multizone cluster with helm chart</h2>
+
+    <h3 class="card-title">Master (values.yaml)</h3>
+<pre><code class="yaml">---
+clusterName: "elasticsearch"
+nodeGroup: "master"
+
+roles:
+  - master
+
+secret:
+  enabled: true
+  password: "elastic123"
+
+replicas: 3
+
+resources:
+  requests:
+    cpu: "1000m"
+    memory: "2G1"
+  limits:
+    cpu: "1000m"
+    memory: "2G1"
+
+volumeClaimTemplate:
+  accessMode: [ "ReadWriteOnce" ]
+  storageClssName: my-storage-class
+  resources:
+    requests:
+      storage: 30Gi</code></pre>
+
+    <h3 class="card-title">Data (values.yaml)</h3>
+<pre><code class="yaml">---
+clusterName: "elasticsearch"
+nodeGroup: "datahot" # Could be datawarm, datacold, datafrozen
+
+extraEnvs:
+  # Use password created by master nodes.
+  - name: ELASTIC_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: elasticsearch-master-credentials
+        key: password
+  - name: xpack.security.enabled
+    value: "true"
+  - name: xpack.security.transport.ssl.enabled
+    value: "true"
+  - name: xpack.security.http.ssl.enabled
+    value: "true"
+  - name: xpack.security.transport.ssl.verification.mode
+    value: "certificate"
+  - name: xpack.security.transport.ssl.key
+    value: "/usr/share/elasticsearch/config/certs/tls.key"
+  - name: xpack.security.transport.ssl.certificate
+    value: "/usr/share/elasticsearch/config/certs/tls.crt"
+  - name: xpack.security.transport.ssl.certificate_authorities
+    value: "/usr/share/elasticsearch/config/certs/ca.cert"
+  - name: xpack.security.http.ssl.key
+    value: "/usr/share/elasticsearch/config/certs/tls.key"
+  - name: xpack.security.http.ssl.certificate
+    value: "/usr/share/elasticsearch/config/certs/tls.crt"
+  - name: xpack.security.http.ssl.certificate_authorities
+    value: "/usr/share/elasticsearch/config/certs/ca.crt"
+
+roles:
+  - data
+  - data_content
+  - data_hot # Could be data_warm, data_cold, data_frozen
+  - ingest
+
+secret:
+  enabled: true
+
+# Use certificate created by master nodes.
+createCertL false
+secretMounts:
+  - name: elastic-certificates
+    secretName: elasticsearch-master-certs
+    path: /usr/share/elasticsearch/config/certs
+
+replicas: 3
+
+resources:
+  requests:
+    cpu: "1000m"
+    memory: "2G1"
+  limits:
+    cpu: "1000m"
+    memory: "2G1"
+
+volumeClaimTemplate:
+  accessMode: [ "ReadWriteOnce" ]
+  storageClssName: my-storage-class
+  resources:
+    requests:
+      storage: 30Gi</code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://github.com/elastic/helm-charts">elastic/helm-charts</a>
+  </div>
+</div>
+<!-- Elasticsearch END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->

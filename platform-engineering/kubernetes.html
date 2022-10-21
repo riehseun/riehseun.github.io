@@ -2494,64 +2494,56 @@ spec:
 <div class="card mb-4" id="kubernetes-52">
   <div class="card-body">
     <h2 class="card-title">Secret</h2>
-    <p class="card-text">Similar to ConfigMap but specifically for confidential data. Secret can be used in three ways.</p>
+    <p class="card-text"></p>
     <ul>
-      <li>File in a volumn mounted on containers</li>
-      <li>Container envinronment variable</li>
-      <li>By Kubelet when pulling images for Pod</li>
+      <li>Similar to ConfigMap but specifically for confidential data.</li>
+      <li>Secret can be used in three ways.
+        <ul>
+          <li>File in a volumn mounted on containers</li>
+          <li>Container envinronment variable</li>
+          <li>By Kubelet when pulling images for Pod</li>
+        </ul>
+      </li>
+      <li>Encoding scheme is base64 by default.</li>
     </ul>
-    <p class="card-text">Encoding scheme is base64 by default.</p>
 
     <h3 class="card-title">Secret types</h3>
-    <table>
-      <tr>
-        <td>Opaque</td>
-        <td>arbitrary user-defined data (default Secret type if omitted)</td>
-      </tr>
-      <tr>
-        <td>kubernetes.io/service-account-token</td>
-        <td>service account token</td>
-      </tr>
-      <tr>
-        <td>kubernetes.io/dockercfg</td>
-        <td>~/.dockercfg file</td>
-      </tr>
-      <tr>
-        <td>kubernetes.io/dockerconfigjson</td>
-        <td>~/.docker/config.json file</td>
-      </tr>
-      <tr>
-        <td>kubernetes.io/basic-auth</td>
-        <td>credentials for basic authentication</td>
-      </tr>
-      <tr>
-        <td>kubernetes.io/ssh-auth</td>
-        <td>credentials for SSH authentication</td>
-      </tr>
-      <tr>
-        <td>kubernetes.io/tls</td>
-        <td>data for a TLS client or server</td>
-      </tr>
-    </table>
+    <ul>
+      <li>Opaque: arbitrary user-defined data. (default Secret type if omitted)</li>
+      <li>kubernetes.io/service-account-token: service account token.</li>
+      <li>kubernetes.io/dockercfg: ~/.dockercfg file.</li>
+      <li>kubernetes.io/dockerconfigjson: ~/.docker/config.json file.</li>
+      <li>kubernetes.io/basic-auth: credentials for basic authentication.</li>
+      <li>kubernetes.io/ssh-auth: credentials for SSH authentication.</li>
+      <li>kubernetes.io/tls: data for a TLS client or server.</li>
+    </ul>
 
     <h3 class="card-title">Opaque Secret</h3>
-<pre><code class="bash">kubectl create secret generic empty-secret
-kubectl get secret empty-secret</code></pre>
+<pre><code class="yaml">apiVersion: v1
+kind: Secret
+metadata:
+  name: my-opaque-secret
+type: Opaque
+stringData:
+  username: my-username
+  password: my-password</code></pre>
 
     <h3 class="card-title">Service account token Secret</h3>
 <pre><code class="yaml">apiVersion: v1
 kind: Secret
 metadata:
-  name: secret-sa-sample
+  name: my-sa-secret
   annotations:
-    kubernetes.io/service-account.name: "sa-name" # Existing service account name
+    kubernetes.io/service-account.name: "my-sa-name" # Existing service account name
 type: kubernetes.io/service-account-token
 data:
   # You can include additional key value pairs as you do with Opaque Secrets
   extra: YmFyCg==</code></pre>
 
     <h3 class="card-title">Docker config Secret</h3>
-    <p class="card-text">~/.dockercfg is legacy, ~/.docker/config.json is the new format.</p>
+    <ul>
+      <li>~/.dockercfg is legacy, ~/.docker/config.json is the new format.</li>
+    </ul>
 <pre><code class="yaml">apiVersion: v1
 kind: Secret
 metadata:
@@ -2565,11 +2557,11 @@ data:
 <pre><code class="yaml">apiVersion: v1
 kind: Secret
 metadata:
-  name: secret-basic-auth
+  name: my-basic-auth-secret
 type: kubernetes.io/basic-auth
 stringData:
-  username: admin
-  password: t0p-Secret</code></pre>
+  username: my-username
+  password: my-password</code></pre>
 
     <h3 class="card-title">SSH authentication Secret</h3>
 <pre><code class="yaml">apiVersion: v1
@@ -2622,6 +2614,9 @@ spec:
         mode: 0777 # Files in /etc/foo/my-group/my-username will have 0777.</code></pre>
 
     <h3 class="card-title">Using Secret as environment variables</h3>
+    <ul>
+      <li>Updating Secret will not update environment variables in the containers unless containers are restarted.</li>
+    </ul>
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
@@ -2634,18 +2629,19 @@ spec:
       - name: SECRET_USERNAME
         valueFrom:
           secretKeyRef:
-            name: mysecret
+            name: my-secret
             key: username
       - name: SECRET_PASSWORD
         valueFrom:
           secretKeyRef:
-            name: mysecret
+            name: my-secret
             key: password
   restartPolicy: Never</code></pre>
-    <p class="card-text">Updating Secret will not update environment variables in the containers unless containers are restarted.</p>
 
     <h3 class="card-title">Immutable Secret</h3>
-    <p class="card-text">Prevents accidental deletion/update of Secret.</p>
+    <ul>
+      <li>Prevents accidental deletion/update of Secret.</li>
+    </ul>
 <pre><code class="yaml">apiVersion: v1
 kind: Secret
 metadata:
