@@ -36,7 +36,7 @@
 <div class="container">
 <div class="row">
 <div class="col-md-12">
-<h1 class="my-4">Infrastructure DevOps</h1>
+<h1 class="my-4">Platform Engineering</h1>
 
 <!-- Kubernetes BEGIN -->
 <div class="card mb-4" id="kubernetes">
@@ -178,7 +178,12 @@
 <div class="card mb-4" id="kubernetes-2">
   <div class="card-body">
     <h2 class="card-title">Kubernetes Objects and API</h2>
-    <p class="card-text">Persistent entities that represent the cluster desired state. Each object has <code>spec</code> and <code>status</code></p>
+    <p class="card-text"></p>
+
+    <ul>
+      <li>Persistent entities that represent the cluster desired state.</li>
+      <li>Each object has <code>spec</code> and <code>status</code></li>
+    </ul>
 
     <h3 class="card-title">Standard API terminology</h3>
     <p class="card-text">Most K8s resource types are objects, which have unique name to allow idempotent creation (virtual types may not have unique name, for example "permission check")</p>
@@ -288,11 +293,16 @@ kubectl config set-context --current --namespace=&lt;namespace&gt;
 kubectl config view | grep namespace</code></pre>
 
     <h3 class="card-title">Namespace</h3>
-<pre><code class="bash">kubectl get ns
+<pre><code class="bash"># List namespace.
+kubectl get ns
+
 # If "Unable to connect to the server: x509: certificate signed by unknown authority"
 kubectl get ns --insecure-skip-tls-verify
+
+# Delete namespace.
 kubectl delete namespace &lt;namespace&gt;
-# Delete a label
+
+# Delete a namespace label.
 kubectl label namespaces &lt;namespace&gt; &lt;label&gt;-</code></pre>
 
 <pre><code class="bash"># Error from server (InternalError): an error on the server ("") has prevented the request from succeeding
@@ -397,11 +407,10 @@ docker exec -u root -it &lt;container_id&gt;</code></pre>
       <li>templates/ - k8s manifest files.</li>
     </ul>
 
-    <h3 class="card-title">Difference from operator</h3>
+    <h3 class="card-title">Helm limitation</h3>
     <ul>
       <li>When users manually changes resources deployed by Helm, Helm does not know the change and the next Helm deployment will fail.</li>
       <li>Uninstalling helm chart does not delete PVC and secret object. Those need to be cleaned up separately.</li>
-      <li>When users manually changes resources deployed by Operator, Operator knows the change and the next Operator deployment will succeed.</li>
     </ul>
 
     <h3 class="card-text">Helm command</h3>
@@ -686,7 +695,10 @@ deploy:
 <div class="card mb-4" id="kubernetes-21">
   <div class="card-body">
     <h2 class="card-title">Namespace</h2>
-    <p class="card-text">Pods in different namespaces can still communicate each other.</p>
+    <ul>
+      <li>Pods in different namespaces can still communicate each other.</li>
+    </ul>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Namespace
 metadata:
@@ -926,7 +938,7 @@ curl -X DELETE  'localhost:8080/apis/apps/v1/namespaces/default/replicasets/fron
     <ul>
       <li>Similar to Deployment, but guarantees ordering and uniqueness of Pods.</li>
       <li>Uniqueness - when a node goes down, a new node needs to be attached to the correct volume.</li>
-      <li>Ordering - When pods are primary and backups, the second backup should take place of primary in case it goes down.</li>
+      <li>Ordering - when pods are provisioned or deleted, they are done in certain order.</li>
     </ul>
 
     <h3 class="card-title">Limitations</h3>
@@ -1884,7 +1896,10 @@ spec:
 <div class="card mb-4" id="kubernetes-33">
   <div class="card-body">
     <h2 class="card-title">Service</h2>
-    <p class="card-text">Service is an abstraction for logical set of Pods. The set of Pods targeted by Service is determined by selector.</p>
+    <ul>
+      <li>Service is an abstraction for logical set of Pods.</li>
+      <li>The set of Pods targeted by Service is determined by selector.</li>
+    </ul>
 <pre><code class="yaml"># Suppose there are Pods where each of them listens to port 9376 and has label "app=MyApp".
 apiVersion: v1
 kind: Service
@@ -1916,9 +1931,17 @@ spec:
 # Service needs to be manually mapped to network address and port</code></pre>
 
     <h3 class="card-title">Virtual IPs and service proxies</h3>
-    <p class="card-text">Every Node runs <code>kube-proxy</code>, which implementes virtual IP. ConfigMap is used to configure <code>kube-proxy</code>.</p>
-    <h4 class="card-title">iptables proxy mode</h4>
-    <p class="card-text"><code>kube-proxy</code> watches for Kubernetes control plane for addition and removal of Service and Endpoint objects. It installs iptable rules and redirect traffics to Service's backend sets (for Service) or backend Pod. (for EndPoint) It chooses backend at random.</p>
+    <ul>
+      <li>Every Node runs <code>kube-proxy</code>, which implementes virtual IP.</li>
+      <li>ConfigMap is used to configure <code>kube-proxy</code>.</li>
+    </ul>
+
+    <h3 class="card-title">iptables proxy mode</h3>
+    <ul>
+      <li><code>kube-proxy</code> watches for Kubernetes control plane for addition and removal of Service and Endpoint objects.</li>
+      <li>It installs iptable rules and redirect traffics to Service's backend sets (for Service) or backend Pod. (for EndPoint)</li>
+      <li>It chooses backend at random.</li>
+    </ul>
 
     <h3 class="card-title">Publishing Service</h3>
     <ul>
@@ -1962,7 +1985,16 @@ status:
     - ip: 192.0.2.127</code></pre>
 
     <h2 class="card-title">Connecting Applications with Services</h2>
-    <p class="card-text">Docker: containers can talk to other containers only if they are on the same machine. Containers must be allowed ports on machine's own IP address. Kubernetes: Pods can talk to other Pods regardless of Nodes. Every Pod gets cluster-private IP address and all Pods in a cluster can see each other.</p>
+    <ul>
+      <li>Docker: containers can talk to other containers only if they are on the same machine.</li>
+      <ul>
+        <li>Containers must be allowed ports on machine's own IP address.</li>
+      </ul>
+      <li>Kubernetes: Pods can talk to other Pods regardless of Nodes.</li>
+      <ul>
+        <li> Every Pod gets cluster-private IP address and all Pods in a cluster can see each other.</li>
+      </ul>
+    </ul>
 
     <h3 class="card-title">Accessing the Service</h3>
     <p class="card-text">There is a DNS cluster addon Service that automatically assigns DNS names to other Services.</p>
