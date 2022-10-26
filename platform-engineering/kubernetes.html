@@ -391,6 +391,11 @@ docker exec -u root -it &lt;container_id&gt;</code></pre>
 
     <h3 class="card-title">Endpoints</h3>
 <pre><code class="bash">kubectl get endpoints -n &lt;namespace&gt;</code></pre>
+
+    <h3 class="card-title">Secrets</h3>
+<pre><code class="bash"># Export certificate and key
+kubectl get secret -n &lt;namespace&gt; &lt;secret_name&gt; -o go-template='{{index .data "&lt;your_cert&gt;.crt" | base64decode }}' > &lt;your_cert&gt;.crt
+kubectl get secret -n &lt;namespace&gt; &lt;secret_name&gt; -o go-template='{{index .data "&lt;your_cert&gt;.key" | base64decode }}' > &lt;your_cert&gt;.key</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://kubernetes.io/docs/reference/kubectl/cheatsheet/">kubectl Cheat Sheet</a>
@@ -1997,8 +2002,11 @@ status:
     </ul>
 
     <h3 class="card-title">Accessing the Service</h3>
-    <p class="card-text">There is a DNS cluster addon Service that automatically assigns DNS names to other Services.</p>
-<pre><code class="bash">kubectl get services kube-dns --namespace=kube-system</code></pre>
+    <ul>
+      <li>There is a DNS cluster addon Service that automatically assigns DNS names to other Services. <pre><code class="bash">kubectl get services kube-dns --namespace=kube-system</code></pre></li>
+      <li>The hostname has the form "&lt;service_name&lt;.&lt;namespace&lt;.".</li>
+      <li><code>/etc/resolve.conf</code> inside the container has the DNS/IP map configuration.</li>
+    </ul>
 
     <h3 class="card-title">Securing the Service</h3>
 <pre><code class="bash"># Create a public private key pair
