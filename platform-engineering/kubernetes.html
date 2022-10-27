@@ -308,8 +308,8 @@ kubectl label namespaces &lt;namespace&gt; &lt;label&gt;-</code></pre>
 <pre><code class="bash"># Error from server (InternalError): an error on the server ("") has prevented the request from succeeding
 # => check proxy setting</code></pre>
 
-<pre><code class="bash"># When a namespace is stuck on Terminating.
-kubectl get namesapce &lt;stuck_namespace&gt; -o json > temp.json
+    <h3 class="card-title">How to remove a namespace that is stuck on terminating</h3>
+<pre><code class="bash">kubectl get namesapce &lt;stuck_namespace&gt; -o json > temp.json
 
 # Update "temp.json" such that "finalizers" array is empty. For example,
 "spec": {
@@ -318,8 +318,7 @@ kubectl get namesapce &lt;stuck_namespace&gt; -o json > temp.json
   ]
 }
 
-kubectl replace --raw "/api/v1/namespaces/&lt;stuck_namespace&gt;/finalize" -f ./temp.json
-kubectl get ns</code></pre>
+kubectl replace --raw "/api/v1/namespaces/&lt;stuck_namespace&gt;/finalize" -f ./temp.json</code></pre>
 
 <pre><code class="bash"># Inspace all namespaces.
 kubectl get pods --all-namespaces
@@ -333,7 +332,7 @@ kubectl get rolebindings,clusterrolebindings \
 kubectl api-resources --verbs=list --namespaced -o name \
   | xargs -n 1 kubectl get --show-kind --ignore-not-found -n &lt;namespace&gt;</code></pre>
 
-    <h3 class="card-title">Image/Container</h3>
+    <h3 class="card-title">Image and container</h3>
 <pre><code class="bash"># List all images.
 kubectl get pods --all-namespaces -o jsonpath="{.items[*].spec.containers[*].image}" | tr -s '[[:space:]]' '\n' | sort | uniq -c
 
@@ -344,20 +343,20 @@ kubectl get pods &lt;pod_name&gt; -n &lt;namespace&gt; -o jsonpath='{.spec.conta
 kubectl get deployments/ds -n &lt;namespace&gt; -o yaml | grep image</code></pre>
 
     <h3 class="card-title">Pod</h3>
-<pre><code class="bash"># Get all pods in a namespace.
-kubectl get pods -n &lt;namespace&gt;
-kubectl get pod &lt;pod_name&gt; -n &lt;namespace&gt; --output=yaml
+<pre><code class="bash"># Get all pods in current namespace.
+kubectl get pods
+kubectl get pods &lt;pod_name&gt; -o=yaml
 
 # View Pod-Node assignment.
-kubectl get pods -n &lt;namespace&gt; -o wide
+kubectl get pods -o wide
 
 # Check pod status periodically.
-watch -n &lt;nubmer_of_seconds&gt; kubectl get pod</code></pre>
+watch -n &lt;nubmer_of_seconds&gt; kubectl get pod
 
-<pre><code class="bash"># Temporarily disable pod.
-kubectl scale --replicas=0 deployment/&lt;deployment_name&gt;</code></pre>
+# Temporarily disable pod.
+kubectl scale --replicas=0 deployment/&lt;deployment_name&gt;
 
-<pre><code class="bash"># Port forward to access app runnig inside a pod/deployment from localhost.
+# Port forward to access app runnig inside a pod/deployment from localhost.
 kubectl port-forward &lt;pod_name&gt; &lt;localhost_port&gt;:&lt;container_port&gt;</code></pre>
 
     <h3 class="card-title">PV/PVC</h3>
@@ -368,8 +367,13 @@ kubectl get pvc -A
 kubectl get pvc</code></pre>
 
     <h3 class="card-title">Log</h3>
-<pre><code class="bash">kubectl logs &lt;pod_name&gt;  # Inspect pod logs.
-kubectl logs &lt;pod_name&gt; -p  # Previous pod.
+<pre><code class="bash"># Inspect pod logs.
+kubectl logs &lt;pod_name&gt;
+
+# Inspect previous pod logs.
+kubectl logs &lt;pod_name&gt; -p
+
+# Inspect container logs.
 kubectl logs &lt;pod_name&gt; -c &lt;container_name&gt;</code></pre>
 
     <h3 class="card-title">Node</h3>
@@ -379,13 +383,17 @@ kubectl drain &lt;node_name&gt; --ignore-daemonsets --delete-local-data
 kubectl delete note &lt;node_name&gt;
 kubectl get nodes --show-labels</code></pre>
 
-<pre><code class="bash"># How to exec into a container as root.
-# 1. Find the node on which the pod is running.
+    <h3 class="card-title">How to exec into a container as root</h3>
+<pre><code class="bash"># 1. Find the node on which the pod is running.
 kubectl get pods -o wide -n &lt;namespace&gt;
+
 # 2. Describe the pod.
 kubectl describe pod &lt;pod_name&gt; -n &lt;namespace&gt;
+
 # 3. Get the container ID.
+
 # 4. SSH into the node.
+
 # 5. Exec into the pod.
 docker exec -u root -it &lt;container_id&gt;</code></pre>
 
@@ -415,7 +423,7 @@ kubectl get secret -n &lt;namespace&gt; &lt;secret_name&gt; -o go-template='{{in
     <h3 class="card-title">Helm limitation</h3>
     <ul>
       <li>When users manually changes resources deployed by Helm, Helm does not know the change and the next Helm deployment will fail.</li>
-      <li>Uninstalling helm chart does not delete PVC and secret object. Those need to be cleaned up separately.</li>
+      <li>Uninstalling helm chart does not delete PVC. Those need to be cleaned up separately.</li>
     </ul>
 
     <h3 class="card-text">Helm command</h3>
