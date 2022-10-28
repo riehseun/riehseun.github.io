@@ -305,20 +305,9 @@ kubectl delete namespace &lt;namespace&gt;
 # Delete a namespace label.
 kubectl label namespaces &lt;namespace&gt; &lt;label&gt;-</code></pre>
 
-<pre><code class="bash"># Error from server (InternalError): an error on the server ("") has prevented the request from succeeding
-# => check proxy setting</code></pre>
 
-    <h3 class="card-title">How to remove a namespace that is stuck on terminating</h3>
-<pre><code class="bash">kubectl get namesapce &lt;stuck_namespace&gt; -o json > temp.json
 
-# Update "temp.json" such that "finalizers" array is empty. For example,
-"spec": {
-  "finalizers": [
 
-  ]
-}
-
-kubectl replace --raw "/api/v1/namespaces/&lt;stuck_namespace&gt;/finalize" -f ./temp.json</code></pre>
 
 <pre><code class="bash"># Inspace all namespaces.
 kubectl get pods --all-namespaces
@@ -698,6 +687,24 @@ deploy:
       <li>If liveness probe is defined, see if it succeeds.</li>
       <li>Check resource memory.</li>
       <li>Check <code>command</code> and <code>args</code> to see if container is set to exit soon.</li>
+    </ul>
+
+    <h3 class="card-title">How to remove a namespace that is stuck on terminating</h3>
+<pre><code class="bash">kubectl get namesapce &lt;stuck_namespace&gt; -o json > temp.json
+
+# Update "temp.json" such that "finalizers" array is empty. For example,
+"spec": {
+  "finalizers": [
+
+  ]
+}
+
+kubectl replace --raw "/api/v1/namespaces/&lt;stuck_namespace&gt;/finalize" -f ./temp.json</code></pre>
+
+    <h3 class="card-title">Kubectl command fails</h3>
+    <ul>
+      <li>Error from server (InternalError): an error on the server ("") has prevented the request from succeeding</li>
+      <li>check proxy setting.</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -2254,8 +2261,12 @@ spec:
 <div class="card mb-4" id="kubernetes-">
   <div class="card-body">
     <h2 class="card-title">Volumes</h2>
-    <p class="card-text">Docker images are the root of filesystem hierarchy. Volumes mount at specific path within the image.</p>
-    <p class="card-text">ConfigMap allows injecting configration data into Pods. <code>log-config</code> ConfigMap is mounted as a volume at path <code>/etc/config/log_level</code> with Pod called <code>configmap-pod</code></p>
+    <ul>
+      <li>Docker images are the root of filesystem hierarchy. Volumes mount at specific path within the image.</li>
+      <li>ConfigMap allows injecting configration data into Pods.</li>
+    </ul>
+
+    <p class="card-text"><code>log-config</code> ConfigMap is mounted as a volume at path <code>/etc/config/log_level</code> with Pod called <code>configmap-pod</code>.</p>
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
@@ -2274,7 +2285,8 @@ spec:
         items:
           - key: log_level
             path: log_level</code></pre>
-    <p class="card-text"><code>emptyDir</code> is created when Pod is assigned to Node. When Pod is removed from Node, data is deleted permanently</p>
+
+    <p class="card-text"><code>emptyDir</code> is created when Pod is assigned to Node. When Pod is removed from Node, data is deleted permanently.</p>
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
@@ -2300,6 +2312,7 @@ metadata:
 provisioner: kubernetes.io/gce-pd
 parameters:
   type: pd-standard</code></pre>
+
 <pre><code class="yaml"> # Create storage class "fast" that provisions persistent disks like SSD.
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -2308,6 +2321,7 @@ metadata:
 provisioner: kubernetes.io/gce-pd
 parameters:
   type: pd-ssd</code></pre>
+
     <p class="card-text">Users request dynamically provisioned storage by including a storage class in their <code>PersistentVolumeClaim</code>. When this claim is deleted, the volume gets destroyed.</p>
 <pre><code class="yaml">apiVersion: v1
 kind: PersistentVolumeClaim
@@ -2320,6 +2334,7 @@ spec:
   resources:
     requests:
       storage: 30Gi</code></pre>
+
     <p class="card-text">Cluster admin can make Claims to use dynamic provisioning by default. This is done by marking a specific StorageClass as default by adding <code>storageclass.kubernetes.io/is-default-class</code> annotation to it.</p>
   </div>
   <div class="card-footer text-muted">
@@ -2330,11 +2345,24 @@ spec:
 <div class="card mb-4" id="kubernetes-43">
   <div class="card-body">
     <h2 class="card-title">Persistent Volumes</h2>
-    <p class="card-text">PersistentVolume (PV) is a piece of storage in a cluster. It is similar to Node. PersistentVolumeClaim (PVC) a request for storage by a user. It is similar to Pod. PVC comsume PV resources. While Pod can request CPU and memory, PVC can request specific size and access mode.</p>
+    <ul>
+      <li>PersistentVolume (PV) is a piece of storage in a cluster. It is similar to Node.</li>
+      <li>PersistentVolumeClaim (PVC) a request for storage by a user. It is similar to Pod.</li>
+      <li>PVC comsume PV resources. While Pod can request CPU and memory, PVC can request specific size and access mode.</li>
+    </ul>
+
     <h3 class="card-title">Binding</h3>
-    <p class="card-text">If PV was dynamically provisioned for a PVC, those PV and PVC will bind together. Otherwise, users will get at least what they asked for but volumes maybe at the excess.</p>
+    <ul>
+      <li>If PV was dynamically provisioned for a PVC, those PV and PVC will bind together.</li>
+      <li>Otherwise, users will get at least what they asked for but volumes maybe at the excess.</li>
+    </ul>
+
     <h3 class="card-title">Storage Object in Use Protection</h3>
-    <p class="card-text">If user deletes PVC, deletion is postponed until PVC is not in use by any Pods. If admin deletes PV, deletion is postponed until PV is not bound to PVC.</p>
+    <ul>
+      <li>If user deletes PVC, deletion is postponed until PVC is not in use by any Pods.</li>
+      <li>If admin deletes PV, deletion is postponed until PV is not bound to PVC.</li>
+    </ul>
+
     <h3 class="card-title">Reserving PV</h3>
 <pre><code class="yaml">apiVersion: v1
 kind: PersistentVolume
@@ -2365,6 +2393,7 @@ spec:
   nfs:
     path: /tmp
     server: 172.17.0.2</code></pre>
+
     <h3 class="card-title">PVC</h3>
 <pre><code class="yaml">apiVersion: v1
 kind: PersistentVolumeClaim
@@ -2383,8 +2412,13 @@ spec:
       release: "stable"
     matchExpressions: # a list of requirements
       - {key: environment, operator: In, values: [dev]}</code></pre>
+
     <h3 class="card-title">Claims as Volumns</h3>
-    <p class="card-text">Pods access storage by using Claim as volume. Claim must exist in the same namespace as Pod. The cluster finds Claim in Pods's namespace and uses it to get PV.</p>
+    <ul>
+      <li>Pods access storage by using Claim as volume.</li>
+      <li>Claim must exist in the same namespace as Pod.</li>
+      <li>The cluster finds Claim in Pods's namespace and uses it to get PV.</li>
+    </ul>
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
@@ -2401,8 +2435,7 @@ spec:
     - name: mypd
       persistentVolumeClaim:
         claimName: myclaim
-        readOnly: True  # This overwrites access mode in PV
-      </code></pre>
+        readOnly: True  # This overwrites access mode in PV</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/">Persistent Volumes</a>
@@ -2412,7 +2445,12 @@ spec:
 <div class="card mb-4" id="kubernetes-47">
   <div class="card-body">
     <h2 class="card-title">Volume Snapshots</h2>
-    <p class="card-text"><code>VolumeSnapshotContent</code> - snapshot taken from a volumn. <code>VolumeSnapshot</code> - request for a snapshot by a user. <code>VolumeSnapshot</code> is only available for CSI (Container Storage Interface) drivers. </p>
+    <ul>
+      <li><code>VolumeSnapshotContent</code> - snapshot taken from a volumn.</li>
+      <li><code>VolumeSnapshot</code> - request for a snapshot by a user.</li>
+      <li><code>VolumeSnapshot</code> is only available for CSI (Container Storage Interface) drivers.</li>
+    </ul>
+
     <h3 class="card-title">VS</h3>
 <pre><code class="yaml">apiVersion: snapshot.storage.k8s.io/v1
 kind: VolumeSnapshot
@@ -2422,6 +2460,7 @@ spec:
   volumeSnapshotClassName: csi-hostpath-snapclass
   source:
     persistentVolumeClaimName: pvc-test # name of PVC data source for the snapshot</code></pre>
+
     <h3 class="card-title">VSC</h3>
 <pre><code class="yaml">apiVersion: snapshot.storage.k8s.io/v1
 kind: VolumeSnapshotContent
@@ -2446,14 +2485,19 @@ spec:
 <div class="card mb-4" id="kubernetes-51">
   <div class="card-body">
     <h2 class="card-title">ConfigMap</h2>
-    <p class="card-text">Provides configuration data, which is separate from application code. Data stored in configMap cannot exceed 1MB.</p>
-    <h3 class="card-title">ConfigMap and Pod</h3>
-    <p class="card-text">ConfigMap and Pod must be in the same namespace. There are four ways to use ConfigMap.</p>
     <ul>
-      <li>Container commands (and args)</li>
-      <li>Environment variables</li>
-      <li>Add a file in read-only volume</li>
-      <li>Code inside Pod that uses K8s API to read ConfigMap</li>
+      <li>Provides configuration data, which is separate from application code. Data stored in configMap cannot exceed 1MB.</li>
+    </ul>
+
+    <h3 class="card-title">ConfigMap and Pod</h3>
+    <ul>
+      <li>ConfigMap and Pod must be in the same namespace. There are four ways to use ConfigMap.</li>
+      <ul>
+        <li>Container commands (and args)</li>
+        <li>Environment variables</li>
+        <li>Add a file in read-only volume</li>
+        <li>Code inside Pod that uses K8s API to read ConfigMap</li>
+      </ul>
     </ul>
 <pre><code class="yaml">apiVersion: v1
 kind: ConfigMap
@@ -2716,12 +2760,26 @@ immutable: true</code></pre>
 <div class="card mb-4" id="kubernetes-53">
   <div class="card-body">
     <h2 class="card-title">RBAC</h2>
-    <p class="card-text">To enable RBAC, start the API server with such that</p>
-<pre><code class="bash">kube-apiserver --authorization-mode=Example,RBAC --other-options --more-options</code></pre>
-    <p class="card-text">RBAC API declares four objects: Role, ClusterRole, RoleBinding, CLusterRoleBinding</p>
+    <ul>
+      <li>To enable RBAC, start the API server with such that:
+        <ul>
+          <li><pre><code class="bash">kube-apiserver --authorization-mode=Example,RBAC --other-options --more-options</code></pre></li>
+        </ul>
+      </li>
+      <li>RBAC API declares four objects:
+        <ul>
+          <li>Role</li>
+          <li>ClusterRole</li>
+          <li>RoleBinding</li>
+          <li>CLusterRoleBinding</li>
+        </ul>
+      </li>
+    </ul>
 
     <h3 class="card-title">Role</h3>
-    <p class="card-text">Role sets permission with a particular namespace.</p>
+    <ul>
+      <li>Role sets permission with a particular namespace.</li>
+    </ul>
 <pre><code class="yaml">apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -2733,7 +2791,9 @@ rules:
   verbs: ["get", "watch", "list"]</code></pre>
 
     <h3 class="card-title">ClusterRole</h3>
-    <p class="card-text">ClusterRole is a cluster-wide, non-namespaced resource.</p>
+    <ul>
+      <li>ClusterRole is a cluster-wide, non-namespaced resource.</li>
+    </ul>
 <pre><code class="yaml">apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -2748,7 +2808,9 @@ rules:
     verbs: ["get", "watch", "list"]</code></pre>
 
     <h3 class="card-title">RoleBidning</h3>
-    <p class="card-text">RoleBinding grants permissions defined in a Role to users.</p>
+    <ul>
+      <li>RoleBinding grants permissions defined in a Role to users.</li>
+    </ul>
 <pre><code class="yaml">apiVersion: rbac.authorization.k8s.io/v1
 # This role binding allows "dave" to read secrets in the "development" namespace.
 # You need to already have a ClusterRole named "secret-reader".
@@ -2769,7 +2831,9 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io</code></pre>
 
     <h3 class="card-title">ClusterRoleBinding</h3>
-    <p class="card-text">ClusterRoleBinding grants permission across the whole cluster.</p>
+    <ul>
+      <li>ClusterRoleBinding grants permission across the whole cluster.</li>
+    </ul>
 <pre><code class="yaml">apiVersion: rbac.authorization.k8s.io/v1
 # This cluster role binding allows anyone in the "manager" group to read secrets in any namespace.
 kind: ClusterRoleBinding
@@ -2785,7 +2849,9 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io</code></pre>
 
     <h3 class="card-title">Aggregated ClusterRole</h3>
-    <p class="card-text">Aggregate serveral ClusterRoles into one ClusterRole.</p>
+    <ul>
+      <li>Aggregate serveral ClusterRoles into one ClusterRole.</li>
+    </ul>
 <pre><code class="yaml">apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
