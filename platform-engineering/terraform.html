@@ -43,7 +43,7 @@
   <div class="card-body">
     <h2 class="card-title">Terraform</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#terraform-1">Terraform with Google Cloud</a></li>
+      <li><a href="#terraform-1">Terraform basic</a></li>
       <li><a href="#terraform-2">Terraform on GCP - Kubernetes</a></li>
       <li><a href="#terraform-3">Terraform on GCP - storage</a></li>
       <li><a href="#terraform-4">Terraform with GCP - common errors</a></li>
@@ -71,10 +71,10 @@
 
     <h3 class="card-title">Command</h3>
     <ul>
-      <li>terraform init: install plugins.</li>
-      <li>terraform plan: preview the change.</li>
-      <li>terraform apply: make the planned changes.</li>
-      <li>terraform destroy (this command tears down instances deployed)</li>
+      <li><code>terraform init</code> - install plugins.</li>
+      <li><code>terraform plan</code> - preview the change.</li>
+      <li><code>terraform apply</code> - make the planned changes.</li>
+      <li><code>terraform destroy</code> - tear down instances deployed.</li>
     </ul>
 
     <h3 class="card-title">Installation (Ubuntu)</h3>
@@ -92,7 +92,7 @@ sudo apt-get install terraform
 
 terraform -v</code></pre>
 
-    <h3 class="card-title">Installation (version 0.11.13) (CentOS)</h3>
+    <h3 class="card-title">Installation (CentOS) - version 0.11.13</h3>
 <pre><code class="bash">yum install -y zip unzip
 wget https://releases.hashicorp.com/terraform/0.9.8/terraform_0.11.13_linux_amd64.zip
 unzip terraform_0.11.13_linux_amd64.zip
@@ -301,7 +301,6 @@ resource "google_storage_notification" "notification" {
 <div class="card mb-4" id="terraform-6">
   <div class="card-body">
     <h2 class="card-title">Terraform on AWS</h2>
-    <p class="card-text"></p>
 
     <h3 class="card-title">How to get access key</h3>
     <img class="img-fluid" class="card-img-top" src="/img/terraform/terraform1.png" alt="Card image cap">
@@ -309,25 +308,29 @@ resource "google_storage_notification" "notification" {
     <br>
     <br>
 
+    <h3 class="card-title">In the shell, create environment variables such that</h3>
 <pre><code class="bash">export AWS_ACCESS_KEY_ID=
 export AWS_SECRET_ACCESS_KEY=</code></pre>
 
     <h3 class="card-title">main.tf</h3>
-<pre><code class="terraform">terraform {
+<pre><code class="terraform"># Terraform setting.
+terraform {
   required_providers {
     aws = {
-      source  = "hashicorp/aws"
-      version = "~> 4.16"
+      source  = "hashicorp/aws"  # Short hand for "registry.terraform.io/hashicorp/aws".
+      version = "~> 4.16"  # If not specified, defaults to the latest version.
     }
   }
 
   required_version = ">= 1.2.0"
 }
 
+# Provider setting.
 provider "aws" {
   region  = "us-west-2"
 }
 
+# Infrastructure setting.
 resource "aws_instance" "app_server" {
   ami           = "ami-830c94e3"
   instance_type = "t2.micro"
