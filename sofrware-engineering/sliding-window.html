@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="/img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/monokai-sublime.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="/js/jquery.min.js"></script>
+<script src="/js/bootstrap.bundle.min.js"></script>
+<script src="/js/highlight.pack.js"></script>
+<script type="text/javascript" src="/js/include_html.js"></script>
+<script type="text/javascript" src="/js/site.js"></script>
+
+</head>
+
+<body>
+
+<include src="/header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Software Engineering</h1>
+
+<!-- Sliding window BEGIN -->
+<div class="card mb-4" id="subject">
+  <div class="card-body">
+    <h2 class="card-title">Sliding window</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#sliding-window-1">Sliding window</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="sliding-window-1">
+  <div class="card-body">
+    <h2 class="card-title">Sliding window</h2>
+    <ul>
+      <li>Variation of two pointers pattern.</li>
+      <li>Process data in segments rather than the entire list.</li>
+      <li>Size of window may or may not be fixed.</li>
+    </ul>
+
+    <h3 class="card-title">Example</h3>
+    <ul>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+    </ul>
+
+<pre><code class="python"></code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/courses/grokking-coding-interview-patterns-python">Grokking Coding Interview Patterns in Python</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="sliding-window-2">
+  <div class="card-body">
+    <h2 class="card-title">Find maximum in sliding window</h2>
+
+    <h3 class="card-title">Navie: iterate each window and compute the max</h3>
+    <ul>
+      <li>Time: O(nw) where n is list length and w is size of window.</li>
+      <li>Space: O(1) there is no extra space used during computation.</li>
+    </ul>
+
+<pre><code class="python">def find_max_sliding_window(nums, window_size):
+
+    result = []
+    start = 0
+    end = window_size
+
+    while end <= len(nums):
+        result.append(max(nums[start:end]))
+        start +=1
+        end += 1
+
+    return result</code></pre>
+
+    <h3 class="card-title">Use a queue to keep the maximum</h3>
+    <ul>
+      <li>Keep the maximum number at the front of the queue. (We can do this by popping out all smaller numbers than the current number)</li>
+      <li>First, compute the maximum number in the first window.</li>
+      <li>Then, everytime a window moves
+        <ul>
+          <li>Pop out all smaller numbers than the current number.</li>
+          <li>Remove previous number, which is now outside of the window, from the queue.</li>
+          <li>Appending the first item in the queue to the result.</li>
+        </ul>
+      </li>
+      <li>Time: O(n) where n is list length.</li>
+      <li>Space: O(w) where w is the window size.</li>
+    </ul>
+
+<pre><code class="python">from collections import deque
+
+def find_max_sliding_window(nums, window_size):
+    result = []
+    queue = deque()
+
+    # Compute the maximum in the first window.
+    for i in range(window_size):
+
+        # Pop out all smaller items than the current item
+        # by removing last items in the queue.
+        # Then the first itme in the queue will always
+        # contains the maximum item.
+        while queue and nums[queue[-1]] < nums[i]:
+            queue.pop()
+        queue.append(i)
+
+    result.append(nums[queue[0]])
+
+    # Move the window
+    for i in range(window_size, len(nums)):
+
+        while queue and nums[queue[-1]] < nums[i]:
+            queue.pop()
+        queue.append(i)
+
+        # Remove all indexes in the queue that is before
+        # and outside than the current window.
+        while queue and queue[0] <= (i - window_size):
+            queue.popleft()
+
+        result.append(nums[queue[0]])
+
+    return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/courses/grokking-coding-interview-patterns-python">Grokking Coding Interview Patterns in Python</a>
+  </div>
+</div>
+<!-- Sliding window END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+</html>
