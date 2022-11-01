@@ -46,7 +46,7 @@
       <li><a href="#database-1">Distributed Systems</a></li>
       <li><a href="#database-2">DB Basic</a></li>
       <li><a href="#database-3">SQL vs NoSQL</a></li>
-      <li><a href="#database-4">Data partitioning</a></li>
+      <li><a href="#database-4">Partitioning</a></li>
       <li><a href="#database-5">Join</a></li>
     </ul>
   </div>
@@ -55,6 +55,12 @@
 <div class="card mb-4" id="database-1">
   <div class="card-body">
     <h2 class="card-title">Distributed Systems</h2>
+    <ul>
+      <li></li>
+      <li></li>
+      <li></li>
+      <li></li>
+    </ul>
 
     <h3 class="card-title">Scalability</h3>
     <p class="card-text">Capability to manage increased demand.</p>
@@ -74,9 +80,23 @@
     </ul>
 
     <h3 class="card-title">Availability</h3>
-    <p class="card-text">Time that systems remain operational.</p>
     <ul>
+      <li>Ability of the system to remain functional despite failures.</li>
+      <li>Achieved by replication.</li>
       <li>Reliability means availability, but the opposite is not true.</li>
+    </ul>
+
+    <h4 class="card-title">Single-master replication (Primary-backup replication)</h4>
+    <ul>
+      <li>Primary processes updates locally and propagates updates to backups.</li>
+      <li>Synchrounous - primary responds to client after receving acknowledgements from all backups.</li>
+      <li>Asynchrounous - primary responds to client without receving acknowledgements from all backups.</li>
+      <li>Scalable for read-heavy (read can happen from any backups) but not so for write-heavy. (only primary can handle writes)</li>
+    </ul>
+
+    <h4 class="card-title">Multi-master replication (multi-primary replication)</h4>
+    <ul>
+      <li>All replicas can accept write requests.</li>
     </ul>
 
     <h3 class="card-title">Strategies to achieve scalability and performance</h3>
@@ -122,7 +142,7 @@
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/courses/grokking-the-system-design-interview/YQWGjlZZVz9">Key Characteristics of Distributed Systems</a>
+    Reference: <a href="https://www.educative.io/courses/grokking-the-system-design-interview">Grokking the System Design Interview</a> | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
   </div>
 </div>
 
@@ -195,41 +215,36 @@
 
 <div class="card mb-4" id="database-4">
   <div class="card-body">
-    <h2 class="card-title">Data partitioning</h2>
+    <h2 class="card-title">Partitioning</h2>
     <p class="card-text">It is cheaper to add more servers than growing the existing server as data increases.</p>
-
-    <h3 class="card-title">Horizontal partitioning</h3>
-    <ul>
-      <li>Also known as range-based paritioning or data sharding.</li>
-      <li>Puts different rows to different tables.</li>
-      <li>May result in unbalanced servers if partitioning sheme is bad.</li>
-    </ul>
 
     <h3 class="card-title">Vertical partitioning</h3>
     <ul>
-      <li>Divides tables into different servers based on features of data.</li>
+      <li>Divides tables into different servers based on features of data. (Split columns)</li>
       <li>Problem when data experiences additional growth.</li>
-    </ul>
-    <h3 class="card-title">Directory-Based Partitioning</h3>
-    <ul>
-      <li>Lookup service that maps its key to data in DB.</li>
+      <li>Queries must hit multiple servers and join operations are needed.</li>
     </ul>
 
-    <h3 class="card-title">Key/Hash-based partitioning</h3>
+    <h3 class="card-title">Horizontal partitioning (Sharding)</h3>
+    <ul>
+      <li>Puts different rows to different tables.</li>
+      <li>Atomic operation is hard to achieve.</li>
+    </ul>
+
+    <h4 class="card-title">Range partitioning</h4>
+    <ul>
+      <li>Split dataset based on specific attribute.</li>
+      <li>May result in unbalanced servers.</li>
+    </ul>
+
+    <h4 class="card-title">Hash partitioning</h4>
     <ul>
       <li>Apply hash function to some attribute of data.</li>
       <li>Uniform allocation of data across servers.</li>
       <li>Adding new servers mean changing hash function and redistribution of data.</li>
     </ul>
 
-    <h3 class="card-title">Problems with partitioning</h3>
-    <ul>
-      <li>Joins are inefficient, so denormalization is required. This means dealing with data inconsistency problem.</li>
-      <li>Applying foreign keys in partitioned DB is hard.</li>
-      <li>There could be a lot of load on a single partition.</li>
-    </ul>
-
-    <h3 class="card-title">Consistent hashing (without V-node)</h3>
+    <h4 class="card-title">Consistent hashing (without V-node)</h4>
     <ul>
       <li>Only small number of keys move when servers are added or removed.</li>
       <li>Example: hash range is 1-100, number of nodes is 4.
@@ -240,10 +255,11 @@
           <li>All data in range 76-100 is stored in server 4.</li>
         </ul>
       <li>Apply hash function (MD5) on the key of data to determine which node to place the data.</li>
-      <li>When nodes are added or removed, only the next node is affected. </li>
+      <li>When nodes are added or removed, only the next node is affected.</li>
+      <li>Imbalanced data distribution as nodes are added or removed.</li>
     </ul>
 
-    <h3 class="card-title">Consistent hashing (with V-node)</h3>
+    <h4 class="card-title">Consistent hashing (with V-node)</h4>
     <ul>
       <li>Each node gets mutiple hash ranges and these hash ranges are randomly distributed across the nodes.</li>
       <li>Node carry replicating hash ranges for fault tolerance. (Some nodes may carry more V-nodes than others)</li>
@@ -252,7 +268,7 @@
 
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/courses/grokking-the-system-design-interview/mEN8lJXV1LA">Data Partitioning</a>
+    Reference: <a href="https://www.educative.io/courses/grokking-the-system-design-interview">Grokking the System Design Interview</a> | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
   </div>
 
   <div class="card mb-4" id="database-5">
