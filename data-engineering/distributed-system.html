@@ -130,10 +130,10 @@
       <li>Adding new servers mean changing hash function and redistribution of data.</li>
     </ul>
 
-    <h4 class="card-title">Consistent hashing (without V-node)</h4>
+    <h4 class="card-title">Consistent hashing</h4>
     <ul>
       <li>Only small number of keys move when servers are added or removed.</li>
-      <li>Example: hash range is 1-100, number of nodes is 4.
+      <li>Example (without virtual node): hash range is 1-100, number of nodes is 4.
         <ul>
           <li>All data in range 1-25 is stored in server 1.</li>
           <li>All data in range 26-50 is stored in server 2.</li>
@@ -141,17 +141,21 @@
           <li>All data in range 76-100 is stored in server 4.</li>
         </ul>
       <li>Apply hash function (MD5) on the key of data to determine which node to place the data.</li>
-      <li>When nodes are added or removed, only the next node is affected.</li>
-      <li>Imbalanced data distribution as nodes are added or removed.</li>
+      <li>Virtual node
+        <ul>
+          <li>Each node gets mutiple hash ranges and these hash ranges are randomly distributed across the nodes.</li>
+          <li>Node carry replicating hash ranges for fault tolerance. (Some nodes may carry more V-nodes than others)</li>
+          <li>Used in Dynamo and Cassandra.</li>
+        </ul>
+      </li>
+      <li>Why virtual node
+        <ul>
+          <li>When a node is added, it receives many v-nodes from the existing nodes to maintain balanced cluster.</li>
+          <li>When a node is removed, v-nodes are spread across many nodes.</li>
+          <li>Random distributed of subranges decreases probability of hotspots.</li>
+        </ul>
+      </li>
     </ul>
-
-    <h4 class="card-title">Consistent hashing (with V-node)</h4>
-    <ul>
-      <li>Each node gets mutiple hash ranges and these hash ranges are randomly distributed across the nodes.</li>
-      <li>Node carry replicating hash ranges for fault tolerance. (Some nodes may carry more V-nodes than others)</li>
-      <li>Used in Dynamo and Cassandra.</li>
-    </ul>
-
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.educative.io/courses/grokking-the-system-design-interview">Grokking the System Design Interview</a> | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
