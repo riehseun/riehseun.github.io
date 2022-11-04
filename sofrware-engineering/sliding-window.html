@@ -169,12 +169,13 @@ if window_size == 0 \
 
     <h3 class="card-title">1. Use hash table to store indexes where each character appears.</h3>
     <ul>
-      <li>Time: O(n) where n is length of str1.</li>
+      <li>Time: O(n^2) where n is length of str1.</li>
       <li>Space: O(n) where n is length of str1.</li>
     </ul>
 
-<pre><code class="python">def min_window(str1, str2):
+<pre><code class="python">import math
 
+def min_window(str1, str2):
     char = {}
 
     for i in range(len(str1)):
@@ -182,34 +183,61 @@ if window_size == 0 \
             char[str1[i]] = []
         char[str1[i]].append(i)
 
-    index_array = []
+    candidate_strings = []
+    first_match = str2[0]
+    all_other_matches = str2[1:]
 
-    # Most possible number of checks will not exceed the number
-    # of characters in str1.
-    for c in str2:
-        if c not in char:
-            return ""
+    if first_match not in char:
+        return ""
 
-        for index in char[c]:
-            if not index_array:
-                # Append the smallest index.
-                index_array.append(index)
+    # Must interate all indices of first chracter match.
+    # Construct shortest valid string starting at each first character match.
+    for index in char[first_match]:
+        index_array = []
+        index_array.append(index)
+
+        # Most possible number of checks will not exceed the number
+        # of characters in str1.
+        for c in all_other_matches:
+            if c not in char:
                 break
-            else:
+
+            for index in char[c]:
                 # Append the smallest index possible.
                 if index > index_array[-1]:
                     index_array.append(index)
                     break
 
-    return str1[index_array[0]:index_array[-1]+1]</code></pre>
+        if len(index_array) >= len(str2):
+            candidate_strings.append(str1[index_array[0]:index_array[-1]+1])
 
-    <h3 class="card-title">1. Use two pointers.</h3>
+    min_length = math.inf
+    min_string = ""
+    for string in candidate_strings:
+        if len(string) < min_length:
+            min_length = len(string)
+            min_string = string
+
+    return min_string</code></pre>
+
+    <h3 class="card-title">2. Use two pointers.</h3>
     <ul>
       <li>Increment index of str1 until all characters in str2 is found in str1.</li>
       <li>Space: O(n) where n is length of str1.</li>
     </ul>
 
+    <h3 class="card-title">Test cases</h3>
+    <ul>
+      <li>First matching character is not part of the solution ("aoeratburcuboerterucotrt", "abc")</li>
+      <li>There is no solution (beta, ab)</li>
+      <li>length of str2 is greater than length of str1 (beta, betac)</li>
+      <li>str1 is empty ("", abc)</li>
+      <li>str2 is empty ("abc", "")</li>
+    </ul>
 
+    <pre><code class="python"># Add this code block in the function.
+if not str1 or not str2 or len(str2) > len(str1):
+    return ""</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.educative.io/courses/grokking-coding-interview-patterns-python">Grokking Coding Interview Patterns in Python</a>
