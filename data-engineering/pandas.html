@@ -184,6 +184,146 @@ mlb_merged = pd.merge(mlb_df1, mlb_df2)
 # 0  john doe  1B  2000   80
 # 1  al smith   C  2004  100</code></pre>
 
+    <h3 class="card-title">Indexing</h3>
+
+<pre><code class="python">df = pd.DataFrame({'c1': [1, 2], 'c2': [3, 4],
+                   'c3': [5, 6]}, index=['r1', 'r2'])
+
+col1 = df['c1']
+# r1    1
+# r2    2
+# Name: c1, dtype: int64</code></pre>
+
+<pre><code class="python">df = pd.DataFrame({'c1': [1, 2, 3], 'c2': [4, 5, 6],
+                   'c3': [7, 8, 9]}, index=['r1', 'r2', 'r3'])
+
+# First two rows.
+df[0:2]
+#     c1  c2  c3
+# r1   1   4   7
+# r2   2   5   8
+# r3   3   6   9
+
+# Last two rows.
+df['r2':'r3']
+#     c1  c2  c3
+# r1   1   4   7
+# r2   2   5   8
+
+df.iloc[1]
+# c1    2
+# c2    5
+# c3    8
+# Name: r2, dtype: int64
+
+df.iloc[[0, 2]]
+#     c1  c2  c3
+# r1   1   4   7
+# r3   3   6   9
+
+df.loc['r2']
+# c1    2
+# c2    5
+# c3    8
+# Name: r2, dtype: int64</code></pre>
+
+    <h3 class="card-title">CSV</h3>
+
+<pre><code class="python">df = pd.read_csv('data.csv')
+#         name pos  HR
+# 0  joe smith  2B  17
+# 1  alan west   C  28
+# 2   john doe   P  19
+
+df = pd.read_csv('data.csv', index_col=0)
+#           pos  HR
+# name
+# joe smith  2B  17
+# alan west   C  28
+# john doe    P  19
+
+df = pd.read_csv('data.csv', index_col=1)
+#           name  HR
+# pos
+# 2B   joe smith  17
+# C    alan west  28
+# P     john doe  19
+
+# Write to csv.
+df.to_csv('data.csv')</code></pre>
+
+    <h3 class="card-title">JSON</h3>
+
+<pre><code class="python">data
+# {'tom june': {'pos': 'P', 'HR': 31}, 'jack doe': {'pos': '1B', 'HR': 4}}
+
+df = pd.read_json('data.json')
+#     tom june jack doe
+# pos        P       1B
+# HR        31        4
+
+df = pd.read_json('data.json', orient='index')
+#          pos  HR
+# tom june   P  31
+# jack doe  1B   4
+
+# Write to json.
+df.to_json('data.json')</code></pre>
+
+    <h3 class="card-title">Grouping</h3>
+
+<pre><code class="python">df
+#    yearID teamID     H    R
+# 0    2017    CLE  1449  818
+# 1    2015    CLE  1395  669
+# 2    2016    BOS  1598  878
+# 3    2015    DET  1515  689
+# 4    2016    DET  1476  750
+# 5    2016    CLE  1435  777
+# 6    2015    BOS  1495  748
+# 7    2017    BOS  1461  785
+# 8    2017    DET  1435  735
+
+groups = df.groupby('yearID')
+groups.get_group(2016))
+#    yearID teamID     H    R
+# 2    2016    BOS  1598  878
+# 4    2016    DET  1476  750
+# 5    2016    CLE  1435  777
+
+groups.sum()
+#            H     R
+# yearID
+# 2015    4405  2106
+# 2016    4509  2405
+# 2017    4345  2338
+
+groups.mean()
+#                  H           R
+# yearID
+# 2015    1468.333333  702.000000
+# 2016    1503.000000  801.666667
+# 2017    1448.333333  779.333333
+
+groups.filter(lambda x: x.name > 2015)
+#    yearID teamID     H    R
+# 0    2017    CLE  1449  818
+# 2    2016    BOS  1598  878
+# 4    2016    DET  1476  750
+# 5    2016    CLE  1435  777
+# 7    2017    BOS  1461  785
+# 8    2017    DET  1435  735</code></pre>
+
+<pre><code class="python">groups = player_df.groupby(['yearID', 'teamID'])
+
+groups.sum()
+#                  H
+# yearID teamID
+# 2016   BOS     607
+#        HOU     374
+# 2017   BOS     441
+#        HOU     337</code></pre>
+
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>

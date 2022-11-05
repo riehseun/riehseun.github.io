@@ -223,15 +223,62 @@ def min_window(str1, str2):
     <h3 class="card-title">2. Use two pointers.</h3>
     <ul>
       <li>Increment index of str1 until all characters in str2 is found in str1.</li>
-      <li>Space: O(n) where n is length of str1.</li>
+      <li>Time: O(n) where n is length of str1.</li>
+      <li>Space: O(1) no extra space needed.</li>
     </ul>
+
+<pre><code class="python">import math
+
+def min_window(str1, str2):
+
+    result = ""
+    min_distance = len(str1) + 1
+
+    index1 = 0
+    index2 = 0
+
+    while index1 < len(str1):
+
+        if str1[index1] == str2[index2]:
+            index2 += 1
+
+            # At this point, str1 contains all chracters of str2.
+            # index1 is at the last matching character.
+            # index2 is at the last matching character plus 1.
+            if index2 == len(str2):
+                # Bring the index2 to the last index of str2.
+                index2 -= 1
+                # Idea: the last chracter in this range is guaranteeed to
+                #       be the part of the solution in this range.
+
+                start = index1
+                end = index1
+
+                while index2 >= 0:
+                    if str1[start] == str2[index2]:
+                        index2 -= 1
+                    start -= 1
+
+                # When index2 is less than 0, then we covered all characters in
+                # str2.
+                # Reset the position of index2 to 0. (At this point, it would be -1)
+                index2 = 0
+
+                if end - start < min_distance:
+                    min_distance = end - start
+                    result = str1[start+1:end+1]
+
+        index1 += 1
+
+    return result</code></pre>
 
     <h3 class="card-title">Test cases</h3>
     <ul>
       <li>First matching character is not part of the solution ("aoeratburcuboerterucotrt", "abc")</li>
-      <li>There is no solution (beta, ab)</li>
-      <li>length of str2 is greater than length of str1 (beta, betac)</li>
-      <li>str1 is empty ("", abc)</li>
+      <li>First and last matching character is at the each end of str1 ("afgegrwgwga" , "aa")</li>
+      <li>There is no solution ("beta", "ab")</li>
+      <li>length of str2 is greater than length of str1 ("beta", "betac")</li>
+      <li>str1 is empty ("", "abc")</li>
       <li>str2 is empty ("abc", "")</li>
     </ul>
 
