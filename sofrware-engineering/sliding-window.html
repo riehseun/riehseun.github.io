@@ -57,14 +57,6 @@
       <li>Size of window may or may not be fixed.</li>
     </ul>
 
-    <h3 class="card-title">Example</h3>
-    <ul>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-    </ul>
-
 <pre><code class="python"></code></pre>
   </div>
   <div class="card-footer text-muted">
@@ -412,6 +404,58 @@ if k >= len(s) or k == 0:
     <ul>
       <li>Either len(s) or len(t) is 0. ("" , "ABC"), ("ABCD" , "")</li>
       <li>The number of unique chars in t is greater than the number of unique chars in s. ("ABCDDA" , "ABCEF")</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/courses/grokking-coding-interview-patterns-python">Grokking Coding Interview Patterns in Python</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="sliding-window-6">
+  <div class="card-body">
+    <h2 class="card-title">Longest substring without repeating characters</h2>
+
+    <h3 class="card-title">1. Use two pointers and a hash table.</h3>
+    <ul>
+      <li>Iterate the string by moving end pointer from the beginning to the end.</li>
+      <li>Start pointer is placed at an index for each substring without repeating characters.</li>
+      <li>A hash table stores each character and its last occuring index.</li>
+      <li>If duplicate chacter is found, move the start pointer, computer the substring length, and update the hash map.</li>
+      <li>Else, just update the hash map with the new character.</li>
+      <li>Time: O(len(input_string)).</li>
+      <li>Space: O(len(input_string)).</li>
+    </ul>
+
+<pre><code class="python">def find_longest_substring(input_string):
+
+   start = 0
+   max_length = 0
+   # Store chracter and its index.
+   char_map = {}
+
+   # Time: O(len(input_string)).
+   # Space: O(len(input_string)).
+   for i in range(len(input_string)):
+
+      # If duplicate is found, compute the length using start and the i pointer.
+      # The second condition ensures that we are only looking at the substring
+      # after the start index.
+      if input_string[i] in char_map and char_map[input_string[i]] >= start:
+         max_length = max(max_length, i-start)
+         # Move the start pointer to plus 1 of the index where the duplicate is.
+         start = char_map[input_string[i]] + 1
+      char_map[input_string[i]] = i
+
+   max_length = max(max_length, len(input_string)-start)
+
+   return max_length
+</code></pre>
+
+    <h3 class="card-title">Test cases</h3>
+    <ul>
+      <li>Entire string consists of a single char. ("aaaaaaaaaaaaaaaaa")</li>
+      <li>String is empty. ("")</li>
+      <li>Repeat of the same substring. ("ababababab")</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
