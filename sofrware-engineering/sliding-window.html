@@ -333,6 +333,91 @@ if k >= len(s) or k == 0:
     Reference: <a href="https://www.educative.io/courses/grokking-coding-interview-patterns-python">Grokking Coding Interview Patterns in Python</a>
   </div>
 </div>
+
+<div class="card mb-4" id="sliding-window-5">
+  <div class="card-body">
+    <h2 class="card-title">Mimimum window substring</h2>
+
+    <h3 class="card-title">1. Use two pointers and two hash tables.</h3>
+    <ul>
+      <li>Prepare start and end pointers and two hash tables for s and t.</li>
+      <li>Compute occurance of each character in t and store it in a hash table.</li>
+      <li>Iterate s by incrementing the end pointer until the substring contains all chars in t. Remember this substring.</li>
+      <li>This substring may not be the "minimum" window substring. Now increment the start pointer.</li>
+      <ul>
+        <li>If the substring contains all chars in t, keep incrementing the start pointer. (as long as start <= end)</li>
+        <li>Otherwise, increment the end pointer.</li>
+      </ul>
+      <li>Time: O(len(s)).</li>
+      <li>Space: O(len(t)).</li>
+    </ul>
+
+<pre><code class="python">def min_window(s, t):
+
+    # In count_s, we will store the count of only the characters
+    # that exist in t.
+    count_s = {}
+    count_t = {}
+
+    min_length = len(s) + 1
+    min_substring = ""
+
+    for c in t:
+        if c not in count_t:
+            count_t[c] = 0
+        count_t[c] += 1
+
+    start = 0
+    end = 0
+
+    # Time O(len(s))
+    # Space O(len(t))
+    while start <= end and end <= len(s):
+
+        if count_s.keys() == count_t.keys():
+
+            if end - start < min_length:
+                min_length = end - start
+                min_substring = s[start:end]
+
+            # Whenever "start" pointer moves forward, must remove
+            # the previous chracter from count_s set.
+            # This block must come before incrementing the start pointer!
+            if s[start] in count_t:
+                if count_s[s[start]] > 1:
+                    count_s[s[start]] -= 1
+                else:
+                    del count_s[s[start]]
+
+            start += 1
+
+        else:
+            # If covered the last character in s,
+            # increment the start pointer until it reaches the end.
+            if end == len(s):
+                start += 1
+            else:
+                # Update count_s dictionary each time "end" pointer moves.
+                # This block must come before incrementing the end pointer!
+                if s[end] in count_t:
+                    if s[end] not in count_s:
+                        count_s[s[end]] = 0
+                    count_s[s[end]] += 1
+
+                end += 1
+
+    return min_substring</code></pre>
+
+    <h3 class="card-title">Test cases</h3>
+    <ul>
+      <li>Either len(s) or len(t) is 0. ("" , "ABC"), ("ABCD" , "")</li>
+      <li>The number of unique chars in t is greater than the number of unique chars in s. ("ABCDDA" , "ABCEF")</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/courses/grokking-coding-interview-patterns-python">Grokking Coding Interview Patterns in Python</a>
+  </div>
+</div>
 <!-- Sliding window END -->
 
 </div> <!-- /.col-md-12 -->
