@@ -287,10 +287,10 @@ if not str1 or not str2 or len(str2) > len(str1):
   <div class="card-body">
     <h2 class="card-title">Repeated DNA subsequence</h2>
 
-    <h3 class="card-title">1. Use hash table to store occurances of all substrings wtih length k.</h3>
+    <h3 class="card-title">1. Use hash table to store occurances of all substrings with length k.</h3>
     <ul>
-      <li>Time: O(n) where n is length of string.</li>
-      <li>Space: O(len(s)-k) number of substring to store is len(s)-k.</li>
+      <li>Time: O(k * len(s)).</li>
+      <li>Space: O(len(s)-k) where number of substring to store is len(s)-k.</li>
     </ul>
 
 <pre><code class="python">def find_repeated_sequences(s, k):
@@ -362,8 +362,6 @@ if k >= len(s) or k == 0:
     start = 0
     end = 0
 
-    # Time O(len(s))
-    # Space O(len(t))
     while start <= end and end <= len(s):
 
         if count_s.keys() == count_t.keys():
@@ -433,8 +431,6 @@ if k >= len(s) or k == 0:
    # Store chracter and its index.
    char_map = {}
 
-   # Time: O(len(input_string)).
-   # Space: O(len(input_string)).
    for i in range(len(input_string)):
 
       # If duplicate is found, compute the length using start and the i pointer.
@@ -448,14 +444,67 @@ if k >= len(s) or k == 0:
 
    max_length = max(max_length, len(input_string)-start)
 
-   return max_length
-</code></pre>
+   return max_length</code></pre>
 
     <h3 class="card-title">Test cases</h3>
     <ul>
       <li>Entire string consists of a single char. ("aaaaaaaaaaaaaaaaa")</li>
       <li>String is empty. ("")</li>
       <li>Repeat of the same substring. ("ababababab")</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/courses/grokking-coding-interview-patterns-python">Grokking Coding Interview Patterns in Python</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="sliding-window-7">
+  <div class="card-body">
+    <h2 class="card-title">Minimum size subarray sum</h2>
+
+    <h3 class="card-title">1. Use two pointers.</h3>
+    <ul>
+      <li>Iterate the array with start and end pointers.</li>
+      <li>Move the end pointer until the sum is >= target. Store the legnth of subarray.</li>
+      <li>Then, move the start pointer until the sum is < target.</li>
+      <li>Continue until both start and end finish.</li>
+      <li>Time O(len(nums)).</li>
+      <li>Space O(1).</li>
+    </ul>
+
+<pre><code class="python">def min_sub_array_len(target, nums):
+
+    if sum(nums) < target:
+        return 0
+
+    min_length = len(nums)
+
+    start = 0
+    end = 0
+
+    # Move end pointer until the sum is >= target
+    # Then, move start pointer until the sum is < target
+    # Continue until both start and end finish
+
+    while start <= end and end < len(nums):
+
+        if sum(nums[start:end+1]) >= target:
+            min_length = min(min_length, end-start+1)
+            start += 1
+        else:
+            # If end pointer reached the end of string.
+            if end == len(nums) - 1:
+                start += 1
+            else:
+                end += 1
+
+    return min_length</code></pre>
+
+    <h3 class="card-title">Test cases</h3>
+    <ul>
+      <li>Empty array. (12, [])</li>
+      <li>Single element. (0, [1])</li>
+      <li>Impossible case. (9, [2,2])</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
