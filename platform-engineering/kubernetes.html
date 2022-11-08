@@ -133,53 +133,58 @@
 
     <h3 class="card-title">Control plane</h3>
     <ul>
-      <li>kube-apiserver
-        <ul>
-          <li>Exposes Kubernetes API.</li>
-        </ul>
-      </li>
-      <li>etcd
-        <ul>
-          <li>Stores cluster data.</li>
-        </ul>
-      </li>
-      <li>kube-scheduler
-        <ul>
-          <li>Assigns Pods to Nodes.</li>
-        </ul>
-      </li>
-      <li>kube-controller-manager
-        <ul>
-          <li>Node controller: notice and respond when Nodes are down.</li>
-          <li>Replication controller: ensures correct number of Pods are running.</li>
-          <li>Endpoint controller: populates Endpoint object.</li>
-          <li>Service Account & Token controller: creates accounts ad API tokens for new namespaces.</li>
-        </ul>
-      </li>
-      <li>cluster-controller-manager
-        <ul>
-          <li>Cloud specific control logic.</li>
-        </ul>
-      </li>
+      <li>Running 3 or 5 replicated masters in an HA configuration is recommended.</li>
+      <li>kube-apiserver</li>
+      <ul>
+        <li>Exposes Kubernetes API.</li>
+        <li>All communication, between all components, must go through the API server.</li>
+      </ul>
+      <li>Cluster store</li>
+      <ul>
+        <li>based on <strong>etcd</strong>, a popular distributed database</li>
+        <li>Stores cluster data.</li>
+        <li>Should run between 3-5 etcd replicas for high availability.</li>
+      </ul>
+      <li>kube-scheduler</li>
+      <ul>
+        <li>Assigns Pods to Nodes.</li>
+      </ul>
+      <li>kube-controller-manager</li>
+      <ul>
+        <li>Node controller: notice and respond when Nodes are down.</li>
+        <li>Replication controller: ensures correct number of Pods are running.</li>
+        <li>Endpoint controller: populates Endpoint object.</li>
+        <li>Service Account & Token controller: creates accounts ad API tokens for new namespaces.</li>
+      </ul>
+      <li>cluster-controller-manager</li>
+      <ul>
+        <li>Cloud specific control logic.</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Node component</h3>
     <ul>
-      <li>kubelet
-        <ul>
-          <li>Ensures containers are running in Pod.</li>
-        </ul>
-      </li>
-      <li>kube-proxy
-        <ul>
-          <li>Network rules on Nodes.</li>
-        </ul>
-      </li>
-      <li>Container runtime
-        <ul>
-          <li>Ex. Docker</li>
-        </ul>
-      </li>
+      <li>kubelet</li>
+      <ul>
+        <li>Registers the node with the cluster.</li>
+        <li>Watches the API server for new work assignments.</li>
+      </ul>
+
+      <li>kube-proxy</li>
+      <ul>
+        <li>Local cluster network rules.</li>
+      </ul>
+
+      <li>Container runtime</li>
+      <ul>
+        <li>Ex. <code>cri-containerd</code></li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">DNS</h3>
+    <ul>
+      <li>Kubernetes cluster has an internal DNS service.</li>
+      <li>This DNS service has a static IP address.</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
