@@ -215,12 +215,13 @@
   <div class="card-body">
     <h2 class="card-title">Quorum</h2>
     <ul>
-      <li>Minimum number of servers where operation succeed to call it overall success. This is to ensure consistency.</li>
-      <li>Quorum should be more than half the nodes. For example, in 5 nodes cluster, N must be 3.</li>
-      <li>Quorum is achieved when R + W > N where R is the minimum read nodes, W is the minimum write nodes, N is the quorum.</li>
-      <li>N=3, W=2, R=2 is an example set up for strong consistency.</li>
-      <li>N=3, W=1, R=3 is fast write but slow read.</li>
-      <li>N=3, W=3, R=1 is slow write but fast read.</li>
+      <li>We write data to the nodes that are only resposible for write operations. We read data from all nodes and return the latest value.</li>
+      <li>We need to find balance between read-write nodes and read-only nodes.</li>
+      <li>Quorum is achieved when</li>
+      <ul>
+        <li>R + W > N. This ensures that a data is not read and written by two operations concurrently.</li>
+        <li>W/2 > N. This ensures hat two write operations from two different operations cannot occur concurrently on the same data.</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -243,6 +244,13 @@
       <li>CA - RDBMS (Non-distributed system)</li>
       <li>PA - Dynamo, Cassandra, CouchDB (BASE DBs choose availability - respond with local data w/o ensuring its the latest with peers)</li>
       <li>PC - BigTable, HBase (ACID DBs choose consistency - refuse response if cannot check peers)</li>
+    </ul>
+
+    <h3 class="card-title">PACELC theorem</h3>
+    <ul>
+      <li>When there is no network partition during normal operation, then choose between latency or consistency.</li>
+      <li>To guarantee data consistency, the system will have to delay write operations until the data has been propagated across the system successfully, taking a latency hit.</li>
+      <li>PA system would go for L (latency) and PC system would go for C (consistency)</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
