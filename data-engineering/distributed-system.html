@@ -49,6 +49,10 @@
       <li><a href="#distributed-system-4">Availability</a></li>
       <li><a href="#distributed-system-5">Quorum</a></li>
       <li><a href="#distributed-system-6">CAP theorem</a></li>
+      <li><a href="#distributed-system-7">Consistency</a></li>
+      <li><a href="#distributed-system-8">Isolation level</a></li>
+      <li><a href="#distributed-system-9">Anomaly</a></li>
+    </ul>
   </div>
 </div>
 
@@ -251,6 +255,119 @@
       <li>When there is no network partition during normal operation, then choose between latency or consistency.</li>
       <li>To guarantee data consistency, the system will have to delay write operations until the data has been propagated across the system successfully, taking a latency hit.</li>
       <li>PA system would go for L (latency) and PC system would go for C (consistency)</li>
+    </ul>
+
+    <p class="card-text"><strong>Systems that choose A over C can still support eventual consistency but no linearizability/sequential/casual!</strong></p>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/courses/grokking-the-system-design-interview">Grokking the System Design Interview</a> | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="distributed-system-7">
+  <div class="card-body">
+    <h2 class="card-title">Consistency</h2>
+    <ul>
+      <li>Considers single object operations.</li>
+    </ul>
+
+    <h3 class="card-title">Linearizability</h3>
+    <ul>
+      <li>Synchronous replication technique.</li>
+      <li>Once an operation is complete and the ack is delivered to client, it is visible to all other clients.</li>
+    </ul>
+
+    <h3 class="card-title">Sequential consistency</h3>
+    <ul>
+      <li>For example, we don't care what’s the ordering of posts between our friends. But, the posts from a single friend has to be displayed in the right order.</li>
+    </ul>
+
+    <h3 class="card-title">Causal consistency</h3>
+    <ul>
+      <li>Operations that are not causally related can be seen in different orders.</li>
+      <li>For example, comments and their sub-comments must appear in the right order.</li>
+    </ul>
+
+    <h3 class="card-title">Eventual consistency</h3>
+    <ul>
+      <li>Do not need to return the latest write as long as the system eventually arrives at a stable state.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/courses/grokking-the-system-design-interview">Grokking the System Design Interview</a> | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="distributed-system-8">
+  <div class="card-body">
+    <h2 class="card-title">Isolation level</h2>
+    <ul>
+      <li>Considers multi object operations.</li>
+    </ul>
+
+    <h3 class="card-title">Serializability</h3>
+    <ul>
+      <li>Two transactions executed concurrently should give same result.</li>
+      <li>Prevents all anomalies.</li>
+    </ul>
+
+    <h3 class="card-title">Repeatable read</h3>
+    <ul>
+      <li>Data once read by a transaction will not change throughout its course.</li>
+    </ul>
+
+    <h3 class="card-title">Snapshot isolation</h3>
+    <ul>
+      <li>All reads made in a transaction see a consistent snapshot of the database.</li>
+    </ul>
+
+    <h3 class="card-title">Read committed</h3>
+    <ul>
+      <li>Does not allows a transaction to read a data that has not yet been committed by other transaction.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/courses/grokking-the-system-design-interview">Grokking the System Design Interview</a> | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="distributed-system-9">
+  <div class="card-body">
+    <h2 class="card-title">Anomaly</h2>
+
+    <h3 class="card-title">Dirty write</h3>
+    <ul>
+      <li>Transaction overwrites a value that was written by another transaction that is not committed yet.</li>
+    </ul>
+
+    <h3 class="card-title">Dirty read</h3>
+    <ul>
+      <li>Transaction reads a value that was written by another transaction that is not committed yet.</li>
+    </ul>
+
+    <h3 class="card-title">Fuzzy or non-repeatable read</h3>
+    <ul>
+      <li>Value is retrieved twice during a transaction and the value is different.</li>
+    </ul>
+
+    <h3 class="card-title">Phantom read</h3>
+    <ul>
+      <li>For example, transaction of two queries runs to calculate the maximum and the average. However, another transaction intervenes to insert lots of record, thus making the first transaction return an average that is larger than the maximum.</li>
+    </ul>
+
+    <h3 class="card-title">Lost update</h3>
+    <ul>
+      <li>Two transactions read the same value and then try to update it to two different values.</li>
+    </ul>
+
+    <h3 class="card-title">Read skew</h3>
+    <ul>
+      <li>A transaction can only see partial results of another transaction.</li>
+    </ul>
+
+    <h3 class="card-title">Dirty write</h3>
+    <ul>
+      <li>Two transactions read the same data, but then modify disjoint sets of data.</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
