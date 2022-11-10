@@ -206,6 +206,87 @@ reg.predict(new_data)
 reg = linear_model.LogisticRegressionCV(
     solver='multinomial', max_iter=1000)</code></pre>
 
+    <h3 class="card-title">Decision tree</h3>
+
+<pre><code class="python">from sklearn import tree
+
+clf_tree1 = tree.DecisionTreeClassifier()
+reg_tree1 = tree.DecisionTreeRegressor()
+clf_tree2 = tree.DecisionTreeClassifier(max_depth=8)  # max depth of 8.
+reg_tree2 = tree.DecisionTreeRegressor(max_depth=5)  # max depth of 5.
+
+# data.shape: (569, 4)
+# labels.shape: (569,)
+clf_tree1.fit(data, labels)</code></pre>
+
+    <h3 class="card-title">Data split</h3>
+
+<pre><code class="python">from sklearn.model_selection import train_test_split
+
+# data.shape: (8, 2)
+# labels.shape: (2,)
+
+split_dataset = train_test_split(data, labels, test_size=0.375)
+train_data = split_dataset[0]
+test_data = split_dataset[1]
+train_labels = split_dataset[2]
+test_labels = split_dataset[3]
+
+# train_data.shape: (5, 2)
+# train_labels.shape: (5,)
+# test_data.shape: (3, 2)
+# test_labels.shape: (3,)</code></pre>
+
+    <h3 class="card-title">Cross validation</h3>
+
+<pre><code class="python">from sklearn import linear_model
+from sklearn.model_selection import cross_val_score
+
+clf = linear_model.LogisticRegression(max_iter=3000)
+cv_score = cross_val_score(clf, data, labels, cv=3)  # k = 3.
+
+reg = linear_model.LinearRegression()
+cv_score = cross_val_score(reg, data, labels, cv=4)  # k = 4.
+
+# Apply K-Fold CV to tune a decision tree's maximum depth.
+is_clf = True  # for classification
+for depth in range(3, 8):
+    # Predefined data and labels
+    scores = cv_decision_tree(is_clf, data, labels, depth, 5)  # k = 5.
+    mean = scores.mean()  # Mean acc across folds.
+    std_2 = 2 * scores.std()  # 2 std devs.</code></pre>
+
+    <h3 class="card-title">Model evaluation</h3>
+
+<pre><code class="python">from sklearn import metrics
+
+reg = tree.DecisionTreeRegressor()
+reg.fit(train_data, train_labels)
+predictions = reg.predict(test_data)
+
+r2 = metrics.r2_score(test_labels, predictions)
+mse = metrics.mean_squared_error(test_labels, predictions)
+mae = metrics.mean_absolute_error(test_labels, predictions)
+
+clf = tree.DecisionTreeClassifier()
+clf.fit(train_data, train_labels)
+predictions = clf.predict(test_data)
+
+acc = metrics.accuracy_score(test_labels, predictions)</code></pre>
+
+    <h3 class="card-title">Grid search</h3>
+    <ul>
+      <li>It can be incredibly slow for larger datasets.</li>
+    </ul>
+
+<pre><code class="python">reg = linear_model.BayesianRidge()
+params = {
+  'alpha_1':[0.1,0.2,0.3],
+  'alpha_2':[0.1,0.2,0.3]
+}
+reg_cv = GridSearchCV(reg, params, cv=5)
+reg_cv.fit(train_data, train_labels)</code></pre>
+
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
