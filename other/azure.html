@@ -203,9 +203,68 @@ yum install nfs-utils -y
 echo "&lt;storage_account_name&gt;.blob.core.windows.net:&lt;storage_account_name&gt;/&lt;container_name&gt; &lt;directory_to_create_mount&gt;    nfs defaults,sec=sys,vers=3,nolock,proto=tcp,nofail    0 0" >> /etc/fstab
 mount &lt;directory_to_create_mount&gt;</code></pre>
 
+    <h3 class="card-title">Mount container to AKS (Blobfuse)</h3>
+    <ul>
+      <li>Storage Account -&gt; Container must allow read & write.</li>
+      <li>PV and PVC must be created before the pod.</li>
+    </ul>
+
+    <h4 class="card-title">PV</h4>
+
+<pre><code class="yaml">apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: (volume_name)
+spec:
+  capacity:
+    storage: (volume_size)  # Ex. 30Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain  # Can also set to "Delete"
+  storageClassName: (storage_class_name)
+  mountOptions:
+    - -o allow_other
+    - --file-cache-timeout-in-seconds=120
+  csi:
+    driver: blob.csi.azure.com
+    readOnly: false
+    volumeHandle: must_be_a_unique_name
+    volumeAttributes:
+      resourceGroup: (resource_group)
+      storageAccount: (storage_account)
+      containerName: (container_name)
+      AzureStorageAuthType: msi
+      AzureStorageIdentityResourceID: (id)  # Should look something like "/subscriptions/../resourceGroups/../providers/Microsoft.ManagedIdentity/userAssignedIdentities/.."</code></pre>
+
+    <h4 class="card-title">PVC</h4>
+
+<pre><code class="yaml">apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: (volume_claim_name)
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: (volume_size)  # Ex. 30Gi
+  volumeName: (volume_name)
+  storageClassName: (storage_class_name)</code></pre>
+
+    <h4 class="card-title">Pod</h4>
+
+<pre><code class="yaml">volumes:
+  - name: (any_volume_name)
+    persistentVolumeClaim:
+      claimName: (volume_name)
+
+volumeMounts:
+  - name: (any_volume_name)
+    mount_path: (mount_path)</code></pre>
+
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://learn.microsoft.com/en-us/azure/storage/blobs/network-file-system-protocol-support-how-to">Mount Blob Storage by using the Network File System (NFS) 3.0 protocol</a>
+    Reference: <a href="https://learn.microsoft.com/en-us/azure/storage/blobs/network-file-system-protocol-support-how-to">Mount Blob Storage by using the Network File System (NFS) 3.0 protocol</a> | <a href="https://learn.microsoft.com/en-us/azure/aks/azure-csi-blob-storage-static?tabs=secret">Create and use a static volume with Azure Blob storage in Azure Kubernetes Service (AKS)</a>
   </div>
 </div>
 <!-- Azure END -->
