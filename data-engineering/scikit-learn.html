@@ -380,6 +380,50 @@ new_obs = np.array([
 mean_shift.predict(new_obs)
 # array([1, 0])</code></pre>
 
+    <h3 class="card-title">DBSCAN</h3>
+
+<pre><code class="python">from sklearn.cluster import DBSCAN
+dbscan = DBSCAN(eps=1.2, min_samples=30)
+# predefined data
+dbscan.fit(data)
+
+num_core_samples = len(dbscan.core_sample_indices_)  # 133</code></pre>
+
+    <h3 class="card-title">Evaluating clusters</h3>
+    <ul>
+      <li>Score -1: bad labeling.</li>
+      <li>Score 0: random labeling.</li>
+      <li>Score 1: perfect labeling.</li>
+    </ul>
+
+<pre><code class="python">from sklearn.metrics import adjusted_rand_score
+true_labels = np.array([0, 0, 0, 1, 1, 1])
+pred_labels = np.array([0, 0, 1, 1, 2, 2])
+
+ari = adjusted_rand_score(true_labels, pred_labels)  # 0.24242424242424243
+ari = adjusted_rand_score(pred_labels, true_labels)  # 0.24242424242424243
+
+perf_labels = np.array([0, 0, 0, 1, 1, 1])
+ari = adjusted_rand_score(true_labels, perf_labels)  # 1.0
+
+permuted_labels = np.array([1, 1, 1, 0, 0, 0])
+ari = adjusted_rand_score(true_labels, permuted_labels)  # 1.0
+
+renamed_labels = np.array([1, 1, 1, 3, 3, 3])
+ari = adjusted_rand_score(true_labels, renamed_labels)  # 1.0
+
+true_labels2 = np.array([0, 1, 2, 0, 3, 4, 5, 1])
+pred_labels2 = np.array([1, 1, 0, 0, 2, 2, 2, 2])
+ari = adjusted_rand_score(true_labels2, pred_labels2)  # -0.12903225806451613</code></pre>
+
+    <h3 class="card-title">Feature clustering</h3>
+
+<pre><code class="python">data.shape  # (150, 4)
+
+from sklearn.cluster import FeatureAgglomeration
+agg = FeatureAgglomeration(n_clusters=2)
+new_data = agg.fit_transform(data)  # (150, 2)</code></pre>
+
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
