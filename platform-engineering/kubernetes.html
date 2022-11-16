@@ -297,10 +297,20 @@
 <div class="card mb-4" id="kubernetes-3">
   <div class="card-body">
     <h2 class="card-title">Kubectl</h2>
+    <ul>
+      <li>Should have only 1 minor version difference from the cluster version.</li>
+      <li>Converts commands into JSON payload required by API server.</li>
+    </ul>
+
     <h3 class="card-title">Cluster</h3>
+
 <pre><code class="bash">kubectl cluster-info</code></pre>
 
     <h3 class="card-title">Config</h3>
+    <ul>
+      <li>Configuration is stored at <strong>$HOME/.kube/config</strong></li>
+    </ul>
+
 <pre><code class="bash">kubectl config view
 kubectl config set-cluster &lt;cluster_name&gt;
 kubectl config get-contexts
@@ -310,6 +320,7 @@ kubectl config set-context --current --namespace=&lt;namespace&gt;
 kubectl config view | grep namespace</code></pre>
 
     <h3 class="card-title">Namespace</h3>
+
 <pre><code class="bash"># List namespace.
 kubectl get ns
 
@@ -321,10 +332,6 @@ kubectl delete namespace &lt;namespace&gt;
 
 # Delete a namespace label.
 kubectl label namespaces &lt;namespace&gt; &lt;label&gt;-</code></pre>
-
-
-
-
 
 <pre><code class="bash"># Inspace all namespaces.
 kubectl get pods --all-namespaces
@@ -339,6 +346,7 @@ kubectl api-resources --verbs=list --namespaced -o name \
   | xargs -n 1 kubectl get --show-kind --ignore-not-found -n &lt;namespace&gt;</code></pre>
 
     <h3 class="card-title">Image and container</h3>
+
 <pre><code class="bash"># List all images.
 kubectl get pods --all-namespaces -o jsonpath="{.items[*].spec.containers[*].image}" | tr -s '[[:space:]]' '\n' | sort | uniq -c
 
@@ -349,6 +357,7 @@ kubectl get pods &lt;pod_name&gt; -n &lt;namespace&gt; -o jsonpath='{.spec.conta
 kubectl get deployments/ds -n &lt;namespace&gt; -o yaml | grep image</code></pre>
 
     <h3 class="card-title">Pod</h3>
+
 <pre><code class="bash"># Get all pods in current namespace.
 kubectl get pods
 kubectl get pods &lt;pod_name&gt; -o=yaml
@@ -366,6 +375,7 @@ kubectl scale --replicas=0 deployment/&lt;deployment_name&gt;
 kubectl port-forward &lt;pod_name&gt; &lt;localhost_port&gt;:&lt;container_port&gt;</code></pre>
 
     <h3 class="card-title">PV/PVC</h3>
+
 <pre><code class="bash"># Show PVC on all namespaces.
 kubectl get pvc -A
 
@@ -373,6 +383,7 @@ kubectl get pvc -A
 kubectl get pvc</code></pre>
 
     <h3 class="card-title">Log</h3>
+
 <pre><code class="bash"># Inspect pod logs.
 kubectl logs &lt;pod_name&gt;
 
@@ -383,6 +394,7 @@ kubectl logs &lt;pod_name&gt; -p
 kubectl logs &lt;pod_name&gt; -c &lt;container_name&gt;</code></pre>
 
     <h3 class="card-title">Node</h3>
+
 <pre><code class="bash">kubectl get nodes
 kubectl drain &lt;node_name&gt;
 kubectl drain &lt;node_name&gt; --ignore-daemonsets --delete-local-data
@@ -390,6 +402,7 @@ kubectl delete note &lt;node_name&gt;
 kubectl get nodes --show-labels</code></pre>
 
     <h3 class="card-title">How to exec into a container as root</h3>
+
 <pre><code class="bash"># 1. Find the node on which the pod is running.
 kubectl get pods -o wide -n &lt;namespace&gt;
 
@@ -404,9 +417,11 @@ kubectl describe pod &lt;pod_name&gt; -n &lt;namespace&gt;
 docker exec -u root -it &lt;container_id&gt;</code></pre>
 
     <h3 class="card-title">Endpoints</h3>
+
 <pre><code class="bash">kubectl get endpoints -n &lt;namespace&gt;</code></pre>
 
     <h3 class="card-title">Secrets</h3>
+
 <pre><code class="bash"># Export certificate and key
 kubectl get secret -n &lt;namespace&gt; &lt;secret_name&gt; -o go-template='{{index .data "&lt;your_cert&gt;.crt" | base64decode }}' > &lt;your_cert&gt;.crt
 kubectl get secret -n &lt;namespace&gt; &lt;secret_name&gt; -o go-template='{{index .data "&lt;your_cert&gt;.key" | base64decode }}' > &lt;your_cert&gt;.key</code></pre>
@@ -2038,7 +2053,7 @@ status:
     <h3 class="card-title">Accessing the Service</h3>
     <ul>
       <li>There is a DNS cluster addon Service that automatically assigns DNS names to other Services. <pre><code class="bash">kubectl get services kube-dns --namespace=kube-system</code></pre></li>
-      <li>The hostname has the form "&lt;service_name&lt;.&lt;namespace&lt;.".</li>
+      <li>The hostname has the form "&lt;service_name&gt;.&lt;namespace&gt;"</li>
       <li><code>/etc/resolve.conf</code> inside the container has the DNS/IP map configuration.</li>
     </ul>
 
