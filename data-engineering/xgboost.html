@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="/img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/monokai-sublime.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="/js/jquery.min.js"></script>
+<script src="/js/bootstrap.bundle.min.js"></script>
+<script src="/js/highlight.pack.js"></script>
+<script type="text/javascript" src="/js/include_html.js"></script>
+<script type="text/javascript" src="/js/site.js"></script>
+
+</head>
+
+<body>
+
+<include src="/header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Data Engineering</h1>
+
+<!-- XGBoost BEGIN -->
+<div class="card mb-4" id="xgboost">
+  <div class="card-body">
+    <h2 class="card-title">XGBoost</h2>
+    <p class="card-text"></p>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#xgboost-1">XGBoost</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="xgboost-1">
+  <div class="card-body">
+    <h2 class="card-title">XGBoost</h2>
+    <ul>
+      <li>Uses an extremely efficient version of gradient boosted decision trees, which is better than decision trees.</li>
+      <li>Train much faster than scikit-learn models.</li>
+    </ul>
+
+<pre><code class="python">import xgboost as xgb
+
+data = np.array([
+  [1.2, 3.3, 1.4],
+  [5.1, 2.2, 6.6]])
+
+dmat1 = xgb.DMatrix(data)  # Data matrix in xgboost.</code></pre>
+
+<pre><code class="python">data.shape  # (569, 30)
+labels.shape  # (569,)
+
+dtrain = xgb.DMatrix(data, label=labels)
+params = {
+  'max_depth': 0,
+  'objective': 'binary:logistic',
+  'eval_metric':'logloss'
+}
+bst = xgb.train(params, dtrain)
+
+eval_data.shape  # (119, 30)
+eval_labels.shape  # (119,)
+
+deval = xgb.DMatrix(eval_data, label=eval_labels)
+bst.eval(deval)  # [0]  eval-logloss:0.586757
+dpred = xgb.DMatrix(new_data)
+predictions = bst.predict(dpred)  # [0.6236573 0.6236573]</code></pre>
+
+    <h3 class="card-title">Cross-validation</h3>
+
+<pre><code class="python">dtrain = xgb.DMatrix(data, label=labels)
+params = {
+  'max_depth': 2,
+  'lambda': 1.5,
+  'objective':'binary:logistic',
+  'eval_metric':'logloss'
+
+}
+cv_results = xgb.cv(params, dtrain, num_boost_round=3)  # Output is pandas DataFrame.
+#    train-logloss-mean  train-logloss-std  test-logloss-mean  test-logloss-std
+# 0            0.483158           0.003513           0.495192          0.004461
+# 1            0.358339           0.002811           0.385320          0.003426
+# 2            0.278666           0.004171           0.312824          0.001838</code></pre>
+
+    <h3 class="card-title">Save and load booster</h3>
+
+<pre><code class="python">dtrain = xgb.DMatrix(data, label=labels)
+params = {
+  'max_depth': 3,
+  'objective':'binary:logistic',
+  'eval_metric':'logloss'
+}
+bst = xgb.train(params, dtrain)
+dpred = xgb.DMatrix(new_data)
+bst.predict(dpred)
+bst.save_model('model.bin')</code></pre>
+
+<pre><code class="python">new_bst = xgb.Booster()
+new_bst.load_model('model.bin')
+new_bst.predict(dpred)</code></pre>
+
+    <h3 class="card-title">XGBoost Wrapper API</h3>
+    <ul>
+      <li>Wrapper APIs let XGBoost used in the same style as scikit-learn.</li>
+    </ul>
+
+<pre><code class="python">model = xgb.XGBClassifier(use_label_encoder=False, eval_metric='logloss')
+model.fit(data, labels)
+predictions = model.predict(new_data)  # array([0, 1])
+
+model = xgb.XGBClassifier(objective='multi:softmax', eval_metric='mlogloss', use_label_encoder=False)
+model.fit(data, labels)
+predictions = model.predict(new_data)  # array([2, 0])</code></pre>
+
+<pre><code class="python">model = xgb.XGBRegressor(max_depth=2)
+model.fit(data, labels)
+predictions = model.predict(new_data)  # array([25.591753, 13.374372], dtype=float32)</code></pre>
+
+    <h3 class="card-title">Feature importance</h3>
+
+<pre><code class="python">model = xgb.XGBClassifier(objective='multi:softmax', eval_metric='mlogloss', use_label_encoder=False)
+model.fit(data, labels)
+model.feature_importances_  # array([0.00959796, 0.01645038, 0.67658573, 0.29736587], dtype=float32)</code></pre>
+
+<pre><code class="python"># Shows a bar graph of the F-scores ( F1-scores) for each feature.
+model = xgb.XGBRegressor()
+model.fit(data, labels)
+xgb.plot_importance(model)
+plt.show()</code></pre>
+
+    <h3 class="card-title">Hyperparameter tuning</h3>
+
+<pre><code class="python">model = xgb.XGBClassifier(objective='binary:logistic', eval_metric='logloss', use_label_encoder=False)
+params = {'max_depth': range(2, 5)}
+
+from sklearn.model_selection import GridSearchCV
+cv_model = GridSearchCV(model, params, cv=4)
+
+cv_model.fit(data, labels)
+cv_model.best_params_['max_depth']  # 4
+cv_model.predict(new_data)  # array([0, 1])</code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
+  </div>
+</div>
+<!-- XGBoost END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+</html>
