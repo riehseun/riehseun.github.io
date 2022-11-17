@@ -116,25 +116,52 @@ az acr list
 # Inspect ACR and AKS integration
 az role assignment list --assignee &lt;app_id&gt; --scope &lt;acr_id&gt;</code></pre>
 
-  <h3 class="card-title">Pod identity</h3>
-  <ul>
-    <li>Pods to be authenticated by AAD.</li>
-    <li>Operator creates azureIdentity (with MSI) and azureIdentityBinding. (with Pod label)</li>
-  </ul>
+    <h3 class="card-title">Pod identity</h3>
+    <ul>
+      <li>Pods to be authenticated by AAD.</li>
+      <li>Operator creates azureIdentity (with MSI) and azureIdentityBinding. (with Pod label)</li>
+    </ul>
 
-  <h4 class="card-title">Managed Identity Controller (MIC)</h4>
-  <ul>
-    <li>Deployed as Deployment.</li>
-    <li>Watches azureIdentityBinding objects and creates azureAssignedIdentity.</li>
-    <li>Watches what Azure Identity is bound to Pod and assign corresponding MSI to Node where that Pod is running.</li>
-  </ul>
+    <h4 class="card-title">Managed Identity Controller (MIC)</h4>
+    <ul>
+      <li>Deployed as Deployment.</li>
+      <li>Watches azureIdentityBinding objects and creates azureAssignedIdentity.</li>
+      <li>Watches what Azure Identity is bound to Pod and assign corresponding MSI to Node where that Pod is running.</li>
+    </ul>
 
-  <h4 class="card-title">Node Managed Identity (NMI)</h4>
-  <ul>
-    <li>Deployed as DeamonSet.</li>
-    <li>Requests ADD token on behalf of Pod.</li>
-  </ul>
+    <h4 class="card-title">Node Managed Identity (NMI)</h4>
+    <ul>
+      <li>Deployed as DeamonSet.</li>
+      <li>Requests ADD token on behalf of Pod.</li>
+    </ul>
 
+    <h3 class="card-title">Storage class</h3>
+
+    <h4 class="card-title">Standard ssd</h4>
+
+<pre><code class="yaml">kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: managed-csi-retain
+provisioner: disk.csi.azure.com
+reclaimPolicy: Retain
+allowVolumeExpansion: True
+volumeBindingMode: WaitForFirstConsumer
+parameters:
+  skuname: Standard_LRS</code></pre>
+
+    <h4 class="card-title">Premium ssd</h4>
+
+<pre><code class="yaml">kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: managed-csi-premium-retain
+provisioner: disk.csi.azure.com
+reclaimPolicy: Retain
+allowVolumeExpansion: True
+volumeBindingMode: WaitForFirstConsumer
+parameters:
+  skuname: Premium_LRS</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://jonathan18186.medium.com/azure-kubernetes-service-aks-with-azure-active-directory-aad-pod-identity-620cf210361e">Azure Kubernetes Service (AKS) with Azure Active Directory (AAD) Pod Identity</a>
