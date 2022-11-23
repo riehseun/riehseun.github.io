@@ -47,6 +47,7 @@
       <li><a href="#security-2">SSL (Secure Sockets Layer)</a></li>
       <li><a href="#security-3">Active directory</a></li>
       <li><a href="#security-4">Encoding</a></li>
+      <li><a href="#security-5">OpenSSL</a></li>
     </ul>
   </div>
 </div>
@@ -165,6 +166,29 @@
       <li>base62: [A-Z, a-z, 0-9]</li>
       <li>base64: [A-Z, a-z ,0-9] plus '+' and '-'</li>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="security-5">
+  <div class="card-body">
+    <h2 class="card-title">OpenSSL</h2>
+
+    <h3>Generate JKS from SSL certificates</h3>
+<pre><code class="bash">openssl pkcs12 -export -in &lt;your_cert&gt;.crt -inkey &lt;your_cert&gt;.key -out &lt;your_cert&gt;.p12
+keytool -importkeystore -srckeystore &lt;your_cert&gt;.p12 -srcstoretype PKCS12 -destkeystore &lt;your_cert&gt;.jks -deststoretype JKS -dname "CN:&lt;your_hostname&gt;"</code></pre>
+
+    <h3>OpenSSL command</h3>
+<pre><code class="bash"># Check common name.
+openssl x509 -noout -subject -in &lt;your_cert&gt;.crt
+
+# Check expiry date.
+openssl x509 -noout -enddate -in &lt;your_cert&gt;.crt
+
+# Check all subject alternative names.
+for i in $(openssl x509 -in &lt;your_cert&gt;.crt -noout -text | grep -A1 'Subject Alternative Name' | tail -n1 | tr -d ','); { echo $i | cut -f2 -d:; }</code></pre>
   </div>
   <div class="card-footer text-muted">
 

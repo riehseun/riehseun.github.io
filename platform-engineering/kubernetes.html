@@ -80,6 +80,7 @@
         <li>External Name - map Service to an existing DNS FQDN.</li>
       </ul>
       <li><a href="#kubernetes-34">Network Policy</a> - denie/allows traffic to/from Pods.</li>
+      <li><a href="#kubernetes-35">CoreDNS</a></li>
       <br>
 
       <li>Storage Class - configuration for storage.</li>
@@ -2292,6 +2293,34 @@ spec:
   </div>
 </div>
 
+<div class="card mb-4" id="kubernetes-35">
+  <div class="card-body">
+    <h2 class="card-title">CoreNDS</h2>
+
+    <h3 class="card-title">How to use custom url for the service</h3>
+    <ul>
+      <li>The default url for Service is &lt;service_name&gt;.&lt;namespace_name&gt;</li>
+      <li>CoreDNS ConfigMap cannot directly be modified.</li>
+      <li>Instead, another ConfigMap <code>coredns-custom</code> should be created under <code>kube-system</code> namespaces</li>
+      <pre><code class="yaml">apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns-custom
+  namespace: kube-system
+data:
+  test.override: |
+    rewrite new_url old_url</code></pre>
+      <li>Then the following commands can be issued to apply the change.</li>
+      <pre><code class="bash">kubectl apply -f &lt;configmap-coredns-custom.yaml&gt;
+kubectl get configmaps -n kube-system coredns-custom -o yaml
+kubectl delete pod -n kube-system -l k8s-app=kube-dns</code></pre>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
 <div class="card mb-4" id="kubernetes-">
   <div class="card-body">
     <h2 class="card-title">Volumes</h2>
@@ -2652,6 +2681,7 @@ spec:
     </ul>
 
     <h3 class="card-title">Opaque Secret</h3>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Secret
 metadata:
@@ -2662,6 +2692,7 @@ stringData:
   password: my-password</code></pre>
 
     <h3 class="card-title">Service account token Secret</h3>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Secret
 metadata:
@@ -2677,6 +2708,7 @@ data:
     <ul>
       <li>~/.dockercfg is legacy, ~/.docker/config.json is the new format.</li>
     </ul>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Secret
 metadata:
@@ -2687,6 +2719,7 @@ data:
           "&lt;base64 encoded ~/.dockercfg file&gt;" # Or &lt;base64 encoded ~/.docker/config.json&gt;</code></pre>
 
     <h3 class="card-title">Basic authentication Secret</h3>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Secret
 metadata:
@@ -2697,6 +2730,7 @@ stringData:
   password: my-password</code></pre>
 
     <h3 class="card-title">SSH authentication Secret</h3>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Secret
 metadata:
@@ -2708,6 +2742,7 @@ data:
         MIIEpQIBAAKCAQEAulqb/Y ...</code></pre>
 
     <h3 class="card-title">TLS secrets</h3>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Secret
 metadata:
@@ -2720,26 +2755,35 @@ data:
   tls.key: |
         MIIEpgIBAAKCAQEA7yn3bRHQ5FHMQ ...</code></pre>
 
+    <h3 class="card-title">Create Secret from a file</h3>
+
+<pre><code class="bash">kubectl create secret generic my-secret --from-file=./&lt;my_secret_file&gt;</code></pre>
+
     <h3 class="card-title">Editing Secret</h3>
+
 <pre><code class="bash">kubectl edit secrets mysecret</code></pre>
 
     <h3 class="card-title">Using Secret as File</h3>
+    <ul>
+      <li>Useful when mounting JKS files into a directory of a container.</li>
+    </ul>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
-  name: mypod
+  name: my-pod
 spec:
   containers:
-  - name: mypod
-    image: redis
+  - name: my-pod
+    image: my-image
     volumeMounts: # Add this to each container that needs Secret.
-    - name: foo
+    - name: my-secret-name
       mountPath: "/etc/foo" # Should be an unused directory where you want Secret to appear.
       readOnly: true
   volumes:
-  - name: foo
+  - name: my-secret-name
     secret:
-      secretName: mysecret # Name of Secret object.
+      secretName: my-secret # Name of Secret object.
       defaultMode: 0400 # Default is 0644 if not specified. All files created by Secret volumn mount will have 0400.
       items:
       - key: username
@@ -2750,6 +2794,7 @@ spec:
     <ul>
       <li>Updating Secret will not update environment variables in the containers unless containers are restarted.</li>
     </ul>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
@@ -2775,6 +2820,7 @@ spec:
     <ul>
       <li>Prevents accidental deletion/update of Secret.</li>
     </ul>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Secret
 metadata:
