@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="/img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/monokai-sublime.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="/js/jquery.min.js"></script>
+<script src="/js/bootstrap.bundle.min.js"></script>
+<script src="/js/highlight.pack.js"></script>
+<script type="text/javascript" src="/js/include_html.js"></script>
+<script type="text/javascript" src="/js/site.js"></script>
+
+</head>
+
+<body>
+
+<include src="/header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Data Engineering</h1>
+
+<!-- Tensorflow BEGIN -->
+<div class="card mb-4" id="tensorflow">
+  <div class="card-body">
+    <h2 class="card-title">Tensorflow</h2>
+    <p class="card-text"></p>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#tensorflow-1">Tensorflow</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="tensorflow-1">
+  <div class="card-body">
+    <h2 class="card-title">Tensorflow</h2>
+
+<pre><code class="python">import tensorflow as tf</code></pre>
+
+    <h3 class="card-title">Placeholder</h3>
+    <ul>
+      <li>Must have for real input data.</li>
+    </ul>
+
+<pre><code class="python">inputs = tf.compat.v1.placeholder(tf.float32, shape=(batch_size, input_size), name='inputs')
+labels = tf.compat.v1.placeholder(tf.int32, shape=(batch_size, output_size), name='labels')</code></pre>
+
+    <h3 class="card-title">Logit</h3>
+    <ul>
+      <li><code>tf.keras.layers.Dense</code> implements a fully connected layer.</li>
+      <li>It also adds bias, which always has a value of 1. This allows fully-connected layer to model a true linear combination of the input values.</li>
+      <li>The weight on a connection from neuron A into neuron B tells how strongly A affects B.</li>
+      <li>The logits produced by single layer perceptron are just a linear combination of the input data feature values.</li>
+      <li>In classification, logits are log-odds that maps probability between 0 and 1 to a real number.</li>
+    </ul>
+
+<pre><code class="python">logits = tf.keras.layers.Dense(output_size, name='logits')(inputs)
+
+probs = tf.math.sigmoid(logits)
+
+# Rounding each probability to the nearest integer (0 or 1)
+rounded_probs = tf.math.round(probs)
+
+predictions = tf.cast(rounded_probs, tf.int32)
+is_correct = tf.math.equal(predictions, labels)
+is_correct_float = tf.cast(is_correct, tf.float32)
+accuracy = tf.math.reduce_mean(is_correct_float)</code></pre>
+
+    <h3 class="card-title">Optimization</h3>
+
+<pre><code class="python">labels_float = tf.cast(labels, tf.float32)
+cross_entropy = tf.nn.sigmoid_cross_entropy_with_logits(labels=labels_float, logits=logits)
+loss = tf.math.reduce_mean(cross_entropy)
+adam = tf.compat.v1.train.AdamOptimizer()
+train_op = adam.minimize(loss)</code></pre>
+
+    <h3 class="card-title">Training</h3>
+
+<pre><code class="python">with tf.compat.v1.Session() as sess:
+  inputs = tf.compat.v1.placeholder(tf.float32, shape=(None, 2))
+  feed_dict = {
+    inputs: [[1.1, -0.3],
+            [0.2, 0.1]]
+  }
+  logits = tf.keras.layers.Dense(units=1, name='logits')(inputs)
+  init_op = tf.compat.v1.global_variables_initializer()
+  sess.run(init_op) # variable initialization
+  arr = sess.run(logits, feed_dict=feed_dict)
+
+# array([[-1.0072184],
+#        [-0.2895739]], dtype=float32)</code></pre>
+
+    <h3 class="card-title">Evaluation</h3>
+
+<pre><code class="python">feed_dict = {inputs: test_data, labels: test_labels}
+eval_acc = sess.run(accuracy, feed_dict=feed_dict)</code></pre>
+
+    <h3 class="card-title">Hidden layer</h3>
+
+<pre><code class="python">hidden1_outputs = tf.keras.layers.Dense(units=5, activation=tf.nn.relu, name='hidden1_inputs')(inputs)
+logits = tf.keras.layers.Dense(units=output_size, name='logits')(hidden1_outputs)</code></pre>
+
+    <h3 class="card-title">Softmax</h3>
+    <ul>
+      <li>Generalization of sigmoid.</li>
+      <li>Takes in a vector of numbers (logits for each class), and converts them to probability distribution.</li>
+    </ul>
+
+<pre><code class="python">t = tf.constant([[0.4, -0.8, 1.3],
+                 [0.2, -1.2, -0.4]])
+softmax_t = tf.nn.softmax(t)
+sess = tf.compat.v1.Session()
+
+sess.run(t)
+# array([[ 0.4, -0.8,  1.3],
+#        [ 0.2, -1.2, -0.4]], dtype=float32)
+
+sess.run(softmax_t)
+# array([[0.2659011 , 0.08008787, 0.65401113],
+#        [0.5569763 , 0.13734867, 0.30567506]], dtype=float32)</code></pre>
+
+    <h3 class="card-title">Prediction</h3>
+
+<pre><code class="python">probs = tf.constant([[0.4, 0.3, 0.3],
+                     [0.2, 0.7, 0.1]])
+preds = tf.argmax(probs, axis=-1)
+sess = tf.compat.v1.Session()
+
+sess.run(probs)
+# array([[0.4, 0.3, 0.3],
+#        [0.2, 0.7, 0.1]], dtype=float32)
+
+sess.run(preds)
+# array([0, 1])</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
+  </div>
+</div>
+<!-- Numpy END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+</html>
