@@ -97,7 +97,7 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X PUT https://&lt;endpoint&gt;/_li
     <h3 class="card-title">Index</h3>
 
 <pre><code class="bash"># List all indices.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_cat/indices?pretty
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_cat/indices?v&pretty
 
 # Create an index.
 curl -k -H "Authorization: ApiKey $apiKey" -X PUT https://&lt;endpoint&gt;/&lt;index_name&gt;
@@ -105,8 +105,8 @@ curl -k -H "Authorization: ApiKey $apiKey" -X PUT https://&lt;endpoint&gt;/&lt;i
 # Get an index.
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/&lt;index_name&gt;?pretty
 
-# Check types.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/&lt;index_name&gt;/_mapping</code></pre>
+# Check an index setting.
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/&lt;index_name&gt;/_setting?pretty</code></pre>
 
     <h3 class="card-title">Document</h3>
 
@@ -125,17 +125,18 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/&lt
         <li>User "elasticsearch" must have write permission to this location.</li>
       </ul>
       <li>All nodes in the cluster must have "path.repo: &lt;snapshot_repo_location&gt;" in <code>elasticsearch.yml</code></li>
+      <li><font color="#ff0000">Warning!</font> If using snapshot for data migration from one verison of Elasticsearch to another, migrated indices may not be readable/writable from the new cluster! (Reindex should be considered)</li>
     </ul>
 
 <pre><code class="bash"># List snapshot repositories.
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_snapshot?pretty
 
-# List snapshots in a repository.
+# List snapshots in a snapshot repository.
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_cat/snapshots/&lt;snapshot_repo_name&gt;?pretty
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_cat/snapshots/&lt;snapshot_repo_name&gt;/_status?pretty
 
 # Create snapshot repository.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_snapshot/&lt;snapshot_repo_name&gt; -d '{ "type": "fs", "settings": { "location": "/path/to/directory" } }'
+curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_snapshot/&lt;snapshot_repo_name&gt; -H "Content-Type: appliction/json" -d '{ "type": "fs", "settings": { "location": "/path/to/directory" } }'
 
 # Create a snapshot. (All indices)
 curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_snapshot/&lt;snapshot_repo_name&gt;/&lt;snapshot_name&gt;?wait_for_completion=true&pretty
@@ -144,6 +145,14 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_s
 
 # Restore from a snapshot.
 curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_snapshot/&lt;snapshot_repo_name&gt;/&lt;snapshot_name&gt;/_restore?wait_for_completion=true&pretty</code></pre>
+
+    <h3 class="card-title">Reindex</h3>
+    <ul>
+      <li>Used when copying document from one index to another index.</li>
+      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_reindex?pretty -H "Content-Type: appliction/json" -d '{ "source": { "index": "source_index" }, "dest": { "index": "dest_index" } }'</code></pre>
+      <li>Used when copying index from one version of Elasticsearch to another version of Elasticsearch.</li>
+      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_reindex?pretty -H "Content-Type: appliction/json" -d '{ "source": { "remote": { "host": "https://remote_endpoint", "username": "my_username", "password": "my_password" }, index": "source_index" }, "dest": { "index": "dest_index" } }'</code></pre>
+    </ul>
 
     <h3 class="card-title">Shards</h3>
 
