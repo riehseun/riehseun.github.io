@@ -66,7 +66,6 @@
     <ul>
       <li>Organize, encpasulate, and re-use configuration.</li>
       <li>A modules is configuration files in a single directory.</li>
-      <li>Provider must be named "terraform-&lt;provider&gt;-&lt;name&gt;"</li>
     </ul>
 
     <h3 class="card-title">Command</h3>
@@ -83,6 +82,54 @@
       <li>YAML - while allowing comments, stll hard to follow in large file. Getting indentation right is tricky.</li>
       <li>HCL - addresses issues in JSON & YAML.</li>
     </ul>
+
+    <h3 class="card-title">Output</h3>
+    <ul>
+      <li>Using an output attribute from a resource: &lt;resource_type&gt;.&lt;resource_identifier&gt;.&lt;attribute_name&gt;</li>
+      <li>Help Terraform understand dependencies of resources.</li>
+    </ul>
+
+    <h3 class="card-title">Provider</h3>
+    <ul>
+      <li>A separate binary that Terraform calls at run time.</li>
+      <li>Binary must be named <code>terraform-&lt;provider&gt;-&lt;name&gt;_vX.Y.Z</code></li>
+    </ul>
+
+<pre><code class="yaml">provider "aws" {
+  region  = "eu-west-1"
+}
+
+terraform {
+  required_providers {
+    aws = {
+      version = "~> 3.46"
+    }
+  }
+}</code></pre>
+
+    <h4 class="card-title">Multiple providers example</h4>
+    <ul>
+      <li>Every provider must have <code>alias</code> set after the first.</li>
+    </ul>
+
+<pre><code class="yaml">provider "aws" {
+    region = "eu-west-1"
+}
+
+provider "aws" {
+    region = "eu-west-2"
+    alias = "london"
+}
+
+# This resource will be created in "eu-west-1".
+resource "aws_vpc" "ireland_vpc" {
+    cidr_block = "10.0.0.0/16"
+}
+
+resource "aws_vpc" "london_vpc" {
+    cidr_block = "10.1.0.0/16"
+    provider = aws.london
+}</code></pre>
 
     <h3 class="card-title">Installation (Ubuntu)</h3>
 
@@ -107,13 +154,6 @@ wget https://releases.hashicorp.com/terraform/0.9.8/terraform_0.11.13_linux_amd6
 unzip terraform_0.11.13_linux_amd64.zip
 mv terraform /usr/local/bin/
 terraform --version</pre></code>
-
-    <h3 class="card-title">Output</h3>
-    <ul>
-      <li>Using an output attribute from a resource: &lt;resource_type&gt;.&lt;resource_identifier&gt;.&lt;attribute_name&gt;</li>
-      <li>Help Terraform understand dependencies of resources.</li>
-    </ul>
-
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://learn.hashicorp.com/collections/terraform/aws-get-started/">Get Started - AWS</a> | <a href="https://learn.hashicorp.com/tutorials/terraform/module">Modules</a>
