@@ -53,6 +53,7 @@
       <li><a href="#distributed-system-8">Isolation level</a></li>
       <li><a href="#distributed-system-9">Anomaly</a></li>
       <li><a href="#distributed-system-10">RPC</a></li>
+      <li><a href="#distributed-system-11">System design</a></li>
     </ul>
   </div>
 </div>
@@ -398,6 +399,115 @@
       <li>Server RPC runtime returns the packed result to Client RPC runtime over the network.</li>
       <li>Client RPC runtime sends the result to the client stub.</li>
       <li>Client stub unpacks the result.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="distributed-system-11">
+  <div class="card-body">
+    <h2 class="card-title">System design</h2>
+
+    <h3 class="card-title">Web servers</h3>
+    <ul>
+      <li>Typically serve static content to client.</li>
+    </ul>
+
+    <h3 class="card-title">App servers</h3>
+    <ul>
+      <li>Typically serve dynamic content to client.</li>
+    </ul>
+
+    <h3 class="card-title">DB servers</h3>
+    <ul>
+      <li>Typically serve dynamic content to client.</li>
+    </ul>
+
+    <h3 class="card-title">Important latencies</h3>
+    <table>
+      <tr>
+        <td>L1 cache reference</td>
+        <td>0.9</td>
+      </tr>
+      <tr>
+        <td>L2 cache reference</td>
+        <td>2.8</td>
+      </tr>
+      <tr>
+        <td>L3 cache reference</td>
+        <td>12.9</td>
+      </tr>
+      <tr>
+        <td>Main memory reference</td>
+        <td>100</td>
+      </tr>
+      <tr>
+        <td>Compress 1KB with Snzip</td>
+        <td>3,000 (3 microseconds)</td>
+      </tr>
+      <tr>
+        <td>Read 1 MB sequentially from memory</td>
+        <td>9,000 (9 microseconds)</td>
+      </tr>
+      <tr>
+        <td>Read 1 MB sequentially from SSD</td>
+        <td>200,000 (200 microseconds)</td>
+      </tr>
+      <tr>
+        <td>Round trip within same datacenter</td>
+        <td>500,000 (500 microseconds)</td>
+      </tr>
+      <tr>
+        <td>Read 1 MB sequentially from SSD with speed ~1GB/sec SSD</td>
+        <td>1,000,000 (1 milliseconds)</td>
+      </tr>
+      <tr>
+        <td>Disk seek</td>
+        <td>4,000,000 (4 milliseconds)</td>
+      </tr>
+      <tr>
+        <td>Read 1 MB sequentially from disk</td>
+        <td>2,000,000 (2 milliseconds)</td>
+      </tr>
+      <tr>
+        <td>Send packet SF->NYC</td>
+        <td>71,000,000 (71 milliseconds)</td>
+      </tr>
+    </table>
+
+    <h3 class="card-title">Important rates</h3>
+    <table>
+      <tr>
+        <td>QPS handled by MySQL</td>
+        <td>1000</td>
+      </tr>
+      <tr>
+        <td>QPS handled by key-value store</td>
+        <td>10,000</td>
+      </tr>
+      <tr>
+        <td>QPS handled by cache server</td>
+        <td>100,000–1 M</td>
+      </tr>
+    </table>
+
+    <h3 class="card-title">Request per second</h3>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>Server has 36 cores (72 threads), 256 GB RAM</li>
+        <li>OS and other processes consumed 16 GB RAM.</li>
+        <li>Each worker consumes 300 MB RAM to complte a request.</li>
+        <li>Each CPU-bound request takes 200 millisecond.</li>
+        <li>Each memory-bound request takes 50 milliseconds.</li>
+      </ul>
+      <li>RPS (CPU) = number of thread / time each task takes = 72 / 200 ms = 360 RPS</li>
+      <li>RPS (RAM) = Available memory / (time each task takes * worker memory comsumption) = 240 GB / (50 ms * 300 MB)= 16,000 RPS</li>
+      <li>Assume half requests are CPU bound and half requests are memory bound: 360 / 2 + 16,000 / 2 = 8,000</li>
+      <li></li>
+      <li></li>
     </ul>
   </div>
   <div class="card-footer text-muted">
