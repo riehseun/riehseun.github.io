@@ -273,7 +273,7 @@
 
     <h3 class="card-title">HDFS</h3>
     <ul>
-      <li>Namenode: stores metadata.</li>
+      <li>Namenode: stores metadata. This is a single point of failure in HDFS.</li>
       <li>Datanode: stores actual data.</li>
       <li>Clients talk to Namenode to read/write a file.</li>
       <li>Namenode responds with the location of the right Datanodes.</li>
@@ -292,6 +292,30 @@
       <li>The underlying physical file system isn’t divided into HDFS block-sized chunks.</li>
     </ul>
 
+    <h3 class="card-title">Write path</h3>
+    <ul>
+      <li>Client buffers data on local disk, waiting for one HDFS-block worth of data to accumulate.</li>
+      <li>Namenode checks for permissions and gives client the list of DataNodes to write to.</li>
+      <li>Client writes to first Datanode.</li>
+      <li>First Datanode writes the first portion to local repo and transport this portion to the second Datanode.</li>
+      <li>Second Datanode performs the same thing, and so on.</li>
+    </ul>
+
+    <h3 class="card-title">Read path</h3>
+    <ul>
+      <li>Client makes an RPC call to Namenode.</li>
+      <li>Namenode responds with a list of Datanode addresses for each requested block. (The list of Datanodes is sorted by proximity to the client)</li>
+      <li>If a local copy of the data block is available, it is returned.</li>
+      <li>Else, client connects to the nearest Datanode to retrieve the first block.</li>
+      <li>Client requests the Namenode for the next batch of data blocks.</li>
+    </ul>
+
+    <h3 class="card-title">Distcp</h3>
+    <ul>
+      <li>Implemented as a map reduce job with no reduce phase.</li>
+      <li>The mappers run in parallel across the cluster to perform the copy.</li>
+      <li>Each file is copied by one map task.</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.coursera.org/specializations/big-data">Big data</a>
