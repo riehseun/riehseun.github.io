@@ -85,7 +85,7 @@
 
     <h3 class="card-title">Output</h3>
     <ul>
-      <li>Using an output attribute from a resource: &lt;resource_type&gt;.&lt;resource_identifier&gt;.&lt;attribute_name&gt;</li>
+      <li>Using an output attribute from a resource: <code>&lt;resource_type&gt;.&lt;resource_identifier&gt;.&lt;attribute_name&gt;</code></li>
       <li>Help Terraform understand dependencies of resources.</li>
     </ul>
 
@@ -131,6 +131,42 @@ resource "aws_vpc" "london_vpc" {
     provider = aws.london
 }</code></pre>
 
+    <h3 class="card-title">Data source</h3>
+    <ul>
+      <li>Use data sources to reference and utilize resources across Terraform projects.</li>
+      <li>Useful when migrating existing infrastructure to Terraform.</li>
+    </ul>
+
+<pre><code class="yaml">provider "aws" {
+    region = "eu-west-1"
+}
+
+data "aws_s3_bucket" "bucket" {
+    bucket = "kevholditch-already-exists"
+}
+
+resource "aws_iam_policy" "my_bucket_policy" {
+    name = "my-bucket-policy"
+
+    policy = &lt;&lt;EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": [
+                "s3:ListBucket"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "${data.aws_s3_bucket.bucket.arn}"
+            ]
+        }
+    ]
+}
+EOF
+}</code></pre>
+
+
     <h3 class="card-title">Installation (Ubuntu)</h3>
 
 <pre><code class="bash">sudo apt-get install -y gnupg software-properties-common
@@ -156,7 +192,7 @@ mv terraform /usr/local/bin/
 terraform --version</pre></code>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://learn.hashicorp.com/collections/terraform/aws-get-started/">Get Started - AWS</a> | <a href="https://learn.hashicorp.com/tutorials/terraform/module">Modules</a>
+    Reference: <a href="https://learn.hashicorp.com/collections/terraform/aws-get-started/">Get Started - AWS</a> | <a href="https://learn.hashicorp.com/tutorials/terraform/module">Modules</a> | <a href="https://www.educative.io/courses/terraform-beginner-master-aws">Terraform: From Beginner to Master with Examples in AWS</a>
   </div>
 </div>
 
