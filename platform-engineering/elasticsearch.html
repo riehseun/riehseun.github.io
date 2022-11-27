@@ -105,8 +105,12 @@ curl -k -H "Authorization: ApiKey $apiKey" -X PUT https://&lt;endpoint&gt;/&lt;i
 # Get an index.
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/&lt;index_name&gt;?pretty
 
-# Check an index setting.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/&lt;index_name&gt;/_setting?pretty</code></pre>
+# Check index setting.
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/&lt;index_name&gt;/_setting?pretty
+
+# Update index setting.
+# For example, temporarily setting number_of_replicas to 0 and refresh_interval to -1 (This disable reflecing written documents in index to users) is helping during the inital data load on index for it will speed up the indexing.
+curl -k -u &lt;username&gt;:&lt;password&gt; -X PUT https://&lt;endpoint&gt;/&lt;index_name&gt;/_setting?pretty -H "Content-Type: appliction/json" -d '{ "index": { "number_of_replicas": 0, "refresh_interval: -1" } }'</code></pre>
 
     <h3 class="card-title">Document</h3>
 
@@ -149,12 +153,25 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_s
     <h3 class="card-title">Reindex</h3>
     <ul>
       <li>Used when copying document from one index to another index.</li>
-      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_reindex?pretty -H "Content-Type: appliction/json" -d '{ "source": { "index": "source_index" }, "dest": { "index": "dest_index" } }'</code></pre>
+      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_reindex?wait_for_completion=false -H "Content-Type: appliction/json" -d '{ "source": { "index": "source_index" }, "dest": { "index": "dest_index" } }'</code></pre>
       <li>Used when copying index from one version of Elasticsearch to another version of Elasticsearch.</li>
-      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_reindex?pretty -H "Content-Type: appliction/json" -d '{ "source": { "remote": { "host": "https://remote_endpoint", "username": "my_username", "password": "my_password" }, index": "source_index" }, "dest": { "index": "dest_index" } }'</code></pre>
+      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_reindex?wait_for_completion=false -H "Content-Type: appliction/json" -d '{ "source": { "remote": { "host": "https://remote_endpoint", "username": "my_username", "password": "my_password" }, index": "source_index" }, "dest": { "index": "dest_index" } }'</code></pre>
       <li><code>size</code> represents the number of documents in each batch. If each batch is greater than 100MB, Elasticsearch will report an error. This error needs to be handled by descreasing the number of documents in each batch so that the while batch does not exceed 100MB.</li>
-      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_reindex?pretty -H "Content-Type: appliction/json" -d '{ "source": { "remote": { "host": "https://remote_endpoint", "username": "my_username", "password": "my_password" }, index": "source_index", size: 100 }, "dest": { "index": "dest_index" } }'</code></pre>
+      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_reindex?wait_for_completion=false -H "Content-Type: appliction/json" -d '{ "source": { "remote": { "host": "https://remote_endpoint", "username": "my_username", "password": "my_password" }, index": "source_index", size: 100 }, "dest": { "index": "dest_index" } }'</code></pre>
+      <li><code>slice</code> can be used for parallel process. (This does not work when reindexing from remote cluster!)</li>
+      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_reindex?slice=100&wait_for_completion=false -H "Content-Type: appliction/json" -d '{ "source": { "index": "source_index" }, "dest": { "index": "dest_index" } }'</code></pre>
     </ul>
+
+    <h3 class="card-title">Task</h3>
+
+<pre><code class="bash"># List tasks.
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_tasks?pretty
+
+# List a specific task.
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_tasks/&lt;task_name&gt;?pretty
+
+# Cancel a specific task.
+curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_tasks/&lt;task_name&gt;/_cancel?pretty</code></pre>
 
     <h3 class="card-title">Shards</h3>
 
