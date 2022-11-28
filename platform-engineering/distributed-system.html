@@ -126,41 +126,65 @@
     <h4 class="card-title">Range partitioning</h4>
     <ul>
       <li>Split dataset based on specific attribute.</li>
+      <li>Range based query is easy to implement.</li>
       <li>May result in unbalanced servers.</li>
     </ul>
 
     <h4 class="card-title">Hash partitioning</h4>
     <ul>
-      <li>Apply hash function to some attribute of data.</li>
+      <li>Apply hash function to some attribute of data and mod that hash value by the number of paritions.</li>
       <li>Uniform allocation of data across servers.</li>
+      <li>Range based query is hard to implement.</li>
       <li>Adding new servers mean changing hash function and redistribution of data.</li>
     </ul>
 
     <h4 class="card-title">Consistent hashing</h4>
     <ul>
       <li>Only small number of keys move when servers are added or removed.</li>
-      <li>Example (without virtual node): hash range is 1-100, number of nodes is 4.
-        <ul>
-          <li>All data in range 1-25 is stored in server 1.</li>
-          <li>All data in range 26-50 is stored in server 2.</li>
-          <li>All data in range 51-75 is stored in server 3.</li>
-          <li>All data in range 76-100 is stored in server 4.</li>
-        </ul>
+      <li>Example (without virtual node): hash range is 1-100, number of nodes is 4.</li>
+      <ul>
+        <li>All data in range 1-25 is stored in server 1.</li>
+        <li>All data in range 26-50 is stored in server 2.</li>
+        <li>All data in range 51-75 is stored in server 3.</li>
+        <li>All data in range 76-100 is stored in server 4.</li>
+      </ul>
       <li>Apply hash function (MD5) on the key of data to determine which node to place the data.</li>
-      <li>Virtual node
-        <ul>
-          <li>Each node gets mutiple hash ranges and these hash ranges are randomly distributed across the nodes.</li>
-          <li>Node carry replicating hash ranges for fault tolerance. (Some nodes may carry more V-nodes than others)</li>
-          <li>Used in Dynamo and Cassandra.</li>
-        </ul>
-      </li>
-      <li>Why virtual node
-        <ul>
-          <li>When a node is added, it receives many v-nodes from the existing nodes to maintain balanced cluster.</li>
-          <li>When a node is removed, v-nodes are spread across many nodes.</li>
-          <li>Random distributed of subranges decreases probability of hotspots.</li>
-        </ul>
-      </li>
+    </ul>
+
+    <h5 class="card-title">Virtual node</h5>
+    <ul>
+      <li>Each node gets mutiple hash ranges and these hash ranges are randomly distributed across the nodes.</li>
+      <li>Node carry replicating hash ranges for fault tolerance. (Some nodes may carry more V-nodes than others)</li>
+      <li>Used in Dynamo and Cassandra.</li>
+      <li>Why virtual node</li>
+      <ul>
+        <li>When a node is added, it receives many v-nodes from the existing nodes to maintain balanced cluster.</li>
+        <li>When a node is removed, v-nodes are spread across many nodes.</li>
+        <li>Random distributed of subranges decreases probability of hotspots.</li>
+      </ul>
+    </ul>
+
+    <h5 class="card-title">Fixed number of partitions</h5>
+    <ul>
+      <li>Number of partitions is fixed when DB is setup.</li>
+      <li>Higher number of partitions are created than the nodes.</li>
+      <li>Paritions are assigned to nodes.</li>
+      <li>If partition is too small, results in overhead. If partition is too large, rebalancing the nodes will be expensive.</li>
+      <li>Used in Elasticsearch.</li>
+    </ul>
+
+    <h5 class="card-title">Dynamic partitioning</h5>
+    <ul>
+      <li>When the size of a partition reaches the threshold, it is split into two partitions.</li>
+      <li>Difficult to apply dynamic rebalancing while serving the reads and writes.</li>
+      <li>Used in HBase and MongoDB.</li>
+    </ul>
+
+    <h5 class="card-title">Partition proportionally to nodes</h5>
+    <ul>
+      <li>Number of partitions is proportionate to the number of nodes, so that every node has fixed partitions.</li>
+      <li>As the number of nodes increases, the partitions shrink. Rebalancing between paritions may result in unfair split.</li>
+      <li>Used in Cassandra.</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -222,7 +246,8 @@
 
     <h3 class="card-title">Multi-master replication (multi-primary replication)</h3>
     <ul>
-      <li>All replicas can accept write requests.</li>
+      <li>Multiple primary nodes that process the writes and send them to all other primary and backup nodes to replicate.</li>
+      <li>Conflict can happen where mutiple nodes modify the same data.</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
