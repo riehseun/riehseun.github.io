@@ -1996,28 +1996,33 @@ spec:
     <h2 class="card-title">Service</h2>
     <ul>
       <li>Service is an abstraction for logical set of Pods.</li>
+      <li>Has static IP, DNS, and port.</li>
       <li>The set of Pods targeted by Service is determined by selector.</li>
+      <li>Each Service gets an associated Endpoints object, which is a dynamic list of all healthy Pods that match Service’s label selector.</li>
     </ul>
-<pre><code class="yaml"># Suppose there are Pods where each of them listens to port 9376 and has label "app=my-app".
-apiVersion: v1
+
+<pre><code class="yaml">apiVersion: v1
 kind: Service
 metadata:
   name: my-service
 spec:
+  # Suppose there are Pods that has label "app=my-app".
   selector:
     app: my-app
+  # Service named "my-service" targets TCP port 9376 on any Pod with label "app=my-app".
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 9376
-# Service named "my-service" targets TCP port 9376 on any Pod with label "app=my-app".</code></pre>
+      targetPort: 9376</code></pre>
 
     <h3 class="card-title">Service without selectors</h3>
     <ul>
       <li>Ex. External database in production, but your own database in test environment.</li>
       <li>Ex. Point Service to another Service in different namespace.</li>
     </ul>
-<pre><code class="yaml">apiVersion: v1
+
+<pre><code class="yaml"># Service needs to be manually mapped to network address and port
+apiVersion: v1
 kind: Service
 metadata:
   name: my-service
@@ -2025,8 +2030,7 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 9376
-# Service needs to be manually mapped to network address and port</code></pre>
+      targetPort: 9376</code></pre>
 
     <h3 class="card-title">Virtual IPs and service proxies</h3>
     <ul>
@@ -2043,11 +2047,27 @@ spec:
 
     <h3 class="card-title">Publishing Service</h3>
     <ul>
-      <li><code>ClusterIP</code> is the default <code>ServiceTypes</code>. Expose Service on cluster-internal IP. Service beomes only reachable from within the cluster.</li>
-      <li><code>NodePort</code> exposes Service on each Node's IP at a static port. <code>ClusterIP</code> is automatically created.</li>
-      <li><code>LoadBalancer</code> exposes Service externally using cloud provider's load balancer. <code>ClusterIP</code> and <code>NodePort</code> are automatically created.</li>
+      <li><code>ClusterIP</code></li>
+      <ul>
+        <li>Default <code>ServiceTypes</code>.</li>
+        <li>Expose Service on cluster-internal IP.</li>
+        <li>Service beomes only reachable from within the cluster.</li>
+      </ul>
+      <li><code>NodePort</code></li>
+      <ul>
+        <li>Exposes Service on each Node's IP at a static port.</li>
+        <li><code>ClusterIP</code> is automatically created.</li>
+        <li>Traffic from outside the cluster can hit any node in the cluster.</li>
+      </ul>
+      <li><code>LoadBalancer</code></li>
+      <ul>
+        <li>Exposes Service externally using cloud provider's load balancer.</li>
+        <li><code>ClusterIP</code> and <code>NodePort</code> are automatically created.</li>
+      </ul>
     </ul>
+
     <h4 class="card-title">NodePort</h4>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Service
 metadata:
@@ -2055,7 +2075,7 @@ metadata:
 spec:
   type: NodePort
   selector:
-    app: MyApp
+    app: my-app
   ports:
       # By default and for convenience, the `targetPort` is set to the same value as the `port` field.
     - port: 80
@@ -2063,14 +2083,16 @@ spec:
       # Optional field
       # By default and for convenience, the Kubernetes control plane will allocate a port from a range (default: 30000-32767)
       nodePort: 30007</code></pre>
+
     <h4 class="card-title">LoadBalancer</h4>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Service
 metadata:
   name: my-service
 spec:
   selector:
-    app: MyApp
+    app: my-app
   ports:
     - protocol: TCP
       port: 80
@@ -2082,7 +2104,7 @@ status:
     ingress:
     - ip: 192.0.2.127</code></pre>
 
-    <h2 class="card-title">Connecting Applications with Services</h2>
+    <h3 class="card-title">Connecting Applications with Services</h3>
     <ul>
       <li>Docker: containers can talk to other containers only if they are on the same machine.</li>
       <ul>
@@ -2094,38 +2116,43 @@ status:
       </ul>
     </ul>
 
-    <h3 class="card-title">Accessing the Service</h3>
+    <h3 class="card-title">Service discovery</h3>
     <ul>
-      <li>There is a DNS cluster addon Service that automatically assigns DNS names to other Services. <pre><code class="bash">kubectl get services kube-dns --namespace=kube-system</code></pre></li>
+      <li>There are Pods running a DNS service in control plane.</li>
+      <li>There is also a DNS cluster addon Service that automatically assigns DNS names to other Services.</li>
+      <pre><code class="bash">kubectl get services kube-dns --namespace=kube-system</code></pre></li>
       <li>The hostname has the form "&lt;service_name&gt;.&lt;namespace&gt;"</li>
       <li><code>/etc/resolve.conf</code> inside the container has the DNS/IP map configuration.</li>
     </ul>
 
     <h3 class="card-title">Securing the Service</h3>
-<pre><code class="bash"># Create a public private key pair
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /d/tmp/nginx.key -out /d/tmp/nginx.crt -subj "/CN=my-nginx/O=my-nginx"
-# Convert the keys to base64 encoding
-cat /d/tmp/nginx.crt | base64
-cat /d/tmp/nginx.key | base64
 
-make keys KEY=/tmp/nginx.key CERT=/tmp/nginx.crt
-kubectl create secret tls nginxsecret --key /tmp/nginx.key --cert /tmp/nginx.crt
-kubectl create configmap nginxconfigmap --from-file=default.conf</code></pre>
+<pre><code class="bash"># Create a public private key pair.
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /d/tmp/mycert.key -out /d/tmp/mycert.crt -subj "/CN=my-app/O=my-app"
+# Convert the keys to base64 encoding
+cat /d/tmp/mycert.crt | base64
+cat /d/tmp/mycert.key | base64
+
+make keys KEY=/tmp/mycert.key CERT=/tmp/mycert.crt
+kubectl create secret tls mysecret --key /tmp/mycert.key --cert /tmp/mycert.crt
+kubectl create configmap myconfigmap --from-file=default.conf</code></pre>
+
 <pre><code class="yaml">apiVersion: "v1"
-kind: "Secret"
+kind: Secret
 metadata:
-  name: "nginxsecret"
-  namespace: "default"
+  name: my-secret
+  namespace: my-namespace
 type: kubernetes.io/tls
 data:
   tls.crt: &lt;encrypted key output from above&gt;
   tls.key: &lt;encrypted key output from above&gt;</code></pre>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Service
 metadata:
-  name: my-nginx
+  name: my-app
   labels:
-    run: my-nginx
+    run: my-app
 spec:
   type: NodePort
   ports:
@@ -2137,49 +2164,49 @@ spec:
     protocol: TCP
     name: https
   selector:
-    run: my-nginx
+    run: my-app
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: my-nginx
+  name: my-app
 spec:
   selector:
     matchLabels:
-      run: my-nginx
+      run: my-app
   replicas: 1
   template:
     metadata:
       labels:
-        run: my-nginx
+        run: my-app
     spec:
       volumes:
       - name: secret-volume
         secret:
-          secretName: nginxsecret
+          secretName: mysecret
       - name: configmap-volume
         configMap:
-          name: nginxconfigmap
+          name: myconfigmap
       containers:
-      - name: nginxhttps
-        image: bprashanth/nginxhttps:1.0
+      - name: my-container
+        image: my-image:1.0
         ports:
         - containerPort: 443
         - containerPort: 80
         volumeMounts:
-        - mountPath: /etc/nginx/ssl
+        - mountPath: /path/to/mount/secret
           name: secret-volume
-        - mountPath: /etc/nginx/conf.d
+        - mountPath: /path/to/mount/configmap
           name: configmap-volume</code></pre>
 
-    <p class="card-text">Can reach the nginx server from any node.</p>
+    <h3 class="card-title">Can reach the server from any node.</h3>
+
 <pre><code class="bash">kubectl get pods -o yaml | grep -i podip
     podIP: 10.244.3.5
-node $ curl -k https://10.244.3.5
-...
-&lt;h1&gt;Welcome to nginx!&lt;/h1&gt;</code></pre>
+node $ curl -k https://10.244.3.5</code></pre>
 
-    <p class="card-text">Setup Pod such that</p>
+    <h3 class="card-title">Setup Pod such that</h3>
+
 <pre><code class="yaml">apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -2187,26 +2214,26 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: curlpod
+      app: curl-pod
   replicas: 1
   template:
     metadata:
       labels:
-        app: curlpod
+        app: curl-pod
     spec:
       volumes:
       - name: secret-volume
         secret:
-          secretName: nginxsecret
+          secretName: my-secret
       containers:
-      - name: curlpod
+      - name: curl-pod
         command:
         - sh
         - -c
         - while true; do sleep 1; done
-        image: radial/busyboxplus:curl
+        image: my-image
         volumeMounts:
-        - mountPath: /etc/nginx/ssl
+        - mountPath: /path/to/mount/secret
           name: secret-volume</code></pre>
   </div>
   <div class="card-footer text-muted">

@@ -97,7 +97,10 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X PUT https://&lt;endpoint&gt;/_li
     <h3 class="card-title">Index</h3>
 
 <pre><code class="bash"># List all indices.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_cat/indices?v&pretty
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_cat/indices?v
+
+# List few indices.
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_cat/indices/&lt;index_name_1&gt;,&lt;index_name_2&gt;,&lt;index_name_3&gt;?v
 
 # Create an index.
 curl -k -H "Authorization: ApiKey $apiKey" -X PUT https://&lt;endpoint&gt;/&lt;index_name&gt;
@@ -111,10 +114,21 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/&lt
 # Update index setting.
 
 # For example, temporarily setting number_of_replicas to 0 and refresh_interval to -1 (This disable reflecing written documents in index to users) is helping during the inital data load on index for it will speed up the indexing.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X PUT https://&lt;endpoint&gt;/&lt;index_name&gt;/_setting?pretty -H "Content-Type: appliction/json" -d '{ "index": { "number_of_replicas": 0, "refresh_interval": -1 } }'
+curl -k -u &lt;username&gt;:&lt;password&gt; -X PUT https://&lt;endpoint&gt;/&lt;index_name&gt;/_setting?pretty -H "Content-Type: appliction/json" -d '
+{
+  "index": {
+    "number_of_replicas": 0,
+    "refresh_interval": -1
+  }
+}'
 
 # To revert the index setting "refresh_interval" to default.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X PUT https://&lt;endpoint&gt;/&lt;index_name&gt;/_setting?pretty -H "Content-Type: appliction/json" -d '{ "index": { "refresh_interval": null } }'</code></pre>
+curl -k -u &lt;username&gt;:&lt;password&gt; -X PUT https://&lt;endpoint&gt;/&lt;index_name&gt;/_setting?pretty -H "Content-Type: appliction/json" -d '
+{
+  "index": {
+    "refresh_interval": null
+  }
+}'</code></pre>
 
     <h3 class="card-title">Mapping</h3>
 
@@ -127,7 +141,33 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/&lt
 curl -k -H "Authorization: ApiKey $apiKey" -H "Content-Type: application/json" -X PUT https://&lt;endpoint&gt;/&lt;index_name&gt;/_doc/&lt;document_id&gt; -d '&lt;JSON&gt;'
 
 # Check a document.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/&lt;index_name&gt;/_doc/&lt;document_id&gt;</code></pre>
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/&lt;index_name&gt;/_doc/&lt;document_id&gt;
+
+# Count the number of documents in an index.
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/&lt;index_name&gt;/_count?pretty
+
+# Count the number of documents matching a query.
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/&lt;index_name&gt;/_count?pretty -H "Content-Type: appliction/json" -d '
+{
+  "query": {
+    "term": {
+      "field": "value"
+    }
+  }
+}'
+
+# Count the number of documents matching a ranged query.
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/&lt;index_name&gt;/_count?pretty -H "Content-Type: appliction/json" -d '
+{
+  "query": {
+    "range": {
+      "field": {
+        "gte": "from value",
+        "lts": "to value"
+      }
+    }
+  }
+}'</code></pre>
 
     <h3 class="card-title">Snapshot</h3>
     <ul>
@@ -149,7 +189,13 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_ca
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_cat/snapshots/&lt;snapshot_repo_name&gt;/_status?pretty
 
 # Create snapshot repository.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_snapshot/&lt;snapshot_repo_name&gt; -H "Content-Type: appliction/json" -d '{ "type": "fs", "settings": { "location": "/path/to/directory" } }'
+curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_snapshot/&lt;snapshot_repo_name&gt; -H "Content-Type: appliction/json" -d '
+{
+  "type": "fs",
+  "settings": {
+    "location": "/path/to/directory"
+  }
+}'
 
 # Create a snapshot. (All indices)
 curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_snapshot/&lt;snapshot_repo_name&gt;/&lt;snapshot_name&gt;?wait_for_completion=true&pretty
@@ -162,13 +208,79 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_s
     <h3 class="card-title">Reindex</h3>
     <ul>
       <li>Used when copying document from one index to another index.</li>
-      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_reindex?wait_for_completion=false -H "Content-Type: appliction/json" -d '{ "source": { "index": "source_index" }, "dest": { "index": "dest_index" } }'</code></pre>
-      <li>Used when copying index from one version of Elasticsearch to another version of Elasticsearch.</li>
-      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_reindex?wait_for_completion=false -H "Content-Type: appliction/json" -d '{ "source": { "remote": { "host": "https://remote_endpoint", "username": "my_username", "password": "my_password" }, index": "source_index" }, "dest": { "index": "dest_index" } }'</code></pre>
+      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_reindex?wait_for_completion=false -H "Content-Type: appliction/json" -d '
+{
+  "source": {
+    "index": "source_index"
+  }, "
+  dest": {
+    "index": "dest_index"
+  }
+}'</code></pre>
+      <li>Used when copying index from one version of Elasticsearch to another version of Elasticsearch. All nodes in the remote cluster must have "reindex.remote.whitelist: &lt;remote_cluster_url&gt;" in <code>elasticsearch.yml</code></li>
+      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_reindex?wait_for_completion=false -H "Content-Type: appliction/json" -d '
+{
+  "source": {
+    "remote": {
+      "host": "https://remote_endpoint",
+      "username": "my_username",
+      "password": "my_password"
+    },
+    "index": "source_index"
+  },
+  "dest": {
+    "index": "dest_index"
+  }
+}'</code></pre>
+      <li>Ranged query can be used to re-index documents whose field has a value under certain range. (For example, between dates)</code></li>
+      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_reindex?wait_for_completion=false -H "Content-Type: appliction/json" -d '
+{
+  "source": {
+    "remote": {
+      "host": "https://remote_endpoint",
+      "username": "my_username",
+      "password": "my_password"
+    },
+    "index": "source_index",
+    "query": {
+      "range": {
+        "field": {
+          "gte": "from value",
+          "lte": "to value"
+        }
+      }
+    }
+  },
+  "dest": {
+    "index": "dest_index"
+  }
+}'</code></pre>
       <li><code>size</code> represents the number of documents in each batch. If each batch is greater than 100MB, Elasticsearch will report an error. This error needs to be handled by descreasing the number of documents in each batch so that the while batch does not exceed 100MB.</li>
-      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_reindex?wait_for_completion=false -H "Content-Type: appliction/json" -d '{ "source": { "remote": { "host": "https://remote_endpoint", "username": "my_username", "password": "my_password" }, index": "source_index", size: 100 }, "dest": { "index": "dest_index" } }'</code></pre>
+      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_reindex?wait_for_completion=false -H "Content-Type: appliction/json" -d '
+{
+  "source": {
+    "remote": {
+      "host": "https://remote_endpoint",
+      "username": "my_username",
+      "password": "my_password"
+    },
+    "index": "source_index",
+    size: 100
+  },
+  "dest": {
+    "index": "dest_index"
+  }
+}'</code></pre>
       <li><code>slice</code> can be used for parallel process. (This does not work when reindexing from remote cluster!)</li>
-      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_reindex?slice=100&wait_for_completion=false -H "Content-Type: appliction/json" -d '{ "source": { "index": "source_index" }, "dest": { "index": "dest_index" } }'</code></pre>
+      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_reindex?slice=100&wait_for_completion=false -H "Content-Type: appliction/json" -d '
+{
+  "source": {
+    "index": "source_index"
+  },
+  "dest": {
+    "index": "dest_index"
+  }
+}'</code></pre>
     </ul>
 
     <h3 class="card-title">Task</h3>
@@ -206,7 +318,15 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_ss
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_security/role
 
 # Create role. (With all privileges to all indices)
-curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_security/&lt;role_name&gt; -d '{ "indicies": [{ "names": [ "*" ], "privileges": [ "all" ] }] }'</code></pre>
+curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_security/&lt;role_name&gt; -d '
+{
+  "indicies": [
+    {
+      "names": [ "*" ],
+      "privileges": [ "all" ]
+    }
+  ]
+}'</code></pre>
 
     <h3 class="card-title">User</h3>
 
@@ -214,7 +334,13 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_s
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_security/user
 
 # Create role. (With superuser)
-curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_security/&lt;user_name&gt; -d '{ "password": "mypassword", "roles": [ "superuser" ], "full_name": "elasticsearch", "email": "elasticsearch@gmail.com" }'</code></pre>
+curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_security/&lt;user_name&gt; -d '
+{
+  "password": "mypassword",
+  "roles": [ "superuser" ],
+  "full_name": "elasticsearch",
+  "email": "elasticsearch@gmail.com"
+}'</code></pre>
   </div>
   <div class="card-footer text-muted">
 
@@ -269,12 +395,22 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_s
 clusterName: "elasticsearch"
 nodeGroup: "master"
 
+esConfig:
+  elasticsearch.yml: |
+    path.repo: path/to/snapshot_repo
+
 roles:
   - master
 
 secret:
   enabled: true
-  password: "elastic123"
+  password: password-for-default-user-elastic
+
+image: image-name
+imageTag: image-tag
+imagePullPolicy: "Always"
+
+createCert: true
 
 replicas: 3
 
@@ -297,6 +433,47 @@ volumeClaimTemplate:
 <pre><code class="yaml">---
 clusterName: "elasticsearch"
 nodeGroup: "datahot" # Could be datawarm, datacold, datafrozen
+
+esConfig:
+  elasticsearch.yml: |
+    path.repo: path/to/snapshot_repo
+
+roles:
+  - data
+  - data_content
+  - data_hot # Could be data_warm, data_cold, data_frozen
+  - ingest
+
+secret:
+  enabled: true
+
+image: image-name
+imageTag: image-tag
+imagePullPolicy: "Always"
+
+# Use certificate created by master nodes.
+createCert: false
+secretMounts:
+  - name: elastic-certificates
+    secretName: elasticsearch-master-certs
+    path: /usr/share/elasticsearch/config/certs
+
+replicas: 3
+
+resources:
+  requests:
+    cpu: "1000m"
+    memory: "2G1"
+  limits:
+    cpu: "1000m"
+    memory: "2G1"
+
+volumeClaimTemplate:
+  accessMode: [ "ReadWriteOnce" ]
+  storageClssName: my-storage-class
+  resources:
+    requests:
+      storage: 30Gi
 
 extraEnvs:
   # Use password created by master nodes.
@@ -324,40 +501,7 @@ extraEnvs:
   - name: xpack.security.http.ssl.certificate
     value: "/usr/share/elasticsearch/config/certs/tls.crt"
   - name: xpack.security.http.ssl.certificate_authorities
-    value: "/usr/share/elasticsearch/config/certs/ca.crt"
-
-roles:
-  - data
-  - data_content
-  - data_hot # Could be data_warm, data_cold, data_frozen
-  - ingest
-
-secret:
-  enabled: true
-
-# Use certificate created by master nodes.
-createCertL false
-secretMounts:
-  - name: elastic-certificates
-    secretName: elasticsearch-master-certs
-    path: /usr/share/elasticsearch/config/certs
-
-replicas: 3
-
-resources:
-  requests:
-    cpu: "1000m"
-    memory: "2G1"
-  limits:
-    cpu: "1000m"
-    memory: "2G1"
-
-volumeClaimTemplate:
-  accessMode: [ "ReadWriteOnce" ]
-  storageClssName: my-storage-class
-  resources:
-    requests:
-      storage: 30Gi</code></pre>
+    value: "/usr/share/elasticsearch/config/certs/ca.crt"</code></pre>
 
   </div>
   <div class="card-footer text-muted">
