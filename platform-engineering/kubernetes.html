@@ -411,6 +411,60 @@ kubectl scale --replicas=0 deployment/&lt;deployment_name&gt;
 # Port forward to access app runnig inside a pod/deployment from localhost.
 kubectl port-forward &lt;pod_name&gt; &lt;localhost_port&gt;:&lt;container_port&gt;</code></pre>
 
+    <h3 class="card-title">Deployment</h3>
+
+<pre><code class="bash"># Check Deployment rollout status.
+kubectl rollout status deployment/&lt;deployment_name&gt;
+
+# Check the labels generated for each Pod.
+kubectl get pods --show-labels
+
+# To update iamge , run one of the following.
+kubectl --record deployment.apps/nginx-deployment set image deployment.v1.apps/&lt;deployment_name&gt; &lt;image_name&gt;=&lt;image_name&gt;:&lt;new_image_version&gt;
+kubectl set image deployment/&lt;deployment_name&gt; &lt;image_name&gt;=&lt;image_name&gt;:&lt;new_image_version&gt; --record</code></pre>
+
+    <h4 class="card-title">Deployment rollback</h4>
+
+<pre><code class="bash"># Check the revisions of Deployment.
+kubectl rollout history deployment.v1.apps/&lt;deployment_name&gt;
+
+# To see the details of each revision.
+kubectl rollout history deployment.v1.apps/&lt;deployment_name&gt; --revision=&lt;revision_number&gt;
+
+# Rollback to a specific version.
+kubectl rollout undo deployment.v1.apps/&lt;deployment_name&gt; --to-revision=&lt;revision_number&gt;</code></pre>
+
+    <h4 class="card-title">Deployment scaling</h4>
+    <ul>
+      <li>Deployment Controller balances additional replicas in the existing ReplicaSets</li>
+    </ul>
+
+<pre><code class="bash"># Scale a Deployment.
+kubectl scale deployment.v1.apps/&lt;deployment_name&gt; --replicas=&lt;number_of_replicas&gt;
+
+# Setup autoscaler for Deployment and choose the minimum and maximum number of Pods.
+kubectl autoscale deployment.v1.apps/&lt;deployment_name&gt; --min=&lt;min_number_of_replicas&gt; --max=&lt;max_number_of_replicas&gt; --cpu-percent=&lt;percentage_of_cpu&gt;
+
+# Rollback to a specific version.
+kubectl rollout undo deployment.v1.apps/&lt;deployment_name&gt; --to-revision=&lt;min_number_of_replicas&gt;</code></pre>
+
+    <h4 class="card-title">Pause and resume Deployment</h4>
+    <ul>
+      <li>Can apply multiple fixes in between pausing and resuming without triggering unnecessary rollouts</li>
+    </ul>
+
+<pre><code class="bash"># To pause the Deployment.
+kubectl rollout pause deployment.v1.apps/&lt;deployment_name&gt;
+
+# Can update the image.
+kubectl set image deployment.v1.apps/&lt;deployment_name&gt; --revision=&lt;revision_number&gt;
+
+# Can update the resources.
+kubectl set resources deployment.v1.apps/&lt;deployment_name&gt; -c=nginx --limits=cpu=&lt;cpu&gt;,memory=&lt;memory&gt;
+
+# To resume the Deployment.
+kubectl rollout resume deployment.v1.apps/&lt;deployment_name&gt;</code></pre>
+
     <h3 class="card-title">PV/PVC</h3>
 
 <pre><code class="bash"># Show PVC on all namespaces.
@@ -805,7 +859,7 @@ metadata:
   <div class="card-body">
     <h2 class="card-title">Deployments</h2>
     <ul>
-      <li>Provides declarative updates for Pods and ReplicaSets.</li>
+      <li>Provides declarative updates for Pods using ReplicaSets.</li>
       <li>Deployment Controller change an actual state to a desired state at a controlled rate.</li>
       <li>Deployment ensures that at least 75% of Pods are up while they are being updated.</li>
       <li>It also ensures that at most 125% of the desired number of Pods are up.</li>
@@ -821,6 +875,7 @@ metadata:
     </ul>
 
     <h3 class="card-title">Create a Deployment</h3>
+
 <pre><code class="yaml"># apiVersion, kind, metadata are mandatory.
 apiVersion: apps/v1
 kind: Deployment
@@ -844,11 +899,7 @@ spec:
       ports:
       - containerPort: 80</code></pre>
 
-<pre><code class="bash"># Create Deployment.
-kubectl apply -f nginx-deployment.yaml
-
-# Check Deployment.
-kubectl get deployments</code></pre>
+    <h3 class="card-title">kubectl get deployments</h3>
 
     <img class="img-fluid" class="card-img-top" src="/img/kubernetes/kubernetes12.png" alt="Card image cap">
 
@@ -860,11 +911,7 @@ kubectl get deployments</code></pre>
       <li>AGE - amount of time the appliation has been running.</li>
     </ul>
 
-<pre><code class="bash"># Check Deployment rollout status.
-kubectl rollout status deployment/nginx-deployment
-
-# Check ReplicaSet created by Deployment.
-kubectl get rs</code></pre>
+    <h3 class="card-title">kubectl get rs</h3>
 
     <img class="img-fluid" class="card-img-top" src="/img/kubernetes/kubernetes13.png" alt="Card image cap">
     <ul class="list-unstyled mb-0">
@@ -875,64 +922,12 @@ kubectl get rs</code></pre>
       <li>AGE - amount of time the appliation has been running.</li>
     </ul>
 
-<pre><code class="bash"># Check the labels generated for each Pod.
-kubectl get pods --show-labels<
-
-# To update iamge from nginx:1.14.2 to nginx:1.16.1, run one of the following.
-kubectl --record deployment.apps/nginx-deployment set image deployment.v1.apps/nginx-deployment nginx=nginx:1.16.1
-kubectl set image deployment/nginx-deployment nginx=nginx:1.16.1 --record
-
-# Check the rollout status.
-kubectl rollout status deployment/nginx-deployment</code></pre></li>
-
     <h3 class="card-title">Rollover</h3>
     <ul>
       <li>Everytime a new Deployment is observed by Deployment Controller, a ReplicaSet is created to bring up the desired Pods.</li>
       <li>If Deployment is updated, the existing ReplicaSet that control Pods whose labels match <code>.spec.selector</code> but whose template does not match <code>.spec.template</code> are scaled down.</li>
       <li>Eventually, new ReplicaSet is scaled to <code>.spec.replicas</code> and all old ReplicaSets is scaled to 0.</li>
     </ul>
-
-    <h3 class="card-title">Rollback</h3>
-<pre><code class="bash"># Check the revisions of Deployment.
-kubectl rollout history deployment.v1.apps/nginx-deployment
-
-# To see the details of each revision.
-kubectl rollout history deployment.v1.apps/nginx-deployment --revision=2
-
-# Rollback to a specific version.
-kubectl rollout undo deployment.v1.apps/nginx-deployment --to-revision=2</code></pre>
-
-    <h3 class="card-title">Scaling</h3>
-<pre><code class="bash"># Scale a Deployment.
-kubectl scale deployment.v1.apps/nginx-deployment --replicas=10
-
-# Setup autoscaler for Deployment and choose the minimum and maximum number of Pods.
-kubectl autoscale deployment.v1.apps/nginx-deployment --min=10 --max=15 --cpu-percent=80
-
-# Rollback to a specific version.
-kubectl rollout undo deployment.v1.apps/nginx-deployment --to-revision=2</code></pre>
-
-    <h3 class="card-title">Proportional scaling</h3>
-    <ul>
-      <li>Deployment Controller balances additional replicas in the existing ReplicaSets</li>
-    </ul>
-
-    <h3 class="card-title">Pause and resume Deployment</h3>
-    <ul>
-      <li>Can apply multiple fixes in between pausing and resuming without triggering unnecessary rollouts</li>
-    </ul>
-<pre><code class="bash"># To pause the Deployment.
-kubectl rollout pause deployment.v1.apps/nginx-deployment
-
-# Can update the image.
-kubectl set image deployment.v1.apps/nginx-deployment nginx=nginx:1.16.1
-
-# Can update the resources.
-kubectl set resources deployment.v1.apps/nginx-deployment -c=nginx --limits=cpu=200m,memory=512Mi
-
-# To resume the Deployment.
-kubectl rollout resume deployment.v1.apps/nginx-deployment</code></pre>
-
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/deployment/">Deployment</a>
