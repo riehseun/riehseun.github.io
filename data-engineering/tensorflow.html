@@ -45,6 +45,7 @@
     <p class="card-text"></p>
     <ul class="list-unstyled mb-0">
       <li><a href="#tensorflow-1">Tensorflow</a></li>
+      <li><a href="#tensorflow-2">Tensorflow for image</a></li>
     </ul>
   </div>
 </div>
@@ -150,6 +151,69 @@ sess.run(probs)
 
 sess.run(preds)
 # array([0, 1])</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="tensorflow-2">
+  <div class="card-body">
+    <h2 class="card-title">Tensorflow for image</h2>
+    <ul>
+      <li><code>tf.io.decode_image</code> is used to load pixel values of input image.</li>
+      <ul>
+        <li><code>channels=1</code> means grey scale.</li>
+        <li><code>channels=3</code> means RGB.</li>
+        <li><code>channels=4</code> means RGBA where A indicates opacity.</li>
+      </ul>
+      <li><code>tf.image.resize</code> compresses or expands the image.</li>
+      <li><code>map</code> rather than using a <code>for</code> loop to do image decoding in parallel across the files.</li>
+    </ul>
+
+<pre><code class="python">import tensorflow as tf
+
+# Decode image data from a file in Tensorflow
+def decode_image(filename, image_type, resize_shape, channels=0):
+    value = tf.io.read_file(filename)
+    if image_type == "png":
+        decoded_image = tf.io.decode_png(value, channels=channels)
+    elif image_type == "jpeg":
+        decoded_image = tf.io.decode_jpeg(value, channels=channels)
+    else:
+        decoded_image = tf.io.decode_image(value, channels=channels)
+
+    if resize_shape is not None \
+        and (image_type == "png" or image_type == "jpeg"):
+        decoded_image = tf.image.resize(decoded_image, resize_shape)
+
+    return decoded_image</code></pre>
+
+<pre><code class="python"># Return a dataset created from the image file paths
+def get_dataset(image_paths, image_type, resize_shape, channels):
+    filename_tensor = tf.constant(image_paths)
+    dataset = tf.data.Dataset.from_tensor_slices(filename_tensor)
+
+    def _map_fn(filename):
+        return decode_image(filename, image_type,resize_shape,channels=channels)
+
+    return dataset.map(_map_fn)
+
+# Get the decoded image data from the input image file paths
+def get_image_data(image_paths, image_type=None, resize_shape=None, channels=0):
+    dataset = get_dataset(image_paths, image_type, resize_shape, channels)
+    iterator =tf.compat.v1.data.make_one_shot_iterator(dataset)
+    next_image = iterator.get_next()
+
+    image_data_list = []
+    with tf.compat.v1.Session() as sess:
+        for i in range(len(image_paths)):
+            image_data = sess.run(next_image)
+            image_data_list.append(image_data)
+
+        return image_data_list
+
+    return image_data_list</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
