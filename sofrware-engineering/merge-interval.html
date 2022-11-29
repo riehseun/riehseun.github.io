@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="/img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/monokai-sublime.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="/js/jquery.min.js"></script>
+<script src="/js/bootstrap.bundle.min.js"></script>
+<script src="/js/highlight.pack.js"></script>
+<script type="text/javascript" src="/js/include_html.js"></script>
+<script type="text/javascript" src="/js/site.js"></script>
+
+</head>
+
+<body>
+
+<include src="/header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Software Engineering</h1>
+
+<!-- Merge interval BEGIN -->
+<div class="card mb-4" id="merge-interval">
+  <div class="card-body">
+    <h2 class="card-title">Two pointer</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#merge-interval-1">Merge interval</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="merge-interval-1">
+  <div class="card-body">
+    <h2 class="card-title">Merge interval</h2>
+
+    <h3 class="card-title">1. Loop through intervals.</h3>
+    <ul>
+      <li>Save the first interval into the result array.</li>
+      <li>While iterating the rest of intervals.</li>
+      <ul>
+        <li>If the end of the last interval is greater than the current, then there is an overlap.</li>
+        <li>Then, merge these two intervals.</li>
+        <li>Else, just append the current interval to the result array.</li>
+      </ul>
+      <li>Time: O(n) where n is the number of intervals.</li>
+      <li>Space: O(n).</li>
+    </ul>
+
+<pre><code class="python">class Interval:
+    def __init__(self, start, end):
+        self.start = start
+        self.end = end
+        self.closed = True
+
+
+def merge_intervals(v):
+
+    if len(v) <= 1:
+        return v
+
+    intervals = []
+    # Keep the first interval.
+    intervals.append(v[0])
+
+    for interval in v[1:]:
+        # If overlap is found.
+        if intervals[-1].end >= interval.start:
+            old = intervals.pop()
+            new = Interval(old.start, max(old.end, interval.end))
+            intervals.append(new)
+        else:
+            intervals.append(interval)
+
+    return intervals</code></pre>
+
+    <h3 class="card-title">Test cases</h3>
+    <ul>
+      <li>Empty intervals. ([])</li>
+      <li>Negative intervals.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/courses/grokking-coding-interview-patterns-python">Grokking Coding Interview Patterns in Python</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="merge-interval-2">
+  <div class="card-body">
+    <h2 class="card-title">Insert interval</h2>
+
+    <h3 class="card-title">1. Order by start time.</h3>
+    <ul>
+      <li>Add intervals that start before the interval to be inserted into the an array.</li>
+      <li>Then, add the interval to be inserted to the array.</li>
+      <li>Then, add all other remaining intervals to the array.</li>
+      <li>Now perform merge_interval on the array</li>
+      <li>Time: O(n) where n is the number of intervals.</li>
+      <li>Space: O(n).</li>
+    </ul>
+
+<pre><code class="python">def insert_interval(existing_intervals, new_interval):
+
+    result = []
+
+    i = 0
+    interval_inserted = False
+    while i < len(existing_intervals):
+        if existing_intervals[i].start < new_interval.start:
+            result.append(existing_intervals[i])
+            i += 1
+        else:
+            if not interval_inserted:
+                result.append(new_interval)
+                interval_inserted = True
+            else:
+                result.append(existing_intervals[i])
+                i += 1
+
+    if not interval_inserted:
+        result.append(new_interval)
+
+    return merge_intervals(result)</code></pre>
+
+    <h3 class="card-title">Test cases</h3>
+    <ul>
+      <li>Insert interval that is ouside the entire range.</li>
+      <li>Insert negative interval.</li>
+      <li>Insert an interval that exactly matches one of the existing intervals.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/courses/grokking-coding-interview-patterns-python">Grokking Coding Interview Patterns in Python</a>
+  </div>
+</div>
+<!-- Merge interval END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+</html>
