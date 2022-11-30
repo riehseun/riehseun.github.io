@@ -44,6 +44,8 @@
     <h2 class="card-title">Two pointer</h2>
     <ul class="list-unstyled mb-0">
       <li><a href="#merge-interval-1">Merge interval</a></li>
+      <li><a href="#merge-interval-2">Insert interval</a></li>
+      <li><a href="#merge-interval-3">Interval intersection</a></li>
     </ul>
   </div>
 </div>
@@ -143,8 +145,63 @@ def merge_intervals(v):
     <h3 class="card-title">Test cases</h3>
     <ul>
       <li>Insert interval that is ouside the entire range.</li>
-      <li>Insert negative interval.</li>
+      <li>Insert arrays that have intervals with negative numbers.</li>
       <li>Insert an interval that exactly matches one of the existing intervals.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/courses/grokking-coding-interview-patterns-python">Grokking Coding Interview Patterns in Python</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="merge-interval-3">
+  <div class="card-body">
+    <h2 class="card-title">Interval intersection</h2>
+
+    <h3 class="card-title">1. Loop through both lists and move forward in the list whose interval ends earlier first.</h3>
+    <ul>
+      <li><code>a.start <= b.end and b.start <= a.end</code> is the condition for the intersection to exist.</li>
+      <li>Time: O(n+m) where n and m are the lengths of input arrays.</li>
+      <li>Space: O(min(n,m))</li>
+    </ul>
+
+<pre><code class="python">def intervals_intersection(interval_list_a, interval_list_b):
+
+    intersection = find_intersection(interval_list_a[0], interval_list_b[0])
+
+    result = []
+    i = 0
+    j = 0
+    while i < len(interval_list_a) \
+        and j < len(interval_list_b):
+
+        # Check for intersection
+        intersection = find_intersection(interval_list_a[i], interval_list_b[j])
+
+        if intersection:
+            result.append(intersection)
+
+        if interval_list_a[i].end <= interval_list_b[j].end:
+            i += 1
+        else:
+            j += 1
+
+    return result
+
+def find_intersection(a, b):
+
+    if a.start <= b.end and b.start <= a.end:
+        intersection = Interval(max(a.start, b.start), min(a.end, b.end))
+    else:
+        intersection = None
+
+    return intersection</code></pre>
+
+    <h3 class="card-title">Test cases</h3>
+    <ul>
+      <li>One of the input arrays are empty.</li>
+      <li>Both input arrays are empty.</li>
+      <li>input arrays that have intervals with negative numbers.</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
