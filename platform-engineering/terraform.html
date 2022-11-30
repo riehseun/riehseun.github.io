@@ -83,19 +83,15 @@
       <li>HCL - addresses issues in JSON & YAML.</li>
     </ul>
 
-    <h3 class="card-title">Output</h3>
-    <ul>
-      <li>Using an output attribute from a resource: <code>&lt;resource_type&gt;.&lt;resource_identifier&gt;.&lt;attribute_name&gt;</code></li>
-      <li>Help Terraform understand dependencies of resources.</li>
-    </ul>
-
     <h3 class="card-title">Provider</h3>
     <ul>
       <li>A separate binary that Terraform calls at run time.</li>
       <li>Binary must be named <code>terraform-&lt;provider&gt;-&lt;name&gt;_vX.Y.Z</code></li>
     </ul>
 
-<pre><code class="yaml">provider "aws" {
+    <h4 class="card-title">Provider example</h4>
+
+<pre><code class="hcl">provider "aws" {
   region  = "eu-west-1"
 }
 
@@ -112,7 +108,7 @@ terraform {
       <li>Every provider must have <code>alias</code> set after the first.</li>
     </ul>
 
-<pre><code class="yaml">provider "aws" {
+<pre><code class="hcl">provider "aws" {
     region = "eu-west-1"
 }
 
@@ -137,7 +133,7 @@ resource "aws_vpc" "london_vpc" {
       <li>Useful when migrating existing infrastructure to Terraform.</li>
     </ul>
 
-<pre><code class="yaml">provider "aws" {
+<pre><code class="hcl">provider "aws" {
     region = "eu-west-1"
 }
 
@@ -166,6 +162,58 @@ resource "aws_iam_policy" "my_bucket_policy" {
 EOF
 }</code></pre>
 
+    <h3 class="card-title">Output</h3>
+    <ul>
+      <li>Using an output attribute from a resource: <code>&lt;resource_type&gt;.&lt;resource_identifier&gt;.&lt;attribute_name&gt;</code></li>
+      <li>Help Terraform understand dependencies of resources.</li>
+    </ul>
+
+    <h4 class="card-title">Output example</h4>
+
+<pre><code class="hcl">provider "aws" {
+    region = "eu-west-1"
+}
+
+resource "aws_s3_bucket" "first_bucket" {
+    bucket = "kevholditch-bucket-outputs"
+}
+
+output "bucket_name" {
+    value = aws_s3_bucket.first_bucket.id
+}
+
+output "bucket_arn" {
+    value = aws_s3_bucket.first_bucket.arn
+}
+
+output "bucket_information" {
+    value = "bucket name: ${aws_s3_bucket.first_bucket.id}, bucket arn: ${aws_s3_bucket.first_bucket.arn}"
+}
+
+output "all" {
+    value = aws_s3_bucket.first_bucket
+}</code></pre>
+
+    <h3 class="card-title">Local</h3>
+    <ul>
+      <li>Variable used in the template.</li>
+    </ul>
+
+    <h4 class="card-title">Local example</h4>
+
+<pre><code class="hcl">provider "aws" {
+    region = "eu-west-1"
+}
+
+locals {
+    first_part = "hello"
+    second_part = "${local.first_part}-there"
+    bucket_name = "${local.second_part}-how-are-you-today"
+}
+
+resource "aws_s3_bucket" "bucket" {
+    bucket = local.bucket_name
+}</code></pre>
 
     <h3 class="card-title">Installation (Ubuntu)</h3>
 
