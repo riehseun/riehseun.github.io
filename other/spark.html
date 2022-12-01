@@ -44,7 +44,7 @@
     <h2 class="card-title">Spark</h2>
     <p class="card-text"></p>
     <ul class="list-unstyled mb-0">
-      <li><a href="#spark-1">Start basic</a></li>
+      <li><a href="#spark-1">Spark</a></li>
       <li><a href="#spark-2">Start with Spark</a></li>
       <li><a href="#spark-3">Spark read</a></li>
     </ul>
@@ -53,22 +53,89 @@
 
 <div class="card mb-4" id="spark-1">
   <div class="card-body">
-    <h2 class="card-title">Start basic</h2>
-    <p class="card-text"></p>
-    <h3 class="card-title">Spark</h3>
+    <h2 class="card-title">Spark</h2>
     <ul>
-      <li>Resilent distributed datasets (RDD)</li>
-      <li>Driver program creates RDD.</li>
-      <li>Create RDD -> apply transformation -> lazily evaluated and action performed.</li>
-      <ul>
-        <li>Transformations will wait until actions are performed.</li>
-        <li>Errors may show up in action stage, not in transformation stage.</li>
-      </ul>
+      <li>Caches data it in memory across the cluster, saving costly round-trips to disk. (As opposed to MapReduce)</li>
+      <li>Driver: master process.</li>
+      <li>Executor: slave process.</li>
+      <li>Spark is compatible with the cluster managers like Hadoop YARN and Kubernetes.</li>
+      <li>Cluster mode: user submits a spark application to the cluster manager. which spawns the driver and executor processes on worker nodes.</li>
+      <li>Client mode: driver process lives on the client machine, that is used to submit the Spark job.</li>
     </ul>
+
+    <h3 class="card-title">Spark lifecycle</h3>
+    <ul>
+      <li>User submits a Spark job to the cluster.</li>
+      <li>Driver process runs and executes user code.</li>
+      <li>Cluster manager launches Executor processes on nodes.</li>
+      <li>Driver assigns tasks to executor processes and job execution begins.</li>
+      <li>Driver exits and the cluster manager shuts down the executor processes.</li>
+    </ul>
+
+    <h3 class="card-title">Resilent distributed datasets (RDD)</h3>
+    <ul>
+      <li>Read-only (immutable) collection of objects.</li>
+      <li>Transformations are applied on RDDs to produce new RDDs.</li>
+      <li>Actions are applied to produce results.</li>
+      <li>Transformations are lazily evaluated so they aren’t executed until an action is performed.</li>
+      <li>RDD keeps track of its lineage, which is a graph of all the parent RDDs.</li>
+    </ul>
+
+    <h3 class="card-title">Data frames</h3>
+    <ul>
+      <li>Looks just like tables in relational databases.</li>
+      <li>RDDs can be converted to data frames.</li>
+      <li>A partition is a collection of rows from the parent DataFrame.</li>
+    </ul>
+
+    <h3 class="card-title">Spark application</h3>
+    <ul>
+      <li>Each Spark application is associated with one SparkSession.</li>
+      <li>SparkSession has another field:SparkContext which represents the connection to the Spark Cluster.</li>
+      <li>SparkContext can create RDDs.</li>
+      <li>Spark application consists of one or more jobs.</li>
+      <li>Each job is made of a directed acyclic graph of stages.</li>
+      <li>A stage is split into tasks and is executed in parallel on RDD partitions.</li>
+      <li></li>
+    </ul>
+
+<pre><code class="bash"># Read in data.
+df = spark.read.option("inferSchema", true).option("header", false).text("file:///path/to/file")
+
+# Examine schema.
+df.schema</code></pre>
+
+<pre><code class="bash"># Print the context object.
+spark.sparkContext
+
+# Read in data.
+rdd = spark.sparkContext.textFile("/path/to/textfile")
+
+# Print the number of records read-in.
+rdd.count()
+
+# Print the first record.
+rdd.first()
+
+# Print all the records.
+rdd.foreach(System.out.println(_))
+
+# Print the number of partitions.
+rdd.getNumPartitions
+
+# Word count problem.
+temp1 = rdd.flatMap(line => line.split(","))
+temp1.collect()
+temp2 = temp1.map(word => (word, 1))
+temp2.collect()
+temp3 = temp2.reduceByKey((v1, v2) => v1 + v2)
+temp3.collect()
+temp4 = temp3.reduce( (t1, t2) => ("total", t1._2 + t2._2) )
+temp4.collect()</code></pre>
 
     <h3 class="card-title">Narrow transformations</h3>
     <ul>
-      <li>Take place in worker nodes locally.</li>
+      <li>Input partition contributes to only one output partition.</li>
       <li>map: apply function to each element of RDD.</li>
       <li>flatMap: map then flatten output.</li>
       <li>filter: keep only elements where function is true.</li>
@@ -77,7 +144,7 @@
 
     <h3 class="card-title">Wide transformations</h3>
     <ul>
-      <li>Processing depends on data residing in multiple partitions distributed across worker nodes,</li>
+      <li>Input partitions contribute to several output partitions.</li>
       <li>groupByKey: (K, V) pairs => (K, list of all V)</li>
     </ul>
 
@@ -89,17 +156,25 @@
       <li>saveAsTextFile(filename): save to local file or HDFS.</li>
     </ul>
 
+    <h3 class="card-title">Shuffle map task</h3>
+    <ul>
+      <li>Physical repartitioning of the data.</li>
+      <li>Runs in all stages except the final stage.</li>
+      <li>Each shuffle task runs a computation on one RDD partition.</li>
+      <li>All shuffle tasks write their output to disk.</li>
+    </ul>
+
+    <h3 class="card-title">Result task</h3>
+    <ul>
+      <li>Runs in the last stage and return a result to the user’s program.</li>
+      <li>Tasks run in parallel on RDDs partition.</li>
+    </ul>
+
     <h3 class="card-title">Spark SQL</h3>
     <ul>
       <li>Enables querying structured and unstructured data through Spark.</li>
       <li>APIs for Scala, Java, Python to convert result into RDDs.</li>
       <li>Deploy business intelligence tools over Spark.</li>
-    </ul>
-
-    <h3 class="card-title">Data frames</h3>
-    <ul>
-      <li>Looks just like tables in relational databases.</li>
-      <li>RDDs can be converted to data frames.</li>
     </ul>
 
     <h3 class="card-title">Spark streaming</h3>
@@ -119,7 +194,7 @@
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://www.coursera.org/specializations/big-data">Big data</a>
+    Reference: <a href="https://www.coursera.org/specializations/big-data">Big data</a> | <a href="https://www.educative.io/courses/introduction-to-big-data-and-hadoop">Introduction to Big Data and Hadoop</a>
   </div>
 </div>
 
