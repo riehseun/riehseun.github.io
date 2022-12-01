@@ -167,9 +167,48 @@ parameters:
 
 <pre><code class="yaml"># Check availability zone of each node.
 kubectl get nodes -o custom-columns=NAME:'{.metadata.name}',REGION:'{.metadata.labels.topology\.kubernetes\.io/region}',ZONE:'{metadata.labels.topology\.kubernetes\.io/zone}'</code></pre>
+
+    <h3 class="card-title">AD integration</h3>
+
+    <h4 class="card-title">Create a role</h4>
+
+<pre><code class="yaml">apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: my-role
+  namespace: my-namespace
+rules:
+- apiGroups: ["", "extensions", "apps"]
+  resources: ["*"]
+  verbs: ["*"]
+- apiGroups: ["batch"]
+  resources:
+  - jobs
+  - cronjobs
+  verbs: ["*"]</code></pre>
+
+    <h4 class="card-title">Create a rolebinding</h4>
+
+<pre><code class="yaml">apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: my-rolebinding
+  namespace: my-namespace
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: my-role
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: User
+  name: &lt;email_address&gt;
+- apiGroup: rbac.authorization.k8s.io
+  kind: Group
+  name: &lt;azure_add_group_object_id&gt;</code></pre>
+
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://jonathan18186.medium.com/azure-kubernetes-service-aks-with-azure-active-directory-aad-pod-identity-620cf210361e">Azure Kubernetes Service (AKS) with Azure Active Directory (AAD) Pod Identity</a> | <a href="https://learn.microsoft.com/en-us/azure/aks/availability-zones">Create an Azure Kubernetes Service (AKS) cluster that uses availability zones</a>
+    Reference: <a href="https://jonathan18186.medium.com/azure-kubernetes-service-aks-with-azure-active-directory-aad-pod-identity-620cf210361e">Azure Kubernetes Service (AKS) with Azure Active Directory (AAD) Pod Identity</a> | <a href="https://learn.microsoft.com/en-us/azure/aks/availability-zones">Create an Azure Kubernetes Service (AKS) cluster that uses availability zones</a> | <a href="https://shailender-choudhary.medium.com/aks-security-using-rbac-and-azure-ad-7e17b92e80b5">AKS Security using RBAC and Azure AD</a>
   </div>
 </div>
 
