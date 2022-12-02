@@ -140,28 +140,19 @@
 
     <h4 class="card-title">Consistent hashing</h4>
     <ul>
-      <li>Only small number of keys move when servers are added or removed.</li>
-      <li>Example (without virtual node): hash range is 1-100, number of nodes is 4.</li>
-      <ul>
-        <li>All data in range 1-25 is stored in server 1.</li>
-        <li>All data in range 26-50 is stored in server 2.</li>
-        <li>All data in range 51-75 is stored in server 3.</li>
-        <li>All data in range 76-100 is stored in server 4.</li>
-      </ul>
-      <li>Apply hash function (MD5) on the key of data to determine which node to place the data.</li>
+      <li>Create conceptual ring of hashes from 0 to n−1, where n is the number of available hash values.</li>
+      <li>Each node and request are put into the ring based on its hash value.</li>
+      <li>Each request is served by the next node in the ring.</li>
+      <li>When a new node is added to the ring, its next node need to share keys with the newly added node.</li>
+      <li>Some node could be heavily loaded compared to others.</li>
     </ul>
 
     <h5 class="card-title">Virtual node</h5>
     <ul>
-      <li>Each node gets mutiple hash ranges and these hash ranges are randomly distributed across the nodes.</li>
-      <li>Node carry replicating hash ranges for fault tolerance. (Some nodes may carry more V-nodes than others)</li>
+      <li>Each node is put into multiple positions in the ring based on multiple hash functions.</li>
+      <li>Each node can have different number of virtual nodes based on hardware capability.</li>
+      <li>Load is more uniform.</li>
       <li>Used in Dynamo and Cassandra.</li>
-      <li>Why virtual node</li>
-      <ul>
-        <li>When a node is added, it receives many v-nodes from the existing nodes to maintain balanced cluster.</li>
-        <li>When a node is removed, v-nodes are spread across many nodes.</li>
-        <li>Random distributed of subranges decreases probability of hotspots.</li>
-      </ul>
     </ul>
 
     <h5 class="card-title">Fixed number of partitions</h5>
