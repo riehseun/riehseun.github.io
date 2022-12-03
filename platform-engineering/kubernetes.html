@@ -423,6 +423,9 @@ winpty kubectl exec -it &lt;pod_name&gt; -- sh
 # Temporarily disable pod.
 kubectl scale --replicas=0 deployment/&lt;deployment_name&gt;
 
+# Rasons for Pod failure.
+kubectl get pod &lt;pod_name&gt; -o go-template="{{range .status.containerStatuses}}{{.lastState.terminated.message}}{{end}}"
+
 # Port forward to access app runnig inside a pod/deployment from localhost.
 kubectl port-forward &lt;pod_name&gt; &lt;localhost_port&gt;:&lt;container_port&gt;</code></pre>
 
@@ -3253,14 +3256,6 @@ spec:
   <div class="card-body">
     <h2 class="card-title">Application inspection and debugging</h2>
 
-
-
-
-
-    <h3 class="card-title">Debug running Pod.</h3>
-<pre><code class="bash">kubectl exec &lt;POD-NAME&gt; -- cat /path/to/log/your_log.log
-kubectl exec -it &lt;POD-NAME&gt; -- sh</code></pre>
-
     <h3 class="card-title">Debug using ephemeral container.</h3>
 <pre><code class="bash">kubectl run &lt;POD-NAME&gt; --image=&lt;IMAGE-NAME-TO-PULL-FOR-THIS-POD&gt; --restart=Never
 # Add debug container.
@@ -3307,9 +3302,6 @@ kubectl get service &lt;SERVICE-NAME&gt; -o json
 kubectl get pods -l app=&lt;SERVICE-NAME&gt;
 # Check if kube-proxy is running.
 ps auxw | grep kube-proxy</code></pre>
-
-    <h3 class="card-title">Determin reasons for Pod failure</h3>
-<pre><code class="bash">kubectl get pod termination-demo -o go-template="{{range .status.containerStatuses}}{{.lastState.terminated.message}}{{end}}"</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-application-introspection/">Application Introspection and Debugging | <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-stateful-set/">Debug a StatefulSet</a> | <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-init-containers/">Debug Init Containers</a> | <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-pod-replication-controller/">Debug Pods and ReplicationControllers</a> | <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-running-pod/">Debug Running Pods</a> | <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-service/">Debug Services</a> | <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/determine-reason-pod-failure/">Determine the Reason for Pod Failure</a>
