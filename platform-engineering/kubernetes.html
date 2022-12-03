@@ -363,9 +363,12 @@ kubectl get ns --insecure-skip-tls-verify
 kubectl delete namespace &lt;namespace&gt;
 
 # Delete a namespace label.
-kubectl label namespaces &lt;namespace&gt; &lt;label&gt;-</code></pre>
+kubectl label namespaces &lt;namespace&gt; &lt;label&gt;-
 
-<pre><code class="bash"># Inspace all namespaces.
+# Find all resources in a namespace.
+kubectl api-resources --verbs=list --namespaced -o name | xargs -n 1 kubectl get --show-kind --ignore-not-found -n &lt;namespace&gt;</code></pre>
+
+<!-- <pre><code class="bash"># Inspace all namespaces.
 kubectl get pods --all-namespaces
 kubectl get rolebinding --all-namespaces
 kubectl get clusterrolebinding --all-namespaces
@@ -373,9 +376,7 @@ kubectl get serviceaccount --all-namespaces
 kubectl get rolebindings,clusterrolebindings \
   --all-namespaces  \
   -o custom-columns='KIND:kind,NAMESPACE:metadata.namespace,NAME:metadata.name,SERVICE_ACCOUNTS:subjects[?(@.kind=="ServiceAccount")].name'
-# Find all resources in a namespace.
-kubectl api-resources --verbs=list --namespaced -o name \
-  | xargs -n 1 kubectl get --show-kind --ignore-not-found -n &lt;namespace&gt;</code></pre>
+</code></pre> -->
 
     <h3 class="card-title">Image and container</h3>
 
@@ -386,7 +387,11 @@ kubectl get pods --all-namespaces -o jsonpath="{.items[*].spec.containers[*].ima
 kubectl get pods &lt;pod_name&gt; -n &lt;namespace&gt; -o jsonpath='{.spec.containers[*].name}'
 
 # Get image used in deployment or daemonset.
-kubectl get deployments/ds -n &lt;namespace&gt; -o yaml | grep image</code></pre>
+kubectl get deployments/ds -n &lt;namespace&gt; -o yaml | grep image
+
+# Debug init container.
+kubectl get pod &lt;pod_name&gt; --template '{{.status.initContainerStatuses}}'
+kubectl logs &lt;pod_name&gt;; -c &lt;init_container_name&gt;</code></pre>
 
     <h3 class="card-title">Pod</h3>
 
@@ -395,6 +400,9 @@ kubectl get pod
 
 # View Pod-Node assignment.
 kubectl get pod -o wide
+
+# List pods matching specific label.
+kubectl get pods -l app=myapp
 
 # View desired state and current observed state.
 kubectl get pod &lt;pod_name&gt; -o=yaml
@@ -426,7 +434,7 @@ kubectl rollout status deployment/&lt;deployment_name&gt;
 # Check the labels generated for each Pod.
 kubectl get pods --show-labels
 
-# To update iamge , run one of the following. ("--record" flag makes K8s document revision history)
+# To update an iamge, run one of the following. ("--record" flag makes K8s document revision history)
 kubectl --record deployment.apps/nginx-deployment set image deployment.v1.apps/&lt;deployment_name&gt; &lt;image_name&gt;=&lt;image_name&gt;:&lt;new_image_version&gt;
 kubectl set image deployment/&lt;deployment_name&gt; &lt;image_name&gt;=&lt;image_name&gt;:&lt;new_image_version&gt; --record</code></pre>
 
@@ -483,21 +491,22 @@ kubectl get pvc</code></pre>
     <h3 class="card-title">Log</h3>
 
 <pre><code class="bash"># Inspect pod logs.
-kubectl logs &lt;pod_name&gt;
+kubectl logs &lt;pod_name&gt; &lt;container_name&gt;
 
 # Inspect previous pod logs.
-kubectl logs &lt;pod_name&gt; -p
-
-# Inspect container logs.
-kubectl logs &lt;pod_name&gt; -c &lt;container_name&gt;</code></pre>
+kubectl logs &lt;pod_name&gt; &lt;container_name&gt; -p</code></pre>
 
     <h3 class="card-title">Node</h3>
 
-<pre><code class="bash">kubectl get nodes
-kubectl drain &lt;node_name&gt;
+<pre><code class="bash">kubectl get nodes --show-labels
+
+# Drain a node.
 kubectl drain &lt;node_name&gt; --ignore-daemonsets --delete-local-data
 kubectl delete note &lt;node_name&gt;
-kubectl get nodes --show-labels</code></pre>
+
+# Check node capacity.
+kubectl get nodes -o yaml | egrep '\sname:|cpu:|memory:'
+kubectl get nodes -o json | jq '.items[] | {name: .metadata.name, cap: .status.capacity}'</code></pre>
 
     <h3 class="card-title">How to exec into a container as root</h3>
 
@@ -847,6 +856,11 @@ kubectl replace --raw "/api/v1/namespaces/&lt;stuck_namespace&gt;/finalize" -f .
     <h2 class="card-title">Namespace</h2>
     <ul>
       <li>Pods in different namespaces can still communicate each other.</li>
+      <ul>
+        <li>Pod can use short name if Service is in the same namespace.</li>
+        <li>Pod must use FQDN if Service is in a different namespace.</li>
+      </ul>
+      <li>Every cluster has subnets and every namespace partitions this subnets.</li>
     </ul>
 
 <pre><code class="yaml">apiVersion: v1
@@ -2006,6 +2020,7 @@ spec:
       <li>Has static IP, DNS, and port.</li>
       <li>The set of Pods targeted by Service is determined by selector.</li>
       <li>Each Service gets an associated Endpoints object, which is a dynamic list of all healthy Pods that match Service’s label selector.</li>
+      <li>Service label can be used to do blue-green deployment of Pods by switching traffics to different Pods.</li>
     </ul>
 
 <pre><code class="yaml">apiVersion: v1
@@ -2013,14 +2028,12 @@ kind: Service
 metadata:
   name: my-service
 spec:
-  # Suppose there are Pods that has label "app=my-app".
   selector:
-    app: my-app
-  # Service named "my-service" targets TCP port 9376 on any Pod with label "app=my-app".
+    app: my-app  # Pods must have all the labels in the Service for the Service to send traffics to Pods.
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 9376</code></pre>
+      port: 80  # Servie listens to this port for the internal request.
+      targetPort: 80  # Application listens to this port inside the pod. By default and for convenience, the "targetPort" is set to the same value as the "port" field.</code></pre>
 
     <h3 class="card-title">Service without selectors</h3>
     <ul>
@@ -2084,12 +2097,10 @@ spec:
   selector:
     app: my-app
   ports:
-      # By default and for convenience, the `targetPort` is set to the same value as the `port` field.
-    - port: 80
+    - protocol: TCP
+      port: 80
       targetPort: 80
-      # Optional field
-      # By default and for convenience, the Kubernetes control plane will allocate a port from a range (default: 30000-32767)
-      nodePort: 30007</code></pre>
+      nodePort: 30007  # Servie listens to this port for the external request.</code></pre>
 
     <h4 class="card-title">LoadBalancer</h4>
 
@@ -2125,12 +2136,29 @@ status:
 
     <h3 class="card-title">Service discovery</h3>
     <ul>
-      <li>There are Pods running a DNS service in control plane.</li>
-      <li>There is also a DNS cluster addon Service that automatically assigns DNS names to other Services.</li>
-      <pre><code class="bash">kubectl get services kube-dns --namespace=kube-system</code></pre></li>
-      <li>The hostname has the form "&lt;service_name&gt;.&lt;namespace&gt;"</li>
-      <li><code>/etc/resolve.conf</code> inside the container has the DNS/IP map configuration.</li>
+      <li>Kubernetes runs an internal DNS service, which is implemented by <code>kube-dns</code> Service and <code>coredns</code> Deployment.</li>
+      <li>Any time a new Service object it observed, DNS record is created so that Service name can be resolved to its ClusterIP.</li>
+      <li>The hostname has the form <code>&lt;service_name&gt;.&lt;namespace&gt;</code>. (Its FQDN will be <code>&lt;service_name&gt;.&lt;namespace&gt;.svc.cluster.local</code>)</li>
+      <li><code>/etc/resolve.conf</code> inside each pod contains the search domain and IP address to send traffic to (Appending search domain to a short name, like Service name, converts the short name to FQDN).</li>
+      <li><code>kube-proxy</code>, which is a system service running on every node, capture traffic destined for Service's ClusterIP and redirects it to the IP addresses of Pods that match the Service’s label selector.</li>
     </ul>
+
+    <h3 class="card-title">Service discovery debugging</h3>
+
+<pre><code class="bash">kubectl get deploy -n kube-system -l k8s-app=kube-dns
+
+kubectl get pods -n kube-system -l k8s-app=kube-dns
+
+kubectl logs &lt;coredns_pod_name&gt; -n kube-system
+
+# ClusterIP address for the kube-dns Service should match the IP address in the /etc/resolv.conf files of all containers running on the cluster.
+kubectl get svc kube-dns -n kube-system
+
+# kube-dns Endpoints should have the IP addresses of the coredns Pods listening on port 53 TCP and UDP.
+kubectl get ep -n kube-system -l k8s-app=kube-dns
+
+# Run DNS pod and run nslookup.
+kubectl run -it dnsutils image gcr.io/kubernetes-e2e-test-images/dnsutils:1.3</code></pre></li>
 
     <h3 class="card-title">Securing the Service</h3>
 
@@ -2244,7 +2272,7 @@ spec:
           name: secret-volume</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://kubernetes.io/docs/concepts/services-networking/service/">Service</a> | <a href="https://kubernetes.io/docs/concepts/services-networking/connect-applications-service/">Connecting Applications with Services</a>
+    Reference: <a href="https://kubernetes.io/docs/concepts/services-networking/service/">Service</a> | <a href="https://kubernetes.io/docs/concepts/services-networking/connect-applications-service/">Connecting Applications with Services</a> | Reference: <a href="https://www.educative.io/courses/the-kubernetes-course">Learn Kubernetes: A Deep Dive</a>
   </div>
 </div>
 
@@ -3224,30 +3252,10 @@ spec:
 <div class="card mb-4" id="kubernetes-63">
   <div class="card-body">
     <h2 class="card-title">Application inspection and debugging</h2>
-<pre><code class="bash">kubectl get pods
-kubectl get pod &lt;POD-NAME&gt; -o yaml
-kubectl describe pod &lt;POD-NAME&gt;
-kubectl get events
-kubectl get events --namespace=&lt;MY-NAMESPACE&gt;
-kubectl get nodes
-kubectl describe node &lt;NODE-NAME&gt;
-kubectl get node &lt;NODE-NAME&gt; -o yaml</code></pre>
 
-    <h3 class="card-title">List all the pods which belong to a StatefulSet, which have a label app=myapp.</h3>
-<pre><code class="bash">kubectl get pods -l app=myapp</code></pre>
 
-    <h3 class="card-title">Debug init container.</h3>
-<pre><code class="bash">kubectl get pod nginx --template '{{.status.initContainerStatuses}}'
-kubectl logs &lt;POD-NAME&gt; -c &lt;INIT-CONTAINER-NAME&gt;</code></pre>
 
-    <h3 class="card-title">Check node capacity.</h3>
-<pre><code class="bash">kubectl get nodes -o yaml | egrep '\sname:|cpu:|memory:'
-kubectl get nodes -o json | jq '.items[] | {name: .metadata.name, cap: .status.capacity}'</code></pre>
 
-    <h3 class="card-title">Examine pod log.</h3>
-<pre><code class="bash">kubectl logs &lt;POD-NAME&gt; &lt;CONTAINER-NAME&gt;
-# If container has previously crashed.
-kubectl logs --previous &lt;POD-NAME&gt; &lt;CONTAINER-NAME&gt;</code></pre>
 
     <h3 class="card-title">Debug running Pod.</h3>
 <pre><code class="bash">kubectl exec &lt;POD-NAME&gt; -- cat /path/to/log/your_log.log
