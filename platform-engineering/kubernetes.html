@@ -489,7 +489,10 @@ kubectl rollout resume deployment.v1.apps/&lt;deployment_name&gt;</code></pre>
 kubectl get pvc -A
 
 # Show PVC on current namespace.
-kubectl get pvc</code></pre>
+kubectl get pvc
+
+# Update PV Reclaim Policy. (to Retain)
+kubectl patch pv &lt;pv_name&gt; -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'</code></pre>
 
     <h3 class="card-title">Log</h3>
 
@@ -2433,48 +2436,63 @@ kubectl delete pod -n kube-system -l k8s-app=kube-dns</code></pre>
   <div class="card-body">
     <h2 class="card-title">Volumes</h2>
     <ul>
-      <li>Docker images are the root of filesystem hierarchy. Volumes mount at specific path within the image.</li>
+      <li>Volumes mount at specific path within the image.</li>
       <li>ConfigMap allows injecting configration data into Pods.</li>
     </ul>
 
-    <p class="card-text"><code>log-config</code> ConfigMap is mounted as a volume at path <code>/etc/config/log_level</code> with Pod called <code>configmap-pod</code>.</p>
+    <h3 class="card-title">Configmap volume</h3>
+    <ul>
+      <li><code>log-config</code> ConfigMap is mounted as a volume at path <code>/etc/config/log_level</code>.</li>
+    </ul>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
-  name: configmap-pod
+  name: my-pod
 spec:
   containers:
-    - name: test
-      image: busybox
+    - name: my-container
+      image: my-image
       volumeMounts:
-        - name: config-vol
+        - name: my-config-volume
           mountPath: /etc/config
   volumes:
-    - name: config-vol
+    - name: my-config-volume
       configMap:
-        name: log-config
+        name: my-configmap
         items:
           - key: log_level
             path: log_level</code></pre>
 
-    <p class="card-text"><code>emptyDir</code> is created when Pod is assigned to Node. When Pod is removed from Node, data is deleted permanently.</p>
+    <h3 class="card-title">emptyDir volume</h3>
+    <ul>
+      <li><code>emptyDir</code> is created when Pod is assigned to Node.</li>
+      <li>When Pod is removed from Node, data is deleted permanently.</li>
+    </ul>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
-  name: test-pd
+  name: my-pod
 spec:
   containers:
-  - image: k8s.gcr.io/test-webserver
-    name: test-container
+  - name: my-container
+    image: my-image
     volumeMounts:
-    - mountPath: /cache
-      name: cache-volume
+    - name: my-cache-volume
+      mountPath: /cache
   volumes:
-  - name: cache-volume
+  - name: my-cache-volume
     emptyDir: {}</code></pre>
 
+
     <h3 class="card-title">Dynamic Volume Provisioning</h3>
-    <p class="card-text">To enable dynamic provisioning, cluster admin must pre-create StorageClass object for users.</p>
+    <ul>
+      <li>To enable dynamic provisioning, cluster admin must pre-create StorageClass object for users.</li>
+      <li>Users request dynamically provisioned storage by including a storage class in their <code>PersistentVolumeClaim</code>. When this claim is deleted, the volume gets destroyed.</li>
+      <li>Cluster admin can make Claims to use dynamic provisioning by default. This is done by marking a specific StorageClass as default by adding <code>storageclass.kubernetes.io/is-default-class</code> annotation to it.</li>
+    </ul>
+
 <pre><code class="yaml"> # Create storage class "slow" that provisions persistent disks like standard disk.
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -2493,7 +2511,6 @@ provisioner: kubernetes.io/gce-pd
 parameters:
   type: pd-ssd</code></pre>
 
-    <p class="card-text">Users request dynamically provisioned storage by including a storage class in their <code>PersistentVolumeClaim</code>. When this claim is deleted, the volume gets destroyed.</p>
 <pre><code class="yaml">apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -2505,8 +2522,6 @@ spec:
   resources:
     requests:
       storage: 30Gi</code></pre>
-
-    <p class="card-text">Cluster admin can make Claims to use dynamic provisioning by default. This is done by marking a specific StorageClass as default by adding <code>storageclass.kubernetes.io/is-default-class</code> annotation to it.</p>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://kubernetes.io/docs/concepts/storage/volumes/">Volumes</a> | <a href="https://kubernetes.io/docs/concepts/storage/dynamic-provisioning/">Dynamic Volume Provisioning</a>
@@ -2535,6 +2550,7 @@ spec:
     </ul>
 
     <h3 class="card-title">Reserving PV</h3>
+
 <pre><code class="yaml">apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -2545,18 +2561,27 @@ spec:
     name: foo-pvc
     namespace: foo
 ...</code></pre>
+
     <h3 class="card-title">PV</h3>
+    <ul>
+      <li><code>ReadWriteOnce</code>: PV can only be bound as R/W by a single PVC.</li>
+      <li><code>ReadWriteMany</code>: PV can be bound as R/W by multiple PVCs.</li>
+      <li><code>ReadOnlyMany</code>: PV can be bound as R/O by multiple PVCs.</li>
+      <li><code>Delete</code>: deletes PV and data stored on the associated external storage.</li>
+      <li><code>Retain</code>: keep PV and data stored on the associated external storage.</li>
+    </ul>
+
 <pre><code class="yaml">apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: pv0003
+  name: my-pv
 spec:
   capacity:
     storage: 5Gi
   volumeMode: Filesystem # Filesystem - default, Block - raw block device
   accessModes:
-    - ReadWriteOnce # ReadWriteOnce, ReadWriteMany, ReadOnlyMany. Once - mounted by single Node, Many - mounted by many Nodes
-  persistentVolumeReclaimPolicy: Recycle # Retain, Recycle, Delete
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
   storageClassName: slow
   mountOptions:
     - hard
@@ -2565,15 +2590,11 @@ spec:
     path: /tmp
     server: 172.17.0.2</code></pre>
 
-    <h3 class="card-title">Update PV Reclaim Policy (to Retain)</h3>
-
-<pre><code class="bash">kubectl patch pv &lt;pv_name&gt; -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'</code></pre>
-
     <h3 class="card-title">PVC</h3>
 <pre><code class="yaml">apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: myclaim
+  name: my-pvc
 spec:
   accessModes:
     - ReadWriteOnce
@@ -2584,7 +2605,7 @@ spec:
   storageClassName: slow
   selector:
     matchLabels: # volumn must have a label with this value
-      release: "stable"
+      name: my-pv
     matchExpressions: # a list of requirements
       - {key: environment, operator: In, values: [dev]}</code></pre>
 
@@ -2594,23 +2615,31 @@ spec:
       <li>Claim must exist in the same namespace as Pod.</li>
       <li>The cluster finds Claim in Pods's namespace and uses it to get PV.</li>
     </ul>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
-  name: mypod
+  name: my-pod
 spec:
   containers:
-    - name: myfrontend
-      image: nginx
+    - name: my-container
+      image: my-image
       volumeMounts:
-      - mountPath: "/var/www/html"
-        name: mypd
-        readOnly: True  # This overwrites access mode in PV
+      - name: my-volumemount
+        mountPath: /path/to/mount
+        readOnly: True  # This overwrites access mode in PV.
   volumes:
-    - name: mypd
+    - name: my-volumemount
       persistentVolumeClaim:
-        claimName: myclaim
-        readOnly: True  # This overwrites access mode in PV</code></pre>
+        claimName: my-pvc
+        readOnly: True  # This overwrites access mode in PV.</code></pre>
+
+    <h3 class="card-title">Storage Class</h3>
+    <ul>
+      <li>There is no need to create PV manually with Storage Class.</li>
+      <li><code>provisioner</code> tells Kubernetes which plugin to use.</li>
+      <li></li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://kubernetes.io/docs/concepts/storage/persistent-volumes/">Persistent Volumes</a>
