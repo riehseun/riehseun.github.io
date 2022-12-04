@@ -48,6 +48,8 @@
       <li><a href="#kubernetes-2">Kubernetes objects and API</a></li>
       <li><a href="#kubernetes-10">Kubernetes manifest</a></li>
       <li><a href="#kubernetes-3">Kubectl</a></li>
+      <li><a href="#kubernetes-11">Kubernetes security</a></li>
+      <li><a href="#kubernetes-12">Autoscaler</a></li>
       <li><a href="#kubernetes-4">Helm</a></li>
       <li><a href="#kubernetes-5">Skaffold</a></li>
       <li><a href="#kubernetes-6">Datadog and kube state metric</a></li>
@@ -549,6 +551,117 @@ kubectl get secret -n &lt;namespace&gt; &lt;secret_name&gt; -o go-template='{{in
   </div>
 </div>
 
+<div class="card mb-4" id="kubernetes-11">
+  <div class="card-body">
+    <h2 class="card-title">Kubernetes security</h2>
+
+    <h3 class="card-title">Spoofing</h3>
+    <ul>
+      <li>Pretending to be someone.</li>
+      <li>Kubernetes components communicate each other using TLS.</li>
+      <li>Certificate is issued by the internal Kubernetes CA.</li>
+    </ul>
+
+    <h3 class="card-title">Tampering</h3>
+    <ul>
+      <li>Changing something in a malicious way.</li>
+      <li>Can enforce readonly to certain directory.</li>
+    </ul>
+
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  securityContext:
+    readOnlyRootFilesystem: true
+    allowedHostPaths:
+      - pathPrefix: /path
+        readOnly: true</code></pre>
+
+    <h3 class="card-title">Repudiation</h3>
+    <ul>
+      <li>Non-repudiation is proving certain actions were carried out by certain individuals.</li>
+      <li>API server has audit logs.</li>
+    </ul>
+
+    <h3 class="card-title">Information Disclosure</h3>
+    <ul>
+      <li>Secrets can be encrypted.</li>
+      <li>Encryption key is stored in nodes but storing it outside the cluster is recommended.</li>
+    </ul>
+
+    <h3 class="card-title">Denial of Service</h3>
+    <ul>
+      <li>Can limit number of pods.</li>
+    </ul>
+
+<pre><code class="yaml">apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: my-resourcequota
+spec:
+  hard:
+    pods: 100</code></pre>
+
+    <h3 class="card-title">Elevation of Privilege</h3>
+    <ul>
+      <li>Gaining higher access than what is granted.</li>
+      <li>Can use RBAC.</li>
+    </ul>
+
+    <h3 class="card-title">User in Pod</h3>
+
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  securityContext:  # Applies to all containers in this Pod.
+    runAsUser: 1000 # Non-root user
+  containers:
+  - name: my-container
+    image: my-image
+    securityContext:
+      runAsUser: 2000  # Overrides the Pod setting.</code></pre>
+
+    <h3 class="card-title">Prevent privilege escalation by containers</h3>
+
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  containers:
+  - name: my-pod
+    image: my-image
+    securityContext:
+      allowPrivilegeEscalation: false</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/courses/the-kubernetes-course">Learn Kubernetes: A Deep Dive</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-12">
+  <div class="card-body">
+    <h2 class="card-title">Autoscaler</h2>
+
+    <h3 class="card-title">Horizontal Pod Autoscaler</h3>
+    <ul>
+      <li>Dynamically scales Pods in a Deployment based on demand.</li>
+    </ul>
+
+    <h3 class="card-title">Cluster Autoscaler</h3>
+    <ul>
+      <li>Dynamically scales nodes based on demand.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/courses/the-kubernetes-course">Learn Kubernetes: A Deep Dive</a>
+  </div>
+</div>
+
 <div class="card mb-4" id="kubernetes-4">
   <div class="card-body">
     <h2 class="card-title">Helm</h2>
@@ -792,7 +905,7 @@ deploy:
 <div class="card mb-4" id="kubernetes-7">
   <div class="card-body">
     <h2 class="card-title">Kured</h2>
-    <p class="card-text"></p>
+
     <ul>
       <li>Kubernetes REbook Daemon. DaemonSet that performs safe node reboots when needed. (indicated by package management system)</li>
       <li>Only one node reboots at a time.</li>
@@ -808,29 +921,28 @@ deploy:
 <div class="card mb-4" id="kubernetes-8">
   <div class="card-body">
     <h2 class="card-title">Istio</h2>
-    <p class="card-text"></p>
 
     <h3 class="card-title">Service mesh</h3>
     <ul>
-      <li>A dedicated infrastructure layer.</li>
-      <li>A/B testing, canary deployments, encryption, load-balancing.</li>
+      <li>Automatically encrypt traffic between microservices.</li>
+      <li>Provide application network telemetry and observability.</li>
+      <li>Provide advanced traffic control.</li>
     </ul>
 
     <h3 class="card-title">Istio</h3>
     <ul>
-      <li>Data plane - envoy proxy is deployed with eash service to intercept all network traffic.</li>
-      <li>Control plane - desired state of configuration.</li>
+      <li>Injected into applications as sidecar containers.</li>
+      <li>Sets up rules to intercept all network traffic entering and exiting the Pod.</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
-
+    Reference: <a href="https://www.educative.io/courses/the-kubernetes-course">Learn Kubernetes: A Deep Dive</a>
   </div>
 </div>
 
 <div class="card mb-4" id="kubernetes-9">
   <div class="card-body">
     <h2 class="card-title">Kubernetes common issues</h2>
-    <p class="card-text"></p>
 
     <h3 class="card-title">CrashLoopBackedOff &#38; Back-off restarting failed containers</h3>
     <ul>
@@ -1052,78 +1164,91 @@ curl -X DELETE  'localhost:8080/apis/apps/v1/namespaces/default/replicasets/fron
   <div class="card-body">
     <h2 class="card-title">StatefulSet</h2>
     <ul>
-      <li>Similar to Deployment, but guarantees ordering and uniqueness of Pods.</li>
-      <li>Uniqueness - when a node goes down, a new node needs to be attached to the correct volume.</li>
-      <li>Ordering - when pods are updated or deleted, they are done in certain order.</li>
+      <li>Predictable and persistent Pod names, DNS hostnames, volume bindings.</li>
+      <li>Create one Pod at a time and always wait for previous Pods to be running and ready before creating the next. (Same for delete)</li>
+      <li>When a StatefulSet Pod is created, any volumes it needs are created at the same time and named in a way to connect them to the right Pod.</li>
+    </ul>
+
+    <h3 class="card-title">Usecases</h3>
+    <ul>
+      <li>Clustered apps that store data cannot have multiple replicas go down at the same time.</li>
     </ul>
 
     <h3 class="card-title">Limitations</h3>
     <ul>
-      <li>Storage for a Pod must be provisioned by PersistentVolumns Provsioner.</li>
       <li>Retention policy is PersistentVolumes must be defined in the StorageClass.</li>
       <li>Deleting StatefulSet does not delete volumns associated with it.</li>
+      <ul>
+        <li>When scaling down, Pod is gone but PVC is still alive.</li>
+        <li>When scaling up, Pod is attached to surviving PVC.</li>
+      </ul>
       <li>StatefulSet requires Headless Service for the network identity of the Pods.</li>
-      <li>StatefulSet does not guarantee on the termination of Pods when Statefulset gets deleted.</li>
+      <li>StatefulSet does not guarantee on the termination of Pods when Statefulset gets deleted. This means Pods do not get terminated in order.</li>
     </ul>
 
-<pre><code class="yaml">apiVersion: v1
-kind: Service
-metadata:
-  name: nginx
-  labels:
-    app: nginx
-spec:
-  ports:
-  - port: 80
-    name: web
-  clusterIP: None
-  selector:
-    app: nginx
----
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: web
-spec:
-  selector:
-    matchLabels:
-      app: nginx # has to match .spec.template.metadata.labels
-  serviceName: "nginx"
-  replicas: 3 # by default is 1
-  template:
-    metadata:
-      labels:
-        app: nginx # has to match .spec.selector.matchLabels
-    spec:
-      terminationGracePeriodSeconds: 10
-      containers:
-      - name: nginx
-        image: k8s.gcr.io/nginx-slim:0.8
-        ports:
-        - containerPort: 80
-          name: web
-        volumeMounts:
-        - name: www
-          mountPath: /usr/share/nginx/html
-  volumeClaimTemplates:
-  - metadata:
-      name: www
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      storageClassName: "my-storage-class"
-      resources:
-        requests:
-          storage: 1Gi</code></pre>
+    <h3 class="card-title">Headless service</h3>
+    <ul>
+      <li>Creates predictable stable DNS entries for every Pod that matches the StatefulSets label selector.</li>
+      <li>Service must set the value <code>clusterIP</code> to <code>None</code>.</li>
+    </ul>
 
+    <h3 class="card-title">Example</h3>
     <ul>
       <li>Three Pods will be deployed in the order web-0, web-1, web-2</li>
       <li>web-1 will not be deployed until web-0 is Running and Ready</li>
       <li>When scaling down, web-1 will not be terminated until web-2 is fully shutdown</li>
     </ul>
 
+<pre><code class="yaml">apiVersion: v1
+kind: Service
+metadata:
+  name: my-headless-service
+  labels:
+    app: my-headless-service
+spec:
+  ports:
+  - port: 80
+    name: web
+  clusterIP: None  # Only difference between headless service and regular service is this field.
+  selector:
+    app: my-headless-service
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: my-statefulset
+spec:
+  selector:
+    matchLabels:
+      app: my-statefulset  # Has to match .spec.template.metadata.labels.
+  serviceName: my-headless-service  # Has to be the name of headless service.
+  replicas: 3  # by default is 1.
+  template:
+    metadata:
+      labels:
+        app: my-statefulset  # Has to match .spec.selector.matchLabels.
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: my-container
+        image: my-image
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: my-volumemount
+          mountPath: /path/to/mount
+  volumeClaimTemplates:
+  - metadata:
+      name: my-volumemount
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: my-storageclass
+      resources:
+        requests:
+          storage: 1Gi</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/">StatefulSet</a>
+    Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/">StatefulSet</a> | <a href="https://www.educative.io/courses/the-kubernetes-course">Learn Kubernetes: A Deep Dive</a>
   </div>
 </div>
 
@@ -1131,24 +1256,25 @@ spec:
   <div class="card-body">
     <h2 class="card-title">DaemonSet</h2>
     <ul>
-      <li>DaemonSet ensures that as Nodes are added Pods are added them, and as Nodes are removed Pods are garbage collected.</li>
+      <li>A Pod exists in each node.</li>
+      <li>Useful for monitoring and logging Pods.</li>
     </ul>
 
 <pre><code class="yaml">apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: fluentd-elasticsearch
+  name: my-daemonset
   namespace: kube-system
   labels:
-    k8s-app: fluentd-logging
+    k8s-app: logging
 spec:
   selector:
     matchLabels:
-      name: fluentd-elasticsearch
+      name: my-daemonset
   template:
     metadata:
       labels:
-        name: fluentd-elasticsearch
+        name: my-daemonset
     spec:
       tolerations:
       # this toleration is to have the daemonset runnable on master nodes
@@ -1157,8 +1283,8 @@ spec:
         operator: Exists
         effect: NoSchedule
       containers:
-      - name: fluentd-elasticsearch
-        image: quay.io/fluentd_elasticsearch/fluentd:v2.5.2
+      - name: my-container
+        image: my-image
         resources:
           limits:
             memory: 200Mi
