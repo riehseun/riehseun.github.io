@@ -514,7 +514,7 @@ kubectl delete note &lt;node_name&gt;
 kubectl get nodes -o yaml | egrep '\sname:|cpu:|memory:'
 kubectl get nodes -o json | jq '.items[] | {name: .metadata.name, cap: .status.capacity}'</code></pre>
 
-    <h3 class="card-title">How to exec into a container as root</h3>
+    <h4 class="card-title">How to exec into a container as root</h4>
 
 <pre><code class="bash"># 1. Find the node on which the pod is running.
 kubectl get pods -o wide -n &lt;namespace&gt;
@@ -532,6 +532,11 @@ docker exec -u root -it &lt;container_id&gt;</code></pre>
     <h3 class="card-title">Endpoints</h3>
 
 <pre><code class="bash">kubectl get endpoints -n &lt;namespace&gt;</code></pre>
+
+    <h3 class="card-title">ConfigMap</h3>
+
+<pre><code class="bash"># Create ConfigMap from a file.
+kubectl create cm &lt;configmap_name&gt;--from-file &lt;filename&gt;</code></pre>
 
     <h3 class="card-title">Secrets</h3>
 
@@ -2690,6 +2695,7 @@ spec:
   <div class="card-body">
     <h2 class="card-title">ConfigMap</h2>
     <ul>
+      <li>Map of key-value pairs.</li>
       <li>Provides configuration data, which is separate from application code. Data stored in configMap cannot exceed 1MB.</li>
     </ul>
 
@@ -2703,16 +2709,17 @@ spec:
         <li>Code inside Pod that uses K8s API to read ConfigMap</li>
       </ul>
     </ul>
+
 <pre><code class="yaml">apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: game-demo
+  name: my-configmap
 data:
-  # property-like keys; each key maps to a simple value
+  # property-like keys; each key maps to a simple value.
   player_initial_lives: "3"
   ui_properties_file_name: "user-interface.properties"
 
-  # file-like keys
+  # file-like keys.
   game.properties: |
     enemy.types=aliens,monsters
     player.maximum-lives=5
@@ -2720,40 +2727,40 @@ data:
     color.good=purple
     color.bad=yellow
     allow.textmode=true</code></pre>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
-  name: configmap-demo-pod
+  name: my-pod
 spec:
   containers:
-    - name: demo
-      image: alpine
+    - name: my-container
+      image: my-image
       command: ["sleep", "3600"]
       env:
         # Define the environment variable
-        - name: PLAYER_INITIAL_LIVES # Notice that the case is different here
-                                     # from the key name in the ConfigMap.
+        - name: PLAYER_INITIAL_LIVES # Notice that the case is different here from the key name in the ConfigMap.
           valueFrom:
             configMapKeyRef:
-              name: game-demo           # The ConfigMap this value comes from.
+              name: my-configmap          # The ConfigMap this value comes from.
               key: player_initial_lives # The key to fetch.
         - name: UI_PROPERTIES_FILE_NAME
           valueFrom:
             configMapKeyRef:
-              name: game-demo
+              name: my-configmap
               key: ui_properties_file_name
         - name: ENV_NAME
           value: env_value
       volumeMounts:
-      - name: config
+      - name: my-volumemount
         mountPath: "/config"
         readOnly: true
   volumes:
     # You set volumes at the Pod level, then mount them into containers inside that Pod
-    - name: config
+    - name: my-volumemount
       configMap:
         # Provide the name of the ConfigMap you want to mount.
-        name: game-demo
+        name: my-configmap
         # An array of keys from the ConfigMap to create as files
         items:
         - key: "game.properties"
@@ -2761,7 +2768,7 @@ spec:
         - key: "user-interface.properties"
           path: "user-interface.properties"</code></pre>
 
-    <h3 class="card-title">Using ConfigMap as file</h3>
+    <h3 class="card-title">Using ConfigMap as file/volume</h3>
     <ul>
       <li>Create a ConfigMap.</li>
       <li>Update Pod to add a volume under <code>.spec.volumes[]</code> whose name can be anything. Make this field <code>spec.volumes[].configMap.name</code> reference ConfigMap object.</li>
@@ -2771,19 +2778,19 @@ spec:
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
-  name: mypod
+  name: my-pod
 spec:
   containers:
-  - name: mypod
-    image: redis
+  - name: my-container
+    image: my-image
     volumeMounts:
-    - name: foo
-      mountPath: "/etc/foo"
+    - name: my-volumemount
+      mountPath: /path/to/mount
       readOnly: true
   volumes:
-  - name: foo
+  - name: my-volumemount
     configMap:
-      name: myconfigmap</code></pre>
+      name: my-configmap</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://kubernetes.io/docs/concepts/configuration/configmap/">ConfigMap</a>
