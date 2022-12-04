@@ -62,12 +62,6 @@
       <li>Terraform plugins are call "providers", which let Terraform interact with cloud providers via their APIs.</li>
     </ul>
 
-    <h3 class="card-title">Module</h3>
-    <ul>
-      <li>Organize, encpasulate, and re-use configuration.</li>
-      <li>A modules is configuration files in a single directory.</li>
-    </ul>
-
     <h3 class="card-title">Command</h3>
     <ul>
       <li><code>terraform init</code> - install plugins.</li>
@@ -215,6 +209,224 @@ resource "aws_s3_bucket" "bucket" {
     bucket = local.bucket_name
 }</code></pre>
 
+    <h3 class="card-title">File</h3>
+    <ul>
+      <li><code>templatefile</code> functional allows dynamic values in a file.</li>
+    </ul>
+
+<pre><code class="hcl">provider "aws" {
+    region = "eu-west-1"
+}
+
+resource "aws_iam_policy" "my_bucket_policy" {
+    name = "list-buckets-policy"
+    policy = file("./policy.iam")
+}</code></pre>
+
+<pre><code class="hcl">locals {
+    rendered = templatefile("./example.tpl", { name = "kevin", number = 7})
+}
+
+output "rendered_template" {
+    value = local.rendered
+}</code></pre>
+
+    <h3 class="card-title">Variable</h3>
+    <ul>
+      <li>Inputs to the template.</li>
+      <li><code>terraform.tfvars</code> file can be used to set the variable.</li>
+    </ul>
+
+<pre><code class="hcl">instance_map = {
+    dev = "t3.small"
+    test = "t3.medium"
+    prod = "t3.large"
+}
+
+environment_type = "dev"</code></pre>
+
+<pre><code class="hcl">variable "instance_map" {}
+variable "environment_type" {}
+
+output "selected_instance" {
+    value = var.instance_map[var.environment_type]
+}</code></pre>
+
+    <h3 class="card-title">Type</h3>
+
+<pre><code class="hcl"># List.
+variable "a" {
+    type = list(string)
+    default = ["foo", "bar", "baz"]
+}
+
+output "a" {
+    value = var.a  # Prints the list.
+}
+
+output "b" {
+    value = element(var.a, 1)  # Prints the item at index 1.
+}
+
+output "c" {
+    value = length(var.a)  # Prints list length.
+}
+
+# Set.
+variable "my_set" {
+    type = set(number)
+    default = [7, 2, 2]
+}
+
+# Tuple.
+variable "my_tup" {
+    type = tuple([number, string, bool])
+    default = [4, "hello", false]
+}
+
+# Map.
+variable "my_map" {
+    type = map(number)
+    default = {
+        "alpha" = 2
+        "bravo" = 3
+    }
+}
+
+output "alpha_value" {
+    value = var.my_map["alpha"]
+}
+
+# Object.
+variable "person_with_address" {
+    type = object({ name = string, age = number,
+            address = object({ line1 = string, line2 = string,
+                        county = string, postcode = string }) })
+    default = {
+        name = "Jim"
+        age = 21
+        address = {
+            line1 = "1 the road"
+            line2 = "St Ives"
+            county = "Cambridgeshire"
+            postcode = "CB1 2GB"
+        }
+    }
+}</code></pre>
+
+    <h3 class="card-title">Module</h3>
+    <ul>
+      <li>Organize, encpasulate, and re-use configuration.</li>
+      <li>A modules is configuration files in a single directory.</li>
+      <li>Generally, providers are set up in a file called <code>main.tf</code>.</li>
+      <li>Terraform considers only the code in the top-level folder. (Ignore the code in subfolders)</li>
+      <li>Child folder are used for modules.</li>
+      <ul>
+        <li><code>variables.tf</code> - input values for the module.</li>
+        <li><code>main.tf</code> - </li>
+        <li><code>output.tf</code> - return values from the module.</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">State</h3>
+    <ul>
+      <li><code>terraform.tfstate</code> stores resource and metadata information. (This only works for a single person project)</li>
+      <li>State is needed for Terranform to delete resources.</li>
+      <li>State can contain sensitive values.</li>
+      <li><code>terraform import</code> will read the resource and put it into its state.</li>
+      <li><code>terraform state mv</code> moves resources from one project to another.</li>
+      <li><code>terraform state list</code> lists all resources.</li>
+    </ul>
+
+    <h4 class="card-title">Remote state</h4>
+    <ul>
+      <li>Allows multiple people to work on a project</li>
+      <li>Convention is to use <code>state.tf</code> file</li>
+    </ul>
+
+<pre><code class="hcl">terraform {
+    backend "s3" {
+        bucket = "&lt;your-bucket-name&gt;"
+        key = "myproject.state"
+        region = "eu-west-1"
+    }
+}</code></pre>
+
+<pre><code class="hcl">provider "aws" {
+    region = "eu-west-1"
+}
+
+resource "aws_sqs_queue" "my_queue" {
+    name = "my_queue"
+}</code></pre>
+
+    <h3 class="card-title">Workspace</h3>
+    <ul>
+      <li><code>terraform workspace list</code> lists all available workspaces.</li>
+      <li><code>terraform workspace new &lt;workspace_name&gt;</code> create a new workspace.</li>
+      <li><code>terraform workspace select &lt;workspace_name&gt;</code> switches to a different workspace.</li>
+    </ul>
+
+    <h3 class="card-title">Provisioner</h3>
+    <ul>
+      <li>Allows script to run either remotely or locally after a resource has been created.</li>
+    </ul>
+
+    <h3 class="card-title">Count</h3>
+    <ul>
+      <li>Can be used to configure a resource as optional.</li>
+    </ul>
+
+<pre><code class="hcl">resource "aws_sqs_queue" "queues" {
+    count = 4
+    name = "queue-${count.index}"
+}</code></pre>
+
+    <h3 class="card-title">Foreach</h3>
+    <ul>
+      <li>Can only work with set or map.</li>
+    </ul>
+
+<pre><code class="hcl">locals {
+  fruit = toset(["apple", "orange", "banana"])
+}
+
+resource "aws_sqs_queue" "queues" {
+    for_each = local.fruit
+    name = "queue-${each.key}"
+}</code></pre>
+
+    <h3 class="card-title">Lifecyle</h3>
+
+<pre><code class="hcl"># This resource will never be destroyed.
+resource "aws_sqs_queue" "queue" {
+  name = "queue"
+  lifecycle {
+    prevent_destroy = true
+  }
+}</code></pre>
+
+    <h3 class="card-title">Depend_on</h3>
+
+<pre><code class="hcl">resource "aws_iam_role_policy" "policy" {
+  name = "policy"
+  role = "role"
+  policy = jsonencode({
+    "Statement" = [{
+      "Action" = "s3:*",
+      "Effect" = "Allow",
+    }],
+  })
+}
+
+resource "aws_instance" "example" {
+  ami = "ami-a1b2c3d4"
+  instance_type = "t2.micro"
+  depends_on = [
+    aws_iam_role_policy.policy,
+  ]
+}</code></pre>
+
     <h3 class="card-title">Installation (Ubuntu)</h3>
 
 <pre><code class="bash">sudo apt-get install -y gnupg software-properties-common
@@ -231,11 +443,11 @@ sudo apt-get install terraform
 
 terraform -v</code></pre>
 
-    <h3 class="card-title">Installation (CentOS) - version 0.11.13</h3>
+    <h3 class="card-title">Installation (CentOS)</h3>
 
 <pre><code class="bash">yum install -y zip unzip
-wget https://releases.hashicorp.com/terraform/0.9.8/terraform_0.11.13_linux_amd64.zip
-unzip terraform_0.11.13_linux_amd64.zip
+wget https://releases.hashicorp.com/terraform/0.9.8/terraform_&lt;version&gt;_linux_amd64.zip
+unzip terraform_&lt;version&gt;_linux_amd64.zip
 mv terraform /usr/local/bin/
 terraform --version</pre></code>
   </div>
