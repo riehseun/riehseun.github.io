@@ -92,7 +92,66 @@
 <div class="card mb-4" id="system-design-2">
   <div class="card-body">
     <h2 class="card-title">ML Platform</h2>
+    <ul>
+      <li>Performce for out-of-sample and out-of-time.</li>
+      <li>Features should be mostly unchanged when input data is slighly perturbed. (Could be challgenging when data contains similar/duplicate features)</li>
+      <li>Interpretation should not be depending on training sample choices.</li>
+    </ul>
 
+    <h3 class="card-title">Problem definition</h3>
+    <ul>
+      <li>Construct ground truth.</li>
+      <li>Metrics.</li>
+    </ul>
+
+    <h3 class="card-title">Data prep</h3>
+    <ul>
+      <li>Proportion of null/zero values across columns.</li>
+      <li>Columns that should be rejected due to zero or null values.</li>
+      <li>Categorical columns with high cardinality.</li>
+      <li>Columns with high sparcity.</li>
+      <li>Duplicate columns.</li>
+      <li>Compute per-month count of rows and selected attribute to see if they make sense.</li>
+      <li>Verify that join keys are consistent across tables.</li>
+      <li>Verify that labels/values to apply exclusions are available in the tables.</li>
+      <li>Verify that labels/values to apply ground truth are available in the tables.</li>
+      <li>Rectify missing values in columns.</li>
+      <ul>
+      <li>Random missing value - value is missing for unexplained reason.</li>
+      <li>Structural missing value - value is missing for a reason. (For example, the fact that it is missing means something)</li>
+      <li>Engineered missing value - feature engineering introduced the missing values. (For example, divide by zero)</li>
+      <li>Table join mismatch - IDs in one table were missing in another table, so missing values are created after join.</li>
+    </ul>
+    </ul>
+
+    <h3 class="card-title">Data profiling</h3>
+    <ul>
+      <li>General statistics.</li>
+      <li>Columns with large portion of missing values. (For example, > 10%)</li>
+      <ul>
+        <li>These columns should generally be retained for they may turn out to be quite predictive.</li>
+        <li>XGBoost has build-in capability to handle missing values.</li>
+      </ul>
+      <li>Similar/duplicate columns. (For example, prefer one feature over another? Can use univariate analysis)</li>
+      <li>Columns with consistant values should be removed because they provide no signal.</li>
+      <li>Remove sensitive features from model inputs. (For example, age / gender)</li>
+      <li>Data imputation (For example, NULL to 0) should rarely happens when feature is critical and will undergo feature engineering and treatment is known.</li>
+    </ul>
+
+    <h3 class="card-title">Exclusion</h3>
+    <ul>
+      <li>Exclude rows based on certain attributes. (This is driven by business reasons)</li>
+    </ul>
+
+    <h3 class="card-title">Ground truth</h3>
+
+    <h3 class="card-title">Data split</h3>
+    <ul>
+      <li>Training: In-Time and In-Sample. Split into 5-folds for cross-validation.</li>
+      <li>Testing: Out-of-Time test and In-Time & Out-of-Sample test.</li>
+      <li>If a data about person is seen at many different dates, all data about that person must be assigned to the same split. (either Out-of-Sample or one of the folds) Otherwise, there is information leak bwetween training and validation.</li>
+      <li>Final model is retrained with all 5 folds combined.</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
 
