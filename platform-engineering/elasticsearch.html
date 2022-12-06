@@ -77,44 +77,44 @@
     <h3 class="card-title">General</h3>
 
 <pre><code class="bash"># Check cluster health.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_cluster/health?pretty
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_cluster/health?pretty"
 
 # View available API endpoints.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_cat
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_cat"
 
 # Create an API key.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_security/api_key --header "Content-Type: application/json" --date '{}'
+curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_security/api_key" -H "Content-Type: application/json" --date '{}'
 apiKey=&lt;encoded_api_key_from_above&gt;</code></pre>
 
     <h3 class="card-title">License</h3>
 
 <pre><code class="bash"># Check license.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_license
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_license"
 
 # Update licese. (With the license in "license.json" file)
-curl -k -u &lt;username&gt;:&lt;password&gt; -X PUT https://&lt;endpoint&gt;/_license -H "Content-Type: application/json" -d @license.json</code></pre>
+curl -k -u &lt;username&gt;:&lt;password&gt; -X PUT "https://&lt;endpoint&gt;/_license" -H "Content-Type: application/json" -d @license.json</code></pre>
 
     <h3 class="card-title">Index</h3>
 
 <pre><code class="bash"># List all indices.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_cat/indices?v
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_cat/indices?v"
 
 # List few indices.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_cat/indices/&lt;index_name_1&gt;,&lt;index_name_2&gt;,&lt;index_name_3&gt;?v
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_cat/indices/&lt;index_name_1&gt;,&lt;index_name_2&gt;,&lt;index_name_3&gt;?v"
 
 # Create an index.
-curl -k -H "Authorization: ApiKey $apiKey" -X PUT https://&lt;endpoint&gt;/&lt;index_name&gt;
+curl -k -H "Authorization: ApiKey $apiKey" -X PUT "https://&lt;endpoint&gt;/&lt;index_name&gt;"
 
 # Get an index.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/&lt;index_name&gt;?pretty
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/&lt;index_name&gt;?pretty"
 
 # Check index setting.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/&lt;index_name&gt;/_setting?pretty
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/&lt;index_name&gt;/_setting?pretty"
 
 # Update index setting.
 
 # For example, temporarily setting number_of_replicas to 0 and refresh_interval to -1 (This disable reflecing written documents in index to users) is helping during the inital data load on index for it will speed up the indexing.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X PUT https://&lt;endpoint&gt;/&lt;index_name&gt;/_settings?pretty -H "Content-Type: application/json" -d '
+curl -k -u &lt;username&gt;:&lt;password&gt; -X PUT "https://&lt;endpoint&gt;/&lt;index_name&gt;/_settings?pretty" -H "Content-Type: application/json" -d '
 {
   "index": {
     "number_of_replicas": 0,
@@ -123,7 +123,7 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X PUT https://&lt;endpoint&gt;/&lt
 }'
 
 # To revert the index setting "refresh_interval" to default.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X PUT https://&lt;endpoint&gt;/&lt;index_name&gt;/_settings?pretty -H "Content-Type: application/json" -d '
+curl -k -u &lt;username&gt;:&lt;password&gt; -X PUT "https://&lt;endpoint&gt;/&lt;index_name&gt;/_settings?pretty" -H "Content-Type: application/json" -d '
 {
   "index": {
     "refresh_interval": null
@@ -133,21 +133,21 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X PUT https://&lt;endpoint&gt;/&lt
     <h3 class="card-title">Mapping</h3>
 
 <pre><code class="bash"># View mapping of an index.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/&lt;index_name&gt;/_mapping?pretty</code></pre>
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/&lt;index_name&gt;/_mapping?pretty"</code></pre>
 
     <h3 class="card-title">Document</h3>
 
 <pre><code class="bash"># Create a document.
-curl -k -H "Authorization: ApiKey $apiKey" -H "Content-Type: application/json" -X PUT https://&lt;endpoint&gt;/&lt;index_name&gt;/_doc/&lt;document_id&gt; -d '&lt;JSON&gt;'
+curl -k -H "Authorization: ApiKey $apiKey" -X PUT "https://&lt;endpoint&gt;/&lt;index_name&gt;/_doc/&lt;document_id&gt;" -H "Content-Type: application/json" -d '&lt;JSON&gt;'
 
 # Check a document.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/&lt;index_name&gt;/_doc/&lt;document_id&gt;
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/&lt;index_name&gt;/_doc/&lt;document_id&gt;"
 
 # Count the number of documents in an index.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/&lt;index_name&gt;/_count?pretty
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/&lt;index_name&gt;/_count?pretty"
 
 # Count the number of documents matching a query.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/&lt;index_name&gt;/_count?pretty -H "Content-Type: application/json" -d '
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/&lt;index_name&gt;/_count?pretty" -H "Content-Type: application/json" -d '
 {
   "query": {
     "term": {
@@ -157,7 +157,7 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/&lt
 }'
 
 # Count the number of documents matching a ranged query.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/&lt;index_name&gt;/_count?pretty -H "Content-Type: application/json" -d '
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/&lt;index_name&gt;/_count?pretty" -H "Content-Type: application/json" -d '
 {
   "query": {
     "range": {
@@ -182,14 +182,14 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/&lt
     </ul>
 
 <pre><code class="bash"># List snapshot repositories.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_snapshot?pretty
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_snapshot?pretty"
 
 # List snapshots in a snapshot repository.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_cat/snapshots/&lt;snapshot_repo_name&gt;?pretty
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_cat/snapshots/&lt;snapshot_repo_name&gt;/_status?pretty
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_cat/snapshots/&lt;snapshot_repo_name&gt;?pretty"
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_cat/snapshots/&lt;snapshot_repo_name&gt;/_status?pretty"
 
 # Create snapshot repository.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_snapshot/&lt;snapshot_repo_name&gt; -H "Content-Type: application/json" -d '
+curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_snapshot/&lt;snapshot_repo_name&gt;" -H "Content-Type: application/json" -d '
 {
   "type": "fs",
   "settings": {
@@ -198,17 +198,17 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_s
 }'
 
 # Create a snapshot. (All indices)
-curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_snapshot/&lt;snapshot_repo_name&gt;/&lt;snapshot_name&gt;?wait_for_completion=true&pretty
+curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_snapshot/&lt;snapshot_repo_name&gt;/&lt;snapshot_name&gt;?wait_for_completion=true&pretty"
 # Create a snapshot. (Specific indices)
-curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_snapshot/&lt;snapshot_repo_name&gt;/&lt;snapshot_name&gt;?wait_for_completion=true&pretty -d '{ "indices": "index1, index2" }'
+curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_snapshot/&lt;snapshot_repo_name&gt;/&lt;snapshot_name&gt;?wait_for_completion=true&pretty" -d '{ "indices": "index1, index2" }'
 
 # Restore from a snapshot.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_snapshot/&lt;snapshot_repo_name&gt;/&lt;snapshot_name&gt;/_restore?wait_for_completion=true&pretty</code></pre>
+curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_snapshot/&lt;snapshot_repo_name&gt;/&lt;snapshot_name&gt;/_restore?wait_for_completion=true&pretty"</code></pre>
 
     <h3 class="card-title">Reindex</h3>
     <ul>
       <li>Used when copying document from one index to another index.</li>
-      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_reindex?wait_for_completion=false -H "Content-Type: application/json" -d '
+      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_reindex?wait_for_completion=false" -H "Content-Type: application/json" -d '
 {
   "source": {
     "index": "source_index"
@@ -217,8 +217,18 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_s
     "index": "dest_index"
   }
 }'</code></pre>
+      <li><code>slice</code> can be used for parallel process. (This does not work when reindexing from remote cluster!)</li>
+      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_reindex?slice=100&wait_for_completion=false" -H "Content-Type: application/json" -d '
+{
+  "source": {
+    "index": "source_index"
+  },
+  "dest": {
+    "index": "dest_index"
+  }
+}'</code></pre>
       <li>Used when copying index from one version of Elasticsearch to another version of Elasticsearch. All nodes in the remote cluster must have "reindex.remote.whitelist: &lt;remote_cluster_url&gt;" in <code>elasticsearch.yml</code></li>
-      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_reindex?wait_for_completion=false -H "Content-Type: application/json" -d '
+      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_reindex?wait_for_completion=false" -H "Content-Type: application/json" -d '
 {
   "source": {
     "remote": {
@@ -233,7 +243,7 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_s
   }
 }'</code></pre>
       <li>Ranged query can be used to re-index documents whose field has a value under certain range. (For example, between dates)</code></li>
-      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_reindex?wait_for_completion=false -H "Content-Type: application/json" -d '
+      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_reindex?wait_for_completion=false" -H "Content-Type: application/json" -d '
 {
   "source": {
     "remote": {
@@ -256,7 +266,7 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_s
   }
 }'</code></pre>
       <li><code>size</code> represents the number of documents in each batch. If each batch is greater than 100MB, Elasticsearch will report an error. This error needs to be handled by descreasing the number of documents in each batch so that the while batch does not exceed 100MB.</li>
-      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_reindex?wait_for_completion=false -H "Content-Type: application/json" -d '
+      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_reindex?wait_for_completion=false" -H "Content-Type: application/json" -d '
 {
   "source": {
     "remote": {
@@ -265,16 +275,21 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_s
       "password": "my_password"
     },
     "index": "source_index",
-    size: 100
+    "size": 100
   },
   "dest": {
     "index": "dest_index"
   }
 }'</code></pre>
-      <li><code>slice</code> can be used for parallel process. (This does not work when reindexing from remote cluster!)</li>
-      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_reindex?slice=100&wait_for_completion=false -H "Content-Type: application/json" -d '
+    <li><code>scroll</code> can be used when there is timeouts during scroll search query due to oversharding, high resource utilization, or garbage collection issues. The default scroll timeout is set to 5 minutes.</li>
+      <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_reindex?scroll=1h&wait_for_completion=false" -H "Content-Type: application/json" -d '
 {
   "source": {
+    "remote": {
+      "host": "https://remote_endpoint",
+      "username": "my_username",
+      "password": "my_password"
+    },
     "index": "source_index"
   },
   "dest": {
@@ -286,18 +301,18 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_s
     <h3 class="card-title">Task</h3>
 
 <pre><code class="bash"># List tasks.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_tasks?pretty
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_tasks?pretty"
 
 # List a specific task.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_tasks/&lt;task_name&gt;?pretty
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_tasks/&lt;task_name&gt;?pretty"
 
 # Cancel a specific task.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_tasks/&lt;task_name&gt;/_cancel?pretty</code></pre>
+curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_tasks/&lt;task_name&gt;/_cancel?pretty"</code></pre>
 
     <h3 class="card-title">Shards</h3>
 
 <pre><code class="bash"># List shards.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_cat/shards?v</code></pre>
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_cat/shards?v"</code></pre>
 
     <h3 class="card-title">Allocation</h3>
     <ul>
@@ -305,20 +320,20 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_ca
     </ul>
 
 <pre><code class="bash"># List disk allcation.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_cat/allocation?v</code></pre>
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_cat/allocation?v"</code></pre>
 
     <h3 class="card-title">SSL certificates</h3>
 
 <pre><code class="bash"># List SSL certificates.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_ssl/certificates</code></pre>
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_ssl/certificates"</code></pre>
 
     <h3 class="card-title">Role</h3>
 
 <pre><code class="bash"># List role.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_security/role
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_security/role"
 
 # Create role. (With all privileges to all indices)
-curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_security/&lt;role_name&gt; -d '
+curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_security/&lt;role_name&gt;" -d '
 {
   "indicies": [
     {
@@ -331,10 +346,10 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_s
     <h3 class="card-title">User</h3>
 
 <pre><code class="bash"># List role.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET https://&lt;endpoint&gt;/_security/user
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_security/user"
 
 # Create role. (With superuser)
-curl -k -u &lt;username&gt;:&lt;password&gt; -X POST https://&lt;endpoint&gt;/_security/&lt;user_name&gt; -d '
+curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_security/&lt;user_name&gt;" -d '
 {
   "password": "mypassword",
   "roles": [ "superuser" ],
