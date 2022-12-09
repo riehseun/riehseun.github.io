@@ -170,9 +170,60 @@
 
     <h3 class="card-title">Feature selection</h3>
     <ul>
-      <li></li>
-      <li></li>
-      <li></li>
+      <li>Start with initial set of feature ~ 1500</li>
+      <li>First gate</li>
+      <ul>
+        <li>Data preparation</li>
+        <li>Feature engineering</li>
+      </ul>
+      <li>After exclusions ~ 1000</li>
+      <li>First stage</li>
+      <ul>
+        <li>Assess each feature individually.</li>
+        <li>Select a metric.</li>
+        <li>Use 4-folds for training and 1 fold for validation.</li>
+        <li>Train a shallow model with a single feature as input and compute performance in validation set.</li>
+        <li>Rank individual features.</li>
+        <li>Then, train a model wtih all features.</li>
+        <li>Then again, rank the features.</li>
+      </ul>
+      <ul>
+        <li>Perform recursive feature search.</li>
+        <li>Use 4-folds for training and 1 fold for validation. (Validation fold must be different from previous step)</li>
+        <li>For each feature in top N features, train a model and score performance on validation set.</li>
+        <li>Add the best scoring features to the candidate features.</li>
+      </ul>
+      <li>Candidate features ~ 100</li>
+      <li>Second gate</li>
+      <ul>
+        <li>Highly correlated features should be justified or redundant features should be removed.</li>
+        <li>Future retraining starts from the candidate features.</li>
+      </ul>
+      <li>Second stage</li>
+      <ul>
+        <li>Perform 5-fold cross validation with each candidate feature.</li>
+        <li>Compute shapley values on the validation set.</li>
+        <li>Select stable features via union of top features across the folds.</li>
+      </ul>
+      <li>Stable features ~ 40</li>
+    </ul>
+
+    <h3 class="card-title">Hyperparameter tuning</h3>
+    <ul>
+      <li>Ex. grid search, random search, bayesian optimization.</li>
+    </ul>
+
+    <h3 class="card-title">Final model training</h3>
+    <ul>
+      <li>Train the model using stable features and tuned hyperparameters.</li>
+      <li>Evaluate on OOS (seasonality) and OOT (final evaluation) test sets.</li>
+    </ul>
+
+    <h3 class="card-title">Monitoring</h3>
+    <ul>
+      <li>Partial dependency plot (PDP) assesses marginal effect of a feature to the model output.</li>
+      <li>Indvidual conditional expectation (ICDE) is equivalent to PDP but for an individual data point.</li>
+      <li>Feature contribution is assessed via shapley values.</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
