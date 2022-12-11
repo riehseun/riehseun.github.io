@@ -531,10 +531,14 @@
 
     <h3 class="card-title">High level design</h3>
     <ul>
-      <li>User uploads video.</li>
-      <li>Server sends video to encoder.</li>
-      <li>Server sends user data and metadata to DB.</li>
-      <li>Encoder encodes video and store it in storage.</li>
+      <li>Load balancer forwards user requests to web servers.</li>
+      <li>Web servers generate some part of page (Mostly static content) and application servers generate other part of page. (Mostly dynamic content)</li>
+      <li>Questions and answers data is stored in MySQL.</li>
+      <li>Images and videos are stored in Blob storage.</li>
+    </ul>
+    <ul>
+      <li>Different features are stored in HBase for each type of question.</li>
+      <li>features are forwarded to ML engine to rank the most useful answer.</li>
     </ul>
     <img class="img-fluid" class="card-img-top" src="/img/system-design/quora1.png" alt="Card image cap">
     <br>
@@ -542,228 +546,50 @@
 
     <h3 class="card-title">API</h3>
     <ul>
-      <li>upload_video(user_id, video_file, title, description, tags, default_language)</li>
-      <ul>
-        <li>Return 202 on success.</li>
-      </ul>
-      <li>search_video(user_id, query, user_location, length, max_videos_to_return)</li>
-      <ul>
-        <li>Return JSON with the list of videos.</li>
-      </ul>
-      <li>stream_video(user_id, video_id, resolution)</li>
-      <ul>
-        <li>Return stream.</li>
-      </ul>
-      <li>like_video(user_id, video_id)</li>
-      <li>dislike_video(user_id, video_id)</li>
-      <li>view_thunbnail(user_id, video_id)</li>
-      <li>comment_video(user_id, video_id, text)</li>
+      <li>post_question(user_id, question, description, video, image</li>
+      <li>post_answer(user_id, question_id, answer_text, video, image)</li>
+      <li>upvote(user_id, question_id, answer_id)</li>
+      <li>comment(user_id, answer_id, comment_text)</li>
+      <li>search(user_id, search_text)</li>
     </ul>
 
     <h3 class="card-title">DB</h3>
-    <ul>
-      <li>Store video metadata in relational DB.</li>
-    </ul>
-
-    <h4 class="card-title">User</h4>
-    <ul>
-      <li>id (int, pk)</li>
-      <li>name (varchar)</li>
-      <li>email (varchar)</li>
-      <li>password (varchar)</li>
-    </ul>
-
-    <h4 class="card-title">Video</h4>
-    <ul>
-      <li>id (int, pk)</li>
-      <li>title (varchar)</li>
-      <li>description (varchar)</li>
-      <li>date (datetime)</li>
-      <li>uploader (int)</li>
-      <li>size (longint)</li>
-      <li>thumbnail (varchar)</li>
-      <li>likes (int)</li>
-      <li>dislikes (int)</li>
-      <li>views (int)</li>
-    </ul>
-
-    <h4 class="card-title">Comment</h4>
-    <ul>
-      <li>id (int, pk)</li>
-      <li>video_id (int)</li>
-      <li>user_id (int)</li>
-      <li>comment (varchar)</li>
-      <li>date (datetime)</li>
-      <li>likes (int)</li>
-      <li>dislikes (int)</li>
-    </ul>
 
     <h3 class="card-title">Component design</h3>
     <ul>
-      <li>Load balancer: distribute user load.</li>
-      <li>Web server: take user request, cache frequently accessed pages. Decouple client request from business logic. Use Lighttpd to run the server for it is fast.</li>
-      <li>App server: business logic.</li>
-      <li>User DB: user related data, decoupled from metadata storage for easy scalability. Need strong consistency on user data. MySQL.</li>
-      <li>Metadata DB: video related data. MySQL.</li>
-      <li>Thumbnail DB: BigTable.</li>
-      <ul>
-        <li>Combines multiple files into one block to store.</li>
-        <li>Very efficient for large number of small files with low retrieval latency.</li>
-      </ul>
-      <li>Encoder: compress vidoes and generate thumbnail.</li>
-      <li>Video DB: blob.</li>
-      <li>CDN: forward videos to closer proximity to serve users faster.</li>
+      <li>Combine web and app servers into one type of powerful machine.</li>
+      <li>Replace HBase with MyRocks for lower latency. Also, MyRocks has native integration with MySQL.</li>
+      <li>Images and videos are forwarded to CDN.</li>
     </ul>
     <img class="img-fluid" class="card-img-top" src="/img/system-design/quora2.png" alt="Card image cap">
     <br>
     <br>
 
-    <h4 class="card-title">How to manage read traffic</h4>
-    <ul>
-      <li>Segregate read traffic and write traffic.</li>
-      <li>Distribute read traffic to different servers.</li>
-      <li>For video metadata, write to primary and read from secondary.</li>
-    </ul>
-
-    <h4 class="card-title">Metadata sharding</h4>
-    <ul>
-      <li>Store based on UserID? It is hard to maintain uniform distribution because some users upload more than others.</li>
-      <li>Store based on VideoID? Solves above problem. Can cache hot vidoes in front of DB servers.</li>
-    </ul>
-
-    <h4 class="card-title">Deduplication</h4>
-    <ul>
-      <li>When users upload vidoes, run video matching algorithm.</li>
-    </ul>
-
-    <h4 class="card-title">Search</h4>
-    <ul>
-      <li>Extract data from each video and store that data into JSON (referred as document)</li>
-      <li>Key-value storage is created from the documents.</li>
-      <ul>
-        <li>Key: all the keywords searched by users.</li>
-        <li>Value: occurrence of each key, its frequency, and location of occurrence in the different documents.</li>
-      </ul>
-      <li>Vidoes with most relevant keywords are returned.</li>
-    </ul>
-
-    <h4 class="card-title">Load-balancing</h4>
-    <ul>
-      <li>Consistent hashing between cache servers.</li>
-    </ul>
-
-    <h4 class="card-title">Cache</h4>
-    <ul>
-      <li>Store hot vidoes in cache servers.</li>
-      <li>Use LRU eviction rule.</li>
-      <li>Use distributed cache like Memcached.</li>
-    </ul>
-
     <h3 class="card-title">Evaluation</h3>
 
     <h4 class="card-title">Availability</h4>
     <ul>
-      <li>Replicate web, app, DB servers.</li>
+      <li>Replicate powerful machines and DB servers.</li>
     </ul>
 
     <h4 class="card-title">Reliability</h4>
     <ul>
-      <li>Data replication.</li>
+      <li>Replicate data.</li>
+      <li>CDN also serves as backup of data.</li>
     </ul>
 
     <h4 class="card-title">Scalability</h4>
     <ul>
-      <li>Horizontally scale web, app servers. (Load balancer can multiplx them)</li>
-      <li>Separate read and write to different servers.</li>
+      <li>Horizontally scale powerful machines. (Load balancer can multiplx them)</li>
+      <li>Vertically scale MySQL columns.</li>
+      <li>Different DB types for different purpose.</li>
     </ul>
 
     <h4 class="card-title">Performance</h4>
     <ul>
-      <li>Lighttpd for serving videos,</li>
-      <li>Cache at various component.</li>
-      <li>Right DB for different data types for fast operations.</li>
+      <li>MyRocks</li>
       <li>CDN</li>
     </ul>
-  </div>
-  <div class="card-footer text-muted">
-    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="system-design-100">
-  <div class="card-body">
-    <h2 class="card-title">key-value store</h2>
-    <ul>
-      <li>Distributed hash tables.</li>
-      <li>Key is generated by hash function.</li>
-      <li>No assumption is made on the structure of value.</li>
-      <li>Used for storing user session and NoSQL database.</li>
-    </ul>
-
-    <h3 class="card-title">Requirement</h3>
-
-    <h4 class="card-title">Functional</h4>
-    <ul>
-      <li>Users can configure different consistency model.</li>
-    </ul>
-
-    <h4 class="card-title">Non-functional</h4>
-    <ul>
-      <li>High availability.</li>
-      <li>High reliability.</li>
-      <li>High scalability.</li>
-      <li>Performance.</li>
-    </ul>
-
-    <h3 class="card-title">API</h3>
-    <ul>
-      <li>get(key)</li>
-      <ul>
-        <li>Return object and <code>context</code></li>
-        <li><code>context</code> contains object metadata.</li>
-        <li>If there a list of objects in <code>context</code> that raises a conflict, ask the client to resolve it.</li>
-      </ul>
-      <li>put(key, context, value)</li>
-    </ul>
-
-    <h3 class="card-title">Design</h3>
-    <ul>
-      <li>Larger value of r in quorum to prefer availability over consistency.</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="system-design-101">
-  <div class="card-body">
-    <h2 class="card-title">Content delivery network</h2>
-
-    <h3 class="card-title">Requirement</h3>
-
-    <h4 class="card-title">Functional</h4>
-    <ul>
-      <li>Retrieve content from original server.</li>
-      <li>Respond to user request.</li>
-      <li>Original server can send contents to CDN.</li>
-    </ul>
-
-    <h4 class="card-title">Non-functional</h4>
-    <ul>
-      <li>High availability.</li>
-      <li>High reliability.</li>
-      <li>High scalability.</li>
-      <li>Performance.</li>
-    </ul>
-
-    <h3 class="card-title">API</h3>
-    <ul>
-      <li></li>
-      <li></li>
-      <li></li>
-    </ul>
-
   </div>
   <div class="card-footer text-muted">
     <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
