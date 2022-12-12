@@ -546,7 +546,7 @@
 
     <h3 class="card-title">API</h3>
     <ul>
-      <li>post_question(user_id, question, description, video, image</li>
+      <li>post_question(user_id, question, description, video, image)</li>
       <li>post_answer(user_id, question_id, answer_text, video, image)</li>
       <li>upvote(user_id, question_id, answer_id)</li>
       <li>comment(user_id, answer_id, comment_text)</li>
@@ -562,6 +562,138 @@
       <li>Images and videos are forwarded to CDN.</li>
     </ul>
     <img class="img-fluid" class="card-img-top" src="/img/system-design/quora2.png" alt="Card image cap">
+    <br>
+    <br>
+
+    <h3 class="card-title">Evaluation</h3>
+
+    <h4 class="card-title">Availability</h4>
+    <ul>
+      <li>Replicate powerful machines and DB servers.</li>
+    </ul>
+
+    <h4 class="card-title">Reliability</h4>
+    <ul>
+      <li>Replicate data.</li>
+      <li>CDN also serves as backup of data.</li>
+    </ul>
+
+    <h4 class="card-title">Scalability</h4>
+    <ul>
+      <li>Horizontally scale powerful machines. (Load balancer can multiplx them)</li>
+      <li>Vertically scale MySQL columns.</li>
+      <li>Different DB types for different purpose.</li>
+    </ul>
+
+    <h4 class="card-title">Performance</h4>
+    <ul>
+      <li>MyRocks</li>
+      <li>CDN</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="system-design-12">
+  <div class="card-body">
+    <h2 class="card-title">Google Maps</h2>
+
+    <h3 class="card-title">Requirement</h3>
+
+    <h4 class="card-title">Functional</h4>
+    <ul>
+      <li>Users can identify current location.</li>
+      <li>Users can find the fastest route between start and end.</li>
+      <li>Users can listen to directions.</li>
+    </ul>
+
+    <h4 class="card-title">Non-functional</h4>
+    <ul>
+      <li>High availability.</li>
+      <li>High reliability.</li>
+      <li>High scalability.</li>
+      <li>Performance</li>
+      <ul>
+        <li>Route and direction should be suggested fast.</li>
+        <li>ETA should be accurate.</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Estimation</h3>
+
+    <h4 class="card-title">Traffic</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>1B active users and 100M daily active users.</li>
+        <li>Each user makes 100 requests per day.</li>
+      </ul>
+      <li>Read: 100M * 100 = 10B per day.</li>
+    </ul>
+
+    <h4 class="card-title">Storage</h4>
+    <ul>
+      <li>Only one time storage is needed in the beginning.</li>
+    </ul>
+
+    <h4 class="card-title">Bandwidth</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>Each request size is 100 bytes.</li>
+        <li>Each response size is 1 KB.</li>
+      </ul>
+      <li>Incoming: (100M * 100 * 100 bytes * 8) / (24 x 60 x 60) = 92 Mbps.</li>
+      <li>Outgoing: 920 Mbps.</li>
+    </ul>
+
+    <h4 class="card-title">Server</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>1B active users and 100M daily active users.</li>
+        <li>A single server can handle 10k connections.</li>
+      </ul>
+      <li>100M / 10k = 10,000 servers are needed.</li>
+    </ul>
+
+    <h3 class="card-title">High level design</h3>
+    <ul>
+      <li>User enters starting and end point. Starting point can be user's current location.</li>
+      <ul>
+        <li>User request is forwarded to route finder service.</li>
+        <li>Route finder forwards requests to area search service.</li>
+        <li>Area search service finds the latitude/longitude for start and end location.</li>
+        <li>Graph processing service finds the shortest path and return it to route finder.</li>
+      </ul>
+      <li>Nagivator updates user location on the map as user is moving. It also provides directions to user.</li>
+      <li>When user deviates from the path, Pub-sub alerts area search service to recalculate the optimal path.</li>
+    </ul>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/google-map1.png" alt="Card image cap">
+    <br>
+    <br>
+
+    <h3 class="card-title">API</h3>
+    <ul>
+      <li>curr_location(location)</li>
+      <ul>
+        <li>Returns user location</li>
+      </ul>
+      <li>find_route(start, end, transport_type)</li>
+      <li>directions(curr_location, steps)</li>
+    </ul>
+
+    <h3 class="card-title">DB</h3>
+
+    <h3 class="card-title">Component design</h3>
+    <ul>
+      <li>Combine web and app servers into one type of powerful machine.</li>
+      <li>Replace HBase with MyRocks for lower latency. Also, MyRocks has native integration with MySQL.</li>
+      <li>Images and videos are forwarded to CDN.</li>
+    </ul>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/google-map2.png" alt="Card image cap">
     <br>
     <br>
 
