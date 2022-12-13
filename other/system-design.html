@@ -760,6 +760,177 @@
     <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
   </div>
 </div>
+
+<div class="card mb-4" id="system-design-13">
+  <div class="card-body">
+    <h2 class="card-title">Yelp</h2>
+
+    <h3 class="card-title">Requirement</h3>
+
+    <h4 class="card-title">Functional</h4>
+    <ul>
+      <li>Users can search place of interest based on their location.</li>
+      <li>Users can post reviews which consists of texts, images, videos.</li>
+      <li>Users can add, delete, and update place information.</li>
+    </ul>
+
+    <h4 class="card-title">Non-functional</h4>
+    <ul>
+      <li>High availability.</li>
+      <li>High reliability.</li>
+      <li>High scalability.</li>
+      <ul>
+        <li>Should be able to handle peak season.</li>
+      </ul>
+      <li>Performance</li>
+    </ul>
+
+    <h3 class="card-title">Estimation</h3>
+
+    <h4 class="card-title">Traffic</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li></li>
+        <li></li>
+      </ul>
+      <li></li>
+    </ul>
+
+    <h4 class="card-title">Storage</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>100M places.</li>
+        <li>Each place need 10KB storage for description text, images, videos.</li>
+        <li>1M reviews are posted per day.</li>
+        <li>Each review need 1KB storage for description text, images, videos.</li>
+      </ul>
+      <li>100M * 10KB + 1M per day * 1 KB = 1 TB + 1 GB per day ~ 1TB</li>
+    </ul>
+
+    <h4 class="card-title">Bandwidth</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li></li>
+        <li></li>
+      </ul>
+      <li>Incoming: </li>
+      <li>Outgoing: </li>
+    </ul>
+
+    <h4 class="card-title">Server</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>1B active users and 100M daily active users.</li>
+        <li>A single server can handle 10k connections.</li>
+      </ul>
+      <li>100M / 10k = 10,000 servers are needed.</li>
+    </ul>
+
+    <h3 class="card-title">High level design</h3>
+    <ul>
+      <li>User enters starting and end point. Starting point can be user's current location.</li>
+      <ul>
+        <li>User request is forwarded to route finder service.</li>
+        <li>Route finder forwards requests to area search service.</li>
+        <li>Area search service finds the latitude/longitude for start and end location.</li>
+        <li>Graph processing service finds the shortest path and return it to route finder.</li>
+      </ul>
+      <li>Nagivator updates user location on the map as user is moving. It also provides directions to user.</li>
+      <li>When user deviates from the path, Pub-sub alerts area search service to recalculate the optimal path.</li>
+    </ul>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/yelp1.png" alt="Card image cap">
+    <br>
+    <br>
+
+    <h3 class="card-title">API</h3>
+    <ul>
+      <li>curr_location(location)</li>
+      <ul>
+        <li>Returns user location</li>
+      </ul>
+      <li>find_route(start, end, transport_type)</li>
+      <li>directions(curr_location, steps)</li>
+    </ul>
+
+    <h3 class="card-title">DB</h3>
+
+    <h4 class="card-title">Key-value store</h4>
+    <ul>
+      <li>Segment to server</li>
+      <ul>
+        <li>segment_id (int)</li>
+        <li>server_id (int)</li>
+      </ul>
+      <li>Belongs to segment</li>
+      <ul>
+        <li>segment_id (int)</li>
+        <li>coordinates (list): stores latitude and longitude.</li>
+      </ul>
+      <li>Neighbors</li>
+      <ul>
+        <li>segment_id (int)</li>
+        <li>neighbors (list): stores a list of segment IDs.</li>
+      </ul>
+    </ul>
+
+    <h4 class="card-title">Graph DB</h4>
+    <ul>
+      <li>Graph data</li>
+      <ul>
+        <li>segment_id (int)</li>
+        <li>road_network (graph)</li>
+      </ul>
+    </ul>
+
+    <h4 class="card-title">Relational DB</h4>
+    <ul>
+      <li>Rush hour</li>
+      <ul>
+        <li>segment_id (int)</li>
+        <li>edge_id (int)</li>
+        <li>hour_range (tuple)</li>
+        <li>rush_hour (bool): where there is congestion or not.</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Component design</h3>
+
+    <h4 class="card-title">Sub-graphs</h4>
+    <ul>
+      <li>Computing distances between two points on the entire graph is super expensive.</li>
+      <li>Precalculate the shortest distance between two points in sub-graphs. Also, cache most requested routes.</li>
+      <li>Connect sub-graphs and run the shortest distance algorithm.</li>
+    </ul>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/yelp2.png" alt="Card image cap">
+    <br>
+    <br>
+
+    <h3 class="card-title">Evaluation</h3>
+
+    <h4 class="card-title">Availability</h4>
+    <ul>
+      <li>Each segment is processed in a separate server.</li>
+      <li>Segments can be replicated.</li>
+    </ul>
+
+    <h4 class="card-title">Reliability</h4>
+
+    <h4 class="card-title">Scalability</h4>
+
+    <h4 class="card-title">Performance</h4>
+    <ul>
+      <li>Use of sub-graphs make computation faster than using entire graph.</li>
+      <li>Cache processed sub-graphs</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
 <!-- System design END -->
 
 </div> <!-- /.col-md-12 -->
