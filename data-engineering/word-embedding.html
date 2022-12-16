@@ -73,7 +73,101 @@
       <li>NCE Loss convert the multiclass classification problem into a binary classification problem.</li>
     </ul>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">import tensorflow as tf
+
+def get_target_and_size(sequence, target_index, window_size):
+    target_word = sequence[target_index]
+    half_window_size = window_size // 2
+    return (target_word, half_window_size)
+
+def get_window_indices(sequence, target_index, half_window_size):
+    left_incl = max(0, target_index - half_window_size)
+    right_excl = min(len(sequence), target_index + half_window_size + 1)
+    return (left_incl, right_excl)
+
+def get_initializer(embedding_dim, vocab_size):
+    initial_bounds = 0.5 / embedding_dim
+    initializer = tf.random.uniform((vocab_size, embedding_dim), minval=-initial_bounds, maxval=initial_bounds)
+    return initializer
+
+# Skip-gram embedding model
+class EmbeddingModel(object):
+    # Model Initialization
+    def __init__(self, vocab_size, embedding_dim):
+        self.vocab_size = vocab_size
+        self.embedding_dim = embedding_dim
+        self.tokenizer = tf.keras.preprocessing.text.Tokenizer(num_words=self.vocab_size)
+
+    # Convert a list of text strings into word sequences
+    def tokenize_text_corpus(self, texts):
+        self.tokenizer.fit_on_texts(texts)
+        sequences = self.tokenizer.texts_to_sequences(texts)
+        return sequences
+
+    # Convert a list of text strings into word sequences
+    def get_target_and_context(self, sequence, target_index, window_size):
+        target_word, half_window_size = get_target_and_size(
+            sequence, target_index, window_size
+        )
+        left_incl, right_excl = get_window_indices(
+            sequence, target_index, half_window_size)
+        return target_word, left_incl, right_excl
+
+    # Create (target, context) pairs for a given window size
+    def create_target_context_pairs(self, texts, window_size):
+        pairs = []
+        sequences = self.tokenize_text_corpus(texts)
+        for sequence in sequences:
+            for i in range(len(sequence)):
+                target_word, left_incl, right_excl = self.get_target_and_context(
+                    sequence, i, window_size)
+                for j in range(left_incl, right_excl):
+                    if i != j:
+                        pairs.append((target_word, sequence[j]))
+        return pairs
+
+    # Forward run of the embedding model to retrieve embeddings
+    def forward(self, target_ids):
+        initializer = get_initializer(
+            self.embedding_dim, self.vocab_size)
+        self.embedding_matrix = tf.compat.v1.get_variable('embedding_matrix', initializer=initializer)
+        embeddings = tf.compat.v1.nn.embedding_lookup(self.embedding_matrix, target_ids)
+        return embeddings
+
+    # Get bias and weights for calculating loss
+    def get_bias_weights(self):
+        weights_initializer = tf.zeros([self.vocab_size, self.embedding_dim])
+        bias_initializer = tf.zeros([self.vocab_size])
+        weights = tf.compat.v1.get_variable('weights',
+            initializer=weights_initializer)
+        bias = tf.compat.v1.get_variable('bias',
+            initializer=bias_initializer)
+        return weights, bias
+
+    # Calculate NCE Loss based on the retrieved embedding and context
+    def calculate_loss(self, embeddings, context_ids, num_negative_samples):
+        weights, bias = self.get_bias_weights()
+        nce_losses = tf.nn.nce_loss(weights, bias, context_ids, embeddings, num_negative_samples, self.vocab_size)
+        overall_loss = tf.math.reduce_mean(nce_losses)
+        return overall_loss
+
+    # Compute cosine similarites between the word's embedding
+    # and all other embeddings for each vocabulary word
+    def compute_cos_sims(self, word, training_texts):
+        self.tokenizer.fit_on_texts(training_texts)
+        word_id = self.tokenizer.word_index[word]
+        word_embedding = self.forward([word_id])
+        normalized_embedding = tf.math.l2_normalize(word_embedding)
+        normalized_matrix = tf.math.l2_normalize(self.embedding_matrix, axis=1)
+        cos_sims = tf.linalg.matmul(normalized_embedding, normalized_matrix, transpose_b=True)
+        return cos_sims
+
+    # Compute K-nearest neighbors for input word
+    def k_nearest_neighbors(self, word, k, training_texts):
+        cos_sims = self.compute_cos_sims(word, training_texts)  # Shape is (1, self.vocab_size)
+        squeezed_cos_sims = tf.squeeze(cos_sims)
+        top_k_output = tf.math.top_k(squeezed_cos_sims, k)
+        return top_k_output</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
