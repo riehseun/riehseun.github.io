@@ -56,6 +56,7 @@
       <li><a href="#system-design-17">Instagram</a></li>
       <li><a href="#system-design-18">TinyURL</a></li>
       <li><a href="#system-design-19">Web crawler</a></li>
+      <li><a href="#system-design-20">Typeahead</a></li>
     </ul>
   </div>
 </div>
@@ -1829,6 +1830,140 @@
         <li>URL checksum.</li>
         <li>Document checksum.</li>
       </ul>
+    </ul>
+
+    <h3 class="card-title">Evaluation</h3>
+
+    <h4 class="card-title">Availability</h4>
+
+    <h4 class="card-title">Reliability</h4>
+
+    <h4 class="card-title">Scalability</h4>
+
+    <h4 class="card-title">Performance</h4>
+
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="system-design-20">
+  <div class="card-body">
+    <h2 class="card-title">Typeahead</h2>
+
+    <h3 class="card-title">Requirement</h3>
+
+    <h4 class="card-title">Functional</h4>
+    <ul>
+      <li>Suggests top 10 terms starting with whatever user has typed.</li>
+    </ul>
+
+    <h4 class="card-title">Non-functional</h4>
+    <ul>
+      <li>Availability.</li>
+      <li>Reliability.</li>
+      <li>Scalability.</li>
+      <li>Performance.</li>
+    </ul>
+
+    <h3 class="card-title">Estimation</h3>
+
+    <h4 class="card-title">Server</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>10M daily active users</li>
+        <li>A single server can handle 10k connections.</li>
+      </ul>
+      <li>10M / 10k = 1,000 servers are needed.</li>
+    </ul>
+
+    <h4 class="card-title">Storage</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>There are 3.5B unique queries per day.</li>
+        <li>There are 2B unique queries out of 3.5B per day.</li>
+        <li>Each query has 15 characters on average.</li>
+        <li>Each character requires 2 bytes to store.</li>
+      </ul>
+      <li>2B per day * 15 * 2 = 60GB per day.</li>
+    </ul>
+
+    <h4 class="card-title">Bandwidth</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>Suggestions have the same length, which is 15 chracters.</li>
+        <li>Top 10 suggestions are shown to users.</li>
+      </ul>
+      <li>Incoming: 3.5B * 2 * 15 * 8 / 86400 = 9.7Mbps</li>
+      <li>Outgoing: 10 * 15 * 9.7Mbps = 1.46Gbps</li>
+    </ul>
+
+    <h3 class="card-title">High level design</h3>
+    <ul>
+      <li>Trie structure.</li>
+      <li>Store this data structure in memory. (Not in DB)</li>
+      <li>Assume case insensitive.</li>
+      <li>For example, when user types "CAP", node "P" will show all suggestions.</li>
+    </ul>
+
+    <h3 class="card-title">API</h3>
+    <ul>
+      <li>get_suggestions(prefix)</li>
+      <li>add_to_database(query)</li>
+    </ul>
+
+    <h3 class="card-title">DB</h3>
+
+    <h3 class="card-title">Component design</h3>
+
+    <h4 class="card-title">How to find top suggestions</h4>
+    <ul>
+      <li>Store the number of searches in the last phrase.</li>
+      <li>Parent nodes recursively call child nodes to get suggestions and counts.</li>
+    </ul>
+
+    <h4 class="card-title">How to update trie</h4>
+    <ul>
+      <li>Spread copies of tries on each server and update them offline. (While some nodes are serving the traffic)</li>
+      <li>Also, remove inappropriate terms from the tries duing this time.</li>
+      <li>Also, update frequency at each node.</li>
+    </ul>
+
+    <h4 class="card-title">Client behavior</h4>
+    <ul>
+      <li>Client should hit the server only when no key has been pressed for 50ms.</li>
+      <li>When user is typing, client should cancel in-progress request.</li>
+      <li>Client should wait until at least few characters are entered in the beginning.</li>
+      <li>Client can store recent history of top suggestions.</li>
+      <li>Establish connection between client and server as soon as browser opens up.</li>
+      <li>Server should push some part of cache to CDNs.</li>
+    </ul>
+
+    <h4 class="card-title">Data partitioning</h4>
+    <ul>
+      <li>Range based partitioning</li>
+      <ul>
+        <li>Pick storage based on starting character of queries.</li>
+        <li>Results in uneven servers.</li>
+        <li>There will be hot servers.</li>
+        <li>May not be able to fit the size of data into each server.</li>
+      </ul>
+      <li>Hash based partitioning</li>
+      <ul>
+        <li>Each term gets a server number from hash function.</li>
+        <li>Minimize hot servers.</li>
+        <li>Must query all servers and aggregate the result.</li>
+      </ul>
+    </ul>
+
+    <h4 class="card-title">Caching</h4>
+    <ul>
+      <li>Cache servers in front of trie servers with frequenctly searched terms and their typeahead suggestions.</li>
+      <li>App servers should check cache servers before hitting trie servers.</li>
     </ul>
 
     <h3 class="card-title">Evaluation</h3>
