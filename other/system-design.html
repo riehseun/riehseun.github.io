@@ -1212,6 +1212,191 @@
     <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
   </div>
 </div>
+
+<div class="card mb-4" id="system-design-16">
+  <div class="card-body">
+    <h2 class="card-title">Newsfeed</h2>
+
+    <h3 class="card-title">Requirement</h3>
+
+    <h4 class="card-title">Functional</h4>
+    <ul>
+      <li>Feed is generated based on posts from people, pages, groups that user follows.</li>
+      <li>User can have/follow many friends, pages, groups.</li>
+      <li>Feed can contain images, videos, texts.</li>
+    </ul>
+
+    <h4 class="card-title">Non-functional</h4>
+    <ul>
+      <li>Availability.</li>
+      <li>Reliability.</li>
+      <li>Scalability.</li>
+      <li>Performance.</li>
+    </ul>
+
+    <h3 class="card-title">Estimation</h3>
+
+    <h4 class="card-title">Server</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>100M daily active users</li>
+        <li>A single server can handle 10k connections.</li>
+      </ul>
+      <li>100M / 10k = 10,000 servers are needed.</li>
+    </ul>
+
+    <h4 class="card-title">Storage</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>Each user's feed has 500 posts.</li>
+        <li>Each post is 1KB.</li>
+      </ul>
+      <li>500KB for each user.</li>
+      <li>50TB for all users.</li>
+    </ul>
+
+    <h4 class="card-title">Bandwidth</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>Each user opens app 10 times a day.</li>
+      </ul>
+      <li>Incoming: 100M * 10 = 1B requests per day.</li>
+    </ul>
+
+    <h3 class="card-title">High level design</h3>
+    <ul>
+      <li>Feed is generated via aggregation.</li>
+      <li>Feed is published and stored in cache and DB.</li>
+    </ul>
+
+    <h3 class="card-title">API</h3>
+    <ul>
+      <li>generate_feed(user_id)</li>
+      <li>get_feed(user_id, count)</li>
+    </ul>
+
+    <h3 class="card-title">DB</h3>
+    <ul>
+      <li>Use relational database.</li>
+      <li>Use a graph database only for the relationships between users.</li>
+    </ul>
+
+    <h4 class="card-title">Entity</h4>
+    <ul>
+      <li>entity_id (int, pk)</li>
+      <li>name (varchar)</li>
+      <li>name (description)</li>
+      <li>creation_date (datetime)</li>
+    </ul>
+
+    <h4 class="card-title">User</h4>
+    <ul>
+      <li>user_id (int, pk)</li>
+      <li>name (varchar)</li>
+      <li>email (varchar)</li>
+      <li>creation_date (datetime)</li>
+    </ul>
+
+    <h4 class="card-title">Feed item</h4>
+    <ul>
+      <li>feed_item_id (int, pk)</li>
+      <li>user_id (int)</li>
+      <li>entity_id (int)</li>
+      <li>content (varchar)</li>
+      <li>num_likes (int)</li>
+      <li>creation_date (datetime)</li>
+    </ul>
+
+    <h4 class="card-title">Media</h4>
+    <ul>
+      <li>media_id (int, pk)</li>
+      <li>description (varchar)</li>
+      <li>path (varchar)</li>
+      <li>creation_date (datetime)</li>
+    </ul>
+
+    <h4 class="card-title">User (Vertex)</h4>
+    <ul>
+      <li>user_id (int, pk)</li>
+      <li>properties (JSON)</li>
+    </ul>
+
+    <h4 class="card-title">Relationship (Edge)</h4>
+    <ul>
+      <li>relation_id (int, pk)</li>
+      <li>from (user_id)</li>
+      <li>to (user_id)</li>
+      <li>properties (JSON)</li>
+    </ul>
+
+    <h3 class="card-title">Component design</h3>
+
+    <h4 class="card-title">Feed generation</h4>
+    <ul>
+      <li>Retrive ID of all users and entities that the user follows.</li>
+      <li>Retrive the latest, most popular, most relevant posts for those IDs.</li>
+      <li>Rank these posts.</li>
+      <li>Store this feed into cache.</li>
+      <li>Return top 20 posts to the user.</li>
+      <li>Repeat these steps every 5 minutes to check for new posts.</li>
+    </ul>
+
+    <h4 class="card-title">Web server</h4>
+    <ul>
+      <li>Maintain connection with users.</li>
+    </ul>
+
+    <h4 class="card-title">Application server</h4>
+    <ul>
+      <li>Store new posts in DB servers.</li>
+      <li>Retrieve and push feeds to users.</li>
+    </ul>
+
+    <h4 class="card-title">Metadata DB and cache</h4>
+    <ul>
+      <li>Store metadata about users, pages, groups.</li>
+    </ul>
+
+    <h4 class="card-title">Post DB and cache</h4>
+    <ul>
+      <li>Store metadata about posts.</li>
+    </ul>
+
+    <h4 class="card-title">Video and photo storage, and media cache</h4>
+    <ul>
+      <li>Blob storage to store all media.</li>
+    </ul>
+
+    <h4 class="card-title">Newsfeed generation service</h4>
+    <ul>
+      <li>Generate feed offline: dedicated servers that generate user feed and store them in memory.</li>
+    </ul>
+
+    <h4 class="card-title">Feed notification service</h4>
+    <ul>
+      <li>Pull: users pull feed at regular interval.</li>
+      <li>Push: post is pushed to all followers whenever it is published.</li>
+      <li>Celebrity users should have pull model.</li>
+    </ul>
+
+    <h3 class="card-title">Evaluation</h3>
+
+    <h4 class="card-title">Availability</h4>
+
+    <h4 class="card-title">Reliability</h4>
+
+    <h4 class="card-title">Scalability</h4>
+
+    <h4 class="card-title">Performance</h4>
+
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
 <!-- System design END -->
 
 </div> <!-- /.col-md-12 -->
