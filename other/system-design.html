@@ -54,6 +54,7 @@
       <li><a href="#system-design-15">Twitter</a></li>
       <li><a href="#system-design-16">Newsfeed</a></li>
       <li><a href="#system-design-17">Instagram</a></li>
+      <li><a href="#system-design-18">TinyURL</a></li>
     </ul>
   </div>
 </div>
@@ -1476,7 +1477,6 @@
       <li>like_post(user_id, target_user_id, post_id)</li>
       <li>search_photo(user_id, keyword)</li>
       <li>view_feed(user_id)</li>
-      <li></li>
     </ul>
 
     <h3 class="card-title">DB</h3>
@@ -1554,6 +1554,141 @@
     <ul>
       <li>Cache servers: CDN.</li>
       <li>Application servers: use LRU eviction policy.</li>
+    </ul>
+
+    <h3 class="card-title">Evaluation</h3>
+
+    <h4 class="card-title">Availability</h4>
+
+    <h4 class="card-title">Reliability</h4>
+
+    <h4 class="card-title">Scalability</h4>
+
+    <h4 class="card-title">Performance</h4>
+
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="system-design-18">
+  <div class="card-body">
+    <h2 class="card-title">TinyURL</h2>
+
+    <h3 class="card-title">Requirement</h3>
+
+    <h4 class="card-title">Functional</h4>
+    <ul>
+      <li>Given a URL, generate a short version.</li>
+      <li>When users click short link, redirect them to original link.</li>
+      <li>Link should expire after certain time.</li>
+    </ul>
+
+    <h4 class="card-title">Non-functional</h4>
+    <ul>
+      <li>Availability.</li>
+      <li>Reliability.</li>
+      <li>Scalability.</li>
+      <li>Performance.</li>
+    </ul>
+
+    <h3 class="card-title">Estimation</h3>
+
+    <h4 class="card-title">Server</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>10M daily active users</li>
+        <li>A single server can handle 10k connections.</li>
+      </ul>
+      <li>10M / 10k = 1,000 servers are needed.</li>
+    </ul>
+
+    <h4 class="card-title">Storage</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>100:1 read:write ratio.</li>
+        <li>100M read (redirect to original) and 1M write (shorten the URL) per month.</li>
+        <li>Store URL shortening request for 5 years.</li>
+        <li>Each object is around 1kB.</li>
+      </ul>
+      <li>Total number of objects to store: 1M * 5 years * 12 months = 60M.</li>
+      <li>Total storage: 60M * 1kB = 60B.</li>
+    </ul>
+
+    <h4 class="card-title">Bandwidth</h4>
+    <ul>
+      <li>URL shortening per second: 1M / (30 days * 24 hrs * 3600 seconds) = 0.386 URLs/s.</li>
+      <li>URL redirections per second: 100M / (30 days * 24 hrs * 3600 seconds) = 38.6k URLs/s.</li>
+      <li>Write: 0.386 * 1kB * 8 = 3Kbps.</li>
+      <li>Read: 38.2 * 1kB * 8 = 300Kbps.</li>
+    </ul>
+
+    <h3 class="card-title">High level design</h3>
+    <ul>
+      <li>User posts original URL and gets shortened URL.</li>
+      <li>User clicks shortened URL and gets redirected to original URL.</li>
+    </ul>
+
+    <h3 class="card-title">API</h3>
+    <ul>
+      <li>short_url(original_url)</li>
+      <li>redirect_url(shortened_url)</li>
+      <li>delete_url(shortened_url)</li>
+    </ul>
+
+    <h3 class="card-title">DB</h3>
+    <ul>
+      <li>Billions of records.</li>
+      <li>Each object is small. (500k)</li>
+      <li>Read heavy.</li>
+      <li>Since there is no relationship between records, No SQL should be chosen. (Dynamo DB, Cassandra, etc)</li>
+    </ul>
+
+    <h4 class="card-title">URL</h4>
+    <ul>
+      <li>shortened_url_hash (varchar, PK)</li>
+      <li>original_url (varchar)</li>
+      <li>user_id (int)</li>
+      <li>creation_date (datetime)</li>
+    </ul>
+
+    <h4 class="card-title">User</h4>
+    <ul>
+      <li>user_id (int, pk)</li>
+      <li>name (varchar)</li>
+      <li>email (varchar)</li>
+      <li>creation_date (datetime)</li>
+    </ul>
+
+    <h3 class="card-title">Component design</h3>
+
+    <h4 class="card-title">Encode the URL</h4>
+    <ul>
+      <li>Want to generate characters at the end of the URL.</li>
+      <li>Assume base64 encoding</li>
+      <ul>
+        <li>6 letters 64^6 = 68.7 billion possible strings.</li>
+        <li>8 letters 64^8 = 281 trillion possible strings.</li>
+      </ul>
+      <li>Duplication: if multiple users enter the same URL, they can get the same shortened URL, which is not good.</li>
+    </ul>
+
+    <h4 class="card-title">Key generating service</h4>
+    <ul>
+      <li>Generates random 6 letter strings and store them in key DB.</li>
+      <li>What is two or more servers are trying the use the same key?</li>
+      <ul>
+        <li>One table for keys not in used, one table for keys in use.</li>
+        <li>Load some keys in memory to give to the servers and at the same time move them to "Used" table.</li>
+        <ul>
+          <li>If servers die, we lose keys. But that is okay given we've got enough keys to cover shortening requests.</li>
+        </ul>
+      </ul>
+      <li>DB size: 6 (characters per key) * 68.7 billion (unique keys) = 412GB</li>
+      <li>Single point of failure? Use replicas.</li>
     </ul>
 
     <h3 class="card-title">Evaluation</h3>
