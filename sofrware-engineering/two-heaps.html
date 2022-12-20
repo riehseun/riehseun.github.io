@@ -50,7 +50,7 @@
 
 <div class="card mb-4" id="two-heaps-1">
   <div class="card-body">
-    <h2 class="card-title">Two heaps</h2>
+    <h2 class="card-title">Maximize capital</h2>
 
     <h3 class="card-title">Use min heap for capital and max heap for profit</h3>
     <ul>
@@ -58,7 +58,7 @@
       <li>Space: O(n)</li>
     </ul>
 
-<pre><code class="python">from heapq import heapify, heappush, heappop
+<pre><code class="python">from heapq import heappush, heappop
 
 def maximum_capital(capital, k, capitals, profits):
 
@@ -95,6 +95,62 @@ def maximum_capital(capital, k, capitals, profits):
       <li>Negative capitals and profits.</li>
       <li>Mismatch between the length of capitals and profits array.</li>
       <li>Cannot buy any capital from the initial capital.</li>>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/courses/grokking-coding-interview-patterns-python">Grokking Coding Interview Patterns in Python</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="two-heaps-2">
+  <div class="card-body">
+    <h2 class="card-title">Sliding window median</h2>
+
+    <h3 class="card-title">In each window, use two heaps to compute the running median</h3>
+    <ul>
+      <li>Time: O(n-k) * O(klogk)</li>
+      <li>Space: O(k) * O(n-k)</li>
+    </ul>
+
+<pre><code class="python">from heapq import heappush, heappop
+
+def median_sliding_window(nums, k):
+
+    result = []
+
+    for i in range(0, len(nums)-k+1):
+        min_heap = []
+        max_heap = []
+
+        for j in nums[i:i+k]:
+            heappush(max_heap, -j)
+
+        # If k is odd, transfer half+1 elements to min heap
+        # Now, min heap has the upper half+1 and max heap has
+        # the lower half.
+        # Then, the root of min heap is the median.
+        if k % 2 != 0:
+            for _ in range((k//2)+1):
+                heappush(min_heap, -heappop(max_heap))
+            median = heappop(min_heap)
+
+        # If k is odd, transfer half elements to min heap.
+        # Now, min heap has the upper half and max heap has
+        # the lower half.
+        # Then, the average between the roots of min and max
+        # heap is the median
+        else:
+            for _ in range((k//2)):
+                heappush(min_heap, -heappop(max_heap))
+            median = (heappop(min_heap)-heappop(max_heap)) / 2
+
+        result.append(float(median))
+
+    return result</code></pre>
+
+    <h3 class="card-title">Test cases</h3>
+    <ul>
+      <li>k is less than the length of num array.</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
