@@ -46,6 +46,14 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#system-design-1">System design</a></li>
       <li><a href="#system-design-2">ML Platform</a></li>
+      <li><a href="#system-design-10">Youtube</a></li>
+      <li><a href="#system-design-11">Quora</a></li>
+      <li><a href="#system-design-12">Google maps</a></li>
+      <li><a href="#system-design-13">Yelp</a></li>
+      <li><a href="#system-design-14">Uber</a></li>
+      <li><a href="#system-design-15">Twitter</a></li>
+      <li><a href="#system-design-16">Newsfeed</a></li>
+      <li><a href="#system-design-17">Instagram</a></li>
     </ul>
   </div>
 </div>
@@ -1380,6 +1388,172 @@
       <li>Pull: users pull feed at regular interval.</li>
       <li>Push: post is pushed to all followers whenever it is published.</li>
       <li>Celebrity users should have pull model.</li>
+    </ul>
+
+    <h3 class="card-title">Evaluation</h3>
+
+    <h4 class="card-title">Availability</h4>
+
+    <h4 class="card-title">Reliability</h4>
+
+    <h4 class="card-title">Scalability</h4>
+
+    <h4 class="card-title">Performance</h4>
+
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="system-design-17">
+  <div class="card-body">
+    <h2 class="card-title">Instagram</h2>
+
+    <h3 class="card-title">Requirement</h3>
+
+    <h4 class="card-title">Functional</h4>
+    <ul>
+      <li>Users can upload, download, and view photos and vidoes.</li>
+      <li>Users can search based on photo and video titles.</li>
+      <li>Users can follow other users.</li>
+      <li>User feed is generated consisting of top photos of all users that the user follows.</li>
+    </ul>
+
+    <h4 class="card-title">Non-functional</h4>
+    <ul>
+      <li>Availability.</li>
+      <li>Reliability.</li>
+      <li>Scalability.</li>
+      <li>Performance.</li>
+    </ul>
+
+    <h3 class="card-title">Estimation</h3>
+
+    <h4 class="card-title">Server</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>10M daily active users</li>
+        <li>A single server can handle 10k connections.</li>
+      </ul>
+      <li>10M / 10k = 1,000 servers are needed.</li>
+    </ul>
+
+    <h4 class="card-title">Storage</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>2M new photos per day.</li>
+        <li>Average photo size 1MB.</li>
+        <li>1M new videos per day</li>
+        <li>Average photo size 10MB.</li>
+      </ul>
+      <li>2M * 1MB + 1M * 10MB = 2TB + 10TB = 12TB per day.</li>
+    </ul>
+
+    <h4 class="card-title">Bandwidth</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>Read-write ratio is 100:1.</li>
+      </ul>
+      <li>Incoming: 12TB per day * 8 / 86400 = 1.1Gbps.</li>
+      <li>Outgoing: 1.1Gbps * 100 = 111Gbps.</li>
+    </ul>
+
+    <h3 class="card-title">High level design</h3>
+    <ul>
+      <li>User uploads images/videos and they are stored in blob.</li>
+      <li>Follower is notificed of the images/videos uploads.</li>
+      <li>Feed is generated for users.</li>
+    </ul>
+
+    <h3 class="card-title">API</h3>
+    <ul>
+      <li>post_media(user_id, media_type)</li>
+      <li>follow_user(user_id, target_user_id)</li>
+      <li>like_post(user_id, target_user_id, post_id)</li>
+      <li>search_photo(user_id, keyword)</li>
+      <li>view_feed(user_id)</li>
+      <li></li>
+    </ul>
+
+    <h3 class="card-title">DB</h3>
+    <ul>
+      <li>Need to index on (photo_id, creation_date) since we want to fetch recent photos.</li>
+      <li>Store metadata in distributed key-value storage.</li>
+      <ul>
+        <li>Key: photo_id, value: object containing photo_location.</li>
+      </ul>
+      <li>Store photos in distributed file storage like HDFS or S3.</li>
+    </ul>
+
+    <h4 class="card-title">Photo</h4>
+    <ul>
+      <li>photo_id (int, pk)</li>
+      <li>user_id (int)</li>
+      <li>photo_path (varchar)</li>
+      <li>photo_latitude (int)</li>
+      <li>photo_longitude (int)</li>
+      <li>creation_date (datetime)</li>
+    </ul>
+
+    <h4 class="card-title">User</h4>
+    <ul>
+      <li>user_id (int, pk)</li>
+      <li>name (varchar)</li>
+      <li>email (varchar)</li>
+      <li>creation_date (datetime)</li>
+    </ul>
+
+    <h4 class="card-title">User follow</h4>
+    <ul>
+      <li>follower_id (int, PK)</li>
+      <li>followee_id (int, PK)</li>
+    </ul>
+
+    <h3 class="card-title">Component design</h3>
+
+    <h4 class="card-title">The service will be read heavy</h4>
+    <ul>
+      <li>Web servers have connection limits.</li>
+      <li>Dediciated servers for read and write such that</li>
+      <ul>
+        <li>Write operations don't hog the system and disrupt read operations.</li>
+        <li>Scale and optimize independently.</li>
+      </ul>
+      <li>Redundancy is needed not to lose photos and for high availability of all other components.</li>
+    </ul>
+
+    <h4 class="card-title">News feed generation</h4>
+    <ul>
+      <li>Fetch a list of users that current user folows. Submit photos of those list of users to ranking algorithms and generate the feed. However, this will cause latency.</li>
+      <li>Have dedicated server to continuously pre-generate user feed into "User feed" table.</li>
+    </ul>
+
+    <h4 class="card-title">News feed update</h4>
+    <ul>
+      <li>Pull: client pulls news feed from server at regular interval. Most of time, client will receive in empty response.</li>
+      <li>Push: server pushes news feed to client whenever there is update. Servers may end up frequently updating client.</li>
+    </ul>
+
+    <h4 class="card-title">Fetch latest photos</h4>
+    <ul>
+      <li>Sort photos based on creation_date.</li>
+      <li>Make creattion_date part of photo_id, which is indexed. (For example, epoch time + auto-incrementing ID from key generation service)</li>
+    </ul>
+
+    <h4 class="card-title">Data partitioning</h4>
+    <ul>
+      <li>Partition photos into different DBs based on PhotoID (For example, PhotoId % 10), which can be generated by key generation service.</li>
+      <li>In the beginning, we can put all DBs into a single server. As the service scales, we can migrate DB to addition DB server one by one.</li>
+    </ul>
+
+    <h4 class="card-title">Video and photo storage, and media cache</h4>
+    <ul>
+      <li>Cache servers: CDN.</li>
+      <li>Application servers: use LRU eviction policy.</li>
     </ul>
 
     <h3 class="card-title">Evaluation</h3>
