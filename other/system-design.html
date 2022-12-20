@@ -55,6 +55,7 @@
       <li><a href="#system-design-16">Newsfeed</a></li>
       <li><a href="#system-design-17">Instagram</a></li>
       <li><a href="#system-design-18">TinyURL</a></li>
+      <li><a href="#system-design-19">Web crawler</a></li>
     </ul>
   </div>
 </div>
@@ -1689,6 +1690,145 @@
       </ul>
       <li>DB size: 6 (characters per key) * 68.7 billion (unique keys) = 412GB</li>
       <li>Single point of failure? Use replicas.</li>
+    </ul>
+
+    <h3 class="card-title">Evaluation</h3>
+
+    <h4 class="card-title">Availability</h4>
+
+    <h4 class="card-title">Reliability</h4>
+
+    <h4 class="card-title">Scalability</h4>
+
+    <h4 class="card-title">Performance</h4>
+
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="system-design-19">
+  <div class="card-body">
+    <h2 class="card-title">Web crawler</h2>
+
+    <h3 class="card-title">Requirement</h3>
+
+    <h4 class="card-title">Functional</h4>
+    <ul>
+      <li>Crawl all the web. (HTML only)</li>
+      <li>Consider HTTP protocol only.</li>
+    </ul>
+
+    <h4 class="card-title">Non-functional</h4>
+    <ul>
+      <li>Availability.</li>
+      <li>Reliability.</li>
+      <li>Scalability.</li>
+      <li>Performance.</li>
+    </ul>
+
+    <h3 class="card-title">Estimation</h3>
+
+    <h4 class="card-title">Server</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>10M daily active users</li>
+        <li>A single server can handle 10k connections.</li>
+      </ul>
+      <li>10M / 10k = 1,000 servers are needed.</li>
+    </ul>
+
+    <h4 class="card-title">Storage</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>1 billion web sites, which is in turn 15 billion HTML pages.</li>
+        <li>Page size is 100KB on average with 500 bytes metadata.</li>
+      </ul>
+      <li>15B * (100KB + 500B) = 1.5PB.</li>
+    </ul>
+
+    <h4 class="card-title">Bandwidth</h4>
+    <ul>
+      <li>1.5PB * 8 / 86400 = 139Gbps.</li>
+    </ul>
+
+    <h3 class="card-title">High level design</h3>
+    <ul>
+      <li>Pick a URL from unvisited URL list.</li>
+      <li>Determine the IP address of the hostname.</li>
+      <li>Download the document.</li>
+      <li>Parse document contents to look for new URLs.</li>
+      <li>Add new URLs to unvisited URL list.</li>
+      <li>Process downloaded document.</li>
+    </ul>
+
+    <h3 class="card-title">API</h3>
+
+    <h3 class="card-title">DB</h3>
+
+    <h3 class="card-title">Component design</h3>
+
+    <h4 class="card-title">URL frontier</h4>
+    <ul>
+      <li>Contains all the remaining URLs to download.</li>
+      <li>Prioritize which URLs should be downloaded first.</li>
+      <li>Use BFS implemented by a queue.</li>
+      <li>Distributed into multiple servers.</li>
+      <ul>
+        <li>Each server maintains many queues such that each thread gets a queue.</li>
+        <li>Hash table maps carnonical hostname to thread number that run the queue.</li>
+      </ul>
+      <li>Due to huge size of URLs, need to store URLs into a disk.</li>
+      <ul>
+        <li>Enqueue buffer, once filled, is dumped into disk.</li>
+        <li>Dequeue buffer keeps cache of URLs to be visited. It periodically reads from disk to fill the buffer.</li>
+      </ul>
+    </ul>
+
+    <h4 class="card-title">HTML fetcher</h4>
+    <ul>
+      <li>Downloads documents corresponding to givne URL using protocol like HTTP.</li>
+    </ul>
+
+    <h4 class="card-title">Document input stream</h4>
+    <ul>
+      <li>Caches the entire document contents.</li>
+      <li>Prevents downloading the same document again.</li>
+    </ul>
+
+    <h4 class="card-title">Document de-dup</h4>
+    <ul>
+      <li>Checks if document is duplicate.</li>
+      <li>Calculates 64-bit checksum of every processed document using MD5 or SHA and store it in DB.</li>
+    </ul>
+
+    <h4 class="card-title">URL filter</h4>
+    <ul>
+      <li>Blocks some websites so that crawler can ignore them.</li>
+    </ul>
+
+    <h4 class="card-title">DNS resolver</h4>
+    <ul>
+      <li>Caches DNS lookup results.</li>
+    </ul>
+
+    <h4 class="card-title">URL de-dup</h4>
+    <ul>
+      <li>Check if URL is duplicates. (Multiple URL linking to the same document)</li>
+      <li>Store checksum of URLs in carnonical forms into DB.</li>
+    </ul>
+
+    <h4 class="card-title">Data partitioning</h4>
+    <ul>
+      <li>Distribute based on hostname which contains</li>
+      <ul>
+        <li>URLs to visit.</li>
+        <li>URL checksum.</li>
+        <li>Document checksum.</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Evaluation</h3>
