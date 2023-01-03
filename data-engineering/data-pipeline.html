@@ -150,6 +150,45 @@ def dataset_from_examples(filenames, config, output_features=None):
     dataset = dataset.map(wrapper)
     return dataset</code></pre>
 
+    <h3 class="card-title">Feature columns</h3>
+    <ul>
+      <li>Numeric.</li>
+      <li>Categorical.</li>
+    </ul>
+
+<pre><code class="python">def create_feature_columns(config, example_spec, output_features=None):
+    if output_features is None:
+        output_features = config.keys()
+    feature_columns = []
+    for feature_name in output_features:
+        dtype = example_spec[feature_name].dtype
+        feature_config = config[feature_name]
+        # HELPER FUNCTIONS USED
+        if 'vocab_list' in feature_config:
+            feature_col = create_list_column(feature_name, feature_config, dtype)
+        elif 'vocab_file' in feature_config:
+            feature_col = create_file_column(feature_name, feature_config, dtype)
+        else:
+            feature_col = create_numeric_column(feature_name, feature_config, dtype)
+        feature_columns.append(feature_col)
+    return feature_columns
+
+def create_list_column(feature_name, feature_config, dtype):
+    vocab_feature_col = tf.feature_column.categorical_column_with_vocabulary_list(feature_name, feature_config['vocab_list'], dtype=dtype)
+    feature_col = tf.feature_column.indicator_column(vocab_feature_col)
+    return feature_col
+
+def create_file_column(feature_name, feature_config, dtype):
+    vocab_feature_col = tf.feature_column.categorical_column_with_vocabulary_file(feature_name, feature_config['vocab_file'], dtype=dtype)
+    feature_col = tf.feature_column.indicator_column(vocab_feature_col)
+    return feature_col
+
+def create_numeric_column(feature_name, feature_config, dtype):
+    feature_col = tf.feature_column.numeric_column(feature_name, shape=feature_config['shape'], dtype=dtype)
+    return feature_col</code></pre>
+
+
+
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
