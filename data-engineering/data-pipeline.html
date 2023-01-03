@@ -52,8 +52,104 @@
 <div class="card mb-4" id="data-pipeline-1">
   <div class="card-body">
     <h2 class="card-title">Data pipeline</h2>
+    <ul>
+      <li>Google protocol buffer</li>
+      <ul>
+        <li>Efficient format for storing large amounts of data.</li>
+        <li>Similar to JSON and XML.</li>
+        <li><code>tf.train.Example</code> class represents the protocol buffer.</li>
+        <li>Each feature value is represented by <code>tf.train.Feature</code> object.</li>
+      </ul>
+    </ul>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">import tensorflow as tf
+
+def dict_to_example(data_dict, config):
+    feature_dict = {}
+    for feature_name, value in data_dict.items():
+        feature_config = config[feature_name]
+        shape = feature_config['shape']
+        if shape == () or shape == []:
+            value = [value]
+        value_type = feature_config['type']
+        if value_type == 'int':
+            feature_dict[feature_name] = make_int_feature(value)
+        elif value_type == 'float':
+            feature_dict[feature_name] = make_float_feature(value)
+        elif value_type == 'string' or value_type == 'bytes':
+            feature_dict[feature_name] = make_bytes_feature(
+              value, value_type)
+    features = tf.train.Features(feature=feature_dict)
+    return tf.train.Example(features=features)
+
+def make_int_feature(value):
+    return tf.train.Feature(int64_list=tf.train.Int64List(value=value))
+
+def make_float_feature(value):
+    return tf.train.Feature(float_list=tf.train.FloatList(value=value))
+
+def make_bytes_feature(value, value_type):
+    if value_type == 'string':
+        value = [s.encode() for s in value]
+    return tf.train.Feature(bytes_list=tf.train.BytesList(value=value))</code></pre>
+
+    <h3 class="card-title">TFRecords</h3>
+    <ul>
+      <li>To store protocol buffer into a file, the object needs to be serialized. (For exmaple, converte into byte string)</li>
+    </ul>
+
+<pre><code class="python">ex = tf.train.Example(features=tf.train.Features(feature=f_dict))
+ser_ex = ex.SerializeToString()
+writer = tf.io.TFRecordWriter('out.tfrecords')
+writer.write(ser_ex)
+writer.close()</code></pre>
+
+    <h3 class="card-title">Features</h3>
+
+<pre><code class="python">def make_feature_config(shape, tf_type, feature_config):
+    if shape is None:
+        feature = tf.io.VarLenFeature(tf_type)
+    else:
+        default_value = feature_config.get('default_value', None)
+        feature = tf.io.FixedLenFeature(shape, tf_type, default_value)
+
+    return feature
+
+def create_example_spec(config):
+    example_spec = {}
+    for feature_name, feature_config in config.items():
+        if feature_config['type'] == 'int':
+            tf_type = tf.int64
+        elif feature_config['type'] == 'float':
+            tf_type = tf.float32
+        else:
+            tf_type = tf.string
+        shape = feature_config['shape']
+        feature = make_feature_config(shape, tf_type, feature_config)
+        example_spec[feature_name] = feature
+    return example_spec</code></pre>
+
+    <h3 class="card-title">Parsing</h3>
+
+<pre><code class="python">def parse_example(example_bytes, example_spec, output_features=None):
+    parsed_features = tf.io.parse_single_example(example_bytes, example_spec)
+    if output_features is not None:
+        temp = {}
+        for feature in output_features:
+            temp[feature] = parsed_features[feature]
+        parsed_features = temp
+    return parsed_features</code></pre>
+
+    <h3 class="card-title">Dataset and mapping</h3>
+
+<pre><code class="python"># Map the parse_example function onto a TFRecord Dataset
+def dataset_from_examples(filenames, config, output_features=None):
+    example_spec = create_example_spec(config)
+    dataset = tf.data.TFRecordDataset(filenames)
+    wrapper = lambda example:parse_example(example, example_spec, output_features)
+    dataset = dataset.map(wrapper)
+    return dataset</code></pre>
+
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
