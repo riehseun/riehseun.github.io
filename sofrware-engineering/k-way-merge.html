@@ -44,6 +44,7 @@
     <h2 class="card-title">K-way merge</h2>
     <ul class="list-unstyled mb-0">
       <li><a href="#k-way-merge-1">K-way merge</a></li>
+      <li><a href="#k-way-merge-2">Kth smallest number in M sorted lists</a></li>
     </ul>
   </div>
 </div>
@@ -51,6 +52,58 @@
 <div class="card mb-4" id="k-way-merge-1">
   <div class="card-body">
     <h2 class="card-title">Merge sorted array</h2>
+
+    <h3 class="card-title">Use min heap</h3>
+    <ul>
+      <li>Push the first element in each list to min heap.</li>
+      <li>Pop the root element from min heap. Also, pop that element from the list it came from.</li>
+      <li>Insert the next element of the list into min heap.</li>
+      <li>Repeat k times.</li>
+      <li>Time: O(klogm). Where m is the number of lists.</li>
+      <li>Space: O(n). Where n is the number of all elements combined.</li>
+    </ul>
+
+<pre><code class="python">from heapq import heappush, heappop
+
+def k_smallest_number(lists, k):
+
+    min_heap = []
+    count = 0
+
+    for i, li in enumerate(lists):
+        heappush(min_heap, (li[0], i))
+
+    while count < k:
+
+        item = heappop(min_heap)
+        number = item[0]
+        index = item[1]
+        del lists[index][0]
+        if lists[index]:
+            heappush(min_heap, (lists[index][0], index))
+        count += 1
+
+        # Heap will be empty when k is greater than the total
+        # number of elements in all lists.
+        if not min_heap:
+            return number
+
+    return number</code></pre>
+
+    <h3 class="card-title">Test cases</h3>
+    <ul>
+      <li>One of inputs arrays are empty.</li>
+      <li>Input arrays are not ordered.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/courses/grokking-coding-interview-patterns-python">Grokking Coding Interview Patterns in Python</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="k-way-merge-2">
+  <div class="card-body">
+    <h2 class="card-title">Kth smallest number in M sorted lists</h2>
 
     <h3 class="card-title">Use 3 pointers</h3>
     <ul>
