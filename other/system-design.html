@@ -1430,15 +1430,28 @@
       <li>Users can upload, download, and view photos and vidoes.</li>
       <li>Users can search based on photo and video titles.</li>
       <li>Users can follow other users.</li>
+      <li>Users can like/dislike posts.</li>
       <li>User feed is generated consisting of top photos of all users that the user follows.</li>
     </ul>
 
     <h4 class="card-title">Non-functional</h4>
     <ul>
       <li>Availability.</li>
+      <ul>
+        <li>Consistency can take hit in the interest of high availability.</li>
+      </ul>
       <li>Reliability.</li>
+      <ul>
+        <li>Photos and videos cannot be lost.</li>
+      </ul>
       <li>Scalability.</li>
+      <ul>
+        <li>Supports hundreds of millions of users.</li>
+      </ul>
       <li>Performance.</li>
+      <ul>
+        <li>Maximum 200ms latency for feed generation.</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Estimation</h3>
@@ -1447,10 +1460,10 @@
     <ul>
       <li>Assume</li>
       <ul>
-        <li>10M daily active users</li>
+        <li>100M daily active users</li>
         <li>A single server can handle 10k connections.</li>
       </ul>
-      <li>10M / 10k = 1,000 servers are needed.</li>
+      <li>100M / 10k = 10,000 servers are needed.</li>
     </ul>
 
     <h4 class="card-title">Storage</h4>
@@ -1478,37 +1491,26 @@
     <h3 class="card-title">High level design</h3>
     <ul>
       <li>User uploads images/videos and they are stored in blob.</li>
-      <li>Follower is notificed of the images/videos uploads.</li>
+      <li>User searches for images/videos stored in blob/db.</li>
+      <li>Follower is notified of the images/videos uploads.</li>
       <li>Feed is generated for users.</li>
+      <li>User likes posts in the feed.</li>
     </ul>
 
     <h3 class="card-title">API</h3>
     <ul>
       <li>post_media(user_id, media_type)</li>
-      <li>follow_user(user_id, target_user_id)</li>
-      <li>like_post(user_id, target_user_id, post_id)</li>
       <li>search_photo(user_id, keyword)</li>
+      <li>follow_user(user_id, target_user_id)</li>
       <li>view_feed(user_id)</li>
+      <li>like_post(user_id, target_user_id, post_id)</li>
     </ul>
 
     <h3 class="card-title">DB</h3>
     <ul>
+      <li>Store metadata in relational db because data is inherently relational.</li>
       <li>Need to index on (photo_id, creation_date) since we want to fetch recent photos.</li>
-      <li>Store metadata in distributed key-value storage.</li>
-      <ul>
-        <li>Key: photo_id, value: object containing photo_location.</li>
-      </ul>
       <li>Store photos in distributed file storage like HDFS or S3.</li>
-    </ul>
-
-    <h4 class="card-title">Photo</h4>
-    <ul>
-      <li>photo_id (int, pk)</li>
-      <li>user_id (int)</li>
-      <li>photo_path (varchar)</li>
-      <li>photo_latitude (int)</li>
-      <li>photo_longitude (int)</li>
-      <li>creation_date (datetime)</li>
     </ul>
 
     <h4 class="card-title">User</h4>
@@ -1525,7 +1527,20 @@
       <li>followee_id (int, PK)</li>
     </ul>
 
+    <h4 class="card-title">Photo</h4>
+    <ul>
+      <li>photo_id (int, pk)</li>
+      <li>user_id (int)</li>
+      <li>photo_path (varchar)</li>
+      <li>photo_latitude (int)</li>
+      <li>photo_longitude (int)</li>
+      <li>creation_date (datetime)</li>
+    </ul>
+
     <h3 class="card-title">Component design</h3>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/instagram1.png" alt="Card image cap">
+    <br>
+    <br>
 
     <h4 class="card-title">The service will be read heavy</h4>
     <ul>
