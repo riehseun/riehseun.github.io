@@ -1245,14 +1245,22 @@
       <li>Feed is generated based on posts from people, pages, groups that user follows.</li>
       <li>User can have/follow many friends, pages, groups.</li>
       <li>Feed can contain images, videos, texts.</li>
+      <li>Supports adding new posts as they arrive.</li>
     </ul>
 
     <h4 class="card-title">Non-functional</h4>
     <ul>
       <li>Availability.</li>
+      <ul>
+        <li>Consistency can take hit.</li>
+      </ul>
       <li>Reliability.</li>
       <li>Scalability.</li>
       <li>Performance.</li>
+      <ul>
+        <li>Maximum latency to generate feeds is 2 seconds.</li>
+        <li>Posts should take less than 5 seconds to make it to user's feed.</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Estimation</h3>
@@ -1261,6 +1269,7 @@
     <ul>
       <li>Assume</li>
       <ul>
+        <li>1B total users.</li>
         <li>100M daily active users</li>
         <li>A single server can handle 10k connections.</li>
       </ul>
@@ -1271,11 +1280,12 @@
     <ul>
       <li>Assume</li>
       <ul>
+        <li>Each user's metadata is 100KB.</li>
         <li>Each user's feed has 500 posts.</li>
-        <li>Each post is 1KB.</li>
+        <li>Each post is 10KB texts, 100KB images, 1MB videos on average.</li>
       </ul>
-      <li>500KB for each user.</li>
-      <li>50TB for all users.</li>
+      <li>100KB * 1B = 100TB for all user metadata.</li>
+      <li>500 * 100M * (10KB + 100KB + 1MB) = 55PB for all posts.</li>
     </ul>
 
     <h4 class="card-title">Bandwidth</h4>
@@ -1289,9 +1299,12 @@
 
     <h3 class="card-title">High level design</h3>
     <ul>
-      <li>Feed is generated via aggregation.</li>
+      <li>Feed is generated via aggregating friends’ and followers’ posts.</li>
       <li>Feed is published and stored in cache and DB.</li>
     </ul>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/newsfeed1.png" alt="Card image cap">
+    <br>
+    <br>
 
     <h3 class="card-title">API</h3>
     <ul>
@@ -1355,8 +1368,9 @@
 
     <h3 class="card-title">Component design</h3>
 
-    <h4 class="card-title">Feed generation</h4>
+    <h4 class="card-title">Newsfeed generation service</h4>
     <ul>
+      <li>Generate feed offline: dedicated servers that generate user feed and store them in memory.</li>
       <li>Retrive ID of all users and entities that the user follows.</li>
       <li>Retrive the latest, most popular, most relevant posts for those IDs.</li>
       <li>Rank these posts.</li>
@@ -1365,13 +1379,23 @@
       <li>Repeat these steps every 5 minutes to check for new posts.</li>
     </ul>
 
-    <h4 class="card-title">Web server</h4>
+    <h4 class="card-title">Newsfeed publishing service</h4>
     <ul>
-      <li>Maintain connection with users.</li>
+      <li>Fetches a list of post IDs from the newsfeed cache, which has <code>(post_id, user_id)</code></li>
+      <li>Other data need to be retrieved from users and posts cache to construct the newsfeed.</li>
+      <li>Celebrity users should have pull model.</li>
+    </ul>
+
+    <h4 class="card-title">Newsfeed notification service</h4>
+    <ul>
+      <li>Pull: users pull feed at regular interval.</li>
+      <li>Push: post is pushed to all followers whenever it is published.</li>
+      <li>Celebrity users should have pull model.</li>
     </ul>
 
     <h4 class="card-title">Application server</h4>
     <ul>
+      <li>Maintain connection with users.</li>
       <li>Store new posts in DB servers.</li>
       <li>Retrieve and push feeds to users.</li>
     </ul>
@@ -1391,27 +1415,24 @@
       <li>Blob storage to store all media.</li>
     </ul>
 
-    <h4 class="card-title">Newsfeed generation service</h4>
-    <ul>
-      <li>Generate feed offline: dedicated servers that generate user feed and store them in memory.</li>
-    </ul>
-
-    <h4 class="card-title">Feed notification service</h4>
-    <ul>
-      <li>Pull: users pull feed at regular interval.</li>
-      <li>Push: post is pushed to all followers whenever it is published.</li>
-      <li>Celebrity users should have pull model.</li>
-    </ul>
-
     <h3 class="card-title">Evaluation</h3>
 
     <h4 class="card-title">Availability</h4>
+    <ul>
+      <li>Replicate app, cache, and DB servers as well as newsfeed generation and publishing service.</li>
+    </ul>
 
     <h4 class="card-title">Reliability</h4>
+    <ul>
+      <li>Replicate data.</li>
+    </ul>
 
     <h4 class="card-title">Scalability</h4>
 
     <h4 class="card-title">Performance</h4>
+    <ul>
+      <li>Use of cache servers.</li>
+    </ul>
 
   </div>
   <div class="card-footer text-muted">
