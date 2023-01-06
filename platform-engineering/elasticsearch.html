@@ -82,9 +82,10 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_c
 # View available API endpoints.
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_cat"
 
-# Create an API key.
+# Create an API key and use it in the header.
 curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_security/api_key" -H "Content-Type: application/json" --date '{}'
-apiKey=&lt;encoded_api_key_from_above&gt;</code></pre>
+apiKey=&lt;encoded_api_key_from_above&gt;
+curl -k -H "Authorization: ApiKey $apiKey"</code></pre>
 
     <h3 class="card-title">License</h3>
 
@@ -103,13 +104,13 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_c
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_cat/indices/&lt;index_name_1&gt;,&lt;index_name_2&gt;,&lt;index_name_3&gt;?v"
 
 # Create an index.
-curl -k -H "Authorization: ApiKey $apiKey" -X PUT "https://&lt;endpoint&gt;/&lt;index_name&gt;"
+curl -k -u &lt;username&gt;:&lt;password&gt; -X PUT "https://&lt;endpoint&gt;/&lt;index_name&gt;?pretty"
 
 # Get an index.
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/&lt;index_name&gt;?pretty"
 
 # Check index setting.
-curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/&lt;index_name&gt;/_setting?pretty"
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/&lt;index_name&gt;/_settings?pretty"
 
 # Update index setting.
 
@@ -146,11 +147,21 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/&l
 # Count the number of documents in an index.
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/&lt;index_name&gt;/_count?pretty"
 
-# Count the number of documents matching a query.
+# Count the number of documents matching a query. (Partial match)
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/&lt;index_name&gt;/_count?pretty" -H "Content-Type: application/json" -d '
 {
   "query": {
     "term": {
+      "field in the document": "value"
+    }
+  }
+}'
+
+# Count the number of documents matching a query. (Exact match)
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/&lt;index_name&gt;/_count?pretty" -H "Content-Type: application/json" -d '
+{
+  "query": {
+    "match": {
       "field in the document": "value"
     }
   }
@@ -219,7 +230,32 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_
   "rename_replacement": "restored_$1"
 }'</code></pre>
 
+    <h3 class="card-title">Snapshot lifecycle management</h3>
+
+<pre><code class="bash"># Take a snapshot every hour.
+curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_slm/policy/&lt;policy_name&gt;?pretty" -H "Content-Type: application/json" -d '
+{
+  "schedule": "0 0 * * * ?",
+  "name": "&lt;hourly-snapshot-{now/d}&gt;",
+  "repository": &lt;snapshot_repository_name&gt;,
+  "config": {
+    "indices": "*",
+    "include_global_state": true
+  },
+  "retention": {
+    "expires_after": "30d",
+    "min_count": 10,
+    "max_count": 30
+  }
+}'
+
+# Check snapshot policy.
+curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_slm/policy/&lt;policy_name&gt;?pretty"</code></pre>
+
     <h3 class="card-title">Reindex</h3>
+    <ul>
+      <li><font color="#ff0000">Warning!</font> Reindexing does not preserve mappings. Indices must be pre-created with pre-defined mapping before reindexing takes place.</li>
+    </ul>
 
     <p class="card-text">Used when copying document from one index to another index.</p>
 
