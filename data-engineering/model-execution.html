@@ -52,8 +52,34 @@
 <div class="card mb-4" id="model-execution-1">
   <div class="card-body">
     <h2 class="card-title">Model execution</h2>
+    <ul>
+      <li><code>tf.compat.v1.train.LoggingTensorHook</code>: log specific values while training.</li>
+      <li><code>tf.compat.v1.train.NanTensorHook</code>: automatically stop training if the loss takes on an infinite value.</li>
+      <li><code>tf.compat.v1.train.MonitoredTrainingSession</code></li>
+      <ul>
+        <li>Replaces <code>tf.compat.v1.Session</code>.</li>
+        <li>Allows creating a checkpoint directory.</li>
+      </ul>
+    </ul>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">def run_model_training(self, input_data, labels, hidden_layers, batch_size, num_epochs, ckpt_dir):
+    self.global_step = tf.compat.v1.train.get_or_create_global_step()
+    dataset = self.dataset_from_numpy(input_data, batch_size,
+        labels=labels, num_epochs=num_epochs)
+    iterator = tf.compat.v1.data.make_one_shot_iterator(dataset)
+    inputs, labels = iterator.get_next()
+    self.run_model_setup(inputs, labels, hidden_layers, True)
+    self.add_to_tensorboard(inputs)
+    log_vals = {'loss': self.loss, 'step': self.global_step}
+    logging_hook = tf.compat.v1.train.LoggingTensorHook(
+        log_vals, every_n_iter=1000)
+    nan_hook = tf.compat.v1.train.NanTensorHook(self.loss)
+    hooks = [nan_hook, logging_hook]
+    with tf.compat.v1.train.MonitoredTrainingSession(
+        checkpoint_dir=ckpt_dir,
+        hooks=hooks) as sess:
+        while not sess.should_stop():
+            sess.run(self.train_op)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
