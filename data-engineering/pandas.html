@@ -48,6 +48,7 @@
       <li><a href="#pandas-2">Exploratory data analysis</a></li>
       <li><a href="#pandas-3">Data scrubbing</a></li>
       <li><a href="#pandas-4">Pre-model algorithm</a></li>
+      <li><a href="#pandas-5">Split validation</a></li>
     </ul>
   </div>
 </div>
@@ -516,12 +517,6 @@ df['reviews_per_month'].fillna(0)
 
 # Remove rows that contain missing values.
 df.dropna(axis = 0, how = 'any', thresh = None, subset = None, inplace = True)</code></pre>
-
-    <h3 class="card-title">Series</h3>
-    <ul>
-      <li>Use <code>pd.Series</code> for 1-D data.</li>
-    </ul>
-
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.educative.io/path/machine-learning-with-python-libraries">Machine Learning with Python Libraries</a>
@@ -582,6 +577,70 @@ plt.xlabel('First Principal Component')
 plt.ylabel('Second Principal Component')
 plt.legend()
 plt.show()</code></pre>
+
+    <h3 class="card-title">K-means clustering</h3>
+
+<pre><code class="python"># Import libraries.
+import numpy as np
+from sklearn.datasets import make_blobs
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+
+# Create blobs
+X, y = make_blobs(n_samples=300, n_features=2, centers=4, cluster_std=4, random_state=10)
+plt.figure(figsize=(7,5))
+plt.scatter(X[:, 0], X[:, 1])
+
+# Run k-means clustering.
+model = KMeans(n_clusters=4)
+model.fit(X)
+
+# Predict.
+model_predict = model.predict(X)
+centroids = model.cluster_centers_
+print(model.cluster_centers_)
+
+# Visualize the output.
+plt.figure(figsize=(7,5))
+plt.scatter(X[:, 0], X[:, 1], c=model_predict, s=50, cmap='rainbow')
+plt.scatter(centroids[:, 0], centroids[:, 1], c='black', s=200, alpha=1)
+
+# Scree plot.
+distortions = []
+K = range(1,10)
+for k in K:
+    model = KMeans(n_clusters=k)
+    model.fit(X, y)
+    distortions.append(model.inertia_)
+
+#Generate plot with k on the x-axis and distortions on the y_axis using matplotlib
+plt.figure(figsize=(16,8))
+plt.plot(K, distortions)
+plt.xlabel('k')
+plt.ylabel('Distortion')
+plt.show()</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/machine-learning-with-python-libraries">Machine Learning with Python Libraries</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="pandas-5">
+  <div class="card-body">
+    <h2 class="card-title">Split validation</h2>
+
+<pre><code class="python">from sklearn.model_selection import train_test_split
+
+import pandas as pd
+df = pd.read_csv('advertising.csv')
+X = df[['Daily Time Spent on Site', 'Age', 'Area Income', 'Daily Internet Usage', 'Ad Topic Line', 'Country']]
+y = df['Clicked on Ad']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=10, shuffle=True)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4)
+
+X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size=0.5)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.educative.io/path/machine-learning-with-python-libraries">Machine Learning with Python Libraries</a>
