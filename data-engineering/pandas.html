@@ -47,6 +47,7 @@
       <li><a href="#pandas-1">Pandas</a></li>
       <li><a href="#pandas-2">Exploratory data analysis</a></li>
       <li><a href="#pandas-3">Data scrubbing</a></li>
+      <li><a href="#pandas-4">Pre-model algorithm</a></li>
     </ul>
   </div>
 </div>
@@ -473,12 +474,6 @@ sns.pairplot(df,vars=['price','number_of_reviews','availability_365'])
 
 df_corr = df.corr()
 sns.heatmap(df_corr,annot=True,cmap='coolwarm')</code></pre>
-
-    <h3 class="card-title">Series</h3>
-    <ul>
-      <li>Use <code>pd.Series</code> for 1-D data.</li>
-    </ul>
-
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.educative.io/path/machine-learning-with-python-libraries">Machine Learning with Python Libraries</a>
@@ -527,6 +522,66 @@ df.dropna(axis = 0, how = 'any', thresh = None, subset = None, inplace = True)</
       <li>Use <code>pd.Series</code> for 1-D data.</li>
     </ul>
 
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/machine-learning-with-python-libraries">Machine Learning with Python Libraries</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="pandas-4">
+  <div class="card-body">
+    <h2 class="card-title">Pre-model algorithm</h2>
+
+    <h3 class="card-title">PCA</h3>
+
+<pre><code class="python"># Import libraries.
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Import dataset.
+df = pd.read_csv('advertising.csv')
+print(df.head())
+
+# Remove non-numerical features.
+del df['Ad Topic Line']
+del df['City']
+del df['Country']
+del df['Timestamp']
+del df['Male']
+
+# Standardize data.
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+scaler.fit(df)
+scaled_data = scaler.transform(df)
+
+# Run PCA.
+from sklearn.decomposition import PCA
+pca = PCA(n_components=2)
+pca.fit(scaled_data)
+scaled_pca = pca.transform(scaled_data)
+print(scaled_data.shape)
+print(scaled_pca.shape)
+
+# Visualize the output.
+plt.figure(figsize=(10,8))
+legend = df['Clicked on Ad']
+
+#Add indigo and yellow RGB colors
+colors = {0: '#4B0082', 1: '#FFFF00'}
+labels = {0: 'Clicked', 1: 'Did not click'}
+
+#Use a for-loop to set color for each data point
+for t in np.unique(legend):
+    ix = np.where(legend == t)
+    plt.scatter(scaled_pca[ix,0], scaled_pca[ix,1], c=colors[t], label=labels[t])
+
+plt.xlabel('First Principal Component')
+plt.ylabel('Second Principal Component')
+plt.legend()
+plt.show()</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.educative.io/path/machine-learning-with-python-libraries">Machine Learning with Python Libraries</a>
