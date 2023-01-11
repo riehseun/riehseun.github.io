@@ -1964,6 +1964,9 @@
       <li>Reliability.</li>
       <li>Scalability.</li>
       <li>Performance.</li>
+      <ul>
+        <li>Users should see suggestions within 200ms.</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Estimation</h3>
@@ -1972,17 +1975,17 @@
     <ul>
       <li>Assume</li>
       <ul>
-        <li>10M daily active users</li>
+        <li>3.5B queries per day = 40,509 queries per second.</li>
         <li>A single server can handle 10k connections.</li>
       </ul>
-      <li>10M / 10k = 1,000 servers are needed.</li>
+      <li>5 servers are needed.</li>
     </ul>
 
     <h4 class="card-title">Storage</h4>
     <ul>
       <li>Assume</li>
       <ul>
-        <li>There are 3.5B unique queries per day.</li>
+        <li>There are 3.5B queries per day.</li>
         <li>There are 2B unique queries out of 3.5B per day.</li>
         <li>Each query has 15 characters on average.</li>
         <li>Each character requires 2 bytes to store.</li>
@@ -1997,16 +2000,14 @@
         <li>Suggestions have the same length, which is 15 chracters.</li>
         <li>Top 10 suggestions are shown to users.</li>
       </ul>
-      <li>Incoming: 3.5B * 2 * 15 * 8 / 86400 = 9.7Mbps</li>
+      <li>Incoming: 3.5B * 15 * 2 * 8 / 86400 = 9.7Mbps</li>
       <li>Outgoing: 10 * 15 * 9.7Mbps = 1.46Gbps</li>
     </ul>
 
     <h3 class="card-title">High level design</h3>
     <ul>
-      <li>Trie structure.</li>
-      <li>Store this data structure in memory. (Not in DB)</li>
-      <li>Assume case insensitive.</li>
-      <li>For example, when user types "CAP", node "P" will show all suggestions.</li>
+      <li>Top 10 suggesstions are queried from Redis cache.</li>
+      <li>User searches are stored in NoSQL DB.</li>
     </ul>
 
     <h3 class="card-title">API</h3>
@@ -2018,6 +2019,13 @@
     <h3 class="card-title">DB</h3>
 
     <h3 class="card-title">Component design</h3>
+
+    <h4 class="card-title">Trie structure</h4>
+    <ul>
+      <li>Store this data structure in memory. (Not in DB)</li>
+      <li>Assume case insensitive.</li>
+      <li>For example, when user types "CAP", node "P" will show all suggestions.</li>
+    </ul>
 
     <h4 class="card-title">How to find top suggestions</h4>
     <ul>
