@@ -163,7 +163,9 @@ def k_smallest_number(lists, k):
       <li>Space: O(n^2)</li>
     </ul>
 
-<pre><code class="python">def k_smallest_pairs(list1, list2, k):
+<pre><code class="python">from heapq import heappush, heappop
+
+def k_smallest_pairs(list1, list2, k):
 
     result = []
     min_heap = []
@@ -180,7 +182,7 @@ def k_smallest_number(lists, k):
 
     return result</code></pre>
 
-    <h3 class="card-title">Get every possible pair and put it in to min_heap</h3>
+    <h3 class="card-title">Pop/push from/to min heap one at a time</h3>
     <ul>
       <li>Initialize a min heap with pairs. (Pairs are constructed by all items in the first list and the first item in the second list)</li>
       <li>Each time popping out the min pair, the next pair to come into the min heap is (item that is popped out from the first list, next time to the item that is popped out from the second list)</li>
@@ -188,7 +190,9 @@ def k_smallest_number(lists, k):
       <li>Space: O(n+m)</li>
     </ul>
 
-<pre><code class="python">def k_smallest_pairs(list1, list2, k):
+<pre><code class="python">from heapq import heappush, heappop
+
+def k_smallest_pairs(list1, list2, k):
 
     count = 0
     result = []
@@ -222,15 +226,50 @@ def k_smallest_number(lists, k):
   <div class="card-body">
     <h2 class="card-title">Merge K sorted linked lists</h2>
 
-    <h3 class="card-title"></h3>
+    <h3 class="card-title">Pop/push from/to min heap one at a time</h3>
     <ul>
-      <li></li>
-      <li></li>
-      <li>Time: </li>
-      <li>Space: </li>
+      <li>From all linked lists, push all the items from its head pointer into the min heap.</li>
+      <li>Pop the smallest into the min heap and push the next item (from the same linked list) into the min heap.</li>
+      <li>At the same time, create a node in the resuling linked list one at time.</li>
+      <li>Time: O(nlog(k)) where n is the total number of items in all linked lists and k is the number of linked lists.</li>
+      <li>Space: O(n)</li>
     </ul>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">from heapq import heappush, heappop
+
+
+class LinkedListNode:
+    # __init__ will be used to make a LinkedListNode type object.
+    def __init__(self, data, next=None):
+        self.data = data
+        self.next = next
+
+
+def merge_k_lists(lists):
+
+    min_heap = []
+    # Init head to some placeholder node.
+    head = LinkedListNode(-1)
+    # "temp" will be the pointer at the very beginning.
+    temp = head
+
+    for i, ll in enumerate(lists):
+        heappush(min_heap, (ll.head.data, i))
+
+    while min_heap:
+        item = heappop(min_heap)
+        ll_head_data = item[0]
+        ll_index = item[1]
+
+        lists[ll_index].head = lists[ll_index].head.next
+        if lists[ll_index].head:
+            heappush(min_heap, (lists[ll_index].head.data, ll_index))
+
+        node = LinkedListNode(ll_head_data)
+        head.next = node
+        head = head.next
+
+    return temp.next</code></pre>
 
     <h3 class="card-title">Test cases</h3>
   </div>
