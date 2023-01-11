@@ -1807,8 +1807,9 @@
 
     <h4 class="card-title">Functional</h4>
     <ul>
-      <li>Crawl all the web. (HTML only)</li>
-      <li>Consider HTTP protocol only.</li>
+      <li>Crawl all the web. (HTML and HTTP protocol only)</li>
+      <li>Store contents of URL in blob storage.</li>
+      <li>Regular scheduling to update records in blob storage.</li>
     </ul>
 
     <h4 class="card-title">Non-functional</h4>
@@ -1825,31 +1826,32 @@
     <ul>
       <li>Assume</li>
       <ul>
-        <li>10M daily active users</li>
-        <li>A single server can handle 10k connections.</li>
+        <li>100ms to traverse one page.</li>
+        <li>100ms * 15B = 1.5Bs = 17,361 days.</li>
       </ul>
-      <li>10M / 10k = 1,000 servers are needed.</li>
+      <li>To crawl the web in one day, we need 17,361 servers.</li>
     </ul>
 
     <h4 class="card-title">Storage</h4>
     <ul>
       <li>Assume</li>
       <ul>
-        <li>1 billion web sites, which is in turn 15 billion HTML pages.</li>
-        <li>Page size is 100KB on average with 500 bytes metadata.</li>
+        <li>15B HTML pages.</li>
+        <li>Page size including metadata is 100KB on average.</li>
       </ul>
-      <li>15B * (100KB + 500B) = 1.5PB.</li>
+      <li>15B * 100KB = 1.5PB.</li>
     </ul>
 
     <h4 class="card-title">Bandwidth</h4>
     <ul>
       <li>1.5PB * 8 / 86400 = 139Gbps.</li>
+      <li>139Gbps / 17361 = 8Mbps per server.</li>
     </ul>
 
     <h3 class="card-title">High level design</h3>
     <ul>
-      <li>Pick a URL from unvisited URL list.</li>
-      <li>Determine the IP address of the hostname.</li>
+      <li>Worker gets a URL to work on.</li>
+      <li>DNS is resolved to provide the IP address.</li>
       <li>Download the document.</li>
       <li>Parse document contents to look for new URLs.</li>
       <li>Add new URLs to unvisited URL list.</li>
@@ -1862,7 +1864,7 @@
 
     <h3 class="card-title">Component design</h3>
 
-    <h4 class="card-title">URL frontier</h4>
+    <h4 class="card-title">URL frontier (priority queue)</h4>
     <ul>
       <li>Contains all the remaining URLs to download.</li>
       <li>Prioritize which URLs should be downloaded first.</li>
@@ -1879,14 +1881,31 @@
       </ul>
     </ul>
 
+    <h4 class="card-title">Relational DB</h4>
+    <ul>
+      <li>Stores all the URLs with two associated parameters "priority" and "update frequency".</li>
+    </ul>
+
+    <h4 class="card-title">DNS resolver</h4>
+    <ul>
+      <li>Custom DNS resolver is needed because DNS lookup is time consuming process.</li>
+      <li>Cache frequently used IP addresses within their TTL.</li>
+    </ul>
+
     <h4 class="card-title">HTML fetcher</h4>
     <ul>
       <li>Downloads documents corresponding to givne URL using protocol like HTTP.</li>
     </ul>
 
+    <h4 class="card-title">Workers</h4>
+    <ul>
+      <li>Each worker dequeues URL from the URL frontier.</li>
+      <li>Each worker uses DNS resolver to acquire web page's IP address.</li>
+    </ul>
+
     <h4 class="card-title">Document input stream</h4>
     <ul>
-      <li>Caches the entire document contents.</li>
+      <li>Cache used to store the extracted document.</li>
       <li>Prevents downloading the same document again.</li>
     </ul>
 
@@ -1901,25 +1920,10 @@
       <li>Blocks some websites so that crawler can ignore them.</li>
     </ul>
 
-    <h4 class="card-title">DNS resolver</h4>
-    <ul>
-      <li>Caches DNS lookup results.</li>
-    </ul>
-
     <h4 class="card-title">URL de-dup</h4>
     <ul>
       <li>Check if URL is duplicates. (Multiple URL linking to the same document)</li>
       <li>Store checksum of URLs in carnonical forms into DB.</li>
-    </ul>
-
-    <h4 class="card-title">Data partitioning</h4>
-    <ul>
-      <li>Distribute based on hostname which contains</li>
-      <ul>
-        <li>URLs to visit.</li>
-        <li>URL checksum.</li>
-        <li>Document checksum.</li>
-      </ul>
     </ul>
 
     <h3 class="card-title">Evaluation</h3>
@@ -1929,9 +1933,14 @@
     <h4 class="card-title">Reliability</h4>
 
     <h4 class="card-title">Scalability</h4>
+    <ul>
+      <li>Data partitioning</li>
+      <ul>
+        <li>Distribute based on hostname which contains URLs to visit, URL checksum, document checksum.</li>
+      </ul>
+    </ul>
 
     <h4 class="card-title">Performance</h4>
-
   </div>
   <div class="card-footer text-muted">
     <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
