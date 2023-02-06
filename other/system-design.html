@@ -57,6 +57,7 @@
       <li><a href="#system-design-18">TinyURL</a></li>
       <li><a href="#system-design-19">Web crawler</a></li>
       <li><a href="#system-design-20">Typeahead</a></li>
+      <li><a href="#system-design-100">Google search</a></li>
     </ul>
   </div>
 </div>
@@ -2083,6 +2084,260 @@
 
     <h4 class="card-title">Performance</h4>
 
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="system-design-100">
+  <div class="card-body">
+    <h2 class="card-title">Google search</h2>
+
+    <h3 class="card-title">Problem</h3>
+
+    <h4 class="card-title">Scope</h4>
+    <ul>
+      <li>A general search engine like Google.</li>
+    </ul>
+
+    <h4 class="card-title">Scale</h4>
+    <ul>
+      <li>How many websites to search from? Billions of documents.</li>
+      <li>How many requests per second? 10k queries per second.</li>
+    </ul>
+
+    <h4 class="card-title">Personalization</h4>
+    <ul>
+      <li>Assume user is logged in and historical search data of user is available.</li>
+    </ul>
+
+    <h3 class="card-title">Metric</h3>
+
+    <h4 class="card-title">Online</h4>
+    <ul>
+      <li>Click through rate</li>
+      <ul>
+        <li>(number of clicks / number of impressions or views)</li>
+        <li>Unsuccessful clicks would also be part of this metric.</li>
+      </ul>
+      <li>Session success rate</li>
+      <ul>
+        <li>Dwell time: time user spent viewing a page.</li>
+        <li>(number of sucessful sessions (dwell time &gt; 10s) / number of total sessions)</li>
+      </ul>
+      <li>Time to success</li>
+      <ul>
+        <li>Low number of quries means the system was good at guess what user wanted.</li>
+      </ul>
+    </ul>
+
+    <h4 class="card-title">Offline</h4>
+    <ul>
+      <li>Ground truth: actual outputs desired by the system. In this case, it is the rating provided by humans.</li>
+      <li>Assume the search engine returns documents D1, D2, D3, D4 in the order of relevance.</li>
+      <li>Assume human rates the documetns on scale of 0-3(3 is highly relevant, 0 is merely relevant) such that</li>
+      <ul>
+        <li>D1=3, D2=2, D3=3, D4=0</li>
+      </ul>
+      <li>Cumulative gain simply adds</li>
+      <ul>
+        <li>3+2+3+0 = 8</li>
+      </ul>
+      <li>Discounted cumulative gain (DCG) penalizes if highly relevant document appears lower in the result.</li>
+      <ul>
+        <li>3/log(1+1) + 2/log(2+1) + 3/log(3+1) + 0/log(4+1) = 3 + 1.262 + 1.5 + 0 = 5.762</li>
+      </ul>
+      <li>Normalized discounted cumulative gain (NDCG) is computed by (DCG / IDCG) where IDCG is DCG of ideal ordering.</li>
+      <ul>
+        <li>Caveat: NDCG does not penalize irrelevant search result.</li>
+        <li>As remedy, human rate could assign negative store to irrelvant document.</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Architecture</h3>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/google-search1.png" alt="Card image cap">
+    <br>
+    <br>
+
+    <h4 class="card-title">Query rewriting</h4>
+    <ul>
+      <li>Spell checker: fix basic spelling mistakes.</li>
+      <li>Query expansion: add terms to user query. For example, "restaurant" is expaneded to "food" or "recipe".</li>
+    </ul>
+
+    <h4 class="card-title">Query understanding</h4>
+    <ul>
+      <li>Query "gas stations" most likely has local intent.</li>
+      <li>Query "earthquake" may have newsy intent.</li>
+    </ul>
+
+    <h4 class="card-title">Document selection</h4>
+    <ul>
+      <li>Focuses on recall.</li>
+      <li>Pick smaller subset from millions of documents.</li>
+    </ul>
+
+    <h4 class="card-title">Ranker</h4>
+    <ul>
+      <li>Find the best order of documents.</li>
+    </ul>
+
+    <h4 class="card-title">Blender</h4>
+    <ul>
+      <li>Provide various search results like images, videos, news, etc.</li>
+    </ul>
+
+    <h4 class="card-title">Training data generation</h4>
+    <ul>
+      <li>Generate positive and negative example from online data.</li>
+    </ul>
+
+
+    <h3 class="card-title">API</h3>
+    <ul>
+      <li>upload_video(user_id, video_file, title, description, tags, default_language)</li>
+      <ul>
+        <li>Return 202 on success.</li>
+      </ul>
+      <li>search_video(user_id, query, user_location, length, max_videos_to_return)</li>
+      <ul>
+        <li>Return JSON with the list of videos.</li>
+      </ul>
+      <li>stream_video(user_id, video_id, resolution)</li>
+      <ul>
+        <li>Return stream.</li>
+      </ul>
+      <li>like_video(user_id, video_id)</li>
+      <li>dislike_video(user_id, video_id)</li>
+      <li>view_thunbnail(user_id, video_id)</li>
+      <li>comment_video(user_id, video_id, text)</li>
+    </ul>
+
+    <h3 class="card-title">DB</h3>
+    <ul>
+      <li>Store video metadata in relational DB.</li>
+    </ul>
+
+    <h4 class="card-title">User</h4>
+    <ul>
+      <li>id (int, pk)</li>
+      <li>name (varchar)</li>
+      <li>email (varchar)</li>
+      <li>password (varchar)</li>
+    </ul>
+
+    <h4 class="card-title">Video</h4>
+    <ul>
+      <li>id (int, pk)</li>
+      <li>title (varchar)</li>
+      <li>description (varchar)</li>
+      <li>date (datetime)</li>
+      <li>uploader (int)</li>
+      <li>size (longint)</li>
+      <li>thumbnail (varchar)</li>
+      <li>likes (int)</li>
+      <li>dislikes (int)</li>
+      <li>views (int)</li>
+    </ul>
+
+    <h4 class="card-title">Comment</h4>
+    <ul>
+      <li>id (int, pk)</li>
+      <li>video_id (int)</li>
+      <li>user_id (int)</li>
+      <li>comment (varchar)</li>
+      <li>date (datetime)</li>
+      <li>likes (int)</li>
+      <li>dislikes (int)</li>
+    </ul>
+
+    <h3 class="card-title">Component design</h3>
+    <ul>
+      <li>Load balancer: distribute user load.</li>
+      <li>Web server: take user request, cache frequently accessed pages. Decouple client request from business logic. Use Lighttpd to run the server for it is fast.</li>
+      <li>App server: business logic.</li>
+      <li>User DB: user related data, decoupled from metadata storage for easy scalability. Need strong consistency on user data. MySQL.</li>
+      <li>Metadata DB: video related data. MySQL.</li>
+      <li>Thumbnail DB: BigTable.</li>
+      <ul>
+        <li>Combines multiple files into one block to store.</li>
+        <li>Very efficient for large number of small files with low retrieval latency.</li>
+      </ul>
+      <li>Encoder: compress vidoes and generate thumbnail.</li>
+      <li>Video DB: blob.</li>
+      <li>CDN: forward videos to closer proximity to serve users faster.</li>
+    </ul>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/youtube2.png" alt="Card image cap">
+    <br>
+    <br>
+
+    <h4 class="card-title">How to manage read traffic</h4>
+    <ul>
+      <li>Segregate read traffic and write traffic.</li>
+      <li>Distribute read traffic to different servers.</li>
+      <li>For video metadata, write to primary and read from secondary.</li>
+    </ul>
+
+    <h4 class="card-title">Metadata sharding</h4>
+    <ul>
+      <li>Store based on UserID? It is hard to maintain uniform distribution because some users upload more than others.</li>
+      <li>Store based on VideoID? Solves above problem. Can cache hot vidoes in front of DB servers.</li>
+    </ul>
+
+    <h4 class="card-title">Deduplication</h4>
+    <ul>
+      <li>When users upload vidoes, run video matching algorithm.</li>
+    </ul>
+
+    <h4 class="card-title">Search</h4>
+    <ul>
+      <li>Extract data from each video and store that data into JSON (referred as document)</li>
+      <li>Key-value storage is created from the documents.</li>
+      <ul>
+        <li>Key: all the keywords searched by users.</li>
+        <li>Value: occurrence of each key, its frequency, and location of occurrence in the different documents.</li>
+      </ul>
+      <li>Vidoes with most relevant keywords are returned.</li>
+    </ul>
+
+    <h4 class="card-title">Load-balancing</h4>
+    <ul>
+      <li>Consistent hashing between cache servers.</li>
+    </ul>
+
+    <h4 class="card-title">Cache</h4>
+    <ul>
+      <li>Store hot vidoes in cache servers.</li>
+      <li>Use LRU eviction rule.</li>
+      <li>Use distributed cache like Memcached.</li>
+    </ul>
+
+    <h3 class="card-title">Evaluation</h3>
+
+    <h4 class="card-title">Availability</h4>
+    <ul>
+      <li>Replicate web, app, DB servers.</li>
+    </ul>
+
+    <h4 class="card-title">Reliability</h4>
+    <ul>
+      <li>Data replication.</li>
+    </ul>
+
+    <h4 class="card-title">Scalability</h4>
+    <ul>
+      <li>Horizontally scale web, app servers. (Load balancer can multiplx them)</li>
+      <li>Separate read and write to different servers.</li>
+    </ul>
+
+    <h4 class="card-title">Performance</h4>
+    <ul>
+      <li>Lighttpd for serving videos,</li>
+      <li>Cache at various component.</li>
+      <li>Right DB for different data types for fast operations.</li>
+      <li>CDN</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
