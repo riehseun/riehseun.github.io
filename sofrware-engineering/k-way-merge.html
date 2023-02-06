@@ -48,6 +48,7 @@
       <li><a href="#k-way-merge-3">Find K pairs with smallest sums</a></li>
       <li><a href="#k-way-merge-4">Merge K sorted linked lists</a></li>
       <li><a href="#k-way-merge-5">Kth smallest element in sorted matrix</a></li>
+      <li><a href="#k-way-merge-6">Median of two sorted arrays</a></li>
     </ul>
   </div>
 </div>
@@ -293,6 +294,58 @@ def merge_k_lists(lists):
       <li>Whenever popping out from min heap, put the rest of items in that row into the min heap.</li>
       <li>Time: O(nlog(n)) where n is the length of matrix.</li>
       <li>Space: O(n^2)</li>
+    </ul>
+
+<pre><code class="python">from heapq import heappush, heappop
+
+def kth_smallest_element(matrix, k):
+
+    min_heap = []
+    seen = set()
+    count = 0
+    next_min_number = None
+
+    # Put the first item in each row to min heap.
+    for i, row in enumerate(matrix):
+        heappush(min_heap, (row[0], i))
+
+    while min_heap and count < k:
+        next_min_number, i = heappop(min_heap)
+        if i not in seen:
+            for num in matrix[i][1:]:
+                heappush(min_heap, (num, i))
+            seen.add(i)
+
+        count += 1
+
+    return next_min_number</code></pre>
+
+    <h3 class="card-title">Test cases</h3>
+    <ul>
+      <li>There is zero element in the matrix.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/courses/grokking-coding-interview-patterns-python">Grokking Coding Interview Patterns in Python</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="k-way-merge-6">
+  <div class="card-body">
+    <h2 class="card-title">Median of two sorted arrays</h2>
+
+    <h3 class="card-title">Pop/push from/to min heap one at a time</h3>
+    <ul>
+      <li>Numbers greater than higher median cannot be the overall median.</li>
+      <ui>
+        <li>If list length is even, numbers higher than bigger of two medians must go.</li>
+      </ui>
+      <li>Numbers smaller than smaller median cannot be the overall median.</li>
+      <ui>
+        <li>If list length is even, numbers less than smaller of two medians must go.</li>
+      </ui>
+      <li>Time: O(log(m+n))</li>
+      <li>Space: O(1)</li>
     </ul>
 
 <pre><code class="python">from heapq import heappush, heappop
