@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="/img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/monokai-sublime.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="/js/jquery.min.js"></script>
+<script src="/js/bootstrap.bundle.min.js"></script>
+<script src="/js/highlight.pack.js"></script>
+<script type="text/javascript" src="/js/include_html.js"></script>
+<script type="text/javascript" src="/js/site.js"></script>
+
+</head>
+
+<body>
+
+<include src="/header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Software Engineering</h1>
+
+<!-- Top K element BEGIN -->
+<div class="card mb-4" id="top-k-element">
+  <div class="card-body">
+    <h2 class="card-title">Top K element</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#top-k-element-1">Kth largest element in a stream</a></li>
+      <li><a href="#top-k-element-2">Reorganize String</a></li>
+      <li><a href="#top-k-element-3">Find K pairs with smallest sums</a></li>
+      <li><a href="#top-k-element-4">Merge K sorted linked lists</a></li>
+      <li><a href="#top-k-element-5">Kth smallest element in sorted matrix</a></li>
+      <li><a href="#top-k-element-6">Median of two sorted arrays</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="top-k-element-1">
+  <div class="card-body">
+    <h2 class="card-title">Kth largest element in a stream</h2>
+
+    <h3 class="card-title">Use min heap</h3>
+    <ul>
+      <li>Initialize min_heap with just K elements from input array.</li>
+      <li>As items are added, maintain K elements in min_heap</li>
+    </ul>
+
+<pre><code class="python">from heapq import heapify, heappush, heappop
+
+class KthLargest:
+
+    # Constructor to initialize heap and add values in it.
+    # Time O(nlogn).
+    # Space O(n).
+    def __init__(self, k, nums):
+        self.k = k
+        self.min_heap = nums
+        heapify(self.min_heap)
+        while len(self.min_heap) > k:
+            heappop(self.min_heap)
+        print(self.min_heap)
+
+    # Adds element in the heap.
+    # Time O(logk).
+    def add(self, val):
+        heappush(self.min_heap, val)
+        if len(self.min_heap) > self.k:
+            heappop(self.min_heap)
+        return self.return_Kth_largest()
+
+    # Returns kth largest element from heap.
+    # Time O(1).
+    def return_Kth_largest(self):
+        return self.min_heap[0]</code></pre>
+
+    <h3 class="card-title">Test cases</h3>
+    <ul>
+      <li>K greater than length of array.</li>
+      <li>Empty array and K=0.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/courses/grokking-coding-interview-patterns-python">Grokking Coding Interview Patterns in Python</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="top-k-element-2">
+  <div class="card-body">
+    <h2 class="card-title">Reorganize String</h2>
+
+    <h3 class="card-title">Use dictionary and max_heap</h3>
+    <ul>
+      <li>Store frequency of each char in a dictionary.</li>
+      <li>Store each char into max_heap by the frequency.</li>
+      <li>Pop out char from max_heap, decrement the frequency, and add the char to the resulting string.</li>
+      <li>Do not push back the char into the max_heap in the same iteration. Push back in the next interation if the frequency is greater than 0. This is to ensure not to repeat the same char in the resulting string.</li>
+    </ul>
+
+<pre><code class="python">from collections import defaultdict
+from heapq import heapify, heappush, heappop
+
+def reorganize_string(input_string):
+
+    frequency = defaultdict(str)
+    max_heap = []
+    result_string = ""
+
+    for char in input_string:
+        if char in frequency:
+            frequency[char] += 1
+        else:
+            frequency[char] = 1
+
+    for k,v in frequency.items():
+        heappush(max_heap, [-v,k])
+
+    previous = None
+    # If previous still exists after max_heap is emptied out, then return empty string.
+    while max_heap or previous:
+
+        if previous and len(max_heap) == 0:
+            return ""
+
+        v, k = heappop(max_heap)
+        v = -v
+
+        # Decrement the frequency.
+        v -= 1
+        result_string += k
+
+        # Idea is that char popped out in this interation must not be pushed back
+        # to max_heap in this interation, but the next iteration.
+        if previous:
+            heappush(max_heap, previous)
+            previous = None
+
+        # "previous" should be set to most recently used char.
+        if v > 0:
+            previous = [-v,k]
+
+    return result_string</code></pre>
+
+    <h3 class="card-title">Test cases</h3>
+    <ul>
+      <li>String with just a single char.</li>
+      <li>Empty string.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/courses/grokking-coding-interview-patterns-python">Grokking Coding Interview Patterns in Python</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="top-k-element-3">
+  <div class="card-body">
+    <h2 class="card-title">Find K pairs with smallest sums</h2>
+
+    <h3 class="card-title">Get every possible pair and put it in to min_heap</h3>
+    <ul>
+      <li>Time: O(n^2)</li>
+      <li>Space: O(n^2)</li>
+    </ul>
+
+<pre><code class="python">from heapq import heappush, heappop
+
+def k_smallest_pairs(list1, list2, k):
+
+    result = []
+    min_heap = []
+
+    for v1 in list1:
+        for v2 in list2:
+            heappush(min_heap, (v1+v2, v1, v2))
+
+    for i in range(k):
+        if not min_heap:
+            break
+        item = heappop(min_heap)
+        result.append([item[1], item[2]])
+
+    return result</code></pre>
+
+    <h3 class="card-title">Pop/push from/to min heap one at a time</h3>
+    <ul>
+      <li>Initialize a min heap with pairs. (Pairs are constructed by all items in the first list and the first item in the second list)</li>
+      <li>Each time popping out the min pair, the next pair to come into the min heap is (item that is popped out from the first list, next time to the item that is popped out from the second list)</li>
+      <li>Time: O((n+m)log(n+m))</li>
+      <li>Space: O(n+m)</li>
+    </ul>
+
+<pre><code class="python">from heapq import heappush, heappop
+
+def k_smallest_pairs(list1, list2, k):
+
+    count = 0
+    result = []
+    min_heap = []
+
+    for i1, v1 in enumerate(list1):
+        heappush(min_heap, (v1+list2[0], i1, 0))
+
+    while min_heap and count < k:
+        sum_pair, i, j = heappop(min_heap)
+        result.append([list1[i], list2[j]])
+        next_j = j + 1
+        if next_j < len(list2):
+            heappush(min_heap, (list1[i]+list2[next_j], i, next_j))
+        count += 1
+
+    return result</code></pre>
+
+    <h3 class="card-title">Test cases</h3>
+    <ui>
+      <li>One of two lists is empty.</li>
+      <li>There are pairs that add up to the same sum.</li>
+    </ui>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/courses/grokking-coding-interview-patterns-python">Grokking Coding Interview Patterns in Python</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="top-k-element-4">
+  <div class="card-body">
+    <h2 class="card-title">Merge K sorted linked lists</h2>
+
+    <h3 class="card-title">Pop/push from/to min heap one at a time</h3>
+    <ul>
+      <li>From all linked lists, push all the items from its head pointer into the min heap.</li>
+      <li>Pop the smallest into the min heap and push the next item (from the same linked list) into the min heap.</li>
+      <li>At the same time, create a node in the resuling linked list one at time.</li>
+      <li>Time: O(nlog(k)) where n is the total number of items in all linked lists and k is the number of linked lists.</li>
+      <li>Space: O(n)</li>
+    </ul>
+
+<pre><code class="python">from heapq import heappush, heappop
+
+
+class LinkedListNode:
+    # __init__ will be used to make a LinkedListNode type object.
+    def __init__(self, data, next=None):
+        self.data = data
+        self.next = next
+
+
+def merge_k_lists(lists):
+
+    min_heap = []
+    # Init head to some placeholder node.
+    head = LinkedListNode(-1)
+    # "temp" will be the pointer at the very beginning.
+    temp = head
+
+    for i, ll in enumerate(lists):
+        heappush(min_heap, (ll.head.data, i))
+
+    while min_heap:
+        item = heappop(min_heap)
+        ll_head_data = item[0]
+        ll_index = item[1]
+
+        lists[ll_index].head = lists[ll_index].head.next
+        if lists[ll_index].head:
+            heappush(min_heap, (lists[ll_index].head.data, ll_index))
+
+        node = LinkedListNode(ll_head_data)
+        head.next = node
+        head = head.next
+
+    return temp.next</code></pre>
+
+    <h3 class="card-title">Test cases</h3>
+    <ul>
+      <li>One of linked lists are empty.</li>
+      <li>Linked lists have different length.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/courses/grokking-coding-interview-patterns-python">Grokking Coding Interview Patterns in Python</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="top-k-element-5">
+  <div class="card-body">
+    <h2 class="card-title">Kth smallest element in sorted matrix</h2>
+
+    <h3 class="card-title">Pop/push from/to min heap one at a time</h3>
+    <ul>
+      <li>Initally put the first element at each column into min heap.</li>
+      <li>Whenever popping out from min heap, put the rest of items in that row into the min heap.</li>
+      <li>Time: O(nlog(n)) where n is the length of matrix.</li>
+      <li>Space: O(n^2)</li>
+    </ul>
+
+<pre><code class="python">from heapq import heappush, heappop
+
+def kth_smallest_element(matrix, k):
+
+    min_heap = []
+    seen = set()
+    count = 0
+    next_min_number = None
+
+    # Put the first item in each row to min heap.
+    for i, row in enumerate(matrix):
+        heappush(min_heap, (row[0], i))
+
+    while min_heap and count < k:
+        next_min_number, i = heappop(min_heap)
+        if i not in seen:
+            for num in matrix[i][1:]:
+                heappush(min_heap, (num, i))
+            seen.add(i)
+
+        count += 1
+
+    return next_min_number</code></pre>
+
+    <h3 class="card-title">Test cases</h3>
+    <ul>
+      <li>There is zero element in the matrix.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/courses/grokking-coding-interview-patterns-python">Grokking Coding Interview Patterns in Python</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="top-k-element-6">
+  <div class="card-body">
+    <h2 class="card-title">Median of two sorted arrays</h2>
+
+    <h3 class="card-title">Pop/push from/to min heap one at a time</h3>
+    <ul>
+      <li>Numbers greater than higher median cannot be the overall median.</li>
+      <ui>
+        <li>If list length is even, numbers higher than bigger of two medians must go.</li>
+      </ui>
+      <li>Numbers smaller than smaller median cannot be the overall median.</li>
+      <ui>
+        <li>If list length is even, numbers less than smaller of two medians must go.</li>
+      </ui>
+      <li>Time: O(log(m+n))</li>
+      <li>Space: O(1)</li>
+    </ul>
+
+<pre><code class="python">from heapq import heappush, heappop
+
+def kth_smallest_element(matrix, k):
+
+    min_heap = []
+    seen = set()
+    count = 0
+    next_min_number = None
+
+    # Put the first item in each row to min heap.
+    for i, row in enumerate(matrix):
+        heappush(min_heap, (row[0], i))
+
+    while min_heap and count < k:
+        next_min_number, i = heappop(min_heap)
+        if i not in seen:
+            for num in matrix[i][1:]:
+                heappush(min_heap, (num, i))
+            seen.add(i)
+
+        count += 1
+
+    return next_min_number</code></pre>
+
+    <h3 class="card-title">Test cases</h3>
+    <ul>
+      <li>There is zero element in the matrix.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/courses/grokking-coding-interview-patterns-python">Grokking Coding Interview Patterns in Python</a>
+  </div>
+</div>
+<!-- Top K element END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+</html>
