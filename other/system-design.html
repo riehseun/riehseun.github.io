@@ -59,6 +59,7 @@
       <li><a href="#system-design-60">Typeahead</a></li>
       <li><a href="#system-design-61">Whatsapp</a></li>
       <li><a href="#system-design-100">Google search</a></li>
+      <li><a href="#system-design-101">Twitter feed</a></li>
     </ul>
   </div>
 </div>
@@ -2476,6 +2477,250 @@
       <li>Use classification to determine if result inappropriate or not.</li>
     </ul>
 
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="system-design-101">
+  <div class="card-body">
+    <h2 class="card-title">Twitter feed</h2>
+
+    <h3 class="card-title">Problem</h3>
+    <ul>
+      <li>Design a Twitter feed system.</li>
+      <li>Reverse chronological order fails to catch most engaging tweets due to the sheer large number of tweets.</li>
+    </ul>
+
+    <h4 class="card-title">Scale</h4>
+    <ul>
+      <li>500M daily active users.</li>
+      <li>1 user is connected to 100 users.</li>
+      <li>User fetches the feed 10 times a day.</li>
+      <ul>
+        <li>We run Tweet ranking algorithm 5B times per day.</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Metric</h3>
+
+    <h4 class="card-title">Positive user actions</h4>
+    <ul>
+      <li>Time spent viewing Tweets.</li>
+      <li>Liking Tweets.</li>
+      <li>Re-Tweeting.</li>
+      <li>Commenting on Tweets.</li>
+    </ul>
+
+    <h4 class="card-title">Negative user actions</h4>
+    <ul>
+      <li>Hiding Tweets.</li>
+      <li>Reporting Tweets as inappropriate.</li>
+    </ul>
+
+    <h4 class="card-title">Weighted user actions</h4>
+    <ul>
+      <li>Not all actions are equal value.</li>
+    </ul>
+
+    <h3 class="card-title">Architecture</h3>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/twitter-feed1.png" alt="Card image cap">
+    <br>
+    <br>
+
+    <h4 class="card-title">Tweet selection</h4>
+    <ul>
+      <li>Fetches a pool of Tweets from the user network since the last login.</li>
+    </ul>
+
+    <h4 class="card-title">Training data generation</h4>
+    <ul>
+      <li>Each user engagement action results in positive and negative examples.</li>
+    </ul>
+
+    <h4 class="card-title">Ranker</h4>
+    <ul>
+      <li>Prdict Tweets probability of engagement.</li>
+    </ul>
+
+    <h3 class="card-title">Feature engineering</h3>
+
+    <h4 class="card-title">User-author historical relations</h4>
+    <ul>
+      <li>author_liked_posts_3months: percentage of author Tweets user liked in the last 3 months.</li>
+      <li>author_liked_posts_count_1year: number of author Tweets user liked in the past one year.</li>
+    </ul>
+
+    <h4 class="card-title">User-author similarity</h4>
+    <ul>
+      <li>common_followees: numbers of users and hash tags followed by both.</li>
+      <li>topic_similarity: similarity between hash tags in the posts that both interacted.</li>
+      <li>tweet_content_embedding_similarity: generate embedding (bag-of-words) for every user and take dot product between them.</li>
+      <li>social_embedding_similarity: every user is represented by bag-of-ids (rather than bag-of-words)</li>
+    </ul>
+
+    <h4 class="card-title">Author influence</h4>
+    <ul>
+      <li>is_verified: if author is verified.</li>
+      <li>author_social_rank: similar to Google page rank.</li>
+      <li>author_num_followers: nubmer of followers that author has.</li>
+      <li>follower_to_following_ratio</li>
+    </ul>
+
+    <h4 class="card-title">Author Tweets historical trend</h4>
+    <ul>
+      <li>author_engagement_rate_3months: (Tweets-interactions) / (Tweets-views)</li>
+      <li>author_topic_engagement_rate_3months: compute similar feature above but per topic.</li>
+    </ul>
+
+    <h4 class="card-title">User-tweet</h4>
+    <ul>
+      <li>topic_similarity: similarity between hashtags and contents that user tweeted in the past and the Tweet itself.</li>
+      <li>embedding_similarity: dot product between user and Tweet vector.</li>
+    </ul>
+
+    <h4 class="card-title">Tweet content</h4>
+    <ul>
+      <li>Tweet_length: concise Tweet has higher chance of getting likes.</li>
+      <li>Tweet_recency: people are interested in latest Tweets.</li>
+      <li>is_image_video: Tweets with image or video are more catchy.</li>
+      <li>is_URL: Tweets with URL have higher probability of engagement.</li>
+    </ul>
+
+    <h4 class="card-title">Tweet interaction</h4>
+    <ul>
+      <li>num_total_interactions: need to use time decay model to give proper attention to trending Tweets.</li>
+      <li>likes_in_last_3_days:</li>
+      <li>comments_in_last_1_day:</li>
+      <li>reshares_in_last_2_hours:</li>
+      <li>likes_in_last_3_days_user’s_network_only:</li>
+      <li>comments_in_last_1_day_user’s_network_only:</li>
+      <li>reshares_in_last_2_hours_user’s_network_only:</li>
+    </ul>
+
+    <h4 class="card-title">Context based features</h4>
+    <ul>
+      <li>day_of_week:</li>
+      <li>time_of_day:</li>
+      <li>current_user_location:</li>
+      <li>season:</li>
+      <li>lastest_k_tag_interactions:</li>
+      <li>approaching_holiday:</li>
+    </ul>
+
+    <h4 class="card-title">Sparse features</h4>
+    <ul>
+      <li>unigrams/bigrams of a Tweet.</li>
+      <li>user_id:</li>
+      <li>tweets_id:</li>
+    </ul>
+
+    <h3 class="card-title">Training data generation</h3>
+
+    <h4 class="card-title">If single model</h4>
+    <ul>
+      <li>All Tweets with user interation will be postive examples.</li>
+      <li>All Tweeks with only impressions will be negative examples.</li>
+    </ul>
+
+    <h4 class="card-title">If many models</h4>
+    <ul>
+      <li>Tweets with "likes" will be positive and Tweets without "likes" will be negative.</li>
+      <li>Tweets with "comments" will be positive and Tweets without "comments" will be negative.</li>
+      <li>And so on.</li>
+    </ul>
+
+    <h4 class="card-title">Balancing positive and negative examples</h4>
+    <ul>
+      <li>Randomly downsample to match the number of positive and negative examples.</li>
+    </ul>
+
+    <h4 class="card-title">Train/dev/test</h4>
+    <ul>
+      <li>Train data on one time interval and validate data on next time interval.</li>
+    </ul>
+
+    <h3 class="card-title">Tweet selection</h3>
+
+    <h4 class="card-title">Consider new Tweets</h4>
+    <ul>
+      <li>Tweets generated between user's log out and log in.</li>
+      <li>Previous Tweets viewed by user, which was not popular but now is popular.</li>
+      <li>Previous Tweets not viewed by user while user was logged in.</li>
+    </ul>
+
+    <h4 class="card-title">User comes back after a while</h4>
+    <ul>
+      <li>There will be limits of Tweet data to fetch.</li>
+      <li>Need to fetch certain numbers of Tweets from a pool.</li>
+    </ul>
+
+    <h4 class="card-title">Tweets outside the user network</h4>
+    <ul>
+      <li>Aligns with user interests.</li>
+      <li>Locally/globally trending.</li>
+      <li>Tweet is relevant to user's network.</li>
+    </ul>
+
+    <h3 class="card-title">Ranking</h3>
+    <ul>
+      <li>Given Tweets, predict probabilities of likes, comments, and re-Tweets.</li>
+      <li>This is classification problem.</li>
+    </ul>
+
+    <h4 class="card-title">Logistic regression</h4>
+    <ul>
+      <li>Must create feature in training data manually. (Tree and NN are able to learn features)</li>
+      <li>Single model to predict overall engagement or separate models to predict different types of engagement.</li>
+    </ul>
+
+    <h4 class="card-title">Logistic regression</h4>
+    <ul>
+      <li>Hyperparameters</li>
+      <ul>
+        <li>Learning rate.</li>
+        <li>Number of hidden layers.</li>
+        <li>Batch size.</li>
+        <li>Number of epochs.</li>
+        <li>Dropout rate.</li>
+      </ul>
+      <li>Multi task NN where total_loss = like_loss + comment_loss + retweet_loss</li>
+      <li>Better than training sepearate network for each task because shared layers make training faster.</li>
+    </ul>
+
+    <h4 class="card-title">Stacking models</h4>
+    <ul>
+      <li>Use Tree and NN to generate features to use in logistic regression.</li>
+      <ul>
+        <li>For example, use outputs of last hidden layer as input of logistic regression.</li>
+        <li>Online learning: update model based on user action.</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Diversity</h3>
+    <ul>
+      <li>Introduce penalty for same authors and similar content.</li>
+      <ul>
+        <li>For example, add negative score for repeated author and contents.</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Online experimentation</h3>
+    <ul>
+      <li>Use training and validation data to train 15 different models.</li>
+      <li>Use test data to select the best model offline.</li>
+      <li>Do A/B testing between the best offline model and online model.</li>
+      <ul>
+        <li>Before testing, retrain the best offline model with the latest data.</li>
+        <li>Select 1% of users. Use existing model to half of 1% of users. Use the best offline model to the other half of 1% of users.</li>
+        <li>Compare user engagement</li>
+        <ul>
+          <li>Use statistical significance. (Ex. p-value)</li>
+          <li>Also, consider if new model causes the system to be more complex.</li>
+        </ul>
+      </ul>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
