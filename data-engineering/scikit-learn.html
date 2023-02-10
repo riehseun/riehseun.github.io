@@ -45,6 +45,7 @@
     <p class="card-text"></p>
     <ul class="list-unstyled mb-0">
       <li><a href="#scikit-learn-1">Scikit-learn</a></li>
+      <li><a href="#scikit-learn-2">Linear regression</a></li>
     </ul>
   </div>
 </div>
@@ -486,6 +487,118 @@ ari = adjusted_rand_score(true_labels2, pred_labels2)  # -0.12903225806451613</c
 from sklearn.cluster import FeatureAgglomeration
 agg = FeatureAgglomeration(n_clusters=2)
 new_data = agg.fit_transform(data)  # (150, 2)</code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="scikit-learn-2">
+  <div class="card-body">
+    <h2 class="card-title">Linear regression</h2>
+
+    <h3 class="card-title">Import libraries</h3>
+
+<pre><code class="python">import pandas as pd
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn import metrics</code></pre>
+
+    <h3 class="card-title">Import dataset</h3>
+
+<pre><code class="python">df = pd.read_csv('Melbourne_housing_FULL.csv')</code></pre>
+
+    <h3 class="card-title">Remove variables</h3>
+
+<pre><code class="python">del df['Address']
+del df['Method']
+del df['SellerG']
+del df['Date']
+del df['Postcode']
+del df['YearBuilt']
+del df['Type']
+del df['Lattitude']
+del df['Longtitude']
+del df['Regionname']
+del df['Suburb']
+del df ['CouncilArea']
+
+df.isnull().sum()
+
+df_heat = df.corr()
+sns.heatmap(df_heat,annot=True,cmap='coolwarm')
+
+#df.shape
+
+#Remove variables
+del df ['Bedroom2']  # Highly correlated with Rooms (0.95)
+del df ['Landsize']  # Low correlation (0.033) to the dependent variable of Price.
+del df ['Propertycount']  # Low correlation (0.059) to the dependent variable of Price.</code></pre>
+
+    <h3 class="card-title">Remove or modify variables with missing values</h3>
+    <ul>
+      <li>Use the mean to fill variables with partial correlation to Price.</li>
+      <li>Remove rows for variables with a small number of missing values.</li>
+      <li>Avoid filling values for variables with significant correlation to Price. Instead, remove those missing values row-by-row.</li>
+    </ul>
+
+<pre><code class="python"># Remove variable BuildingArea.
+del df ['BuildingArea']
+
+# Fill missing values with the mean for the variable Car.
+df['Car'].fillna(df['Car'].mean(),inplace=True)
+
+# Drop remaining missing values on a row-by-row basis.
+df.dropna(axis=0, how='any', thresh=None, subset=None, inplace=True)
+
+df.shape</code></pre>
+
+    <h3 class="card-title">Set X and y variables</h3>
+
+<pre><code class="python">X = df[['Rooms', 'Distance', 'Bathroom', 'Car']]
+y = df['Price']
+
+# Let’s also shuffle and sub-divide the data into training and test sets using a standard 70/30 split.
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=10, shuffle=True)</code></pre>
+
+    <h3 class="card-title">Set algorithm</h3>
+
+<pre><code class="python">model = LinearRegression()
+model.fit(X_train, y_train)</code></pre>
+
+    <h3 class="card-title">Find y-intercept and X coefficients</h3>
+
+<pre><code class="python"># Find y-intercept.
+print("model.intercept_ result:")
+print(model.intercept_)
+print("")
+
+# Find x coefficients.
+print("model.coef_ result:")
+print(model.coef_)
+print("")
+
+model_results = pd.DataFrame(model.coef_, X.columns, columns=['Coefficients'])
+print(model_results)</code></pre>
+
+    <h3 class="card-title">Predict</h3>
+
+<pre><code class="python">new_house = [
+  2, #Rooms
+  2.5, #Distance
+  1, #Bathroom
+  1, #Car
+]
+
+new_house_predict = model.predict([new_house])
+print(new_house_predict)</code></pre>
+
+    <h3 class="card-title">Evaluate</h3>
+
+<pre><code class="python">prediction = model.predict(X_test)
+print(metrics.mean_absolute_error(y_test, prediction))</code></pre>
 
   </div>
   <div class="card-footer text-muted">
