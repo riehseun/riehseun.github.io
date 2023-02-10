@@ -46,6 +46,7 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#scikit-learn-1">Scikit-learn</a></li>
       <li><a href="#scikit-learn-2">Linear regression</a></li>
+      <li><a href="#scikit-learn-3">Logistic regression</a></li>
     </ul>
   </div>
 </div>
@@ -599,6 +600,144 @@ print(new_house_predict)</code></pre>
 
 <pre><code class="python">prediction = model.predict(X_test)
 print(metrics.mean_absolute_error(y_test, prediction))</code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="scikit-learn-3">
+  <div class="card-body">
+    <h2 class="card-title">Logistic regression</h2>
+
+    <h3 class="card-title">Import libraries</h3>
+
+<pre><code class="python">import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import confusion_matrix, classification_report</code></pre>
+
+    <h3 class="card-title">Import dataset</h3>
+
+<pre><code class="python">df = pd.read_csv('18k_Projects.csv', dtype='unicode')</code></pre>
+
+    <h3 class="card-title">Remove variables</h3>
+
+<pre><code class="python">del df ['Id']
+del df ['Name']
+del df ['Url']
+del df ['Location']
+del df ['Pledged']
+del df ['Creator']
+del df ['Category']
+del df ['Updates']
+del df ['Start']
+del df ['End']
+del df ['Latitude']
+del df ['Longitude']
+del df ['Start Timestamp (UTC)']
+del df ['End Timestamp (UTC)']
+del df ['Creator Bio']
+del df ['Creator Website']
+
+print(df.shape)</code></pre>
+
+    <h3 class="card-title">Convert non-numeric values</h3>
+
+<pre><code class="python">df = pd.get_dummies(df, columns=['State', 'Currency', 'Top Category', 'Facebook Connected', 'Has Video'], drop_first = True)
+print(df.shape)</code></pre>
+
+    <h3 class="card-title">Remove and fill missing values</h3>
+
+<pre><code class="python">print(df.isnull().sum())
+
+print(df.describe())
+
+# Distribution plot of variable 'Facebook Friends'.
+plt.figure(figsize=(12,6))
+sns.distplot(df['Facebook Friends'], kde=True, hist=0)
+
+# Distribution plot of variable 'Creator - # Projects Backed'.
+plt.figure(figsize=(12,6))
+sns.distplot(df['Creator - # Projects Backed'], kde=True, hist=0)
+
+# Fill missing values for 'Creator - # Projects Backed' with the mean value.
+df['Creator - # Projects Backed'].fillna(df['Creator - # Projects Backed'].astype(float).mean(), inplace=True)
+
+# Drop remaining missing values for remaining variables.
+df.dropna(axis=0, how='any', thresh=None, subset=None, inplace=True)
+
+print(df.shape)</code></pre>
+
+    <h3 class="card-title">Set X and y variables</h3>
+
+<pre><code class="python">X = df.drop('State_successful',axis=1)
+y = df['State_successful']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=10, shuffle=True)</code></pre>
+
+    <h3 class="card-title">Set algorithm</h3>
+
+<pre><code class="python">model = LogisticRegression(max_iter=10000)
+model.fit(X_train, y_train)</code></pre>
+
+    <h3 class="card-title">Predict</h3>
+
+<pre><code class="python">model_predict = model.predict(X_test)
+new_project = [
+    0, #Comments
+    9, #Rewards
+    2500, #Goal
+    157, #Backers
+    31, #Duration in Days
+    319, #Facebook Friends
+    110, #Facebook Shares
+    1, #Creator - # Projects Created
+    0, #Creator - # Projects Backed
+    0, ## Videos
+    12, ## Images
+    872, ## Words (Description)
+    65, ## Words (Risks and Challenges)
+    0, ## FAQs
+    0, #Currency_AUD
+    1, #Currency_CAD
+    0, #Currency_EUR
+    0, #Currency_GBP
+    0, #Currency_NZD
+    0, #Currency_USD
+    0, #Top Category_Art
+    0, #Top Category_Comics
+    0, #Top Category_Crafts
+    0, #Top Category_Dance
+    0, #Top Category_Design
+    0, #Top Category_Fashion
+    1, #Top Category_Film & Video
+    0, #Top Category_Food
+    0, #Top Category_Games
+    0, #Top Category_Journalism
+    0, #Top Category_Music
+    0, #Top Category_Photography
+    0, #Top Category_Publishing
+    0, #Top Category_Technology
+    0, #Top Category_Theater
+    #0, #Facebook Connected_No
+    #0, #Facebook Connected_Yes
+    #0, #Has Video_No
+    #1, #Has Video_Yes
+]
+new_pred = model.predict([new_project])
+print(new_pred)</code></pre>
+
+    <h3 class="card-title">Evaluate</h3>
+
+<pre><code class="python"># Confusion matrix.
+print(confusion_matrix(y_test, model_predict))
+
+# Classification report.
+print(classification_report(y_test, model_predict))</code></pre>
 
   </div>
   <div class="card-footer text-muted">
