@@ -58,6 +58,7 @@
       <li><a href="#system-design-59">Web crawler</a></li>
       <li><a href="#system-design-60">Typeahead</a></li>
       <li><a href="#system-design-61">Whatsapp</a></li>
+      <li><a href="#system-design-62">Google Doc</a></li>
       <li><a href="#system-design-100">Google search</a></li>
       <li><a href="#system-design-101">Twitter feed</a></li>
     </ul>
@@ -822,7 +823,7 @@
         <li>Each search returns 10 pages.</li>
       </ul>
       <li>Incoming: 1M * 1KB * 8 / 86400 = 92 Kbps</li>
-      <li>Outgoing: 100M * 1 * 10 * 10KB * 8 / 86400 = 926 Mbps</li>
+      <li>Outgoing: 100M * 1 * 10 * 10 KB * 8 / 86400 = 926 Mbps</li>
     </ul>
 
     <h3 class="card-title">High level design</h3>
@@ -2138,18 +2139,18 @@
     <ul>
       <li>Assume</li>
       <ul>
-        <li>100B messages per day.</li>
+        <li>100 B messages per day.</li>
         <li>Each message is 100 bytes.</li>
         <li>Whatsapp keeps messages for 30 days only.</li>
       </ul>
-      <li>100B per day * 100 bytes = 10TB per day.</li>
-      <li>300TB per month</li>
+      <li>10 0B per day * 100 bytes = 10 TB per day.</li>
+      <li>300 TB per month</li>
     </ul>
 
     <h4 class="card-title">Bandwidth</h4>
     <ul>
-      <li>Incoming: 10TB per day * 8 bits / 86400 seconds per day = 926Mbps.</li>
-      <li>Outgoing: 10 * 15 * 9.7Mbps = 1.46Gbps</li>
+      <li>Incoming: 10 TB per day * 8 bits / 86400 seconds per day = 926 Mbps.</li>
+      <li>Outgoing: 10 * 15 * 9.7Mbps = 1.46 Gbps</li>
     </ul>
 
     <h3 class="card-title">High level design</h3>
@@ -2207,6 +2208,97 @@
       <li>Low latency via CDN.</li>
     </ul>
 
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="system-design-62">
+  <div class="card-body">
+    <h2 class="card-title">Google Doc</h2>
+
+    <h3 class="card-title">Requirement</h3>
+
+    <h4 class="card-title">Functional</h4>
+    <ul>
+      <li>Multiple users can view/edit documents simultaneously.</li>
+      <li>Chaged made by a user should be propagated to other users.</li>
+      <li>Resolve conflicts when many users are updating the same portion.</li>
+      <li>Users can see view count of the document.</li>
+      <li>Users can see history of collaboration of the document.</li>
+    </ul>
+
+    <h4 class="card-title">Non-functional</h4>
+    <ul>
+      <li>Availability.</li>
+      <li>Reliability.</li>
+      <li>Scalability.</li>
+      <li>Performance.</li>
+    </ul>
+
+    <h3 class="card-title">Estimation</h3>
+
+    <h4 class="card-title">Server</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>100 M active users.</li>
+        <li>A single server can handle 10k connections per day.</li>
+      </ul>
+      <li>100M / 10k = 10,000 servers are needed.</li>
+    </ul>
+
+    <h4 class="card-title">Storage</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>Each user creates 1 doc per day.</li>
+        <li>100 M active users.</li>
+        <li>Each doc is 1MB.</li>
+      </ul>
+      <li>1 per day * 100 M * 1 MB = 100 TB per day.</li>
+      <li>300TB per month</li>
+    </ul>
+
+    <h4 class="card-title">Bandwidth</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>Each user views 5 doc per day.</li>
+        <li>5 * 100 M / 86400 = 5787 doc views per second.</li>
+        <li></li>
+      </ul>
+      <li>Incoming: 100 TB per day * 8 bits / 86400 seconds per day = 9.26 Gbps.</li>
+      <li>Outgoing: 5787 * 1 MB * 8 = 46 Gbps.</li>
+    </ul>
+
+    <h3 class="card-title">High level design</h3>
+    <ul>
+      <li>When users collaborate, request is forwarded to operations queue. Conflict gets resolved here and data is batched.</li>
+      <li>Different versions of document is stored in time series DB.</li>
+      <li>Async operations like view count and comments are queued in pub-sub like Kafka.</li>
+      <li>App server supports document import/export.</li>
+    </ul>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/google-doc1.png" alt="Card image cap">
+    <br>
+    <br>
+
+    <h3 class="card-title">API</h3>
+
+    <h3 class="card-title">DB</h3>
+
+    <h3 class="card-title">Component design</h3>
+
+    <h3 class="card-title">Evaluation</h3>
+
+    <h4 class="card-title">Availability</h4>
+
+    <h4 class="card-title">Reliability</h4>
+
+    <h4 class="card-title">Scalability</h4>
+
+    <h4 class="card-title">Performance</h4>
   </div>
   <div class="card-footer text-muted">
     <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
