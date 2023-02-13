@@ -45,10 +45,7 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#top-k-element-1">Kth largest element in a stream</a></li>
       <li><a href="#top-k-element-2">Reorganize string</a></li>
-      <li><a href="#top-k-element-3">Find K pairs with smallest sums</a></li>
-      <li><a href="#top-k-element-4">Merge K sorted linked lists</a></li>
-      <li><a href="#top-k-element-5">Kth smallest element in sorted matrix</a></li>
-      <li><a href="#top-k-element-6">Median of two sorted arrays</a></li>
+      <li><a href="#top-k-element-3">K closest points to origin</a></li>
     </ul>
   </div>
 </div>
@@ -112,6 +109,8 @@ class KthLargest:
       <li>Store each char into max_heap by the frequency.</li>
       <li>Pop out char from max_heap, decrement the frequency, and add the char to the resulting string.</li>
       <li>Do not push back the char into the max_heap in the same iteration. Push back in the next interation if the frequency is greater than 0. This is to ensure not to repeat the same char in the resulting string.</li>
+      <li>Time: O(n)</li>
+      <li>Space: O(1)</li>
     </ul>
 
 <pre><code class="python">from collections import defaultdict
@@ -171,224 +170,54 @@ def reorganize_string(input_string):
 
 <div class="card mb-4" id="top-k-element-3">
   <div class="card-body">
-    <h2 class="card-title">Find K pairs with smallest sums</h2>
+    <h2 class="card-title">K closest points to origin</h2>
 
-    <h3 class="card-title">Get every possible pair and put it in to min_heap</h3>
+    <h3 class="card-title">Pop/push from/to min heap one at a time</h3>
     <ul>
-      <li>Time: O(n^2)</li>
-      <li>Space: O(n^2)</li>
+      <li>First, push k elements to min heap.</li>
+      <li>Loop through the rest of points, if the dist is smaller than root of min heap, pop and push.</li>
+      <li>Time: O(nlogk)</li>
+      <li>Space: O(k)</li>
     </ul>
+
+<pre><code class="python">import math
+
+class Point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def get(self):
+        return (self.x, self.y)
+
+    def get_distance(self):
+        return math.sqrt(self.x ** 2 + self.y ** 2)</code></pre>
 
 <pre><code class="python">from heapq import heappush, heappop
 
-def k_smallest_pairs(list1, list2, k):
+def k_closest(points, k):
 
-    result = []
     min_heap = []
-
-    for v1 in list1:
-        for v2 in list2:
-            heappush(min_heap, (v1+v2, v1, v2))
 
     for i in range(k):
-        if not min_heap:
-            break
-        item = heappop(min_heap)
-        result.append([item[1], item[2]])
+        heappush(min_heap, [points[i].get_distance(), points[i]])
 
-    return result</code></pre>
+    for j in range(k+1, len(points)):
+        dist = points[j].get_distance()
+        if dist < min_heap[-1][0]:
+            heappop(min_heap)
+            heappush(min_heap, [points[j].get_distance(), points[j]])
 
-    <h3 class="card-title">Pop/push from/to min heap one at a time</h3>
-    <ul>
-      <li>Initialize a min heap with pairs. (Pairs are constructed by all items in the first list and the first item in the second list)</li>
-      <li>Each time popping out the min pair, the next pair to come into the min heap is (item that is popped out from the first list, next time to the item that is popped out from the second list)</li>
-      <li>Time: O((n+m)log(n+m))</li>
-      <li>Space: O(n+m)</li>
-    </ul>
-
-<pre><code class="python">from heapq import heappush, heappop
-
-def k_smallest_pairs(list1, list2, k):
-
-    count = 0
     result = []
-    min_heap = []
-
-    for i1, v1 in enumerate(list1):
-        heappush(min_heap, (v1+list2[0], i1, 0))
-
-    while min_heap and count < k:
-        sum_pair, i, j = heappop(min_heap)
-        result.append([list1[i], list2[j]])
-        next_j = j + 1
-        if next_j < len(list2):
-            heappush(min_heap, (list1[i]+list2[next_j], i, next_j))
-        count += 1
+    while min_heap:
+        dist, point = heappop(min_heap)
+        result.append(point)
 
     return result</code></pre>
 
     <h3 class="card-title">Test cases</h3>
-    <ui>
-      <li>One of two lists is empty.</li>
-      <li>There are pairs that add up to the same sum.</li>
-    </ui>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/courses/grokking-coding-interview-patterns-python">Grokking Coding Interview Patterns in Python</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="top-k-element-4">
-  <div class="card-body">
-    <h2 class="card-title">Merge K sorted linked lists</h2>
-
-    <h3 class="card-title">Pop/push from/to min heap one at a time</h3>
     <ul>
-      <li>From all linked lists, push all the items from its head pointer into the min heap.</li>
-      <li>Pop the smallest into the min heap and push the next item (from the same linked list) into the min heap.</li>
-      <li>At the same time, create a node in the resuling linked list one at time.</li>
-      <li>Time: O(nlog(k)) where n is the total number of items in all linked lists and k is the number of linked lists.</li>
-      <li>Space: O(n)</li>
-    </ul>
-
-<pre><code class="python">from heapq import heappush, heappop
-
-
-class LinkedListNode:
-    # __init__ will be used to make a LinkedListNode type object.
-    def __init__(self, data, next=None):
-        self.data = data
-        self.next = next
-
-
-def merge_k_lists(lists):
-
-    min_heap = []
-    # Init head to some placeholder node.
-    head = LinkedListNode(-1)
-    # "temp" will be the pointer at the very beginning.
-    temp = head
-
-    for i, ll in enumerate(lists):
-        heappush(min_heap, (ll.head.data, i))
-
-    while min_heap:
-        item = heappop(min_heap)
-        ll_head_data = item[0]
-        ll_index = item[1]
-
-        lists[ll_index].head = lists[ll_index].head.next
-        if lists[ll_index].head:
-            heappush(min_heap, (lists[ll_index].head.data, ll_index))
-
-        node = LinkedListNode(ll_head_data)
-        head.next = node
-        head = head.next
-
-    return temp.next</code></pre>
-
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li>One of linked lists are empty.</li>
-      <li>Linked lists have different length.</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/courses/grokking-coding-interview-patterns-python">Grokking Coding Interview Patterns in Python</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="top-k-element-5">
-  <div class="card-body">
-    <h2 class="card-title">Kth smallest element in sorted matrix</h2>
-
-    <h3 class="card-title">Pop/push from/to min heap one at a time</h3>
-    <ul>
-      <li>Initally put the first element at each column into min heap.</li>
-      <li>Whenever popping out from min heap, put the rest of items in that row into the min heap.</li>
-      <li>Time: O(nlog(n)) where n is the length of matrix.</li>
-      <li>Space: O(n^2)</li>
-    </ul>
-
-<pre><code class="python">from heapq import heappush, heappop
-
-def kth_smallest_element(matrix, k):
-
-    min_heap = []
-    seen = set()
-    count = 0
-    next_min_number = None
-
-    # Put the first item in each row to min heap.
-    for i, row in enumerate(matrix):
-        heappush(min_heap, (row[0], i))
-
-    while min_heap and count < k:
-        next_min_number, i = heappop(min_heap)
-        if i not in seen:
-            for num in matrix[i][1:]:
-                heappush(min_heap, (num, i))
-            seen.add(i)
-
-        count += 1
-
-    return next_min_number</code></pre>
-
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li>There is zero element in the matrix.</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/courses/grokking-coding-interview-patterns-python">Grokking Coding Interview Patterns in Python</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="top-k-element-6">
-  <div class="card-body">
-    <h2 class="card-title">Median of two sorted arrays</h2>
-
-    <h3 class="card-title">Pop/push from/to min heap one at a time</h3>
-    <ul>
-      <li>Numbers greater than higher median cannot be the overall median.</li>
-      <ui>
-        <li>If list length is even, numbers higher than bigger of two medians must go.</li>
-      </ui>
-      <li>Numbers smaller than smaller median cannot be the overall median.</li>
-      <ui>
-        <li>If list length is even, numbers less than smaller of two medians must go.</li>
-      </ui>
-      <li>Time: O(log(m+n))</li>
-      <li>Space: O(1)</li>
-    </ul>
-
-<pre><code class="python">from heapq import heappush, heappop
-
-def kth_smallest_element(matrix, k):
-
-    min_heap = []
-    seen = set()
-    count = 0
-    next_min_number = None
-
-    # Put the first item in each row to min heap.
-    for i, row in enumerate(matrix):
-        heappush(min_heap, (row[0], i))
-
-    while min_heap and count < k:
-        next_min_number, i = heappop(min_heap)
-        if i not in seen:
-            for num in matrix[i][1:]:
-                heappush(min_heap, (num, i))
-            seen.add(i)
-
-        count += 1
-
-    return next_min_number</code></pre>
-
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li>There is zero element in the matrix.</li>
+      <li>K bigger than length of input array.</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
