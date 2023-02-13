@@ -61,6 +61,7 @@
       <li><a href="#system-design-62">Google Doc</a></li>
       <li><a href="#system-design-100">Google search</a></li>
       <li><a href="#system-design-101">Twitter feed</a></li>
+      <li><a href="#system-design-102">Netflix</a></li>
     </ul>
   </div>
 </div>
@@ -2767,7 +2768,7 @@
       <li>Single model to predict overall engagement or separate models to predict different types of engagement.</li>
     </ul>
 
-    <h4 class="card-title">Logistic regression</h4>
+    <h4 class="card-title">Deep learning</h4>
     <ul>
       <li>Hyperparameters</li>
       <ul>
@@ -2812,6 +2813,207 @@
           <li>Also, consider if new model causes the system to be more complex.</li>
         </ul>
       </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="system-design-102">
+  <div class="card-body">
+    <h2 class="card-title">Netflix</h2>
+
+    <h3 class="card-title">Problem</h3>
+    <ul>
+      <li>Give a user and context (time, location, etc) predict probability of engagement for each movie, and order movies.</li>
+      <li>Will use implicit feedback (user watched the movie or not) rathen explicit feedback (user rated the movie) to gather large training data.</li>
+    </ul>
+
+    <h4 class="card-title">Scale</h4>
+    <ul>
+      <li>50M daily active users.</li>
+      <li>200M total users.</li>
+    </ul>
+
+    <h3 class="card-title">Metric</h3>
+
+    <h4 class="card-title">Online</h4>
+    <ul>
+      <li>Engagement rate: (user clicked a movie / total number of sessions)</li>
+      <li>Videos watched: count videos user watch at least for some time.</li>
+      <li>Session watch time: overall time that user spent watching movies based on recommendation in a session.</li>
+    </ul>
+
+    <h4 class="card-title">Offline</h4>
+    <ul>
+      <li>Mean Average Precision (mAP @ N)</li>
+      <ul>
+        <li>Precision = number of relevant recommendations / total number of recommendations</li>
+        <li>Measures how system performs overall.</li>
+      </ul>
+      <li>Mean Average Recall (mAR @ N)</li>
+      <ul>
+        <li>Recall = number of relevant recommendations / number of all movies</li>
+        <li>Measures how many top recommendation (based on historical data) that system can put in the recommendation list.</li>
+      </ul>
+      <li>F1 score = 2 * (mAP*mAR) / (mAP+mAR)</li>
+    </ul>
+
+    <h3 class="card-title">Architecture</h3>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/netflix1.png" alt="Card image cap">
+    <br>
+    <br>
+
+    <h3 class="card-title">Feature engineering</h3>
+
+    <h4 class="card-title">User</h4>
+    <ul>
+      <li>age</li>
+      <li>gender</li>
+      <li>language</li>
+      <li>country</li>
+      <li>average_session_time</li>
+      <li>last_genre_watched</li>
+      <li>user_actor_histogram: histogram showing historical interaction between users and actors in movies.</li>
+      <li>user_genre_histogram</li>
+      <li>user_language_histogram</li>
+    </ul>
+
+    <h4 class="card-title">Context</h4>
+    <ul>
+      <li>season_of_the_year</li>
+      <li>upcoming_holiday</li>
+      <li>days_to_upcoming_holiday</li>
+      <li>time_of_day</li>
+      <li>day_of_week</li>
+      <li>device</li>
+    </ul>
+
+    <h4 class="card-title">Media</h4>
+    <ul>
+      <li>public-platform-rating</li>
+      <li>revenue</li>
+      <li>time_passed_since_release_date</li>
+      <li>time_on_platform</li>
+      <li>media_watch_history</li>
+      <li>genre</li>
+      <li>movie_duration</li>
+      <li>content_set_time_period</li>
+      <li>content_tags</li>
+      <li>show_season_number</li>
+      <li>country_of_origin</li>
+      <li>release_country</li>
+      <li>release_year</li>
+      <li>release_type</li>
+      <li>maturity_rating</li>
+    </ul>
+
+    <h4 class="card-title">User-media</h4>
+    <ul>
+      <li>user_genre_historical_interaction_3months</li>
+      <li>user_genre_historical_interaction_1year</li>
+      <li>user_and_movie_embedding_similarity</li>
+      <li>user_actor</li>
+      <li>user_director</li>
+      <li>user_language_match</li>
+      <li>user_age_match</li>
+    </ul>
+
+    <h4 class="card-title">Sparse feature</h4>
+    <ul>
+      <li>movie_id</li>
+      <li>title_of_media</li>
+      <li>synopsis</li>
+      <li>original_title</li>
+      <li>distributor</li>
+      <li>creator</li>
+      <li>original_language</li>
+      <li>director</li>
+      <li>first_release_year</li>
+      <li>music_composer</li>
+      <li>actors</li>
+    </ul>
+
+    <h3 class="card-title">Training data generation</h3>
+    <ul>
+      <li>User watched 80% or more of the movie? positive example.</li>
+      <li>User watched 10% or less of the movie? negative example.</li>
+      <li>Between 10% and 80%? uncertain example.</li>
+      <li>Make sure to downsample over-represented class.</li>
+    </ul>
+
+    <h3 class="card-title">Candidate generation</h3>
+    <ul>
+      <li>Select top K movies to recommend to user.</li>
+      <li>Focuses on recall.</li>
+    </ul>
+
+    <h4 class="card-title">Collaborative filtering</h4>
+    <ul>
+      <li>Find simialr users to active user based on historical watches.</li>
+      <li>User and media profiles do not require domain knowledge.</li>
+      <li>Has cold start problem</li>
+      <ul>
+        <li>It is hard to find similar users to current user who had historical interactions.</li>
+        <li>Cannot recommend new movies because they do not have user feedback yet.</li>
+      </ul>
+    </ul>
+
+    <h4 class="card-title">Nearest neighborhood</h4>
+    <ul>
+      <li>Computationally expensive.</li>
+      <li>Task is to predict the feedback for movies that users haven't watched.</li>
+    </ul>
+
+    <h4 class="card-title">Content-based filtering</h4>
+    <ul>
+      <li>Make recommendations based on content of media that user had already interacted with.</li>
+      <li>User and media profiles require some domain knowledge. (Can get this by asking user preference when they sign up)</li>
+      <li>Does not have cold start problem.</li>
+    </ul>
+
+    <h4 class="card-title">Two options for recommending media to user (Given TD-IDF representation for each movie)</h4>
+    <ul>
+      <li>Similarity with historical interactions.</li>
+      <ul>
+        <li>Recommend movies similar to movies that user watched in the past.</li>
+        <li>Compute by taking dot product between movies.</li>
+      </ul>
+      <li>Similarity between media and user profiles.</li>
+    </ul>
+
+    <h4 class="card-title">Embedding-based similarity</h4>
+    <ul>
+      <li>Use deep learning to generate latent vectors/embeddings to represent both movies and users.</li>
+      <li>Then, use KNN to find movies to recommend.</li>
+      <li>Has cold start problem</li>
+      <ul>
+        <li>If any one of user or movie is new, then fewer feedbacks are available.</li>
+        <li>In other words, there is lack of training example to update user and movie embedding vectors.</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Ranking</h3>
+    <ul>
+      <li>Probability of user watching a media.</li>
+      <li>Focuses on precision.</li>
+    </ul>
+
+    <h4 class="card-title">Logistic regression</h4>
+    <ul>
+      <li>When training data is limited.</li>
+    </ul>
+
+    <h4 class="card-title">Deep learning</h4>
+    <ul>
+      <li>When 100M data is available.</li>
+    </ul>
+
+    <h4 class="card-title">Two sparse features to consider</h4>
+    <ul>
+      <li>Videos user watched in the past.</li>
+      <li>User's search terms.</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
