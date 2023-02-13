@@ -47,6 +47,8 @@
       <li><a href="#scikit-learn-1">Scikit-learn</a></li>
       <li><a href="#scikit-learn-2">Linear regression</a></li>
       <li><a href="#scikit-learn-3">Logistic regression</a></li>
+      <li><a href="#scikit-learn-4">Support vector machine</a></li>
+      <li><a href="#scikit-learn-5">K-Nearest Neighbors</a></li>
     </ul>
   </div>
 </div>
@@ -738,7 +740,151 @@ print(confusion_matrix(y_test, model_predict))
 
 # Classification report.
 print(classification_report(y_test, model_predict))</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
+  </div>
+</div>
 
+<div class="card mb-4" id="scikit-learn-4">
+  <div class="card-body">
+    <h2 class="card-title">Support vector machine</h2>
+    <ul>
+      <li>Similar to logistic regression.</li>
+      <li>Unlike logistic regression, separate data classes by maximum distance between the partitioned data points.</li>
+    </ul>
+
+    <h3 class="card-title">Import libraries</h3>
+
+<pre><code class="python">import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.model_selection import GridSearchCV</code></pre>
+
+    <h3 class="card-title">Import dataset</h3>
+
+<pre><code class="python">df = pd.read_csv('advertising.csv')</code></pre>
+
+    <h3 class="card-title">Remove variables</h3>
+
+<pre><code class="python">del df ['Ad Topic Line']
+del df ['Timestamp']</code></pre>
+
+    <h3 class="card-title">Convert non-numeric values</h3>
+
+<pre><code class="python">df = pd.get_dummies(df, columns=['Country','City'])</code></pre>
+
+    <h3 class="card-title">Set X and y variables</h3>
+
+<pre><code class="python">X = df.drop('Clicked on Ad',axis=1)
+y = df['Clicked on Ad']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=10)</code></pre>
+
+    <h3 class="card-title">Set algorithm</h3>
+
+<pre><code class="python">model = SVC()
+model.fit(X_train, y_train)</code></pre>
+
+    <h3 class="card-title">Evaluate</h3>
+
+<pre><code class="python">model_predict = model.predict(X_test)
+
+# Confusion matrix.
+print(confusion_matrix(y_test, model_predict))
+
+# Classification report.
+print(classification_report(y_test, model_predict))</code></pre>
+
+    <h3 class="card-title">Grid search</h3>
+
+<pre><code class="python">hyperparameters = {'C':[10,25,50],'gamma':[0.001,0.0001,0.00001]}
+
+grid = GridSearchCV(SVC(),hyperparameters)
+
+grid.fit(X_train, y_train)
+
+print(grid.best_params_)</code></pre>
+
+    <h3 class="card-title">Grid search predict</h3>
+
+<pre><code class="python">grid_predictions = grid.predict(X_test)
+
+# Confusion matrix.
+print(confusion_matrix(y_test,grid_predictions))
+
+# Classification report.
+print(classification_report(y_test,grid_predictions))</code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="scikit-learn-5">
+  <div class="card-body">
+    <h2 class="card-title">K-Nearest Neighbors</h2>
+    <ul>
+      <li>Full training data is used each time a prediction is made..</li>
+      <li>Not recommended for analyzing large datasets.</li>
+    </ul>
+
+    <h3 class="card-title">Import libraries</h3>
+
+<pre><code class="python">import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import classification_report, confusion_matrix</code></pre>
+
+    <h3 class="card-title">Import dataset</h3>
+
+<pre><code class="python">df = pd.read_csv('advertising.csv')</code></pre>
+
+    <h3 class="card-title">Remove variables</h3>
+
+<pre><code class="python">del df ['Ad Topic Line']
+del df ['Timestamp']
+del df['Male']
+del df ['Country']
+del df ['City']
+
+print(df.head())</code></pre>
+
+    <h3 class="card-title">Scale data</h3>
+
+<pre><code class="python">scaler = StandardScaler()
+scaler.fit(df.drop('Clicked on Ad',axis=1))
+scaled_features = scaler.transform(df.drop('Clicked on Ad',axis=1))</code></pre>
+
+    <h3 class="card-title">Set X and y variables</h3>
+
+<pre><code class="python">X = scaled_features
+y = df['Clicked on Ad']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=10, shuffle=True)</code></pre>
+
+    <h3 class="card-title">Set algorithm</h3>
+
+<pre><code class="python">model = KNeighborsClassifier(n_neighbors=5)
+model.fit(X_train, y_train)</code></pre>
+
+    <h3 class="card-title">Evaluate</h3>
+
+<pre><code class="python">model_predict = model.predict(X_test)
+
+print(confusion_matrix(y_test, model_predict))
+print(classification_report(y_test, model_predict))</code></pre>
+
+    <h3 class="card-title">Optimize</h3>
+    <ul>
+      <li>Experiment with the number of neighbors chosen in step 5 and reduce the number of incorrectly predicted outcomes.</li>
+    </ul>
+
+    <h3 class="card-title">Predict</h3>
+
+<pre><code class="python">model.predict(scaled_features)[0:10]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
