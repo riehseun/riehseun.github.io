@@ -46,6 +46,7 @@
       <li><a href="#top-k-element-1">Kth largest element in a stream</a></li>
       <li><a href="#top-k-element-2">Reorganize string</a></li>
       <li><a href="#top-k-element-3">K closest points to origin</a></li>
+      <li><a href="#top-k-element-4">Top K frequent elements</a></li>
     </ul>
   </div>
 </div>
@@ -218,6 +219,53 @@ def k_closest(points, k):
     <h3 class="card-title">Test cases</h3>
     <ul>
       <li>K bigger than length of input array.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/courses/grokking-coding-interview-patterns-python">Grokking Coding Interview Patterns in Python</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="top-k-element-4">
+  <div class="card-body">
+    <h2 class="card-title">Top K frequent elements</h2>
+
+    <h3 class="card-title">Use min heap of size K</h3>
+    <ul>
+      <li>Create a hash table with number and its frequency mapping.</li>
+      <li>Push number and frequency pair to min heap. When min heap size exceeds K, pop out the root item.</li>
+      <li>Time: O(nlogk)</li>
+      <li>Space: O(n+k) hash table and heap</li>
+    </ul>
+
+<pre><code class="python">from heapq import heappush, heappop
+from collections import defaultdict
+
+def top_k_frequent(arr, k):
+
+    frequency = defaultdict(int)
+
+    for num in arr:
+        frequency[num] += 1
+
+    min_heap = []
+
+    for key,val in frequency.items():
+        heappush(min_heap, [val, key])
+
+        if len(min_heap) > k:
+            heappop(min_heap)
+
+    result = []
+    while min_heap:
+        result.append(heappop(min_heap)[1])
+
+    return result</code></pre>
+
+    <h3 class="card-title">Test cases</h3>
+    <ul>
+      <li>K bigger than length of input array.</li>
+      <li>K bigger than the number of unique numbers in the input array.</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
