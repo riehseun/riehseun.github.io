@@ -343,10 +343,14 @@
 
     <h3 class="card-title">High level design</h3>
     <ul>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
+      <li>The origin server provides the URI namespace to request routing system.</li>
+      <li>The origin server publishes the content to the distribution system.</li>
+      <li>The distribution system distributes the content to the proxy servers and provides feedback to the request routing system.</li>
+      <li>User requests the routing system for a suitable proxy server.</li>
+      <li>The request routing system returns IP address of a proxy server.</li>
+      <li>User requests routes through the scrubber servers for security reasons.</li>
+      <li>The scrubber server forwards good traffic to the edge proxy server.</li>
+      <li>The edge proxy server serves the client reques.</li>
     </ul>
     <img class="img-fluid" class="card-img-top" src="/img/system-design/cdn1.png" alt="Card image cap">
     <br>
@@ -354,21 +358,25 @@
 
     <h3 class="card-title">API</h3>
     <ul>
-      <li>get(key)</li>
-      <li>put(key, value)</li>
+      <li>retrieve_content(proxyserver_id, content_type, description)</li>
+      <li>deliver_content(originserver_id, server_list, content_type, description)</li>
+      <li>request_content(user_id, content_type, description)</li>
+      <li>search_content(proxyserver_id, content_type, description)</li>
+      <li>update_content(proxyserver_id, content_type, description)</li>
     </ul>
 
     <h3 class="card-title">Component design</h3>
 
-    <h4 class="card-title">Vector clock</h4>
+    <h4 class="card-title">Push CDN</h4>
     <ul>
-      <li>A list of (node, counter) pairs.</li>
-      <li>If two objects have different vector clocks, we’re able to tell whether they’re causally related or not.</li>
+      <li>Content gets sent automatically to the CDN proxy servers from the origin server.</li>
+      <li>Appropriate for static content delivery.</li>
     </ul>
 
-    <h4 class="card-title">Merkle tree</h4>
+    <h4 class="card-title">Pull CDN</h4>
     <ul>
-      <li>Keys are hashed and used as the leaves of the tree.</li>
+      <li>A CDN pulls the unavailable data from origin servers when requested by a user.</li>
+      <li>Appropriate for dynamic content delivery.</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
