@@ -67,6 +67,7 @@
       <li><a href="#system-design-102">Netflix</a></li>
       <li><a href="#system-design-103">Tesla</a></li>
       <li><a href="#system-design-104">Entity linking</a></li>
+      <li><a href="#system-design-105">Ad prediction</a></li>
     </ul>
   </div>
 </div>
@@ -3429,6 +3430,215 @@
     <ul>
       <li>Build a model that gives the probability of a candidate being true match for a recognized entity.</li>
       <li>Inputs to this model should be represented by BERT/ELMo embeddings.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="system-design-105">
+  <div class="card-body">
+    <h2 class="card-title">Ad prediction</h2>
+
+    <h3 class="card-title">Problem</h3>
+    <ul>
+      <li>Predict the probability of user engagement with an AD given context (query, device, etc)</li>
+    </ul>
+
+    <h3 class="card-title">Metric</h3>
+
+    <h4 class="card-title">Offline</h4>
+    <ul>
+      <li>AUC (Area under curve)</li>
+      <ul>
+        <li>Common metric for binary classification.</li>
+        <li>Does not penalize how far off predicted score is from the actual label.</li>
+        <li>Insensitive to well-calibrated probabilities.</li>
+      </ul>
+      <li>Log loss (Cross-entropy loss)</li>
+      <ul>
+        <li>Calibration sensitive metric.</li>
+        <li>Captures what degree expected probabilities diverge from class label.</li>
+      </ul>
+    </ul>
+
+    <h4 class="card-title">Online</h4>
+    <ul>
+      <li>Revenue, which is the sum of winning bid value.</li>
+      <ul>
+        <li>If bid is 1 and user clicks the Ad, advertisement is charged 1.</li>
+        <li>Advertiser is not charged unless users click the AD.</li>
+      </ul>
+      <li>Counter metric</li>
+      <ul>
+        <li>Hide the AD.</li>
+        <li>Never see the AD.</li>
+        <li>Report AD as inappropriate.</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Architecture</h3>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/ad-prediction1.png" alt="Card image cap">
+    <br>
+    <br>
+
+    <h4 class="card-title">Auction</h4>
+    <ul>
+      <li>AD rank score = (AD predicted score * bid)</li>
+      <li>Cost per engagement = (AD rank of AD below / AD rank score) + 0.01</li>
+      <li>AD will cost the minimum price that wins the auction.</li>
+    </ul>
+
+    <h4 class="card-title">When user issues a query</h4>
+    <ul>
+      <li>AD selection selects all ADs matching the targeting criteria and predict AD relevance score using simple model.</li>
+      <li>AD selection also ranks the ADs and sends top ADs to AD prediction.</li>
+      <li>AD prediction uses ML model to predict precisely calibrated score.</li>
+      <li>AD auction uses bid and predicted score to pick the top most relevant ADs shown to users.</li>
+    </ul>
+
+    <h3 class="card-title">Feature engineering</h3>
+
+    <h4 class="card-title">Ad</h4>
+    <ul>
+      <li>ad_id</li>
+      <li>ad_content_raw_terms</li>
+      <li>historical_engagement_rate</li>
+      <ul>
+        <li>ad_engagement_history_last_24_hrs</li>
+        <li>ad_engagement_history_last_7_days</li>
+      </ul>
+      <li>ad_impression</li>
+      <li>ad_negative_engagement_rate</li>
+      <li>ad_embedding</li>
+      <li>ad_age</li>
+      <li>ad_bid</li>
+    </ul>
+
+    <h4 class="card-title">Advertiser</h4>
+    <ul>
+      <li>advertiser_domain</li>
+      <li>historical_engagement_rate</li>
+      <li>region_wise_engagement</li>
+    </ul>
+
+    <h4 class="card-title">User</h4>
+    <ul>
+      <li>user_previous_search_terms</li>
+      <li>user_search_terms</li>
+      <li>age</li>
+      <li>gender</li>
+      <li>language</li>
+      <li>embedding_last_k_ads</li>
+      <li>engagement_content_type</li>
+      <li>engagement_days</li>
+      <li>platform_time_spent</li>
+      <li>region</li>
+    </ul>
+
+    <h4 class="card-title">Context</h4>
+    <ul>
+      <li>current_region</li>
+      <li>time</li>
+      <li>device</li>
+      <ul>
+        <li>screen_size</li>
+      </ul>
+    </ul>
+
+    <h4 class="card-title">User-ad</h4>
+    <ul>
+      <li>embedding_similarity</li>
+      <li>region_wise_engagement</li>
+      <li>user_ad_category_histogram</li>
+      <li>user_ad_subcategory_histogram</li>
+      <li>user_gender_ad_histogram</li>
+      <li>user_age_ad_histogram</li>
+    </ul>
+
+    <h4 class="card-title">User-advertiser</h4>
+    <ul>
+      <li>embedding_similarity</li>
+      <li>user_gender_advertiser_histogram</li>
+      <li>user_age_advertiser_histogram</li>
+    </ul>
+
+    <h3 class="card-title">Training data generation</h3>
+
+    <h4 class="card-title">Positive</h4>
+    <ul>
+      <li>Clicks the AD.</li>
+      <li>Add item to cart.</li>
+    </ul>
+
+    <h4 class="card-title">Negative</h4>
+    <ul>
+      <li>Ignore the AD.</li>
+      <li>Negative feedback on AD.</li>
+    </ul>
+
+    <h4 class="card-title">Model recalibration</h4>
+    <ul>
+      <li>Downsample negative examples because it is likely that 98% of data would be negative.</li>
+      <li>Recalibration is needed such that</li>
+      <ul>
+        <li>q = p / ( p + (1-p)/w )</li>
+        <li>q is re-calibrated prediction score.</li>
+        <li>p is prediction in downsampling space.</li>
+        <li>w is downsampling rate.</li>
+      </ul>
+    </ul>
+
+    <h4 class="card-title">Train/test</h4>
+    <ul>
+      <li>Train on first two weeks of data and test on third week of data.</li>
+    </ul>
+
+    <h3 class="card-title">Ad selection</h3>
+
+    <h4 class="card-title">1. Selection</h4>
+    <ul>
+      <li>Build an in-memory index.</li>
+      <li>Issue a query to fetch all Ads that are targeted for the current user.</li>
+      <ul>
+        <li>Ex. Use search term, age, location, gender, etc to fetch the result.</li>
+      </ul>
+    </ul>
+
+    <h4 class="card-title">2. Narrow down selection</h4>
+    <ul>
+      <li>Use (bid * prior cost per engagement score) to pick the top selections.</li>
+      <ul>
+        <li>If no prior score due to being new AD, give slightly higher score.</li>
+      </ul>
+    </ul>
+
+    <h4 class="card-title">3. Rank using simple model</h4>
+    <ul>
+      <li>Select top K Ads from the result of the previous step.</li>
+      <li>Use logistic regression or additive trees.</li>
+      <li>At evaluation, Ads will be ranked basd on (bid * cost per engagement score)</li>
+    </ul>
+
+    <h3 class="card-title">Ad prediction</h3>
+
+    <h4 class="card-title">Online learning</h4>
+    <ul>
+      <li>Refresh model with the latest impression and engagement at regular interval (15min, 30min, etc)</li>
+      <ul>
+        <li>Train base model and add new examples on top of it.</li>
+        <li>Stochastic gradient descent is used.</li>
+      </ul>
+      <li>Generates the latest training examples using an online joiner.</li>
+      <li>Training data generater takes those examples and generates right feature sets.</li>
+      <li>Model trainer runs SGD with those examples.</li>
+    </ul>
+
+    <h4 class="card-title">Non-linear feature generation</h4>
+    <ul>
+      <li>Use additive trees and neural network to generate features.</li>
+      <li>Use features from above in logistic regression.</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
