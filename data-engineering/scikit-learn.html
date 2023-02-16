@@ -48,10 +48,13 @@
       <li><a href="#scikit-learn-2">Linear regression</a></li>
       <li><a href="#scikit-learn-3">Logistic regression</a></li>
       <li><a href="#scikit-learn-4">Support vector machine</a></li>
-      <li><a href="#scikit-learn-5">K-Nearest Neighbors</a></li>
-      <li><a href="#scikit-learn-6">Decision Trees</a></li>
-      <li><a href="#scikit-learn-7">Random Forests</a></li>
-      <li><a href="#scikit-learn-8">Gradient Boosting</a></li>
+      <li><a href="#scikit-learn-5">K-Nearest neighbors</a></li>
+      <li><a href="#scikit-learn-6">Decision trees</a></li>
+      <li><a href="#scikit-learn-7">Random forests</a></li>
+      <li><a href="#scikit-learn-8">Gradient boosting</a></li>
+      <li><a href="#scikit-learn-9">K-means clustering (unsupervised learning)</a></li>
+      <li><a href="#scikit-learn-10">t-SNE (unsupervised learning)</a></li>
+      <li><a href="#scikit-learn-11">Neural network</a></li>
     </ul>
   </div>
 </div>
@@ -828,7 +831,7 @@ print(classification_report(y_test,grid_predictions))</code></pre>
 
 <div class="card mb-4" id="scikit-learn-5">
   <div class="card-body">
-    <h2 class="card-title">K-Nearest Neighbors</h2>
+    <h2 class="card-title">K-Nearest neighbors</h2>
     <ul>
       <li>Full training data is used each time a prediction is made.</li>
       <li>Not recommended for analyzing large datasets.</li>
@@ -896,7 +899,7 @@ print(classification_report(y_test, model_predict))</code></pre>
 
 <div class="card mb-4" id="scikit-learn-6">
   <div class="card-body">
-    <h2 class="card-title">Decision Trees</h2>
+    <h2 class="card-title">Decision trees</h2>
     <ul>
       <li>Interprets patterns by splitting data into groups.</li>
       <li>Uses variables that best split the data.</li>
@@ -947,7 +950,7 @@ print(classification_report(y_test, model_predict))</code></pre>
 
 <div class="card mb-4" id="scikit-learn-7">
   <div class="card-body">
-    <h2 class="card-title">Random Forests</h2>
+    <h2 class="card-title">Random forests</h2>
     <ul>
       <li>Grow multiple decision trees using a randomized selection of input data for each tree.</li>
       <li>Combines the results by averaging the output.</li>
@@ -998,7 +1001,7 @@ print(classification_report(y_test, model_predict))</code></pre>
 
 <div class="card mb-4" id="scikit-learn-8">
   <div class="card-body">
-    <h2 class="card-title">Gradient Boosting</h2>
+    <h2 class="card-title">Gradient noosting</h2>
     <ul>
       <li>Yet another regression/classification technique for aggregating the outcome of multiple decision trees.</li>
       <li>Sequential method that aims to improve the performance of each subsequent tree.</li>
@@ -1133,6 +1136,130 @@ print ("Test Set Mean Absolute Error: %.2f" % mae_test)</code></pre>
 
 new_pred = model.predict([new_property])
 print(new_pred)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="scikit-learn-9">
+  <div class="card-body">
+    <h2 class="card-title">K-means clustering (unsupervised learning)</h2>
+    <ul>
+      <li>Clustering groups similar items in some groups based on some kind of metric.</li>
+    </ul>
+
+<pre><code class="python">import sklearn.datasets as datasets
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+
+X, y = datasets.make_blobs(400, centers=4, cluster_std=0.6, random_state=0)
+
+plt.tight_layout()
+fig3, axe3 = plt.subplots(nrows=1,
+                          ncols=4,
+                          figsize=(14, 6), dpi=800)
+for k in range(2, 6):
+    km = KMeans(n_clusters=k)
+    km.fit(X)
+    pred_y = km.predict(X)
+    axe3[k - 2].scatter(X[:, 0], X[:, 1], c=pred_y)
+    axe3[k - 2].set_title("cluster with k={}".format(k))
+fig3.savefig("output/img.png", dpi = 300)
+plt.close(fig3)</code></pre>
+
+    <h3 class="card-title">Spectral clustering</h3>
+
+<pre><code class="python">import sklearn.datasets as datasets
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans, SpectralClustering
+
+X, y = datasets.make_moons(300, random_state=12, noise=0.05)
+
+fig, axe = plt.subplots(dpi=800)
+sc = SpectralClustering(n_clusters=2,
+                        affinity='nearest_neighbors',
+                        assign_labels='kmeans')
+sc.fit(X)
+pred_y = sc.fit_predict(X)
+axe.scatter(X[:, 0], X[:, 1], c=pred_y)
+fig.savefig("output/img.png", dpi = 300)
+plt.close(fig)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="scikit-learn-10">
+  <div class="card-body">
+    <h2 class="card-title">t-SNE (unsupervised learning)</h2>
+    <ul>
+      <li>Manifold learning is an approach to non-linear dimensionality reduction.</li>
+      <li>While PCA is deterministic, t-SNE is not and it will generate different result each time.</li>
+    </ul>
+
+<pre><code class="python">import sklearn.datasets as datasets
+from sklearn.manifold import TSNE
+import matplotlib.pyplot as plt
+
+X, y = datasets.make_blobs(500, n_features=10, centers=4, random_state=42)
+print("The shape of X is {}".format(X.shape))
+print("The shape of y is {}".format(y.shape))
+
+t = TSNE(random_state=20)
+x_trans = t.fit_transform(X)
+
+print("The shape after the transform is {}".format(x_trans.shape))
+
+fig, axe = plt.subplots(dpi=800)
+axe.scatter(x_trans[:, 0], x_trans[:, 1], c=y)
+fig.savefig("output/img.png", dpi = 300)
+plt.close(fig)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="scikit-learn-11">
+  <div class="card-body">
+    <h2 class="card-title">Neural network</h2>
+
+<pre><code class="python">import sklearn.datasets as datasets
+from sklearn.neural_network import MLPClassifier
+from sklearn.model_selection import train_test_split
+import sklearn.metrics as metrics
+import matplotlib.pyplot as plt
+
+X, y = datasets.make_classification(n_samples=1000,
+                                    n_features=30,
+                                    random_state=10)
+
+print("the shape of X is {}".format(X.shape))
+print("the shape of y is {}".format(y.shape))
+
+train_x, test_x, train_y, test_y = train_test_split(X,
+                                                    y,
+                                                    test_size=0.2,
+                                                    random_state=42)
+
+nn = MLPClassifier(batch_size=32,
+                   hidden_layer_sizes=(64, 32),
+                   solver="sgd",
+                   shuffle=True,
+                   tol=1e-3,
+                   max_iter=300,
+                   learning_rate_init=0.001)
+
+nn.fit(train_x, train_y)
+
+fig, axe = plt.subplots()
+axe.plot(range(len(nn.loss_curve_)), nn.loss_curve_)
+axe.set_xlabel("iteration")
+axe.set_ylabel("loss")
+fig.savefig("output/img.png", dpi = 300)
+plt.close(fig)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
