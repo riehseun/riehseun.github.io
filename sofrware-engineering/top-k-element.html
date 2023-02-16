@@ -47,6 +47,8 @@
       <li><a href="#top-k-element-2">Reorganize string</a></li>
       <li><a href="#top-k-element-3">K closest points to origin</a></li>
       <li><a href="#top-k-element-4">Top K frequent elements</a></li>
+      <li><a href="#top-k-element-5">Kth largest element in an array</a></li>
+      <li><a href="#top-k-element-6">Kth smallest element in a BST</a></li>
     </ul>
   </div>
 </div>
@@ -266,6 +268,102 @@ def top_k_frequent(arr, k):
     <ul>
       <li>K bigger than length of input array.</li>
       <li>K bigger than the number of unique numbers in the input array.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/courses/grokking-coding-interview-patterns-python">Grokking Coding Interview Patterns in Python</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="top-k-element-5">
+  <div class="card-body">
+    <h2 class="card-title">Kth largest element in an array</h2>
+
+    <h3 class="card-title">Use min heap of size K</h3>
+    <ul>
+      <li>Insert first K numbers into min heap.</li>
+      <li>Iterate the rest of the numbers, checking to see if they are greater than the root of min heap. If so, pop it out and insert the greater number.</li>
+      <li>Time: O(nlogk)</li>
+      <li>Space: O(k)</li>
+    </ul>
+
+<pre><code class="python">from heapq import heappush, heappop
+
+def find_kth_largest(arr, k):
+
+    min_heap = []
+
+    for i in range(k):
+        heappush(min_heap, arr[i])
+
+    for j in range(k, len(arr)):
+        if arr[j] > min_heap[0]:
+            heappop(min_heap)
+            heappush(min_heap, arr[j])
+
+    return heappop(min_heap)</code></pre>
+
+    <h3 class="card-title">Test cases</h3>
+    <ul>
+      <li>K bigger than length of input array.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/courses/grokking-coding-interview-patterns-python">Grokking Coding Interview Patterns in Python</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="top-k-element-6">
+  <div class="card-body">
+    <h2 class="card-title">Kth smallest element in a BST</h2>
+
+    <h3 class="card-title">Use min heap of size K</h3>
+    <ul>
+      <li>First do inorder traversal on BST.</li>
+      <li>Insert first K numbers into max heap.</li>
+      <li>Iterate the rest of the numbers, checking to see if they are smaller than the root of max heap. If so, pop it out and insert the smaller number.</li>
+      <li>Time: O(nlogk)</li>
+      <li>Space: O(k)</li>
+    </ul>
+
+<pre><code class="python">class BinaryTreeNode:
+    def __init__(self, data):
+        self.data = data
+        self.left = None
+        self.right = None</code></pre>
+
+<pre><code class="python">from binary_tree_node import *
+from binary_tree import *
+from heapq import heappush, heappop
+
+def kth_smallest_element(root, k):
+    array = []
+    in_order_traversal(root, array)
+
+    max_heap = []
+
+    for i in range(k):
+        heappush(max_heap, -array[i])
+
+    for j in range(k, len(array)):
+        if array[j] < -max_heap[0]:
+            heappop(max_heap)
+            heappush(max_heap, -array[j])
+
+    return -heappop(max_heap)
+
+
+def in_order_traversal(root, array):
+    array.append(root.data)
+
+    if root.left:
+        in_order_traversal(root.left, array)
+    if root.right:
+        in_order_traversal(root.right, array)</code></pre>
+
+    <h3 class="card-title">Test cases</h3>
+    <ul>
+      <li>K bigger than length of input tree.</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
