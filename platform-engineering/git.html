@@ -48,6 +48,7 @@
       <li><a href="#git-3">Git commands</a></li>
       <li><a href="#git-4">Squashing commits</a></li>
       <li><a href="#git-5">Branching</a></li>
+      <li><a href="#git-6">Revert</a></li>
     </ul>
   </div>
 </div>
@@ -177,48 +178,6 @@ git diff &lt;branch_1&gt; &lt;branch_2&gt;
 # Compare a specific file between two branches.
 git diff &lt;branch_1&gt; &lt;branch_2&gt; -- &lt;file&gt;</code></pre>
 
-    <h3 class="card-title">Revert changes in local branch</h3>
-
-<pre><code class="bash"># Show lost commits.
-git reflog
-
-# Revert to a deleted commit. (Assuming &lt;commit_hash&gt; was retrieved from the output of "git reflog")
-git reset --hard &lt;commit_hash&gt;
-
-# Revert to previous commit in the remote.
-git reset --hard &lt;commit_hash&gt; && git push -f origin &lt;branch&gt;
-
-# Discard changes in a particualr file. / Restore a deleted file.
-git checkout HEAD &lt;file&gt;
-
-# Force overwrite local with remote.
-git fetch --all && git reset --hard origin/&lt;branch_name&gt;
-
-# &lt;commit_hash&gt; should come from &lt;source_branch&gt;. Last two steps are to clean up the &lt;source_branch&gt;
-git checkout &lt;target_branch&gt; && git cherry-pick &lt;commit_hash&gt; && git checkout &lt;source_branch&gt; && git reset --hard HEAD~1 </code></pre>
-<!-- probably should use "git branch | grep -v "master" | xargs git branch -D "-->
-
-    <h3 class="card-title">Revert a merged PR</h3>
-
-<pre><code class="bash"># Checkout a branch from master. Ex. git checkout -b revert
-
-# This reverts a particular commit
-git revert -m 1 &lt;commit_hash_of_PR_to_revert&gt;
-
-# This reverts everything up to but not including commit_hash
-git revert -m 1 &lt;commit_hash&gt;..HEAD
-
-# Then push the reverted changes to the branch.
-git push origin revert
-
-# Finally, raise a PR from revert to master</code></pre>
-
-    <h3 class="card-title">Revert a single file</h3>
-
-<pre><code class="bash">git checkout &lt;commit_hash_of_file_to_revert_to&gt; -- &lt;file_including_path&gt;
-git commit -am &lt;commit_message&gt;
-git push origin &lt;branch_name&gt;</code></pre>
-
     <h3 class="card-title">Moving uncommited changes to a new branch</h3>
     <ul>
       <li>Useful for example when accidently made changes to the master branch.</li>
@@ -296,6 +255,57 @@ git branch -a
 
 # Remove all untracked files.
 git clean -f</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="git-6">
+  <div class="card-body">
+    <h2 class="card-title">Revert</h2>
+
+    <h3 class="card-title">Revert changes in local branch</h3>
+
+<pre><code class="bash"># Show lost commits.
+git reflog
+
+# Revert to a deleted commit. (Assuming &lt;commit_hash&gt; was retrieved from the output of "git reflog")
+git reset --hard &lt;commit_hash&gt;
+
+# Revert to previous commit in the remote.
+git reset --hard &lt;commit_hash&gt; && git push -f origin &lt;branch&gt;
+
+# Discard changes in a particualr file. / Restore a deleted file.
+git checkout HEAD &lt;file&gt;
+
+# Force overwrite local with remote.
+git fetch --all && git reset --hard origin/&lt;branch_name&gt;
+
+# &lt;commit_hash&gt; should come from &lt;source_branch&gt;. Last two steps are to clean up the &lt;source_branch&gt;
+git checkout &lt;target_branch&gt; && git cherry-pick &lt;commit_hash&gt; && git checkout &lt;source_branch&gt; && git reset --hard HEAD~1 </code></pre>
+<!-- probably should use "git branch | grep -v "master" | xargs git branch -D "-->
+
+    <h3 class="card-title">Revert a merged PR</h3>
+
+<pre><code class="bash"># Checkout a branch from master. Ex. git checkout -b revert
+
+# This reverts a particular commit
+git revert -m 1 &lt;commit_hash_of_PR_to_revert&gt;
+
+# This reverts everything up to but not including commit_hash
+git revert -m 1 &lt;commit_hash&gt;..HEAD
+
+# Then push the reverted changes to the branch.
+git push origin revert
+
+# Finally, raise a PR from revert to master</code></pre>
+
+    <h3 class="card-title">Revert a single file</h3>
+
+<pre><code class="bash">git checkout &lt;commit_hash_of_file_to_revert_to&gt; -- &lt;file_including_path&gt;
+git commit -am &lt;commit_message&gt;
+git push origin &lt;branch_name&gt;</code></pre>
   </div>
   <div class="card-footer text-muted">
 
