@@ -3016,23 +3016,53 @@
 <div class="card mb-4" id="system-design-102">
   <div class="card-body">
     <h2 class="card-title">Netflix</h2>
-
-    <h3 class="card-title">Problem</h3>
     <ul>
       <li>Give a user and context (time, location, etc) predict probability of engagement for each movie, and order movies.</li>
       <li>Will use implicit feedback (user watched the movie or not) rathen explicit feedback (user rated the movie) to gather large training data.</li>
     </ul>
 
-    <h4 class="card-title">Scale</h4>
+    <h3 class="card-title">Requirement</h3>
+
+    <h4 class="card-title">Training</h4>
     <ul>
-      <li>50M daily active users.</li>
-      <li>200M total users.</li>
+      <li>Train many times during the day to capture temporal changes.</li>
+    </ul>
+
+    <h4 class="card-title">Inference</h4>
+    <ul>
+      <li>Latency needs to be under 200ms.</li>
+      <li>Balance between exploitation (relevancy) and exploration (fresh new content)</li>
+    </ul>
+
+    <h3 class="card-title">Estimation</h3>
+    <ul>
+      <li>1B total users.</li>
+      <li>150M video views per month.</li>
+      <li>10% of videos are watched from recommendations (15M).</li>
+      <li>User sees 100 videos on homepage.</li>
+      <li>User watches 2 out of 100 recommendations.</li>
+      <li>If user does not click video in 10 minutes, it is missed recommendation.</li>
+    </ul>
+
+    <h4 class="card-title">Storage</h4>
+    <ul>
+      <li>15B positive labels and 750B negative labels per month.</li>
+      <li>Hundreds of features per data point, costing 500 bytes.</li>
+      <li>800B row of data point per month.</li>
+      <li>Total: 500 * 800 * 10^9 = 4 * 10^14 bytes = 0.4PB per month. Keep old data past 6 months to cold storage to save cost.</li>
+    </ul>
+
+    <h4 class="card-title">Bandwidth</h4>
+    <ul>
+      <li>Generate recommendation for 10M users per second.</li>
+      <li>Each request will generate ranks for 1k-10k videos.</li>
     </ul>
 
     <h3 class="card-title">Metric</h3>
 
     <h4 class="card-title">Online</h4>
     <ul>
+      <li>Use A/B testing to compare.</li>
       <li>Engagement rate: (user clicked a movie / total number of sessions)</li>
       <li>Videos watched: count videos user watch at least for some time.</li>
       <li>Session watch time: overall time that user spent watching movies based on recommendation in a session.</li>
@@ -3051,10 +3081,14 @@
         <li>Measures how many top recommendation (based on historical data) that system can put in the recommendation list.</li>
       </ul>
       <li>F1 score = 2 * (mAP*mAR) / (mAP+mAR)</li>
+      <li>Ranking loss, and logloss.</li>
     </ul>
 
     <h3 class="card-title">Architecture</h3>
     <img class="img-fluid" class="card-img-top" src="/img/system-design/netflix1.png" alt="Card image cap">
+    <br>
+    <br>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/netflix2.png" alt="Card image cap">
     <br>
     <br>
 
