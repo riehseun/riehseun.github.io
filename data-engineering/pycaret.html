@@ -46,6 +46,9 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#pycaret-1">Regression</a></li>
       <li><a href="#pycaret-2">Classification</a></li>
+      <li><a href="#pycaret-3">Clustering</a></li>
+      <li><a href="#pycaret-4">Anomaly detection</a></li>
+      <li><a href="#pycaret-5">Natural language processing</a></li>
     </ul>
   </div>
 </div>
@@ -254,6 +257,283 @@ tuned_model = tune_model(model_cat, optimize = 'Accuracy', fold = 4, tuner_verbo
 
 <pre><code class="python">predictions = predict_model(model)
 predictions.head(10)</code></pre>
+
+    <h3 class="card-title">Plotting the model</h3>
+
+<pre><code class="python">plot_model(model, 'confusion_matrix')</code></pre>
+
+    <h3 class="card-title">Finalizing and saving the model</h3>
+
+<pre><code class="python">final_model = finalize_model(model)
+save_model(final_model, 'classification_model')</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="pycaret-3">
+  <div class="card-body">
+    <h2 class="card-title">Clustering</h2>
+
+    <h3 class="card-title">Import libraries</h3>
+
+<pre><code class="python">import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+import seaborn as sns
+from pycaret.clustering import *
+from sklearn.datasets import make_blobs
+mpl.rcParams['figure.dpi'] = 300</code></pre>
+
+    <h3 class="card-title">Generating a synthetic dataset</h3>
+
+<pre><code class="python">cols = ['column1', 'column2', 'column3',
+        'column4', 'column5']
+arr = make_blobs(n_samples = 1000, n_features = 5, random_state = 20,
+                 centers = 3, cluster_std = 1)
+data = pd.DataFrame(data = arr[0], columns = cols)
+data.head()</code></pre>
+
+    <h3 class="card-title">Exploratory data analysis</h3>
+
+<pre><code class="python"># Histogram
+
+data.hist(bins = 30, figsize = (10,7), grid = False)
+plt.show()
+
+# Color-encoded matrix
+
+plt.figure(figsize=(8, 6))
+sns.heatmap(data.corr().round(decimals=2), annot=True)
+plt.show()
+
+# Scatter plot
+
+plt.figure(figsize=(8, 6))
+sns.heatmap(data.corr().round(decimals=2), annot=True)
+plt.show()</code></pre>
+
+    <h3 class="card-title">Initializing PyCaret environment</h3>
+
+<pre><code class="python">cluster = setup(data,silent=True, session_id = 7652)</code></pre>
+
+    <h3 class="card-title">Creating the model</h3>
+
+<pre><code class="python">model = create_model('kmeans')
+
+plot_model(model, 'elbow')
+
+# After using the elbow method to find the optimal number of clusters, we train the K-means model again.
+model = create_model('kmeans', num_clusters = 3)
+
+# PCA plot
+
+plot_model(model, 'cluster')</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="pycaret-4">
+  <div class="card-body">
+    <h2 class="card-title">Anomaly detection</h2>
+
+    <h3 class="card-title">Import libraries</h3>
+
+<pre><code class="python">import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+import seaborn as sns
+from pycaret.datasets import get_data
+from pycaret.anomaly import *
+mpl.rcParams['figure.dpi'] = 300</code></pre>
+
+    <h3 class="card-title">Loading the dataset</h3>
+
+<pre><code class="python">numeric = ['Fresh','Milk','Grocery','Frozen','Detergents_Paper','Delicassen']
+categorical = ['Channel','Region']
+replace_dict = { "Channel": {1: "Horeca", 2: "Retail"},
+                 "Region":  {1: "Lisbon", 2: "Oporto", 3: "Other"} }
+data = get_data('wholesale', verbose = False)
+data.replace(replace_dict, inplace = True)
+data.head(10)</code></pre>
+
+    <h3 class="card-title">Exploratory data analysis</h3>
+
+<pre><code class="python"># Histogram
+
+data[numeric].hist(bins=30, figsize=(9,8), grid=False)
+plt.show()
+
+# Numeric and categorical features
+
+fig, axes = plt.subplots(1, 2, figsize = (9,4))
+for ax, col in zip(axes.flatten(), categorical):
+  sns.histplot(data=data, x ='Grocery', hue=col,
+                 multiple='stack', ax=ax)
+plt.show()
+
+# Box plot
+
+fig, ax = plt.subplots(figsize = (9,7))
+sns.boxplot(data=data[numeric], orient='h', ax = ax)
+ax.set_xlim(0, 60000)
+plt.show()
+
+# Bar plot
+
+fig, ax = plt.subplots(figsize = (9,7))
+sns.boxplot(data=data[numeric], orient='h', ax = ax)
+ax.set_xlim(0, 60000)
+plt.show()
+
+# Heatmap plot
+
+plt.figure(figsize=(9, 7))
+sns.heatmap(data.corr().round(decimals=2), annot=True)
+plt.show()
+
+# Scatter plot
+
+cols = ['Milk', 'Grocery', 'Frozen', 'Detergents_Paper']
+sns.pairplot(data, vars=cols, hue='Channel')
+plt.show()</code></pre>
+
+    <h3 class="card-title">Initializing PyCaret environment</h3>
+
+<pre><code class="python">anomaly = setup(data, silent=True, session_id = 8477)</code></pre>
+
+    <h3 class="card-title">Creating the model</h3>
+
+<pre><code class="python">model = create_model('lof', fraction = 0.05)
+data_assigned = assign_model(model)
+data_assigned.head(10)</code></pre>
+
+    <h3 class="card-title">Inliers and outliers</h3>
+
+<pre><code class="python">data_inliers = data_assigned.query('Anomaly == 0')
+data_outliers = data_assigned.query('Anomaly == 1')
+data_outliers.head(10)</code></pre>
+
+    <h3 class="card-title">Evaluating the model</h3>
+
+<pre><code class="python">data_skew = data[numeric].skew()
+inliers_skew = data_inliers[numeric].skew()
+print("Skewness of original dataset")
+print(data_skew.round(decimals=2).to_string())
+print("Mean skewness %0.2f" %data_skew.mean())
+print("\nSkewness of inlier dataset")
+print(inliers_skew.round(decimals=2).to_string())
+print("Mean skewness %0.2f" %inliers_skew.mean())</code></pre>
+
+    <h3 class="card-title">Plotting the model</h3>
+
+<pre><code class="python">cols = ['Milk', 'Grocery', 'Frozen', 'Detergents_Paper']
+sns.pairplot(data_assigned, vars=cols, hue='Anomaly', diag_kind = 'hist')
+plt.show()
+
+plot_model(model, 'umap')</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="pycaret-5">
+  <div class="card-body">
+    <h2 class="card-title">Natural language processing</h2>
+
+    <h3 class="card-title">Import libraries</h3>
+
+<pre><code class="python">import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+from wordcloud import WordCloud
+from spacy.lang.en.stop_words import STOP_WORDS
+from pycaret import nlp
+from pycaret import classification
+mpl.rcParams['figure.dpi'] = 300</code></pre>
+
+    <h3 class="card-title">Loading the dataset</h3>
+
+<pre><code class="python">data = pd.read_csv('bbc-text.csv')
+data.head(10)
+
+# Getting dataset info
+
+data.info()</code></pre>
+
+    <h3 class="card-title">Exploratory data analysis</h3>
+
+<pre><code class="python"># Plotting the bar chart
+
+color = ['C0', 'C1', 'C2', 'C3', 'C4']
+categories = data['category'].value_counts()
+categories.plot(kind = 'bar', figsize = (12,8), color = color)
+plt.show()
+
+# Plotting word cloud
+
+wc = WordCloud(width = 1800, height = 1200, stopwords = STOP_WORDS,
+     background_color = 'white', min_word_length = 3, max_words = 100)
+
+data_tech = data.query(" category == 'tech' ")['text']
+text_tech = ' '.join(data_tech.to_list())
+wc_img = wc.generate(text_tech)
+
+plt.figure(figsize = (12,8))
+plt.imshow(wc_img, interpolation = 'bilinear')
+plt.axis("off")
+plt.show()
+
+# Visualize word frequencies in bar chart
+
+text = ' '.join(data['text'].to_list())
+freq = wc.process_text(text)
+df_freq = pd.DataFrame.from_dict(freq, orient='index', columns=['frequency'])
+df_freq = df_freq.sort_values('frequency')
+df_freq[-20:].plot(kind = 'barh', figsize = (10,8))
+
+plt.show()</code></pre>
+
+    <h3 class="card-title">Initializing NLP environment</h3>
+
+<pre><code class="python">nlp_ = nlp.setup(data = data, target='text', session_id = 6842)
+data_ = nlp.get_config('data_')
+data_.head(10)</code></pre>
+
+    <h3 class="card-title">Creating the topic model</h3>
+
+<pre><code class="python">cols = ['Topic_0','Topic_1','Topic_2',
+        'Topic_3','Topic_4','category']
+
+lda = nlp.create_model('lda', num_topics = 5)
+data_assigned = nlp.assign_model(lda)
+data_assigned_ = data_assigned[cols]
+
+data_assigned_.head(10)</code></pre>
+
+    <h3 class="card-title">Plotting the model</h3>
+
+<pre><code class="python">nlp.plot_model(model = lda, plot = 'topic_model')</code></pre>
+
+    <h3 class="card-title">Classification environment setup</h3>
+
+<pre><code class="python">classf = classification.setup(data_assigned_, target = 'category',
+    fix_imbalance = True, silent=True, train_size = 0.8, session_id = 3100)</code></pre>
+
+    <h3 class="card-title">Creating the model</h3>
+
+<pre><code class="python">catboost = classification.create_model('catboost')</code></pre>
+
+    <h3 class="card-title">Finalizing and saving the models</h3>
+
+<pre><code class="python">catboost_final = classification.finalize_model(catboost)
+nlp.save_model(lda, 'lda_model')
+save=classification.save_model(catboost_final, 'catboost_model')</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
