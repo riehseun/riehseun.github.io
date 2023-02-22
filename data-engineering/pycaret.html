@@ -45,10 +45,7 @@
     <p class="card-text"></p>
     <ul class="list-unstyled mb-0">
       <li><a href="#pycaret-1">Regression</a></li>
-      <li><a href="#pycaret-2">Linear regression</a></li>
-      <li><a href="#pycaret-3">Logistic regression</a></li>
-      <li><a href="#pycaret-4">Support vector machine</a></li>
-      <li><a href="#pycaret-5">K-Nearest neighbors</a></li>
+      <li><a href="#pycaret-2">Classification</a></li>
     </ul>
   </div>
 </div>
@@ -173,392 +170,90 @@ save_model(final_model, 'regression_model')</code></pre>
 
 <div class="card mb-4" id="pycaret-2">
   <div class="card-body">
-    <h2 class="card-title">Linear regression</h2>
+    <h2 class="card-title">Classification</h2>
 
     <h3 class="card-title">Import libraries</h3>
 
-<pre><code class="python">import pandas as pd
-import seaborn as sns
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-from sklearn import metrics</code></pre>
-
-    <h3 class="card-title">Import dataset</h3>
-
-<pre><code class="python">df = pd.read_csv('Melbourne_housing_FULL.csv')</code></pre>
-
-    <h3 class="card-title">Remove variables</h3>
-
-<pre><code class="python">del df['Address']
-del df['Method']
-del df['SellerG']
-del df['Date']
-del df['Postcode']
-del df['YearBuilt']
-del df['Type']
-del df['Lattitude']
-del df['Longtitude']
-del df['Regionname']
-del df['Suburb']
-del df ['CouncilArea']
-
-df.isnull().sum()
-
-df_heat = df.corr()
-sns.heatmap(df_heat,annot=True,cmap='coolwarm')
-
-#df.shape
-
-#Remove variables
-del df ['Bedroom2']  # Highly correlated with Rooms (0.95)
-del df ['Landsize']  # Low correlation (0.033) to the dependent variable of Price.
-del df ['Propertycount']  # Low correlation (0.059) to the dependent variable of Price.</code></pre>
-
-    <h3 class="card-title">Remove or modify variables with missing values</h3>
-    <ul>
-      <li>Use the mean to fill variables with partial correlation to Price.</li>
-      <li>Remove rows for variables with a small number of missing values.</li>
-      <li>Avoid filling values for variables with significant correlation to Price. Instead, remove those missing values row-by-row.</li>
-    </ul>
-
-<pre><code class="python"># Remove variable BuildingArea.
-del df ['BuildingArea']
-
-# Fill missing values with the mean for the variable Car.
-df['Car'].fillna(df['Car'].mean(),inplace=True)
-
-# Drop remaining missing values on a row-by-row basis.
-df.dropna(axis=0, how='any', thresh=None, subset=None, inplace=True)
-
-df.shape</code></pre>
-
-    <h3 class="card-title">Set X and y variables</h3>
-
-<pre><code class="python">X = df[['Rooms', 'Distance', 'Bathroom', 'Car']]
-y = df['Price']
-
-# Let’s also shuffle and sub-divide the data into training and test sets using a standard 70/30 split.
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=10, shuffle=True)</code></pre>
-
-    <h3 class="card-title">Set algorithm</h3>
-
-<pre><code class="python">model = LinearRegression()
-model.fit(X_train, y_train)</code></pre>
-
-    <h3 class="card-title">Find y-intercept and X coefficients</h3>
-
-<pre><code class="python"># Find y-intercept.
-print("model.intercept_ result:")
-print(model.intercept_)
-print("")
-
-# Find x coefficients.
-print("model.coef_ result:")
-print(model.coef_)
-print("")
-
-model_results = pd.DataFrame(model.coef_, X.columns, columns=['Coefficients'])
-print(model_results)</code></pre>
-
-    <h3 class="card-title">Predict</h3>
-
-<pre><code class="python">new_house = [
-  2, #Rooms
-  2.5, #Distance
-  1, #Bathroom
-  1, #Car
-]
-
-new_house_predict = model.predict([new_house])
-print(new_house_predict)</code></pre>
-
-    <h3 class="card-title">Evaluate</h3>
-
-<pre><code class="python">prediction = model.predict(X_test)
-print(metrics.mean_absolute_error(y_test, prediction))</code></pre>
-
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="pycaret-3">
-  <div class="card-body">
-    <h2 class="card-title">Logistic regression</h2>
-
-    <h3 class="card-title">Import libraries</h3>
-
-<pre><code class="python">import pandas as pd
+<pre><code class="python">import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import seaborn as sns
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import confusion_matrix, classification_report</code></pre>
+from pycaret.datasets import get_data
+from pycaret.classification import *
+mpl.rcParams['figure.dpi'] = 300</code></pre>
 
     <h3 class="card-title">Import dataset</h3>
 
-<pre><code class="python">df = pd.read_csv('18k_Projects.csv', dtype='unicode')</code></pre>
-
-    <h3 class="card-title">Remove variables</h3>
-
-<pre><code class="python">del df ['Id']
-del df ['Name']
-del df ['Url']
-del df ['Location']
-del df ['Pledged']
-del df ['Creator']
-del df ['Category']
-del df ['Updates']
-del df ['Start']
-del df ['End']
-del df ['Latitude']
-del df ['Longitude']
-del df ['Start Timestamp (UTC)']
-del df ['End Timestamp (UTC)']
-del df ['Creator Bio']
-del df ['Creator Website']
-
-print(df.shape)</code></pre>
-
-    <h3 class="card-title">Convert non-numeric values</h3>
-
-<pre><code class="python">df = pd.get_dummies(df, columns=['State', 'Currency', 'Top Category', 'Facebook Connected', 'Has Video'], drop_first = True)
-print(df.shape)</code></pre>
-
-    <h3 class="card-title">Remove and fill missing values</h3>
-
-<pre><code class="python">print(df.isnull().sum())
-
-print(df.describe())
-
-# Distribution plot of variable 'Facebook Friends'.
-plt.figure(figsize=(12,6))
-sns.distplot(df['Facebook Friends'], kde=True, hist=0)
-
-# Distribution plot of variable 'Creator - # Projects Backed'.
-plt.figure(figsize=(12,6))
-sns.distplot(df['Creator - # Projects Backed'], kde=True, hist=0)
-
-# Fill missing values for 'Creator - # Projects Backed' with the mean value.
-df['Creator - # Projects Backed'].fillna(df['Creator - # Projects Backed'].astype(float).mean(), inplace=True)
-
-# Drop remaining missing values for remaining variables.
-df.dropna(axis=0, how='any', thresh=None, subset=None, inplace=True)
-
-print(df.shape)</code></pre>
-
-    <h3 class="card-title">Set X and y variables</h3>
-
-<pre><code class="python">X = df.drop('State_successful',axis=1)
-y = df['State_successful']
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=10, shuffle=True)</code></pre>
-
-    <h3 class="card-title">Set algorithm</h3>
-
-<pre><code class="python">model = LogisticRegression(max_iter=10000)
-model.fit(X_train, y_train)</code></pre>
-
-    <h3 class="card-title">Predict</h3>
-
-<pre><code class="python">model_predict = model.predict(X_test)
-new_project = [
-    0, #Comments
-    9, #Rewards
-    2500, #Goal
-    157, #Backers
-    31, #Duration in Days
-    319, #Facebook Friends
-    110, #Facebook Shares
-    1, #Creator - # Projects Created
-    0, #Creator - # Projects Backed
-    0, ## Videos
-    12, ## Images
-    872, ## Words (Description)
-    65, ## Words (Risks and Challenges)
-    0, ## FAQs
-    0, #Currency_AUD
-    1, #Currency_CAD
-    0, #Currency_EUR
-    0, #Currency_GBP
-    0, #Currency_NZD
-    0, #Currency_USD
-    0, #Top Category_Art
-    0, #Top Category_Comics
-    0, #Top Category_Crafts
-    0, #Top Category_Dance
-    0, #Top Category_Design
-    0, #Top Category_Fashion
-    1, #Top Category_Film & Video
-    0, #Top Category_Food
-    0, #Top Category_Games
-    0, #Top Category_Journalism
-    0, #Top Category_Music
-    0, #Top Category_Photography
-    0, #Top Category_Publishing
-    0, #Top Category_Technology
-    0, #Top Category_Theater
-    #0, #Facebook Connected_No
-    #0, #Facebook Connected_Yes
-    #0, #Has Video_No
-    #1, #Has Video_Yes
-]
-new_pred = model.predict([new_project])
-print(new_pred)</code></pre>
+<pre><code class="python">data = get_data('iris')
 
-    <h3 class="card-title">Evaluate</h3>
+data.info()</code></pre>
 
-<pre><code class="python"># Confusion matrix.
-print(confusion_matrix(y_test, model_predict))
+    <h3 class="card-title">Exploratory data analysis</h3>
 
-# Classification report.
-print(classification_report(y_test, model_predict))</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
-  </div>
-</div>
+<pre><code class="python"># Plotting pie chart
 
-<div class="card mb-4" id="pycaret-4">
-  <div class="card-body">
-    <h2 class="card-title">Support vector machine</h2>
-    <ul>
-      <li>Similar to logistic regression.</li>
-      <li>Unlike logistic regression, separate data classes by maximum distance between the partitioned data points.</li>
-    </ul>
+data['species'].value_counts().plot(kind='pie')
+plt.ylabel('')
+plt.show()
 
-    <h3 class="card-title">Import libraries</h3>
+# Plotting box plot
 
-<pre><code class="python">import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.svm import SVC
-from sklearn.metrics import classification_report, confusion_matrix
-from sklearn.model_selection import GridSearchCV</code></pre>
+fig, axes = plt.subplots(2, 2, figsize = (9, 7))
+for ax, col in zip(axes.flatten(), data.columns) :
+  sns.boxplot(data = data, x = 'species', y = col, ax = ax)
+  ax.set_xlabel('')
 
-    <h3 class="card-title">Import dataset</h3>
+# Drawing color-encoded matrix
 
-<pre><code class="python">df = pd.read_csv('advertising.csv')</code></pre>
+plt.figure(figsize=(8, 6))
+sns.heatmap(data.corr().round(decimals=2), annot=True)
+plt.show()
 
-    <h3 class="card-title">Remove variables</h3>
+# Drawing scatter plots
 
-<pre><code class="python">del df ['Ad Topic Line']
-del df ['Timestamp']</code></pre>
+sns.pairplot(data, hue='species')
+plt.show()</code></pre>
 
-    <h3 class="card-title">Convert non-numeric values</h3>
+    <h3 class="card-title">Initializing PyCaret environment</h3>
 
-<pre><code class="python">df = pd.get_dummies(df, columns=['Country','City'])</code></pre>
+<pre><code class="python">classf = setup(data = data, target = 'species', train_size = 0.8,
+normalize = True,silent=True, session_id = 3934)</code></pre>
 
-    <h3 class="card-title">Set X and y variables</h3>
+    <h3 class="card-title">Comparing classification models</h3>
 
-<pre><code class="python">X = df.drop('Clicked on Ad',axis=1)
-y = df['Clicked on Ad']
+<pre><code class="python">import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+import seaborn as sns
+from pycaret.datasets import get_data
+from pycaret.classification import *
+mpl.rcParams['figure.dpi'] = 300
+data = get_data('iris')
+classf = setup(data = data, target = 'species', train_size = 0.8, normalize = True,silent=True, session_id = 3934)
+# Comparing classification models
+compare_models(sort = 'Accuracy')</code></pre>
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=10)</code></pre>
+    <h3 class="card-title">Creating the model</h3>
 
-    <h3 class="card-title">Set algorithm</h3>
+<pre><code class="python">model = create_model('lda')</code></pre>
 
-<pre><code class="python">model = SVC()
-model.fit(X_train, y_train)</code></pre>
+    <h3 class="card-title">Tuning the model</h3>
 
-    <h3 class="card-title">Evaluate</h3>
+<pre><code class="python">model_cat = create_model('catboost', verbose = False)
+params = {'iterations': np.arange(100, 1000, 100),
+       'max_depth': np.arange(1, 10),
+       'learning_rate': np.arange(0.01, 1, 0.01),
+       'random_strength': np.arange(0.1, 1.0, 0.1),
+       'l2_leaf_reg': np.arange(1, 100),
+       'border_count': np.arange(1, 256)}
+tuned_model = tune_model(model_cat, optimize = 'Accuracy', fold = 4, tuner_verbose = False, search_library = 'scikit-optimize', custom_grid = params, n_iter = 15)</code></pre>
 
-<pre><code class="python">model_predict = model.predict(X_test)
+    <h3 class="card-title">Making predictions</h3>
 
-# Confusion matrix.
-print(confusion_matrix(y_test, model_predict))
-
-# Classification report.
-print(classification_report(y_test, model_predict))</code></pre>
-
-    <h3 class="card-title">Grid search</h3>
-
-<pre><code class="python">hyperparameters = {'C':[10,25,50],'gamma':[0.001,0.0001,0.00001]}
-
-grid = GridSearchCV(SVC(),hyperparameters)
-
-grid.fit(X_train, y_train)
-
-print(grid.best_params_)</code></pre>
-
-    <h3 class="card-title">Grid search predict</h3>
-
-<pre><code class="python">grid_predictions = grid.predict(X_test)
-
-# Confusion matrix.
-print(confusion_matrix(y_test,grid_predictions))
-
-# Classification report.
-print(classification_report(y_test,grid_predictions))</code></pre>
-
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="pycaret-5">
-  <div class="card-body">
-    <h2 class="card-title">K-Nearest neighbors</h2>
-    <ul>
-      <li>Full training data is used each time a prediction is made.</li>
-      <li>Not recommended for analyzing large datasets.</li>
-    </ul>
-
-    <h3 class="card-title">Import libraries</h3>
-
-<pre><code class="python">import pandas as pd
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import classification_report, confusion_matrix</code></pre>
-
-    <h3 class="card-title">Import dataset</h3>
-
-<pre><code class="python">df = pd.read_csv('advertising.csv')</code></pre>
-
-    <h3 class="card-title">Remove variables</h3>
-
-<pre><code class="python">del df ['Ad Topic Line']
-del df ['Timestamp']
-del df['Male']
-del df ['Country']
-del df ['City']
-
-print(df.head())</code></pre>
-
-    <h3 class="card-title">Scale data</h3>
-
-<pre><code class="python">scaler = StandardScaler()
-scaler.fit(df.drop('Clicked on Ad',axis=1))
-scaled_features = scaler.transform(df.drop('Clicked on Ad',axis=1))</code></pre>
-
-    <h3 class="card-title">Set X and y variables</h3>
-
-<pre><code class="python">X = scaled_features
-y = df['Clicked on Ad']
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=10, shuffle=True)</code></pre>
-
-    <h3 class="card-title">Set algorithm</h3>
-
-<pre><code class="python">model = KNeighborsClassifier(n_neighbors=5)
-model.fit(X_train, y_train)</code></pre>
-
-    <h3 class="card-title">Evaluate</h3>
-
-<pre><code class="python">model_predict = model.predict(X_test)
-
-print(confusion_matrix(y_test, model_predict))
-print(classification_report(y_test, model_predict))</code></pre>
-
-    <h3 class="card-title">Optimize</h3>
-    <ul>
-      <li>Experiment with the number of neighbors chosen in step 5 and reduce the number of incorrectly predicted outcomes.</li>
-    </ul>
-
-    <h3 class="card-title">Predict</h3>
-
-<pre><code class="python">model.predict(scaled_features)[0:10]</code></pre>
+<pre><code class="python">predictions = predict_model(model)
+predictions.head(10)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
