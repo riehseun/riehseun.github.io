@@ -44,9 +44,14 @@
     <h2 class="card-title">Linked list</h2>
     <ul class="list-unstyled mb-0">
       <li><a href="#linkedlist-1">Linked list</a></li>
-      <li><a href="#linkedlist-2">Insertion at tail</a></li>
-      <li><a href="#linkedlist-3">Search in a singly linked list</a></li>
-      <li><a href="#linkedlist-4">Delete in a singly linked list</a></li>
+      <li><a href="#linkedlist-2">Reverse linked list</a></li>
+      <li><a href="#linkedlist-3">Search</a></li>
+      <li><a href="#linkedlist-4">Insert at head</a></li>
+      <li><a href="#linkedlist-5">Insert at tail</a></li>
+      <li><a href="#linkedlist-6">Delete at head</a></li>
+      <li><a href="#linkedlist-7">Delete by value</a></li>
+      <li><a href="#linkedlist-8">Delete by value (Doubly)</a></li>
+      <li><a href="#linkedlist-9">Find length</a></li>
     </ul>
   </div>
 </div>
@@ -62,34 +67,33 @@
       <li>Delete (at tail): O(n)</li>
     </ul>
 
-<pre><code class="python">class Node:
-    def __init__(self, data):
+<pre><code class="python"># Singly.
+class Node:
+    def __init__(self, data=0, next=None):
         self.data = data
-        self.next_element = None</code></pre>
+        self.next = next
 
-<pre><code class="python">from Node import Node
+# Doubly.
+class Node:
+    def __init__(self, data=0, next=None, prev=None):
+        self.data = data
+        self.prev = prev
+        self.next = next</code></pre>
+  </div>
+  <div class="card-footer text-muted">
 
+  </div>
+</div>
 
-class LinkedList:
-    def __init__(self):
-        self.head_node = None
-
-    def get_head(self):
-        return self.head_node
-
-    def is_empty(self):
-        if(self.head_node is None):  # Check whether the head is None
-            return True
-        else:
-            return False</code></pre>
-
-    <h3 class="card-title">Reverse linked list</h3>
+<div class="card mb-4" id="linkedlist-2">
+  <div class="card-body">
+    <h2 class="card-title">Reverse linked list</h2>
 
 <pre><code class="python">prev = None
     nex = None
     while head:
-        nex = head.next_element
-        head.next_element = prev
+        nex = head.next
+        head.next = prev
         prev = head
         head = nex
     head = prev</code></pre>
@@ -99,47 +103,18 @@ class LinkedList:
   </div>
 </div>
 
-<div class="card mb-4" id="linkedlist-2">
-  <div class="card-body">
-    <h2 class="card-title">Insertion at tail</h2>
-
-<pre><code class="python">from LinkedList import LinkedList
-from Node import Node
-
-
-def insert_at_tail(lst, value):
-
-    node = Node(value)
-    head = lst.get_head()
-
-    # If linked list is empty
-    if head is None:
-        lst.head_node = node
-        return
-
-    while head.next_element:
-        head = head.next_element
-
-    head.next_element = node
-    return</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-
-  </div>
-</div>
-
 <div class="card mb-4" id="linkedlist-3">
   <div class="card-body">
-    <h2 class="card-title">Search in a singly linked list</h2>
+    <h2 class="card-title">Search</h2>
 
 <pre><code class="python">def search(lst, value):
 
     head = lst.get_head()
 
-    while head.next_element:
+    while head.next:
         if head.data == value:
             return True
-        head = head.next_element
+        head = head.next
 
     return False</code></pre>
   </div>
@@ -150,15 +125,137 @@ def insert_at_tail(lst, value):
 
 <div class="card mb-4" id="linkedlist-4">
   <div class="card-body">
-    <h2 class="card-title">Delete in a singly linked list</h2>
+    <h2 class="card-title">Insert at head</h2>
 
-<pre><code class="python">def delete_at_head(lst):
+<pre><code class="python">insert_at_head(lst, value):
+
+    temp_node = Node(value)
+    temp_node.next = lst.get_head()
+    lst.head_node = temp_node
+    return</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="linkedlist-5">
+  <div class="card-body">
+    <h2 class="card-title">Insert at tail</h2>
+
+<pre><code class="python">def insert_at_tail(lst, value):
+
+    node = Node(value)
     head = lst.get_head()
 
-    if not head:
-        lst.head_node = head.next_element
-        head.next_element = None
+    # If linked list is empty
+    if head is None:
+        lst.head_node = node
+        return
+
+    while head.next:
+        head = head.next
+
+    head.next = node
     return</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="linkedlist-6">
+  <div class="card-body">
+    <h2 class="card-title">Delete at head</h2>
+
+<pre><code class="python">def delete_at_head(lst):
+    first_element = lst.get_head()
+
+    if first_element is not None:
+        head_node = first_element.next
+        first_element.next = None
+    return</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="linkedlist-7">
+  <div class="card-body">
+    <h2 class="card-title">Delete by value</h2>
+
+<pre><code class="python">def delete_by_value(lst, value):
+    if lst.is_empty():
+        return
+
+    curr = lst.get_head()
+    prev = None
+    if curr.data == value:
+        delete_at_head(lst)
+        return
+
+    while curr_node is not None:
+        if curr.data == value:
+            prev.next = curr.next
+            curr.next = None
+            break
+
+        prev = curr
+        curr = curr.next
+
+    return</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="linkedlist-8">
+  <div class="card-body">
+    <h2 class="card-title">Delete by value (Doubly)</h2>
+
+<pre><code class="python">def delete_by_value(lst, value):
+    if lst.is_empty():
+        return
+
+    curr = lst.get_head()
+    if curr.data == value:
+        lst.head_node = curr.next
+        if curr.next is not None and curr.next.prev is not None:
+            curr.next.prev = None
+
+    while curr:
+        if curr.data == value:
+            if curr.next:
+                prev = curr.prev
+                nex = curr.next
+                prev.next = nex
+                nex.prev = prev
+            else:
+                curr.prev.next = None
+            break
+        curr = curr.next
+
+    return</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="linkedlist-9">
+  <div class="card-body">
+    <h2 class="card-title">Find length</h2>
+
+<pre><code class="python">def length(lst):
+    curr = lst.get_head()
+    length = 0
+
+    while curr:
+        length += 1
+        curr = curr.next
+    return length</code></pre>
   </div>
   <div class="card-footer text-muted">
 
