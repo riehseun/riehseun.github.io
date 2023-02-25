@@ -45,6 +45,7 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#modified-binary-search-1">Kth largest element in a stream</a></li>
       <li><a href="#modified-binary-search-2">First bad version</a></li>
+      <li><a href="#modified-binary-search-3">Find K closest elements</a></li>
     </ul>
   </div>
 </div>
@@ -105,6 +106,62 @@ def binary_search(nums, low, high, target):
 </div>
 
 <div class="card mb-4" id="modified-binary-search-2">
+  <div class="card-body">
+    <h2 class="card-title">Find K closest elements</h2>
+
+    <h3 class="card-title">Use binary search to find the closest element</h3>
+    <ul>
+      <li>Time: O(logn+k)</li>
+      <li>Space: O(1)</li>
+    </ul>
+
+<pre><code class="python">def find_closest_elements(nums, k, num):
+
+    index = binary_search(nums, 0, len(nums)-1, num)
+
+    left = index - 1
+    right = index
+
+    while right - left - 1 < k:
+        # check for out of bounds
+        if left == -1:
+            right += 1
+            continue
+
+        if right == len(nums) \
+            or abs(nums[left] - num) <= abs(nums[right] - num):
+            left -= 1
+        else:
+            right += 1
+
+    return nums[left+1:right]
+
+def binary_search(nums, low, high, target):
+
+    if low > high:
+        return low
+
+    mid = low + (high - low) / 2
+    mid = int(mid)
+
+    if target > nums[mid]:
+        return binary_search(nums, mid+1, high, target)
+    elif target < nums[mid]:
+        return binary_search(nums, low, mid-1, target)
+    else:
+        return mid</code></pre>
+
+    <h3 class="card-title">Test cases</h3>
+    <ul>
+      <li>K exceeds the length of array.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/courses/grokking-coding-interview-patterns-python">Grokking Coding Interview Patterns in Python</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="modified-binary-search-3">
   <div class="card-body">
     <h2 class="card-title">First bad version</h2>
 
