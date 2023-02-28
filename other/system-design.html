@@ -54,6 +54,7 @@
       <li><a href="#system-design-15">Pub-sub</a></li>
       <li><a href="#system-design-16">Rate limiter</a></li>
       <li><a href="#system-design-17">Blob store</a></li>
+      <li><a href="#system-design-18">Distributed search</a></li>
       <li><a href="#system-design-50">Youtube</a></li>
       <li><a href="#system-design-51">Quora</a></li>
       <li><a href="#system-design-52">Google maps</a></li>
@@ -657,7 +658,7 @@
       <li>Assume</li>
       <ul>
         <li>250,000 videos per day.</li>
-        <li>Each video is 50 MB..</li>
+        <li>Each video is 50 MB.</li>
       </ul>
       <li>250,000 * 50 MB = 12.5TB per day.</li>
     </ul>
@@ -670,6 +671,102 @@
       </ul>
       <li>12.5 TB * 8 / 86400 = 1.16 Gbps</li>
       <li>5M * 20 * 50MB * 8 = 462.96 Gbps.</li>
+    </ul>
+
+    <h3 class="card-title">High level design</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/blob-store1.png" alt="Card image cap">
+    <br>
+    <br>
+
+    <h3 class="card-title">API</h3>
+    <ul>
+      <li>create_container(container_name)</li>
+      <li>put_blob(container_path, blob_bame, data)</li>
+      <li>get_blob(blob_path)</li>
+      <li>delete_blob(blob_path)</li>
+      <li>list_blob(container_path)</li>
+      <li>delete_container(container_path)</li>
+      <li>list_containers(account_id)</li>
+    </ul>
+
+    <h3 class="card-title">Component design</h3>
+    <ul>
+      <li>Data nodes: hold the actual blob data.</li>
+      <li>Master node: manages storage paths and access privileges of blobs.</li>
+      <li>Monitoring service: monitors the data nodes and the master node.</li>
+    </ul>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/blob-store2.png" alt="Card image cap">
+    <br>
+    <br>
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="system-design-18">
+  <div class="card-body">
+    <h2 class="card-title">Distributed search</h2>
+    <ul>
+      <li>Crawler: fetches content and creates documents.</li>
+      <li>Indexer: builds a searchable index.</li>
+      <li>Searcher: responds to search queries by running the search query on the index created by the indexer..</li>
+    </ul>
+
+    <h3 class="card-title">Requirement</h3>
+
+    <h4 class="card-title">Functional</h4>
+    <ul>
+      <li>User can search via queries.</li>
+    </ul>
+
+    <h4 class="card-title">Non-functional</h4>
+    <ul>
+      <li>Availability.</li>
+      <li>Reliability.</li>
+      <li>Scalability.</li>
+      <li>Performance.</li>
+      <ul>
+        <li>Users should get result quickly.</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Estimation</h3>
+
+    <h4 class="card-title">Server</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>3M daily active users.</li>
+        <li>A single server can handle 1000 connections.</li>
+      </ul>
+      <li>3M / 1,000 = 3,000 servers are needed.</li>
+    </ul>
+
+    <h4 class="card-title">Storage</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>Single JSON is 200 KB.</li>
+        <li>The number of unique terms from each document is 1000.</li>
+        <li>Each term is 100 bytes.</li>
+        <li>6000 videos per day.</li>
+      </ul>
+      <li>One video: 200 KB * 1000 * 100 bytes = 300 KB.</li>
+      <li>6000 * 300 KB = 1.8 GB per day.</li>
+    </ul>
+
+    <h4 class="card-title">Bandwidth</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>150 M queries per day.</li>
+        <li>Each query is 100 bytes.</li>
+        <li>Response is 4000 bytes.</li>
+      </ul>
+      <li>Incoming: 150 M * 100 * 8 / 86400 = 1.39 Mbps</li>
+      <li>Outgoing: 150 M * 4000 * 8 / 86400 = 55.56 Mbps</li>
     </ul>
 
     <h3 class="card-title">High level design</h3>
