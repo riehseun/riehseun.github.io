@@ -44,8 +44,8 @@
     <h2 class="card-title">PyTorch</h2>
     <p class="card-text"></p>
     <ul class="list-unstyled mb-0">
-      <li><a href="#pytorch-1">Tensorflow</a></li>
-      <li><a href="#pytorch-2">Tensorflow for image</a></li>
+      <li><a href="#pytorch-1">PyTorch basic</a></li>
+      <li><a href="#pytorch-2">PyTorch neural network</a></li>
       <li><a href="#pytorch-3">Tensorflow for CNN</a></li>
     </ul>
   </div>
@@ -101,61 +101,107 @@ print("Gradient at x = 3.5: ", x.grad)</code></pre>
 
 <div class="card mb-4" id="pytorch-2">
   <div class="card-body">
-    <h2 class="card-title">Tensorflow for image</h2>
-    <ul>
-      <li><code>tf.io.decode_image</code> is used to load pixel values of input image.</li>
-      <ul>
-        <li><code>channels=1</code> means grey scale.</li>
-        <li><code>channels=3</code> means RGB.</li>
-        <li><code>channels=4</code> means RGBA where A indicates opacity.</li>
-      </ul>
-      <li><code>tf.image.resize</code> compresses or expands the image.</li>
-      <li><code>map</code> rather than using a <code>for</code> loop to do image decoding in parallel across the files.</li>
-    </ul>
+    <h2 class="card-title">PyTorch neural network</h2>
 
-<pre><code class="python">import tensorflow as tf
+<pre><code class="python">class Classifier(nn.Module):
 
-# Decode image data from a file in Tensorflow
-def decode_image(filename, image_type, resize_shape, channels=0):
-    value = tf.io.read_file(filename)
-    if image_type == "png":
-        decoded_image = tf.io.decode_png(value, channels=channels)
-    elif image_type == "jpeg":
-        decoded_image = tf.io.decode_jpeg(value, channels=channels)
-    else:
-        decoded_image = tf.io.decode_image(value, channels=channels)
+    def __init__(self):
+        # initialise parent pytorch class
+        super().__init__()
 
-    if resize_shape is not None \
-        and (image_type == "png" or image_type == "jpeg"):
-        decoded_image = tf.image.resize(decoded_image, resize_shape)
+        # define neural network layers
+        self.model = nn.Sequential(
+            nn.Linear(784, 200),
+            nn.Sigmoid(),
+            nn.Linear(200, 10),
+            nn.Sigmoid()
+        )
 
-    return decoded_image</code></pre>
+        # create loss function
+        self.loss_function = nn.MSELoss()
 
-<pre><code class="python"># Return a dataset created from the image file paths
-def get_dataset(image_paths, image_type, resize_shape, channels):
-    filename_tensor = tf.constant(image_paths)
-    dataset = tf.data.Dataset.from_tensor_slices(filename_tensor)
+        # create optimiser, using simple stochastic gradient descent
+        self.optimiser = torch.optim.SGD(self.parameters(), lr=0.01)
 
-    def _map_fn(filename):
-        return decode_image(filename, image_type,resize_shape,channels=channels)
+        # counter and accumulator for progress
+        self.counter = 0
+        self.progress = []
 
-    return dataset.map(_map_fn)
+        pass
 
-# Get the decoded image data from the input image file paths
-def get_image_data(image_paths, image_type=None, resize_shape=None, channels=0):
-    dataset = get_dataset(image_paths, image_type, resize_shape, channels)
-    iterator =tf.compat.v1.data.make_one_shot_iterator(dataset)
-    next_image = iterator.get_next()
 
-    image_data_list = []
-    with tf.compat.v1.Session() as sess:
-        for i in range(len(image_paths)):
-            image_data = sess.run(next_image)
-            image_data_list.append(image_data)
+    def forward(self, inputs):
+        # simply run model
+        return self.model(inputs)
 
-        return image_data_list
 
-    return image_data_list</code></pre>
+    def train(self, inputs, targets):
+        # calculate the output of the network
+        outputs = self.forward(inputs)
+
+        # calculate loss
+        loss = self.loss_function(outputs, targets)
+
+        # increase counter and accumulate error every 10
+        self.counter += 1
+        if (self.counter % 10 == 0):
+            self.progress.append(loss.item())
+            pass
+        if (self.counter % 10000 == 0):
+            print("counter = ", self.counter)
+            pass
+
+        # zero gradients, perform a backward pass, and update the weights
+        self.optimiser.zero_grad()
+        loss.backward()
+        self.optimiser.step()
+
+        pass
+
+
+    def plot_progress(self):
+        df = pandas.DataFrame(self.progress, columns=['loss'])
+        df.plot(ylim=(0, 1.0), figsize=(16,8), alpha=0.1, marker='.', grid=True, yticks=(0, 0.25, 0.5))
+        pass
+
+    pass</code></pre>
+
+<pre><code class="python">%%time
+# create neural network
+C = Classifier()
+
+# train network on MNIST data set
+epochs = 3
+
+for i in range(epochs):
+    print('training epoch', i+1, "of", epochs)
+    for label, image_data_tensor, target_tensor in mnist_dataset:
+        C.train(image_data_tensor, target_tensor)
+        pass
+    pass</code></pre>
+
+<pre><code class="python">image_data = mnist_test_dataset[record][1]
+
+# query from trained network
+output = C.forward(image_data)
+
+# plot output tensor
+pandas.DataFrame(output.detach().numpy()).plot(kind='bar', legend=False, ylim=(0,1))</code></pre>
+
+<pre><code class="python"># test trained neural network on training data
+score = 0
+items = 0
+
+for label, image_data_tensor, target_tensor in mnist_test_dataset:
+    answer = C.forward(image_data_tensor).detach().numpy()
+    if (answer.argmax() == label):
+        score += 1
+        pass
+    items += 1
+
+    pass
+
+print(score, items, score/items)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
