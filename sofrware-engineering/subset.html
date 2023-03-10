@@ -56,50 +56,37 @@
   <div class="card-body">
     <h2 class="card-title">Subset</h2>
 
-    <h3 class="card-title">First implement binary search, then modify</h3>
+    <h3 class="card-title">Generate binary numbers.</h3>
     <ul>
-      <li>Time: O(logn)</li>
-      <li>Space: O(1)</li>
+      <li>If bit is 1, include the number. If bit is 0, exclude the number.</li>
+      <li>Time: O(n * 2**n)</li>
+      <li>Space: O(2**n)</li>
     </ul>
 
-<pre><code class="python">def binary_search_rotated(nums, target):
+<pre><code class="python">def find_all_subsets(v):
 
-    return binary_search(nums, 0, len(nums)-1, target)
+    result = []
+    result.append([])
 
-def binary_search(nums, low, high, target):
+    num_subset = 2 ** len(v)
 
-    if low > high:
-        return -1
+    for i in range(1, num_subset):
+        binary = bin(i)
+        binary = binary.replace("0b","")
+        padding = "0" * (len(v)-len(binary))
+        binary = padding + binary
+        subset = []
 
-    mid = low + (high - low) / 2
-    mid = int(mid)
+        for j, bit in enumerate(binary):
+            if bit == "1":
+                subset.append(v[j])
+        result.append(subset)
 
-    # If regular binary search.
-    # if target > nums[mid]:
-    #     return binary_search(nums, mid+1, high, target)
-    # elif target < nums[mid]:
-    #     return binary_search(nums, low, mid-1, target)
-    # else:
-    #     return mid
-
-    if nums[mid] == target:
-        return mid
-
-    if nums[low] <= nums[mid]:
-        if nums[low] <= target and target < nums[mid]:
-            return binary_search(nums, low, mid-1, target)
-        else:
-            return binary_search(nums, mid+1, high, target)
-    else:
-        if nums[mid] < target and target <= nums[high]:
-            return binary_search(nums, mid+1, high, target)
-        else:
-            return binary_search(nums, low, mid-1, target)</code></pre>
+    return result</code></pre>
 
     <h3 class="card-title">Test cases</h3>
     <ul>
-      <li>Array with a single element.</li>
-      <li>Search for an element that does not exist in array.</li>
+      <li>Input is empty array.</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
