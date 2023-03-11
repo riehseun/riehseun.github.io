@@ -501,9 +501,13 @@ kubectl logs &lt;pod_name&gt; &lt;container_name&gt; -p</code></pre>
 
 <pre><code class="bash">kubectl get nodes --show-labels
 
-# Drain a node.
+# Drain and delete a node.
 kubectl drain &lt;node_name&gt; --ignore-daemonsets --delete-local-data
 kubectl delete node &lt;node_name&gt;
+
+# This could be preferred over draining a node.
+kubectl cordon &lt;node_name&gt;
+kubectl uncordon &lt;node_name&gt;
 
 # Check node capacity.
 kubectl get nodes -o yaml | egrep '\sname:|cpu:|memory:'
@@ -1158,7 +1162,10 @@ curl -X DELETE  'localhost:8080/apis/apps/v1/namespaces/default/replicasets/fron
     <h2 class="card-title">StatefulSet</h2>
     <ul>
       <li>Predictable and persistent Pod names, DNS hostnames, volume bindings.</li>
-      <li>Create one Pod at a time and always wait for previous Pods to be running and ready before creating the next. (Same for delete)</li>
+      <li>Create one Pod at a time and always wait for previous Pods to be running and ready before creating the next.</li>
+      <ul>
+        <li>This is the same for delete.</li>
+      </ul>
       <li>When a StatefulSet Pod is created, any volumes it needs are created at the same time and named in a way to connect them to the right Pod.</li>
     </ul>
 
@@ -1181,7 +1188,7 @@ curl -X DELETE  'localhost:8080/apis/apps/v1/namespaces/default/replicasets/fron
 
     <h3 class="card-title">Headless service</h3>
     <ul>
-      <li>Creates predictable stable DNS entries for every Pod that matches the StatefulSets label selector.</li>
+      <li>Creates predictable and stable DNS entries for every Pod that matches the StatefulSets label selector.</li>
       <li>Service must set the value <code>clusterIP</code> to <code>None</code>.</li>
     </ul>
 
@@ -1205,6 +1212,7 @@ spec:
   clusterIP: None  # Only difference between headless service and regular service is this field.
   selector:
     app: my-headless-service
+
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -1239,6 +1247,17 @@ spec:
       resources:
         requests:
           storage: 1Gi</code></pre>
+
+    <h3 class="card-title">Recreate Pod from Statefulset with new volume</h3>
+
+<pre><code class="bash"># The terminal will get stuck after issuing this command.
+kubectl delete pvc &lt;pvc_name&gt;
+
+# Do this on a different terminal.
+kubectl delete statefulset &lt;statefulset_name&gt; --cascade=false
+kubectl delete pod &lt;pod_name&gt;
+kubectl apply -f &lt;statefulset_yaml&gt;</code></pre>
+
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/">StatefulSet</a> | <a href="https://www.educative.io/courses/the-kubernetes-course">Learn Kubernetes: A Deep Dive</a>
