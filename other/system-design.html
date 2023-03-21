@@ -846,20 +846,23 @@
     <ul>
       <li>Users can upload, share, view, like/dislike, search videos.</li>
       <li>Users can add, view comments.</li>
-      <li>Users can view thumbnauls, number of views.</li>
+      <li>Users can view thumbnails, number of views.</li>
     </ul>
 
     <h4 class="card-title">Non-functional</h4>
     <ul>
-      <li>Availability.</li>
+      <li>Availability</li>
       <ul>
         <li>Consistency can take a hit.</li>
         <li>Subscribers need not get notifications for uploaded videos immediately.</li>
         <li>No need to show consistent feed for all users.</li>
       </ul>
-      <li>Reliability.</li>
-      <li>Scalability.</li>
-      <li>Performance: users should not feel lag watching videos.</li>
+      <li>Reliability</li>
+      <li>Scalability</li>
+      <li>Performance</li>
+      <ul>
+        <li>Users should not feel lag watching videos.</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Estimation</h3>
@@ -904,8 +907,8 @@
     <ul>
       <li>User uploads video.</li>
       <li>Server sends video to encoder.</li>
-      <li>Server sends user data and metadata to DB.</li>
-      <li>Encoder encodes video and store it in storage.</li>
+      <li>Server sends user data and metadata to relational DB.</li>
+      <li>Encoder encodes video and store it in object storage.</li>
     </ul>
     <img class="img-fluid" class="card-img-top" src="/img/system-design/youtube1.png" alt="Card image cap">
     <br>
@@ -914,20 +917,10 @@
     <h3 class="card-title">API</h3>
     <ul>
       <li>upload_video(user_id, video_file, title, description, tags, default_language)</li>
-      <ul>
-        <li>Return 202 on success.</li>
-      </ul>
-      <li>search_video(user_id, query, user_location, length, max_videos_to_return)</li>
-      <ul>
-        <li>Return JSON with the list of videos.</li>
-      </ul>
       <li>stream_video(user_id, video_id, resolution)</li>
-      <ul>
-        <li>Return stream.</li>
-      </ul>
-      <li>like_video(user_id, video_id)</li>
-      <li>dislike_video(user_id, video_id)</li>
+      <li>search_video(user_id, query, user_location, length, max_videos_to_return)</li>
       <li>view_thunbnail(user_id, video_id)</li>
+      <li>like_or_dislike_video(user_id, video_id, like)</li>
       <li>comment_video(user_id, video_id, text)</li>
     </ul>
 
@@ -1034,23 +1027,27 @@
 
     <h4 class="card-title">Availability</h4>
     <ul>
-      <li>Replicate web, app, DB servers.</li>
+      <li>Data replication.</li>
+      <li>Local load balancer to exclude dead servers.</li>
+      <li>Global load balancer to reroute traffic to different region.</li>
     </ul>
 
     <h4 class="card-title">Reliability</h4>
     <ul>
-      <li>Data replication.</li>
+      <li>Data partitioning.</li>
+      <li>Redundant hardware for fault tolerance.</li>
+      <li>Monitor servers and use consistent hashing to add/remove servers seemlessly.</li>
     </ul>
 
     <h4 class="card-title">Scalability</h4>
     <ul>
-      <li>Horizontally scale web, app servers. (Load balancer can multiplx them)</li>
+      <li>Horizontally scale web and app servers. (Load balancer can multiplx them)</li>
       <li>Separate read and write to different servers.</li>
     </ul>
 
     <h4 class="card-title">Performance</h4>
     <ul>
-      <li>Lighttpd for serving videos,</li>
+      <li>Lighttpd for serving videos.</li>
       <li>Cache at various component.</li>
       <li>Right DB for different data types for fast operations.</li>
       <li>CDN</li>
