@@ -47,6 +47,16 @@
       <li><a href="#tensorflow-1">Tensorflow</a></li>
       <li><a href="#tensorflow-2">Tensorflow for image</a></li>
       <li><a href="#tensorflow-3">Tensorflow for CNN</a></li>
+      <li><a href="#tensorflow-4">SqueezeNet</a></li>
+      <li><a href="#tensorflow-5">ResNet</a></li>
+      <li><a href="#tensorflow-6">Word embedding</a></li>
+      <li><a href="#tensorflow-7">Language model</a></li>
+      <li><a href="#tensorflow-8">Text classification</a></li>
+      <li><a href="#tensorflow-9">Seq2Seq</a></li>
+      <li><a href="#tensorflow-10">Data pipeline</a></li>
+      <li><a href="#tensorflow-11">Model execution</a></li>
+      <li><a href="#tensorflow-12">Data processing</a></li>
+      <li><a href="#tensorflow-13">Model prediction</a></li>
     </ul>
   </div>
 </div>
@@ -295,6 +305,1220 @@ class MNISTModel(object):
         logits = tf.keras.layers.Dense(self.output_size, name='logits')(dropout)
 
         return logits</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="tensorflow-4">
+  <div class="card-body">
+    <h2 class="card-title">SqueezeNet</h2>
+    <ul>
+      <li>Memory efficient and as accurate as AlexNet.</li>
+      <li>Number of parameters: P = W x H x F x C + F</li>
+      <ul>
+        <li>W and H are width and height of kernal.</li>
+        <li>F is filters.</li>
+        <li>C is input channels.</li>
+      </ul>
+      <li>CIFAR-10 (Canadian Institute for Advanced Research) dataset contains 60,000 color images with dimensions 32x32.</li>
+      <li>Transform images to generate more data. For example, random crop followed (potentially) by a horizontal flip.</li>
+      <li>To make model smaller, decrease parameters by decreasing kernel size and number of input channels.</li>
+      <ul>
+        <li>Uses an intermediate convolution layer, referred to as a squeeze layer.</li>
+      </ul>
+    </ul>
+
+<pre><code class="python">import tensorflow as tf
+
+class SqueezeNetModel(object):
+    # Model Initialization
+    def __init__(self, original_dim, resize_dim, output_size):
+        self.original_dim = original_dim
+        self.resize_dim = resize_dim
+        self.output_size = output_size
+
+    # Random crop and flip
+    def random_crop_and_flip(self, float_image):
+        crop_image = tf.compat.v1.random_crop(float_image, [self.resize_dim, self.resize_dim, 3])
+        updated_image = tf.image.random_flip_left_right(crop_image)
+        return updated_image
+
+    # Data Augmentation
+    def image_preprocessing(self, data, is_training):
+        reshaped_image = tf.reshape(data, [3, self.original_dim, self.original_dim])
+        transposed_image = tf.transpose(reshaped_image, [1, 2, 0])
+        float_image = tf.cast(transposed_image, tf.float32)
+        if is_training:
+            updated_image = self.random_crop_and_flip(float_image)
+        else:
+            updated_image = tf.image.resize_image_with_crop_or_pad(float_image, self.resize_dim, self.resize_dim)
+        standardized_image = tf.image.per_image_standardization(updated_image)
+        return standardized_image
+
+    # Convolution layer wrapper
+    def custom_conv2d(self, inputs, filters, kernel_size, name):
+        return tf.keras.layers.Conv2D(
+        filters=filters,
+        kernel_size=kernel_size,
+        padding='same',
+        activation='relu',
+        name=name)(inputs)
+
+    # SqueezeNet fire module
+    def fire_module(self, inputs, squeeze_depth, expand_depth, name):
+        with tf.compat.v1.variable_scope(name):
+            squeezed_inputs = self.custom_conv2d(
+                inputs,
+                squeeze_depth,
+                [1, 1],
+                'squeeze')
+            expand1x1 = self.custom_conv2d(
+                squeezed_inputs,
+                expand_depth,
+                [1, 1],
+                'expand1x1')
+            expand3x3 = self.custom_conv2d(
+                squeezed_inputs,
+                expand_depth,
+                [3, 3],
+                'expand3x3')
+            return tf.concat([expand1x1, expand3x3], axis=-1)
+
+    # Stacked fire modules
+    def multi_fire_module(self, layer, params_list):
+        for params in params_list:
+            layer = self.fire_module(layer, params[0], params[1], params[2])
+        return layer
+
+    # Max pooling layer wrapper
+    def custom_max_pooling2d(self, inputs, name):
+        return tf.keras.layers.MaxPool2D(
+        pool_size=[2, 2],
+        strides=2,
+        name=name)(inputs)
+
+    # Model Layers
+    # inputs: [batch_size, resize_dim, resize_dim, 3]
+    def model_layers(self, inputs, is_training):
+        conv1 = self.custom_conv2d(inputs, 64, [3, 3], name='conv1')
+        pool1 = self.custom_max_pooling2d(conv1, name='pool1')
+
+        fire_params1 = [(32, 64, 'fire1'), (32, 64, 'fire2')]
+        multi_fire1 = self.multi_fire_module(pool1, fire_params1)
+        pool2 = self.custom_max_pooling2d(multi_fire1, 'pool2')
+
+        fire_params2 = [(32, 128, 'fire3'), (32, 128, 'fire4')]
+        multi_fire2 = self.multi_fire_module(pool2, fire_params2)
+        dropout1 = tf.keras.layers.Dropout(rate=0.5)(multi_fire2, training=is_training)
+
+        conv_layer = self.custom_conv2d(dropout1, self.output_size, [1, 1], 'final_conv')
+        return self.get_logits(conv_layer)
+
+    # Set up and run model training
+    def run_model_setup(self, inputs, labels):
+        logits = self.model_layers(inputs, is_training)
+        self.probs = tf.nn.softmax(logits, name='probs')
+        self.predictions = tf.math.argmax(
+        self.probs, axis=-1, name='predictions')
+        is_correct = tf.math.equal(tf.cast(self.predictions, tf.int32), labels)
+        is_correct_float = tf.cast(is_correct, tf.float32)
+        self.accuracy = tf.math.reduce_mean(is_correct_float)
+        # calculate cross entropy
+        cross_entropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=logits)
+        self.loss = tf.math.reduce_mean(cross_entropy)
+        adam = tf.compat.v1.train.AdamOptimizer()
+        self.train_op = adam.minimize(self.loss, global_step=self.global_step)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="resnet-1">
+  <div class="card-body">
+    <h2 class="card-title">ResNet</h2>
+    <ul>
+      <li>ImageNet contains 1.4 million images, with 1.2M in the training set, 50,000 in the validation set, and 150,000 in the test set.</li>
+      <li>NCHW format is optimized for GPU training.</li>
+      <li>NHWC format is optimized for CPU training.</li>
+      <li>Internal covariate shift</li>
+      <ul>
+        <li>Covariate shift that happens between layers of a model.</li>
+        <li>Each layer's output distribution will change, which is a concern for model with many layers.</li>
+        <li>Batch normalization</li>
+        <ul>
+          <li>Enforce a fixed distribution to the inputs of each layer.</li>
+          <li>Subtract the mean from the inputs and divide by the standard deviation.</li>
+          <li>Applied right before activation function.</li>
+          <li>Bottleneck block reduces the number of parameters. (Similar to fire module in SqueezeNet)</li>
+          <li>It is normally not necessary to use dropout together with batch normalization.</li>
+        </ul>
+      </ul>
+    </ul>
+
+<pre><code class="python">import tensorflow as tf
+
+block_layer_sizes = {
+    18: [2, 2, 2, 2],
+    34: [3, 4, 6, 3],
+    50: [3, 4, 6, 3],
+    101: [3, 4, 23, 3],
+    152: [3, 8, 36, 3],
+    200: [3, 24, 36, 3]
+}
+
+class ResNetModel(object):
+    # Model Initialization
+    def __init__(self, min_aspect_dim, resize_dim, num_layers, output_size,
+        data_format='channels_last'):
+        self.min_aspect_dim = min_aspect_dim
+        self.resize_dim = resize_dim
+        self.filters_initial = 64
+        self.block_strides = [1, 2, 2, 2]
+        self.data_format = data_format
+        self.output_size = output_size
+        self.block_layer_sizes = block_layer_sizes[num_layers]
+        # True if model uses bottle blocks. False if model uses regular blocks.
+        self.bottleneck = num_layers >= 50
+
+    # Custom padding function
+    def custom_padding(self, inputs, kernel_size):
+        pad_total = kernel_size - 1
+        pad_before = pad_total // 2
+        pad_after = pod_total - pad_before
+        if self.data_format == 'channels_first':
+            padded_inputs = tf.pad(inputs, [[0, 0], [0, 0], [pad_before, pad_after], [pad_before, pad_after]])
+        else:
+            padded_inputs = tf.pad(inputs, [[0, 0], [pad_before, pad_after], [pad_before, pad_after], [0, 0]])
+        return padded_inputs
+
+    # Custom convolution function w/ consistent padding
+    def custom_conv2d(self, inputs, filters, kernel_size, strides, name=None):
+        if strides > 1:
+            padding = 'valid'
+            inputs = self.custom_padding(inputs, kernel_size)
+        else:
+            padding = 'same'
+        return tf.keras.layers.Conv2D(
+            filters=filters, kernel_size=kernel_size,
+            strides=strides, padding=padding, data_format=self.data_format,
+            name=name)(inputs)
+
+    # Applies pre-activation to the inputs
+    def pre_activation(self, inputs, is_training):
+        if self.data_format == 'channels_first':
+            axis = 1
+        else:
+            axis = 3
+
+        bn_inputs = tf.keras.layers.BatchNormalization(axis=axis)(inputs, training=is_training)
+        pre_activated_inputs = tf.nn.relu(bn_inputs)
+        return pre_activated_inputs
+
+    # Returns pre-activated inputs and the shortcut
+    def pre_activation_with_shortcut(self, inputs, is_training, shortcut_params):
+        pre_activated_inputs = self.pre_activation(inputs, is_training)
+        shortcut = inputs
+        shortcut_filters = shortcut_params[0]
+        if shortcut_filters is not None:
+            strides = shortcut_params[1]
+            shortcut = self.custom_conv2d(pre_activated_inputs, shortcut_filters, 1, strides)
+
+        return pre_activated_inputs, shortcut
+
+    def regular_block(self, inputs, filters, strides, is_training, index, shortcut_filters=None):
+        with tf.compat.v1.variable_scope('regular_block{}'.format(index)):
+            shortcut_params = (shortcut_filters, strides)
+            pre_activated1, shortcut = self.pre_activation_with_shortcut(inputs, is_training, shortcut_params)
+            conv1 = self.custom_conv2d(pre_activated1, filters, 3, strides)
+            pre_activated2 = self.pre_activation(conv1, is_training)
+            conv2 = self.custom_conv2d(pre_activated2, filters, 3, 1)
+            return conv2 + shortcut
+
+    def bottleneck_block(self, inputs, filters, strides, is_training, index, shortcut_filters=None):
+        with tf.compat.v1.variable_scope('bottleneck_block{}'.format(index)):
+            shortcut_params = (shortcut_filters, strides)
+            pre_activated1, shortcut = self.pre_activation_with_shortcut(inputs, is_training, shortcut_params)
+            conv1 = self.custom_conv2d(pre_activated1, filters, 1, 1)
+            pre_activated2 = self.pre_activation(conv1, is_training)
+            conv2 = self.custom_conv2d(pre_activated2, filters, 3, strides)
+            pre_activated3 = self.pre_activation(conv2, is_training)
+            conv3 = self.custom_conv2d(pre_activated3, 4 * filters, 1, 1)
+            return conv3 + shortcut
+
+    # Creates a layer of blocks
+    def block_layer(self, inputs, filters, strides, num_blocks, is_training, index):
+        with tf.compat.v1.variable_scope('block_layer{}'.format(index)):
+            shortcut_filters = 4 * filters if self.bottleneck else filters
+            block_fn = self.bottleneck_block if self.bottleneck else self.regular_block
+            block_output = block_fn(inputs, filters, strides, is_training, 0,
+                shortcut_filters=shortcut_filters)
+            # stack the blocks in this layer
+            for i in range(1, num_blocks):
+                block_output = block_fn(block_output, filters, 1, is_training, i)
+            return block_output
+
+    # Model Layers
+    # inputs (channels_last): [batch_size, resize_dim, resize_dim, 3]
+    # inputs (channels_first): [batch_size, 3, resize_dim, resize_dim]
+    def model_layers(self, inputs, is_training):
+        # initial convolution layer
+        conv_initial = self.custom_conv2d(
+            inputs, self.filters_initial, 7, 2, name='conv_initial')
+        # pooling layer
+        curr_layer = tf.keras.layers.MaxPool2D(
+            3, 2, padding='same',
+            data_format=self.data_format,
+            name='pool_initial')(conv_initial)
+        # stack the block layers
+        for i, num_blocks in enumerate(self.block_layer_sizes):
+            filters = self.filters_initial * 2**i
+            strides = self.block_strides[i]
+            # stack this block layer on the previous one
+            curr_layer = self.block_layer(
+                curr_layer, filters, strides,
+                num_blocks, is_training, i)
+        # pre-activation
+        pre_activated_final = self.pre_activation(curr_layer, is_training)
+        filter_size = int(pre_activated_final.shape[2])
+        # final pooling layer
+        avg_pool = tf.keras.layers.AveragePooling2D(
+            filter_size, 1,
+            data_format=self.data_format)(pre_activated_final)
+        final_layer = tf.layers.flatten(avg_pool)
+        # get logits from final layer
+        logits = tf.keras.layers.Dense(self.output_size, name='logits')(final_layer)
+        return logits</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="tensorflow-6">
+  <div class="card-body">
+    <h2 class="card-title">Word embedding</h2>
+    <ul>
+      <li><code>Tokenizer</code> converts each vocabulary word to an integer ID. (IDs are given to words by descending frequency)</li>
+      <li>Out-of-vocabulary (OOV) - new text contains words not in the corpus vocabulary.</li>
+      <li><code>texts_to_sequences</code> automatically filters out all OOV words.</li>
+      <li>Skip gram</li>
+      <ul>
+        <li>“paul likes <strong>singing</strong> in french” -> (singing,paul), (singing,likes), (singing, in), (singing, french)</li>
+        <li>Requires much less actual data.</li>
+        <li>Represent rarer words or phrases better.</li>
+      </ul>
+      <li>Continuous bag of words (CBOW)</li>
+      <ul>
+        <li>“tom eats <strong>spicy</strong> crab salad” -> (tom,eats,crab,salad),spicy)</li>
+        <li>Faster to train.</li>
+        <li>Provides more accurate embeddings for more common words.</li>
+      </ul>
+      <li>Variable should be a 2-D matrix that contains embedding vectors for each vocabulary word ID.</li>
+      <li>Training an embedding model is equivalent to multiclass classification, where the possible classes include every single vocabulary word.</li>
+      <li>NCE Loss convert the multiclass classification problem into a binary classification problem.</li>
+    </ul>
+
+<pre><code class="python">import tensorflow as tf
+
+def get_target_and_size(sequence, target_index, window_size):
+    target_word = sequence[target_index]
+    half_window_size = window_size // 2
+    return (target_word, half_window_size)
+
+def get_window_indices(sequence, target_index, half_window_size):
+    left_incl = max(0, target_index - half_window_size)
+    right_excl = min(len(sequence), target_index + half_window_size + 1)
+    return (left_incl, right_excl)
+
+def get_initializer(embedding_dim, vocab_size):
+    initial_bounds = 0.5 / embedding_dim
+    initializer = tf.random.uniform((vocab_size, embedding_dim), minval=-initial_bounds, maxval=initial_bounds)
+    return initializer
+
+# Skip-gram embedding model
+class EmbeddingModel(object):
+    # Model Initialization
+    def __init__(self, vocab_size, embedding_dim):
+        self.vocab_size = vocab_size
+        self.embedding_dim = embedding_dim
+        self.tokenizer = tf.keras.preprocessing.text.Tokenizer(num_words=self.vocab_size)
+
+    # Convert a list of text strings into word sequences
+    def tokenize_text_corpus(self, texts):
+        self.tokenizer.fit_on_texts(texts)
+        sequences = self.tokenizer.texts_to_sequences(texts)
+        return sequences
+
+    # Convert a list of text strings into word sequences
+    def get_target_and_context(self, sequence, target_index, window_size):
+        target_word, half_window_size = get_target_and_size(
+            sequence, target_index, window_size
+        )
+        left_incl, right_excl = get_window_indices(
+            sequence, target_index, half_window_size)
+        return target_word, left_incl, right_excl
+
+    # Create (target, context) pairs for a given window size
+    def create_target_context_pairs(self, texts, window_size):
+        pairs = []
+        sequences = self.tokenize_text_corpus(texts)
+        for sequence in sequences:
+            for i in range(len(sequence)):
+                target_word, left_incl, right_excl = self.get_target_and_context(
+                    sequence, i, window_size)
+                for j in range(left_incl, right_excl):
+                    if i != j:
+                        pairs.append((target_word, sequence[j]))
+        return pairs
+
+    # Forward run of the embedding model to retrieve embeddings
+    def forward(self, target_ids):
+        initializer = get_initializer(
+            self.embedding_dim, self.vocab_size)
+        self.embedding_matrix = tf.compat.v1.get_variable('embedding_matrix', initializer=initializer)
+        embeddings = tf.compat.v1.nn.embedding_lookup(self.embedding_matrix, target_ids)
+        return embeddings
+
+    # Get bias and weights for calculating loss
+    def get_bias_weights(self):
+        weights_initializer = tf.zeros([self.vocab_size, self.embedding_dim])
+        bias_initializer = tf.zeros([self.vocab_size])
+        weights = tf.compat.v1.get_variable('weights',
+            initializer=weights_initializer)
+        bias = tf.compat.v1.get_variable('bias',
+            initializer=bias_initializer)
+        return weights, bias
+
+    # Calculate NCE Loss based on the retrieved embedding and context
+    def calculate_loss(self, embeddings, context_ids, num_negative_samples):
+        weights, bias = self.get_bias_weights()
+        nce_losses = tf.nn.nce_loss(weights, bias, context_ids, embeddings, num_negative_samples, self.vocab_size)
+        overall_loss = tf.math.reduce_mean(nce_losses)
+        return overall_loss
+
+    # Compute cosine similarites between the word's embedding
+    # and all other embeddings for each vocabulary word
+    def compute_cos_sims(self, word, training_texts):
+        self.tokenizer.fit_on_texts(training_texts)
+        word_id = self.tokenizer.word_index[word]
+        word_embedding = self.forward([word_id])
+        normalized_embedding = tf.math.l2_normalize(word_embedding)
+        normalized_matrix = tf.math.l2_normalize(self.embedding_matrix, axis=1)
+        cos_sims = tf.linalg.matmul(normalized_embedding, normalized_matrix, transpose_b=True)
+        return cos_sims
+
+    # Compute K-nearest neighbors for input word
+    def k_nearest_neighbors(self, word, k, training_texts):
+        cos_sims = self.compute_cos_sims(word, training_texts)  # Shape is (1, self.vocab_size)
+        squeezed_cos_sims = tf.squeeze(cos_sims)
+        top_k_output = tf.math.top_k(squeezed_cos_sims, k)
+        return top_k_output</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="tensorflow-7">
+  <div class="card-body">
+    <h2 class="card-title">Language model</h2>
+    <ul>
+      <li>Assign probabilities to words in sequences of text.</li>
+      <li>The probability for each word is conditioned on the words that appear before it in the sequence.</li>
+      <li>This is essentially multiclass classification.</li>
+      <li>Example</li>
+      <ul>
+        <li>Original sequence: ["she", "bought", "a", "book", "from" ,"me"]</li>
+        <li>Input sequence: ["she", "bought", "a", "book", "from"]</li>
+        <li>Target sequence: ["bought", "a", "book", "from" ,"me"]</li>
+      </ul>
+      <li>Recurrent neural network: language model needs to be able to handle input data of varied lengths.</li>
+      <li>LSTM: capture long term dependencies.</li>
+      <li>Apply dropout to the input and/or output of each cell unit. (As opposed to hidden units in DL)</li>
+    </ul>
+
+<pre><code class="python">import tensorflow as tf
+
+def truncate_sequences(sequence, max_length):
+    input_sequence = sequence[:max_length-1]
+    target_sequence = sequence[1:max_length]
+    return input_sequence, target_sequence
+
+def pad_sequences(sequence, max_length):
+    padding_amount = max_length - len(sequence)
+    padding = [0] * padding_amount
+    input_sequence =  sequence[:-1] + padding
+    target_sequence = sequence[1:] + padding
+    return input_sequence, target_sequence
+
+# LSTM Language Model
+class LanguageModel(object):
+    # Model Initialization
+    def __init__(self, vocab_size, max_length, num_lstm_units, num_lstm_layers):
+        self.vocab_size = vocab_size
+        self.max_length = max_length
+        self.num_lstm_units = num_lstm_units
+        self.num_lstm_layers = num_lstm_layers
+        self.tokenizer = tf.keras.preprocessing.text.Tokenizer(num_words=vocab_size)
+
+    def get_input_target_sequence(self, sequence):
+        seq_len = len(sequence)
+        if seq_len >= self.max_length:
+            input_sequence, target_sequence = truncate_sequences(
+                sequence, self.max_length
+            )
+        else:
+            # Next chapter
+            input_sequence, target_sequence = pad_sequences(
+                sequence, self.max_length
+            )
+        return input_sequence, target_sequence
+
+    # Create a cell for the LSTM
+    def make_lstm_cell(self, dropout_keep_prob):
+        cell = tf.keras.layers.LSTMCell(self.num_lstm_units)
+        dropout_cell = tf.compat.v1.nn.rnn_cell.DropoutWrapper(cell, output_keep_prob=dropout_keep_prob)
+        return dropout_cell
+
+    # Stack multiple layers for the LSTM
+    def stacked_lstm_cells(self, is_training):
+        if is_training:
+            dropout_keep_prob = 0.5
+        else:
+            dropout_keep_prob = 1.0
+
+        cell_list = []
+        for i in range(self.num_lstm_layers):
+            cell_list.append(self.make_lstm_cell(dropout_keep_prob))
+        cell = tf.keras.layers.StackedRNNCells(cell_list)
+        return cell
+
+    # Convert input sequences to embeddings
+    def get_input_embeddings(self, input_sequences):
+        embedding_dim = int(self.vocab_size**0.25)
+        embedding=tf.keras.layers.Embedding(
+            self.vocab_size+1, embedding_dim, embeddings_initializer='uniform',
+            mask_zero=True, input_length=self.max_length
+        )
+        input_embeddings = embedding(input_sequences)
+        return input_embeddings
+
+    # Run the LSTM on the input sequences
+    def run_lstm(self, input_sequences, is_training):
+        cell = self.stacked_lstm_cells(is_training)
+        input_embeddings = self.get_input_embeddings(input_sequences)
+        binary_sequences = tf.math.sign(input_sequences)
+        sequence_lengths = tf.math.reduce_sum(binary_sequences, axis=1)
+        lstm_outputs = tf.keras.layers.RNN(cell, input_length=sequence_lengths, dtype=tf.float32)(input_embeddings)
+        return lstm_outputs, binary_sequences
+
+    def calculate_loss(self, lstm_outputs, binary_sequences, output_sequences):
+        logits = tf.keras.layers.Dense(lstm_outputs, self.vocab_size)
+        batch_sequence_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=output_sequences, logits=logits)
+        unpadded_loss = tf.cast(binary_sequences, tf.float32) * batch_sequence_loss
+        overall_loss = tf.math.reduce_sum(unpadded_loss)
+        return overall_loss
+
+    # Predict next word ID
+    def get_word_predictions(self, word_preds, binary_sequences, batch_size):
+        row_indices = tf.range(batch_size)
+        final_indexes = tf.math.reduce_sum(binary_sequences, axis=1) - 1
+        gather_indices = tf.transpose([row_indices, final_indexes])
+        final_id_predictions = tf.gather_nd(word_preds, gather_indices)
+        return final_id_predictions</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="tensorflow-8">
+  <div class="card-body">
+    <h2 class="card-title">Text classification</h2>
+    <ul>
+      <li>Text classification also involves training pairs consisting of input data and labels.</li>
+      <ul>
+        <li>The class labels are just integers in range [0, n - 1] where n is the total number of classes.</li>
+        <li>Positive example: ([1,5,6,8,2],1)</li>
+        <li>Negative example: ([3,5,2,9,8],0)</li>
+      </ul>
+      <li>BiLSTM consists of forward LSTMs and backwards LSTMs, which read the input sequence in reverse.</li>
+    </ul>
+
+<pre><code class="python">import tensorflow as tf
+
+# Text classification model
+class ClassificationModel(object):
+    # Model initialization
+    def __init__(self, vocab_size, max_length, num_lstm_units):
+        self.vocab_size = vocab_size
+        self.max_length = max_length
+        self.num_lstm_units = num_lstm_units
+        self.tokenizer = tf.keras.preprocessing.text.Tokenizer(num_words=self.vocab_size)
+
+    def tokenize_text_corpus(self, texts):
+        self.tokenizer.fit_on_texts(texts)
+        sequences = self.tokenizer.texts_to_sequences(texts)
+        return sequences
+
+    # Create training pairs for text classification
+    def make_training_pairs(self, texts, labels):
+        sequences = self.tokenize_text_corpus(texts)
+        for i in range(len(sequences)):
+            sequence = sequences[i]
+            if len(sequence) > self.max_length:
+                sequences[i] = sequence[:self.max_length]
+        training_pairs = list(zip(sequences, labels))
+        return training_pairs
+
+    def make_lstm_cell(self, dropout_keep_prob):
+        cell = tf.keras.layers.LSTMCell(self.num_lstm_units, dropout=dropout_keep_prob)
+        return cell
+
+    # Use feature columns to create input embeddings
+    def get_input_embeddings(self, input_sequences):
+
+        input_col = tf.compat.v1.feature_column \
+              .categorical_column_with_identity(
+                  'inputs', self.vocab_size)
+        embed_size = int(self.vocab_size**0.25)
+        embed_col = tf.compat.v1.feature_column.embedding_column(
+                  input_col, embed_size)
+        input_dict = {'inputs': input_sequences}
+        input_embeddings= tf.compat.v1.feature_column \
+                                 .input_layer(
+                                     input_dict, [embed_col])
+
+        sequence_lengths = tf.compat.v1.placeholder("int64", shape=(None,),
+                    name="input_layer/input_embedding/sequence_length")
+        return input_embeddings, sequence_lengths
+
+    # Create and run a BiLSTM on the input sequences
+    def run_bilstm(self, input_sequences, is_training):
+        input_embeddings, sequence_lengths = self.get_input_embeddings(input_sequences)
+        dropout_keep_prob = 0.5 if is_training else 1.0
+        cell = self.make_lstm_cell(dropout_keep_prob)
+        rnn = tf.keras.layers.RNN(cell, return_sequences=True, go_backwards=True, return_state=True)
+        Bi_rnn = tf.keras.layers.Bidirectional(rnn, merge_mode=None)
+        # Embedded input sequences
+        # Shape: (batch_size, time_steps, embed_dim)
+        input_embeddings = tf.compat.v1.placeholder(tf.float32, shape=(None, 10, 12))
+        lstm_outputs = Bi_rnn(input_embeddings)
+        return lstm_outputs
+
+    def get_gather_indices(self, batch_size, sequence_lengths):
+        row_indices = tf.range(batch_size)
+        final_indexes = tf.cast(sequence_lengths - 1, tf.int32)
+        return tf.transpose([row_indices, final_indexes])
+
+    # Calculate logits based on the outputs of the BiLSTM
+    def calculate_logits(self, lstm_outputs, batch_size, sequence_lengths):
+        lstm_outputs_fw, lstm_outputs_bw = lstm_outputs
+        combined_outputs = tf.concat([lstm_outputs_fw, lstm_outputs_bw], -1)
+        gather_indices = self.get_gather_indices(batch_size, sequence_lengths)
+        final_outputs = tf.gather_nd(combined_outputs, gather_indices)
+        logits = tf.keras.layers.Dense(1)(final_outputs)
+        return logits
+
+    # Calculate LOSS
+    def calculate_loss(self, lstm_outputs, batch_size, sequence_lengths, labels):
+        logits = self.calculate_logits(lstm_outputs, batch_size, sequence_lengths)
+        float_labels = tf.cast(labels, tf.float32)
+        batch_loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=float_labels, logits=logits)
+        overall_loss = tf.reduce_sum(batch_loss)
+        return overall_loss
+
+    # Convert Logits to Predictions
+    def logits_to_predictions(self, logits):
+        probs = tf.math.sigmoid(logits)
+        preds = tf.math.round(probs)
+        return preds</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="tensorflow-9">
+  <div class="card-body">
+    <h2 class="card-title">Seq2Seq</h2>
+    <ul>
+      <li>Use training pairs that contain an input sequence and an output sequence.</li>
+      <ul>
+        <li>Input Task: Extract useful information from the input sequence.</li>
+        <li>Output Task: Calculate word probabilities at each output time step, using information from the input sequence and previous words in the output sequence.</li>
+        <ul>
+          <li>Ground truth sequence - equivalent to the input sequence for a language model.</li>
+          <li>Final token sequence - equivalent to the output sequence when training a language model.</li>
+        </ul>
+      </ul>
+      <li>Start-of-sequence (SOS) and end-of-sequence (EOS) tokens. For example, ["SOS", "he", "ate", "apple", EOS"]</li>
+      <li>Encoder</li>
+      <ul>
+        <li>BiLSTM.</li>
+        <li>Extract useful information from the input sequence</li>
+        <li>Need to pass the final state of the encoder into the decoder.</li>
+      </ul>
+      <li>Decoder</li>
+      <ul>
+        <li>LSTM.</li>
+        <li>Uses the final state of the encoder as its initial state.</li>
+      </ul>
+      <li>Attention</li>
+      <ul>
+        <li>Let decoder decide which encoder outputs are most useful at the current decoding time step.</li>
+        <li>Calculates context vector.</li>
+      </ul>
+    </ul>
+
+<pre><code class="python">import tensorflow as tf
+import tensorflow_addons as tfa
+
+# Get c and h vectors for bidirectional LSTM final states
+def ref_get_bi_state_parts(state_fw, state_bw):
+    bi_state_c = tf.concat([state_fw[0], state_bw[0]], -1)
+    bi_state_h = tf.concat([state_fw[1], state_bw[1]], -1)
+    return bi_state_c, bi_state_h
+
+def create_basic_decoder(enc_outputs, extended_vocab_size, batch_size, final_state, dec_cell, sampler):
+    projection_layer = tf.keras.layers.Dense(extended_vocab_size)
+    batch_size = tf.constant(batch_size)
+    initial_state = dec_cell.get_initial_state(enc_outputs[0], batch_size=batch_size, dtype=tf.float32)
+    decoder = tfa.seq2seq.sampler.BasicDecoder(dec_cell, sampler, initial_state, output_layer=projection_layer)
+    return decoder
+
+def run_decoder(decoder,inputs, initial_state, input_seq_lens, is_training, dec_seq_lens):
+    dec_outputs, _, _ = decoder(inputs, initial_state=initial_state, sequence_length=input_seq_lens, training=is_training)
+    if is_training:
+        logits = dec_outputs.rnn_output
+        return logits, dec_seq_lens
+    return dec_outpus.sample.id
+
+# Seq2seq model
+class Seq2SeqModel(object):
+    def __init__(self, vocab_size, num_lstm_layers, num_lstm_units):
+        self.vocab_size = vocab_size
+        # Extended vocabulary includes start, stop token
+        self.extended_vocab_size = vocab_size + 2
+        self.num_lstm_layers = num_lstm_layers
+        self.num_lstm_units = num_lstm_units
+        self.tokenizer = tf.keras.preprocessing.text.Tokenizer(
+            num_words=vocab_size)
+
+    # Create a sequence training tuple from input/output sequences
+    def make_training_tuple(self, input_sequence, output_sequence):
+        truncate_front = output_sequence[1:]
+        truncate_back = output_sequence[:-1]
+        sos_token = [self.vocab_size]
+        eos_token = [self.vocab_size + 1]
+        input_sequence = sos_token + input_sequence + eos_token
+        ground_truth = sos_token + truncate_back
+        final_sequence = truncate_front + eos_token
+        return input_sequence, ground_truth, final_sequence
+
+    def make_lstm_cell(self, dropout_keep_prob, num_units):
+        cell = tf.keras.layers.LSTMCell(num_units, dropout=dropout_keep_prob)
+        return cell
+
+    # Create multi-layer LSTM
+    def stacked_lstm_cells(self, is_training, num_units):
+        dropout_keep_prob = 0.5 if is_training else 1.0
+        cell_list = [self.make_lstm_cell(dropout_keep_prob, num_units) for i in range(self.num_lstm_layers)]
+        cell = tf.keras.layers.StackedRNNCells(cell_list)
+        return cell
+
+    # Get embeddings for input/output sequences
+    def get_embeddings(self, sequences, scope_name):
+        with tf.compat.v1.variable_scope(scope_name,reuse=tf.compat.v1.AUTO_REUSE):
+            cat_column = tf.compat.v1.feature_column \
+              .categorical_column_with_identity(
+                  'sequences', self.extended_vocab_size)
+            embed_size = int(self.extended_vocab_size**0.25)
+            embedding_column = tf.compat.v1.feature_column.embedding_column(
+                  cat_column, embed_size)
+            seq_dict = {'sequences': sequences}
+            embeddings= tf.compat.v1.feature_column \
+                                 .input_layer(
+                                     seq_dict, [embedding_column])
+            sequence_lengths = tf.compat.v1.placeholder("int64", shape=(None,), name=scope_name+"/sinput_layer/sequence_length")
+            return embeddings, tf.cast(sequence_lengths, tf.int32)
+
+    # Create the encoder for the model
+    def encoder(self, encoder_inputs, is_training):
+        input_embeddings, input_seq_lens = self.get_embeddings(encoder_inputs, 'encoder_emb')
+        cell = self.stacked_lstm_cells(is_training, self.num_lstm_units)
+
+        combined_state = []
+        rnn = tf.keras.layers.RNN(
+              cell,
+              return_sequences=True,
+              return_state=True,
+              go_backwards=True,
+              dtype=tf.float32)
+        Bi_rnn = tf.keras.layers.Bidirectional(
+              rnn,
+              merge_mode='concat'
+              )
+        input_embeddings = tf.reshape(input_embeddings, [-1,-1,2])
+        outputs = Bi_rnn(input_embeddings)
+        enc_outputs = outputs[0]
+        states_fw =  [ outputs[i]  for i in range(1,self.num_lstm_layers+1)]
+        states_bw =  [ outputs[i]  for i in range(self.num_lstm_layers+1,len(outputs))]
+
+        for i in range(self.num_lstm_layers):
+            bi_state_c, bi_state_h = ref_get_bi_state_parts(
+                states_fw[i], states_bw[i]
+            )
+            bi_lstm_state = tf.compat.v1.nn.rnn_cell.LSTMStateTuple(bi_state_c, bi_state_h)
+            combined_state.append(bi_lstm_state)
+        final_state = tuple(combined_state)
+        return enc_outputs, input_seq_lens, final_state
+
+    # Helper funtion to combine BiLSTM encoder outputs
+    def combine_enc_outputs(self, enc_outputs):
+        enc_outputs_fw, enc_outputs_bw = enc_outputs
+        return tf.concat([enc_outputs_fw, enc_outputs_bw], -1)
+
+    # Create the stacked LSTM cells for the decoder
+    def create_decoder_cell(self, enc_outputs, input_seq_lens, is_training):
+        num_decode_units = self.num_lstm_units * 2
+        dec_cell = self.stacked_lstm_cells(is_training, num_decode_units)
+        combined_enc_outputs = self.combine_enc_outputs(enc_outputs)
+        attention_mechanism = tfa.seq2seq.LuongAttention(num_decode_units, combined_enc_outputs, memory_sequence_length=input_seq_lens)
+        dec_cell = tfa.seq2seq.AttentionWrapper(dec_cell, attention_mechanism, attention_layer_size=num_decode_units)
+        return dec_cell
+
+    # Calculate the model loss
+    def calculate_loss(self, logits, dec_seq_lens, decoder_outputs, batch_size):
+        binary_sequences = tf.compat.v1.sequence_mask(dec_seq_lens, dtype=tf.float32)
+        batch_loss = tf.compat.v1.nn.sparse_softmax_cross_entropy_with_logits(labels=decoder_outputs, logits=logits)
+        unpadded_loss = batch_loss * binary_sequences
+        per_seq_loss = tf.math.reduce_sum(unpadded_loss) / batch_size
+        return per_seq_loss
+
+    # Create the sampler for decoding
+    def create_decoder_sampler(self, decoder_inputs, is_training, batch_size):
+        if is_training:
+            dec_embeddings, dec_seq_lens = self.get_embeddings(decoder_inputs, 'decoder_emb')
+            sampler = tfa.seq2seq.sampler.TrainingSampler()
+        else:
+            embedding_matrix = tf.keras.layers.Embedding(self.vocab_size, int(self.vocab_size/2))
+            sampler = tfa.seq2seq.sampler.GreedyEmbeddingSampler(embedding_matrix)
+            dec_seq_lens  = None
+        return sampler, dec_seq_lens
+
+    def Decoder(self, enc_outputs, input_seq_lens, final_state, batch_size,
+            sampler, dec_seq_lens , is_training):
+        dec_cell = self.create_decoder_cell(enc_outputs, input_seq_lens, is_training)
+        projection_layer = tf.keras.layers.Dense(self.extended_vocab_size)
+        batch_s = tf.constant(batch_size)
+
+
+        initial_state = dec_cell.get_initial_state(enc_outputs[0],batch_size=batch_s , dtype = tf.float32)
+
+        decoder = tfa.seq2seq.BasicDecoder(
+            dec_cell, sampler,
+            output_layer=projection_layer
+            )
+        inputs = enc_outputs[0]
+        output = run_decoder(decoder,inputs , initial_state , input_seq_lens , is_training , dec_seq_lens)
+        return output</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="tensorflow-10">
+  <div class="card-body">
+    <h2 class="card-title">Data pipeline</h2>
+    <ul>
+      <li>Google protocol buffer</li>
+      <ul>
+        <li>Efficient format for storing large amounts of data.</li>
+        <li>Similar to JSON and XML.</li>
+        <li><code>tf.train.Example</code> class represents the protocol buffer.</li>
+        <li>Each feature value is represented by <code>tf.train.Feature</code> object.</li>
+      </ul>
+    </ul>
+
+<pre><code class="python">import tensorflow as tf
+
+def dict_to_example(data_dict, config):
+    feature_dict = {}
+    for feature_name, value in data_dict.items():
+        feature_config = config[feature_name]
+        shape = feature_config['shape']
+        if shape == () or shape == []:
+            value = [value]
+        value_type = feature_config['type']
+        if value_type == 'int':
+            feature_dict[feature_name] = make_int_feature(value)
+        elif value_type == 'float':
+            feature_dict[feature_name] = make_float_feature(value)
+        elif value_type == 'string' or value_type == 'bytes':
+            feature_dict[feature_name] = make_bytes_feature(
+              value, value_type)
+    features = tf.train.Features(feature=feature_dict)
+    return tf.train.Example(features=features)
+
+def make_int_feature(value):
+    return tf.train.Feature(int64_list=tf.train.Int64List(value=value))
+
+def make_float_feature(value):
+    return tf.train.Feature(float_list=tf.train.FloatList(value=value))
+
+def make_bytes_feature(value, value_type):
+    if value_type == 'string':
+        value = [s.encode() for s in value]
+    return tf.train.Feature(bytes_list=tf.train.BytesList(value=value))</code></pre>
+
+    <h3 class="card-title">TFRecords</h3>
+    <ul>
+      <li>To store protocol buffer into a file, the object needs to be serialized. (For exmaple, converte into byte string)</li>
+    </ul>
+
+<pre><code class="python">ex = tf.train.Example(features=tf.train.Features(feature=f_dict))
+ser_ex = ex.SerializeToString()
+writer = tf.io.TFRecordWriter('out.tfrecords')
+writer.write(ser_ex)
+writer.close()</code></pre>
+
+    <h3 class="card-title">Features</h3>
+
+<pre><code class="python">def make_feature_config(shape, tf_type, feature_config):
+    if shape is None:
+        feature = tf.io.VarLenFeature(tf_type)
+    else:
+        default_value = feature_config.get('default_value', None)
+        feature = tf.io.FixedLenFeature(shape, tf_type, default_value)
+
+    return feature
+
+def create_example_spec(config):
+    example_spec = {}
+    for feature_name, feature_config in config.items():
+        if feature_config['type'] == 'int':
+            tf_type = tf.int64
+        elif feature_config['type'] == 'float':
+            tf_type = tf.float32
+        else:
+            tf_type = tf.string
+        shape = feature_config['shape']
+        feature = make_feature_config(shape, tf_type, feature_config)
+        example_spec[feature_name] = feature
+    return example_spec</code></pre>
+
+    <h3 class="card-title">Parsing</h3>
+
+<pre><code class="python">def parse_example(example_bytes, example_spec, output_features=None):
+    parsed_features = tf.io.parse_single_example(example_bytes, example_spec)
+    if output_features is not None:
+        temp = {}
+        for feature in output_features:
+            temp[feature] = parsed_features[feature]
+        parsed_features = temp
+    return parsed_features</code></pre>
+
+    <h3 class="card-title">Dataset and mapping</h3>
+
+<pre><code class="python"># Map the parse_example function onto a TFRecord Dataset
+def dataset_from_examples(filenames, config, output_features=None):
+    example_spec = create_example_spec(config)
+    dataset = tf.data.TFRecordDataset(filenames)
+    wrapper = lambda example:parse_example(example, example_spec, output_features)
+    dataset = dataset.map(wrapper)
+    return dataset</code></pre>
+
+    <h3 class="card-title">Feature columns</h3>
+    <ul>
+      <li>Numeric.</li>
+      <li>Categorical.</li>
+    </ul>
+
+<pre><code class="python">def create_feature_columns(config, example_spec, output_features=None):
+    if output_features is None:
+        output_features = config.keys()
+    feature_columns = []
+    for feature_name in output_features:
+        dtype = example_spec[feature_name].dtype
+        feature_config = config[feature_name]
+        # HELPER FUNCTIONS USED
+        if 'vocab_list' in feature_config:
+            feature_col = create_list_column(feature_name, feature_config, dtype)
+        elif 'vocab_file' in feature_config:
+            feature_col = create_file_column(feature_name, feature_config, dtype)
+        else:
+            feature_col = create_numeric_column(feature_name, feature_config, dtype)
+        feature_columns.append(feature_col)
+    return feature_columns
+
+def create_list_column(feature_name, feature_config, dtype):
+    vocab_feature_col = tf.feature_column.categorical_column_with_vocabulary_list(feature_name, feature_config['vocab_list'], dtype=dtype)
+    feature_col = tf.feature_column.indicator_column(vocab_feature_col)
+    return feature_col
+
+def create_file_column(feature_name, feature_config, dtype):
+    vocab_feature_col = tf.feature_column.categorical_column_with_vocabulary_file(feature_name, feature_config['vocab_file'], dtype=dtype)
+    feature_col = tf.feature_column.indicator_column(vocab_feature_col)
+    return feature_col
+
+def create_numeric_column(feature_name, feature_config, dtype):
+    feature_col = tf.feature_column.numeric_column(feature_name, shape=feature_config['shape'], dtype=dtype)
+    return feature_col</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="tensorflow-11">
+  <div class="card-body">
+    <h2 class="card-title">Model execution</h2>
+    <ul>
+      <li><code>tf.compat.v1.train.LoggingTensorHook</code>: log specific values while training.</li>
+      <li><code>tf.compat.v1.train.NanTensorHook</code>: automatically stop training if the loss takes on an infinite value.</li>
+      <li><code>tf.compat.v1.train.MonitoredTrainingSession</code></li>
+      <ul>
+        <li>Replaces <code>tf.compat.v1.Session</code>.</li>
+        <li>Allows creating a checkpoint directory.</li>
+      </ul>
+    </ul>
+
+<pre><code class="python">def run_model_training(self, input_data, labels, hidden_layers, batch_size, num_epochs, ckpt_dir):
+    self.global_step = tf.compat.v1.train.get_or_create_global_step()
+    dataset = self.dataset_from_numpy(input_data, batch_size,
+        labels=labels, num_epochs=num_epochs)
+    iterator = tf.compat.v1.data.make_one_shot_iterator(dataset)
+    inputs, labels = iterator.get_next()
+    self.run_model_setup(inputs, labels, hidden_layers, True)
+    self.add_to_tensorboard(inputs)
+    log_vals = {'loss': self.loss, 'step': self.global_step}
+    logging_hook = tf.compat.v1.train.LoggingTensorHook(
+        log_vals, every_n_iter=1000)
+    nan_hook = tf.compat.v1.train.NanTensorHook(self.loss)
+    hooks = [nan_hook, logging_hook]
+    with tf.compat.v1.train.MonitoredTrainingSession(
+        checkpoint_dir=ckpt_dir,
+        hooks=hooks) as sess:
+        while not sess.should_stop():
+            sess.run(self.train_op)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="tensorflow-12">
+  <div class="card-body">
+    <h2 class="card-title">Data processing</h2>
+    <ul>
+      <li>DataFrame is not the most efficient data storage for the input pipeline.</li>
+      <li>Randomly shuffle data before splitting it.</li>
+      <li>Convert each DataFrame row into a TensorFlow Example object to optimize the input pipeline.</li>
+      <li>Use TFRecords files (Which hold serialized Example objects) for efficient input pipeline storage for both the training and evaluation sets.</li>
+      <li>Use Example spec to parse the serialized Examples in the input pipeline.</li>
+    </ul>
+
+<pre><code class="python">import tensorflow as tf
+
+def add_int_features(dataset_row, feature_dict):
+    int_vals = ['Store', 'Dept', 'IsHoliday', 'Size']
+    for feature_name in int_vals:
+        list_val = tf.train.Int64List(value=[dataset_row[feature_name]])
+        feature_dict[feature_name] = tf.train.Feature(int64_list=list_val)
+
+def add_float_features(dataset_row, feature_dict, has_labels):
+    float_vals = ['Temperature', 'Fuel_Price', 'CPI', 'Unemployment']
+    if has_labels:
+        float_vals.append('Weekly_Sales')
+    for feature_name in float_vals:
+        list_val = tf.train.FloatList(value=[dataset_row[feature_name]])
+        feature_dict[feature_name] = tf.train.Feature(float_list=list_val)
+
+def create_example(dataset_row, has_labels):
+    feature_dict = {}
+    add_int_features(dataset_row, feature_dict)
+    add_float_features(dataset_row, feature_dict, has_labels)
+    byte_type = dataset_row['Type'].encode()
+    list_val = tf.train.BytesList(value=[byte_type])
+    feature_dict['Type'] = tf.train.Feature(bytes_list=list_val)
+    features_obj = tf.train.Features(feature=feature_dict)
+    return tf.train.Example(features=features_obj)
+
+# Write serialized Example objects to a TFRecords file
+def write_tfrecords(dataset, has_labels, tfrecords_file):
+    writer = tf.python_io.TFRecordWriter(tfrecords_file)
+    for i in range(len(dataset)):
+        example = create_example(dataset.iloc[i], has_labels)
+        writer.write(example.SerializeToString())
+    writer.close()
+
+# train_set is the training DataFrame
+write_tfrecords(train_set, 'train.tfrecords')
+
+# eval_set is the evaluation DataFrame
+write_tfrecords(eval_set, 'eval.tfrecords')
+
+def create_example_spec(has_labels):
+    example_spec = {}
+    int_vals = ['Store', 'Dept', 'IsHoliday', 'Size']
+    float_vals = ['Temperature', 'Fuel_Price', 'CPI', 'Unemployment']
+    if has_labels:
+        float_vals.append('Weekly_Sales')
+    for feature_name in int_vals:
+        example_spec[feature_name] = tf.io.FixedLenFeature((), tf.int64)
+    for feature_name in float_vals:
+        example_spec[feature_name] = tf.io.FixedLenFeature((), tf.float32)
+    example_spec['Type'] = tf.io.FixedLenFeature((), tf.string)
+    return example_spec
+
+def parse_features(ser_ex, example_spec, has_labels):
+    parsed_features = tf.io.parse_single_example(ser_ex, example_spec)
+    features = {k: parsed_features[k] for k in parsed_features if k != 'Weekly_Sales'}
+    if not has_labels:
+        return features
+    label = parsed_features['Weekly_Sales']
+    return features, label
+
+train_file = 'train.tfrecords'
+eval_file = 'eval.tfrecords'
+train_dataset = tf.data.TFRecordDataset(train_file)
+eval_dataset = tf.data.TFRecordDataset(eval_file)
+
+example_spec = create_example_spec(True)
+parse_fn = lambda ser_ex: parse_features(ser_ex, example_spec, True)
+train_dataset = train_dataset.map(parse_fn)
+eval_dataset = eval_dataset.map(parse_fn)
+
+train_dataset = train_dataset.shuffle(421570)
+eval_dataset = eval_dataset.shuffle(421570)
+
+train_dataset = train_dataset.repeat()
+
+train_dataset = train_dataset.batch(100)
+eval_dataset = eval_dataset.batch(20)
+
+def add_numeric_columns(feature_columns):
+    numeric_features = ['Size', 'Temperature', 'Fuel_Price', 'CPI', 'Unemployment']
+    for feature_name in numeric_features:
+        feature_col = tf.feature_column.numeric_column(feature_name, shape=())
+        feature_columns.append(feature_col)
+
+# Add the numeric feature columns to the list of dataset feature columns
+dataset_feature_columns = []
+add_numeric_columns(dataset_feature_columns)
+
+def add_indicator_columns(final_dataset, feature_columns):
+    indicator_features = ['IsHoliday', 'Type']
+    for feature_name in indicator_features:
+        dtype = tf.string if feature_name == 'Type' else tf.int64
+        vocab_list = list(final_dataset[feature_name].unique())
+        vocab_col = tf.feature_column.categorical_column_with_vocabulary_list(
+                feature_name, vocab_list, dtype=dtype)
+        feature_col = tf.feature_column.indicator_column(vocab_col)
+        feature_columns.append(feature_col)
+
+def add_embedding_columns(final_dataset, feature_columns):
+    embedding_features = ['Store', 'Dept']
+    for feature_name in embedding_features:
+        vocab_list = list(final_dataset[feature_name].unique())
+        vocab_feature_col = tf.feature_column.categorical_column_with_vocabulary_list(
+                feature_name, vocab_list, dtype=tf.int64)
+        embedding_dim = int(len(vocab_list)**0.25)
+        feature_col = tf.feature_column.embedding_column(vocab_feature_col, embedding_dim)
+        feature_columns.append(feature_col)
+
+def create_feature_columns(final_dataset):
+    feature_columns = []
+    add_numeric_columns(feature_columns)
+    add_indicator_columns(final_dataset, feature_columns)
+    add_embedding_columns(final_dataset, feature_columns)
+    return feature_columns
+
+feature_columns = create_feature_columns(final_dataset)</code></pre>
+
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="tensorflow-13">
+  <div class="card-body">
+    <h2 class="card-title">Model prediction</h2>
+    <ul>
+      <li>Three phases to completing the machine learning model: training, evaluation, and prediction.</li>
+      <li>The EstimatorSpec object has three modes.</li>
+      <ul>
+        <li>Training: <code>tf.estimator.ModeKeys.TRAIN</code></li>
+        <li>Evaluation: <code>tf.estimator.ModeKeys.EVAL</code></li>
+        <li>Prediction: <code>tf.estimator.ModeKeys.PREDICT</code></li>
+      </ul>
+    </ul>
+
+<pre><code class="python">class SalesModel(object):
+    def __init__(self, hidden_layers):
+        self.hidden_layers = hidden_layers
+
+    def run_regression_predict(self, ckpt_dir, data_file):
+        regression_model = self.create_regression_model(ckpt_dir)
+        input_fn = lambda:create_tensorflow_dataset(data_file, 1, training=False, has_labels=False)
+        predictions = regression_model.predict(input_fn)
+        pred_list = []
+        for pred_dict in predictions:
+            pred_list.append(pred_dict['predictions'][0])
+        return pred_list
+
+    def run_regression_eval(self, ckpt_dir):
+        regression_model = self.create_regression_model(ckpt_dir)
+        input_fn = lambda:create_tensorflow_dataset('eval.tfrecords', 50, training=False)
+        return regression_model.evaluate(input_fn)
+
+    def run_regression_training(self, ckpt_dir, batch_size, num_training_steps=None):
+        regression_model = self.create_regression_model(ckpt_dir)
+        input_fn = lambda:create_tensorflow_dataset('train.tfrecords', batch_size)
+        regression_model.train(input_fn, steps=num_training_steps)
+
+    def create_regression_model(self, ckpt_dir):
+        config = tf.estimator.RunConfig(log_step_count_steps=5000)
+        regression_model = tf.estimator.Estimator(
+            self.regression_fn,
+            config=config,
+            model_dir=ckpt_dir)
+        return regression_model
+
+    def regression_fn(self, features, labels, mode, params):
+        feature_columns = create_feature_columns()
+        inputs = tf.feature_column.input_layer(features, feature_columns)
+        batch_predictions = self.model_layers(inputs)
+        predictions = tf.squeeze(batch_predictions)
+        if labels is not None:
+            loss = tf.losses.absolute_difference(labels, predictions)
+
+        if mode == tf.estimator.ModeKeys.TRAIN:
+            global_step = tf.train.get_or_create_global_step()
+            adam = tf.train.AdamOptimizer()
+            train_op = adam.minimize(
+                loss, global_step=global_step)
+            return tf.estimator.EstimatorSpec(mode, loss=loss, train_op=train_op)
+        if mode == tf.estimator.ModeKeys.EVAL:
+            return tf.estimator.EstimatorSpec(mode, loss=loss)
+        if mode == tf.estimator.ModeKeys.PREDICT:
+            prediction_info = {
+              'predictions': batch_predictions
+            }
+            return tf.estimator.EstimatorSpec(mode, predictions=prediction_info)
+
+    def model_layers(self, inputs):
+        layer = inputs
+        for num_nodes in self.hidden_layers:
+            layer = tf.layers.dense(layer, num_nodes,
+                activation=tf.nn.relu)
+        batch_predictions = tf.layers.dense(layer, 1)
+        return batch_predictions</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
