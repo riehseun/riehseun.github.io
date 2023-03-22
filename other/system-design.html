@@ -46,6 +46,7 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#system-design-1">System design</a></li>
       <li><a href="#system-design-2">Machine learning system design</a></li>
+      <br>
       <li><a href="#system-design-10">Key-value store</a></li>
       <li><a href="#system-design-11">CDN</a></li>
       <li><a href="#system-design-12">Sequencer</a></li>
@@ -57,6 +58,7 @@
       <li><a href="#system-design-18">Distributed search</a></li>
       <li><a href="#system-design-19">Distributed task scheduler</a></li>
       <li><a href="#system-design-20">Sharded counter</a></li>
+      <br>
       <li><a href="#system-design-50">Youtube</a></li>
       <li><a href="#system-design-51">Quora</a></li>
       <li><a href="#system-design-52">Google maps</a></li>
@@ -70,6 +72,7 @@
       <li><a href="#system-design-60">Typeahead</a></li>
       <li><a href="#system-design-61">Whatsapp</a></li>
       <li><a href="#system-design-62">Google doc</a></li>
+      <br>
       <li><a href="#system-design-100">Google search</a></li>
       <li><a href="#system-design-101">Twitter feed</a></li>
       <li><a href="#system-design-102">Netflix</a></li>
@@ -2899,6 +2902,10 @@
 
     <h3 class="card-title">Requirement</h3>
 
+    <h4 class="card-title">Training</h4>
+
+    <h4 class="card-title">Inference</h4>
+
     <h3 class="card-title">Estimation</h3>
     <ul>
       <li>How many websites to search from? Billions of documents.</li>
@@ -2930,7 +2937,7 @@
     <ul>
       <li>Ground truth: actual outputs desired by the system. In this case, it is the rating provided by humans.</li>
       <li>Assume the search engine returns documents D1, D2, D3, D4 in the order of relevance.</li>
-      <li>Assume human rates the documetns on scale of 0-3(3 is highly relevant, 0 is merely relevant) such that</li>
+      <li>Assume human rates the documents on scale of 0-3(3 is highly relevant, 0 is merely relevant) such that</li>
       <ul>
         <li>D1=3, D2=2, D3=3, D4=0</li>
       </ul>
@@ -2945,7 +2952,7 @@
       <li>Normalized discounted cumulative gain (NDCG) is computed by (DCG / IDCG) where IDCG is DCG of ideal ordering.</li>
       <ul>
         <li>Caveat: NDCG does not penalize irrelevant search result.</li>
-        <li>As remedy, human rate could assign negative store to irrelvant document.</li>
+        <li>As remedy, human rater could assign negative store to irrelvant document.</li>
       </ul>
     </ul>
 
@@ -3000,7 +3007,7 @@
 
     <h4 class="card-title">Query</h4>
     <ul>
-      <li>History:</li>
+      <li>History</li>
       <ul>
         <li>For example, query "earthquake" historically was related to recent news.</li>
       </ul>
@@ -3229,86 +3236,140 @@
       <li>Fetches a pool of Tweets from the user network since the last login.</li>
     </ul>
 
+    <h4 class="card-title">Ranker</h4>
+    <ul>
+      <li>Predict Tweets probability of engagement.</li>
+    </ul>
+
     <h4 class="card-title">Training data generation</h4>
     <ul>
       <li>Each user engagement action results in positive and negative examples.</li>
-    </ul>
-
-    <h4 class="card-title">Ranker</h4>
-    <ul>
-      <li>Prdict Tweets probability of engagement.</li>
     </ul>
 
     <h3 class="card-title">Feature engineering</h3>
 
     <h4 class="card-title">User-author historical relations</h4>
     <ul>
-      <li>author_liked_posts_3months: percentage of author Tweets user liked in the last 3 months.</li>
-      <li>author_liked_posts_count_1year: number of author Tweets user liked in the past one year.</li>
+      <li>author_liked_posts_3months</li>
+      <ul>
+        <li>Percentage of author Tweets user liked in the last 3 months.</li>
+      </ul>
+      <li>author_liked_posts_count_1year</li>
+      <ul>
+        <li>Number of author Tweets user liked in the past one year.</li>
+      </ul>
     </ul>
 
     <h4 class="card-title">User-author similarity</h4>
     <ul>
-      <li>common_followees: numbers of users and hash tags followed by both.</li>
-      <li>topic_similarity: similarity between hash tags in the posts that both interacted.</li>
-      <li>tweet_content_embedding_similarity: generate embedding (bag-of-words) for every user and take dot product between them.</li>
-      <li>social_embedding_similarity: every user is represented by bag-of-ids (rather than bag-of-words)</li>
+      <li>common_followees</li>
+      <ul>
+        <li>Numbers of users and hash tags followed by bothN</li>
+      </ul>
+      <li>topic_similarity</li>
+      <ul>
+        <li>Similarity between hash tags in the posts that both interacted.</li>
+      </ul>
+      <li>tweet_content_embedding_similarity</li>
+      <ul>
+        <li>Generate embedding (bag-of-words) for every user and take dot product between them.</li>
+      </ul>
+      <li>social_embedding_similarity</li>
+      <ul>
+        <li>Every user is represented by bag-of-ids (rather than bag-of-words)</li>
+      </ul>
     </ul>
 
     <h4 class="card-title">Author influence</h4>
     <ul>
-      <li>is_verified: if author is verified.</li>
-      <li>author_social_rank: similar to Google page rank.</li>
-      <li>author_num_followers: nubmer of followers that author has.</li>
+      <li>is_verified</li>
+      <ul>
+        <li>If author is verifiedI</li>
+      </ul>
+      <li>author_social_rank</li>
+      <ul>
+        <li>Similar to Google page rank.</li>
+      </ul>
+      <li>author_num_followers</li>
+      <ul>
+        <li>Nubmer of followers that author has.</li>
+      </ul>
       <li>follower_to_following_ratio</li>
     </ul>
 
     <h4 class="card-title">Author Tweets historical trend</h4>
     <ul>
-      <li>author_engagement_rate_3months: (Tweets-interactions) / (Tweets-views)</li>
-      <li>author_topic_engagement_rate_3months: compute similar feature above but per topic.</li>
+      <li>author_engagement_rate_3months</li>
+      <ul>
+        <li>(Tweets-interactions) / (Tweets-views)</li>
+      </ul>
+      <li>author_topic_engagement_rate_3months</li>
+      <ul>
+        <li>Compute similar feature above but per topic.</li>
+      </ul>
     </ul>
 
     <h4 class="card-title">User-tweet</h4>
     <ul>
-      <li>topic_similarity: similarity between hashtags and contents that user tweeted in the past and the Tweet itself.</li>
-      <li>embedding_similarity: dot product between user and Tweet vector.</li>
+      <li>topic_similarity</li>
+      <ul>
+        <li>Similarity between hashtags and contents that user tweeted in the past and the Tweet itself.</li>
+      </ul>
+      <li>embedding_similarity</li>
+      <ul>
+        <li>Dot product between user and Tweet vector.</li>
+      </ul>
     </ul>
 
     <h4 class="card-title">Tweet content</h4>
     <ul>
-      <li>Tweet_length: concise Tweet has higher chance of getting likes.</li>
-      <li>Tweet_recency: people are interested in latest Tweets.</li>
-      <li>is_image_video: Tweets with image or video are more catchy.</li>
-      <li>is_URL: Tweets with URL have higher probability of engagement.</li>
+      <li>Tweet_length</li>
+      <ul>
+        <li>Concise Tweet has higher chance of getting likes.</li>
+      </ul>
+      <li>Tweet_recency</li>
+      <ul>
+        <li>People are interested in latest Tweets.</li>
+      </ul>
+      <li>is_image_video</li>
+      <ul>
+        <li>Tweets with image or video are more catchy.</li>
+      </ul>
+      <li>is_URL</li>
+      <ul>
+        <li>Tweets with URL have higher probability of engagement.</li>
+      </ul>
     </ul>
 
     <h4 class="card-title">Tweet interaction</h4>
     <ul>
-      <li>num_total_interactions: need to use time decay model to give proper attention to trending Tweets.</li>
-      <li>likes_in_last_3_days:</li>
-      <li>comments_in_last_1_day:</li>
-      <li>reshares_in_last_2_hours:</li>
-      <li>likes_in_last_3_days_user’s_network_only:</li>
-      <li>comments_in_last_1_day_user’s_network_only:</li>
-      <li>reshares_in_last_2_hours_user’s_network_only:</li>
+      <li>num_total_interactions</li>
+      <ul>
+        <li>Need to use time decay model to give proper attention to trending Tweets.</li>
+      </ul>
+      <li>likes_in_last_3_days</li>
+      <li>comments_in_last_1_day</li>
+      <li>reshares_in_last_2_hours</li>
+      <li>likes_in_last_3_days_user’s_network_only</li>
+      <li>comments_in_last_1_day_user’s_network_only</li>
+      <li>reshares_in_last_2_hours_user’s_network_only</li>
     </ul>
 
     <h4 class="card-title">Context based features</h4>
     <ul>
-      <li>day_of_week:</li>
-      <li>time_of_day:</li>
-      <li>current_user_location:</li>
-      <li>season:</li>
-      <li>lastest_k_tag_interactions:</li>
-      <li>approaching_holiday:</li>
+      <li>day_of_week</li>
+      <li>time_of_day</li>
+      <li>current_user_location</li>
+      <li>season</li>
+      <li>lastest_k_tag_interactions</li>
+      <li>approaching_holiday</li>
     </ul>
 
     <h4 class="card-title">Sparse features</h4>
     <ul>
-      <li>unigrams/bigrams of a Tweet.</li>
-      <li>user_id:</li>
-      <li>tweets_id:</li>
+      <li>unigrams/bigrams of a Tweet</li>
+      <li>user_id</li>
+      <li>tweets_id</li>
     </ul>
 
     <h3 class="card-title">Training data generation</h3>
@@ -3374,11 +3435,11 @@
     <ul>
       <li>Hyperparameters</li>
       <ul>
-        <li>Learning rate.</li>
-        <li>Number of hidden layers.</li>
-        <li>Batch size.</li>
-        <li>Number of epochs.</li>
-        <li>Dropout rate.</li>
+        <li>Learning rate</li>
+        <li>Number of hidden layers</li>
+        <li>Batch size</li>
+        <li>Number of epochs</li>
+        <li>Dropout rate</li>
       </ul>
       <li>Multi task NN where total_loss = like_loss + comment_loss + retweet_loss</li>
       <li>Better than training sepearate network for each task because shared layers make training faster.</li>
@@ -3408,7 +3469,7 @@
       <li>Do A/B testing between the best offline model and online model.</li>
       <ul>
         <li>Before testing, retrain the best offline model with the latest data.</li>
-        <li>Select 1% of users. Use existing model to half of 1% of users. Use the best offline model to the other half of 1% of users.</li>
+        <li>Select 1% of users. Use existing model to one half of 1% of users. Use the best offline model to the other half of 1% of users.</li>
         <li>Compare user engagement</li>
         <ul>
           <li>Use statistical significance. (Ex. p-value)</li>
@@ -3511,7 +3572,10 @@
       <li>country</li>
       <li>average_session_time</li>
       <li>last_genre_watched</li>
-      <li>user_actor_histogram: histogram showing historical interaction between users and actors in movies.</li>
+      <li>user_actor_histogram</li>
+      <ul>
+        <li>Histogram showing historical interaction between users and actors in movies.</li>
+      </ul>
       <li>user_genre_histogram</li>
       <li>user_language_histogram</li>
     </ul>
@@ -3587,7 +3651,7 @@
 
     <h4 class="card-title">Collaborative filtering</h4>
     <ul>
-      <li>Find simialr users to active user based on historical watches.</li>
+      <li>Find similar users to active user based on historical watches.</li>
       <li>User and media profiles do not require domain knowledge.</li>
       <li>Has cold start problem</li>
       <ul>
@@ -3660,10 +3724,8 @@
 <div class="card mb-4" id="system-design-103">
   <div class="card-body">
     <h2 class="card-title">Tesla</h2>
-
-    <h3 class="card-title">Problem</h3>
     <ul>
-      <li>design a self-driving car system focusing on semantic image segmentation.</li>
+      <li>Design a self-driving car system focusing on semantic image segmentation.</li>
     </ul>
 
     <h4 class="card-title">Scope</h4>
@@ -3689,6 +3751,14 @@
       <li>Scene understanding</li>
       <li>Movement plan</li>
     </ul>
+
+    <h3 class="card-title">Requirement</h3>
+
+    <h4 class="card-title">Training</h4>
+
+    <h4 class="card-title">Inference</h4>
+
+    <h3 class="card-title">Estimation</h3>
 
     <h3 class="card-title">Metric</h3>
 
@@ -3788,6 +3858,14 @@
         </ul>
       </ul>
     </ul>
+
+    <h3 class="card-title">Requirement</h3>
+
+    <h4 class="card-title">Training</h4>
+
+    <h4 class="card-title">Inference</h4>
+
+    <h3 class="card-title">Estimation</h3>
 
     <h3 class="card-title">Metric</h3>
     <ul>
