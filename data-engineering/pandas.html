@@ -49,6 +49,7 @@
       <li><a href="#pandas-3">Data scrubbing</a></li>
       <li><a href="#pandas-4">Pre-model algorithm</a></li>
       <li><a href="#pandas-5">Split validation</a></li>
+      <li><a href="#pandas-6">Data analysis</a></li>
     </ul>
   </div>
 </div>
@@ -644,6 +645,60 @@ X_test, X_val, y_test, y_val = train_test_split(X_test, y_test, test_size=0.5)</
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.educative.io/path/machine-learning-with-python-libraries">Machine Learning with Python Libraries</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="pandas-6">
+  <div class="card-body">
+    <h2 class="card-title">Data analysis</h2>
+
+<pre><code class="python">import pandas as pd
+
+# Read the CSV data files into DataFrames
+def read_dataframes():
+    train_df = pd.read_csv('weekly_sales.csv')
+    features_df = pd.read_csv('features.csv')
+    stores_df = pd.read_csv('stores.csv')
+    return train_df, features_df, stores_df</code></pre>
+
+    <h3 class="card-title">Merge feature</h3>
+
+<pre><code class="python">general_features = features_df.columns
+print('General Features: {}\n'.format(general_features.tolist()))
+
+store_features = stores_df.columns
+print('Store Features: {}'.format(store_features.tolist()))
+
+merged_features = features_df.merge(stores_df, on='Store')
+print(merged_features)</code></pre>
+
+    <h3 class="card-title">Missing data</h3>
+    <ul>
+      <li>Pandas represents missing values with an <code>NA</code> in the DataFrame.</li>
+      <li>Count the number of <code>True</code> for each feature column in the boolean DataFrame.</li>
+    </ul>
+
+<pre><code class="python">na_values = pd.isna(merged_features)  # Boolean DataFrame.
+na_features = na_values.any()  # Boolean Series.
+print(na_features)
+
+print(len(na_values))
+print(sum(na_values['MarkDown1']))
+print(sum(na_values['CPI']))
+
+# Drop unusable features.
+markdowns = [
+    'MarkDown1',
+    'MarkDown2',
+    'MarkDown3',
+    'MarkDown4',
+    'MarkDown5'
+]
+merged_features = merged_features.drop(columns=markdowns)
+print(merged_features.columns.tolist())</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
   </div>
 </div>
 <!-- Pandas END -->
