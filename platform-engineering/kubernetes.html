@@ -45,22 +45,19 @@
 
     <ul class="list-unstyled mb-0">
       <li><a href="#kubernetes-1">Kubernetes basic</a>
-      <li><a href="#kubernetes-2">Kubernetes objects and API</a></li>
-      <li><a href="#kubernetes-10">Kubernetes manifest</a></li>
-      <li><a href="#kubernetes-3">Kubectl</a></li>
-      <li><a href="#kubernetes-11">Kubernetes security</a></li>
-      <li><a href="#kubernetes-12">Autoscaler</a></li>
-      <li><a href="#kubernetes-4">Helm</a></li>
-      <li><a href="#kubernetes-5">Skaffold</a></li>
-      <li><a href="#kubernetes-6">Datadog and kube state metric</a></li>
-      <li><a href="#kubernetes-7">Kured</a></li>
-      <li><a href="#kubernetes-8">Istio</a></li>
-      <li><a href="#kubernetes-9">Kubernetes common issues</a></li>
+      <li><a href="#kubernetes-2">Kubectl</a></li>
+      <li><a href="#kubernetes-3">Kubernetes security</a></li>
+      <li><a href="#kubernetes-4">Autoscaler</a></li>
+      <li><a href="#kubernetes-5">Helm</a></li>
+      <li><a href="#kubernetes-6">Skaffold</a></li>
+      <li><a href="#kubernetes-7">Datadog and kube state metric</a></li>
+      <li><a href="#kubernetes-8">Kured</a></li>
+      <li><a href="#kubernetes-9">Istio</a></li>
+      <li><a href="#kubernetes-10">Kubernetes common issues</a></li>
       <br>
 
       <li><a href="#kubernetes-21">Namespace</a> - virtual clusters supported by the same physical cluster.</li>
       <li><a href="#kubernetes-22">Deployment</a> - declarative updates for Pod and ReplicaSet including rollouts and rollbacks.</li>
-      <li>ReplicationController - no longer used.</li>
       <li><a href="#kubernetes-23">ReplicaSet</a> - creates Pods. (should not be manipulated, Deployment should be used instead)</li>
       <li><a href="#kubernetes-24">StatefulSet</a> - similar to Deployment, but provides uniqueness and ordering of Pods.</li>
       <li><a href="#kubernetes-25">DaemonSet</a> - exactly one Pod per Node. Deleting it clean up Pods.</li>
@@ -76,31 +73,15 @@
       <li><a href="#kubernetes-35">CoreDNS</a></li>
       <br>
 
-      <li>Storage Class - configuration for storage.</li>
-      <li><a href="#kubernetes-41">Persistent Volumes</a> - piece of storage, simialr to Node.</li>
-      <li>Persistent Volumes Claim - request for storage, simialr to Pod. Can request size and access mode. Pods mount this.</li>
-      <li>Volume Snapshot Class - simialr to Storage Class but for Volume Snapshot.</li>
-      <li>Volume Snapshot Content - snapshot taken from a volume.</li>
-      <br>
+      <li><a href="#kubernetes-41">Volumes</a></li>
+      <li><a href="#kubernetes-42">Persistent Volumes</a> - piece of storage, simialr to Node.</li>
       <li><a href="#kubernetes-45">Volume Snapshot</a> - request for a snapshot.</li>
+      <br>
 
       <li><a href="#kubernetes-51">ConfigMap</a> - configuration data separate from app code. Must be in the same namespace with Pod.</li>
       <li><a href="#kubernetes-52">Secret</a> - similar to ConfigMap but specifically for confidential data.</li>
       <li><a href="#kubernetes-53">RBAC</a>
-      <li>emptyDir - temp storage created when Pod is assigned to Node. Deleted when Pod is removed.</li>
       <br>
-
-      <li><a href="#kubernetes-61">Container logging</a>
-      <li><a href="#kubernetes-62">Monitoring</a>
-      <li><a href="#kubernetes-63">Application inspection and debugging</a>
-      <br>
-
-      <li><a href="#kubernetes-71">Create cluster with kubeadm</a>
-      <li><a href="#kubernetes-72">Create HA cluster with kubeadm</a>
-      <li><a href="#kubernetes-73">Upgrade kubeadm clusters</a>
-      <li><a href="#kubernetes-74">Operating etcd clusters</a>
-      <br>
-
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -181,134 +162,26 @@
       <li>Kubernetes cluster has an internal DNS service.</li>
       <li>This DNS service has a static IP address.</li>
     </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/courses/the-kubernetes-course">Learn Kubernetes: A Deep Dive</a>
-  </div>
-</div>
 
-<div class="card mb-4" id="kubernetes-2">
-  <div class="card-body">
-    <h2 class="card-title">Kubernetes objects and API</h2>
+    <h3 class="card-title">Kubernetes manifest</h3>
 
-    <ul>
-      <li>Persistent entities that represent the cluster desired state.</li>
-      <li>Each object has <code>spec</code> and <code>status</code></li>
-    </ul>
-
-    <h3 class="card-title">Standard API terminology</h3>
-    <p class="card-text">Most K8s resource types are objects, which have unique name to allow idempotent creation (virtual types may not have unique name, for example "permission check")</p>
-    <ul>
-      <li>Resource type - name used in the URLs (pods, namespaces, services)</li>
-      <li>Kind - JSON representation of resource types</li>
-      <li>Collection - list of instances of a resource type</li>
-      <li>Resource - single instance of the resource type</li>
-    </ul>
-    <p class="card-text">All resource types are either <strong>cluster-scoped</strong> or <strong>namespace-scoped</strong>. namespace-scoped resource types will be deleted when the namespace is deleted</p>
-    <p class="card-text">cluster-scoped</p>
-    <ul>
-      <li>GET /apis/GROUP/VERSION/RESOURCETYPE</li>
-      <li>GET /apis/GROUP/VERSION/RESOURCETYPE/NAME</li>
-    </ul>
-    <p class="card-text">namespace-scoped</p>
-    <ul>
-      <li>GET /apis/GROUP/VERSION/namespaces/NAMESPACE/RESOURCETYPE</li>
-      <li>GET /apis/GROUP/VERSION/namespaces/NAMESPACE/RESOURCETYPE/NAME</li>
-      <li>GET /apis/GROUP/VERSION/namespaces/NAMESPACE/RESOURCETYPE/NAME</li>
-    </ul>
-    <p class="card-text">A namespace is a cluster-scoped resource type. Retrive all namespaces with "GET /api/v1/namespaces" and particular namespace with "GET /api/v1/namespaces/NAME"</p>
-    <p class="card-text">K8s uses "list" to return a collection of resource and "get" to return a single resource</p>
-    <p class="card-text">Some resources have sub-resource(s)</p>
-    <ul>
-      <li>GET /apis/GROUP/VERSION/RESOURCETYPE/NAME/SUBRESOURCE</li>
-      <li>GET /apis/GROUP/VERSION/namespaces/NAMESPACE/RESOURCETYPE/NAME/SUBRESOURCE</li>
-    </ul>
-
-    <h3 class="card-title">Efficient detection of changes</h3>
-    <p class="card-text"><strong>watch</strong> - detects incremental changes in cluster state. Use "resourceVersion" to store the state of resources</p>
-    <ul>
-      <li>GET /api/v1/namespaces/test/pods - list all pods in given namespace</li>
-      <li>GET /api/v1/namespaces/test/pods?watch=1&resourceVersion=10245 - starting resource version 10245, receive notifications for create/delete/update as JSON</li>
-    </ul>
-    <p class="card-text">K8s server can only store history for a limted time. Clusters using etcd3 preserve changes for the last 5 mins by default. Clients are expected to handle http status code "410 Gone"</p>
-    <p class="card-text"><strong>bookmarks</strong> - marks that all changes up to given "resourceVersion" has already been sent. (in an attempt to mitigate the short history window problem)</p>
-    <ul>
-      <li>GET /api/v1/namespaces/test/pods?watch=1&resourceVersion=10245&allowWatchBookmarks=true</li>
-    </ul>
-
-    <h3 class="card-title">Retrieving large results sets in chunks</h3>
-    <p class="card-text">Break single large collection requests into small chunks by parameters "limit" and "continue"</p>
-    <ul>
-      <li>GET /api/v1/pods?limit=500 - retrive all pods in cluster, up to 500</li>
-      <li>GET /api/v1/pods?limit=500&continue=ENCODED_CONTINUE_TOKEN - continue from the previous call to get 501-1000 pods</li>
-      <li>GET /api/v1/pods?limit=500&continue=ENCODED_CONTINUE_TOKEN_2 - continue from the previous call to get last set of pods</li>
-    </ul>
-
-    <h3 class="card-title">Receiving resources as Tables</h3>
-    <ul>
-      <li>GET /api/v1/pods<br>
-          Accept: application/json;as=Table;g=meta.k8s.io;v=v1beta1<br>
-          - retrive all pods in cluster in table format</li>
-    </ul>
-    <p class="card-text">Because there are resource types that don't support Table response, client should handle both Table/non-Table case by using content-type</p>
-    <ul>
-      <li>Accept: application/json;as=Table;g=meta.k8s.io;v=v1beta1, application/json</li>
-    </ul>
-
-    <h3 class="card-title">Receiving resources as Protobuf</h3>
-    <p class="card-text">This is for better performance at scale</p>
-    <ul>
-      <li>GET /api/v1/pods
-          Accept: application/vnd.kubernetes.protobuf<br>
-          - retrive all pods in cluster in Protobuf format</li>
-      <li>POST /api/v1/namespaces/test/pods
-          Content-Type: application/vnd.kubernetes.protobuf
-          Accept: application/json
-          - create a pod with Protobuf encoded data, but receive response in JSON</li>
-    </ul>
-    <p class="card-text">Similar to Table response, multiple content-types are needed in the "Accept" header to support resource types that don't have Protobuf support</p>
-    <ul>
-      <li>Accept: application/vnd.kubernetes.protobuf, application/json</li>
-    </ul>
-
-    <h3 class="card-title">Resource deletion</h3>
-    <p class="card-text">Takes place in two phases 1. finalization 2. removal. Finalizers are removed in any order. Once the last finalizer is removed, the resource is removed from etcd.</p>
-
-    <h3 class="card-title">Dry-run</h3>
-    <p class="card-text">dry-run executes the request up until persisting objects in storage. The reponse body should be as close as possible to the actual run. Authorization of dry and non-dry runs are identical</p>
-    <ul>
-      <li>POST /api/v1/namespaces/test/pods?dryRun=All<br>
-          Content-Type: application/json<br>
-          Accept: application/json<br>
-          - ALL: every stage runs normal except the final stage of persisting objects in storage</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/">Understanding Kubernetes Objects</a> | <a href="https://kubernetes.io/docs/reference/using-api/api-concepts/">Kubernetes API Concepts</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="kubernetes-10">
-  <div class="card-body">
-    <h2 class="card-title">Kubernetes manifest</h2>
-
-    <h3 class="card-title">apiVersion</h3>
+    <h4 class="card-title">apiVersion</h4>
     <ul>
       <li>StorageClass objects are defined <code>storage.k8s.io/v1</code></li>
       <li>Pods are defined <code>v1</code></li>
     </ul>
 
-    <h3 class="card-title">kind</h3>
+    <h4 class="card-title">kind</h4>
     <ul>
       <li>Type of object being deployed.</li>
     </ul>
 
-    <h3 class="card-title">metadata</h3>
+    <h4 class="card-title">metadata</h4>
     <ul>
       <li>Define name, label, namepsace.</li>
     </ul>
 
-    <h3 class="card-title">spec</h3>
+    <h4 class="card-title">spec</h4>
     <ul>
       <li>Define container(s).</li>
     </ul>
@@ -318,7 +191,7 @@
   </div>
 </div>
 
-<div class="card mb-4" id="kubernetes-3">
+<div class="card mb-4" id="kubernetes-2">
   <div class="card-body">
     <h2 class="card-title">Kubectl</h2>
     <ul>
@@ -548,7 +421,7 @@ kubectl get secret -n &lt;namespace&gt; &lt;secret_name&gt; -o go-template='{{in
   </div>
 </div>
 
-<div class="card mb-4" id="kubernetes-11">
+<div class="card mb-4" id="kubernetes-3">
   <div class="card-body">
     <h2 class="card-title">Kubernetes security</h2>
 
@@ -640,7 +513,7 @@ spec:
   </div>
 </div>
 
-<div class="card mb-4" id="kubernetes-12">
+<div class="card mb-4" id="kubernetes-4">
   <div class="card-body">
     <h2 class="card-title">Autoscaler</h2>
 
@@ -659,7 +532,7 @@ spec:
   </div>
 </div>
 
-<div class="card mb-4" id="kubernetes-4">
+<div class="card mb-4" id="kubernetes-5">
   <div class="card-body">
     <h2 class="card-title">Helm</h2>
     <p class="card-text">Helps packaging K8s manifest files.</p>
@@ -840,7 +713,7 @@ helm uninstall &lt;release_name&gt;
   </div>
 </div>
 
-<div class="card mb-4" id="kubernetes-5">
+<div class="card mb-4" id="kubernetes-6">
   <div class="card-body">
     <h2 class="card-title">Skaffold</h2>
     <p class="card-text">Simple pipeline for CI/CD targeting K8s.</p>
@@ -884,7 +757,7 @@ deploy:
   </div>
 </div>
 
-<div class="card mb-4" id="kubernetes-6">
+<div class="card mb-4" id="kubernetes-7">
   <div class="card-body">
     <h2 class="card-title">Datadog and kube state metric</h2>
     <p class="card-text">Datadog: collects logs from K8s infrastructure (nodes, API server, etc).</p>
@@ -899,7 +772,7 @@ deploy:
   </div>
 </div>
 
-<div class="card mb-4" id="kubernetes-7">
+<div class="card mb-4" id="kubernetes-8">
   <div class="card-body">
     <h2 class="card-title">Kured</h2>
 
@@ -915,7 +788,7 @@ deploy:
   </div>
 </div>
 
-<div class="card mb-4" id="kubernetes-8">
+<div class="card mb-4" id="kubernetes-9">
   <div class="card-body">
     <h2 class="card-title">Istio</h2>
 
@@ -937,7 +810,7 @@ deploy:
   </div>
 </div>
 
-<div class="card mb-4" id="kubernetes-9">
+<div class="card mb-4" id="kubernetes-10">
   <div class="card-body">
     <h2 class="card-title">Kubernetes common issues</h2>
 
@@ -2577,7 +2450,7 @@ kubectl delete pod -n kube-system -l k8s-app=kube-dns</code></pre>
   </div>
 </div>
 
-<div class="card mb-4" id="kubernetes-">
+<div class="card mb-4" id="kubernetes-41">
   <div class="card-body">
     <h2 class="card-title">Volumes</h2>
     <ul>
@@ -2673,7 +2546,7 @@ spec:
   </div>
 </div>
 
-<div class="card mb-4" id="kubernetes-41">
+<div class="card mb-4" id="kubernetes-42">
   <div class="card-body">
     <h2 class="card-title">Persistent Volumes</h2>
     <ul>
@@ -3256,7 +3129,108 @@ rules:
   </div>
 </div>
 
-<div class="card mb-4" id="kubernetes-61">
+<!-- <div class="card mb-4" id="kubernetes-?">
+  <div class="card-body">
+    <h2 class="card-title">Kubernetes objects and API</h2>
+
+    <ul>
+      <li>Persistent entities that represent the cluster desired state.</li>
+      <li>Each object has <code>spec</code> and <code>status</code></li>
+    </ul>
+
+    <h3 class="card-title">Standard API terminology</h3>
+    <p class="card-text">Most K8s resource types are objects, which have unique name to allow idempotent creation (virtual types may not have unique name, for example "permission check")</p>
+    <ul>
+      <li>Resource type - name used in the URLs (pods, namespaces, services)</li>
+      <li>Kind - JSON representation of resource types</li>
+      <li>Collection - list of instances of a resource type</li>
+      <li>Resource - single instance of the resource type</li>
+    </ul>
+    <p class="card-text">All resource types are either <strong>cluster-scoped</strong> or <strong>namespace-scoped</strong>. namespace-scoped resource types will be deleted when the namespace is deleted</p>
+    <p class="card-text">cluster-scoped</p>
+    <ul>
+      <li>GET /apis/GROUP/VERSION/RESOURCETYPE</li>
+      <li>GET /apis/GROUP/VERSION/RESOURCETYPE/NAME</li>
+    </ul>
+    <p class="card-text">namespace-scoped</p>
+    <ul>
+      <li>GET /apis/GROUP/VERSION/namespaces/NAMESPACE/RESOURCETYPE</li>
+      <li>GET /apis/GROUP/VERSION/namespaces/NAMESPACE/RESOURCETYPE/NAME</li>
+      <li>GET /apis/GROUP/VERSION/namespaces/NAMESPACE/RESOURCETYPE/NAME</li>
+    </ul>
+    <p class="card-text">A namespace is a cluster-scoped resource type. Retrive all namespaces with "GET /api/v1/namespaces" and particular namespace with "GET /api/v1/namespaces/NAME"</p>
+    <p class="card-text">K8s uses "list" to return a collection of resource and "get" to return a single resource</p>
+    <p class="card-text">Some resources have sub-resource(s)</p>
+    <ul>
+      <li>GET /apis/GROUP/VERSION/RESOURCETYPE/NAME/SUBRESOURCE</li>
+      <li>GET /apis/GROUP/VERSION/namespaces/NAMESPACE/RESOURCETYPE/NAME/SUBRESOURCE</li>
+    </ul>
+
+    <h3 class="card-title">Efficient detection of changes</h3>
+    <p class="card-text"><strong>watch</strong> - detects incremental changes in cluster state. Use "resourceVersion" to store the state of resources</p>
+    <ul>
+      <li>GET /api/v1/namespaces/test/pods - list all pods in given namespace</li>
+      <li>GET /api/v1/namespaces/test/pods?watch=1&resourceVersion=10245 - starting resource version 10245, receive notifications for create/delete/update as JSON</li>
+    </ul>
+    <p class="card-text">K8s server can only store history for a limted time. Clusters using etcd3 preserve changes for the last 5 mins by default. Clients are expected to handle http status code "410 Gone"</p>
+    <p class="card-text"><strong>bookmarks</strong> - marks that all changes up to given "resourceVersion" has already been sent. (in an attempt to mitigate the short history window problem)</p>
+    <ul>
+      <li>GET /api/v1/namespaces/test/pods?watch=1&resourceVersion=10245&allowWatchBookmarks=true</li>
+    </ul>
+
+    <h3 class="card-title">Retrieving large results sets in chunks</h3>
+    <p class="card-text">Break single large collection requests into small chunks by parameters "limit" and "continue"</p>
+    <ul>
+      <li>GET /api/v1/pods?limit=500 - retrive all pods in cluster, up to 500</li>
+      <li>GET /api/v1/pods?limit=500&continue=ENCODED_CONTINUE_TOKEN - continue from the previous call to get 501-1000 pods</li>
+      <li>GET /api/v1/pods?limit=500&continue=ENCODED_CONTINUE_TOKEN_2 - continue from the previous call to get last set of pods</li>
+    </ul>
+
+    <h3 class="card-title">Receiving resources as Tables</h3>
+    <ul>
+      <li>GET /api/v1/pods<br>
+          Accept: application/json;as=Table;g=meta.k8s.io;v=v1beta1<br>
+          - retrive all pods in cluster in table format</li>
+    </ul>
+    <p class="card-text">Because there are resource types that don't support Table response, client should handle both Table/non-Table case by using content-type</p>
+    <ul>
+      <li>Accept: application/json;as=Table;g=meta.k8s.io;v=v1beta1, application/json</li>
+    </ul>
+
+    <h3 class="card-title">Receiving resources as Protobuf</h3>
+    <p class="card-text">This is for better performance at scale</p>
+    <ul>
+      <li>GET /api/v1/pods
+          Accept: application/vnd.kubernetes.protobuf<br>
+          - retrive all pods in cluster in Protobuf format</li>
+      <li>POST /api/v1/namespaces/test/pods
+          Content-Type: application/vnd.kubernetes.protobuf
+          Accept: application/json
+          - create a pod with Protobuf encoded data, but receive response in JSON</li>
+    </ul>
+    <p class="card-text">Similar to Table response, multiple content-types are needed in the "Accept" header to support resource types that don't have Protobuf support</p>
+    <ul>
+      <li>Accept: application/vnd.kubernetes.protobuf, application/json</li>
+    </ul>
+
+    <h3 class="card-title">Resource deletion</h3>
+    <p class="card-text">Takes place in two phases 1. finalization 2. removal. Finalizers are removed in any order. Once the last finalizer is removed, the resource is removed from etcd.</p>
+
+    <h3 class="card-title">Dry-run</h3>
+    <p class="card-text">dry-run executes the request up until persisting objects in storage. The reponse body should be as close as possible to the actual run. Authorization of dry and non-dry runs are identical</p>
+    <ul>
+      <li>POST /api/v1/namespaces/test/pods?dryRun=All<br>
+          Content-Type: application/json<br>
+          Accept: application/json<br>
+          - ALL: every stage runs normal except the final stage of persisting objects in storage</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/">Understanding Kubernetes Objects</a> | <a href="https://kubernetes.io/docs/reference/using-api/api-concepts/">Kubernetes API Concepts</a>
+  </div>
+</div> -->
+
+<!-- <div class="card mb-4" id="kubernetes-61">
   <div class="card-body">
     <h2 class="card-title">Container logging</h2>
     <h3 class="card-title">Pod with two sidecar containers</h3>
@@ -3372,9 +3346,9 @@ spec:
   <div class="card-footer text-muted">
     Reference: <a href="https://kubernetes.io/docs/concepts/cluster-administration/logging/">Logging Architecture</a>
   </div>
-</div>
+</div> -->
 
-<div class="card mb-4" id="kubernetes-62">
+<!-- <div class="card mb-4" id="kubernetes-62">
   <div class="card-body">
     <h2 class="card-title">Monitoring</h2>
     <h3 class="card-title">Enable Node Problem Detector</h3>
@@ -3432,9 +3406,9 @@ spec:
   <div class="card-footer text-muted">
     Reference: <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/monitor-node-health/">Monitor Node Health</a>
   </div>
-</div>
+</div> -->
 
-<div class="card mb-4" id="kubernetes-63">
+<!-- <div class="card mb-4" id="kubernetes-63">
   <div class="card-body">
     <h2 class="card-title">Application inspection and debugging</h2>
 
@@ -3488,9 +3462,9 @@ ps auxw | grep kube-proxy</code></pre>
   <div class="card-footer text-muted">
     Reference: <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-application-introspection/">Application Introspection and Debugging | <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-stateful-set/">Debug a StatefulSet</a> | <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-init-containers/">Debug Init Containers</a> | <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-pod-replication-controller/">Debug Pods and ReplicationControllers</a> | <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-running-pod/">Debug Running Pods</a> | <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-service/">Debug Services</a> | <a href="https://kubernetes.io/docs/tasks/debug-application-cluster/determine-reason-pod-failure/">Determine the Reason for Pod Failure</a>
   </div>
-</div>
+</div> -->
 
-<div class="card mb-4" id="kubernetes-71">
+<!-- <div class="card mb-4" id="kubernetes-71">
   <div class="card-body">
     <h2 class="card-title">Create cluster with kubeadm</h2>
     <p class="card-text">Control plan is the node where <code>etcd</code> and <code>API server</code> run. Initialize the control plane node,</p>
@@ -3530,9 +3504,9 @@ kubectl delete node &lt;node name&gt;</code></pre>
   <div class="card-footer text-muted">
     Reference: <a href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/">Creating a cluster with kubeadm</a>
   </div>
-</div>
+</div> -->
 
-<div class="card mb-4" id="kubernetes-72">
+<!-- <div class="card mb-4" id="kubernetes-72">
   <div class="card-body">
     <h2 class="card-title">Create HA cluster with kubeadm</h2>
 
@@ -3669,9 +3643,9 @@ etcd:
   <div class="card-footer text-muted">
     Reference: <a href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/high-availability/">Creating Highly Available clusters with kubeadm</a> | <a href="https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/setup-ha-etcd-with-kubeadm/">Set up a High Availability etcd cluster with kubeadm</a>
   </div>
-</div>
+</div> -->
 
-<div class="card mb-4" id="kubernetes-73">
+<!-- <div class="card mb-4" id="kubernetes-73">
   <div class="card-body">
     <h2 class="card-title">Upgrade kubeadm clusters</h2>
 
@@ -3714,9 +3688,9 @@ kubectl uncordon &lt;node-to-drain&gt; --ignore-daemonsets</code></pre>
   <div class="card-footer text-muted">
     Reference: <a href="https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/">Upgrading kubeadm clusters</a>
   </div>
-</div>
+</div> -->
 
-<div class="card mb-4" id="kubernetes-74">
+<!-- <div class="card mb-4" id="kubernetes-74">
   <div class="card-body">
     <h2 class="card-title">Operating etcd clusters</h2>
     <p class="card-text">etcd is storage for all cluster data. A five member etcd cluster is recommended for production. Access to etcd is equivalent to root permission to the cluster and ideally only API server should have it. </p>
@@ -3751,7 +3725,8 @@ etcd [flags]
   <div class="card-footer text-muted">
     Reference: <a href="https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/">Operating etcd clusters for Kubernetes</a>
   </div>
-</div>
+</div> -->
+
 <!-- Kubernetes END -->
 
 </div> <!-- /.col-md-12 -->
@@ -3763,3 +3738,4 @@ etcd [flags]
 </body>
 
 </html>
+
