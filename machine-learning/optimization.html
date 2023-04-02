@@ -65,6 +65,23 @@
       <li>Stochastic: run through one sample to do single update of parameters.</li>
     </ul>
 
+<pre><code class="python"># Batch.
+for t in range(steps):
+    dw = gradient(loss, data, w)
+    w = w - learning_rate * dw</code></pre>
+
+<pre><code class="python"># Min-batch.
+for t in range(steps):
+    for mini_batch in get_batches(data, batch_size):
+        dw = gradient(loss, mini_batch, w)
+        w = w - learning_rate * dw</code></pre>
+
+<pre><code class="python"># Stochastic.
+for t in range(steps):
+    for example in data:
+        dw = gradient(loss, example, w)
+        w = w - learning_rate * dw</code></pre>
+
     <h3 class="card-title">Learning rate decay</h3>
     <ul>
       <li>Helps gradient descent converge by taking smaller steps as it approaches the minimum.</li>
@@ -120,49 +137,62 @@ if __name__ == "__main__":
 <div class="card mb-4" id="optimization-2">
   <div class="card-body">
     <h2 class="card-title">Momentum</h2>
-    <p class="card-text"></p>
-
     <ul>
+      <li>Enforce gradients to move in the same direction as previous timesteps.</li>
+      <li>Velocity: running mean of gradients including the direction.</li>
+      <li>Friction: a constant.</li>
+      <li>At every step, update velocity, then update weights with the velocity.</li>
+      <li>Can escape local minimums or saddle points because gradients keep moving downwards even though gradients are zero.</li>
       <li>Reduce oscilation by slowing learning vertially but speeding up learning horizontally.</li>
     </ul>
 
+<pre><code class="python">for t in range(steps):
+    dw = gradient(loss, w)
+    v = rho * v + dw
+    w = w - learning_rate * v</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
+    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a> | <a href="https://www.educative.io/path/become-a-deep-learning-professional">Become a Deep Learning Professional</a>
   </div>
 </div>
 
 <div class="card mb-4" id="optimization-3">
   <div class="card-body">
     <h2 class="card-title">RMSprop</h2>
-    <p class="card-text"></p>
-
     <ul>
-      <li></li>
-      <li></li>
-      <li></li>
+      <li>Adaptive learning rate: smaller updates for frequent features and bigger updates for infrequent features.</li>
+      <li>Keep running sum of squares of gradients in each dimension.</li>
+      <li>Decay the sum of the previous squared gradients.</li>
     </ul>
 
+<pre><code class="python">for t in range(steps):
+    dw = gradient(loss, w)
+    squared_gradients = decay_rate * squared_gradients + (1-decay_rate) * dw * dw
+    w = w - learning_rate * (dw/(squared_gradients.sqrt()+e)</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
+    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a> | <a href="https://www.educative.io/path/become-a-deep-learning-professional">Become a Deep Learning Professional</a>
   </div>
 </div>
 
 <div class="card mb-4" id="optimization-4">
   <div class="card-body">
     <h2 class="card-title">Adam (Adaptive moment estimation)</h2>
-    <p class="card-text"></p>
-
     <ul>
-      <li></li>
-      <li></li>
-      <li></li>
+      <li>Keep track of two running variables, velocity and the squared gradients average.</li>
+      <li>At t=0, velocity is close to 0, resulting in very big change in gradients. Add biases in moments to take smaller steps in the beginning.</li>
     </ul>
 
+<pre><code class="python">for t in range(steps):
+    dw = gradient(loss, w)
+    moment1 = delta1 * moment1 + (1-delta1) * dw
+    moment2 = delta2 * moment2 + (1-delta2) * dw * dw
+    moment1_unbiased = moment1 / (1-delta1**t)
+    moment2_unbiased = moment2 / (1-delta2**t)
+    w = w - learning_rate * moment1_unbiased / (moment2_unbiased.sqrt()+e)</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
+    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a> | <a href="https://www.educative.io/path/become-a-deep-learning-professional">Become a Deep Learning Professional</a>
   </div>
 </div>
 <!-- Optimization END -->
