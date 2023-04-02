@@ -24,8 +24,10 @@
 <script src="/js/jquery.min.js"></script>
 <script src="/js/bootstrap.bundle.min.js"></script>
 <script src="/js/highlight.pack.js"></script>
-<script type="text/javascript" src="/js/include_html.js"></script>
-<script type="text/javascript" src="/js/site.js"></script>
+<script src="/js/include_html.js" type="text/javascript"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script src="/js/site.js" type="text/javascript"></script>
 
 </head>
 
@@ -52,15 +54,57 @@
 <div class="card mb-4" id="linear-regression-1">
   <div class="card-body">
     <h2 class="card-title">Linear regression</h2>
-
     <ul>
       <li>Fits line to data.</li>
       <li>Dependent or target variable <string>y</string>.</li>
       <li>Independent or predictor variable <string>x</string>.</li>
       <li>Assumes errors are independently and identically normally distributed.</li>
-      <li>Sinle layer neural network with linear activation is identical with linear regression.</li>
+      <li>Single layer neural network with linear activation is identical with linear regression.</li>
     </ul>
 
+    <h3 class="card-title">Linear classifier</h3>
+    <ul>
+      <li>$ y = \mathbf{W}x + b $</li>
+      <li>\( y \) is output of the classifier.</li>
+      <li>\( W \) is \( N \) by \( N \) matrix.</li>
+      <li>\( b \) and \( W \) are \( N \) dimensional matrix.</li>
+    </ul>
+
+    <ul>
+      <li>Data are provided in pairs \( (x,t) \)</li>
+      <li>\( x \) is input to the classifer.</li>
+      <li>\( t \) is label.</li>
+    </ul>
+
+    <h3 class="card-title">Linear classifier with 5 inputs and 10 outputs</h3>
+
+<pre><code class="python">import torch
+import torch.nn as nn
+
+classifier = nn.Linear(5, 10)</code></pre>
+
+    <h3 class="card-title">Mean squared error</h3>
+    <ul>
+      <li>$ \sum_{i=0}^n (y_{i} - t_{i})^2 $</li>
+      <li>Goal is to find \( W \) that minimizes the cost.</li>
+    </ul>
+
+<pre><code class="python">import torch
+import torch.nn as nn
+
+model = nn.Linear(10,3)
+loss = nn.MSELoss()
+
+## Use random input x.
+input_vector = torch.randn(10)
+
+## Assume classiciation with 3 clases.
+target = torch.tensor([0,0,1])
+
+pred = model(input_vector)
+output = loss(pred, target)
+print("Prediction: " ,pred)
+print("Output: " , output)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://github.com/alexeygrigorev/data-science-interviews/blob/master/theory.md">Theoretical interview questions</a>
