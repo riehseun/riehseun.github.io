@@ -55,8 +55,6 @@
 <div class="card mb-4" id="optimization-1">
   <div class="card-body">
     <h2 class="card-title">Gradient descent</h2>
-    <p class="card-text"></p>
-
     <ul>
       <li>Find values of parameters of function that minimize a cost function.</li>
       <li>Used when parameters cannot be calculated analytically.</li>
@@ -78,9 +76,44 @@
       <li>Plateaus (where derivatives are close to 0) can slow down the learning.</li>
     </ul>
 
+<pre><code class="python">import torch
+import torch.nn as nn
+
+def train():
+
+    model = nn.Linear(4,2)
+
+    criterion = torch.nn.MSELoss()
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
+
+    for epoch in range(10):
+        # Convert inputs and labels to variable.
+        inputs = torch.Tensor([0.8,0.4,0.4,0.2])
+        labels = torch.Tensor([1,0])
+
+        # Clear gradient buffers because we don't want any gradient from previous epoch to carry forward.
+        optimizer.zero_grad()
+
+        # Get output from the model from the inputs.
+        outputs = model(inputs)
+
+        # Get loss for the predicted output.
+        loss = criterion(outputs, labels)
+        print(loss)
+
+        # Get gradients w.r.t to parameters.
+        loss.backward()
+
+        # Update parameters.
+        optimizer.step()
+
+        print('epoch {}, loss {}'.format(epoch, loss.item()))
+
+if __name__ == "__main__":
+    train()</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
+    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a> | <a href="https://www.educative.io/path/become-a-deep-learning-professional">Become a Deep Learning Professional</a>
   </div>
 </div>
 
