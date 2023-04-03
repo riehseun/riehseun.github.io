@@ -2802,6 +2802,9 @@
     <h4 class="card-title">Non-functional</h4>
     <ul>
       <li>Availability.</li>
+      <ul>
+        <li>Can be compromised for causal consistency.</li>
+      </ul>
       <li>Reliability.</li>
       <li>Scalability.</li>
       <li>Performance.</li>
@@ -2834,7 +2837,7 @@
         <li>Each message is 100 bytes.</li>
         <li>Whatsapp keeps messages for 30 days only.</li>
       </ul>
-      <li>10 0B per day * 100 bytes = 10 TB per day.</li>
+      <li>100 B per day * 100 bytes = 10 TB per day.</li>
       <li>300 TB per month</li>
     </ul>
 
@@ -2874,20 +2877,50 @@
     </ul>
 
     <h3 class="card-title">Component design</h3>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/whatsapp2.png" alt="Card image cap">
+    <br>
+    <br>
 
-    <h4 class="card-title"></h4>
+    <h4 class="card-title">Websocket server</h4>
     <ul>
       <li>Web socket server keeps connection open with all active users.</li>
       <li>These servers provide a port to every online user.</li>
       <li>Web socket manager maintains mapping between port and user.</li>
-      <li>Message service provides API to handle messages.</li>
-      <li>Asset service provides API to handle media files.</li>
-      <li>Group messages are handled by group message handler, Group message service, Kafka.</li>
+    </ul>
+
+    <h4 class="card-title">Message service</h4>
+    <ul>
+      <li>Interface to Mnesia DB.</li>
+      <li>store and retriev messages from Mnesia DB.</li>
+    </ul>
+
+    <h4 class="card-title">Asset service</h4>
+    <ul>
+      <li>Similar to message service, but for files.</li>
+    </ul>
+
+    <h4 class="card-title">Group service</h4>
+    <ul>
+      <li>Keep all information about users in each group.</li>
+      <li>store and retriev messages from Mnesia DB.</li>
+    </ul>
+
+    <h4 class="card-title">Group message handler</h4>
+    <ul>
+      <li>Similar to Websocket server, but for group messages.</li>
+    </ul>
+
+    <h4 class="card-title">Kafka</h4>
+    <ul>
+      <li>Message service sends messages to Kafka, to be saved for further processing.</li>
     </ul>
 
     <h3 class="card-title">Evaluation</h3>
 
     <h4 class="card-title">Availability</h4>
+    <ul>
+      <li>Websocket servers are replicated.</li>
+    </ul>
 
     <h4 class="card-title">Reliability</h4>
 
