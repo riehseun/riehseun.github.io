@@ -44,6 +44,10 @@
     <h2 class="card-title">Hash table</h2>
     <ul class="list-unstyled mb-0">
       <li><a href="#hashtable-1">Hash table</a></li>
+      <li><a href="#hashtable-2">List as a subset of another list</a></li>
+      <li><a href="#hashtable-3">Check if lists are disjoint</a></li>
+      <li><a href="#hashtable-4">Find symmetric pairs in a list</a></li>
+      <li><a href="#hashtable-5">Trace the complete path of a journey</a></li>
     </ul>
   </div>
 </div>
@@ -54,13 +58,131 @@
     <ul>
       <li>There is always an underlying array.</li>
       <li>Hash function maps keys to indexes of an array.</li>
-      <li>Search/insert/delete becomes O(1) when index is known.</li>
+      <li>Large number of keys are mapped to small number of indexes, which could cause collision.</li>
+      <li>Each element of array holds a linked list to handle collision.</li>
+      <li>Search/insert/delete is O(1) on average and O(n) in the worst case.</li>
     </ul>
 <pre><code class="python"># Dictionary implementation of hash table.
 my_dict = {}
 
 # Set implementation of hash table.
 my_set = set()</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="hashtable-2">
+  <div class="card-body">
+    <h2 class="card-title">List as a subset of another list</h2>
+
+<pre><code class="python">def is_subset(list1, list2):
+    list1 = set(list1)
+    list2 = set(list2)
+    if list2.issubset(list1):
+        return True
+
+    return False</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="hashtable-3">
+  <div class="card-body">
+    <h2 class="card-title">Check if lists are disjoint</h2>
+
+<pre><code class="python">def is_disjoint(list1, list2):
+    list1 = set(list1)
+    for i in list2:
+        if i in list1:
+            return False
+
+    return True</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="hashtable-4">
+  <div class="card-body">
+    <h2 class="card-title">Find symmetric pairs in a list</h2>
+
+<pre><code class="python">def find_symmetric(my_list):
+
+    result = []
+    result_set = set()
+    temp_set = set()
+
+    for pair in my_list:
+        pair = tuple(pair)
+        temp_set.add(pair)
+
+    for pair in temp_set:
+        pair_reverse = (pair[1], pair[0])
+        if pair_reverse in temp_set:
+            result_set.add(pair)
+            result_set.add(pair_reverse)
+
+    for pair in result_set:
+        result.append([pair[0],pair[1]])
+
+    return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="hashtable-5">
+  <div class="card-body">
+    <h2 class="card-title">Trace the complete path of a journey</h2>
+
+<pre><code class="python">def trace_path(my_dict):  # A Map object
+
+    # Find a key that does not show up in value (root)
+    # Find a value that does not show up in key (last leaf)
+
+    root = None
+    last_child = None
+
+    for k,v in my_dict.items():
+        if k not in my_dict.values():
+            root = k
+        if v not in my_dict.keys():
+            last_child = v
+
+    result = dfs(root, my_dict)
+
+    final_result = []
+    for city in result:
+        if city != last_child:
+            final_result.append([city, my_dict[city]])
+
+    return final_result
+
+def dfs(source, graph):
+    explored = set()
+    explored.add(source)
+
+    stack = []
+    stack.append((source))
+
+    result = []
+
+    while stack:
+        node = stack.pop()
+        result.append(node)
+        if node in graph:
+            next_node = graph[node]
+            if next_node not in explored:
+                explored.add(next_node)
+                stack.append((next_node))
+
+    return result</code></pre>
   </div>
   <div class="card-footer text-muted">
 
