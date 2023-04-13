@@ -64,6 +64,16 @@
       <li><a href="#kubernetes-26">Job</a> - create short living Pods. Deleting it clean up Pods.</li>
       <li><a href="#kubernetes-27">Cron Job</a> - create Jobs on repeating schedule.</li>
       <li><a href="#kubernetes-28">Pod</a> - smallest deployable unit.</li>
+      <ul>
+        <li><a href="#kubernetes-101">Init containers</a></li>
+        <li><a href="#kubernetes-102">Pod Topology Spread Constraints</a></li>
+        <li><a href="#kubernetes-103">Multi-container pod design</a></li>
+        <li><a href="#kubernetes-104">Disruptions</a></li>
+        <li><a href="#kubernetes-105">Application Resource Requirement</a></li>
+        <li><a href="#kubernetes-106">LivenesProbe and ReadinessProbe</a></li>
+        <li><a href="#kubernetes-107">Service Account</a></li>
+        <li><a href="#kubernetes-108">SecurityContext</a></li>
+      </ul>
       <br>
 
       <li><a href="#kubernetes-31">Ingress Controller</a> - specification of Ingress.</li>
@@ -956,66 +966,6 @@ spec:
       <li>Runs a background reconciliation loop, constantly checking whether the right number of Pod are present.</li>
     </ul>
 
-<pre><code class="yaml">apiVersion: apps/v1
-kind: ReplicaSet
-metadata:
-  name: frontend
-  labels:
-    app: guestbook
-    tier: frontend
-spec:
-  # modify replicas according to your case
-  replicas: 3
-  selector:
-    matchLabels:
-      tier: frontend
-  template:
-    metadata:
-      labels:
-        tier: frontend
-    spec:
-      containers:
-      - name: php-redis
-        image: gcr.io/google_samples/gb-frontend:v3</code></pre>
-
-<pre><code class="yaml"># These Pods do not have Controller as their owner reference. And they match the selector of frontend ReplicaSet (right above). This means these Pods will be acquired by that ReplicaSet. Moreover, if the frontend ReplicaSet is already deployed, creating these two additional Pods cause them to immediately terminate because the ReplicaSet exceeds the desired count.
-apiVersion: v1
-kind: Pod
-metadata:
-  name: pod1
-  labels:
-    tier: frontend
-spec:
-  containers:
-  - name: hello1
-    image: gcr.io/google-samples/hello-app:2.0
-
----
-
-apiVersion: v1
-kind: Pod
-metadata:
-  name: pod2
-  labels:
-    tier: frontend
-spec:
-  containers:
-  - name: hello2
-    image: gcr.io/google-samples/hello-app:1.0</code></pre>
-
-    <p class="card-text"></p>
-
-<pre><code class="bash"># Delete ReplicaSet and its Pods.
-kubectl proxy --port=8080
-curl -X DELETE  'localhost:8080/apis/apps/v1/namespaces/default/replicasets/frontend' \
-> -d '{"kind":"DeleteOptions","apiVersion":"v1","propagationPolicy":"Foreground"}' \
-> -H "Content-Type: application/json"</code></pre>
-
-<pre><code class="bash"># Delete just a ReplicaSet.
-kubectl proxy --port=8080
-curl -X DELETE  'localhost:8080/apis/apps/v1/namespaces/default/replicasets/frontend' \
-> -d '{"kind":"DeleteOptions","apiVersion":"v1","propagationPolicy":"Orphan"}' \
-> -H "Content-Type: application/json"</code></pre>
     <h3 class="card-title">Scale-down a ReplicaSet</h3>
     <ul>
       <li>Pending Pods are scaled-down first</li>
@@ -1024,7 +974,6 @@ curl -X DELETE  'localhost:8080/apis/apps/v1/namespaces/default/replicasets/fron
       <li>Pods created recently are scaled-down fourth</li>
     </ul>
   </div>
-
   <div class="card-footer text-muted">
     Reference: <a href="https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/">ReplicaSet</a>
   </div>
@@ -1042,7 +991,7 @@ curl -X DELETE  'localhost:8080/apis/apps/v1/namespaces/default/replicasets/fron
       <li>When a StatefulSet Pod is created, any volumes it needs are created at the same time and named in a way to connect them to the right Pod.</li>
     </ul>
 
-    <h3 class="card-title">Usecases</h3>
+    <h3 class="card-title">Use cases</h3>
     <ul>
       <li>Clustered apps that store data cannot have multiple replicas go down at the same time.</li>
     </ul>
@@ -1494,8 +1443,15 @@ spec:
     image: nginx:1.14.2
     ports:
     - containerPort: 80</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/concepts/workloads/pods/">Pods | <a href="https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/">Pod Lifecycle</a> | <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/">Labels and Selectors</a> | <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/">Annotations</a>
+  </div>
+</div>
 
-    <h3 class="card-title">Init Containers</h3>
+<div class="card mb-4" id="kubernetes-101">
+  <div class="card-body">
+    <h2 class="card-title">Init containers</h2>
     <p class="card-text">Specialized containers that run before app containers in Pod.</p>
     <ul>
       <li>Init containers always run to completion.</li>
@@ -1549,8 +1505,15 @@ spec:
   - protocol: TCP
     port: 80
     targetPort: 9377</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/concepts/workloads/pods/init-containers/">Init Containers</a>
+  </div>
+</div>
 
-    <h3 class="card-title">Pod Topology Spread Constraints</h3>
+<div class="card mb-4" id="kubernetes-102">
+  <div class="card-body">
+    <h2 class="card-title">Pod Topology Spread Constraints</h2>
     <img class="img-fluid" class="card-img-top" src="/img/kubernetes/kubernetes2.png" alt="Card image cap">
 
 <pre><code class="yaml">kind: Pod
@@ -1650,8 +1613,15 @@ profiles:
       <li>Pod Affinity - can place any number of Pods into qualifying topology domains.</li>
       <li>Pod Anti-Affinity - can only place one Pod into a single topology domain.</li>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/">Pod Topology Spread Constraints</a>
+  </div>
+</div>
 
-    <h3 class="card-title">Multi-container pod design</h3>
+<div class="card mb-4" id="kubernetes-103">
+  <div class="card-body">
+    <h2 class="card-title">Multi-container pod design</h2>
     <ul>
       <li>Each pod can have multiple containers. (which would run on the same node)</li>
       <li>Communication between containers is faster and securer, and containers can share volumns and file systems.</li>
@@ -1764,8 +1734,15 @@ spec:
     - name: logs
       mountPath: /var/log</code></pre>
     <p class="card-text">"app-container" outputs stream of dates in log file while "log-adapter" appends a word to those stream of dates</p>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://betterprogramming.pub/understanding-kubernetes-multi-container-pod-patterns-577f74690aee">Understanding Kubernetes Multi-Container Pod Patterns</a>
+  </div>
+</div>
 
-    <h3 class="card-title">Disruptions</h3>
+<div class="card mb-4" id="kubernetes-104">
+  <div class="card-body">
+    <h2 class="card-title">Disruptions</h2>
     <p class="card-text">There are involuntary disruptions.</p>
     <ul>
       <li>Hardware failure.</li>
@@ -1774,21 +1751,25 @@ spec:
       <li>Network issue.</li>
       <li>Pod eviction due to Node having out of resource.</li>
     </ul>
+
     <p class="card-text">There are voluntary disruptions. Application owners can</p>
     <ul>
       <li>Delete the Deployment.</li>
       <li>Update the Deployment, causing a restart.</li>
       <li>Directly delete Pods by accident.</li>
     </ul>
+
     <p class="card-text">Cluster admins can</p>
     <ul>
       <li>Drain a Node for repair or scale down.</li>
       <li>Remove a Pod from a Node to fit in something else.</li>
     </ul>
+
     <p class="card-text">Pod description budgets (PDB)</p>
     <ul>
       <li>Limits the number of Pods down simultaneously from voluntary disruptions.</li>
     </ul>
+
     <p class="card-text">Consider the following scenario where Pod-a, Pod-b, Pod-c are subject to PDB (whose requirement is that at least 2 out of 3 Pods must be available) while Pod-x is not</p>
     <img class="img-fluid" class="card-img-top" src="/img/kubernetes/kubernetes6.png" alt="Card image cap">
     <p class="card-text">Now the cluster admin drains Node 1, which will cause Pod-a and Pod-x to start terminating</p>
@@ -1801,8 +1782,15 @@ spec:
     <img class="img-fluid" class="card-img-top" src="/img/kubernetes/kubernetes10.png" alt="Card image cap">
     <p class="card-text">The cluster admin now attempts to drain Node 2. Either one of Pod-b or Pod-d will be evicted but both cannot be eviced due to PDB. Assuming Pod-b got evicted, the Deployment will create a replacement Pod-e. But since there are not enough resources in Node 2 and 3, the drain will block</p>
     <img class="img-fluid" class="card-img-top" src="/img/kubernetes/kubernetes11.png" alt="Card image cap">
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/concepts/workloads/pods/disruptions/">Disruptions</a>
+  </div>
+</div>
 
-    <h3 class="card-title">Application Resource Requirement</h3>
+<div class="card mb-4" id="kubernetes-105">
+  <div class="card-body">
+    <h2 class="card-title">Application Resource Requirement</h2>
     <p class="card-text"><code>Mib</code> indicates the momory size based on 2's power.</p>
     <p class="card-text">For example, a mebibyte is 1,048,576 (2<sup>20</sup>) bytes while a megabyte is 1,000,000 (10<sup>6</sup>) bytes.</p>
 
@@ -1848,8 +1836,16 @@ spec:
       <li>Container can use all the CPU/memory in the Node. (until it invokes OOM killer)</li>
       <li>Or, container is running in namespace with a default CPU/memory limit.</li>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/tasks/configure-pod-container/assign-memory-resource/">Assign Memory Resources to Containers and Pods</a> | <a href="https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/">Assign CPU Resources to Containers and Pods</a>
+  </div>
+</div>
 
-    <h3 class="card-title">LivenesProbe and ReadinessProbe</h3>
+<div class="card mb-4" id="kubernetes-106">
+  <div class="card-body">
+    <h2 class="card-title">LivenesProbe and ReadinessProbe</h2>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
@@ -1916,11 +1912,19 @@ spec:
         port: 8080
       initialDelaySeconds: 15
       periodSeconds: 20</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/">Configure Liveness, Readiness and Startup Probes</a>
+  </div>
+</div>
 
-    <h3 class="card-title">Service Account</h3>
+<div class="card mb-4" id="kubernetes-107">
+  <div class="card-body">
+    <h2 class="card-title">Service Account</h2>
+
     <p class="card-text">When creating Pod, when service account is not specified, it is automatically assigned <code>default</code> service account in the same namespace.</p>
 
-    <p class="card-text">Opt-out of automatic service account assignment.</h3>
+    <p class="card-text">Opt-out of automatic service account assignment.</p>
 <pre><code class="yaml">apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -1929,7 +1933,7 @@ metadata:
   automountServiceAccountToken: false
 ...</code></pre>
 
-    <p class="card-text">Opt-out of automatic service account assignment for a specific Pod.</h3>
+    <p class="card-text">Opt-out of automatic service account assignment for a specific Pod.</p>
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
@@ -1939,7 +1943,7 @@ spec:
   automountServiceAccountToken: false
   ...</code></pre>
 
-    <p class="card-text">Manually create service account API token.</h3>
+    <p class="card-text">Manually create service account API token.</p>
 <pre><code class="yaml">apiVersion: v1
 kind: Secret
 metadata:
@@ -1947,8 +1951,16 @@ metadata:
   annotations:
     kubernetes.io/service-account.name: build-robot
 type: kubernetes.io/service-account-token</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/">Configure Service Accounts for Pods</a>
+  </div>
+</div>
 
-    <h3 class="card-title">SecurityContext</h3>
+<div class="card mb-4" id="kubernetes-108">
+  <div class="card-body">
+    <h2 class="card-title">SecurityContext</h2>
+
     <p class="card-text">Defines provilege and access control for Pod and Container.</p>
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
@@ -1999,7 +2011,7 @@ spec:
         add: ["NET_ADMIN", "SYS_TIME"] # Linux capabilities.</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://kubernetes.io/docs/concepts/workloads/pods/">Pods | <a href="https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/">Pod Lifecycle</a> | <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/">Labels and Selectors</a> | <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/">Annotations</a> | <a href="https://kubernetes.io/docs/concepts/workloads/pods/init-containers/">Init Containers</a> | <a href="https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/">Pod Topology Spread Constraints</a> | <a href="https://betterprogramming.pub/understanding-kubernetes-multi-container-pod-patterns-577f74690aee">Understanding Kubernetes Multi-Container Pod Patterns</a> | <a href="https://kubernetes.io/docs/concepts/workloads/pods/disruptions/">Disruptions</a> | <a href="https://kubernetes.io/docs/tasks/configure-pod-container/assign-memory-resource/">Assign Memory Resources to Containers and Pods</a> | <a href="https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/">Assign CPU Resources to Containers and Pods</a> | <a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/">Configure Liveness, Readiness and Startup Probes</a> | <a href="https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/">Configure Service Accounts for Pods</a> | <a href="https://kubernetes.io/docs/tasks/configure-pod-container/security-context/">Configure a Security Context for a Pod or Container</a>
+    Reference: <a href="https://kubernetes.io/docs/tasks/configure-pod-container/security-context/">Configure a Security Context for a Pod or Container</a>
   </div>
 </div>
 
