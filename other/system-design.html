@@ -1603,7 +1603,7 @@
         <li>From 1KB of drivers metadata, 100 bytes are used for driver id and location.</li>
       </ul>
       <li>Incoming (trip information): (10M trips per day / 86400) * 1KB * 8 = 0.926Mbps</li>
-      <li>Outgoing (driver location): (1M drivers / 2) * 100B * 8 = 0.926Mbps = 400 Mbps</li>
+      <li>Outgoing (driver location): (1M drivers / 2) * 100 bytes * 8 = 0.926Mbps = 400Mbps</li>
     </ul>
 
     <h3 class="card-title">High level design</h3>
@@ -1773,23 +1773,23 @@
       <li>Assume</li>
       <ul>
         <li>100M Tweets everyday.</li>
-        <li>Each Tweet takes up 200 bytes. (Including the metadata)</li>
-        <li>Photo in every 5 Tweets with 200KB.</li>
-        <li>Video in every 10 Tweets with 2MB.</li>
+        <li>Each Tweet takes up 1KB. (Including the metadata)</li>
+        <li>Photo in every 10 Tweets with 100KB.</li>
+        <li>Video in every 10 Tweets with 1MB.</li>
       </ul>
-      <li>Tweet: 100M * 200 bytes = 20GB per day.</li>
-      <li>Media: (100M/5) * 200KB + (100M/10) * 2MB = 24TB per day.</li>
+      <li>Tweet: 100M * 1KB = 100GB per day.</li>
+      <li>Media: (100M/10) * 100KB + (100M/10) * 1MB = 21TB per day.</li>
     </ul>
 
     <h4 class="card-title">Bandwidth</h4>
     <ul>
       <li>Assume</li>
       <ul>
-        <li>Each user views 50 tweets per day.</li>
-        <li>Then, the number of Tweet views per day = 100M * 50 = 5B per day</li>
+        <li>Each user views 100 tweets per day.</li>
+        <li>Then, the number of Tweet views per day = 100M * 100 = 10B per day</li>
       </ul>
-      <li>Incoming: 24TB per day * 8 / 86400 = 2.2Gbps.</li>
-      <li>Outgoing: ( 5B * 200 bytes + (5B/5) * 200 KB + (5B/10) * 2MB ) * 8 / 86400 = (1,000GB + 200,000GB + 1,000,000GB) * 8 / 86400 = 111.2Gbps</li>
+      <li>Incoming: 11TB per day * 8 / 86400 = 1Gbps.</li>
+      <li>Outgoing: ( 10B * 1KB + (10B/10) * 100KB + (10B/10) * 1MB ) * 8 / 86400 = (10,000GB + 100,000GB + 1,000,000GB) * 8 / 86400 = 102.7Gbps</li>
     </ul>
 
     <h3 class="card-title">High level design</h3>
@@ -1976,11 +1976,11 @@
       <li>Assume</li>
       <ul>
         <li>Each user's metadata is 100KB.</li>
-        <li>Each user's feed has 500 posts.</li>
-        <li>Each post is 10KB texts, 100KB images, 1MB videos on average.</li>
+        <li>Each user's feed has 1000 posts.</li>
+        <li>Each post is 1KB texts, 100KB images, 1MB videos on average.</li>
       </ul>
       <li>100KB * 1B = 100TB for all user metadata.</li>
-      <li>500 * 100M * (10KB + 100KB + 1MB) = 55PB for all posts.</li>
+      <li>1000 * 100M * (1KB + 100KB + 1MB) = 110PB for all posts.</li>
     </ul>
 
     <h4 class="card-title">Bandwidth</h4>
@@ -2179,21 +2179,22 @@
       <li>Assume</li>
       <ul>
         <li>100M daily active users.</li>
-        <li>A single server can handle 10K connections.</li>
+        <li>Each user makes 10 requests per day.</li>
+        <li>A single server can handle 100 requests per second.</li>
       </ul>
-      <li>100M / 10K = 10,000 servers are needed.</li>
+      <li>(100M * 10) / (100 * 86400) = 116 servers are needed.</li>
     </ul>
 
     <h4 class="card-title">Storage</h4>
     <ul>
       <li>Assume</li>
       <ul>
-        <li>2M new photos per day.</li>
+        <li>10M new photos per day.</li>
         <li>Average photo size 1MB.</li>
         <li>1M new videos per day.</li>
-        <li>Average photo size 10MB.</li>
+        <li>Average video size 10MB.</li>
       </ul>
-      <li>2M * 1MB + 1M * 10MB = 2TB + 10TB = 12TB per day.</li>
+      <li>10M * 1MB + 1M * 10MB = 10TB + 10TB = 20TB per day.</li>
     </ul>
 
     <h4 class="card-title">Bandwidth</h4>
@@ -2202,8 +2203,8 @@
       <ul>
         <li>Read-write ratio is 100:1.</li>
       </ul>
-      <li>Incoming: 12TB per day * 8 / 86400 = 1.1Gbps.</li>
-      <li>Outgoing: 1.1Gbps * 100 = 111Gbps.</li>
+      <li>Incoming: 20TB per day * 8 / 86400 = 1.85Gbps.</li>
+      <li>Outgoing: 1.85Gbps * 100 = 185Gbps.</li>
     </ul>
 
     <h3 class="card-title">High level design</h3>
