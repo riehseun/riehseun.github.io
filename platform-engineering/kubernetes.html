@@ -73,6 +73,7 @@
         <li><a href="#kubernetes-106">LivenesProbe and ReadinessProbe</a></li>
         <li><a href="#kubernetes-107">Service Account</a></li>
         <li><a href="#kubernetes-108">SecurityContext</a></li>
+        <li><a href="#kubernetes-109">Labels, selectors, and annotations</a></li>
       </ul>
       <br>
 
@@ -1265,25 +1266,6 @@ spec:
       <li>Pod gets created by resources such as Deployment, Job, or StatefulSet.</li>
       <li>Controller for those resources handles Pod replication, rollout, and failure.</li>
       <li>Controllers create Pod from Pod Template.</li>
-    </ul>
-
-<pre><code class="yaml">apiVersion: batch/v1
-kind: Job
-metadata:
-  name: my-job
-spec:
-  template:
-    # This is the pod template
-    spec:
-      containers:
-      - name: my-container
-        image: my-image
-        command: ['sh', '-c', 'echo "Hello, Kubernetes!" && sleep 3600']
-      restartPolicy: OnFailure
-    # The pod template ends here</code></pre>
-
-    <ul>
-      <li>Modifying the Pod Template will make StatefulSet to create new Pods, which then will replace old Pods</li>
       <li>Every container in a Pod share the same IP address and port. These containers can communicate to each other using localhost</li>
       <li>Any container in a Pod can enable privileged mode to use OS admin level capabilities</li>
       <li>Static Pods are managed directly by kubelet without API server. Kubelet though will create mirror Pods on API server for each static Pod</li>
@@ -1292,18 +1274,18 @@ spec:
     <h3 class="card-title">Pod Lifecycle</h3>
     <ul>
       <li>Pods are created, assinged a unique ID (UUID), and scheduled to nodes. They can never be rescheduled to different nodes.</li>
-      <li>Pending - containers have not been setup yet.</li>
-      <li>Running - Pod is bounded to a node. Containers are created but still running.</li>
-      <li>Succeeded (Completed when <code>restartPolicy:Never</code>) - Containers are terminated with success.</li>
-      <li>Failed (CrashLoopBackoff when Pod fails or exits unexpectedly) - At least one container is terminated with failure.</li>
-      <li>Unknown - Pod status cannot be obtained. Most often error communicating with the node.</li>
+      <li><strong>Pending</strong> - containers have not been setup yet.</li>
+      <li><strong>Running</strong> - Pod is bounded to a node. Containers are created but still running.</li>
+      <li><strong>Succeeded</strong> (<strong>Completed</strong> when <code>restartPolicy:Never</code>) - containers are terminated with success.</li>
+      <li><strong>Failed</strong> (<strong>CrashLoopBackoff</strong> when Pod fails or exits unexpectedly) - at least one container is terminated with failure.</li>
+      <li><strong>Unknown</strong> - Pod status cannot be obtained. Most often error communicating with the node.</li>
     </ul>
 
     <h3 class="card-title">Container lifecycle</h3>
     <ul>
-      <li>Waiting - running operations to complete startup.</li>
-      <li>Running - executing without issues.</li>
-      <li>Terminated - either ran to completion or failed.</li>
+      <li><strong>Waiting</strong> - running operations to complete startup.</li>
+      <li><strong>Running</strong> - executing without issues.</li>
+      <li><strong>Terminated</strong> - either ran to completion or failed.</li>
     </ul>
 
     <h3 class="card-title">Container restart policy</h3>
@@ -1313,65 +1295,10 @@ spec:
 
     <h3 class="card-title">Pod condition</h3>
     <ul>
-      <li>PodScheduled - Pod is scheduled to a node.</li>
-      <li>ContainersReady - all containers in Pod are ready.</li>
-      <li>Initialized - all init containers are started.</li>
-      <li>Ready - Pod can serve requests.</li>
-    </ul>
-
-    <h3 class="card-title">Pod readiness</h3>
-    <ul>
-      <li><code>spec</code> of Pod has <code>readinessGates</code>, that allows additional conditions to be specified.</li>
-    </ul>
-
-<pre><code class="yaml">kind: Pod
-...
-spec:
-  readinessGates:
-    - conditionType: "www.example.com/feature-1"
-status:
-  conditions:
-    - type: Ready                              # a built in PodCondition
-      status: "False"
-      lastProbeTime: null
-      lastTransitionTime: 2018-01-01T00:00:00Z
-    - type: "www.example.com/feature-1"        # an extra PodCondition
-      status: "False"
-      lastProbeTime: null
-      lastTransitionTime: 2018-01-01T00:00:00Z
-  containerStatuses:
-    - containerID: docker://abcd...
-      ready: true
-...</code></pre>
-
-    <h3 class="card-title">Container probe</h3>
-    <ul>
-      <li>Kubelet performs diagnostic on a container periodically. (this is call Probe)</li>
-      <li>Kubelet calls Handler, which is implemented by the container.</li>
-      <li>ExecAction Handler - executes a command inside container. Diagnostic successful if command exits with 0.</li>
-      <li>TCPSocketAction Handler - TCP check on IP address on specified port. Diagnostic successful if port is open.</li>
-      <li>HTTPGetAction Handler - HTTP GET check on IP address on specified port and path. Diagnostic successful if  200 &le; response &lt; 400.</li>
-    </ul>
-
-    <h3 class="card-title">livenessProbe</h3>
-    <ul>
-      <li>Indicates whether the container is running.</li>
-      <li>Similar to readiness probe, but probes periodically to make sure the pod is healthy and restarts it if not.</li>
-      <li>If liveness probe fails, kubelet kills the container, and container is subject to its restart policy.</li>
-    </ul>
-
-    <h3 class="card-title">readinessProbe</h3>
-    <ul>
-      <li>Indicates whether the container is ready to respond to requests.</li>
-      <li>If readiness probe fails, endpoint controller removes Pod IP address from Service endpoints that match the Pod.</li>
-      <li>Used when container needs to load large data, configuration files.</li>
-    </ul>
-
-    <h3 class="card-title">startupProbe</h3>
-    <ul>
-      <li>Indicates whether the application within the container has started.</li>
-      <li>If starup probe fails, kubelet kills the container, and container is subject to its restart policy.</li>
-      <li>Used when containers take long time to come into service.</li>
+      <li><strong>PodScheduled</strong> - Pod is scheduled to a node.</li>
+      <li><strong>ContainersReady</strong> - all containers in Pod are ready.</li>
+      <li><strong>Initialized</strong> - all init containers are started.</li>
+      <li><strong>Ready</strong> - Pod can serve requests.</li>
     </ul>
 
     <h3 class="card-title">Pod Termination</h3>
@@ -1383,69 +1310,10 @@ status:
       <li>API server deletes Pod's object.</li>
     </ul>
 
-    <h3 class="card-title">Labels, Selectors, and Annotations</h3>
-    <ul>
-      <li>Labels are key/value pairs enabling users to map their own structures to system objects (for example, Pods) in loosely coupled fashion.</li>
-      <li>Labels do not need to be unique.</li>
-    </ul>
-<pre><code class="yaml">"metadata": {
-  "labels": {
-    "key1" : "value1",
-    "key2" : "value2"
-  }
-}</code></pre>
 
-    <p class="card-text">Example, Pods with two labels <code>environment: production</code> and <code>app: nginx</code></p>
-<pre><code class="yaml">apiVersion: v1
-kind: Pod
-metadata:
-  name: label-demo
-  labels:
-    environment: production
-    app: nginx
-spec:
-  containers:
-  - name: nginx
-    image: nginx:1.14.2
-    ports:
-    - containerPort: 80</code></pre>
-
-    <p class="card-text">Selectors are equality-based allows filtering by label keys and values while set-based allows filtering keys according to a set of values. For example,</p>
-
-<pre><code class="bash">kubectl get pods -l environment=production,tier=frontend # equality based
-kubectl get pods -l 'environment in (production),tier in (frontend)' # set based</code></pre>
-
-    <p class="card-text">Service and Replication Controller only support equality-based selector.</p>
-
-<pre><code class="yaml">selector:
-  component: redis</code></pre>
-
-    <p class="card-text">Job, Deployment, ReplicaSet, DaemonSet also support set-based selector.</p>
-
-<pre><code class="yaml">selector:
-matchLabels:
-  component: redis
-matchExpressions:
-  - {key: tier, operator: In, values: [cache]}
-  - {key: environment, operator: NotIn, values: [dev]}</code></pre>
-
-    <p class="card-text">Annotations - allows attaching arbitrary non-identifying metadata to objects. (while Labels are used to select objects, annotations are for recording metadata)</p>
-
-<pre><code class="yaml">apiVersion: v1
-kind: Pod
-metadata:
-  name: annotations-demo
-  annotations:
-    imageregistry: "https://hub.docker.com/"
-spec:
-  containers:
-  - name: nginx
-    image: nginx:1.14.2
-    ports:
-    - containerPort: 80</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://kubernetes.io/docs/concepts/workloads/pods/">Pods | <a href="https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/">Pod Lifecycle</a> | <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/">Labels and Selectors</a> | <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/">Annotations</a>
+    Reference: <a href="https://kubernetes.io/docs/concepts/workloads/pods/">Pods | <a href="https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/">Pod Lifecycle</a>
   </div>
 </div>
 
@@ -1846,6 +1714,36 @@ spec:
   <div class="card-body">
     <h2 class="card-title">LivenesProbe and ReadinessProbe</h2>
 
+    <h3 class="card-title">Container probe</h3>
+    <ul>
+      <li>Kubelet performs diagnostic on a container periodically. (this is call Probe)</li>
+      <li>Kubelet calls Handler, which is implemented by the container.</li>
+      <li>ExecAction Handler - executes a command inside container. Diagnostic successful if command exits with 0.</li>
+      <li>TCPSocketAction Handler - TCP check on IP address on specified port. Diagnostic successful if port is open.</li>
+      <li>HTTPGetAction Handler - HTTP GET check on IP address on specified port and path. Diagnostic successful if  200 &le; response &lt; 400.</li>
+    </ul>
+
+    <h3 class="card-title">livenessProbe</h3>
+    <ul>
+      <li>Indicates whether the container is running.</li>
+      <li>Similar to readiness probe, but probes periodically to make sure the pod is healthy and restarts it if not.</li>
+      <li>If liveness probe fails, kubelet kills the container, and container is subject to its restart policy.</li>
+    </ul>
+
+    <h3 class="card-title">readinessProbe</h3>
+    <ul>
+      <li>Indicates whether the container is ready to respond to requests.</li>
+      <li>If readiness probe fails, endpoint controller removes Pod IP address from Service endpoints that match the Pod.</li>
+      <li>Used when container needs to load large data, configuration files.</li>
+    </ul>
+
+    <h3 class="card-title">startupProbe</h3>
+    <ul>
+      <li>Indicates whether the application within the container has started.</li>
+      <li>If starup probe fails, kubelet kills the container, and container is subject to its restart policy.</li>
+      <li>Used when containers take long time to come into service.</li>
+    </ul>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
@@ -2012,6 +1910,75 @@ spec:
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://kubernetes.io/docs/tasks/configure-pod-container/security-context/">Configure a Security Context for a Pod or Container</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-109">
+  <div class="card-body">
+    <h2 class="card-title">Labels, selectors, and annotations</h2>
+    <ul>
+      <li>Labels are key/value pairs enabling users to map their own structures to system objects (for example, Pods) in loosely coupled fashion.</li>
+      <li>Labels do not need to be unique.</li>
+    </ul>
+<pre><code class="yaml">"metadata": {
+  "labels": {
+    "key1" : "value1",
+    "key2" : "value2"
+  }
+}</code></pre>
+
+    <p class="card-text">Example, Pods with two labels <code>environment: production</code> and <code>app: nginx</code></p>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: label-demo
+  labels:
+    environment: production
+    app: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.14.2
+    ports:
+    - containerPort: 80</code></pre>
+
+    <p class="card-text">Selectors are equality-based allows filtering by label keys and values while set-based allows filtering keys according to a set of values. For example,</p>
+
+<pre><code class="bash">kubectl get pods -l environment=production,tier=frontend # equality based
+kubectl get pods -l 'environment in (production),tier in (frontend)' # set based</code></pre>
+
+    <p class="card-text">Service and Replication Controller only support equality-based selector.</p>
+
+<pre><code class="yaml">selector:
+  component: redis</code></pre>
+
+    <p class="card-text">Job, Deployment, ReplicaSet, DaemonSet also support set-based selector.</p>
+
+<pre><code class="yaml">selector:
+matchLabels:
+  component: redis
+matchExpressions:
+  - {key: tier, operator: In, values: [cache]}
+  - {key: environment, operator: NotIn, values: [dev]}</code></pre>
+
+    <p class="card-text">Annotations - allows attaching arbitrary non-identifying metadata to objects. (while Labels are used to select objects, annotations are for recording metadata)</p>
+
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: annotations-demo
+  annotations:
+    imageregistry: "https://hub.docker.com/"
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.14.2
+    ports:
+    - containerPort: 80</code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/">Labels and Selectors</a> | <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/">Annotations</a>
   </div>
 </div>
 
