@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="/img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/monokai-sublime.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="/js/jquery.min.js" type="text/javascript"></script>
+<script src="/js/bootstrap.bundle.min.js" type="text/javascript"></script>
+<script src="/js/highlight.pack.js" type="text/javascript"></script>
+<script src="/js/include_html.js" type="text/javascript"></script>
+<script src="/js/mathjax.js" type="text/javascript"></script>
+<script src="/js/site.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<include src="/header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Machine Learning</h1>
+
+<!-- Entity linking BEGIN -->
+<div class="card mb-4" id="entity-linking">
+  <div class="card-body">
+    <h2 class="card-title">Entity linking</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#entity-linking-1">Entity linking</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="entity-linking-1">
+  <div class="card-body">
+    <h2 class="card-title">Entity linking</h2>
+
+    <h3 class="card-title">Problem</h3>
+    <ul>
+      <li>Named entity recognition</li>
+      <ul>
+        <li>Detect person, organization, location, etc.</li>
+      </ul>
+      <li>Disambiguation</li>
+      <ul>
+        <li>Map each detected entity to corresponding entity in knowledge base.</li>
+        <li>For example, "Michael Jordan is a machine learning professor at UC Berkeley."</li>
+        <ul>
+          <li>Michael Jordan linked to the professor at the University of California, Berkeley entity in the knowledge base.</li>
+          <li>UC Berkeley is linked to the University of California entity in the knowledge base.</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Requirement</h3>
+
+    <h4 class="card-title">Training</h4>
+
+    <h4 class="card-title">Inference</h4>
+
+    <h3 class="card-title">Estimation</h3>
+
+    <h3 class="card-title">Metric</h3>
+    <ul>
+      <li>There will be separate metric for each of three components</li>
+      <ul>
+        <li>Named entity recognition</li>
+        <li>Disambiguation</li>
+        <li>Entity linking as a whole</li>
+      </ul>
+    </ul>
+
+    <h4 class="card-title">Named entity recognition (Offline)</h4>
+    <ul>
+      <li>Precision = number of correctly recognized named entities / number of total recognized named entitied</li>
+      <li>Recall = number of correctly recognized named entities / number of named entities in corpus</li>
+      <li>F1 score = \( 2 * \frac{PR}{P+R} \)</li>
+    </ul>
+
+    <h4 class="card-title">Disambiguation (Offline)</h4>
+    <ul>
+      <li>Recall doesn't make sense.</li>
+      <li>Precision = number of mentions correctly linked / number of total mentions</li>
+    </ul>
+
+    <h4 class="card-title">Micro average (Offline)</h4>
+    <ul>
+      <li>Aggregates contributions of all documents to compute average.</li>
+      <li>Precision = sum of TP / (sum of TP + sum of FP)</li>
+      <li>Recall = sum of TP / (sum of TP + sum of FN)</li>
+      <li>Micro-averaged F1-score = \( 2 * \frac{PR}{P+R} \)</li>
+    </ul>
+
+    <h4 class="card-title">Macro average (Offline)</h4>
+    <ul>
+      <li>Computes metrics independently for each document and takes the average.</li>
+      <li>Precision = sum of Precision over documents / n</li>
+      <li>Recall = sum of Recall over documents / n</li>
+      <li>Macro-averaged F1-score = \( 2 * \frac{PR}{P+R} \)</li>
+    </ul>
+
+    <h3 class="card-title">Architecture</h3>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/entity-linking1.png" alt="Card image cap">
+    <br>
+    <br>
+
+    <h3 class="card-title">Training data generation</h3>
+    <ul>
+      <li>Named entity recognition</li>
+      <ul>
+        <li>CoNLL-2003</li>
+      </ul>
+      <li>Disambiguation</li>
+      <ul>
+        <li>AIDA CoNLL-YAGO Dataset</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Modeling</h3>
+    <ul>
+      <li>Traditional word embedding like Word2vec does not understand the context.</li>
+    </ul>
+
+    <h4 class="card-title">ELMo (Embeddings from Language Models)</h4>
+    <ul>
+      <li>Starts with something like Word2vec.</li>
+      <li>Raw vectors are fed into bidirectional LSTM layer.</li>
+      <li>Forward and backward LSTMs are trained independently.</li>
+      <li>Word representations cannot take advantage of left and right context simultaneously.</li>
+    </ul>
+
+    <h4 class="card-title">BERT (Bidirectional encoder representations from transformers)</h4>
+    <ul>
+      <li>Take input sentenses, which can be multiple sentences separated by SEP tag.</li>
+      <li>Each word is converted to embedding and fed into transformer encoder layer.</li>
+      <li>All words are processed simultaneously in the layer.</li>
+      <li>Final transformer layer outputs the contextualized representation of each word.</li>
+    </ul>
+
+    <h4 class="card-title">NER modelling</h4>
+    <ul>
+      <li>Option 1. Use embeddings generated by BERT as features in NER modelling.</li>
+      <li>Option 2. Take pre-trained models and fine-tune them based on NER dataset.</li>
+    </ul>
+
+    <h4 class="card-title">Disambiguation modeling</h4>
+
+    <h5 class="card-title">Candidate generation</h5>
+    <ul>
+      <li>Build an index where terms are mapped to knowledge base entities.</li>
+      <li>Index should include all terms that could possibly refer to an entity.</li>
+    </ul>
+
+    <h5 class="card-title">Linking</h5>
+    <ul>
+      <li>Build a model that gives the probability of a candidate being true match for a recognized entity.</li>
+      <li>Inputs to this model should be represented by BERT/ELMo embeddings.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://www.educative.io/path/become-a-machine-learning-engineer">Become a Machine Learning Engineer</a>
+  </div>
+</div>
+<!-- Entity linking END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+</html>
