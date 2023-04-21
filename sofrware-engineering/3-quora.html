@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="/img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/monokai-sublime.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="/js/jquery.min.js" type="text/javascript"></script>
+<script src="/js/bootstrap.bundle.min.js" type="text/javascript"></script>
+<script src="/js/highlight.pack.js" type="text/javascript"></script>
+<script src="/js/include_html.js" type="text/javascript"></script>
+<script src="/js/mathjax.js" type="text/javascript"></script>
+<script src="/js/site.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<include src="/header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Software Engineering</h1>
+
+<!-- Quora BEGIN -->
+<div class="card mb-4" id="heap">
+  <div class="card-body">
+    <h2 class="card-title">Quora</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#quora-1">Quora</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="quora-1">
+  <div class="card-body">
+    <h2 class="card-title">Quora</h2>
+
+    <h3 class="card-title">Requirement</h3>
+
+    <h4 class="card-title">Functional</h4>
+    <ul>
+      <li>Users can ask questions and provide answers.</li>
+      <li>Users can upvote, downvote, and comment on answers.</li>
+      <li>Users can search for questions.</li>
+      <li>Feed is generated based on user interest.</li>
+      <li>Answers are ranked based on usefulness.</li>
+    </ul>
+
+    <h4 class="card-title">Non-functional</h4>
+    <ul>
+      <li>Availability</li>
+      <ul>
+        <li>Causal consistency must be met between questions and answers and comments and sub-comments.</li>
+        <li>No need for all users to see new post immediately.</li>
+        <li>No need for feeds to have the same ordering for all users.</li>
+      </ul>
+      <li>Reliability</li>
+      <li>Scalability</li>
+      <li>Performance</li>
+    </ul>
+
+    <h3 class="card-title">Estimation</h3>
+
+    <h4 class="card-title">Server</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>100M daily active users.</li>
+        <li>A single server can handle 10K connections.</li>
+      </ul>
+      <li>100M / 10K = 10,000 servers are needed.</li>
+    </ul>
+
+    <h4 class="card-title">Storage</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>Each user posts 1 question per day.</li>
+        <li>Questions, answers, comments all together consume 1KB.</li>
+        <li>20% of questions have images and 10% of questions have videos.</li>
+        <li>Each image is 1MB and each video is 100MB.</li>
+      </ul>
+      <li>(100M * 1) * (1KB + 0.2 * 1MB + 0.1 * 100MB) = 1PB per day.</li>
+    </ul>
+
+    <h4 class="card-title">Bandwidth</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>Each user views 20 questions per day.</li>
+      </ul>
+      <li>Incoming: (1PB per day * 8 bits) / 86400 = 92Gbps.</li>
+      <li>Outgoing: 92Gbps * 20 = 1840Gbps. (1:20 ratio between write and read)</li>
+    </ul>
+
+    <h3 class="card-title">High level design</h3>
+    <ul>
+      <li>Load balancer forwards user requests to web servers.</li>
+      <li>Web servers generate some part of page (Mostly static content) and application servers generate other part of page. (Mostly dynamic content)</li>
+      <li>Questions and answers data is stored in MySQL.</li>
+      <li>Images and videos are stored in Blob storage.</li>
+      <li>Different features are stored in HBase for each type of question.</li>
+      <li>features are forwarded to ML engine to rank the most useful answer.</li>
+    </ul>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/quora1.png" alt="Card image cap">
+    <br>
+    <br>
+
+    <h3 class="card-title">API</h3>
+    <ul>
+      <li>post_question(user_id, question, description, video, image)</li>
+      <li>post_answer(user_id, question_id, answer_text, video, image)</li>
+      <li>upvote(user_id, question_id, answer_id)</li>
+      <li>comment(user_id, answer_id, comment_text)</li>
+      <li>search(user_id, search_text)</li>
+    </ul>
+
+    <h3 class="card-title">DB</h3>
+
+    <h3 class="card-title">Component design</h3>
+    <ul>
+      <li>Service host: combine web and app servers into one type of powerful machine. Eliminates network I/O and latency.</li>
+      <li>MySQL: vertical sharding.</li>
+      <li>Zookeeper: keep mappings/metadata of vertical sharding.</li>
+      <li>MyRocks: replace HBase for lower latency. Also, MyRocks has native integration with MySQL.</li>
+      <li>Kafka: separate not-so-urgent tasks from regular API calls.</li>
+      <li>CDN: store images and videos.</li>
+    </ul>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/quora2.png" alt="Card image cap">
+    <br>
+    <br>
+
+    <h3 class="card-title">Evaluation</h3>
+
+    <h4 class="card-title">Availability</h4>
+    <ul>
+      <li>Replicate powerful machines and DB servers.</li>
+      <li>Data sharding and replication.</li>
+      <li>CDN as backup of data.</li>
+      <li>Load balancer to distribute requests to service hosts.</li>
+      <li>Consistency</li>
+      <ul>
+        <li>MySQL for storing question/answer.</li>
+      </ul>
+    </ul>
+
+    <h4 class="card-title">Reliability</h4>
+
+    <h4 class="card-title">Scalability</h4>
+    <ul>
+      <li>Horizontally scale service hosts.</li>
+      <li>Vertically scale MySQL columns.</li>
+      <li>Different DB types for different purpose.</li>
+    </ul>
+
+    <h4 class="card-title">Performance</h4>
+    <ul>
+      <li>MyRocks for lower latency.</li>
+      <li>CDN to service images and vidoes.</li>
+      <li>Kafka improve service host performance.</li>
+      <li>Redis cache for frequently accessed data.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
+<!-- Quora END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+</html>

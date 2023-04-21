@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="/img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/monokai-sublime.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="/js/jquery.min.js" type="text/javascript"></script>
+<script src="/js/bootstrap.bundle.min.js" type="text/javascript"></script>
+<script src="/js/highlight.pack.js" type="text/javascript"></script>
+<script src="/js/include_html.js" type="text/javascript"></script>
+<script src="/js/mathjax.js" type="text/javascript"></script>
+<script src="/js/site.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<include src="/header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Software Engineering</h1>
+
+<!-- Youtube BEGIN -->
+<div class="card mb-4" id="heap">
+  <div class="card-body">
+    <h2 class="card-title">Youtube</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#youtube-1">Youtube</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="youtube-1">
+  <div class="card-body">
+    <h2 class="card-title">Youtube</h2>
+
+    <h3 class="card-title">Requirement</h3>
+
+    <h4 class="card-title">Functional</h4>
+    <ul>
+      <li>Users can upload, share, view, like/dislike, search videos.</li>
+      <li>Users can add, view comments.</li>
+      <li>Users can view thumbnails, number of views.</li>
+    </ul>
+
+    <h4 class="card-title">Non-functional</h4>
+    <ul>
+      <li>Availability</li>
+      <ul>
+        <li>Consistency can take a hit.</li>
+        <li>Subscribers need not get notifications for uploaded videos immediately.</li>
+        <li>No need to show consistent feed for all users.</li>
+      </ul>
+      <li>Reliability</li>
+      <li>Scalability</li>
+      <li>Performance</li>
+      <ul>
+        <li>Users should not feel lag watching videos.</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Estimation</h3>
+
+    <h4 class="card-title">Server</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>100M daily active users.</li>
+        <li>A single server can handle 10K connections.</li>
+      </ul>
+      <li>100M / 10K = 10,000 servers are needed.</li>
+    </ul>
+
+    <h4 class="card-title">Storage</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>Each video before encoding is 1GB.</li>
+        <li>After encoding, size becomes 100MB.</li>
+        <li>1000 videos are uploaded every minute.</li>
+      </ul>
+      <li>100MB per video * 1000 video per minute = 100GB per minute.</li>
+    </ul>
+
+    <h4 class="card-title">Bandwidth</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>Ratio of upload:view is 1:100. (Every uploaded video gets 100 views)</li>
+      </ul>
+      <li>Video uploads (write): 1000 per minute.</li>
+      <li>Video views (reads): 1000 * 100 = 100K per minute.</li>
+      <li>Incoming (upload): 1GB * 1000 per minute = 10TB per minute = 1333Gbps. (Video is uncompressed during upload)</li>
+      <li>Outgoing (stream): 100MB * 100K per minute = 10TB per minute = 1333Gbps.</li>
+    </ul>
+
+    <h3 class="card-title">High level design</h3>
+    <ul>
+      <li>User uploads video.</li>
+      <li>Server sends video to encoder.</li>
+      <li>Server sends user data and metadata to relational DB.</li>
+      <li>Encoder encodes video and store it in object storage.</li>
+    </ul>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/youtube1.png" alt="Card image cap">
+    <br>
+    <br>
+
+    <h3 class="card-title">API</h3>
+    <ul>
+      <li>upload_video(user_id, video_file, title, description, tags, default_language)</li>
+      <li>stream_video(user_id, video_id, resolution)</li>
+      <li>search_video(user_id, query, user_location, length, max_videos_to_return)</li>
+      <li>view_thunbnail(user_id, video_id)</li>
+      <li>like_or_dislike_video(user_id, video_id, like)</li>
+      <li>comment_video(user_id, video_id, text)</li>
+    </ul>
+
+    <h3 class="card-title">DB</h3>
+    <ul>
+      <li>Store video metadata in relational DB.</li>
+    </ul>
+
+    <h4 class="card-title">User</h4>
+    <ul>
+      <li>id (int, pk)</li>
+      <li>name (varchar)</li>
+      <li>email (varchar)</li>
+      <li>password (varchar)</li>
+    </ul>
+
+    <h4 class="card-title">Video</h4>
+    <ul>
+      <li>id (int, pk)</li>
+      <li>title (varchar)</li>
+      <li>description (varchar)</li>
+      <li>date (datetime)</li>
+      <li>uploader (int)</li>
+      <li>size (longint)</li>
+      <li>thumbnail (varchar)</li>
+      <li>likes (int)</li>
+      <li>dislikes (int)</li>
+      <li>views (int)</li>
+    </ul>
+
+    <h4 class="card-title">Comment</h4>
+    <ul>
+      <li>id (int, pk)</li>
+      <li>video_id (int)</li>
+      <li>user_id (int)</li>
+      <li>comment (varchar)</li>
+      <li>date (datetime)</li>
+      <li>likes (int)</li>
+      <li>dislikes (int)</li>
+    </ul>
+
+    <h3 class="card-title">Component design</h3>
+    <ul>
+      <li>Load balancer: distribute user load.</li>
+      <li>Web server: take user request, cache frequently accessed pages. Decouple client request from business logic. Use Lighttpd to run the server for it is fast.</li>
+      <li>App server: business logic.</li>
+      <li>User DB: user related data, decoupled from metadata storage for easy scalability. Need strong consistency on user data. MySQL.</li>
+      <li>Metadata DB: video related data. MySQL.</li>
+      <li>Thumbnail DB: BigTable.</li>
+      <ul>
+        <li>Combines multiple files into one block to store.</li>
+        <li>Very efficient for large number of small files with low retrieval latency.</li>
+      </ul>
+      <li>Encoder: compress vidoes and generate thumbnail.</li>
+      <li>Video DB: blob.</li>
+      <li>CDN: forward videos to closer proximity to serve users faster.</li>
+    </ul>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/youtube2.png" alt="Card image cap">
+    <br>
+    <br>
+
+    <h4 class="card-title">How to manage read traffic</h4>
+    <ul>
+      <li>Segregate read traffic and write traffic.</li>
+      <li>Distribute read traffic to different servers.</li>
+      <li>For video metadata, write to primary and read from secondary.</li>
+    </ul>
+
+    <h4 class="card-title">Metadata sharding</h4>
+    <ul>
+      <li>Store based on UserID? It is hard to maintain uniform distribution because some users upload more than others.</li>
+      <li>Store based on VideoID? Solves above problem. Can cache hot vidoes in front of DB servers.</li>
+    </ul>
+
+    <h4 class="card-title">Deduplication</h4>
+    <ul>
+      <li>When users upload vidoes, run video matching algorithm.</li>
+    </ul>
+
+    <h4 class="card-title">Search</h4>
+    <ul>
+      <li>Extract data from each video and store that data into JSON (referred as document)</li>
+      <li>Key-value storage is created from the documents.</li>
+      <ul>
+        <li>Key: all the keywords searched by users.</li>
+        <li>Value: occurrence of each key, its frequency, and location of occurrence in the different documents.</li>
+      </ul>
+      <li>Vidoes with most relevant keywords are returned.</li>
+    </ul>
+
+    <h4 class="card-title">Load-balancing</h4>
+    <ul>
+      <li>Consistent hashing between cache servers.</li>
+    </ul>
+
+    <h4 class="card-title">Cache</h4>
+    <ul>
+      <li>Store hot vidoes in cache servers.</li>
+      <li>Use LRU eviction rule.</li>
+      <li>Use distributed cache like Memcached.</li>
+    </ul>
+
+    <h3 class="card-title">Evaluation</h3>
+
+    <h4 class="card-title">Availability</h4>
+    <ul>
+      <li>Data replication.</li>
+      <li>Local load balancer to exclude dead servers.</li>
+      <li>Global load balancer to reroute traffic to different region.</li>
+    </ul>
+
+    <h4 class="card-title">Reliability</h4>
+    <ul>
+      <li>Data partitioning.</li>
+      <li>Redundant hardware for fault tolerance.</li>
+      <li>Monitor servers and use consistent hashing to add/remove servers seemlessly.</li>
+    </ul>
+
+    <h4 class="card-title">Scalability</h4>
+    <ul>
+      <li>Horizontally scale web and app servers. (Load balancer can multiplx them)</li>
+      <li>Separate read and write to different servers.</li>
+    </ul>
+
+    <h4 class="card-title">Performance</h4>
+    <ul>
+      <li>Lighttpd for serving videos.</li>
+      <li>Cache at various component.</li>
+      <li>Right DB for different data types for fast operations.</li>
+      <li>CDN</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
+<!-- Youtube END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+</html>

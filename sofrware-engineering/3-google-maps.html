@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="/img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/monokai-sublime.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="/js/jquery.min.js" type="text/javascript"></script>
+<script src="/js/bootstrap.bundle.min.js" type="text/javascript"></script>
+<script src="/js/highlight.pack.js" type="text/javascript"></script>
+<script src="/js/include_html.js" type="text/javascript"></script>
+<script src="/js/mathjax.js" type="text/javascript"></script>
+<script src="/js/site.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<include src="/header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Software Engineering</h1>
+
+<!-- Google maps BEGIN -->
+<div class="card mb-4" id="heap">
+  <div class="card-body">
+    <h2 class="card-title">Google maps</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#google-maps-1">Google maps</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="google-maps-1">
+  <div class="card-body">
+    <h2 class="card-title">Google Maps</h2>
+
+    <h3 class="card-title">Requirement</h3>
+
+    <h4 class="card-title">Functional</h4>
+    <ul>
+      <li>Users can identify current location.</li>
+      <li>Users can find the fastest route between start and end.</li>
+      <li>Users can listen to directions.</li>
+    </ul>
+
+    <h4 class="card-title">Non-functional</h4>
+    <ul>
+      <li>Availability</li>
+      <li>Reliability</li>
+      <li>Scalability</li>
+      <li>Performance</li>
+      <ul>
+        <li>Route and direction should be suggested fast.</li>
+        <li>ETA should be accurate.</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Estimation</h3>
+
+    <h4 class="card-title">Server</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>100M daily active users.</li>
+        <li>A single server can handle 10K connections.</li>
+      </ul>
+      <li>100M / 10K = 10,000 servers are needed.</li>
+    </ul>
+
+    <h4 class="card-title">Storage</h4>
+    <ul>
+      <li>Only one time storage is needed in the beginning. (Minimal changes after that)</li>
+    </ul>
+
+    <h4 class="card-title">Bandwidth</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>Each user makes 100 requests per day.</li>
+        <li>Each request size is 100 bytes.</li>
+        <li>Each response size is 1MB.</li>
+      </ul>
+      <li>Incoming: (100M * 100 requests per day * 100 bytes per request * 8 bits) / 86400 = 92Mbps.</li>
+      <li>Outgoing: (100M * 100 requests per day * 1MB per response * 8 bits) / 86400 = 920Gbps.</li>
+    </ul>
+
+    <h3 class="card-title">High level design</h3>
+    <ul>
+      <li>User enters starting and end point. Starting point can be user's current location.</li>
+      <ul>
+        <li>User request is forwarded to route finder service.</li>
+        <li>Route finder forwards requests to area search service.</li>
+        <li>Area search service finds the latitude/longitude for start and end location.</li>
+        <li>Graph processing service finds the shortest path and return it to route finder.</li>
+      </ul>
+      <li>Nagivator updates user location on the map as user is moving. It also provides directions to user.</li>
+      <li>When user deviates from the path, Pub-sub alerts area search service to recalculate the optimal path.</li>
+    </ul>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/google-map1.png" alt="Card image cap">
+    <br>
+    <br>
+
+    <h3 class="card-title">API</h3>
+    <ul>
+      <li>curr_location(location)</li>
+      <li>find_route(start, end, transport_type)</li>
+      <li>directions(curr_location, steps)</li>
+    </ul>
+
+    <h3 class="card-title">DB</h3>
+
+    <h4 class="card-title">Key-value store</h4>
+    <ul>
+      <li>Segment to server</li>
+      <ul>
+        <li>segment_id (int)</li>
+        <li>server_id (int)</li>
+      </ul>
+      <li>Belongs to segment</li>
+      <ul>
+        <li>segment_id (int)</li>
+        <li>coordinates (list): stores latitude and longitude.</li>
+      </ul>
+      <li>Neighbors</li>
+      <ul>
+        <li>segment_id (int)</li>
+        <li>neighbors (list): stores a list of segment IDs.</li>
+      </ul>
+    </ul>
+
+    <h4 class="card-title">Graph DB</h4>
+    <ul>
+      <li>Graph data</li>
+      <ul>
+        <li>segment_id (int)</li>
+        <li>road_network (graph)</li>
+      </ul>
+    </ul>
+
+    <h4 class="card-title">Relational DB</h4>
+    <ul>
+      <li>Rush hour</li>
+      <ul>
+        <li>segment_id (int)</li>
+        <li>edge_id (int)</li>
+        <li>hour_range (tuple)</li>
+        <li>rush_hour (bool): where there is congestion or not.</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Component design</h3>
+
+    <h4 class="card-title">Sub-graphs</h4>
+    <ul>
+      <li>Computing distances between two points on the entire graph is super expensive.</li>
+      <li>Precalculate the shortest distance between two points in sub-graphs. Also, cache most requested routes.</li>
+      <li>Connect sub-graphs and run the shortest distance algorithm.</li>
+    </ul>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/google-map2.png" alt="Card image cap">
+    <br>
+    <br>
+
+    <h3 class="card-title">Evaluation</h3>
+
+    <h4 class="card-title">Availability</h4>
+    <ul>
+      <li>Each segment is processed in a separate server.</li>
+      <li>Segments can be replicated.</li>
+      <li>Load balancer distributes requests to different segments.</li>
+    </ul>
+
+    <h4 class="card-title">Reliability</h4>
+
+    <h4 class="card-title">Scalability</h4>
+    <ul>
+      <li>Segments can easily be added.</li>
+      <li>Host segments on different servers.</li>
+    </ul>
+
+    <h4 class="card-title">Performance</h4>
+    <ul>
+      <li>Use of sub-graphs make computation faster than using entire graph.</li>
+      <li>Cache processed sub-graphs.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
+<!-- Google maps END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+</html>
