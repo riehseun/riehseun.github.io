@@ -39,41 +39,37 @@
 <div class="col-md-12">
 <h1 class="my-4">Software Engineering</h1>
 
-<!-- Quora BEGIN -->
+<!-- Yelp BEGIN -->
 <div class="card mb-4" id="heap">
   <div class="card-body">
-    <h2 class="card-title">Quora</h2>
+    <h2 class="card-title">Yelp</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#quora-1">Quora</a></li>
+      <li><a href="#yelp-1">Yelp</a></li>
     </ul>
   </div>
 </div>
 
-<div class="card mb-4" id="quora-1">
+<div class="card mb-4" id="yelp-1">
   <div class="card-body">
-    <h2 class="card-title">Quora</h2>
+    <h2 class="card-title">Yelp</h2>
 
     <h3 class="card-title">Requirement</h3>
 
     <h4 class="card-title">Functional</h4>
     <ul>
-      <li>Users can ask questions and provide answers.</li>
-      <li>Users can upvote, downvote, and comment on answers.</li>
-      <li>Users can search for questions.</li>
-      <li>Feed is generated based on user interest.</li>
-      <li>Answers are ranked based on usefulness.</li>
+      <li>Users can search place of interest based on their location.</li>
+      <li>Users can post reviews which consists of texts, images, videos.</li>
+      <li>Users can add, delete, and update place information.</li>
     </ul>
 
     <h4 class="card-title">Non-functional</h4>
     <ul>
       <li>Availability</li>
-      <ul>
-        <li>Causal consistency must be met between questions and answers and comments and sub-comments.</li>
-        <li>No need for all users to see new post immediately.</li>
-        <li>No need for feeds to have the same ordering for all users.</li>
-      </ul>
       <li>Reliability</li>
       <li>Scalability</li>
+      <ul>
+        <li>Should be able to handle peak season.</li>
+      </ul>
       <li>Performance</li>
     </ul>
 
@@ -93,97 +89,156 @@
     <ul>
       <li>Assume</li>
       <ul>
-        <li>Each user posts 1 question per day.</li>
-        <li>Questions, answers, comments all together consume 1KB.</li>
-        <li>20% of questions have images and 10% of questions have videos.</li>
-        <li>Each image is 1MB and each video is 100MB.</li>
+        <li>100M places.</li>
+        <li>Each place need 10KB storage for description text, images, videos. (Image and video are compressed)</li>
+        <li>1M reviews are posted per day.</li>
+        <li>Each review need 1KB storage for description text, images, videos. (Image and video are compressed)</li>
       </ul>
-      <li>(100M * 1) * (1KB + 0.2 * 1MB + 0.1 * 100MB) = 1PB per day.</li>
+      <li>100M * 10KB + 1M per day * 1 KB = 1 TB + 1 GB per day ~ 1TB</li>
     </ul>
 
     <h4 class="card-title">Bandwidth</h4>
     <ul>
       <li>Assume</li>
       <ul>
-        <li>Each user views 20 questions per day.</li>
+        <li>1M reviews per day and each review takes 1KB.</li>
+        <li>10 places are added per day and each place need 10KB storage.</li>
+        <li>Each user searches once a day.</li>
+        <li>Each search returns 10 pages.</li>
       </ul>
-      <li>Incoming: (1PB per day * 8 bits) / 86400 = 92Gbps.</li>
-      <li>Outgoing: 92Gbps * 20 = 1840Gbps. (1:20 ratio between write and read)</li>
+      <li>Incoming: (1M * 1KB + 10 * 10KB) * 8 / 86400 = 92Kbps</li>
+      <li>Outgoing: 100M * 1 * 10 * 10 KB * 8 / 86400 = 926Mbps</li>
     </ul>
 
     <h3 class="card-title">High level design</h3>
     <ul>
-      <li>Load balancer forwards user requests to web servers.</li>
-      <li>Web servers generate some part of page (Mostly static content) and application servers generate other part of page. (Mostly dynamic content)</li>
-      <li>Questions and answers data is stored in MySQL.</li>
-      <li>Images and videos are stored in Blob storage.</li>
-      <li>Different features are stored in HBase for each type of question.</li>
-      <li>features are forwarded to ML engine to rank the most useful answer.</li>
+      <li>User searches for places.</li>
+      <ul>
+        <li>Request goes to read servers.</li>
+        <li>Key-value store holds segment (map) information.</li>
+      </ul>
+      <li>User post reviews.</li>
+      <ul>
+        <li>Images and videos go to blob storage.</li>
+        <li>Other data goes to relational DB.</li>
+        <li>Request goes to write servers.</li>
+      </ul>
     </ul>
-    <img class="img-fluid" class="card-img-top" src="/img/system-design/quora1.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/yelp1.png" alt="Card image cap">
     <br>
     <br>
 
     <h3 class="card-title">API</h3>
     <ul>
-      <li>post_question(user_id, question, description, video, image)</li>
-      <li>post_answer(user_id, question_id, answer_text, video, image)</li>
-      <li>upvote(user_id, question_id, answer_id)</li>
-      <li>comment(user_id, answer_id, comment_text)</li>
-      <li>search(user_id, search_text)</li>
+      <li>search(category, user_location, radius)</li>
+      <ul>
+        <li>Search based on category of place. Returns JSON object.</li>
+      </ul>
+      <li>search(place_name, user_location, radius)</li>
+      <ul>
+        <li>Search based on name of place. Returns JSON object.</li>
+      </ul>
+      <li>add_place(place_name, place_description, category, latitude, longitude, photo)</li>
+      <li>add_review(place_id, user_id, review_description, rating)</li>
     </ul>
 
     <h3 class="card-title">DB</h3>
+    <ul>
+      <li>Relational DB.</li>
+    </ul>
+
+    <h4 class="card-title">Place</h4>
+    <ul>
+      <li>place_id (int, pk)</li>
+      <li>place_name (varchar)</li>
+      <li>place_description (varchar)</li>
+      <li>category (varchar)</li>
+      <li>latitude (float)</li>
+      <li>longitude (float)</li>
+      <li>photo_id (int)</li>
+    </ul>
+
+    <h4 class="card-title">Photo</h4>
+    <ul>
+      <li>photo_id (int, pk)</li>
+      <li>place_id (int)</li>
+      <li>photo_path (varchar)</li>
+    </ul>
+
+    <h4 class="card-title">Review</h4>
+    <ul>
+      <li>review_id (int, pk)</li>
+      <li>place_id (int)</li>
+      <li>user_id (int)</li>
+      <li>review_description (varchar)</li>
+      <li>rating (int)</li>
+    </ul>
+
+    <h4 class="card-title">User</h4>
+    <ul>
+      <li>user_id (int, pk)</li>
+      <li>username (varchar)</li>
+      <li>password (varchar)</li>
+      <li>email (varchar)</li>
+    </ul>
 
     <h3 class="card-title">Component design</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/yelp2.png" alt="Card image cap">
+    <br>
+    <br>
+
+    <h4 class="card-title">Segment</h4>
     <ul>
-      <li>Service host: combine web and app servers into one type of powerful machine. Eliminates network I/O and latency.</li>
-      <li>MySQL: vertical sharding.</li>
-      <li>Zookeeper: keep mappings/metadata of vertical sharding.</li>
-      <li>MyRocks: replace HBase for lower latency. Also, MyRocks has native integration with MySQL.</li>
-      <li>Kafka: separate not-so-urgent tasks from regular API calls.</li>
-      <li>CDN: store images and videos.</li>
+      <li>Each segment id is mapped to a list of places within that segment.</li>
     </ul>
-    <img class="img-fluid" class="card-img-top" src="/img/system-design/quora2.png" alt="Card image cap">
-    <br>
-    <br>
+
+    <h4 class="card-title">Data partitioning</h4>
+    <ul>
+      <li>Partition based on place id.</li>
+    </ul>
+
+    <h4 class="card-title">QuadTree server</h4>
+    <ul>
+      <li>Have trees that contain the places in the segments.</li>
+      <li>Find a list of places based on the given radius.</li>
+    </ul>
+
+    <h4 class="card-title">Aggregator server</h4>
+    <ul>
+      <li>Aggregate the results from QuadTree servers and return search result to the user.</li>
+    </ul>
 
     <h3 class="card-title">Evaluation</h3>
 
     <h4 class="card-title">Availability</h4>
     <ul>
-      <li>Replicate powerful machines and DB servers.</li>
-      <li>Data sharding and replication.</li>
-      <li>CDN as backup of data.</li>
-      <li>Load balancer to distribute requests to service hosts.</li>
-      <li>Consistency</li>
-      <ul>
-        <li>MySQL for storing question/answer.</li>
-      </ul>
+      <li>Horizontal scaling of read / write servers.</li>
+      <li>Data paritioning.</li>
     </ul>
 
     <h4 class="card-title">Reliability</h4>
+    <ul>
+      <li>Data replication.</li>
+    </ul>
 
     <h4 class="card-title">Scalability</h4>
     <ul>
-      <li>Horizontally scale service hosts.</li>
-      <li>Vertically scale MySQL columns.</li>
-      <li>Different DB types for different purpose.</li>
+      <li>Separation of read and write servers so that they can scale independently.</li>
+      <li>Data paritioning.</li>
+      <li>QuadTrees.</li>
     </ul>
 
     <h4 class="card-title">Performance</h4>
     <ul>
-      <li>MyRocks for lower latency.</li>
-      <li>CDN to service images and vidoes.</li>
-      <li>Kafka improve service host performance.</li>
-      <li>Redis cache for frequently accessed data.</li>
+      <li>Use cashe on read servers.</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
     <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
   </div>
 </div>
-<!-- Quora END -->
+<!-- Yelp END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->

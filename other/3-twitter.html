@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="/img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/monokai-sublime.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="/js/jquery.min.js" type="text/javascript"></script>
+<script src="/js/bootstrap.bundle.min.js" type="text/javascript"></script>
+<script src="/js/highlight.pack.js" type="text/javascript"></script>
+<script src="/js/include_html.js" type="text/javascript"></script>
+<script src="/js/mathjax.js" type="text/javascript"></script>
+<script src="/js/site.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<include src="/header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Software Engineering</h1>
+
+<!-- Twitter BEGIN -->
+<div class="card mb-4" id="twitter">
+  <div class="card-body">
+    <h2 class="card-title">Twitter</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#twitter-1">Twitter</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="twitter-1">
+  <div class="card-body">
+    <h2 class="card-title">Twitter</h2>
+
+    <h3 class="card-title">Requirement</h3>
+
+    <h4 class="card-title">Functional</h4>
+    <ul>
+      <li>Users can post new tweets.</li>
+      <li>Users can delete tweets.</li>
+      <li>Users can like/dislike tweets.</li>
+      <li>Users can reply to tweets.</li>
+      <li>Users can retweet tweets.</li>
+      <li>Users can search tweets.</li>
+      <li>Users can follow/unfollow other users.</li>
+      <li>Display users timeline with top tweets.</li>
+      <li>Tweets contain photos and videos.</li>
+    </ul>
+
+    <h4 class="card-title">Non-functional</h4>
+    <ul>
+      <li>Availability</li>
+      <li>Reliability</li>
+      <li>Scalability</li>
+      <li>Performance</li>
+    </ul>
+
+    <h3 class="card-title">Estimation</h3>
+
+    <h4 class="card-title">Server</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>100M daily active users</li>
+        <li>A single server can handle 10K connections.</li>
+      </ul>
+      <li>100M / 10K = 10,000 servers are needed.</li>
+    </ul>
+
+    <h4 class="card-title">Storage</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>100M Tweets everyday.</li>
+        <li>Each Tweet takes up 1KB. (Including the metadata)</li>
+        <li>Photo in every 10 Tweets with 100KB.</li>
+        <li>Video in every 10 Tweets with 1MB.</li>
+      </ul>
+      <li>Tweet: 100M * 1KB = 100GB per day.</li>
+      <li>Media: (100M/10) * 100KB + (100M/10) * 1MB = 21TB per day.</li>
+    </ul>
+
+    <h4 class="card-title">Bandwidth</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>Each user views 100 tweets per day.</li>
+        <li>Then, the number of Tweet views per day = 100M * 100 = 10B per day</li>
+      </ul>
+      <li>Incoming: 11TB per day * 8 / 86400 = 1Gbps.</li>
+      <li>Outgoing: ( 10B * 1KB + (10B/10) * 100KB + (10B/10) * 1MB ) * 8 / 86400 = (10,000GB + 100,000GB + 1,000,000GB) * 8 / 86400 = 102.7Gbps</li>
+    </ul>
+
+    <h3 class="card-title">High level design</h3>
+    <ul>
+      <li>User posts Tweets, which gets stored in DB.</li>
+      <li>Requests go through load balancers and app servers.</li>
+      <li>CDN servers photos and videos to users.</li>
+      <li>DNS servers provides users with IP addresses.</li>
+    </ul>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/twitter1.png" alt="Card image cap">
+    <br>
+    <br>
+
+    <h3 class="card-title">API</h3>
+    <ul>
+      <li>post_tweet(user_id, tweet_content)</li>
+      <li>delete_tweet(tweet_id)</li>
+      <li>like_tweet(user_id, tweet_id)</li>
+      <li>reply_tweet(user_id, tweet_id, reply_content)</li>
+      <li>retweet_tweet(user_id, tweet_id)</li>
+      <li>search_tweet(user_id, search_term)</li>
+      <li>follow_user(user_id, followee_id)</li>
+      <li>display_timeline(user_id, tweets_count)</li>
+    </ul>
+
+    <h3 class="card-title">DB</h3>
+
+    <h4 class="card-title">Tweet</h4>
+    <ul>
+      <li>tweet_id (int, pk)</li>
+      <li>user_id (int)</li>
+      <li>content (varchar)</li>
+      <li>creation_date (datetime)</li>
+      <li>num_favorite (int)</li>
+    </ul>
+
+    <h4 class="card-title">User</h4>
+    <ul>
+      <li>user_id (int, pk)</li>
+      <li>name (varchar)</li>
+      <li>email (varchar)</li>
+      <li>creation_date (datetime)</li>
+    </ul>
+
+    <h4 class="card-title">User follow</h4>
+    <ul>
+      <li>user_id1 (int, pk)</li>
+      <li>user_id2 (int, pk)</li>
+    </ul>
+
+    <h3 class="card-title">Component design</h3>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/twitter2.png" alt="Card image cap">
+    <br>
+    <br>
+
+    <h4 class="card-title">BigQuery</h4>
+    <ul>
+      <li>Storage for big data.</li>
+    </ul>
+
+    <h4 class="card-title">Manhattan</h4>
+    <ul>
+      <li>Real-time distributed key-value store.</li>
+    </ul>
+
+    <h4 class="card-title">Blob store</h4>
+    <ul>
+      <li>Stores photos, videos, binary files.</li>
+    </ul>
+
+    <h4 class="card-title">MySQL</h4>
+    <ul>
+      <li>Ad data that need strong consistency.</li>
+    </ul>
+
+    <h4 class="card-title">Kafka</h4>
+    <ul>
+      <li>Handles real time requests.</li>
+    </ul>
+
+    <h4 class="card-title">FlockDB</h4>
+    <ul>
+      <li>Graph database for huge adjacency lists, rapid reads and writes.</li>
+    </ul>
+
+    <h4 class="card-title">Apache Lucene</h4>
+    <ul>
+      <li>Used for real-time search, which uses an inverted index.</li>
+    </ul>
+
+<!--     <h4 class="card-title">Data sharding</h4>
+    <ul>
+      <li>Construct Tweet ID such that</li>
+      <ul>
+        <li>[epoch_timestamp]-[auto-incrementing-sequence]</li>
+        <li>Assign shard based on the second part. (auto-incrementing-sequence)</li>
+        <li>Reset auto-incrementing-sequence every second.</li>
+      </ul>
+      <li>Indexing Tweet ID makes querying the latest Tweets fast.</li>
+      <li>Still need to query all the servers for timeline generation.</li>
+      <li>Aggregate results from DBs and return it to users.</li>
+    </ul>
+
+    <h4 class="card-title">Caching</h4>
+    <ul>
+      <li>App servers can check cache servers before going to DB.</li>
+      <ul>
+        <li>Use LRU eviction policy.</li>
+      </ul>
+      <li>Cache the latest data.</li>
+      <ul>
+        <li>Hash table where key is UserID and value is doubly linked list containning all Tweets from the user in the past 3 days.</li>
+        <li>Always insert new Tweets at the head of doubly linked list.</li>
+        <li>Evict Tweets from the tail.</li>
+      </ul>
+    </ul>
+
+    <h4 class="card-title">Replication</h4>
+    <ul>
+      <li>Each DB has multiple replicas.</li>
+      <li>Writes go to primary and reads go to secondary.</li>
+    </ul> -->
+
+    <h3 class="card-title">Evaluation</h3>
+
+    <h4 class="card-title">Availability</h4>
+
+    <h4 class="card-title">Reliability</h4>
+
+    <h4 class="card-title">Scalability</h4>
+
+    <h4 class="card-title">Performance</h4>
+
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
+<!-- Twitter END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+</html>
