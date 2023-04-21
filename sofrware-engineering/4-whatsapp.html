@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="/img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/monokai-sublime.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="/js/jquery.min.js" type="text/javascript"></script>
+<script src="/js/bootstrap.bundle.min.js" type="text/javascript"></script>
+<script src="/js/highlight.pack.js" type="text/javascript"></script>
+<script src="/js/include_html.js" type="text/javascript"></script>
+<script src="/js/mathjax.js" type="text/javascript"></script>
+<script src="/js/site.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<include src="/header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Software Engineering</h1>
+
+<!-- Whatsapp BEGIN -->
+<div class="card mb-4" id="whatsapp">
+  <div class="card-body">
+    <h2 class="card-title">Whatsapp</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#whatsapp-1">Whatsapp</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="whatsapp-1">
+  <div class="card-body">
+    <h2 class="card-title">Whatsapp</h2>
+
+    <h3 class="card-title">Requirement</h3>
+
+    <h4 class="card-title">Functional</h4>
+    <ul>
+      <li>Supports 1-on-1 conversation between users.</li>
+      <li>Persists chat history.</li>
+      <li>Acknowledgs sent, delivered, and read.</li>
+      <li>Supports sharing of images and videos.</li>
+      <li>Notifies offline users of new messages when they come online.</li>
+    </ul>
+
+    <h4 class="card-title">Non-functional</h4>
+    <ul>
+      <li>Availability.</li>
+      <ul>
+        <li>Can be compromised for causal consistency.</li>
+      </ul>
+      <li>Reliability.</li>
+      <li>Scalability.</li>
+      <li>Performance.</li>
+      <ul>
+        <li>Users should receive messages with low latency.</li>
+      </ul>
+      <li>Security.</li>
+      <ul>
+        <li>Messages must be secured.</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Estimation</h3>
+
+    <h4 class="card-title">Server</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>2B connections per day.</li>
+        <li>A single server can handle 10M connections per day.</li>
+      </ul>
+      <li>2B/10M = 200 servers are needed.</li>
+    </ul>
+
+    <h4 class="card-title">Storage</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>100 B messages per day.</li>
+        <li>Each message is 100 bytes.</li>
+        <li>Whatsapp keeps messages for 30 days only.</li>
+      </ul>
+      <li>100 B per day * 100 bytes = 10 TB per day.</li>
+      <li>300 TB per month</li>
+    </ul>
+
+    <h4 class="card-title">Bandwidth</h4>
+    <ul>
+      <li>Incoming: 10 TB per day * 8 bits / 86400 seconds per day = 926 Mbps.</li>
+      <li>Outgoing: 10 * 15 * 9.7Mbps = 1.46 Gbps</li>
+    </ul>
+
+    <h3 class="card-title">High level design</h3>
+    <ul>
+      <li>When user A sends a message to user B</li>
+      <ul>
+        <li>Server receives the message and send ack back to A.</li>
+        <li>Server stores the message into DB and sends message to B.</li>
+        <li>B receives the message and sends ack back to the server.</li>
+        <li>Server notifies A that the message has been delivered.</li>
+      </ul>
+    </ul>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/whatsapp1.png" alt="Card image cap">
+    <br>
+    <br>
+
+    <h3 class="card-title">API</h3>
+    <ul>
+      <li>send_msessage(sender_ID, reciever_ID, type, text=none, media_object=none)</li>
+      <li>get_message(user_Id)</li>
+      <li>upload_file(file_type, file)</li>
+      <li>download_file(user_id, file_id)</li>
+    </ul>
+
+    <h3 class="card-title">DB</h3>
+    <ul>
+      <li>RDBMS (MySQL) or NoSQL (MongoDB) are not good because we need to do frequent read/write.</li>
+      <li>Choose wide-column DB like HBase. HBase stores data into memory buffer and move data into disk when buffer is full. This works well with variable-sized data.</li>
+      <li>Store multiple copies of data in different servers.</li>
+    </ul>
+
+    <h3 class="card-title">Component design</h3>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/whatsapp2.png" alt="Card image cap">
+    <br>
+    <br>
+
+    <h4 class="card-title">Websocket server</h4>
+    <ul>
+      <li>Web socket server keeps connection open with all active users.</li>
+      <li>These servers provide a port to every online user.</li>
+      <li>Web socket manager maintains mapping between port and user.</li>
+    </ul>
+
+    <h4 class="card-title">Message service</h4>
+    <ul>
+      <li>Interface to Mnesia DB.</li>
+      <li>store and retriev messages from Mnesia DB.</li>
+    </ul>
+
+    <h4 class="card-title">Asset service</h4>
+    <ul>
+      <li>Similar to message service, but for files.</li>
+    </ul>
+
+    <h4 class="card-title">Group service</h4>
+    <ul>
+      <li>Keep all information about users in each group.</li>
+      <li>store and retriev messages from Mnesia DB.</li>
+    </ul>
+
+    <h4 class="card-title">Group message handler</h4>
+    <ul>
+      <li>Similar to Websocket server, but for group messages.</li>
+    </ul>
+
+    <h4 class="card-title">Kafka</h4>
+    <ul>
+      <li>Message service sends messages to Kafka, to be saved for further processing.</li>
+    </ul>
+
+    <h3 class="card-title">Evaluation</h3>
+
+    <h4 class="card-title">Availability</h4>
+    <ul>
+      <li>Websocket servers are replicated.</li>
+    </ul>
+
+    <h4 class="card-title">Reliability</h4>
+
+    <h4 class="card-title">Scalability</h4>
+
+    <h4 class="card-title">Performance</h4>
+    <ul>
+      <li>Low latency via web socket servers and cache.</li>
+      <li>Low latency via CDN.</li>
+    </ul>
+
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
+<!-- Whatsapp END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+</html>

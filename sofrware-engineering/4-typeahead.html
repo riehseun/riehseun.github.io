@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="/img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/monokai-sublime.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="/js/jquery.min.js" type="text/javascript"></script>
+<script src="/js/bootstrap.bundle.min.js" type="text/javascript"></script>
+<script src="/js/highlight.pack.js" type="text/javascript"></script>
+<script src="/js/include_html.js" type="text/javascript"></script>
+<script src="/js/mathjax.js" type="text/javascript"></script>
+<script src="/js/site.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<include src="/header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Software Engineering</h1>
+
+<!-- Typeahead BEGIN -->
+<div class="card mb-4" id="typeahead">
+  <div class="card-body">
+    <h2 class="card-title">Typeahead</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#typeahead-1">Typeahead</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="typeahead-1">
+  <div class="card-body">
+    <h2 class="card-title">Typeahead</h2>
+
+    <h3 class="card-title">Requirement</h3>
+
+    <h4 class="card-title">Functional</h4>
+    <ul>
+      <li>Suggests top 10 terms starting with whatever user has typed.</li>
+    </ul>
+
+    <h4 class="card-title">Non-functional</h4>
+    <ul>
+      <li>Availability.</li>
+      <li>Reliability.</li>
+      <li>Scalability.</li>
+      <li>Performance.</li>
+      <ul>
+        <li>Users should see suggestions within 200ms.</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Estimation</h3>
+
+    <h4 class="card-title">Server</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>3.5B queries per day = 40,509 queries per second.</li>
+        <li>A single server can handle 10K connections.</li>
+      </ul>
+      <li>5 servers are needed.</li>
+    </ul>
+
+    <h4 class="card-title">Storage</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>There are 3.5B queries per day.</li>
+        <li>There are 2B unique queries out of 3.5B per day.</li>
+        <li>Each query has 15 characters on average.</li>
+        <li>Each character requires 2 bytes to store.</li>
+      </ul>
+      <li>2B per day * 15 * 2 = 60GB per day.</li>
+    </ul>
+
+    <h4 class="card-title">Bandwidth</h4>
+    <ul>
+      <li>Assume</li>
+      <ul>
+        <li>Suggestions have the same length, which is 15 chracters.</li>
+        <li>Top 10 suggestions are shown to users.</li>
+      </ul>
+      <li>Incoming: 3.5B * 15 * 2 * 8 / 86400 = 9.7Mbps</li>
+      <li>Outgoing: 10 * 15 * 9.7Mbps = 1.46Gbps</li>
+    </ul>
+
+    <h3 class="card-title">High level design</h3>
+    <ul>
+      <li>Top 10 suggesstions are queried from Redis cache.</li>
+      <li>User searches are stored in NoSQL DB.</li>
+    </ul>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/typeahead1.png" alt="Card image cap">
+    <br>
+    <br>
+
+    <h3 class="card-title">API</h3>
+    <ul>
+      <li>get_suggestions(prefix)</li>
+      <li>add_to_database(query)</li>
+    </ul>
+
+    <h3 class="card-title">DB</h3>
+
+    <h3 class="card-title">Component design</h3>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/typeahead2.png" alt="Card image cap">
+    <br>
+    <br>
+
+    <h4 class="card-title">Suggestion service</h4>
+    <ul>
+      <li>Returns top 10 from cache. (Redis)</li>
+    </ul>
+
+    <h4 class="card-title">Collection service</h4>
+    <ul>
+      <li>Stores metadata about user query.</li>
+    </ul>
+
+    <h4 class="card-title">Aggregator</h4>
+    <ul>
+      <li>Retrieves data from HDFS and distributes to different workers.</li>
+    </ul>
+
+    <h4 class="card-title">Trie builder</h4>
+    <ul>
+      <li>Creat/update tries.</li>
+    </ul>
+
+    <h4 class="card-title">Trie structure</h4>
+    <ul>
+      <li>Store this data structure in memory. (Not in DB)</li>
+      <li>Assume case insensitive.</li>
+      <li>For example, when user types "CAP", node "P" will show all suggestions.</li>
+    </ul>
+
+    <h4 class="card-title">How to find top suggestions</h4>
+    <ul>
+      <li>Store the number of searches in the last phrase.</li>
+      <li>Parent nodes recursively call child nodes to get suggestions and counts.</li>
+    </ul>
+
+    <h4 class="card-title">How to update trie</h4>
+    <ul>
+      <li>Spread copies of tries on each server and update them offline. (While some nodes are serving the traffic)</li>
+      <li>Also, remove inappropriate terms from the tries duing this time.</li>
+      <li>Also, update frequency at each node.</li>
+    </ul>
+
+    <h4 class="card-title">Client behavior</h4>
+    <ul>
+      <li>Client should hit the server only when no key has been pressed for 50ms.</li>
+      <li>When user is typing, client should cancel in-progress request.</li>
+      <li>Client should wait until at least few characters are entered in the beginning.</li>
+      <li>Client can store recent history of top suggestions.</li>
+      <li>Establish connection between client and server as soon as browser opens up.</li>
+      <li>Server should push some part of cache to CDNs.</li>
+    </ul>
+
+    <h4 class="card-title">Data partitioning</h4>
+    <ul>
+      <li>Range based partitioning</li>
+      <ul>
+        <li>Pick storage based on starting character of queries.</li>
+        <li>Results in uneven servers.</li>
+        <li>There will be hot servers.</li>
+        <li>May not be able to fit the size of data into each server.</li>
+      </ul>
+      <li>Hash based partitioning</li>
+      <ul>
+        <li>Each term gets a server number from hash function.</li>
+        <li>Minimize hot servers.</li>
+        <li>Must query all servers and aggregate the result.</li>
+      </ul>
+    </ul>
+
+    <h4 class="card-title">Caching</h4>
+    <ul>
+      <li>Cache servers in front of trie servers with frequenctly searched terms and their typeahead suggestions.</li>
+      <li>App servers should check cache servers before hitting trie servers.</li>
+    </ul>
+
+    <h3 class="card-title">Evaluation</h3>
+
+    <h4 class="card-title">Availability</h4>
+
+    <h4 class="card-title">Reliability</h4>
+
+    <h4 class="card-title">Scalability</h4>
+
+    <h4 class="card-title">Performance</h4>
+
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
+<!-- Typeahead END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+</html>
