@@ -1990,7 +1990,10 @@ spec:
       <li>Different load balancer requires different Ingress Controller implementation.</li>
     </ul>
 
-<pre><code class="yaml"></code></pre>
+    <h2 class="card-title">Enable Ingress Controller</h2>
+
+<pre><code class="bash">kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.3.0/deploy/static/provider/cloud/deploy.yaml
+kubectl get pods -n=ingress-nginx</code></pre>
 
   </div>
   <div class="card-footer text-muted">
@@ -2006,7 +2009,25 @@ spec:
       <li>Depending on the host and its path the ingress receives, sends the request to different services.</li>
     </ul>
 
-<pre><code class="yaml"></code></pre>
+<pre><code class="yaml">apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: my-service
+            port:
+              number: 80</code></pre>
 
   </div>
   <div class="card-footer text-muted">
