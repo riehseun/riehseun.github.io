@@ -2809,17 +2809,6 @@ spec:
       </ul>
     </ul>
 
-    <h3 class="card-title">Secret types</h3>
-    <ul>
-      <li>Opaque: arbitrary user-defined data. (default Secret type if omitted)</li>
-      <li>kubernetes.io/service-account-token: service account token.</li>
-      <li>kubernetes.io/dockercfg: ~/.dockercfg file.</li>
-      <li>kubernetes.io/dockerconfigjson: ~/.docker/config.json file.</li>
-      <li>kubernetes.io/basic-auth: credentials for basic authentication.</li>
-      <li>kubernetes.io/ssh-auth: credentials for SSH authentication.</li>
-      <li>kubernetes.io/tls: data for a TLS client or server.</li>
-    </ul>
-
     <h3 class="card-title">Opaque Secret</h3>
 
 <pre><code class="yaml">apiVersion: v1
@@ -2905,7 +2894,7 @@ data:
 
     <h3 class="card-title">Using Secret as File</h3>
     <ul>
-      <li>Useful when mounting JKS files into a directory of a container.</li>
+      <li>Useful when, for example, mounting JKS files into a directory of a container.</li>
     </ul>
 
 <pre><code class="yaml">apiVersion: v1
@@ -2985,19 +2974,15 @@ immutable: true</code></pre>
   <div class="card-body">
     <h2 class="card-title">RBAC</h2>
     <ul>
-      <li>To enable RBAC, start the API server with such that:
-        <ul>
-          <li><pre><code class="bash">kube-apiserver --authorization-mode=Example,RBAC --other-options --more-options</code></pre></li>
-        </ul>
-      </li>
-      <li>RBAC API declares four objects:
-        <ul>
-          <li>Role</li>
-          <li>ClusterRole</li>
-          <li>RoleBinding</li>
-          <li>CLusterRoleBinding</li>
-        </ul>
-      </li>
+      <li>To enable RBAC, start the API server with such that:</li>
+<pre><code class="bash">kube-apiserver --authorization-mode=Example,RBAC --other-options --more-options</code></pre>
+      <li>RBAC API declares four objects:</li>
+      <ul>
+        <li>Role</li>
+        <li>ClusterRole</li>
+        <li>RoleBinding</li>
+        <li>CLusterRoleBinding</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Role</h3>
@@ -3010,7 +2995,7 @@ metadata:
   name: pod-reader
   namespace: default
 rules:
-- apiGroups: [""] # "" indicates the core API group
+- apiGroups: [""]  # "" indicates the core API group.
   resources: ["pods"]
   verbs: ["get", "watch", "list"]</code></pre>
 
@@ -3021,14 +3006,10 @@ rules:
 <pre><code class="yaml">apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  # "namespace" omitted since ClusterRoles are not namespaced
-  name: secret-reader
+  name: secret-reader  # "namespace" omitted since ClusterRoles are not namespaced.
 rules:
   - apiGroups: [""]
-  #
-  # at the HTTP level, the name of the resource for accessing Secret
-  # objects is "secrets"
-    resources: ["secrets"]
+    resources: ["secrets"]    # At the HTTP level, the name of the resource for accessing Secret objects is "secrets".
     verbs: ["get", "watch", "list"]</code></pre>
 
     <h3 class="card-title">RoleBidning</h3>
@@ -3041,13 +3022,12 @@ rules:
 kind: RoleBinding
 metadata:
   name: read-secrets
-  #
   # The namespace of the RoleBinding determines where the permissions are granted.
   # This only grants permissions within the "development" namespace.
   namespace: development
 subjects:
   - kind: User
-    name: dave # Name is case sensitive
+    name: dave  # Name is case sensitive.
     apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: ClusterRole
@@ -3065,7 +3045,7 @@ metadata:
   name: read-secrets-global
 subjects:
   - kind: Group
-    name: manager # Name is case sensitive
+    name: manager  # Name is case sensitive.
     apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: ClusterRole
