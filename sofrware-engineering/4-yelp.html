@@ -116,13 +116,14 @@
       <li>User searches for places.</li>
       <ul>
         <li>Request goes to read servers.</li>
-        <li>Key-value store holds segment (map) information.</li>
+        <li>Read servers direct request to QuadTree servers to find places under the radius.</li>
+        <li>QuadTree servers send the results to the aggregators, then to the user.</li>
       </ul>
       <li>User post reviews.</li>
       <ul>
+        <li>Request goes to write servers.</li>
         <li>Images and videos go to blob storage.</li>
         <li>Other data goes to relational DB.</li>
-        <li>Request goes to write servers.</li>
       </ul>
     </ul>
 
@@ -181,20 +182,7 @@
     </ul>
 
     <h3 class="card-title">Component design</h3>
-
     <img class="img-fluid" class="card-img-top" src="/img/system-design/yelp2.png" alt="Card image cap">
-    <br>
-    <br>
-
-    <h4 class="card-title">Segment</h4>
-    <ul>
-      <li>Each segment id is mapped to a list of places within that segment.</li>
-    </ul>
-
-    <h4 class="card-title">Data partitioning</h4>
-    <ul>
-      <li>Partition based on place id.</li>
-    </ul>
 
     <h4 class="card-title">QuadTree server</h4>
     <ul>
@@ -205,6 +193,22 @@
     <h4 class="card-title">Aggregator server</h4>
     <ul>
       <li>Aggregate the results from QuadTree servers and return search result to the user.</li>
+    </ul>
+
+    <h4 class="card-title">Relational DB</h4>
+    <ul>
+      <li>Tables such as User, Place, Review, Photo.</li>
+    </ul>
+
+    <h4 class="card-title">Key-value store</h4>
+    <ul>
+      <li>Keeps mapping between segment_id and list of places.</li>
+    </ul>
+
+    <h4 class="card-title">Data partitioning</h4>
+    <ul>
+      <li>Partition based on place_id.</li>
+      <li>Use key-value store to map place_id to server where the place is stored.</li>
     </ul>
 
     <h3 class="card-title">Evaluation</h3>

@@ -119,7 +119,7 @@
       <li>Questions and answers data is stored in MySQL.</li>
       <li>Images and videos are stored in Blob storage.</li>
       <li>Different features are stored in HBase for each type of question.</li>
-      <li>features are forwarded to ML engine to rank the most useful answer.</li>
+      <li>Features are forwarded to ML engine to rank the most useful answer.</li>
     </ul>
 
     <h3 class="card-title">API</h3>
@@ -135,13 +135,36 @@
 
     <h3 class="card-title">Component design</h3>
     <img class="img-fluid" class="card-img-top" src="/img/system-design/quora2.png" alt="Card image cap">
+
+    <h4 class="card-title">Service host</h4>
     <ul>
-      <li>Service host: combine web and app servers into one type of powerful machine. Eliminates network I/O and latency.</li>
-      <li>MySQL: vertical sharding.</li>
-      <li>Zookeeper: keep mappings/metadata of vertical sharding.</li>
-      <li>MyRocks: replace HBase for lower latency. Also, MyRocks has native integration with MySQL.</li>
-      <li>Kafka: separate not-so-urgent tasks from regular API calls.</li>
-      <li>CDN: store images and videos.</li>
+      <li>Combine web and app servers into one type of powerful machine.</li>
+      <li>Eliminates network I/O and latency.</li>
+    </ul>
+
+    <h4 class="card-title">MySQL vertical sharding</h4>
+    <ul>
+      <li>Split tables into multiple partitions.</li>
+      <li>Keep tables where joins are expected in a single partition.</li>
+      <li>Use Zookeeper to keep mappings/metadata of vertical sharding.</li>
+      <li>Because related data is on single partition, there is no neeed to query data from multiple shards.</li>
+    </ul>
+
+    <h4 class="card-title">MyRocks</h4>
+    <ul>
+      <li>Replace HBase for lower latency.</li>
+      <li>Also, MyRocks has native integration with MySQL.</li>
+    </ul>
+
+    <h4 class="card-title">Kafka</h4>
+    <ul>
+      <li>Separate not-so-urgent tasks from regular API calls.</li>
+    </ul>
+
+    <h4 class="card-title">Distributed cache</h4>
+    <ul>
+      <li>Memcached: store frequently accessed data that is stored in MySQL.</li>
+      <li>Redis: store online view counter of answers because it supports in-store increments.</li>
     </ul>
 
     <h3 class="card-title">Evaluation</h3>
