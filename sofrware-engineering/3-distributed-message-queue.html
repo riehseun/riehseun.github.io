@@ -54,7 +54,18 @@
     <h2 class="card-title">Distributed message queue</h2>
     <ul>
       <li>Component between producers and consumers.</li>
-      <li>Enables asynchronous communication</li>
+      <li>Performance: enables asynchronous communication between producers and consumers, eliminating speed difference.</li>
+      <li>Realibility: producers and consumers can fail independently without affecting one another.</li>
+    </ul>
+
+    <h4 class="card-title">Best effort ordering</h4>
+    <ul>
+      <li>Messages are ordered by the arrival time to the queue.</li>
+    </ul>
+
+    <h4 class="card-title">Strict ordering</h4>
+    <ul>
+      <li>Messages are ordered by the creation time from the producer.</li>
     </ul>
 
     <h3 class="card-title">Requirement</h3>
@@ -67,17 +78,74 @@
 
     <h4 class="card-title">Non-functional</h4>
     <ul>
-      <li>Availability.</li>
-      <li>Reliability.</li>
-      <li>Scalability.</li>
-      <li>Performance.</li>
+      <li>Availability</li>
+      <li>Durability</li>
+      <li>Scalability</li>
+      <li>Performance</li>
     </ul>
 
     <h3 class="card-title">High level design</h3>
-
     <img class="img-fluid" class="card-img-top" src="/img/system-design/distributed-message-queue1.png" alt="Card image cap">
-    <br>
-    <br>
+
+    <h4 class="card-title">Frontend servers</h4>
+    <ul>
+      <li>Validate requests.</li>
+      <li>Perform authentication and authorization.</li>
+      <li>Stores metadata in cache.</li>
+      <li>Dispatch requests to backend servers and metadata service.</li>
+      <li>Remove duplicate requests.</li>
+    </ul>
+
+    <h4 class="card-title">Metadata service</h4>
+    <ul>
+      <li>Handles metadata stored in metadata store and cache whenever queue is created or deleted.</li>
+      <li>Frontend servers check the cache first. It miss occurs, then data is retrived from store and cache is updated accordingly.</li>
+    </ul>
+
+    <h3 class="card-title">Component design</h3>
+
+    <h4 class="card-title">Backend service</h4>
+    <ul>
+      <li>Message is replicated to achieve avilability.</li>
+      <li>Internal cluster manager - manages the assignment of queues within a cluster.</li>
+      <li>External cluster manager - manages the assignment of queues across clusters.</li>
+      <li>Primary-secondary model</li>
+      <ul>
+        <li>Each node is primary host of collection of queues.</li>
+        <li>Frontend server talks to metadata service to determine primary host for each request.</li>
+        <li>Internal cluster manager maps primary host, secondary hosts, and queues.</li>
+      </ul>
+      <li>A cluster of independent hosts</li>
+      <ul>
+        <li>Several clusters of multiple nodes.</li>
+        <li>Frontend server talks to metadata service to determine the cluster for each request.</li>
+        <li>External cluster manager maps clusters and queues.</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Evaluation</h3>
+
+    <h4 class="card-title">Durability</h4>
+    <ul>
+      <li>Queue's metadata is replicated to different nodes.</li>
+      <li>Messages are replicated to to different queues residing on different nodes.</li>
+    </ul>
+
+    <h4 class="card-title">Scalability</h4>
+    <ul>
+      <li>Frontend servers, backend servers, metadata cache, metadata store can scale horizontally.</li>
+    </ul>
+
+    <h4 class="card-title">Durability</h4>
+    <ul>
+      <li>Load balancer routes traffic around failed nodes.</li>
+      <li>Metadata and messages are replicated on different nodes.</li>
+    </ul>
+
+    <h4 class="card-title">Performce</h4>
+    <ul>
+      <li>Use of cache.</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>

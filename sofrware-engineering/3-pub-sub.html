@@ -55,39 +55,75 @@
     <ul>
       <li>Asynchronous service-to-service communication.</li>
       <li>Producers and consumers are disconnected and operate independently.</li>
+      <li>Enables push-based notification.</li>
+      <li>Handles log ingestion.</li>
     </ul>
 
     <h3 class="card-title">Requirement</h3>
 
     <h4 class="card-title">Functional</h4>
     <ul>
-      <li>Create and subscribe topic.</li>
+      <li>Create and subscribe to topic.</li>
       <li>Read, write, and delete message.</li>
       <li>Specify retention time.</li>
     </ul>
 
     <h4 class="card-title">Non-functional</h4>
     <ul>
-      <li>Availability.</li>
-      <li>Reliability.</li>
-      <li>Scalability.</li>
-      <li>Performance.</li>
+      <li>Availability</li>
+      <li>Durability</li>
+      <li>Scalability</li>
+      <li>Fault tolerance</li>
     </ul>
 
     <h3 class="card-title">High level design</h3>
-
     <img class="img-fluid" class="card-img-top" src="/img/system-design/pub-sub1.png" alt="Card image cap">
-    <br>
-    <br>
+
+    <h4 class="card-title">Broker</h4>
+    <ul>
+      <li>Where producers send messages to and consumers read messages from.</li>
+    </ul>
+
+    <h4 class="card-title">Cluster manager</h4>
+    <ul>
+      <li>Monitors broker.</li>
+      <li>Broker and topic registry</li>
+      <ul>
+        <li>Stores list of topics for each broker.</li>
+      </ul>
+      <li>Replication</li>
+      <ul>
+        <li>Replication by the leader-follower approach.</li>
+        <li>If the leader fails, the cluster manager decides who the next leader is.</li>
+        <li>If follower fails, it adds a new broker.</li>
+      </ul>
+    </ul>
+
+    <h4 class="card-title">Consumer manager</h4>
+    <ul>
+      <li>Verify the consumer</li>
+      <ul>
+        <li>Verify if the consumer is allowed to read a certain message.</li>
+      </ul>
+      <li>Retention time management</li>
+      <ul>
+        <li>When exceeds the retention time, the message should be inaccessible to the consumer.</li>
+      </ul>
+      <li>Message receiving options management</li>
+      <ul>
+        <li>System pushes the data to its consumers.</li>
+        <li>Consumers request the system to read data from a specific topic.</li>
+      </ul>
+    </ul>
 
     <h3 class="card-title">API</h3>
     <ul>
-      <li>create(topic_id, topic_name)</li>
-      <li>write(topic_id, message)</li>
-      <li>read(topic_id)</li>
-      <li>subscribe(topic_id)</li>
-      <li>unsubscribe(topic_id)</li>
-      <li>delete_topic(topic_id)</li>
+      <li><code>create(topic_id, topic_name)</code></li>
+      <li><code>write(topic_id, message)</code></li>
+      <li><code>read(topic_id)</code></li>
+      <li><code>subscribe(topic_id)</code></li>
+      <li><code>unsubscribe(topic_id)</code></li>
+      <li><code>delete_topic(topic_id)</code></li>
     </ul>
   </div>
   <div class="card-footer text-muted">
