@@ -45,10 +45,11 @@
     <h2 class="card-title">Terraform</h2>
     <ul class="list-unstyled mb-0">
       <li><a href="#terraform-1">Terraform basic</a></li>
-      <li><a href="#terraform-2">Terraform on GCP - Kubernetes</a></li>
-      <li><a href="#terraform-3">Terraform on GCP - storage</a></li>
-      <li><a href="#terraform-4">Terraform with GCP - common errors</a></li>
-      <li><a href="#terraform-6">Terraform on AWS</a></li>
+      <li><a href="#terraform-2">Provider</a></li>
+      <li><a href="#terraform-102">Terraform on GCP - Kubernetes</a></li>
+      <li><a href="#terraform-103">Terraform on GCP - storage</a></li>
+      <li><a href="#terraform-104">Terraform with GCP - common errors</a></li>
+      <li><a href="#terraform-106">Terraform on AWS</a></li>
     </ul>
   </div>
 </div>
@@ -59,7 +60,7 @@
     <ul>
       <li>There is <strong>engine</strong> and <strong>providers</strong></li>
       <li>Terraform <strong>state</strong> allows tracking changes in resources.</li>
-      <li>Terraform plugins are call <strong>providers</strong>, which let Terraform interact with cloud providers via their APIs.</li>
+      <li>Terraform <strong>plugins</strong> are call <strong>providers</strong>, which let Terraform interact with cloud providers via their APIs.</li>
     </ul>
 
     <h3 class="card-title">Command</h3>
@@ -76,50 +77,6 @@
       <li>YAML - while allowing comments, stll hard to follow in large file. Getting indentation right is tricky.</li>
       <li>HCL - addresses issues in JSON & YAML.</li>
     </ul>
-
-    <h3 class="card-title">Provider</h3>
-    <ul>
-      <li>A separate binary that Terraform calls at run time.</li>
-      <li>Binary must be named <code>terraform-&lt;provider&gt;-&lt;name&gt;_vX.Y.Z</code></li>
-    </ul>
-
-    <h4 class="card-title">Provider example</h4>
-
-<pre><code class="hcl">provider "aws" {
-  region = "eu-west-1"
-}
-
-terraform {
-  required_providers {
-    aws = {
-      version = "~> 3.46"
-    }
-  }
-}</code></pre>
-
-    <h4 class="card-title">Multiple providers example</h4>
-    <ul>
-      <li>Every provider must have <code>alias</code> set after the first.</li>
-    </ul>
-
-<pre><code class="hcl">provider "aws" {
-    region = "eu-west-1"
-}
-
-provider "aws" {
-    region = "eu-west-2"
-    alias = "london"
-}
-
-# This resource will be created in "eu-west-1".
-resource "aws_vpc" "ireland_vpc" {
-    cidr_block = "10.0.0.0/16"
-}
-
-resource "aws_vpc" "london_vpc" {
-    cidr_block = "10.1.0.0/16"
-    provider = aws.london
-}</code></pre>
 
     <h3 class="card-title">Data source</h3>
     <ul>
@@ -458,6 +415,57 @@ terraform --version</pre></code>
 
 <div class="card mb-4" id="terraform-2">
   <div class="card-body">
+    <h2 class="card-title">Provider</h2>
+    <ul>
+      <li>A separate binary that Terraform calls at run time.</li>
+      <li>Binary must be named <code>terraform-&lt;provider&gt;-&lt;name&gt;_vX.Y.Z</code></li>
+    </ul>
+
+    <h4 class="card-title">Provider example</h4>
+
+<pre><code class="hcl">provider "aws" {
+  region = "eu-west-1"
+}
+
+terraform {
+  required_providers {
+    aws = {
+      version = "~> 3.46"
+    }
+  }
+}</code></pre>
+
+    <h4 class="card-title">Multiple providers example</h4>
+    <ul>
+      <li>Every provider must have <code>alias</code> set after the first.</li>
+    </ul>
+
+<pre><code class="hcl">provider "aws" {
+    region = "eu-west-1"
+}
+
+provider "aws" {
+    region = "eu-west-2"
+    alias = "london"
+}
+
+# This resource will be created in "eu-west-1".
+resource "aws_vpc" "ireland_vpc" {
+    cidr_block = "10.0.0.0/16"
+}
+
+resource "aws_vpc" "london_vpc" {
+    cidr_block = "10.1.0.0/16"
+    provider = aws.london
+}</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/become-an-aws-and-terraform-expert">Become an AWS and Terraform Expert</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="terraform-102">
+  <div class="card-body">
     <h2 class="card-title">Terraform on GCP - Kubernetes</h2>
 
     <h3 class="card-title">Example: main.tf</h3>
@@ -604,7 +612,7 @@ resource "google_compute_subnetwork" "private_subnet" {
   </div>
 </div>
 
-<div class="card mb-4" id="terraform-3">
+<div class="card mb-4" id="terraform-103">
   <div class="card-body">
     <h2 class="card-title">Terraform with GCP - storage</h2>
 
@@ -637,7 +645,7 @@ resource "google_storage_notification" "notification" {
   </div>
 </div>
 
-<div class="card mb-4" id="terraform-4">
+<div class="card mb-4" id="terraform-104">
   <div class="card-body">
     <h2 class="card-title">Terraform with GCP - common errors</h2>
     <ul>
@@ -649,7 +657,7 @@ resource "google_storage_notification" "notification" {
   </div>
 </div>
 
-<div class="card mb-4" id="terraform-6">
+<div class="card mb-4" id="terraform-106">
   <div class="card-body">
     <h2 class="card-title">Terraform on AWS</h2>
 
