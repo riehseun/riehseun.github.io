@@ -53,27 +53,24 @@
   <div class="card-body">
     <h2 class="card-title">Distributed search</h2>
     <ul>
-      <li>Crawler: fetches content and creates documents.</li>
-      <li>Indexer: builds a searchable index.</li>
-      <li>Searcher: responds to search queries by running the search query on the index created by the indexer..</li>
+      <li><strong>Crawler</strong> - fetches content and creates documents.</li>
+      <li><strong>Indexer</strong> - builds a searchable index.</li>
+      <li><strong>Searcher</strong> - responds to search queries by running the search query on the index created by the indexer..</li>
     </ul>
 
     <h3 class="card-title">Requirement</h3>
 
     <h4 class="card-title">Functional</h4>
     <ul>
-      <li>User can search via queries.</li>
+      <li>User can search by running queries.</li>
     </ul>
 
     <h4 class="card-title">Non-functional</h4>
     <ul>
-      <li>Availability.</li>
-      <li>Reliability.</li>
-      <li>Scalability.</li>
-      <li>Performance.</li>
-      <ul>
-        <li>Users should get result quickly.</li>
-      </ul>
+      <li>Availability</li>
+      <li>Scalability</li>
+      <li>Low cost</li>
+      <li>Fast search</li>
     </ul>
 
     <h3 class="card-title">Estimation</h3>
@@ -83,9 +80,9 @@
       <li>Assume</li>
       <ul>
         <li>3M daily active users.</li>
-        <li>A single server can handle 1000 connections.</li>
+        <li>A single server can handle 1000 connections at one time.</li>
       </ul>
-      <li>3M / 1,000 = 3,000 servers are needed.</li>
+      <li>3M / 1000 = 3000 servers are needed.</li>
     </ul>
 
     <h4 class="card-title">Storage</h4>
@@ -105,23 +102,71 @@
     <ul>
       <li>Assume</li>
       <ul>
-        <li>150 M queries per day.</li>
+        <li>150M queries per day.</li>
         <li>Each query is 100 bytes.</li>
         <li>Response is 4000 bytes.</li>
       </ul>
-      <li>Incoming: 150 M * 100 * 8 / 86400 = 1.39 Mbps</li>
-      <li>Outgoing: 150 M * 4000 * 8 / 86400 = 55.56 Mbps</li>
+      <li>Incoming: 150M * 100 * 8 / 86400 = 1.39 Mbps</li>
+      <li>Outgoing: 150M * 4000 * 8 / 86400 = 55.56 Mbps</li>
     </ul>
 
     <h3 class="card-title">High level design</h3>
-
     <img class="img-fluid" class="card-img-top" src="/img/system-design/distributed-search1.png" alt="Card image cap">
-    <br>
-    <br>
+
+    <h4 class="card-title">Index</h4>
+    <ul>
+      <li>Assign ID to each document and store in DB.</li>
+      <li>Searching over documents will be very slow.</li>
+    </ul>
+
+    <h4 class="card-title">Inverted index</h4>
+    <ul>
+      <li>Split documents into words.</li>
+      <li>For each term, store</li>
+      <ul>
+        <li>Documents in which the term appears.</li>
+        <li>Frequency of the term in each document.</li>
+        <li>Position of the term in each document.</li>
+        <ll>There is storage overhead but search time is reduced.</ll>
+        <li>When documents are added/removed, the whole inverted index needs to be processed.</li>
+      </ul>
+    </ul>
+
+    <h4 class="card-title">Crawler</h4>
+    <ul>
+      <li>Collects contents from sources, convert to JSON, and store in distributed storage.</li>
+    </ul>
+
+    <h4 class="card-title">Indexer</h4>
+    <ul>
+      <li>Fetches documents from distributed storage, and using MapReduce, constructed index table.</li>
+      <li>Index table is stored in distributed storage.</li>
+    </ul>
 
     <h3 class="card-title">API</h3>
     <ul>
-      <li>search(query)</li>
+      <li><code>search(query)</code></li>
+    </ul>
+
+    <h3 class="card-title">Component design</h3>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/distributed-search2.png" alt="Card image cap">
+
+    <h4 class="card-title">Indexing</h4>
+    <ul>
+      <li>Cluster manager splits documents into partitions.</li>
+    </ul>
+
+    <h4 class="card-title">Searching</h4>
+    <ul>
+      <li>Run parallel search on each inverted index.</li>
+      <li>Merger aggregates search result.</li>
+    </ul>
+
+    <h4 class="card-title">Replication</h4>
+    <ul>
+      <li>Each node would have one primary partition and replicas of other partitions.</li>
+      <li>Generally, 3 replicas are sufficient.</li>
+      <li>Index is computed on primary paritions, results are sent to distributed storage, and replica paritions updates index by reading from distributed storage.</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
