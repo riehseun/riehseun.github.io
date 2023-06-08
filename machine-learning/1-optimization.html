@@ -50,6 +50,7 @@
       <li><a href="#optimization-2">Momentum</a></li>
       <li><a href="#optimization-3">RMSprop</a></li>
       <li><a href="#optimization-4">Adam (Adaptive moment estimation)</a></li>
+      <li><a href="#optimization-6">Learning rate decay</a></li>
     </ul>
   </div>
 </div>
@@ -90,6 +91,7 @@
     <h3 class="card-title">Batch</h3>
     <ul>
       <li>Run through all samples to do single update of parameters.</li>
+      <li>Used when training set is small. (Less than 2,000)</li>
     </ul>
 
 <pre><code class="python">for t in range(steps):
@@ -99,6 +101,9 @@
     <h3 class="card-title">Min-batch</h3>
     <ul>
       <li>Run through subset of samples to do single update of parameters.</li>
+      <li>Subsets of both inputs and labelled outputs.</li>
+      <li>Typically, min-batch size is 64, 128, 256, 512.</li>
+      <li>Make sure each mini-batch \( X^{[t]}, Y^{[t]} \) fits in CPU/GPU memory.</li>
     </ul>
 
 <pre><code class="python">for t in range(steps):
@@ -171,18 +176,35 @@ if __name__ == "__main__":
 <div class="card mb-4" id="optimization-2">
   <div class="card-body">
     <h2 class="card-title">Momentum</h2>
+
+    <h3 class="card-title">Exponentially weighted averages (Moving average)</h3>
     <ul>
-      <li>Enforce gradients to move in the same direction as previous timesteps.</li>
-      <li>Velocity: running mean of gradients including the direction.</li>
-      <li>Friction: a constant.</li>
+      <li>\( v_{t} = \beta v_{t-1} + (1-\beta) \theta_{t-1} \)</li>
+      <li>\( v_{t} \) is approximately averaging over \( \frac{1}{\beta-1} \) data points.</li>
+      <li>To improve initial phase of estimates, use \( \frac{v_{t}}{1-\beta} \). However, in ML, we don't usually bother with bias in the initial phase.</li>
+    </ul>
+
+    <h3 class="card-title">Momentum</h3>
+    <ul>
+      <li>On vertical axis, we want slower learning & reduce oscilation. ( \( b \) direction )</li>
+      <li>But on horizontal axis, we want faster learning. ( \( W \) direction )</li>
+      <li>On each iteration \( t \)</li>
+      <ul>
+        <li>Compute \( dW, db \)</li>
+        <li>\( V_{dW} = \beta V_{dW} + (1-\beta) dW \)</li>
+        <li>\( V_{db} = \beta V_{db} + (1-\beta) db \)</li>
+        <li>\( W = W - \alpha V_{dW} \)</li>
+        <li>\( b = b - \alpha V_{db} \)</li>
+        <li>( \beta \) is commonly chosen to be ( 0.9 \)</li>
+      </ul>
+      <li>On vertical direction, the derivates will average out to zero.</li>
+      <li>Velocity is the running mean of gradients including the direction.</li>
       <li>At every step, update velocity, then update weights with the velocity.</li>
-      <li>Can escape local minimums or saddle points because gradients keep moving downwards even though gradients are zero.</li>
-      <li>Reduce oscilation by slowing learning vertially but speeding up learning horizontally.</li>
     </ul>
 
 <pre><code class="python">for t in range(steps):
     dw = gradient(loss, w)
-    v = rho * v + dw
+    v = beta * v + (1-beta) * dw
     w = w - learning_rate * v</code></pre>
   </div>
   <div class="card-footer text-muted">
@@ -194,14 +216,22 @@ if __name__ == "__main__":
   <div class="card-body">
     <h2 class="card-title">RMSprop</h2>
     <ul>
-      <li>Adaptive learning rate: smaller updates for frequent features and bigger updates for infrequent features.</li>
-      <li>Keep running sum of squares of gradients in each dimension.</li>
-      <li>Decay the sum of the previous squared gradients.</li>
+      <li>RMSprop has the same motivation as momentum.</li>
+      <li>On each iteration \( t \)</li>
+      <ul>
+        <li>Compute \( dW, db \)</li>
+        <li>\( S_{dW} = \beta S_{dW} + (1-\beta) dW^{2} \) (Square is applied to element-wise)</li>
+        <li>\( S_{db} = \beta S_{db} + (1-\beta) db^{2} \) (Square is applied to element-wise)</li>
+        <li>\( W = W - \alpha \frac{dW}{\sqrt{S_{dW}}+\epsilon} \)</li>
+        <li>\( b = b - \alpha \frac{db}{\sqrt{S_{db}}+\epsilon} \)</li>
+        <li>\( \epsilon \) is in order not to divide by zero.</li>
+      </ul>
+      <li>We want small \( S_{dW} \) and large \( S_{db} \)</li>
     </ul>
 
 <pre><code class="python">for t in range(steps):
     dw = gradient(loss, w)
-    squared_gradients = decay_rate * squared_gradients + (1-decay_rate) * dw * dw
+    squared_gradients = beta * squared_gradients + (1-beta) * dw * dw
     w = w - learning_rate * (dw/(squared_gradients.sqrt()+e)</code></pre>
   </div>
   <div class="card-footer text-muted">
@@ -213,22 +243,52 @@ if __name__ == "__main__":
   <div class="card-body">
     <h2 class="card-title">Adam (Adaptive moment estimation)</h2>
     <ul>
-      <li>Keep track of two running variables, velocity and the squared gradients average.</li>
-      <li>At t=0, velocity is close to 0, resulting in very big change in gradients. Add biases in moments to take smaller steps in the beginning.</li>
+      <li>\( V_{dW} = V_{db} = S_{dW} = S_{db} = 0 \).</li>
+      <li>On each iteration \( t \)</li>
+      <ul>
+        <li>Compute \( dW, db \)</li>
+        <li>\( V_{dW} = \beta_{1} V_{dW} + (1-\beta_{1}) dW \)</li>
+        <li>\( V_{db} = \beta_{1} V_{db} + (1-\beta_{1}) db \)</li>
+        <li>\( S_{dW} = \beta_{2} S_{dW} + (1-\beta_{2}) dW^{2} \)</li>
+        <li>\( S_{db} = \beta_{2} S_{db} + (1-\beta_{2}) db^{2} \)</li>
+        <li>\( V_{dW, corrected} = \dfrac{V_{dW}}{1-\beta_{1}^{t}} \)</li>
+        <li>\( V_{db, corrected} = \dfrac{V_{db}}{1-\beta_{1}^{t}} \)</li>
+        <li>\( S_{dW, corrected} = \dfrac{S_{dW}}{1-\beta_{2}^{t}} \)</li>
+        <li>\( S_{db, corrected} = \dfrac{S_{db}}{1-\beta_{2}^{t}} \)</li>
+        <li>\( W = W - \alpha \frac{V_{dW, corrected}}{\sqrt{S_{dW, corrected}}+\epsilon} \)</li>
+        <li>\( b = b - \alpha \frac{V_{db, corrected}}{\sqrt{S_{db, corrected}}+\epsilon} \)</li>
+        <li>( \beta_{1} \) is commonly chosen to be \( 0.9 \)</li>
+        <li>( \beta_{2} \) is commonly chosen to be \( 0.999 \)</li>
+      </ul>
+      <li></li>
     </ul>
 
 <pre><code class="python">for t in range(steps):
     dw = gradient(loss, w)
-    moment1 = delta1 * moment1 + (1-delta1) * dw
-    moment2 = delta2 * moment2 + (1-delta2) * dw * dw
-    moment1_unbiased = moment1 / (1-delta1**t)
-    moment2_unbiased = moment2 / (1-delta2**t)
+    moment1 = beta1 * moment1 + (1-beta1) * dw
+    moment2 = beta2 * moment2 + (1-beta2) * dw * dw
+    moment1_unbiased = moment1 / (1-beta1**t)
+    moment2_unbiased = moment2 / (1-beta2**t)
     w = w - learning_rate * moment1_unbiased / (moment2_unbiased.sqrt()+e)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a> | <a href="https://www.educative.io/path/become-a-deep-learning-professional">Become a Deep Learning Professional</a>
   </div>
 </div>
+
+<div class="card mb-4" id="optimization-6">
+  <div class="card-body">
+    <h2 class="card-title">Learning rate decay</h2>
+    <ul>
+      <li>We want bigger \( \alpha \) in the beginning but smaller \( \alpha \) near the optimum.</li>
+      <li>\( \alpha = \dfrac{1}{decayrate * epocnum}\alpha_{0} \)</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
+  </div>
+</div>
+
 <!-- Optimization END -->
 
 </div> <!-- /.col-md-12 -->

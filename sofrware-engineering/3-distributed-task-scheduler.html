@@ -61,37 +61,98 @@
       <li>User can cancel submitted tasks.</li>
       <li>User can see task status.</li>
       <li>CPU and memory must be allocated efficiently.</li>
+      <li>CPU and memory must be released when tasks are completed.</li>
     </ul>
 
     <h4 class="card-title">Non-functional</h4>
     <ul>
-      <li>Availability.</li>
-      <li>Reliability.</li>
-      <li>Scalability.</li>
-      <li>Performance.</li>
+      <li>Availability</li>
+      <li>Durability</li>
+      <li>Scalability</li>
+      <li>Bounded waiting time</li>
     </ul>
 
     <h3 class="card-title">High level design</h3>
-
     <img class="img-fluid" class="card-img-top" src="/img/system-design/distributed-task-scheduler1.png" alt="Card image cap">
-    <br>
-    <br>
 
     <h3 class="card-title">Component design</h3>
-
     <img class="img-fluid" class="card-img-top" src="/img/system-design/distributed-task-scheduler2.png" alt="Card image cap">
-    <br>
-    <br>
-  </div>
-  <div class="card-footer text-muted">
-    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
-  </div>
-</div>
 
-<div class="card mb-4" id="system-design-20">
-  <div class="card-body">
-    <h2 class="card-title">Shared counter</h2>
+    <h4 class="card-title">Rate limiter</h4>
+    <ul>
+      <li>Limits the number of tasks the client schedules based on its subscription</li>
+    </ul>
 
+    <h4 class="card-title">Task submitter</h4>
+    <ul>
+      <li>Admits the task if rate limiter accepts it.</li>
+    </ul>
+
+    <h4 class="card-title">UUID generator</h4>
+    <ul>
+      <li>Assigns IDs to admitted tasks.</li>
+    </ul>
+
+    <h4 class="card-title">DB</h4>
+    <ul>
+      <li>All admitted tasks are stored in DB.</li>
+      <li>Relational DB</li>
+      <ul>
+        <li>Stores task_id, user_id, resource_requirement, delay_tolerance, execution_cap, status, etc.</li>
+      </ul>
+      <li>Graph DB</li>
+      <ul>
+        <li>Stores DAG of dependent tasks in order to execute tasks based on that DAG.</li>
+      </ul>
+    </ul>
+
+    <h4 class="card-title">Batching and prioritization</h4>
+    <ul>
+      <li>Tasks are grouped into batches.</li>
+      <li>Prioritization is based task attriutes like delay_tolerance and execution_cap.</li>
+    </ul>
+
+    <h4 class="card-title">Distributed queue</h4>
+    <ul>
+      <li>Queue manager adds, updates, deletes tasks in the queue.</li>
+      <li>Queues categorize tasks</li>
+      <ul>
+        <li>Tasks that can’t be delayed.</li>
+        <li>Tasks that can be delayed.</li>
+        <li>Tasks that need to be executed periodically.</li>
+      </ul>
+    </ul>
+
+    <h4 class="card-title">Resource</h4>
+    <ul>
+      <li>Resource manager knows which resources are free.</li>
+      <li>Resource manager pulls tasks from distributed queue and assigns them resources.</li>
+    </ul>
+
+    <h3 class="card-title">Evaluation</h3>
+
+    <h4 class="card-title">Availability</h4>
+    <ul>
+      <li>Rate limiter is replicated.</li>
+      <li>Task submitter is spread out to many nodes.</li>
+      <li>Queues are distributed.</li>
+      <li>Continuously monitors the resources.</li>
+    </ul>
+
+    <h4 class="card-title">Durability</h4>
+    <ul>
+      <li>Tasks are stored in persistent DB.</li>
+    </ul>
+
+    <h4 class="card-title">Scalability</h4>
+    <ul>
+      <li>Tasks submitters, queues, relational DB are all distributed.</li>
+    </ul>
+
+    <h4 class="card-title">Bounded waiting time</h4>
+    <ul>
+      <li>Clients can set delay_tolerance.</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
