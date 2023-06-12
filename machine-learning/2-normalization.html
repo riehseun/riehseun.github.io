@@ -47,6 +47,8 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#normalization-1">Normalization</a></li>
       <li><a href="#normalization-2">Batch normalization</a></li>
+      <li><a href="#normalization-3">Why batch norm works</a></li>
+      <li><a href="#normalization-4">Batch norm at test time</a></li>
     </ul>
   </div>
 </div>
@@ -60,6 +62,54 @@
       <li>If features have very different scale, the cost function will look very elongated. The gradient descent will oscilate a lot before converging.</li>
       <li>If normalize, the contour will look more symmetric. The gradient descent will oscilate less before converging.</li>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="normalization-2">
+  <div class="card-body">
+    <h2 class="card-title">Batch normalization</h2>
+    <ul>
+      <li>Normalize activations in neural network in order to train parameters.</li>
+      <li>Normalizing \( z \) is more common than normalizing \( a \)</li>
+      <li>Given some intermediate values \( z^{(i)} \dots z^{(n)} \) in layer \( l \)</li>
+      <ul>
+        <li>\( \mu = \dfrac{1}{m}\displaystyle\sum_{i} z^{(i)})) \)</li>
+        <li>\( \sigma^{2} = \dfrac{1}{m}\displaystyle\sum_{i} (z_{i}-\mu)^{2} \)</li>
+        <li>\( z^{norm,(i)} = \dfrac{z^{(i)}-\mu}{\sqrt{\sigma^{2}+\epsilon}} \)</li>
+        <li>We do not want \( z \) to have mean \( 0 \) and variance \( 1 \)</li>
+        <li>\( \tilde{z}^{(i)} = \gamma z^{norm,(i)} + \beta \) where \( \gamma \) and \( \beta \) are learnable parameters.</li>
+      </ul>
+      <li>Neural network has additional paramters \( \gamma^{1}, \beta^{1} \dots \gamma^{l}, \beta^{l} \) to train.</li>
+      <li>\( \gamma \) and \( \beta \) updated the same way via gradient descent like \( \textbf{w} \) and \( \textbf{b} \)</li>
+      <li>If using batch normalization, \( z^{[l]} =  W^{[l]}a^{[l-1]} + b^{[l]} =  W^{[l]}a^{[l-1]} \) (We can drop \( b \) from neural network)</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="normalization-3">
+  <div class="card-body">
+    <h2 class="card-title">Why batch norm works</h2>
+    <ul>
+      <li>During training, distribution of hidden units changes.</li>
+      <li>Batch norm limits the distribution changes.</li>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="normalization-4">
+  <div class="card-body">
+    <h2 class="card-title">Batch norm at test time</h2>
+    <ul>
+      <li>Unlike during training where a batch of sample is given, there is only one sample at test time.</li>
+      <li>For each layer \( l \), remember \( \mu, \sigma \) for each batch. Then, take the exponentially weighted average over all batches for each layer.</li>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
