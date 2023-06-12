@@ -4,38 +4,35 @@ class Solution:
         Do not return anything, modify board in-place instead.
         """
 
-        board_copy = board.copy()
-        print(board)
-        print(board_copy)
+        # Denote new 0 as -1 and new 1 as 2.
 
-        n = len(board_copy)
-        m = len(board_copy[0])
+        n = len(board)
+        m = len(board[0])
 
         for i in range(n):
             for j in range(m):
-                count = self.get_neighbor_count(board_copy, i, j, n, m)
-                if count < 2:
-                    board[i][j] = 0
-                if count == 3:
+
+                count = 0
+
+                for dir in [[-1,-1],[-1,0],[-1,1],[0,1],[1,1],[1,0],[1,-1],[0,-1]]:
+                    n_i = i + dir[0]
+                    n_j = j + dir[1]
+
+                    if 0 <= n_i < n and 0 <= n_j < m and abs(board[n_i][n_j]) == 1:
+                            count += 1
+
+                if board[i][j] == 1:
+                    if count < 2 or count > 3:
+                        board[i][j] = -1
+                else:
+                    if count == 3:
+                        board[i][j] = 2
+
+        for i in range(n):
+            for j in range(m):
+                if board[i][j] == 2:
                     board[i][j] = 1
-                if count > 3:
+                elif board[i][j] == -1:
                     board[i][j] = 0
 
         return board
-
-    def get_neighbor_count(self, board_copy, i, j, n, m):
-
-        count = 0
-        print(str(i) +":"+ str(j))
-            
-        for dir in [[-1,-1],[-1,0],[-1,1],[0,1],[1,1],[1,0],[1,-1],[0,-1]]:
-            n_i = i + dir[0]
-            n_j = j + dir[1]
-
-            if 0 <= n_i <= n and 0 <= n_j <= m:
-                if board_copy[n_i][n_j] == 1:
-                    count += 1
-            print(count)
-
-        return count
-        
