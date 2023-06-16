@@ -2,7 +2,7 @@ class Solution:
     def countSmaller(self, nums: List[int]) -> List[int]:
 
         result = [0] * len(nums)
-        self.helper(0, len(nums), nums, result)
+        self.helper(0, len(nums)-1, nums, result)
         return result
 
     def helper(self, low, high, nums, result):
@@ -11,8 +11,6 @@ class Solution:
             return
 
         mid = low + ((high-low)//2)
-        # mid = (high+low) // 2
-        mid = int((high+low)/2)
 
         self.helper(low, mid, nums, result)
         self.helper(mid+1, high, nums, result)
@@ -24,9 +22,9 @@ class Solution:
 
         # Compute the count of smaller items to the right
         # for each number.
-        while left < mid+1 and right <= high:
+        while left <= mid and right <= high:
             if nums[left] > nums[right]:
-                count + 1
+                count += 1
                 merged.append(nums[right])
                 right += 1
             else:
@@ -35,7 +33,7 @@ class Solution:
                 left += 1
 
         # Do merge sort
-        while left < mid+1:
+        while left <= mid:
             result[nums.index(nums[left])] += count
             merged.append(nums[left])
             left += 1
@@ -48,6 +46,8 @@ class Solution:
         for num in merged:
             nums[pos] = num
             pos += 1
+
+        print(merged)
 
 
 
