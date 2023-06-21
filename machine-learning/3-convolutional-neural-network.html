@@ -51,6 +51,7 @@
       <li><a href="#convolutional-neural-network-4">Stride</a></li>
       <li><a href="#convolutional-neural-network-5">Convolution over volumn</a></li>
       <li><a href="#convolutional-neural-network-6">Pooling layers</a></li>
+      <li><a href="#convolutional-neural-network-7">Inspired by LeNet-5</a></li>
     </ul>
   </div>
 </div>
@@ -59,7 +60,9 @@
   <div class="card-body">
     <h2 class="card-title">Convolutional neural network</h2>
     <ul>
-      <li>Why convolution? Images have huge number of pixels. If pixels are used as input, neural network will have huge number of parameters overfitting is unavoidable.</li>
+      <li>Why convolution? Images have huge number of pixels. If pixels are used as input, neural network will have huge number of parameters where overfitting is unavoidable.</li>
+      <li>Parameter sharing - filter (used as feature detector) used in one part of image could be useful in other parts of the image.</li>
+      <li>Sparse connection - each output pixel value depends on only small part of input pixel values, making it less prone to overfitting.</li>
       <!-- <li>Nearby pixels share similar characteristics. (Inductive bias)</li>
       <li>Focus on local structure instead of fully connected layers that take linear combinations of the input.</li>
       <li>Slide window (kernal) throughout the input image.</li>
@@ -182,7 +185,30 @@
         <li>\( 3 * 3 * 3 = 27 \) numbers are summed up for each pixel in the output.</li>
       </ul>
       <li>\( 6 \cdot 6 \cdot 3 \) image  * two different \( 3 \cdot 3 \cdot 3 \) filters where one is vertical edge detector and the other is horizontal edge detector = \( 4 \cdot 4 \cdot 2 \)</li>
-      <li>In general, \( (n-f+1) \cdot (n-f+1) \cdot n_{c}^{'} \) where \( n_{c}^{'} \) is the number of filters.</li>
+      <li>In general, \( (n-f+1) \cdot (n-f+1) \cdot n_{f} \) where \( n_{f} \) is the number of filters.</li>
+    </ul>
+
+    <h3 class="card-title">1st CNN layer</h3>
+    <ul>
+      <li>\( a^{[0]} = X \) is the input image.</li>
+      <li>\( W^{[1]} \) is the filters.</li>
+      <li>\( W^{[1]}a^{[0]}  \) is the output images.</li>
+      <li>For example, two different \( 3 \cdot 3 \cdot 3 \) filters have \( 28 * 2 = 56 \) parameters.</li>
+    </ul>
+
+    <h3 class="card-title">In layer \( l \)</h3>
+    <ul>
+      <li>\( f^{[l]} \) is filter size.</li>
+      <li>\( p^{[l]} \) is padding.</li>
+      <li>\( s^{[l]} \) is stride.</li>
+      <li>\( n^{[l]} = \frac{n^{[l-1]}+2p^{[l]}-f^{[l]}}{2}+1 \) is stride.</li>
+      <li>\( n_{H}^{[l-1]} \cdot n_{W}^{[l-1]} \cdot n_{c}^{[l-1]} \) is input image dimension.</li>
+      <li>\( f^{[l]} \cdot f^{[l]} \cdot n_{c}^{[l-1]} \) is filter dimension.</li>
+      <li>\( n_{H}^{[l]} \cdot n_{W}^{[l]} \cdot n_{f}^{[l]} \) is output image dimension.</li>
+      <li>\( m \cdot n_{H}^{[l]} \cdot n_{W}^{[l]} \cdot n_{f}^{[l]} \) is the activation dimension.</li>
+      <li>\( f^{[l]} \cdot f^{[l]} \cdot n_{c}^{[l-1]} \cdot n_{f}^{[l]} \) is the weight dimension.</li>
+      <li>\( n_{f}^{[l]} \) is the bias dimension.</li>
+      <li>Note that \( n_{f}^{[l]} = n_{c}^{[l]} \)</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -195,9 +221,42 @@
     <h2 class="card-title">Pooling layers</h2>
     <ul>
       <li>Learn low-level features like lines.</li>
-      <li>"max pooling": take max number in each region.</li>
+      <li><strong>max pooling</strong> - take max number in each region.</li>
       <li>No parameters to learn.</li>
-      <li>2 by 2 with stride 2 is commonly used.</li>
+      <li>\( 2 \) by \( 2 \) with stride \( 2 \) is commonly used.</li>
+      <li>Output image dimension is \( (\frac{n_{H}-f}{s}+1) \cdot (\frac{n_{W}-f}{s}+1) \cdot n_{c} \)</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="convolutional-neural-network-7">
+  <div class="card-body">
+    <h2 class="card-title">Inspired by LeNet-5</h2>
+    <ul>
+      <li>Input: \( 32 \cdot 32 \cdot 3 \)</li>
+      <ul>
+        <li>Use \( f=5, s=1 \)</li>
+      </ul>
+      <li>Conv1: \( 28 \cdot 28 \cdot 6 \)</li>
+      <ul>
+        <li>Use \( f=2, s=2 \)</li>
+      </ul>
+      <li>Pool1: \( 14 \cdot 14 \cdot 6  \)</li>
+      <ul>
+        <li>Use \( f=5, s=1 \)</li>
+      </ul>
+      <li>Conv2: \( 10 \cdot 10 \cdot 16 \)</li>
+      <ul>
+        <li>Use \( f=2, s=2 \)</li>
+      </ul>
+      <li>Pool2: \( 5 \cdot 5 \cdot 16  \)</li>
+      <li>Flatten: \( 400 \)</li>
+      <li>FC3: \( 120 \) where weights are \( 120 \) by \( 400 \)</li>
+      <li>FC4: \( 84 \)</li>
+      <li>Softmax of \( 10 \) outputs</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
