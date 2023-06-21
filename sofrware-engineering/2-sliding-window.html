@@ -44,12 +44,13 @@
   <div class="card-body">
     <h2 class="card-title">Sliding window</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#sliding-window-2">Find maximum in sliding window</a></li>
-      <li><a href="#sliding-window-3">Minimum window subsequence</a></li>
-      <li><a href="#sliding-window-4">Repeated DNA subsequence</a></li>
-      <li><a href="#sliding-window-5">Mimimum window substring</a></li>
       <li><a href="#sliding-window-6">Longest substring without repeating characters</a></li>
+      <li><a href="#sliding-window-5">Mimimum window substring</a></li>
+      <li><a href="#sliding-window-4">Repeated DNA subsequence</a></li>
       <li><a href="#sliding-window-7">Minimum size subarray sum</a></li>
+      <li><a href="#sliding-window-2">Sliding window maximumw</a></li>
+
+      <li><a href="#sliding-window-3">Minimum window subsequence</a></li>
       <li><a href="#sliding-window-8">Best time to buy and sell stock</a></li>
       <li><a href="#sliding-window-9">Best time to buy and sell stock II</a></li>
       <li><a href="#sliding-window-10">Longest consecutive sequence</a></li>
@@ -59,92 +60,273 @@
   </div>
 </div>
 
+<div class="card mb-4" id="sliding-window-6">
+  <div class="card-body">
+    <h2 class="card-title">Longest substring without repeating characters (M) (Interview/Liked)</h2>
+
+<pre><code class="python">class Solution:
+    def lengthOfLongestSubstring(self, s: str) -> int:
+
+        # Time: O(n)
+        # Space: O(n)
+        # n = length of input string
+
+        # Move the end pointer until seeing repeating chars.
+        # Move the start pointer until substring has no repeating chars.
+        # Keep the max diff between end and start pointer.
+        # Scan finished when both start and end pointers reach the end of string.
+
+        start = 0
+        max_length = 0
+        char_map = {}  # Store chracter and its index.
+
+        for i,c in enumerate(s):
+
+            # If duplicate is found, compute the length using start and the i pointer.
+            # The second condition ensures that we are only looking at the substring
+            # after the start index.
+            if c in char_map and char_map[c] >= start:
+                max_length = max(max_length, i-start)
+                # Move the start pointer to plus 1 of the index where the duplicate is.
+                start = char_map[c] + 1
+            char_map[c] = i
+
+        max_length = max(max_length, len(s)-start)
+
+        return max_length
+
+lengthOfLongestSubstring("aaaaaaaaaaaaaaaaa")
+lengthOfLongestSubstring("")
+lengthOfLongestSubstring("ababababab")</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/longest-substring-without-repeating-characters/">3. Longest Substring Without Repeating Characters</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="sliding-window-5">
+  <div class="card-body">
+    <h2 class="card-title">Mimimum window substring (H) (Interview/Liked)</h2>
+
+<pre><code class="python">class Solution:
+    def minWindow(self, s: str, t: str) -> str:
+
+        # Time: O(len(s))
+        # Space: O(len(t))
+
+        # Prepare start and end pointers and two hash tables for s and t.
+        # Compute occurance of each character in t and store it in a hash table.
+        # Iterate s by incrementing the end pointer until the substring contains all chars in t. Remember this substring.
+        # This substring may not be the "minimum" window substring. Now increment the start pointer.
+        #   If the substring contains all chars in t, keep incrementing the start pointer. (as long as start <= end)
+        #   Otherwise, increment the end pointer.
+
+        # In count_s, we will store the count of only the characters
+        # that exist in t.
+        count_s = {}
+        count_t = {}
+
+        min_length = len(s) + 1
+        min_substring = ""
+
+        for c in t:
+            if c not in count_t:
+                count_t[c] = 0
+            count_t[c] += 1
+
+        start = 0
+        end = 0
+
+        while start <= end and end <= len(s):
+
+            is_valid_substring = True
+            for k,v in count_t.items():
+                if k not in count_s \
+                    or (k in count_s and count_s[k] < count_t[k]):
+                    is_valid_substring = False
+
+            if is_valid_substring:
+
+                if end - start < min_length:
+                    min_length = end - start
+                    min_substring = s[start:end]
+
+                # Whenever "start" pointer moves forward, must remove
+                # the previous chracter from count_s set.
+                # This block must come before incrementing the start pointer!
+                if s[start] in count_t:
+                    if count_s[s[start]] > 1:
+                        count_s[s[start]] -= 1
+                    else:
+                        del count_s[s[start]]
+
+                start += 1
+
+            else:
+                # If covered the last character in s,
+                # increment the start pointer until it reaches the end.
+                if end == len(s):
+                    start += 1
+                else:
+                    # Update count_s dictionary each time "end" pointer moves.
+                    # This block must come before incrementing the end pointer!
+                    if s[end] in count_t:
+                        if s[end] not in count_s:
+                            count_s[s[end]] = 0
+                        count_s[s[end]] += 1
+
+                    end += 1
+
+        return min_substring
+
+minWindow("" , "ABC")
+minWindow("ABCD" , "")
+minWindow("ABCDDA" , "ABCEF")  # Number of unique chars in t is greater than the number of unique chars in s.</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/minimum-window-substring/">76. Minimum Window Substring</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="sliding-window-4">
+  <div class="card-body">
+    <h2 class="card-title">Repeated DNA subsequence (M)</h2>
+
+    <h3 class="card-title"></h3>
+
+<pre><code class="python">class Solution:
+    def findRepeatedDnaSequences(self, s: str) -> List[str]:
+        # Time: O(k*len(s))
+        # Space: O(len(s)-k) where number of substring to store is len(s)-k
+
+        # Use hash table to store occurances of all substrings with length k.
+
+        k = 10
+        substrings = set()
+        result = set()
+
+        for i in range(0, len(s)-k+1):
+            substring = s[i:i+k]
+            # To save set space, use hash of substring
+            # Instead of the actual substring.
+            if hash(substring) not in substrings:
+                substrings.add(hash(substring))
+            # Substring is repeated.
+            else:
+                result.add(substring)
+
+        return result
+
+findRepeatedDnaSequences("abcedfuef")  # k is greater than len(s).
+findRepeatedDnaSequences("abcedfuefe")  # k is equal to len(s).
+findRepeatedDnaSequences("")</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/repeated-dna-sequences/">187. Repeated DNA Sequences</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="sliding-window-7">
+  <div class="card-body">
+    <h2 class="card-title">Minimum size subarray sum (M)</h2>
+
+<pre><code class="python">class Solution:
+    def minSubArrayLen(self, target: int, nums: List[int]) -> int:
+
+        # Time O(n)
+        # Space O(1)
+        # n = length of nums
+
+        if sum(nums) < target:
+            return 0
+
+        min_length = len(nums)
+
+        start = 0
+        end = 0
+
+        # Move end pointer until the sum is >= target.
+        # Then, move start pointer until the sum is < target.
+        # Continue until both start and end finish.
+
+        while start <= end and end < len(nums):
+
+            if sum(nums[start:end+1]) >= target:
+                min_length = min(min_length, end-start+1)
+                start += 1
+            else:
+                # If end pointer reached the end of string.
+                if end == len(nums) - 1:
+                    start += 1
+                else:
+                    end += 1
+
+        return min_length
+
+minSubArrayLen(12, [])
+minSubArrayLen(0, [1])
+minSubArrayLen(9, [2,2])  # Edge case.</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/minimum-size-subarray-sum/">209. Minimum Size Subarray Sum</a>
+  </div>
+</div>
+
 <div class="card mb-4" id="sliding-window-2">
   <div class="card-body">
-    <h2 class="card-title">Find maximum in sliding window</h2>
-
-    <h3 class="card-title">Iterate each window and compute the max</h3>
-
-<pre><code class="python">def find_max_sliding_window(nums, window_size):
-
-    # Time: O(nw) where n is list length and w is size of window.
-    # Space: O(1) there is no extra space used during computation.
-
-    result = []
-    start = 0
-    end = window_size
-
-    while end <= len(nums):
-        result.append(max(nums[start:end]))
-        start +=1
-        end += 1
-
-    return result</code></pre>
-
-    <h3 class="card-title">Use a queue to keep track of the maximum</h3>
-    <ul>
-      <li>Keep the maximum number at the front of the queue. (We can do this by popping out all smaller numbers than the current number)</li>
-      <li>First, compute the maximum number in the first window.</li>
-      <li>Then, everytime a window moves
-        <ul>
-          <li>Pop out all smaller numbers than the current number.</li>
-          <li>Remove previous number, which is now outside of the window, from the queue.</li>
-          <li>Append the first item in the queue to the result.</li>
-        </ul>
-      </li>
-    </ul>
+    <h2 class="card-title">Sliding window maximumw (H) (Interview/Liked)</h2>
 
 <pre><code class="python">from collections import deque
 
-def find_max_sliding_window(nums, window_size):
+class Solution:
+    def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
 
-    # Time: O(n) where n is list length.
-    # Space: O(w) where w is the window size.
+        # Time: O(n) where n is list length.
+        # Space: O(k)
+        # n = length of nums
 
-    result = []
-    queue = deque()
+        # Keep the maximum number at the front of the queue. (We can do this by popping out all smaller numbers than the current number)
+        # First, compute the maximum number in the first window.
+        # Then, everytime a window moves.
+        #   Pop out all smaller numbers than the current number.
+        #   Remove previous number, which is now outside of the window, from the queue.
+        #   Append the first item in the queue to the result.
 
-    # Compute the maximum in the first window.
-    for i in range(window_size):
+        result = []
+        queue = deque()
 
-        # Pop out all smaller items than the current item
-        # by removing last items in the queue.
-        # Then the first itme in the queue will always
-        # contains the maximum item.
-        while queue and nums[queue[-1]] < nums[i]:
-            queue.pop()
-        queue.append(i)
+        # Compute the maximum in the first window.
+        for i in range(k):
 
-    result.append(nums[queue[0]])
-
-    # Move the window
-    for i in range(window_size, len(nums)):
-
-        while queue and nums[queue[-1]] < nums[i]:
-            queue.pop()
-        queue.append(i)
-
-        # Remove all indexes in the queue that is before
-        # and outside than the current window.
-        while queue and queue[0] <= (i - window_size):
-            queue.popleft()
+            # Pop out all smaller items than the current item
+            # by removing last items in the queue.
+            # Then the first itme in the queue will always
+            # contains the maximum item.
+            while queue and nums[queue[-1]] < nums[i]:
+                queue.pop()
+            queue.append(i)
 
         result.append(nums[queue[0]])
 
-    return result</code></pre>
+        # Move the window
+        for i in range(k, len(nums)):
 
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li>Window size is greater than the list length. ([1,2], 3)</li>
-      <li>Window size is zero. ([1,2], 0)</li>
-      <li>Window size and list length are zero. ([], 0)</li>
-    </ul>
+            while queue and nums[queue[-1]] < nums[i]:
+                queue.pop()
+            queue.append(i)
 
-<pre><code class="python"># Add this code block in the function.
-if window_size == 0 \
-    or window_size > len(nums) \
-    or len(nums) == 0:
-    return result</code></pre>
+            # Remove all indexes in the queue that is before
+            # and outside than the current window.
+            while queue and queue[0] <= (i - k):
+                queue.popleft()
+
+            result.append(nums[queue[0]])
+
+        return result
+
+maxSlidingWindow([1,2], 3)  # Window size is greater than the list length.
+maxSlidingWindow([1,2], 0)  # Window size is zero.
+maxSlidingWindow([], 0)  # Window size and list length are zero.</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/sliding-window-maximum/">239. Sliding Window Maximum</a>
@@ -280,243 +462,6 @@ if not str1 or not str2 or len(str2) > len(str1):
   </div>
 </div>
 
-<div class="card mb-4" id="sliding-window-4">
-  <div class="card-body">
-    <h2 class="card-title">Repeated DNA subsequence</h2>
-
-    <h3 class="card-title">Use hash table to store occurances of all substrings with length k.</h3>
-
-<pre><code class="python">def find_repeated_sequences(s, k):
-
-    # Time: O(k * len(s)).
-    # Space: O(len(s)-k) where number of substring to store is len(s)-k.
-
-    substrings = set()
-    result = set()
-
-    for i in range(0, len(s)-k):
-        substring = s[i:i+k]
-        # To save set space, use hash of substring
-        # Instead of the actual substring.
-        if hash(substring) not in substrings:
-            substrings.add(hash(substring))
-        # Substring is repeated.
-        else:
-            result.add(substring)
-
-    return result</code></pre>
-
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li>k is greater than len(s).</li>
-      <li>Either one of k or len(s) is 0.</li>
-      <li>k is equal to len(s)</li>
-    </ul>
-
-    <pre><code class="python"># Add this code block in the function.
-if k >= len(s) or k == 0:
-    return set()</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/repeated-dna-sequences/">187. Repeated DNA Sequences</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="sliding-window-5">
-  <div class="card-body">
-    <h2 class="card-title">Mimimum window substring</h2>
-
-    <h3 class="card-title">Use two pointers and two hash tables.</h3>
-    <ul>
-      <li>Prepare start and end pointers and two hash tables for s and t.</li>
-      <li>Compute occurance of each character in t and store it in a hash table.</li>
-      <li>Iterate s by incrementing the end pointer until the substring contains all chars in t. Remember this substring.</li>
-      <li>This substring may not be the "minimum" window substring. Now increment the start pointer.</li>
-      <ul>
-        <li>If the substring contains all chars in t, keep incrementing the start pointer. (as long as start <= end)</li>
-        <li>Otherwise, increment the end pointer.</li>
-      </ul>
-    </ul>
-
-<pre><code class="python">def min_window(s, t):
-
-    # Time: O(len(s)).
-    # Space: O(len(t)).
-
-    # In count_s, we will store the count of only the characters
-    # that exist in t.
-    count_s = {}
-    count_t = {}
-
-    min_length = len(s) + 1
-    min_substring = ""
-
-    for c in t:
-        if c not in count_t:
-            count_t[c] = 0
-        count_t[c] += 1
-
-    start = 0
-    end = 0
-
-    while start <= end and end <= len(s):
-
-        is_valid_substring = True
-        for k,v in count_t.items():
-            if k not in count_s \
-                or (k in count_s and count_s[k] < count_t[k]):
-                is_valid_substring = False
-
-        if is_valid_substring:
-
-            if end - start < min_length:
-                min_length = end - start
-                min_substring = s[start:end]
-
-            # Whenever "start" pointer moves forward, must remove
-            # the previous chracter from count_s set.
-            # This block must come before incrementing the start pointer!
-            if s[start] in count_t:
-                if count_s[s[start]] > 1:
-                    count_s[s[start]] -= 1
-                else:
-                    del count_s[s[start]]
-
-            start += 1
-
-        else:
-            # If covered the last character in s,
-            # increment the start pointer until it reaches the end.
-            if end == len(s):
-                start += 1
-            else:
-                # Update count_s dictionary each time "end" pointer moves.
-                # This block must come before incrementing the end pointer!
-                if s[end] in count_t:
-                    if s[end] not in count_s:
-                        count_s[s[end]] = 0
-                    count_s[s[end]] += 1
-
-                end += 1
-
-    return min_substring</code></pre>
-
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li>Either len(s) or len(t) is 0. ("" , "ABC"), ("ABCD" , "")</li>
-      <li>The number of unique chars in t is greater than the number of unique chars in s. ("ABCDDA" , "ABCEF")</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/minimum-window-substring/">76. Minimum Window Substring</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="sliding-window-6">
-  <div class="card-body">
-    <h2 class="card-title">Longest substring without repeating characters</h2>
-
-    <h3 class="card-title">Use two pointers and a hash table.</h3>
-    <ul>
-      <li>Iterate the string by moving end pointer from the beginning to the end.</li>
-      <li>Start pointer is placed at an index for each substring without repeating characters.</li>
-      <li>A hash table stores each character and its last occuring index.</li>
-      <li>If duplicate chacter is found, move the start pointer, compute the substring length, and update the hash map.</li>
-      <li>Else, just update the hash map with the new character.</li>
-    </ul>
-
-<pre><code class="python">def find_longest_substring(input_string):
-
-    # Time: O(len(input_string)).
-    # Space: O(len(input_string)).
-
-    start = 0
-    max_length = 0
-    # Store chracter and its index.
-    char_map = {}
-
-    for i in range(len(input_string)):
-
-        # If duplicate is found, compute the length using start and the i pointer.
-        # The second condition ensures that we are only looking at the substring
-        # after the start index.
-        if input_string[i] in char_map and char_map[input_string[i]] >= start:
-             max_length = max(max_length, i-start)
-             # Move the start pointer to plus 1 of the index where the duplicate is.
-             start = char_map[input_string[i]] + 1
-        char_map[input_string[i]] = i
-
-    max_length = max(max_length, len(input_string)-start)
-
-    return max_length</code></pre>
-
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li>Entire string consists of a single char. ("aaaaaaaaaaaaaaaaa")</li>
-      <li>String is empty. ("")</li>
-      <li>Repeat of the same substring. ("ababababab")</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/longest-substring-without-repeating-characters/">3. Longest Substring Without Repeating Characters</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="sliding-window-7">
-  <div class="card-body">
-    <h2 class="card-title">Minimum size subarray sum</h2>
-
-    <h3 class="card-title">Use two pointers.</h3>
-    <ul>
-      <li>Iterate the array with start and end pointers.</li>
-      <li>Move the end pointer until the sum is >= target. Store the legnth of subarray.</li>
-      <li>Then, move the start pointer until the sum is < target.</li>
-      <li>Continue until both start and end finish.</li>
-    </ul>
-
-<pre><code class="python">def min_sub_array_len(target, nums):
-
-    # Time O(len(nums)).
-    # Space O(1).
-
-    if sum(nums) < target:
-        return 0
-
-    min_length = len(nums)
-
-    start = 0
-    end = 0
-
-    # Move end pointer until the sum is >= target
-    # Then, move start pointer until the sum is < target
-    # Continue until both start and end finish
-
-    while start <= end and end < len(nums):
-
-        if sum(nums[start:end+1]) >= target:
-            min_length = min(min_length, end-start+1)
-            start += 1
-        else:
-            # If end pointer reached the end of string.
-            if end == len(nums) - 1:
-                start += 1
-            else:
-                end += 1
-
-    return min_length</code></pre>
-
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li>Empty array. (12, [])</li>
-      <li>Single element. (0, [1])</li>
-      <li>Impossible case. (9, [2,2])</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/minimum-size-subarray-sum/">209. Minimum Size Subarray Sum</a>
-  </div>
-</div>
-
 <div class="card mb-4" id="sliding-window-8">
   <div class="card-body">
     <h2 class="card-title">Best time to buy and sell stock</h2>
@@ -579,7 +524,7 @@ for price in stock_prices:
 
 <div class="card mb-4" id="sliding-window-10">
   <div class="card-body">
-    <h2 class="card-title">Longest consecutive sequence</h2>
+    <h2 class="card-title">Longest consecutive sequence (M) (Interview/Liked)</h2>
 
 <pre><code class="python"></code></pre>
 
