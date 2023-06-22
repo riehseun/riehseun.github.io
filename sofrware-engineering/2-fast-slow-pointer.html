@@ -44,8 +44,8 @@
   <div class="card-body">
     <h2 class="card-title">Fast slow pointer</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#fast-slow-pointer-1">Happy Number</a></li>
       <li><a href="#fast-slow-pointer-2">Linked list cycle</a></li>
+      <li><a href="#fast-slow-pointer-1">Happy Number</a></li>
       <li><a href="#fast-slow-pointer-3">Circular array loop</a></li>
       <li><a href="#fast-slow-pointer-4">Middle of linked list</a></li>
       <li><a href="#fast-slow-pointer-5">Intersection of two linked lists</a></li>
@@ -55,111 +55,80 @@
   </div>
 </div>
 
-<div class="card mb-4" id="fast-slow-pointer-1">
-  <div class="card-body">
-    <h2 class="card-title">Happy Number</h2>
-
-    <h3 class="card-title">Slow pointer moves one step at a time while fast pointer moves two steps at a time.</h3>
-    <ul>
-      <li>If converges, then the result fo slow pointer would be equal to 1.</li>
-      <li>If diverges, then the result of slow and fast pointer would be equal at one point.</li>
-    </ul>
-
-<pre><code class="python">def is_happy_number(n):
-
-    return run(n, n)
-
-def run(slow, fast):
-
-    # Time: O(mlogn) log(n) for the recursion and m is the number of digits in the input.
-    # Space O(1).
-
-    slow = get_squared_sum_of_digits(slow)
-    fast = get_squared_sum_of_digits(get_squared_sum_of_digits(fast))
-
-    # Converges to 1.
-    if slow == 1:
-        return True
-
-    # Cycle detected. (Endless loop)
-    if slow == fast:
-        return False
-
-    return run(slow, fast)
-
-def get_squared_sum_of_digits(n):
-
-    ssd = 0
-
-    for i in str(n):
-        ssd = (int(i)**2)
-
-    return ssd
-</code></pre>
-
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li>Number 0. (0)</li>
-      <li>Negative n umber (-97)</li>
-    </ul>
-
-<pre><code class="python"># Add this code block in the function.
-if n < 0:
-    return False</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/happy-number/">202. Happy Number</a>
-  </div>
-</div>
-
 <div class="card mb-4" id="fast-slow-pointer-2">
   <div class="card-body">
-    <h2 class="card-title">Linked list cycle</h2>
+    <h2 class="card-title">Linked list cycle (E) (Interview/Liked)</h2>
 
-    <h3 class="card-title">Move slow and faster pointer to see if they meet.</h3>
-    <ul>
-      <li>If fast pointer exits linked list, return False.</li>
-      <li>If two pointers are the same at any point, return True.</li>
-    </ul>
+<pre><code class="python"># Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
 
-<pre><code class="python">def detect_cycle(head):
+class Solution:
 
-    return run(head, head)
+    # If fast pointer exits linked list, return False.
+    # If two pointers are the same at any point, return True.
 
-def run(slow, fast):
+    def hasCycle(self, head: Optional[ListNode]) -> bool:
+        return self.run(head, head)
 
-    # Time: O(n).
-    # Space: O(1).
+    def run(self, slow, fast):
 
-    slow = slow.next
+        if slow:
+            slow = slow.next
 
-    if not fast or not fast.next:
-        return False
+        if not fast or not fast.next:
+            return False
 
-    fast = fast.next.next
+        fast = fast.next.next
 
-    if slow == fast:
-        return True
+        if slow == fast:
+            return True
 
-    return run(slow, fast)</code></pre>
-
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li>Empty linked list. ("")</li>
-    </ul>
-
-<pre><code class="python"># Add this code block in the function.
-if not slow:
-    return False</code></pre>
+        return self.run(slow, fast)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/linked-list-cycle/">141. Linked List Cycle</a>
   </div>
 </div>
 
+<div class="card mb-4" id="fast-slow-pointer-1">
+  <div class="card-body">
+    <h2 class="card-title">Happy Number (E) (Interview)</h2>
+
+<pre><code class="python">class Solution:
+    def isHappy(self, n: int) -> bool:
+
+        # If converges, then the result fo slow pointer would be equal to 1.
+        # If diverges, then the result of slow and fast pointer would be equal at one point.
+
+        seen = set()
+        return self.helper(n, seen)
+
+    def helper(self, n, seen):
+
+        if n == 1:
+            return True
+
+        if n in seen:
+            return False
+
+        num = 0
+        for char in str(n):
+            num += int(char) ** 2
+        seen.add(n)
+
+        return self.helper(num, seen)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/happy-number/">202. Happy Number</a>
+  </div>
+</div>
+
 <div class="card mb-4" id="fast-slow-pointer-3">
   <div class="card-body">
-    <h2 class="card-title">Circular array loop</h2>
+    <h2 class="card-title">Circular array loop (M)</h2>
 
     <h3 class="card-title">Move slow and faster pointer to see if they meet.</h3>
     <ul>
@@ -168,59 +137,59 @@ if not slow:
       <li>If a value at a particular index equals to the length of array, return False.</li>
     </ul>
 
-<pre><code class="python">def circular_array_loop(arr):
+<pre><code class="python">class Solution:
+    def circularArrayLoop(self, nums: List[int]) -> bool:
+        # Time: O(n^2)
+        # Space: O(1)
 
-    # Time: O(n^2)
-    # Space: O(1)
+        result = False
 
-    result = False
+        # If find one index i at which there is a cycle, must return True.
+        for i in range(len(nums)):
+            result_i = self.run(i, "", i, "", nums)
+            result = result or result_i
 
-    # If find one index i at which there is a cycle, must return True.
-    for i in range(len(arr)):
-        result_i = run(i, "", i, "", arr)
-        result = result or result_i
+        return result
 
-    return result
+    def run(self, slow, slow_direction, fast, fast_direction, nums):
 
-def run(slow, slow_direction, fast, fast_direction, arr):
+        slow, slow_direction = self.move_index(slow, slow_direction, nums)
+        fast, fast_direction = self.move_index(fast, fast_direction, nums)
+        fast, fast_direction = self.move_index(fast, fast_direction, nums)
 
-    slow, slow_direction = move_index(slow, slow_direction, arr)
-    fast, fast_direction = move_index(fast, fast_direction, arr)
-    fast, fast_direction = move_index(fast, fast_direction, arr)
+        # Direction changes in either slow or fast pointer, not a cycle.
+        if slow == -1 or fast == -1:
+            return False
 
-    # Direction changes in either slow or fast pointer, not a cycle.
-    if slow == -1 or fast == -1:
-        return False
+        # If two pointers match at one point, cycle.
+        if slow == fast:
+            return True
 
-    # If two pointers match at one point, cycle.
-    if slow == fast:
-        return True
+        return self.run(slow, slow_direction, fast, fast_direction, nums)
 
-    return run(slow, slow_direction, fast, fast_direction, arr)
+    def move_index(self, i, current_direction, nums):
+        index = i + nums[i]
 
-def move_index(i, current_direction, arr):
-    index = i + arr[i]
-
-    # Loop with just one element, not a cycle.
-    if abs(arr[i]) % len(arr) == 0:
-        return -1, ""
-
-    if arr[i] > 0:
-        if current_direction == "neg":
+        # Loop with just one element, not a cycle.
+        if abs(nums[i]) % len(nums) == 0:
             return -1, ""
-        current_direction = "pos"
-    elif arr[i] < 0:
-        if current_direction == "pos":
-            return -1, ""
-        current_direction = "neg"
 
-    if index >= len(arr):
-        index = index % len(arr)
+        if nums[i] > 0:
+            if current_direction == "neg":
+                return -1, ""
+            current_direction = "pos"
+        elif nums[i] < 0:
+            if current_direction == "pos":
+                return -1, ""
+            current_direction = "neg"
 
-    if index < 0:
-        index = len(arr) - (abs(index)%len(arr))
+        if index >= len(nums):
+            index = index % len(nums)
 
-    return index, current_direction</code></pre>
+        if index < 0:
+            index = len(nums) - (abs(index)%len(nums))
+
+        return index, current_direction</code></pre>
 
     <h3 class="card-title">Test cases</h3>
     <ul>
@@ -238,74 +207,23 @@ if 0 in arr:
 
 <div class="card mb-4" id="fast-slow-pointer-4">
   <div class="card-body">
-    <h2 class="card-title">Middle of linked list</h2>
+    <h2 class="card-title">Middle of linked list (E)</h2>
 
-    <h3 class="card-title">Move slow and fast pointer from the head of the linked list.</h3>
-    <ul>
-      <li>If fast pointer exits linked list, slow pointer would be located in the middle of the linked list.</li>
-      <li>From the middle pointer, reverse second half of the linked list.</li>
-      <li>Traverse from both ends of the linked list towards the middle.</li>
-    </ul>
+<pre><code class="python"># Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def middleNode(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        # Time: O(n)
+        # Space: O(1)
 
-<pre><code class="python">def palindrome(head):
-
-    # Time: O(n)
-    # Space: O(1)
-
-    start = head
-    middle = run(head, head)
-    middle_save = middle
-
-    # Reverse the second half of linked list
-    prev = None
-    nex = None
-    while middle:
-        nex = middle.next
-        middle.next = prev
-        prev = middle
-        middle = nex
-    end = prev
-
-    # Iterate linked list from both ends simultaneously.
-    while True:
-
-        print(start.data)
-        print(end.data)
-
-        # If odd, both pointers will meet at the middle point.
-        if start == end:
-            return True
-
-        # If even, this condition will be met around the middle point.
-        if start.next == end:
-            if start.data != end.data:
-                return False
-            else:
-                return True
-
-        # If at any point difference is found.
-        if start.data != end.data:
-            return False
-
-        start = start.next
-        end = end.next
-
-    return True
-
-def run(slow, fast):
-
-    if not fast or not fast.next:
-        return slow
-
-    slow = slow.next
-    fast = fast.next.next
-
-    return run(slow, fast)</code></pre>
-
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li>Empty linked list. (None)</li>
-    </ul>
+        slow = fast = head
+        while fast and fast.next:
+            slow = slow.next
+            fast = fast.next.next
+        return slow</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/middle-of-the-linked-list/">876. Middle of the Linked List</a>
