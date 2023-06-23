@@ -55,53 +55,38 @@
 
 <div class="card mb-4" id="merge-interval-1">
   <div class="card-body">
-    <h2 class="card-title">Merge interval</h2>
+    <h2 class="card-title">Merge interval (M) (Interview/Liked)</h2>
 
-    <h3 class="card-title">Loop through intervals.</h3>
-    <ul>
-      <li>Save the first interval into the result array.</li>
-      <li>While iterating the rest of intervals.</li>
-      <ul>
-        <li>If the end of the last interval is greater than the current, then there is an overlap.</li>
-        <li>Then, merge these two intervals.</li>
-        <li>Else, just append the current interval to the result array.</li>
-      </ul>
-    </ul>
+<pre><code class="python">class Solution:
+    def merge(self, intervals: List[List[int]]) -> List[List[int]]:
 
-<pre><code class="python">class Interval:
-    def __init__(self, start, end):
-        self.start = start
-        self.end = end
-        self.closed = True
+        # Save the first interval into the result array.
+        # While iterating the rest of intervals.
+        #   If the end of the last interval is greater than the current, then there is an overlap.
+        #   Then, merge these two intervals.
+        #   Else, just append the current interval to the result array.
 
-def merge_intervals(v):
+        if len(intervals) <= 1:
+            return intervals
 
-    # Time: O(n) where n is the number of intervals.
-    # Space: O(n)
+        intervals.sort(key = lambda x: x[0])
 
-    if len(v) <= 1:
-        return v
+        result = []
+        # Keep the first interval.
+        result.append(intervals[0])
 
-    intervals = []
-    # Keep the first interval.
-    intervals.append(v[0])
+        for interval in intervals[1:]:
+            # If overlap is found.
+            if result[-1][1] >= interval[0] and result[-1][0] <= interval[1]:
+                old = result.pop()
+                new = [min(old[0], interval[0]), max(old[1], interval[1])]
+                result.append(new)
+            else:
+                result.append(interval)
 
-    for interval in v[1:]:
-        # If overlap is found.
-        if intervals[-1].end >= interval.start:
-            old = intervals.pop()
-            new = Interval(old.start, max(old.end, interval.end))
-            intervals.append(new)
-        else:
-            intervals.append(interval)
+        return result
 
-    return intervals</code></pre>
-
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li>Empty intervals. ([])</li>
-      <li>Negative intervals.</li>
-    </ul>
+merge([])</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/merge-intervals/">56. Merge Intervals</a>
@@ -110,48 +95,40 @@ def merge_intervals(v):
 
 <div class="card mb-4" id="merge-interval-2">
   <div class="card-body">
-    <h2 class="card-title">Insert interval</h2>
+    <h2 class="card-title">Insert interval (M)</h2>
 
-    <h3 class="card-title">Order by start time.</h3>
-    <ul>
-      <li>Add intervals that start before the interval to be inserted into the an array.</li>
-      <li>Then, add the interval to be inserted to the array.</li>
-      <li>Then, add all other remaining intervals to the array.</li>
-      <li>Now perform merge_interval on the array</li>
-    </ul>
+<pre><code class="python">class Solution:
+    def insert(self, intervals: List[List[int]], newInterval: List[int]) -> List[List[int]]:
 
-<pre><code class="python">def insert_interval(existing_intervals, new_interval):
+        # Time: O(n)
+        # Space: O(n)
+        # n = length of intervals
 
-    # Time: O(n) where n is the number of intervals.
-    # Space: O(n)
+        # Add intervals that start before the interval to be inserted into the an array.
+        # Then, add the interval to be inserted to the array.
+        # Then, add all other remaining intervals to the array.
+        # Now perform merge on the array.
 
-    result = []
+        result = []
 
-    i = 0
-    interval_inserted = False
-    while i < len(existing_intervals):
-        if existing_intervals[i].start < new_interval.start:
-            result.append(existing_intervals[i])
-            i += 1
-        else:
-            if not interval_inserted:
-                result.append(new_interval)
-                interval_inserted = True
-            else:
-                result.append(existing_intervals[i])
+        i = 0
+        interval_inserted = False
+        while i < len(intervals):
+            if intervals[i][0] < newInterval[0]:
+                result.append(intervals[i])
                 i += 1
+            else:
+                if not interval_inserted:
+                    result.append(newInterval)
+                    interval_inserted = True
+                else:
+                    result.append(intervals[i])
+                    i += 1
 
-    if not interval_inserted:
-        result.append(new_interval)
+        if not interval_inserted:
+            result.append(newInterval)
 
-    return merge_intervals(result)</code></pre>
-
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li>Insert interval that is ouside the entire range.</li>
-      <li>Insert arrays that have intervals with negative numbers.</li>
-      <li>Insert an interval that exactly matches one of the existing intervals.</li>
-    </ul>
+        return self.merge(result)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/insert-interval/">57. Insert Interval</a>
