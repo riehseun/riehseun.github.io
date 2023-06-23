@@ -46,9 +46,9 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#merge-interval-1">Merge interval</a></li>
       <li><a href="#merge-interval-2">Insert interval</a></li>
-      <li><a href="#merge-interval-3">Interval intersection</a></li>
-      <li><a href="#merge-interval-4">Free time</a></li>
       <li><a href="#merge-interval-5">Meeting room</a></li>
+      <li><a href="#merge-interval-4">Free time</a></li>
+      <li><a href="#merge-interval-3">Interval intersection</a></li>
     </ul>
   </div>
 </div>
@@ -135,108 +135,9 @@ merge([])</code></pre>
   </div>
 </div>
 
-<div class="card mb-4" id="merge-interval-3">
-  <div class="card-body">
-    <h2 class="card-title">Interval intersection (M)</h2>
-
-<pre><code class="python">class Solution:
-    def intervalIntersection(self, firstList: List[List[int]], secondList: List[List[int]]) -> List[List[int]]:
-
-        # Time: O(n+m)
-        # Space: O(min(n,m))
-        # n, m = the lengths of input arrays.
-
-        if not firstList or not secondList:
-            return []
-
-        intersection = self.find_intersection(firstList[0], secondList[0])
-
-        result = []
-        i = 0
-        j = 0
-        while i < len(firstList) \
-            and j < len(secondList):
-
-            # Check for intersection
-            intersection = self.find_intersection(firstList[i], secondList[j])
-
-            if intersection:
-                result.append(intersection)
-
-            if firstList[i][1] <= secondList[j][1]:
-                i += 1
-            else:
-                j += 1
-
-        return result
-
-    def find_intersection(self, a, b):
-
-        if a[0] <= b[1] and b[0] <= a[1]:
-            intersection = [max(a[0], b[0]), min(a[1], b[1])]
-        else:
-            intersection = []
-
-        return intersection</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/interval-list-intersections/">986. Interval List Intersections</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="merge-interval-4">
-  <div class="card-body">
-    <h2 class="card-title">Free time</h2>
-
-    <h3 class="card-title">Sort the interval by the start, and then end by reverse.</h3>
-    <ul>
-      <li>If any start is after the latest end seen, then there is non-intersection.</li>
-    </ul>
-
-<pre><code class="python">def employee_free_time(schedule):
-
-    # Time: O(nlogn) where n length of combined input arrays.
-    # Space: O(n)
-
-    result = []
-
-    array = convert_input_to_list(schedule)
-
-    latest_end = 0
-    for interval in array:
-
-        if interval[0] > latest_end and latest_end != 0:
-                result.append(Interval(latest_end, interval[0]))
-        latest_end = max(latest_end, interval[1])
-
-    return result
-
-def convert_input_to_list(schedules):
-
-    flat_array = []
-
-    for schedule in schedules:
-        for array in schedule:
-            flat_array.append([array.start, array.end])
-
-    flat_array.sort(key = lambda x: (x[0], -x[1]))
-
-    return flat_array</code></pre>
-
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li>All input arrays are empty.</li>
-      <li>There is no free time.</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/employee-free-time/">759. Employee Free Time</a>
-  </div>
-</div>
-
 <div class="card mb-4" id="merge-interval-5">
   <div class="card-body">
-    <h2 class="card-title">Meeting room</h2>
+    <h2 class="card-title">Meeting room (E)</h2>
 
     <h3 class="card-title">Sort the meetings by the start time, and iterate while checking for intersections.</h3>
     <ul>
@@ -288,6 +189,105 @@ def find_sets(intervals):
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/meeting-rooms/">252. Meeting Rooms</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="merge-interval-4">
+  <div class="card-body">
+    <h2 class="card-title">Free time (H)</h2>
+
+    <h3 class="card-title">Sort the interval by the start, and then end by reverse.</h3>
+    <ul>
+      <li>If any start is after the latest end seen, then there is non-intersection.</li>
+    </ul>
+
+<pre><code class="python">def employee_free_time(schedule):
+
+    # Time: O(nlogn) where n length of combined input arrays.
+    # Space: O(n)
+
+    result = []
+
+    array = convert_input_to_list(schedule)
+
+    latest_end = 0
+    for interval in array:
+
+        if interval[0] > latest_end and latest_end != 0:
+                result.append(Interval(latest_end, interval[0]))
+        latest_end = max(latest_end, interval[1])
+
+    return result
+
+def convert_input_to_list(schedules):
+
+    flat_array = []
+
+    for schedule in schedules:
+        for array in schedule:
+            flat_array.append([array.start, array.end])
+
+    flat_array.sort(key = lambda x: (x[0], -x[1]))
+
+    return flat_array</code></pre>
+
+    <h3 class="card-title">Test cases</h3>
+    <ul>
+      <li>All input arrays are empty.</li>
+      <li>There is no free time.</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/employee-free-time/">759. Employee Free Time</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="merge-interval-3">
+  <div class="card-body">
+    <h2 class="card-title">Interval intersection (M)</h2>
+
+<pre><code class="python">class Solution:
+    def intervalIntersection(self, firstList: List[List[int]], secondList: List[List[int]]) -> List[List[int]]:
+
+        # Time: O(n+m)
+        # Space: O(min(n,m))
+        # n, m = the lengths of input arrays.
+
+        if not firstList or not secondList:
+            return []
+
+        intersection = self.find_intersection(firstList[0], secondList[0])
+
+        result = []
+        i = 0
+        j = 0
+        while i < len(firstList) \
+            and j < len(secondList):
+
+            # Check for intersection
+            intersection = self.find_intersection(firstList[i], secondList[j])
+
+            if intersection:
+                result.append(intersection)
+
+            if firstList[i][1] <= secondList[j][1]:
+                i += 1
+            else:
+                j += 1
+
+        return result
+
+    def find_intersection(self, a, b):
+
+        if a[0] <= b[1] and b[0] <= a[1]:
+            intersection = [max(a[0], b[0]), min(a[1], b[1])]
+        else:
+            intersection = []
+
+        return intersection</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/interval-list-intersections/">986. Interval List Intersections</a>
   </div>
 </div>
 <!-- Merge interval END -->
