@@ -137,54 +137,47 @@ merge([])</code></pre>
 
 <div class="card mb-4" id="merge-interval-3">
   <div class="card-body">
-    <h2 class="card-title">Interval intersection</h2>
+    <h2 class="card-title">Interval intersection (M)</h2>
 
-    <h3 class="card-title">Loop through both lists and move forward in the list whose interval ends earlier first.</h3>
-    <ul>
-      <li><code>a.start <= b.end and b.start <= a.end</code> is the condition for the intersection to exist.</li>
-    </ul>
+<pre><code class="python">class Solution:
+    def intervalIntersection(self, firstList: List[List[int]], secondList: List[List[int]]) -> List[List[int]]:
 
-<pre><code class="python">def intervals_intersection(interval_list_a, interval_list_b):
+        # Time: O(n+m)
+        # Space: O(min(n,m))
+        # n, m = the lengths of input arrays.
 
-    # Time: O(n+m) where n and m are the lengths of input arrays.
-    # Space: O(min(n,m))
+        if not firstList or not secondList:
+            return []
 
-    intersection = find_intersection(interval_list_a[0], interval_list_b[0])
+        intersection = self.find_intersection(firstList[0], secondList[0])
 
-    result = []
-    i = 0
-    j = 0
-    while i < len(interval_list_a) \
-        and j < len(interval_list_b):
+        result = []
+        i = 0
+        j = 0
+        while i < len(firstList) \
+            and j < len(secondList):
 
-        # Check for intersection
-        intersection = find_intersection(interval_list_a[i], interval_list_b[j])
+            # Check for intersection
+            intersection = self.find_intersection(firstList[i], secondList[j])
 
-        if intersection:
-            result.append(intersection)
+            if intersection:
+                result.append(intersection)
 
-        if interval_list_a[i].end <= interval_list_b[j].end:
-            i += 1
+            if firstList[i][1] <= secondList[j][1]:
+                i += 1
+            else:
+                j += 1
+
+        return result
+
+    def find_intersection(self, a, b):
+
+        if a[0] <= b[1] and b[0] <= a[1]:
+            intersection = [max(a[0], b[0]), min(a[1], b[1])]
         else:
-            j += 1
+            intersection = []
 
-    return result
-
-def find_intersection(a, b):
-
-    if a.start <= b.end and b.start <= a.end:
-        intersection = Interval(max(a.start, b.start), min(a.end, b.end))
-    else:
-        intersection = None
-
-    return intersection</code></pre>
-
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li>One of the input arrays are empty.</li>
-      <li>Both input arrays are empty.</li>
-      <li>input arrays that have intervals with negative numbers.</li>
-    </ul>
+        return intersection</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/interval-list-intersections/">986. Interval List Intersections</a>
