@@ -47,7 +47,10 @@
       <li><a href="#heap-1">Heap</a></li>
       <li><a href="#heap-2">Convert max heap to min heap</a></li>
       <li><a href="#heap-3">Find K smallest elements in a list</a></li>
-      <li><a href="#heap-4">Find K largest elements in a list</a></li>
+      <li><a href="#heap-5">Merge sorted array</a></li>
+      <li><a href="#heap-6">The skyline problem</a></li>
+      <li><a href="#heap-4">Kth largest element in an array</a></li>
+      <li><a href="#heap-7">Kth smallest element in a sorted matrix</a></li>
     </ul>
   </div>
 </div>
@@ -119,24 +122,140 @@ def find_K_smallest(lst, k):
   </div>
 </div>
 
+<div class="card mb-4" id="heap-5">
+  <div class="card-body">
+    <h2 class="card-title">Merge sorted array (E) (Interview)</h2>
+
+<pre><code class="python">from heapq import heappush, heappop
+
+class Solution:
+    def merge(self, nums1: List[int], m: int, nums2: List[int], n: int) -> None:
+        """
+        Do not return anything, modify nums1 in-place instead.
+        """
+
+        min_heap = []
+        for i in range(m):
+            heappush(min_heap, nums1[i])
+
+        for j in range(n):
+            heappush(min_heap, nums2[j])
+
+        k = 0
+        while min_heap:
+            nums1[k] = heappop(min_heap)
+            k += 1
+
+        return nums1</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/merge-sorted-array">88. Merge Sorted Array</a>
+  </div>
+</div>
+
 <div class="card mb-4" id="heap-4">
   <div class="card-body">
-    <h2 class="card-title">Find K largest elements in a list</h2>
+    <h2 class="card-title">Kth largest element in an array (M) (Interview/Liked)</h2>
 
-<pre><code class="python">def findKLargest(lst, k):
+<pre><code class="python">from heapq import heappush, heappop
 
-    result = []
-    negative_list = [-1*i for i in lst]
-    heapify(negative_list)
+class Solution:
+    def findKthLargest(self, nums: List[int], k: int) -> int:
 
-    for _ in range(k):
-        result.append(-heappop(negative_list))
+        min_heap = []
 
-    return result</code></pre>
+        for i in range(k):
+            heappush(min_heap, nums[i])
+
+        for j in range(k, len(nums)):
+            if nums[j] > min_heap[0]:
+                heappop(min_heap)
+                heappush(min_heap, nums[j])
+
+        return heappop(min_heap)</code></pre>
 
   </div>
   <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/merge-sorted-array">215. Kth Largest Element in an Array</a>
+  </div>
+</div>
 
+<div class="card mb-4" id="heap-6">
+  <div class="card-body">
+    <h2 class="card-title">The skyline problem (H) Interview</h2>
+
+<pre><code class="python">from heapq import heappush, heappop
+
+class Solution:
+    def getSkyline(self, buildings: List[List[int]]) -> List[List[int]]:
+
+        events = []
+
+        # Start building events.
+        for x1, x2, h in buildings:
+            events.append((x1,x2,h))
+
+        # End building events. (Building with 0 heights)
+        for x1, x2, h in buildings:
+            events.append((x2,0,0))
+
+        events.sort(key = lambda x: (x[0], -x[2]))
+
+        result = [[0,0]]  # [x1, h]
+        live = [[0, math.inf]]  # [h, x2]
+
+        for x1, x2, h in events:
+            # Remove all buildings that have ended within intervals.
+            while live[0][1] <= x1:
+                heappop(live)
+
+            # If start event, set the building alive.
+            if h:
+                heappush(live, [-h, x2])
+
+            if result[-1][1] != -live[0][0]:
+                result += [ [x1, -live[0][0]] ]
+
+        return result[1:]
+</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/the-skyline-problem">218. The Skyline Problem</a>
+  </div>
+</div>=
+
+<div class="card mb-4" id="heap-7">
+  <div class="card-body">
+    <h2 class="card-title">Kth smallest element in a sorted matrix (M) (Interview)</h2>
+
+<pre><code class="python">from heapq import heappush, heappop
+
+class Solution:
+    def kthSmallest(self, matrix: List[List[int]], k: int) -> int:
+
+        # 1  5  9
+        # 10 11 13
+        # 12 13 15
+
+        # Kth smallest among N sorted rows
+
+        n = len(matrix)
+        m = len(matrix[0])
+        min_heap = []
+
+        for i in range(min(n,k)):
+            heappush(min_heap, (matrix[i][0], i, 0))
+
+        val = min_heap[0][0]
+        for _ in range(k):
+            val, i, j = heappop(min_heap)
+            if j < m-1:
+                heappush(min_heap, (matrix[i][j+1], i, j+1))
+
+        return val</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/kth-smallest-element-in-a-sorted-matrix">378. Kth Smallest Element in a Sorted Matrix</a>
   </div>
 </div>
 <!-- Heap END -->
