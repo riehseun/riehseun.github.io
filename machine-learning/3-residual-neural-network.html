@@ -24,8 +24,10 @@
 <script src="/js/jquery.min.js"></script>
 <script src="/js/bootstrap.bundle.min.js"></script>
 <script src="/js/highlight.pack.js"></script>
-<script type="text/javascript" src="/js/include_html.js"></script>
-<script type="text/javascript" src="/js/site.js"></script>
+<script src="/js/include_html.js" type="text/javascript"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script src="/js/site.js" type="text/javascript"></script>
 
 </head>
 
@@ -53,14 +55,21 @@
 <div class="card mb-4" id="residual-neural-network-1">
   <div class="card-body">
     <h2 class="card-title">Residual neural network</h2>
-    <p class="card-text"></p>
-
     <ul>
-      <li>Take shortcuts and skips intermediate connections.</li>
       <li>ResNet makes it easy to learn identity function.</li>
       <li>Skip connection helps with vanishing gradients.</li>
     </ul>
 
+    <h3 class="card-title">Residual block</h3>
+    <ul>
+      <li>To compute \( a^{[l+2]} \) using \( a^{[l]} \), the following computation needs to be performed.</li>
+      <li>\( z^{[l+1]} = W^{[l+1]}a^{[l]} + b^{[l+1]} \)</li>
+      <li>\( a^{[l+1]} = g(z^{[l+1]}) \)</li>
+      <li>\( z^{[l+2]} = W^{[l+2]}a^{[l+1]} + b^{[l+2]} \)</li>
+      <li>\( a^{[l+2]} = g(z^{[l+2]}) \)</li>
+      <li>Using skip connection, the last equation takes in additional information.</li>
+      <li>\( a^{[l+2]} = g(z^{[l+2]}+W_{s}a^{[l]}) \) where \( W_{s} \) is used to adjust the dimension of \( a^{[l]} \)</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
@@ -70,13 +79,10 @@
 <div class="card mb-4" id="residual-neural-network-2">
   <div class="card-body">
     <h2 class="card-title">1x1 convolution</h2>
-    <p class="card-text"></p>
-
     <ul>
-      <li>Ex. 6x6x32 * 1x1x32 = 6x6xnumber_of_filters.</li>
-      <li>Ex. 28x28x192 * 1x1x32 = 23x23x32 .</li>
+      <li>While pulling layers are used to shrink \( n_{H} \) and \( n_{W} \), 1x1 convoltion is used to shrink \( n_{c} \)</li>
+      <li>Ex. \( 6 \cdot 6 \cdot 32 \) * \( 1 \cdot 1 \cdot 32 \) = \( 6 \cdot 6 \cdot number of filters \)</li>
     </ul>
-
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
@@ -86,21 +92,29 @@
 <div class="card mb-4" id="residual-neural-network-3">
   <div class="card-body">
     <h2 class="card-title">Inception network</h2>
-    <p class="card-text"></p>
-
     <ul>
-      <li>With input 28x28x192, apply 3 different convolutions and 1 max-pooling.</li>
-      <li>
-        <ul>
-          <li>28x28x192 * 1x1 = 28x28x64.</li>
-          <li>28x28x192 * 3x3 (same) = 28x28x128.</li>
-          <li>28x28x192 * 5x5 (same) = 28x28x32.</li>
-          <li>28x28x192 * POOL (same, s=1) = 28x28x32.</li>
-        </ul>
-      </li>
-      <li>Total output is 28x28x256.</li>
+      <li>With \( 28 \cdot 28 \cdot 192 \) input image, apply 3 different convolutions and 1 max-pooling.</li>
+      <ul>
+        <li>\( 28 \cdot 28 \cdot 192 \) image * \( 1 \cdot 1 \) = \( 28 \cdot 28 \cdot 64 \).</li>
+        <li>\( 28 \cdot 28 \cdot 192 \) image * \( 3 \cdot 3 \)(same) = \( 28 \cdot 28 \cdot 128 \)</li>
+        <li>\( 28 \cdot 28 \cdot 192 \) image * \( 5 \cdot 5 \) (same) = \( 28 \cdot 28 \cdot 32 \)</li>
+        <li>\( 28 \cdot 28 \cdot 192 \) image * MAXPOOL (same, s=1) = \( 28 \cdot 28 \cdot 32 \)</li>
+      </ul>
+      <li>Add the outputs to get the total output, which is \( 28 \cdot 28 \cdot 256 \)</li>
     </ul>
 
+    <h2 class="card-title">Reduce computational overhead using 1x1 convolution</h2>
+    <ul>
+      <li>Input: \( 28 \cdot 28 \cdot 192 \)</li>
+      <ul>
+        <li>Use ( 1 \cdot 1, 16, 1 \cdot 1 \cdot 192 \)</li>
+      </ul>
+      <li>Bottleneck block: \( 28 \cdot 28 \cdot 16 \)</li>
+      <ul>
+        <li>Use ( 5 \cdot 5, 32, 5 \cdot 5 \cdot 16 \)</li>
+      </ul>
+      <li>\( 28 \cdot 28 \cdot 32 \)</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
