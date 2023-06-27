@@ -44,19 +44,173 @@
   <div class="card-body">
     <h2 class="card-title">Top K element</h2>
     <ul class="list-unstyled mb-0">
+      <li><a href="#top-k-element-5">Kth largest element in an array</a></li>
+      <li><a href="#top-k-element-6">Kth smallest element in a BST</a></li>
+      <li><a href="#top-k-element-4">Top K frequent elements</a></li>
+      <li><a href="#top-k-element-7">Kth smallest element in sorted matrix</a></li>
       <li><a href="#top-k-element-1">Kth largest element in a stream</a></li>
       <li><a href="#top-k-element-2">Reorganize string</a></li>
       <li><a href="#top-k-element-3">K closest points to origin</a></li>
-      <li><a href="#top-k-element-4">Top K frequent elements</a></li>
-      <li><a href="#top-k-element-5">Kth largest element in an array</a></li>
-      <li><a href="#top-k-element-6">Kth smallest element in a BST</a></li>
     </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="top-k-element-5">
+  <div class="card-body">
+    <h2 class="card-title">Kth largest element in an array (M) (Interview/Liked)</h2>
+
+<pre><code class="python">from heapq import heappush, heappop
+
+class Solution:
+    def findKthLargest(self, nums: List[int], k: int) -> int:
+
+        min_heap = []
+
+        for i in range(k):
+            heappush(min_heap, nums[i])
+
+        for j in range(k, len(nums)):
+            if nums[j] > min_heap[0]:
+                heappop(min_heap)
+                heappush(min_heap, nums[j])
+
+        return heappop(min_heap)</code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/merge-sorted-array">215. Kth Largest Element in an Array</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="top-k-element-6">
+  <div class="card-body">
+    <h2 class="card-title">Kth smallest element in a BST (M) (Interview/Liked)</h2>
+
+<pre><code class="python"># Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+from heapq import heappush, heappop
+
+class Solution:
+    def kthSmallest(self, root: Optional[TreeNode], k: int) -> int:
+
+        # Time: O(nlogk)
+        # Space: O(k)
+
+        # First do inorder traversal on BST.
+        # Insert first K numbers into max heap.
+        # Iterate the rest of the numbers, checking to see if they are smaller than the root of max heap. If so, pop it out and insert the smaller number.
+
+        array = []
+        self.in_order_traversal(root, array)
+
+        max_heap = []
+
+        for i in range(k):
+            heappush(max_heap, -array[i])
+
+        for j in range(k, len(array)):
+            if array[j] < -max_heap[0]:
+                heappop(max_heap)
+                heappush(max_heap, -array[j])
+
+        return -heappop(max_heap)
+
+    def in_order_traversal(self, root, array):
+
+        array.append(root.val)
+
+        if root.left:
+            self.in_order_traversal(root.left, array)
+        if root.right:
+            self.in_order_traversal(root.right, array)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/kth-smallest-element-in-a-bst/">230. Kth Smallest Element in a BST</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="top-k-element-4">
+  <div class="card-body">
+    <h2 class="card-title">Top K frequent elements (M) (Interview/Liked)</h2>
+
+<pre><code class="python">from heapq import heappush, heappop
+from collections import defaultdict
+
+class Solution:
+    def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+
+        # Time: O(nlogk)
+        # Space: O(n+k) hash table and heap
+
+        # Create a hash table with number and its frequency mapping.
+        # Push number and frequency pair to min heap. When min heap size exceeds K, pop out the root item.
+
+        frequency = defaultdict(int)
+
+        for num in nums:
+            frequency[num] += 1
+
+        min_heap = []
+
+        for key,val in frequency.items():
+            heappush(min_heap, [val, key])
+
+            if len(min_heap) > k:
+                heappop(min_heap)
+
+        result = []
+        while min_heap:
+            result.append(heappop(min_heap)[1])
+
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/top-k-frequent-elements/">347. Top K Frequent Elements</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="top-k-element-7">
+  <div class="card-body">
+    <h2 class="card-title">Kth smallest element in a sorted matrix (M) (Interview)</h2>
+
+<pre><code class="python">from heapq import heappush, heappop
+
+class Solution:
+    def kthSmallest(self, matrix: List[List[int]], k: int) -> int:
+
+        # 1  5  9
+        # 10 11 13
+        # 12 13 15
+
+        # Kth smallest among N sorted rows
+
+        n = len(matrix)
+        m = len(matrix[0])
+        min_heap = []
+
+        for i in range(min(n,k)):
+            heappush(min_heap, (matrix[i][0], i, 0))
+
+        val = min_heap[0][0]
+        for _ in range(k):
+            val, i, j = heappop(min_heap)
+            if j < m-1:
+                heappush(min_heap, (matrix[i][j+1], i, j+1))
+
+        return val</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/kth-smallest-element-in-a-sorted-matrix">378. Kth Smallest Element in a Sorted Matrix</a>
   </div>
 </div>
 
 <div class="card mb-4" id="top-k-element-1">
   <div class="card-body">
-    <h2 class="card-title">Kth largest element in a stream</h2>
+    <h2 class="card-title">Kth largest element in a stream (E)</h2>
 
     <h3 class="card-title">Use min heap</h3>
     <ul>
@@ -68,10 +222,11 @@
 
 class KthLargest:
 
-    # Constructor to initialize heap and add values in it.
     # Time O(nlogn).
     # Space O(n).
-    def __init__(self, k, nums):
+
+    # Constructor to initialize heap and add values in it.
+    def __init__(self, k: int, nums: List[int]):
         self.k = k
         self.min_heap = nums
         heapify(self.min_heap)
@@ -81,22 +236,11 @@ class KthLargest:
 
     # Adds element in the heap.
     # Time O(logk).
-    def add(self, val):
+    def add(self, val: int) -> int:
         heappush(self.min_heap, val)
         if len(self.min_heap) > self.k:
             heappop(self.min_heap)
-        return self.return_Kth_largest()
-
-    # Returns kth largest element from heap.
-    # Time O(1).
-    def return_Kth_largest(self):
         return self.min_heap[0]</code></pre>
-
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li>K greater than length of array.</li>
-      <li>Empty array and K=0.</li>
-    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/kth-largest-element-in-a-stream/">703. Kth Largest Element in a Stream</a>
@@ -105,68 +249,60 @@ class KthLargest:
 
 <div class="card mb-4" id="top-k-element-2">
   <div class="card-body">
-    <h2 class="card-title">Reorganize string</h2>
-
-    <h3 class="card-title">Use dictionary and max_heap</h3>
-    <ul>
-      <li>Store frequency of each char in a dictionary.</li>
-      <li>Store each char into max_heap by the frequency.</li>
-      <li>Pop out char from max_heap, decrement the frequency, and add the char to the resulting string.</li>
-      <li>Do not push back the char into the max_heap in the same iteration. Push back in the next interation if the frequency is greater than 0. This is to ensure not to repeat the same char in the resulting string.</li>
-    </ul>
+    <h2 class="card-title">Reorganize string (M)</h2>
 
 <pre><code class="python">from collections import defaultdict
 from heapq import heapify, heappush, heappop
 
-def reorganize_string(input_string):
+class Solution:
+    def reorganizeString(self, s: str) -> str:
 
-    # Time: O(n)
-    # Space: O(1)
+        # Time: O(n)
+        # Space: O(1)
 
-    frequency = defaultdict(str)
-    max_heap = []
-    result_string = ""
+        # Store frequency of each char in a dictionary.
+        # Store each char into max_heap by the frequency.
+        # Pop out char from max_heap, decrement the frequency, and add the char to the resulting string.
+        # Do not push back the char into the max_heap in the same iteration. Push back in the next interation if the frequency is greater than 0. This is to ensure not to repeat the same char in the resulting string.
 
-    for char in input_string:
-        if char in frequency:
-            frequency[char] += 1
-        else:
-            frequency[char] = 1
+        frequency = defaultdict(str)
+        max_heap = []
+        result_string = ""
 
-    for k,v in frequency.items():
-        heappush(max_heap, [-v,k])
+        for char in s:
+            if char in frequency:
+                frequency[char] += 1
+            else:
+                frequency[char] = 1
 
-    previous = None
-    # If previous still exists after max_heap is emptied out, then return empty string.
-    while max_heap or previous:
+        for k,v in frequency.items():
+            heappush(max_heap, [-v,k])
 
-        if previous and len(max_heap) == 0:
-            return ""
+        previous = None
+        # If previous still exists after max_heap is emptied out, then return empty string.
+        while max_heap or previous:
 
-        v, k = heappop(max_heap)
-        v = -v
+            if previous and len(max_heap) == 0:
+                return ""
 
-        # Decrement the frequency.
-        v -= 1
-        result_string += k
+            v, k = heappop(max_heap)
+            v = -v
 
-        # Idea is that char popped out in this interation must not be pushed back
-        # to max_heap in this interation, but the next iteration.
-        if previous:
-            heappush(max_heap, previous)
-            previous = None
+            # Decrement the frequency.
+            v -= 1
+            result_string += k
 
-        # "previous" should be set to most recently used char.
-        if v > 0:
-            previous = [-v,k]
+            # Idea is that char popped out in this interation must not be pushed back
+            # to max_heap in this interation, but the next iteration.
+            if previous:
+                heappush(max_heap, previous)
+                previous = None
 
-    return result_string</code></pre>
+            # "previous" should be set to most recently used char.
+            if v > 0:
+                previous = [-v,k]
 
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li>String with just a single char.</li>
-      <li>Empty string.</li>
-    </ul>
+        return result_string</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/reorganize-string/">767. Reorganize String</a>
@@ -175,205 +311,43 @@ def reorganize_string(input_string):
 
 <div class="card mb-4" id="top-k-element-3">
   <div class="card-body">
-    <h2 class="card-title">K closest points to origin</h2>
-
-    <h3 class="card-title">Pop/push from/to min heap one at a time</h3>
-    <ul>
-      <li>First, push k elements to min heap.</li>
-      <li>Loop through the rest of points, if the dist is smaller than root of min heap, pop and push.</li>
-    </ul>
-
-<pre><code class="python">import math
-
-class Point:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def get(self):
-        return (self.x, self.y)
-
-    def get_distance(self):
-        return math.sqrt(self.x ** 2 + self.y ** 2)</code></pre>
+    <h2 class="card-title">K closest points to origin (M)</h2>
 
 <pre><code class="python">from heapq import heappush, heappop
 
-def k_closest(points, k):
+class Solution:
+    def kClosest(self, points: List[List[int]], k: int) -> List[List[int]]:
 
-    # Time: O(nlogk)
-    # Space: O(k)
+        # Time: O(nlogk)
+        # Space: O(k)
 
-    min_heap = []
+        # First, push k elements to min heap.
+        # Loop through the rest of points, if the dist is smaller than root of min heap, pop and push.
 
-    for i in range(k):
-        heappush(min_heap, [points[i].get_distance(), points[i]])
+        min_heap = []
 
-    for j in range(k+1, len(points)):
-        dist = points[j].get_distance()
-        if dist < min_heap[-1][0]:
-            heappop(min_heap)
-            heappush(min_heap, [points[j].get_distance(), points[j]])
+        for i in range(k):
+            heappush(min_heap, [self.get_distance(points[i]), points[i]])
 
-    result = []
-    while min_heap:
-        dist, point = heappop(min_heap)
-        result.append(point)
+        for j in range(k+1, len(points)):
+            dist = self.get_distance(points[j])
+            if dist < min_heap[-1][0]:
+                heappop(min_heap)
+                heappush(min_heap, [self.get_distance(points[j]), points[j]])
 
-    return result</code></pre>
+        result = []
+        while min_heap:
+            dist, point = heappop(min_heap)
+            result.append(point)
 
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li>K bigger than length of input array.</li>
-    </ul>
+        return result
+
+    def get_distance(self, point):
+        num = (point[0]-point[1]) ** 2
+        return math.sqrt(num)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/k-closest-points-to-origin/">973. K Closest Points to Origin</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="top-k-element-4">
-  <div class="card-body">
-    <h2 class="card-title">Top K frequent elements</h2>
-
-    <h3 class="card-title">Use min heap of size K</h3>
-    <ul>
-      <li>Create a hash table with number and its frequency mapping.</li>
-      <li>Push number and frequency pair to min heap. When min heap size exceeds K, pop out the root item.</li>
-    </ul>
-
-<pre><code class="python">from heapq import heappush, heappop
-from collections import defaultdict
-
-def top_k_frequent(arr, k):
-
-    # Time: O(nlogk)
-    # Space: O(n+k) hash table and heap
-
-    frequency = defaultdict(int)
-
-    for num in arr:
-        frequency[num] += 1
-
-    min_heap = []
-
-    for key,val in frequency.items():
-        heappush(min_heap, [val, key])
-
-        if len(min_heap) > k:
-            heappop(min_heap)
-
-    result = []
-    while min_heap:
-        result.append(heappop(min_heap)[1])
-
-    return result</code></pre>
-
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li>K bigger than length of input array.</li>
-      <li>K bigger than the number of unique numbers in the input array.</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/top-k-frequent-elements/">347. Top K Frequent Elements</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="top-k-element-5">
-  <div class="card-body">
-    <h2 class="card-title">Kth largest element in an array</h2>
-
-    <h3 class="card-title">Use min heap of size K</h3>
-    <ul>
-      <li>Insert first K numbers into min heap.</li>
-      <li>Iterate the rest of the numbers, checking to see if they are greater than the root of min heap. If so, pop it out and insert the greater number.</li>
-    </ul>
-
-<pre><code class="python">from heapq import heappush, heappop
-
-def find_kth_largest(arr, k):
-
-    # Time: O(nlogk)
-    # Space: O(k)
-
-    min_heap = []
-
-    for i in range(k):
-        heappush(min_heap, arr[i])
-
-    for j in range(k, len(arr)):
-        if arr[j] > min_heap[0]:
-            heappop(min_heap)
-            heappush(min_heap, arr[j])
-
-    return heappop(min_heap)</code></pre>
-
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li>K bigger than length of input array.</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/kth-largest-element-in-an-array/">215. Kth Largest Element in an Array</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="top-k-element-6">
-  <div class="card-body">
-    <h2 class="card-title">Kth smallest element in a BST</h2>
-
-    <h3 class="card-title">Use min heap of size K</h3>
-    <ul>
-      <li>First do inorder traversal on BST.</li>
-      <li>Insert first K numbers into max heap.</li>
-      <li>Iterate the rest of the numbers, checking to see if they are smaller than the root of max heap. If so, pop it out and insert the smaller number.</li>
-    </ul>
-
-<pre><code class="python">class BinaryTreeNode:
-    def __init__(self, data):
-        self.data = data
-        self.left = None
-        self.right = None</code></pre>
-
-<pre><code class="python">from binary_tree_node import *
-from binary_tree import *
-from heapq import heappush, heappop
-
-def kth_smallest_element(root, k):
-
-    # Time: O(nlogk)
-    # Space: O(k)
-
-    array = []
-    in_order_traversal(root, array)
-
-    max_heap = []
-
-    for i in range(k):
-        heappush(max_heap, -array[i])
-
-    for j in range(k, len(array)):
-        if array[j] < -max_heap[0]:
-            heappop(max_heap)
-            heappush(max_heap, -array[j])
-
-    return -heappop(max_heap)
-
-def in_order_traversal(root, array):
-    array.append(root.data)
-
-    if root.left:
-        in_order_traversal(root.left, array)
-    if root.right:
-        in_order_traversal(root.right, array)</code></pre>
-
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li>K bigger than length of input tree.</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/kth-smallest-element-in-a-bst/">230. Kth Smallest Element in a BST</a>
   </div>
 </div>
 <!-- Top K element END -->
