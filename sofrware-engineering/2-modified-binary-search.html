@@ -45,252 +45,99 @@
     <h2 class="card-title">Modified binary search</h2>
     <ul class="list-unstyled mb-0">
       <li><a href="#modified-binary-search-1">Search in rotated sorted array</a></li>
-      <li><a href="#modified-binary-search-2">First bad version</a></li>
-      <li><a href="#modified-binary-search-3">Find K closest elements</a></li>
-      <li><a href="#modified-binary-search-4">Single element in a sorted array</a></li>
-      <li><a href="#modified-binary-search-5">Search in rotated sorted array II</a></li>
       <li><a href="#modified-binary-search-6">Find first and last position of element in sorted array</a></li>
+      <li><a href="#modified-binary-search-5">Search in rotated sorted array II</a></li>
       <li><a href="#modified-binary-search-7">Find peak element</a></li>
+      <li><a href="#modified-binary-search-2">First bad version</a></li>
+      <li><a href="#modified-binary-search-4">Single element in a sorted array</a></li>
+      <li><a href="#modified-binary-search-3">Find K closest elements</a></li>
     </ul>
   </div>
 </div>
 
 <div class="card mb-4" id="modified-binary-search-1">
   <div class="card-body">
-    <h2 class="card-title">Search in rotated sorted array</h2>
+    <h2 class="card-title">Search in rotated sorted array (M) (Interview/Liked)</h2>
 
-    <h3 class="card-title">First implement binary search, then modify</h3>
+<pre><code class="python">class Solution:
+    def search(self, nums: List[int], target: int) -> int:
+        return self.binary_search(nums, 0, len(nums)-1, target)
 
-<pre><code class="python">def binary_search_rotated(nums, target):
+    def binary_search(self, nums, low, high, target):
 
-    return binary_search(nums, 0, len(nums)-1, target)
+        # Time: O(logn)
+        # Space: O(1)
 
-def binary_search(nums, low, high, target):
+        # If regular binary search.
+        # if target > nums[mid]:
+        #     return binary_search(nums, mid+1, high, target)
+        # elif target < nums[mid]:
+        #     return binary_search(nums, low, mid-1, target)
+        # else:
+        #     return mid
 
-    # Time: O(logn)
-    # Space: O(1)
+        if low > high:
+            return -1
 
-    if low > high:
-        return -1
+        mid = low + (high - low) / 2
+        mid = int(mid)
 
-    mid = low + (high - low) / 2
-    mid = int(mid)
+        if nums[mid] == target:
+            return mid
 
-    # If regular binary search.
-    # if target > nums[mid]:
-    #     return binary_search(nums, mid+1, high, target)
-    # elif target < nums[mid]:
-    #     return binary_search(nums, low, mid-1, target)
-    # else:
-    #     return mid
-
-    if nums[mid] == target:
-        return mid
-
-    if nums[low] <= nums[mid]:
-        if nums[low] <= target and target < nums[mid]:
-            return binary_search(nums, low, mid-1, target)
+        if nums[low] <= nums[mid]:
+            if nums[low] <= target and target < nums[mid]:
+                return self.binary_search(nums, low, mid-1, target)
+            else:
+                return self.binary_search(nums, mid+1, high, target)
         else:
-            return binary_search(nums, mid+1, high, target)
-    else:
-        if nums[mid] < target and target <= nums[high]:
-            return binary_search(nums, mid+1, high, target)
-        else:
-            return binary_search(nums, low, mid-1, target)</code></pre>
-
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li>Array with a single element.</li>
-      <li>Search for an element that does not exist in array.</li>
-    </ul>
+            if nums[mid] < target and target <= nums[high]:
+                return self.binary_search(nums, mid+1, high, target)
+            else:
+                return self.binary_search(nums, low, mid-1, target)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/search-in-rotated-sorted-array/">33. Search in Rotated Sorted Array</a>
   </div>
 </div>
 
-<div class="card mb-4" id="modified-binary-search-2">
-  <div class="card-body">
-    <h2 class="card-title">First bad version</h2>
-
-    <h3 class="card-title">First implement binary search, then modify</h3>
-
-<pre><code class="python">def first_bad_version(n):
-
-    return search(n, 1, n, 0)
-
-# "is_bad_version" is given.
-def search(n, low, high, count):
-
-    # Time: O(logn)
-    # Space: O(1)
-
-    if low > high:
-        return low, count
-
-    mid = low + (high-low) / 2
-    mid = int(mid)
-    version = is_bad_version(mid)
-    if version:
-        count += 1
-        return search(n, low, mid-1, count)
-    else:
-        return search(n, mid+1, high, count)</code></pre>
-
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li>What if there is no bad version.</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/first-bad-version/">278. First Bad Version</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="modified-binary-search-3">
-  <div class="card-body">
-    <h2 class="card-title">Find K closest elements</h2>
-
-    <h3 class="card-title">Use binary search to find the closest element</h3>
-
-<pre><code class="python">def find_closest_elements(nums, k, num):
-
-    # Time: O(logn+k)
-    # Space: O(1)
-
-    index = binary_search(nums, 0, len(nums)-1, num)
-
-    left = index - 1
-    right = index
-
-    while right - left - 1 < k:
-        # check for out of bounds
-        if left == -1:
-            right += 1
-            continue
-
-        if right == len(nums) \
-            or abs(nums[left] - num) <= abs(nums[right] - num):
-            left -= 1
-        else:
-            right += 1
-
-    return nums[left+1:right]
-
-def binary_search(nums, low, high, target):
-
-    if low > high:
-        return low
-
-    mid = low + (high - low) / 2
-    mid = int(mid)
-
-    if target > nums[mid]:
-        return binary_search(nums, mid+1, high, target)
-    elif target < nums[mid]:
-        return binary_search(nums, low, mid-1, target)
-    else:
-        return mid</code></pre>
-
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li>K exceeds the length of array.</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/find-k-closest-elements/">658. Find K Closest Elements</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="modified-binary-search-4">
-  <div class="card-body">
-    <h2 class="card-title">Single element in a sorted array</h2>
-
-    <h3 class="card-title">Use binary search and update left or right in each recursive call</h3>
-
-<pre><code class="python">def single_non_duplicate(nums):
-
-    return search(nums, 0, len(nums)-1)
-
-def search(nums, left, right):
-
-    # Time: O(logn)
-    # Space: O(1)
-
-    if left >= right:
-        return nums[left]
-
-    mid = left + (right-left) // 2
-    if mid % 2 != 0:
-        mid -= 1
-
-    if nums[mid] == nums[mid+1]:
-        left = mid + 2
-    else:
-        right = mid
-
-    return search(nums, left, right)</code></pre>
-
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li>More than one single element.</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/single-element-in-a-sorted-array/">540. Single Element in a Sorted Array</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="modified-binary-search-5">
-  <div class="card-body">
-    <h2 class="card-title">Search in rotated sorted array II</h2>
-
-    <h3 class="card-title">First implement binary search, then modify</h3>
-
-<pre><code class="python">def search(arr, t):
-
-    return search_helper(arr, 0, len(arr)-1, t)
-
-def search_helper(arr, low, high, t):
-
-    # Time: O(logn)
-    # Space: O(1)
-
-    if low > high:
-        return False
-
-    mid = low + (high-low) // 2
-
-    if arr[mid] == t:
-        return True
-
-    if arr[low] <= arr[mid]:
-        if arr[low] <= t and t < arr[mid]:
-            return search_helper(arr, low, mid-1, t)
-        else:
-            return search_helper(arr, mid+1, high, t)
-    else:
-        if arr[mid] < t and t <= arr[high]:
-            return search_helper(arr, mid+1, high, t)
-        else:
-            return search_helper(arr, low, mid-1, t)</code></pre>
-
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li>Array with a single element.</li>
-      <li>Search for an element that does not exist in array.</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/search-in-rotated-sorted-array-ii/">81. Search in Rotated Sorted Array II</a>
-  </div>
-</div>
-
 <div class="card mb-4" id="modified-binary-search-6">
   <div class="card-body">
-    <h2 class="card-title">Find first and last position of element in sorted array</h2>
+    <h2 class="card-title">Find first and last position of element in sorted array (M) (Interview/Liked)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def searchRange(self, nums: List[int], target: int) -> List[int]:
+        return self.binary_search(nums, 0, len(nums)-1, target)
+
+    def binary_search(self, nums, low, high, target):
+
+        if low > high:
+            return [-1, -1]
+
+        mid = low + (high - low) / 2
+        mid = int(mid)
+
+        if target > nums[mid]:
+            return self.binary_search(nums, mid+1, high, target)
+        elif target < nums[mid]:
+            return self.binary_search(nums, low, mid-1, target)
+        else:
+            # return mid
+            start = mid
+            while nums[mid] == nums[start]:
+                start -= 1
+                if start < 0:
+                    break
+            start += 1
+
+            end = mid
+            while nums[mid] == nums[end]:
+                end += 1
+                if end >= len(nums):
+                    break
+            end -= 1
+
+            return [start, end]</code></pre>
 
   </div>
   <div class="card-footer text-muted">
@@ -298,15 +145,184 @@ def search_helper(arr, low, high, t):
   </div>
 </div>
 
+<div class="card mb-4" id="modified-binary-search-5">
+  <div class="card-body">
+    <h2 class="card-title">Search in rotated sorted array II (M)</h2>
+
+<pre><code class="python">class Solution:
+    def search(self, nums: List[int], target: int) -> bool:
+        return self.search_helper(nums, 0, len(nums)-1, target)
+
+    def search_helper(self, arr, low, high, t):
+
+        # Time: O(logn)
+        # Space: O(1)
+
+        if low > high:
+            return False
+
+        mid = low + (high-low) // 2
+
+        if arr[mid] == t:
+            return True
+
+        if arr[low] <= arr[mid]:
+            if arr[low] <= t and t < arr[mid]:
+                return self.search_helper(arr, low, mid-1, t)
+            else:
+                return self.search_helper(arr, mid+1, high, t)
+        else:
+            if arr[mid] < t and t <= arr[high]:
+                return self.search_helper(arr, mid+1, high, t)
+            else:
+                return self.search_helper(arr, low, mid-1, t)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/search-in-rotated-sorted-array-ii/">81. Search in Rotated Sorted Array II</a>
+  </div>
+</div>
+
 <div class="card mb-4" id="modified-binary-search-7">
   <div class="card-body">
-    <h2 class="card-title">Find peak element</h2>
+    <h2 class="card-title">Find peak element (M) (Interview)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def findPeakElement(self, nums: List[int]) -> int:
+
+        # Binary search trying to find local max.
+        return self.helper(0, len(nums)-1, nums)
+
+    def helper(self, low, high, nums):
+
+        # mid = low + (high-low) // 2
+        mid1 = int((low+high)/2)
+        mid2 = mid1 + 1
+
+        if low == high:
+            return low
+
+        if nums[mid1] > nums[mid2]:
+            return self.helper(low, mid1, nums)
+        else:
+            return self.helper(mid2, high, nums)</code></pre>
 
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/find-peak-element">162. Find Peak Element</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="modified-binary-search-2">
+  <div class="card-body">
+    <h2 class="card-title">First bad version (E)</h2>
+
+<pre><code class="python"># The isBadVersion API is already defined for you.
+# def isBadVersion(version: int) -> bool:
+
+class Solution:
+    def firstBadVersion(self, n: int) -> int:
+        return self.search(n, 1, n, 0)
+
+    def search(self, n, low, high, count):
+
+        # Time: O(logn)
+        # Space: O(1)
+
+        if low > high:
+            return low, count
+
+        mid = low + (high-low) / 2
+        mid = int(mid)
+        version = isBadVersion(mid)
+        if version:
+            count += 1
+            return self.search(n, low, mid-1, count)
+        else:
+            return self.search(n, mid+1, high, count)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/first-bad-version/">278. First Bad Version</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="modified-binary-search-4">
+  <div class="card-body">
+    <h2 class="card-title">Single element in a sorted array (M)</h2>
+
+<pre><code class="python">class Solution:
+    def singleNonDuplicate(self, nums: List[int]) -> int:
+        return self.search(nums, 0, len(nums)-1)
+
+    def search(self, nums, left, right):
+
+        # Time: O(logn)
+        # Space: O(1)
+
+        if left >= right:
+            return nums[left]
+
+        mid = left + (right-left) // 2
+        if mid % 2 != 0:
+            mid -= 1
+
+        if nums[mid] == nums[mid+1]:
+            left = mid + 2
+        else:
+            right = mid
+
+        return self.search(nums, left, right)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/single-element-in-a-sorted-array/">540. Single Element in a Sorted Array</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="modified-binary-search-3">
+  <div class="card-body">
+    <h2 class="card-title">Find K closest elements (M)</h2>
+
+<pre><code class="python">class Solution:
+    def findClosestElements(self, nums: List[int], k: int, num: int) -> List[int]:
+
+        # Time: O(logn+k)
+        # Space: O(1)
+
+        index = self.binary_search(nums, 0, len(nums)-1, num)
+
+        left = index - 1
+        right = index
+
+        while right - left - 1 < k:
+            # check for out of bounds
+            if left == -1:
+                right += 1
+                continue
+
+            if right == len(nums) \
+                or abs(nums[left] - num) <= abs(nums[right] - num):
+                left -= 1
+            else:
+                right += 1
+
+        return nums[left+1:right]
+
+    def binary_search(self, nums, low, high, target):
+
+        if low > high:
+            return low
+
+        mid = low + (high - low) / 2
+        mid = int(mid)
+
+        if target > nums[mid]:
+            return self.binary_search(nums, mid+1, high, target)
+        elif target < nums[mid]:
+            return self.binary_search(nums, low, mid-1, target)
+        else:
+            return mid</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/find-k-closest-elements/">658. Find K Closest Elements</a>
   </div>
 </div>
 <!-- Modified binary search END -->
