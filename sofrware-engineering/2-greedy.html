@@ -44,46 +44,105 @@
   <div class="card-body">
     <h2 class="card-title">Greedy</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#greedy-1">Jump game I</a></li>
-      <li><a href="#greedy-2">Boats to save people</a></li>
-      <li><a href="#greedy-3">Gas stations</a></li>
-      <li><a href="#greedy-4">Two city scheduling</a></li>
       <li><a href="#greedy-5">Jump Game II</a></li>
+      <li><a href="#greedy-1">Jump game I</a></li>
+      <li><a href="#greedy-3">Gas stations</a></li>
+      <li><a href="#greedy-2">Boats to save people</a></li>
+      <li><a href="#greedy-4">Two city scheduling</a></li>
     </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="greedy-5">
+  <div class="card-body">
+    <h2 class="card-title">Jump Game II (M) (Liked)</h2>
+
+<pre><code class="python">class Solution:
+    def jump(self, nums: List[int]) -> int:
+
+        # Time O(n)
+        # Space O(1)
+        # Compute farthest jump in each interation and update current jump to farthest jump when needed.
+
+        farthest_jump = 0  # Farthest index we can reach.
+        current_jump = 0  # End index of current jump.
+        num_jumps = 0
+
+        for i in range(len(nums)-1):
+            farthest_jump = max(farthest_jump, nums[i]+i)
+            if i == current_jump:
+                current_jump = farthest_jump
+                num_jumps += 1
+
+        return num_jumps</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/jump-game-ii/">45. Jump Game II</a>
   </div>
 </div>
 
 <div class="card mb-4" id="greedy-1">
   <div class="card-body">
-    <h2 class="card-title">Jump game I</h2>
+    <h2 class="card-title">Jump game (M) (Interview/Liked)</h2>
 
-    <h3 class="card-title">Loop backwards and update target index.</h3>
-    <ul>
-      <li>Target number is initially at last index.</li>
-      <li>Time: O(n)</li>
-      <li>Space: O(1)</li>
-    </ul>
+<pre><code class="python">class Solution:
+    def canJump(self, nums: List[int]) -> bool:
 
-<pre><code class="python">def jump_game(nums):
+        # Time O(n)
+        # Space O(1)
 
-    target_index = len(nums)-1
+        # Loop backwards and update target index.
+        # Target number is initially at last index.
 
-    for i in range(len(nums)-2, -1, -1):
-        if nums[i] + i >= target_index:
-            target_index = i
+        target_index = len(nums)-1
 
-    if target_index == 0:
-        return True
+        for i in range(len(nums)-2, -1, -1):
+            if nums[i] + i >= target_index:
+                target_index = i
 
-    return False</code></pre>
+        if target_index == 0:
+            return True
 
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li></li>
-    </ul>
+        return False</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/jump-game/">55. Jump Game</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="greedy-3">
+  <div class="card-body">
+    <h2 class="card-title">Gas stations (M) (Interview)</h2>
+
+<pre><code class="python">class Solution:
+    def canCompleteCircuit(self, gas: List[int], cost: List[int]) -> int:
+
+        # Time: O(n)
+        # Space: O(1)
+
+        # If sum(gas) >= sum(cost), there is enough gas to make a trip from at least one index.
+        # Solution is guaranteed to be unique from the problem.
+
+        # If this condition is not met, there is at least one index
+        # where the trip can be started with enough gas.
+
+        if sum(gas) < sum(cost):
+            return -1
+
+        n = len(gas)
+        accumulated_gas = 0
+        starting_index = 0
+
+        for i in range(n):
+            accumulated_gas += (gas[i]-cost[i])
+            if accumulated_gas < 0:
+                accumulated_gas = 0
+                starting_index = i + 1
+
+        return starting_index</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/gas-station/">134. Gas Station</a>
   </div>
 </div>
 
@@ -128,47 +187,6 @@
   </div>
 </div>
 
-<div class="card mb-4" id="greedy-3">
-  <div class="card-body">
-    <h2 class="card-title">Gas stations</h2>
-
-    <h3 class="card-title">Compare total gas and total cost</h3>
-    <ul>
-      <li>If sum(gas) >= sum(cost), there is enough gas to make a trip from at least one index.</li>
-      <li>Solution is guaranteed to be unique from the problem.</li>
-      <li>Time: O(n)</li>
-      <li>Space: O(1)</li>
-    </ul>
-
-<pre><code class="python">def gas_station_journey(gas, cost):
-
-    # If this condition is not met, there is at least one index
-    # where the trip can be started with enough gas.
-    if sum(gas) < sum(cost):
-        return -1
-
-    n = len(gas)
-    accumulated_gas = 0
-    starting_index = 0
-
-    for i in range(n):
-        accumulated_gas += (gas[i]-cost[i])
-        if accumulated_gas < 0:
-            accumulated_gas = 0
-            starting_index = i + 1
-
-    return starting_index</code></pre>
-
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li></li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/gas-station/">134. Gas Station</a>
-  </div>
-</div>
-
 <div class="card mb-4" id="greedy-4">
   <div class="card-body">
     <h2 class="card-title">Two city scheduling</h2>
@@ -206,41 +224,6 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/two-city-scheduling/">1029. Two City Scheduling</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="greedy-5">
-  <div class="card-body">
-    <h2 class="card-title">Jump Game II</h2>
-
-    <h3 class="card-title">Use farthest jump and current jump</h3>
-    <ul>
-      <li>Compute farthest jump in each interation and update current jump to farthest jump when needed.</li>
-      <li>Time: O(n)</li>
-      <li>Space: O(1)</li>
-    </ul>
-
-<pre><code class="python">def jump_game_two(nums):
-
-    farthest_jump = 0  # Farthest index we can reach.
-    current_jump = 0  # End index of current jump.
-    num_jumps = 0
-
-    for i in range(len(nums)-1):
-        farthest_jump = max(farthest_jump, nums[i]+i)
-        if i == current_jump:
-            current_jump = farthest_jump
-            num_jumps += 1
-
-    return num_jumps</code></pre>
-
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li></li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/jump-game-ii/">45. Jump Game II</a>
   </div>
 </div>
 <!-- Greedy END -->
