@@ -57,9 +57,85 @@
 
 <div class="card mb-4" id="backtracking-5">
   <div class="card-body">
-    <h2 class="card-title">Sudoku solver</h2>
+    <h2 class="card-title">Sudoku solver (H)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def solveSudoku(self, board: List[List[str]]) -> None:
+        """
+        Do not return anything, modify board in-place instead.
+        """
+
+        coord = self.get_empty_spot(board)
+
+        # No empty spot means, puzzle is solved.
+        if coord == (-1, -1):
+            return True
+
+        for number in ["1","2","3","4","5","6","7","8","9"]:
+            if self.check_row(board, coord[0], number) \
+                and self.check_col(board, coord[1], number) \
+                and self.check_square(board, coord[0], coord[1], number):
+                # All three conditions met.
+                board[coord[0]][coord[1]] = number
+                if self.solveSudoku(board):
+                    return True
+
+        # If cannot solve the problem using any numbers (1 to 9) in that
+        # coordinate, reset the coordicate and return False.
+        board[coord[0]][coord[1]] = "."
+        return False
+
+    def get_empty_spot(self, board):
+        """
+        Find an empty spot on a board.
+        """
+
+        for row in board:  ## Iterate through rows.
+            for num in row:  ## Iterate through each col in each row.
+                if num == ".":
+                    return (board.index(row), row.index(num))
+
+        return (-1, -1)
+
+    def check_row(self, board, row_num, num):
+        """
+        Check if the number can be inserted into the row.
+        """
+
+        if num in board[row_num]:
+            return False
+
+        return True
+
+    def check_col(self, board, col_num, num):
+        """
+        Check if the number can be inserted into the column.
+        """
+
+        for row in board:
+            if row[col_num] == num:
+                return False
+
+        return True
+
+    def check_square(self, board, row_num, col_num, num):
+        """
+        Check if the number can be inserted into the square.
+        """
+
+        # If row_num = 1, check rows 0-2.
+        # If row_num = 3, check rows 3-5.
+        # If row_num = 8, check rows 6-8.
+
+        row_num = int(3*(math.floor(row_num/3)))
+        col_num = int(3*(math.floor(col_num/3)))
+
+        for i in range(row_num, row_num+3):
+            for j in range(col_num, col_num+3):
+                if board[i][j] == num:
+                    return False
+
+        return True</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/sudoku-solver/">37. Sudoku Solver</a>
@@ -68,10 +144,51 @@
 
 <div class="card mb-4" id="backtracking-1">
   <div class="card-body">
-    <h2 class="card-title">N-Queens</h2>
+    <h2 class="card-title">N-Queens (H) (Liked)</h2>
 
-<pre><code class="python"># Time: O(n^n)
-# Space: O(n)</code></pre>
+<pre><code class="python">class Solution:
+    def solveNQueens(self, n: int) -> List[List[str]]:
+
+        # Time O(n^n)
+        # Space O(n)
+
+        board = []
+        for i in range(n):
+            board.append([])
+            for _ in range(n):
+                board[i].append(".")
+
+        column = set()
+        diag = set()
+        anti_diag = set()
+        result = []
+        self.helper(0, n, board, column, diag, anti_diag, result)
+        return result
+
+    def helper(self, row, n, board, column, diag, anti_diag, result):
+        # If reached the last row, add to the result and return.
+        if row == n:
+            result.append(["".join(row) for row in board])
+            return
+
+        # Try to place a queen in each column.
+        for col in range(n):
+            if col not in column \
+                and row+col not in diag \
+                and row-col not in anti_diag:
+                # Place the queen.
+                board[row][col] = "Q"
+                # Mark column, diag, anti_diag as occupied.
+                column.add(col)
+                diag.add(row+col)
+                anti_diag.add(row-col)
+                # Move on to the next row.
+                self.helper(row+1, n, board, column, diag, anti_diag, result)
+                # Backtrack. Unplace the queen. Unmark column, diag, anti_diag.
+                board[row][col] = '.'
+                column.remove(col)
+                diag.remove(row+col)
+                anti_diag.remove(row-col)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/n-queens/">51. N-Queens</a>
@@ -80,12 +197,49 @@
 
 <div class="card mb-4" id="backtracking-2">
   <div class="card-body">
-    <h2 class="card-title">Word search</h2>
+    <h2 class="card-title">Word search (M) (Interview/Liked)</h2>
 
-    <h3 class="card-title">Sort the array</h3>
+<pre><code class="python">class Solution:
+    def exist(self, board: List[List[str]], word: str) -> bool:
 
-<pre><code class="python"># Time: O(n * 3^m) where n is number of cells and m is the word length
-# Space: (m)</code></pre>
+        # Time O(n * 3^m)
+        # Space (m)
+        # n = number of cells and m is the word length
+
+        # Sort the array.
+
+        n = len(board)  # row.
+        m = len(board[0])  # col.
+        directions = [[0,1],[1,0],[0,-1],[-1,0]]
+
+        for i in range(n):
+            for j in range(m):
+                visited = {(i,j)}
+                if self.helper(board, word, directions, (i,j), n, m, visited, 0):
+                    return True
+
+        return False
+
+    def helper(self, board, word, directions, start, n, m, visited, word_index):
+        if board[start[0]][start[1]] == word[word_index]:
+            if word_index == len(word) - 1:
+                return True
+
+            for x1, y1 in directions:
+                x = start[0] + x1
+                y = start[1] + y1
+                if 0 <= x < n \
+                    and 0 <= y < m \
+                    and (x,y) not in visited:
+                    # Make the move.
+                    visited.add((x,y))
+                    # Move on to the next character in word.
+                    if self.helper(board, word, directions, (x,y), n, m, visited, word_index+1):
+                        return True
+                    # Backtrack.
+                    visited.remove((x,y))
+
+        return False</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/word-search/">79. Word Search</a>
@@ -94,9 +248,44 @@
 
 <div class="card mb-4" id="backtracking-4">
   <div class="card-body">
-    <h2 class="card-title">Restore IP addresses</h2>
+    <h2 class="card-title">Restore IP addresses (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def restoreIpAddresses(self, s: str) -> List[str]:
+
+        # Number of dots should be exactly 3.
+        # When we take 2 or 3 letters make sure first letter shouldn't be zero.
+        # We can only take any number from 0-255.
+
+        # Take 1 number.
+        # Take 2 number but also check if first digit is 0.
+        # Take 3 number but also check if first digit is 0 and number exceeds 255.
+        result = set()
+        self.helper(0, s, 0, "", result)
+        return result
+
+    def helper(self, i, s, num_dots, string, result):
+
+        if i >= len(s):
+            if num_dots > 3:
+                string = string[:-1]
+            if string[-1] != ".":
+                result.add(string)
+            return
+
+        if num_dots > 3:
+            return
+
+        new_string = string + s[i] + '.'
+        self.helper(i+1, s, num_dots+1, new_string, result)
+
+        if s[i] != "0":
+            new_string = string + s[i:i+2] + '.'
+            self.helper(i+2, s, num_dots+1, new_string, result)
+
+        if s[i] != "0" and int(s[i:i+3]) <= 255:
+            new_string = string + s[i:i+3] + '.'
+            self.helper(i+3, s, num_dots+1, new_string, result)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/restore-ip-addresses/">93. Restore IP Addresses</a>
@@ -105,9 +294,26 @@
 
 <div class="card mb-4" id="backtracking-7">
   <div class="card-body">
-    <h2 class="card-title">Palindrome partitioning</h2>
+    <h2 class="card-title">Palindrome partitioning (M) (Interview/Liked)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def partition(self, s: str) -> List[List[str]]:
+        result = []
+        self.helper(s, [], 1, result)
+        return result
+
+    def helper(self, s, path, i, result):
+        if i == len(s) + 1:
+            result.append(list(path))
+            return
+        for j in range(i, len(s)+1):
+            if self.is_palindrome(s[i-1:j]):
+                path.append(s[i-1:j])
+                self.helper(s, path, j+1, result)
+                path.pop()
+
+    def is_palindrome(self, x):
+        return x == x[::-1]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/palindrome-partitioning">131. Palindrome Partitioning</a>
@@ -116,9 +322,28 @@
 
 <div class="card mb-4" id="backtracking-3">
   <div class="card-body">
-    <h2 class="card-title">House robber III</h2>
+    <h2 class="card-title">House robber III (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python"># Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def rob(self, root: Optional[TreeNode]) -> int:
+        return max(self.helper(root))
+
+    def helper(self, root):
+        if root == None:
+            return [0, 0]
+
+        left_subtree = self.helper(root.left)
+        right_subtree  = self.helper(root.right)
+        include_root = root.val + left_subtree[1] + right_subtree[1]
+        exclude_root = max(left_subtree) + max(right_subtree)
+
+        return [include_root, exclude_root]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/house-robber-iii/">337. House Robber III</a>
@@ -127,9 +352,49 @@
 
 <div class="card mb-4" id="backtracking-6">
   <div class="card-body">
-    <h2 class="card-title">Matchsticks to square</h2>
+    <h2 class="card-title">Matchsticks to square (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def makesquare(self, matchsticks: List[int]) -> bool:
+
+        total_length = sum(matchsticks)
+        if total_length % 4 != 0:
+            return False
+
+        side_length = total_length // 4
+        if max(matchsticks) > side_length:
+            return False
+
+        matchsticks.sort()
+        matchsticks.reverse()
+
+        return self.helper(0, matchsticks, [0,0,0,0], side_length)
+
+
+    def helper(self, i, matchsticks, sides, side_length):
+        # Used all the sticks.
+        if i == len(matchsticks):
+
+            formed_square = True
+            for side in sides:
+                if side != side_length:
+                    formed_square = False
+
+            if formed_square:
+                return True
+            else:
+                return False
+
+        for j in range(4):
+            if matchsticks[i] <= side_length - sides[j]:
+                # Use the stick.
+                new_sides = sides.copy()
+                new_sides[j] += matchsticks[i]
+                if self.helper(i+1, matchsticks, new_sides, side_length):
+                    return True
+
+        # If cannot use all the sticks.
+        return False</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/matchsticks-to-square/">473. Matchsticks to Square</a>
