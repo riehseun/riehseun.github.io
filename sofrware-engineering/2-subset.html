@@ -44,86 +44,103 @@
   <div class="card-body">
     <h2 class="card-title">Subset</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#subset-1">Subset</a></li>
-      <li><a href="#subset-2">Permutation</a></li>
-      <li><a href="#subset-3">Find K-sum subsets</a></li>
       <li><a href="#subset-4">Generate parentheses</a></li>
+      <li><a href="#subset-2">Permutation</a></li>
+      <li><a href="#subset-1">Subset</a></li>
+      <li><a href="#subset-3">Find K-sum subsets</a></li>
     </ul>
   </div>
 </div>
 
-<div class="card mb-4" id="subset-1">
+<div class="card mb-4" id="subset-4">
   <div class="card-body">
-    <h2 class="card-title">Subset</h2>
+    <h2 class="card-title">Generate parentheses (M) (Interview/Liked)</h2>
 
-    <h3 class="card-title">Generate binary numbers.</h3>
-    <ul>
-      <li>If bit is 1, include the number. If bit is 0, exclude the number.</li>
-    </ul>
+<pre><code class="python">class Solution:
+    def generateParenthesis(self, n: int) -> List[str]:
+        combinations = []
 
-<pre><code class="python">def find_all_subsets(v):
+        self.subroutine(n, 0, 0, "", combinations)
 
-    # Time: O(n * 2**n)
-    # Space: O(2**n)
+        return combinations
 
-    result = []
-    result.append([])
+    def subroutine(self, n, num_open, num_close, string, combinations):
+        if num_open == n and num_close == n:
+            combinations.append(string)
 
-    num_subset = 2 ** len(v)
+        if num_open < n:
+            # No "return" statement.
+            self.subroutine(n, num_open+1, num_close, string+"(", combinations)
 
-    for i in range(1, num_subset):
-        binary = bin(i)
-        binary = binary.replace("0b","")
-        padding = "0" * (len(v)-len(binary))
-        binary = padding + binary
-        subset = []
-
-        for j, bit in enumerate(binary):
-            if bit == "1":
-                subset.append(v[j])
-        result.append(subset)
-
-    return result</code></pre>
-
-    <h3 class="card-title">Test cases</h3>
-    <ul>
-      <li>Input is empty array.</li>
-    </ul>
+        # Number of closing parenthesie cannot exceed the number of
+        # opening parenthesis at any point to construct valid patterns.
+        if num_close < num_open:
+            # No "return" statement.
+            self.subroutine(n, num_open, num_close+1, string+")", combinations)</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/subsets/">78. Subsets</a>
+    Reference: <a href="https://leetcode.com/problems/generate-parentheses">22. Generate Parentheses</a>
   </div>
 </div>
 
 <div class="card mb-4" id="subset-2">
   <div class="card-body">
-    <h2 class="card-title">Permutation</h2>
+    <h2 class="card-title">Permutation (M) (Interview/Liked)</h2>
 
-    <h3 class="card-title">Swap the chars in the string to compute permutation</h3>
+<pre><code class="python">class Solution:
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        result = []
+        self.permute_helper(result, nums, 0, len(nums)-1)
+        return result
 
-<pre><code class="python">def permute_word(word):
-    result = []
-    permute(result, word, 0, len(word)-1)
-    return result
-
-def permute(result, string, start, end):
-
-    # Time: O(n!)
-    # Space: O(n)
-
-    if start == end:
-        result.append(string)
-        return
-    else:
-        for i in range(start, end+1):
-            # Swap two chars in the string.
-            swap_index = list(string)
-            swap_index[i], swap_index[start] = swap_index[start], swap_index[i]
-            string = ''.join(swap_index)
-            permute(result, string, start+1, end)</code></pre>
+    def permute_helper(self, result, nums, start, end):
+        if start == end:
+            result.append(nums)
+            return
+        else:
+            for i in range(start, end+1):
+                nums_copy = nums.copy()
+                nums_copy[i], nums_copy[start] = nums_copy[start], nums_copy[i]
+                self.permute_helper(result, nums_copy, start+1, end)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/permutations/">46. Permutations</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="subset-1">
+  <div class="card-body">
+    <h2 class="card-title">Subset (M) (Interview/Liked)</h2>
+
+<pre><code class="python">class Solution:
+    def subsets(self, nums: List[int]) -> List[List[int]]:
+
+        # Time: O(n * 2**n)
+        # Space: O(2**n)
+
+        # If bit is 1, include the number. If bit is 0, exclude the number.
+
+        result = []
+        result.append([])
+
+        num_subset = 2 ** len(nums)
+
+        for i in range(1, num_subset):
+            binary = bin(i)
+            binary = binary.replace("0b","")
+            padding = "0" * (len(nums)-len(binary))
+            binary = padding + binary
+            subset = []
+
+            for j, bit in enumerate(binary):
+                if bit == "1":
+                    subset.append(nums[j])
+            result.append(subset)
+
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/subsets/">78. Subsets</a>
   </div>
 </div>
 
@@ -169,17 +186,6 @@ def find_all_subsets(v):
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.educative.io/path/ace-python-coding-interview">Ace the Python Coding Interview</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="subset-4">
-  <div class="card-body">
-    <h2 class="card-title">Generate parentheses</h2>
-
-<pre><code class="python"></code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/generate-parentheses">22. Generate Parentheses</a>
   </div>
 </div>
 <!-- Subset END -->
