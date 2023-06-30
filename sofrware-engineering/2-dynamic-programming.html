@@ -61,9 +61,66 @@
 
 <div class="card mb-4" id="dynamicprogramming-6">
   <div class="card-body">
-    <h2 class="card-title">Regular expression matching</h2>
+    <h2 class="card-title">Regular expression matching (H) (Interview)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def isMatch(self, s: str, p: str) -> bool:
+
+        # Initialize 2D array.
+        dp = []
+        for i in range(0, len(s)+1):
+            dp.append([])
+            for j in range(0, len(p)+1):
+                dp[i].append(" ")
+
+        # An empty pattern always mathes an empty string.
+        dp[0][0] = "Y"
+
+        #       a a b a a a
+        #     0 1 2 3 4 5 6
+        #   0 Y N N N N N N
+        # a 1 N Y N N N N N
+        # * 2 Y Y Y N N N N
+        # ? 3 Y Y N N N N N
+
+        # First row for a pattern to match an empty char in string.
+        for i in range(1, len(s)+1):
+            dp[i][0] = "N"
+
+        # First column for an empty char in pattern to match any char
+        # in string.
+        for i in range(1, len(p)+1):
+            if p[i-1] == "*":
+                dp[0][j] = dp[0][j-1]
+            else:
+                dp[0][j] = "N"
+
+        # for i in range(0, len(s)+1):
+        #     for j in range(0, len(p)+1):
+        #         print(dp[i][j])
+        #     print("\n")
+
+        for i in range(1, len(s)+1):
+            for j in range(1, len(p)+1):
+                if s[i-1] == p[j-1] or p[j-1] == "?":
+                    dp[i][j] = dp[i-1][j-1]
+                elif p[j-1] == "*":
+                    if dp[i-1][j] == "Y" or dp[i][j-1] == "Y":
+                        dp[i][j] = "Y"
+                    else:
+                        dp[i][j] = "N"
+                else:
+                    dp[i][j] = "N"
+
+        for i in range(0, len(s)+1):
+            for j in range(0, len(p)+1):
+                print(dp[i][j])
+            print("\n")
+
+        if dp[len(s)][len(p)] == "Y":
+            return True
+        else:
+            return False</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/regular-expression-matching">10. Regular Expression Matching</a>
@@ -72,9 +129,66 @@
 
 <div class="card mb-4" id="dynamicprogramming-7">
   <div class="card-body">
-    <h2 class="card-title">Wildcard matching</h2>
+    <h2 class="card-title">Wildcard matching (H) (Interview)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def isMatch(self, s: str, p: str) -> bool:
+
+        # Initialize 2D array.
+        dp = []
+        for i in range(0, len(s)+1):
+            dp.append([])
+            for j in range(0, len(p)+1):
+                dp[i].append(" ")
+
+        # An empty pattern always mathes an empty string.
+        dp[0][0] = "Y"
+
+        #       a a b a a a
+        #     0 1 2 3 4 5 6
+        #   0 Y N N N N N N
+        # a 1 N Y N N N N N
+        # * 2 Y Y Y N N N N
+        # ? 3 Y Y N N N N N
+
+        # First row for a pattern to match an empty char in string.
+        for i in range(1, len(s)+1):
+            dp[i][0] = "N"
+
+        # First column for an empty char in pattern to match any char
+        # in string.
+        for j in range(1, len(p)+1):
+            if p[j-1] == "*":
+                dp[0][j] = dp[0][j-1]
+            else:
+                dp[0][j] = "N"
+
+        # for i in range(0, len(s)+1):
+        #     for j in range(0, len(p)+1):
+        #         print(dp[i][j])
+        #     print("\n")
+
+        for i in range(1, len(s)+1):
+            for j in range(1, len(p)+1):
+                if s[i-1] == p[j-1] or p[j-1] == "?":
+                    dp[i][j] = dp[i-1][j-1]
+                elif p[j-1] == "*":
+                    if dp[i-1][j] == "Y" or dp[i][j-1] == "Y":
+                        dp[i][j] = "Y"
+                    else:
+                        dp[i][j] = "N"
+                else:
+                    dp[i][j] = "N"
+
+        for i in range(0, len(s)+1):
+            for j in range(0, len(p)+1):
+                print(dp[i][j])
+            print("\n")
+
+        if dp[len(s)][len(p)] == "Y":
+            return True
+        else:
+            return False</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/wildcard-matching">44. Wildcard Matching</a>
@@ -83,9 +197,38 @@
 
 <div class="card mb-4" id="dynamicprogramming-8">
   <div class="card-body">
-    <h2 class="card-title">Unique paths</h2>
+    <h2 class="card-title">Unique paths (M) (Interview/Liked)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def uniquePaths(self, m: int, n: int) -> int:
+
+        # Each cell container the number of unique path leading
+        # up to it. The value at a cell is the addition of its left
+        # and up cell.
+        #   0 1 2 3 4 5 6 7
+        # 0 0 0 0 0 0 0 0 0
+        # 1 0 1 1 1 1 1 1 1
+        # 2 0 1 2 3 4 5 6 7
+        # 3 0 1 3 6 10 15 21 28
+
+        dp = []
+        for i in range(m+1):
+            dp.append([])
+            for _ in range(n+1):
+                dp[i].append(0)
+
+        for i in range(1,m+1):
+            for j in range(1,n+1):
+                if i == 1 and j == 1:
+                    dp[i][j] = 1
+                else:
+                    dp[i][j] = dp[i-1][j] + dp[i][j-1]
+
+        for i in range(m+1):
+            for j in range(n+1):
+                print(dp[i][j])
+
+        return dp[m][n]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/unique-paths">62. Unique Paths</a>
@@ -94,9 +237,41 @@
 
 <div class="card mb-4" id="dynamicprogramming-9">
   <div class="card-body">
-    <h2 class="card-title">Decode ways</h2>
+    <h2 class="card-title">Decode ways (M) (Interview)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def numDecodings(self, s: str) -> int:
+        # dp[i] = number of ways to parse the string s[:i]
+        # s = "231"
+        # dp[0] = 1
+        # "2" dp[1] = 1
+        # "23" dp[2] = 2
+        # "231" dp[3] = 2
+
+        #     2 3 1
+        #   1 1 2 2
+
+        dp = []
+        for i in range(len(s)+1):
+            dp.append(0)
+
+        dp[0] = 1
+        if s[0] == "0":
+            dp[1] = 0
+        else:
+            dp[1] = 1
+
+        for i in range(2, len(s)+1):
+            if 0 < int(s[i-1:i]) <= 9:
+                dp[i] += dp[i-1]
+
+            if 10 <= int(s[i-2:i]) <= 26:
+                dp[i] += dp[i-2]
+
+        for i in dp:
+            print(i)
+
+        return dp[len(s)]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/decode-ways">91. Decode Ways</a>
@@ -105,9 +280,53 @@
 
 <div class="card mb-4" id="dynamicprogramming-10">
   <div class="card-body">
-    <h2 class="card-title">Word break</h2>
+    <h2 class="card-title">Word break (M) (Interview/Liked)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">from collections import defaultdict
+
+class Solution(object):
+    def wordBreak(self, s, wordDict):
+        """
+        :type s: str
+        :type wordDict: List[str]
+        :rtype: bool
+        """
+
+        occurences = defaultdict(list)
+
+        for word in wordDict:
+
+            start = 0
+            end = len(s)
+            while start < end:
+                index = s.find(word, start, end)
+                if index == -1:
+                    break
+                else:
+                    occurences[index].append(index+len(word))
+                    start = index + 1
+
+        return self.dfs(occurences, 0, len(s))
+
+    def dfs(self, graph, start_node, end_node):
+        explored = set()
+        explored.add(start_node)
+
+        stack = []
+        stack.append(start_node)
+
+        while stack:
+            node = stack.pop()
+            if node in graph:
+                for child_node in graph[node]:
+                    if child_node == end_node:
+                        return True
+
+                    if child_node not in explored:
+                        stack.append(child_node)
+                        explored.add(child_node)
+
+        return False</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/word-break">139. Word Break</a>
@@ -116,9 +335,32 @@
 
 <div class="card mb-4" id="dynamicprogramming-4">
   <div class="card-body">
-    <h2 class="card-title">Word break II</h2>
+    <h2 class="card-title">Word break II (H) (Interview)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def wordBreak(self, s: str, wordDict: List[str]) -> List[str]:
+
+        # dp[i] = all possible outputs for s[:i+1]
+        word_set = set(wordDict)
+        n = len(s)
+
+        dp = []
+        for i in range(n):
+            dp.append([])
+        dp += [[""]]
+
+        for i in range(n):
+            for j in range(i, -1, -1):
+                if s[j:i+1] in word_set:
+                    for sol in dp[j-1]:
+                        dp[i].append(sol+" "+s[j:i+1])
+
+        result = []
+        for string in dp[n-1]:
+            if len(string.strip().replace(" ", "")) == n:
+                result.append(string.strip())
+
+        return result</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/word-break-ii/">140. Word Break II</a>
@@ -127,9 +369,24 @@
 
 <div class="card mb-4" id="dynamicprogramming-11">
   <div class="card-body">
-    <h2 class="card-title">House robber</h2>
+    <h2 class="card-title">House robber (M) (Interview/Liked)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def rob(self, nums: List[int]) -> int:
+
+        # a) rob the current house
+        # b) don't rob the current house
+        # max(current + rob(i-2), rob(i-1))
+
+        prev1 = 0
+        prev2 = 0
+
+        for num in nums:
+            temp = prev1
+            prev1 = max(num+prev2, prev1)
+            prev2 = temp
+
+        return prev1</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/house-robber">198. House Robber</a>
@@ -138,9 +395,39 @@
 
 <div class="card mb-4" id="dynamicprogramming-1">
   <div class="card-body">
-    <h2 class="card-title">Coin change</h2>
+    <h2 class="card-title">Coin change (M) (Interview/Liked)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def coinChange(self, coins: List[int], amount: int) -> int:
+
+        #   0 1 2 3 4 5 6 7 8 9 10 11
+        # 0 0 m m m m m m m m m m  m
+        # 1 0 1 2 3 4 5 6 7 8 9 10 11
+        # 2 0 1 1 2 2 3 3 4 4 5 5  6
+        # 5 0 1 1 2 2 1 2 2 3 3 2  3
+
+        max_amount = 10001
+        dp = []
+        for i in range(amount+1):
+            dp.append([])
+            for _ in range(len(coins)+1):
+                dp[i].append(0)
+
+        for i in range(1, amount+1):
+            dp[i][0] = max_amount
+
+        for i in range(1, amount+1):
+            for j in range(1, len(coins)+1):
+                if i >= coins[j-1]:
+                    dp[i][j] = min(dp[i][j-1], 1+dp[i-coins[j-1]][j])
+                # Amount if less than face value of coin.
+                else:
+                    dp[i][j] = dp[i][j-1]
+
+        if dp[amount][len(coins)] == max_amount:
+            return -1
+
+        return dp[amount][len(coins)]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/coin-change/">322. Coin Change</a>
@@ -149,9 +436,41 @@
 
 <div class="card mb-4" id="dynamicprogramming-3">
   <div class="card-body">
-    <h2 class="card-title">Equal subset sum</h2>
+    <h2 class="card-title">Equal subset sum (M) (Liked)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def canPartition(self, nums: List[int]) -> bool:
+
+        if sum(nums) % 2 != 0:
+            return False
+
+        n = len(nums)
+        m = sum(nums) // 2
+
+        # [1,2,5,2]
+        # dp[i][j] = True if we can pick numbers from nums[:i+1] whose sum equals to the value at j.
+        # dp[i][j] = True means whether dp[i-1][j] is already true or dp[i-1][j-nums[i]] is true
+
+        #     1 2 5 2
+        #   T F F F F
+        # 1 F
+        # 2 F
+        # 3 F
+        # 4 F
+        # 5 F
+
+        dp = []
+        for i in range(n+1):
+            dp.append([])
+            for j in range(m+1):
+                dp[i].append(False)
+        dp[0][0] = True
+
+        for i in range(1,n+1):
+            for j in range(1,m+1):
+                dp[i][j] = dp[i-1][j] or (j >= nums[i-1] and dp[i-1][j-nums[i-1]])
+
+        return dp[n][m]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/partition-equal-subset-sum/">416. Partition Equal Subset Sum</a>
@@ -160,9 +479,39 @@
 
 <div class="card mb-4" id="dynamicprogramming-5">
   <div class="card-body">
-    <h2 class="card-title">Minimum number of refueling stops</h2>
+    <h2 class="card-title">Minimum number of refueling stops (H)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">from heapq import heappush, heappop
+
+class Solution:
+    def minRefuelStops(self, target: int, startFuel: int, stations: List[List[int]]) -> int:
+
+        # dp[t] = furthest distance we can travel with fueling t times.
+        # Then, dp[t+1] = max(dp[t+1], dp[t]+stations[i][1])
+
+        # start = 10, target = 100, [10,60],[20,30],[30,30],[60,40]
+        # 0  1  2  3  4
+        # 10 70 110
+
+        if startFuel >= target:
+            return 0
+
+        if not stations:
+            return -1
+
+        n = len(stations)
+        dp = [startFuel] + [0] * n
+
+        for i in range(n):
+            for t in range(i, -1, -1):
+                if dp[t] >= stations[i][0] and t != n:
+                    dp[t+1] = max(dp[t+1], dp[t]+stations[i][1])
+
+        for t, d in enumerate(dp):
+            if d >= target:
+                return t
+
+        return -1</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/minimum-number-of-refueling-stops/">871. Minimum Number of Refueling Stops</a>
@@ -171,9 +520,24 @@
 
 <div class="card mb-4" id="dynamicprogramming-2">
   <div class="card-body">
-    <h2 class="card-title">Nth tribonacci number</h2>
+    <h2 class="card-title">Nth tribonacci number (E)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def tribonacci(self, n: int) -> int:
+        if n == 0:
+            return 0
+        if n == 1:
+            return 1
+        if n == 2:
+            return 1
+
+        a, b, c = 0, 1, 1
+        output = 0
+        for i in range(3,n+1):
+            output = a + b + c
+            a, b, c = b, c, output
+
+        return output</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/n-th-tribonacci-number/">1137. N-th Tribonacci Number</a>
