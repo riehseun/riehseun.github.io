@@ -46,12 +46,12 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#stack-1">Stack</a></li>
       <li><a href="#stack-2">Evaluate postfix expression</a></li>
-      <li><a href="#stack-3">Next greater element</a></li>
       <li><a href="#stack-4">Balanced parenthesis</a></li>
       <li><a href="#stack-5">Spiral matrix</a></li>
       <li><a href="#stack-6">Evaluate reverse polish notation</a></li>
       <li><a href="#stack-7">Min stack</a></li>
       <li><a href="#stack-8">Basic calculator II</a></li>
+      <li><a href="#stack-3">Next greater element</a></li>
     </ul>
   </div>
 </div>
@@ -104,73 +104,43 @@ stack[-1]</code></pre>
   </div>
 </div>
 
-<div class="card mb-4" id="stack-3">
-  <div class="card-body">
-    <h2 class="card-title">Next greater element</h2>
-
-<pre><code class="python">def next_greater_element(nums):
-
-    stack = []
-    result = [-1] * len(nums)
-
-    for i in range(len(nums)-1, -1, -1):
-
-        if not stack:
-            stack.append(nums[i])
-            continue
-
-        # If current value is larger than top,
-        # then top is the next greater element of current value
-        while stack and stack[-1] < nums[i]:
-            stack.pop()
-
-        if stack:
-            result[i] = stack[-1]
-
-        stack.append(nums[i])
-
-    return result</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    <a href="https://leetcode.com/problems/next-greater-element-i/">496. Next Greater Element I</a>
-  </div>
-</div>
-
 <div class="card mb-4" id="stack-4">
   <div class="card-body">
-    <h2 class="card-title">Balanced parenthesis</h2>
+    <h2 class="card-title">Valid Parentheses (E) (Interview/Liked)</h2>
 
-<pre><code class="python">def is_balanced(s):
-    stack = []
+<pre><code class="python">class Solution:
+    def isValid(self, s: str) -> bool:
 
-    for char in s:
-        # If opening parenthesis, push to stack.
-        if char == "(" or char == "[" or char == "{":
-            stack.append(char)
-        else:
-            # If stack is not empty.
-            if stack:
-                # If closing parenthesis
-                if char == ")" or char == "]" or char == "}":
-                    # Pop if the top element is the corresponding
-                    # opening parenthesis.
-                    if ((char == ")" and stack[-1] == "(") or
-                        (char == "]" and stack[-1] == "[") or
-                        (char == "}" and stack[-1] == "{")):
-                        # One of three conditions satisfied
-                        stack.pop()
-                    # If not, bracket mismatch
-                    else:
-                        return False
-            # If expression does not start with (,[,{
+        stack = []
+
+        for char in s:
+            # If opening parenthesis, push to stack.
+            if char == "(" or char == "[" or char == "{":
+                stack.append(char)
             else:
-                return False
+                # If stack is not empty.
+                if stack:
+                    # If closing parenthesis
+                    if char == ")" or char == "]" or char == "}":
+                        # Pop if the top element is the corresponding
+                        # opening parenthesis.
+                        if ((char == ")" and stack[-1] == "(") or
+                            (char == "]" and stack[-1] == "[") or
+                            (char == "}" and stack[-1] == "{")):
+                            # One of three conditions satisfied
+                            stack.pop()
+                        # If not, bracket mismatch
+                        else:
+                            return False
+                # If expression does not start with (,[,{
+                else:
+                    return False
 
-    # If stack is empty
-    if not stack:
-        return True
+        # If stack is empty
+        if not stack:
+            return True
 
-    return False</code></pre>
+        return False</code></pre>
   </div>
   <div class="card-footer text-muted">
     <a href="https://leetcode.com/problems/valid-parentheses/">20. Valid Parentheses</a>
@@ -179,9 +149,44 @@ stack[-1]</code></pre>
 
 <div class="card mb-4" id="stack-5">
   <div class="card-body">
-    <h2 class="card-title">Spiral matrix</h2>
+    <h2 class="card-title">Spiral matrix (M) (Interview/Liked)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def spiralOrder(self, matrix: List[List[int]]) -> List[int]:
+        # Remove rows and columns from the matrix while moving spiral.
+        # The order is
+        #   Remove first row
+        #   Remove last col
+        #   Remove last row
+        #   Remove first col
+        # Repeat
+
+        result = []
+
+        while matrix:
+            nums = matrix.pop(0)  # Remove first row.
+            result += nums
+
+            if matrix and matrix[0]:
+                for row in matrix:
+                    num = row.pop()  # Remove last col.
+                    result += [num]
+
+            if matrix:
+                nums = matrix.pop()  # Remove last row.
+                # Ensure the order that numbers are appended to the result.
+                nums.reverse()
+                result += nums
+
+            if matrix and matrix[0]:
+                # Ensure the order that numbers are appended to the result.
+                matrix_copy = matrix.copy()
+                matrix_copy.reverse()
+                for row in matrix_copy:
+                    num = row.pop(0)  # Remove first col.
+                    result += [num]
+
+        return result</code></pre>
   </div>
   <div class="card-footer text-muted">
     <a href="https://leetcode.com/problems/spiral-matrix">54. Spiral Matrix</a>
@@ -190,9 +195,36 @@ stack[-1]</code></pre>
 
 <div class="card mb-4" id="stack-6">
   <div class="card-body">
-    <h2 class="card-title">Evaluate reverse polish notation</h2>
+    <h2 class="card-title">Evaluate reverse polish notation (M) (Interview)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def evalRPN(self, tokens: List[str]) -> int:
+
+        stack = []
+
+        for i in tokens:
+
+            print(i)
+
+            if not stack:
+                stack.append(i)
+                continue
+
+            if i.lstrip("-").isdigit():
+                stack.append(i)
+            else:
+                b = int(stack.pop())
+                a = int(stack.pop())
+                if i == "+":
+                    stack.append(str(a+b))
+                if i == "-":
+                    stack.append(str(a-b))
+                if i == "*":
+                    stack.append(str(a*b))
+                if i == "/":
+                    stack.append(str(int(float(a)/b)))
+
+        return int(stack.pop())</code></pre>
   </div>
   <div class="card-footer text-muted">
     <a href="https://leetcode.com/problems/evaluate-reverse-polish-notation">150. Evaluate Reverse Polish Notation</a>
@@ -201,9 +233,38 @@ stack[-1]</code></pre>
 
 <div class="card mb-4" id="stack-7">
   <div class="card-body">
-    <h2 class="card-title">Min stack</h2>
+    <h2 class="card-title">Min stack (M) (Interview/Liked)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class MinStack:
+
+    def __init__(self):
+        self.stack = []
+        self.minimum = math.inf
+
+    def push(self, val: int) -> None:
+        self.minimum = min(self.minimum, val)
+        self.stack.append(val)
+
+    def pop(self) -> None:
+        self.stack.pop()
+        if not self.stack:
+            self.minimum = math.inf
+        else:
+            self.minimum = min(self.stack)
+
+    def top(self) -> int:
+        return self.stack[-1]
+
+    def getMin(self) -> int:
+        return self.minimum
+
+
+# Your MinStack object will be instantiated and called as such:
+# obj = MinStack()
+# obj.push(val)
+# obj.pop()
+# param_3 = obj.top()
+# param_4 = obj.getMin()</code></pre>
   </div>
   <div class="card-footer text-muted">
     <a href="https://leetcode.com/problems/min-stack">155. Min Stack</a>
@@ -212,12 +273,107 @@ stack[-1]</code></pre>
 
 <div class="card mb-4" id="stack-8">
   <div class="card-body">
-    <h2 class="card-title">Basic calculator II</h2>
+    <h2 class="card-title">Basic calculator II (M) (Interview)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def calculate(self, s: str) -> int:
+
+        s = s.replace(" ", "")
+        stack = []
+        num = 0
+        operator = "+"
+
+        for i, token in enumerate(s):
+
+            if token.isdigit():
+                num = num*10 + int(token)
+
+            elif token in "+-*/":
+                self.helper(stack, operator, num)
+                num = 0
+                operator = token
+
+        self.helper(stack, operator, num)
+        print(stack)
+        return sum(stack)
+
+
+    def helper(self, stack, operator, num):
+
+        if operator == "+":
+            stack.append(num)
+        if operator == "-":
+            stack.append(-num)
+        if operator == "*":
+            stack.append(stack.pop()*num)
+        if operator == "/":
+            stack.append(int(stack.pop()/num))</code></pre>
   </div>
   <div class="card-footer text-muted">
     <a href="https://leetcode.com/problems/basic-calculator-ii">227. Basic Calculator II</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="stack-3">
+  <div class="card-body">
+    <h2 class="card-title">Next greater element (E)</h2>
+
+<pre><code class="python">class Solution:
+    def nextGreaterElement(self, nums1: List[int], nums2: List[int]) -> List[int]:
+
+        # Loop through nums2 in reverse
+        # 1. Last num is nums2 will always result in -1
+        # 2. If decreasing, the previous is the result
+        #    Store this previous number is stack
+        # 3. If increasing, result is the first larger
+        #    number (than the current value) in the stack
+        #    Pop out numbers less than current value in the stack
+
+        # [4,1,2]
+        # [1,3,4,2]
+        # stack: [-1,4,3]
+        # dict: {2:-1, 4:-1, 3:4, 1:3}
+
+        # [1,3,5,2,4]
+        # [6,5,4,3,2,1,7]
+        # stack: [-1,7]
+        # dict: {7:-1, 1:7, 2:7, 3:7, 4:7, 5:7, 6:7}
+
+        nums2_dict = {}
+        stack = [-1]
+        # Time O(n)
+        nums2.reverse()
+        # Dictionary is guaranteed to be unique since
+        # arrays contain distinct numbers.
+        nums2_dict[nums2[0]] = stack[-1]
+
+        # Time O(n)
+        # Space O(n)
+        for i in range(1, len(nums2)):
+            # Increasing
+            if nums2[i] > nums2[i-1]:
+                while len(stack) > 1:
+                    if nums2[i] > stack[-1]:
+                        stack.pop()
+                    else:
+                        break
+                nums2_dict[nums2[i]] = stack[-1]
+            # Decreasing
+            else:
+                stack.append(nums2[i-1])
+                nums2_dict[nums2[i]] = stack[-1]
+
+        # Time O(n)
+        # Space O(n)
+        result = []
+        for num in nums1:
+            if num in nums2_dict:
+                result.append(nums2_dict[num])
+
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://leetcode.com/problems/next-greater-element-i/">496. Next Greater Element I</a>
   </div>
 </div>
 <!-- Stack END -->
