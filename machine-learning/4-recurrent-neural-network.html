@@ -100,6 +100,61 @@
       <li>Training set: large english corpus.</li>
     </ul>
 
+    <h3 class="card-title">Long short term memory</h3>
+    <ul>
+      <li>Addresses vanishing gradient.</li>
+      <li>If exploding gradient, apply gradient clipping.</li>
+    </ul>
+
+    <h4 class="card-title">Candidate value</h4>
+    <ul>
+      <li>Tensor containing values between -1 to 1.</li>
+      <li>Information from current time step that may be stored in current cell state.</li>
+      <li>\( \tilde{c}^{&lt;t&gt;} = tanh(W_{c}[a^{&lt;t-1&gt;}, x^{&lt;t&gt;}] + b_{c}) \)</li>
+    </ul>
+
+    <h4 class="card-title">Update gate</h4>
+    <ul>
+      <li>Tensor containing values between 0 and 1.</li>
+      <ul>
+        <li>If unit in update gate is close to 1, it allows the value of the candidate to be passed onto the hidden state.</li>
+        <li>If unit in update gate is close to 0, it prevents the corresponding value in the candidate from being passed onto the hidden state.</li>
+      </ul>
+      <li>Decide what aspects of the candidate to add to the cell state.</li>
+      <li>\( \Gamma_{u} = \sigma(W_{u}[a^{&lt;t-1&gt;}, x^{&lt;t&gt;}] + b_{u}) \)</li>
+    </ul>
+
+    <h4 class="card-title">Forget gate</h4>
+    <ul>
+      <li>Tensor containing values between 0 and 1.</li>
+      <ul>
+        <li>If unit in forget gate has value close to 0, LSTM will "forget" the stored state in the previous cell state.</li>
+        <li>If unit in forget gate has value close to 1, LSTM will mostly remember the corresponding value in the stored state.</li>
+      </ul>
+      <li>\( \Gamma_{f} = \sigma(W_{f}[a^{&lt;t-1&gt;}, x^{&lt;t&gt;}] + b_{f}) \)</li>
+    </ul>
+
+    <h4 class="card-title">Output gate</h4>
+    <ul>
+      <li>Decides what gets sent as the prediction (output) of the time step.</li>
+      <li>\( \Gamma_{o} = \sigma(W_{o}[a^{&lt;t-1&gt;}, x^{&lt;t&gt;}] + b_{o}) \)</li>
+    </ul>
+
+    <h4 class="card-title">Cell state</h4>
+    <ul>
+      <li>The "memory" that gets passed onto future time steps.</li>
+      <li>The new cell state is a combination of the previous cell state and the candidate value.</li>
+      <li>\( c^{&lt;t&gt;} = \Gamma_{u} * \tilde{c}^{&lt;t&gt;} + \Gamma_{f} c^{&lt;t-1&gt;} \)</li>
+    </ul>
+
+    <h4 class="card-title">Hidden state</h4>
+    <ul>
+      <li>Hidden state gets passed to the LSTM cell's next time step.</li>
+      <li>Determines the three gates of the next time step.</li>
+      <li>Hidden state is also used for the prediction.</li>
+      <li>\( a^{&lt;t&gt;} = \Gamma_{o} * tanh(c^{&lt;t&gt;}) \)</li>
+    </ul>
+
     <h3 class="card-title">Dropout</h3>
     <ul>
       <li>In RNN, dropout is applied to input/output of each cell unit.</li>
