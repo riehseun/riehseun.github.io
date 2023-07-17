@@ -54,17 +54,36 @@
   <div class="card-body">
     <h2 class="card-title">Recurrent neural network</h2>
     <ul>
-      <li>First need to extract numerical features from text data. (Ex. bag of words, N-grams, word embeddings)</li>
-      <li>Process the input timestep by timestep.</li>
-      <li>Backprop needs separate layer for each time step with the same weights for all layers.</li>
-      <li>Different loss per timestep.</li>
-      <li>Gradients from multiple timesteps are added to calculate the final gradient.</li>
+      <li>Process the input (word in a sentence) timestep by timestep.</li>
     </ul>
 
     <h3 class="card-title">Why not standard network</h3>
     <ul>
-      <li>Inputs, outputs can be of different lengths in different examples.</li>
+      <li>Inputs and outputs can be of different lengths in different examples.</li>
       <li>Does not share features learned across different positions of text.</li>
+    </ul>
+
+    <!-- <ul>
+      <li>First need to extract numerical features from text data. (Ex. bag of words, N-grams, word embeddings)</li>
+      <li>Process the input (word in a sentence) timestep by timestep.</li>
+      <li>Backprop needs separate layer for each time step with the same weights for all layers.</li>
+      <li>Different loss per timestep.</li>
+      <li>Gradients from multiple timesteps are added to calculate the final gradient.</li>
+    </ul> -->
+
+    <h3 class="card-title">Forward prop</h3>
+    <ul>
+      <li>\( a^{<0>} = 0 \)</li>
+      <li>\( a^{<1>} = g(W_{aa}a^{<0>} + W_{ax}a^{<1>} + b_{a}) \)</li>
+      <li>\( y^{<1>} = g(W_{ya}a^{<1>} + b_{y}) \)</li>
+      <li>\( a^{&lt;t&gt;} = g(W_{aa}a^{&lt;t-1&gt;} + W_{ax}a^{&lt;t&gt;} + b_{a}) = g(W_{a}[a^{&lt;t-1&gt;}, x^{&lt;t&gt;}] + b_{a}) \)</li>
+      <li>\( y^{&lt;t&gt;} = g(W_{ya}a^{&lt;t&gt;} + b_{y}) = g(W_{y}[a^{&lt;t&gt;}] + b_{y}) \)</li>
+    </ul>
+
+    <h3 class="card-title">Loss function</h3>
+    <ul>
+      <li>\( L^{&lt;t&gt;}(\hat{y}^{&lt;t&gt;}, y^{&lt;t&gt;}) = -y^{&lt;t&gt;}log\hat{y}^{&lt;t&gt;} - (1-y^{&lt;t&gt;})log(1-\hat{y}^{&lt;t&gt;}) \)</li>
+      <li>\( L(\hat{y},y) = \displaystyle\sum_{t=1}^{T_{y}} L^{&lt;t&gt;}(\hat{y}^{&lt;t&gt;}, y^{&lt;t&gt;}) \)</li>
     </ul>
 
     <h3 class="card-title">RNN types</h3>
