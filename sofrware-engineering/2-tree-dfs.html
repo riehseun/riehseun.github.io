@@ -39,570 +39,126 @@
 <div class="col-md-12">
 <h1 class="my-4">Software Engineering</h1>
 
-<!-- Tree BEGIN -->
+<!-- Tree DFS BEGIN -->
 <div class="card mb-4" id="tree">
   <div class="card-body">
-    <h2 class="card-title">Tree</h2>
+    <h2 class="card-title">Tree DFS</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#tree-1">Tree</a></li>
-      <li><a href="#tree-2">Binary tree</a></li>
-      <li><a href="#tree-3">Binary search tree</a></li>
-      <li><a href="#tree-4">AVL tree</a></li>
-      <li><a href="#tree-5">Red-black tree</a></li>
-      <li><a href="#tree-6">Find min in BST</a></li>
-      <li><a href="#tree-7">Find Kth maximum</a></li>
-      <li><a href="#tree-8">Find ancestors of a node in BST</a></li>
-      <li><a href="#tree-9">Maximum depth of binary tree</a></li>
-      <li><a href="#tree-10">Find Nodes at K distance from the Root</a></li>
-      <li><a href="#tree-11">Validate binary search tree</a></li>
-      <li><a href="#tree-12">Symmetric tree</a></li>
-      <li><a href="#tree-13">Binary tree level order traversal</a></li>
-      <li><a href="#tree-14">Binary tree zigzag level order traversal</a></li>
-      <li><a href="#tree-15">Construct binary tree from preorder and inorder traversal</a></li>
-      <li><a href="#tree-16">Convert sorted array to binary search tree</a></li>
-      <li><a href="#tree-17">Populating next right pointers in each node</a></li>
       <li><a href="#tree-18">Binary tree maximum path sum</a></li>
-      <li><a href="#tree-19">Lowest common ancestor of a binary tree</a></li>
       <li><a href="#tree-20">Serialize and deserialize binary tree</a></li>
     </ul>
   </div>
 </div>
 
-<div class="card mb-4" id="tree-1">
-  <div class="card-body">
-    <h2 class="card-title">Tree</h2>
-
-<pre><code class="python">class TreeNode(object):
-    def __init__(self, val=0, left=None, right=None):
-        self.val = val
-        self.left = left
-        self.right = right</code></pre>
-
-    <h3 class="card-title">Heap (priority queue)</h3>
-    <ul>
-      <li>Perfectly balanced tree.</li>
-      <li>Root element must have the minimum key.</li>
-      <li>Runtime</li>
-      <ul>
-        <li>Insert (add to heap): O(nlogn).</li>
-        <li>Extract (remove an element with minimum key): O(nlogn).</li>
-        <li>Heapify (n batched inserts): O(n).</li>
-        <li>Delete: O(nlogn).</li>
-      </ul>
-    </ul>
-
-<pre><code class="python"># Insert(key k)
-#     stick k at the end of last level
-#     bubble-up k until k's parent <= k</code></pre>
-
-<pre><code class="python"># Extract-Min
-#     delete root
-#     move last node to new root
-#     bubble-down k until k's parent <= k</code></pre>
-
-
-
-<pre><code class="python"># Search(key k)
-#     start at the root
-#     traverse left (if k < key at current node) or right (if k > key at current node) child pointers as needed
-#     return node with key k or NULL, as appropriate</code></pre>
-
-<pre><code class="python"># Insert(key k)
-#     start at the root
-#     do search (which will return NULL)
-#     rewire final NULL pointer to point to new node with key k</code></pre>
-
-<pre><code class="python"># Min/Max
-#     start at the root
-#     follow left (min case) or right (max case) until the bottom (return last key found)</code></pre>
-
-<pre><code class="python"># Pred(key k)
-#     easy case: if k's left subtree nonempty, return max key in left subtree
-#     otherwise: follow parent pointers until you get to a key less than k</code></pre>
-
-<pre><code class="python"># Inorder traversal
-#     to print out keys in increasing order
-#     let r = root, Tr = right subtree, Tl = left subtree
-#     recurse on Tl
-#         by recursion, prints out keys of TL in increasing order
-#     print out r's key
-#     recurse on Tr
-#         by recursion, prints out keys of TR in increasing order</code></pre>
-
-<pre><code class="python"># Delete(key k)
-#     search for k
-#     if k has no children
-#         delete k
-#     k has one child
-#         delete k, and put child under k's parent
-#     k has two children
-#         compute k's predecessor l
-#             for example, traverse k's (non-NULL) left child pointer, then right child pointers until no longer possible
-#         swap k and l
-#         delete k</code></pre>
-
-<pre><code class="python"># Select(order statistic i)
-#     store a little bit of extra info at each tree node about the tree itself
-#     start at root x, with children y and z
-#     let a = size(y) # a = 0 if x has no left child
-#     if a = i-1
-#         return x's key
-#     if a >= i
-#         recurse to compute ith order statistic on new root y
-#     if a < i-1
-#         recurse to compute (i-a-1)th order statistic on new root z</code></pre>
-
-    <h3 class="card-title">Balanced search tree (sorted array with fast insert & delete)</h3>
-    <ul>
-      <li>Search: O(logn).</li>
-      <li>Select: O(logn).</li>
-      <li>Min/Max: O(logn).</li>
-      <li>Pred/Succ: O(logn).</li>
-      <li>Rank: O(logn).</li>
-      <li>Output in sorted order: O(n).</li>
-      <li>Insert/Delete: O(logn).</li>
-    </ul>
-
-    <h4 class="card-title">Red-Black tree</h4>
-    <ul>
-      <li>Each node red or black.</li>
-      <li>Root is black.</li>
-      <li>No 2 reds in a row. (red node => only black children)</li>
-      <li>Every root-NULL path (unsuccessful search) has the same number of black nodes.</li>
-      <li>Height guarantee.</li>
-      <ul>
-        <li>Every red-black tree with n nodes has height less than or equal to 2log_{2}(n+1)</li>
-      </ul>
-      <li>Rotation.</li>
-      <ul>
-        <li>Locally rebalance subtrees at a node in O(1) time.</li>
-        <li>Left rotation.</li>
-        <li>Right rotation.</li>
-      </ul>
-    </ul>
-
-<pre><code class="python"># Insert(x)
-#     insert x as usual (makes x a leaf)
-#     try coloring x red
-#     if x's parent y is black, done
-#     else y is red, then y has a black parent w</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/binary-tree-inorder-traversal">94. Binary Tree Inorder Traversal</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="tree-2">
-  <div class="card-body">
-    <h2 class="card-title">Binary tree</h2>
-    <ul>
-      <li>Exactly one node per key.</li>
-      <li>Each node has</li>
-      <ul>
-        <li>Left child pointer</li>
-        <li>Right child pointer</li>
-        <li>Parent</li>
-      </ul>
-      <li>All nodes left on node X are less than X.</li>
-      <li>All nodes right on node X are greater than X.</li>
-      <li>Many possible trees for a set of keys.</li>
-      <li>Height could be anywhere from log_{2}^{n} to n.</li>
-      <li>Generally operations are O(height).</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-
-  </div>
-</div>
-
-<div class="card mb-4" id="tree-3">
-  <div class="card-body">
-    <h2 class="card-title">Binary search tree</h2>
-    <ul>
-      <li>Binary tree where each node of the tree has key-value pairs.</li>
-    </ul>
-
-<pre><code class="python">class Node(object):
-    def __init__(self, val=0, left=None, right=None, parent=None):
-        self.val = val
-        self.left = left
-        self.right = right
-        self.parent = parent</code></pre>
-
-    <h4 class="card-title">Insert</h4>
-
-<pre><code class="python">def insert(self, val):
-    current = self
-    parent = None
-
-    while current:
-        parent = current
-        if val < current.val:
-            current = current.left
-        else:
-            current = current.right
-
-    if val < parent.val:
-        parent.left = Node(val)
-    else:
-        parent.right = Node(val)</code></pre>
-
-    <h4 class="card-title">Search</h4>
-
-<pre><code class="python">def search(self, val):
-    current = self
-
-    while current is not None:
-
-        if val < current.val:
-            current = current.left
-        elif val > current.val:
-            current = current.right
-        else:
-            return True
-
-    return False</code></pre>
-
-    <h4 class="card-title">Delete</h4>
-
-<pre><code class="python">def delete(self, val):
-
-    if val < self.val:
-        if self.left:
-            self.left = self.left.delete(val)
-        else:
-            print(str(val) + " not found in the tree")
-            return self
-    elif val > self.val:
-        if self.right:
-            self.right = self.right.delete(val)
-        else:
-            print(str(val) + " not found in the tree")
-            return self
-    else:
-        # Delete node with no children.
-        if self.left is None and self.right is None:
-            self = None
-            return None
-
-        # Delete node with right child.
-        elif self.left is None:
-            tmp = self.right
-            self = None
-            return tmp
-
-        # Delete node with left child.
-        elif self.right is None:
-            tmp = self.left
-            self = None
-            return tmp
-
-        # Delete node with two children.
-        else:
-            current = self.right
-
-            # Find the leftmost leaf.
-            while current.left is not None:
-                current = current.left
-            self.val = current.val
-            self.right = self.right.delete(current.val)
-
-    return self</code></pre>
-
-    <h4 class="card-title">Pre-order traversal</h4>
-
-<pre><code class="python">def pre_order_traversal(node):
-    if node is not None:
-        print(node.val)
-        pre_order_traversal(node.left)
-        pre_order_traversal(node.right)</code></pre>
-
-    <h4 class="card-title">Post-order traversal</h4>
-
-<pre><code class="python">def post_order_traversal(node):
-    if node is not None:
-        post_order_traversal(node.left)
-        post_order_traversal(node.right)
-        print(node.val)</code></pre>
-
-    <h4 class="card-title">In-order traversal</h4>
-
-<pre><code class="python">def in_order_traversal(node):
-    if node is not None:
-        in_order_traversal(node.left)
-        print(node.val)
-        in_order_traversal(node.right)</code></pre>
-
-  </div>
-  <div class="card-footer text-muted">
-
-  </div>
-</div>
-
-<div class="card mb-4" id="tree-4">
-  <div class="card-body">
-    <h2 class="card-title">AVL tree</h2>
-    <ul>
-      <li>Balanced binary search tree.</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-
-  </div>
-</div>
-
-<div class="card mb-4" id="tree-5">
-  <div class="card-body">
-    <h2 class="card-title">Red-black tree</h2>
-    <ul>
-      <li>AVL tree where</li>
-      <ul>
-        <li>Root is always black.</li>
-        <li>Two red nodes cannot be adjacent.</li>
-      </ul>
-    </ul>
-
-<pre><code class="python">class Node:
-    def __init__(self,val):
-        self.val = val
-        self.left = None
-        self.right = None
-        is_red = None</code></pre>
-
-  </div>
-  <div class="card-footer text-muted">
-
-  </div>
-</div>
-
-<div class="card mb-4" id="tree-6">
-  <div class="card-body">
-    <h2 class="card-title">Find min in BST</h2>
-
-<pre><code class="python">def find_min(root):
-    if not root:
-        return None
-    elif not root.left:
-        return root.val
-    else:
-        return findMin(root.left)</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/path/ace-python-coding-interview">Ace the Python Coding Interview</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="tree-7">
-  <div class="card-body">
-    <h2 class="card-title">Find Kth maximum</h2>
-
-<pre><code class="python">def find_Kth_max(root, k):
-    tree = []
-    inorder_traverse(root, tree)
-    if len(tree) - k >= 0 and k > 0:
-        return tree[-k]
-
-    return None
-
-def inorder_traverse(node, tree):
-
-    if node:
-        inorder_traverse(node.left, tree)
-
-        if len(tree) == 0:
-            tree.append(node.val)
-        elif tree[-1] != node.val:
-            tree.append(node.val)
-
-        inorder_traverse(node.right, tree)</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/kth-smallest-element-in-a-bst">230. Kth Smallest Element in a BST</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="tree-8">
-  <div class="card-body">
-    <h2 class="card-title">Find ancestors of a node in BST</h2>
-
-<pre><code class="python">def find_ancestors(root, node):
-    if not root:
-        return None
-    ancestors = []
-    current = root
-
-    while current:
-        if current.val < node:
-            ancestors.append(current.val)
-            current = current.right
-        elif current.val > node:
-            ancestors.append(current.val)
-            current = current.left
-        else:
-            ancestors.reverse()
-            return ancestors
-
-    return []</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/path/ace-python-coding-interview">Ace the Python Coding Interview</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="tree-9">
-  <div class="card-body">
-    <h2 class="card-title">Maximum depth of binary tree</h2>
-
-<pre><code class="python">def find_height(root):
-
-    if not root:
-        return -1
-
-    else:
-        max_sub_tree_height = max(find_height(root.left), find_height(root.right))
-        return max_sub_tree_height + 1</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/maximum-depth-of-binary-tree">104. Maximum Depth of Binary Tree</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="tree-10">
-  <div class="card-body">
-    <h2 class="card-title">Find Nodes at K distance from the Root</h2>
-
-<pre><code class="python">def find_nodes_at_k_distance(root, k):
-    result = []
-    helper(root, k, result)  # recurse the tree for node at k distance
-    return result
-
-
-def helper(root, k, result):
-    if not root:
-        return
-
-    if k == 0:
-        result.append(root.val)
-
-    else:
-        helper(root.left, k-1, result)
-        helper(root.right, k-1, result)</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/path/ace-python-coding-interview">Ace the Python Coding Interview</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="tree-11">
-  <div class="card-body">
-    <h2 class="card-title">Validate binary search tree</h2>
-
-<pre><code class="python"></code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/validate-binary-search-tree">98. Validate Binary Search Tree</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="tree-12">
-  <div class="card-body">
-    <h2 class="card-title">Symmetric tree</h2>
-
-<pre><code class="python"></code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/symmetric-tree">101. Symmetric Tree</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="tree-13">
-  <div class="card-body">
-    <h2 class="card-title">Binary tree level order traversal</h2>
-
-<pre><code class="python"></code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/binary-tree-level-order-traversal">102. Binary Tree Level Order Traversal</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="tree-14">
-  <div class="card-body">
-    <h2 class="card-title">Binary tree zigzag level order traversal</h2>
-
-<pre><code class="python"></code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/binary-tree-zigzag-level-order-traversal">103. Binary Tree Zigzag Level Order Traversal</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="tree-15">
-  <div class="card-body">
-    <h2 class="card-title">Construct binary tree from preorder and inorder traversal</h2>
-
-<pre><code class="python"></code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal">105. Construct Binary Tree from Preorder and Inorder Traversal</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="tree-16">
-  <div class="card-body">
-    <h2 class="card-title">Convert sorted array to binary search tree</h2>
-
-<pre><code class="python"></code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/convert-sorted-array-to-binary-search-tree">108. Convert Sorted Array to Binary Search Tree</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="tree-17">
-  <div class="card-body">
-    <h2 class="card-title">Populating next right pointers in each node</h2>
-
-<pre><code class="python"></code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/populating-next-right-pointers-in-each-node">116. Populating Next Right Pointers in Each Node</a>
-  </div>
-</div>
-
 <div class="card mb-4" id="tree-18">
   <div class="card-body">
-    <h2 class="card-title">Binary tree maximum path sum</h2>
+    <h2 class="card-title">Binary tree maximum path sum (H) (Interview/Liked)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python"># Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def maxPathSum(self, root: Optional[TreeNode]) -> int:
+        max_sum = []
+        self.helper(root, max_sum)
+        return max(max_sum)
+
+
+    def helper(self, node, max_sum):
+
+        # Example:
+        #   -10
+        #  9    20
+        #     15   7
+        #
+        #   -10
+        #  9    42
+
+        if node is None:
+            return 0
+
+        sum_from_left_subtree = max(self.helper(node.left, max_sum), 0)
+        sum_from_right_subtree = max(self.helper(node.right, max_sum), 0)
+
+        # At each node, the maximum sum can be constructed by.
+        max_sum.append(node.val+sum_from_left_subtree+sum_from_right_subtree)
+
+        # At each node, the path can only be constructed by taking
+        # either one of left or right child node.
+        max_path = node.val + max(sum_from_left_subtree, sum_from_right_subtree)
+        return max_path</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/binary-tree-maximum-path-sum">124. Binary Tree Maximum Path Sum</a>
   </div>
 </div>
 
-<div class="card mb-4" id="tree-19">
-  <div class="card-body">
-    <h2 class="card-title">Lowest common ancestor of a binary tree</h2>
-
-<pre><code class="python"></code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree">236. Lowest Common Ancestor of a Binary Tree</a>
-  </div>
-</div>
-
 <div class="card mb-4" id="tree-20">
   <div class="card-body">
-    <h2 class="card-title">Serialize and deserialize binary tree</h2>
+    <h2 class="card-title">Serialize and deserialize binary tree (H) (Interview)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python"># Definition for a binary tree node.
+# class TreeNode(object):
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Codec:
+
+    def serialize(self, root):
+        """Encodes a tree to a single string.
+
+        :type root: TreeNode
+        :rtype: str
+        """
+
+        def pre_order_traversal(node):
+            if node is not None:
+                tree.append(str(node.val))
+                pre_order_traversal(node.left)
+                pre_order_traversal(node.right)
+            else:
+                tree.append("X")
+
+        tree = []
+        pre_order_traversal(root)
+        return " ".join(tree)
+
+    def deserialize(self, data):
+        """Decodes your encoded data to tree.
+
+        :type data: str
+        :rtype: TreeNode
+        """
+
+        def decode():
+            val = next(values)
+            if val != "X":
+                node = TreeNode(int(val))
+                node.left = decode()
+                node.right = decode()
+                return node
+            else:
+                return None
+
+        values = iter(data.split(" "))
+        print(data)
+        return decode()
+
+# Your Codec object will be instantiated and called as such:
+# ser = Codec()
+# deser = Codec()
+# ans = deser.deserialize(ser.serialize(root))</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/serialize-and-deserialize-binary-tree">297. Serialize and Deserialize Binary Tree</a>
   </div>
 </div>
-<!-- Tree END -->
+<!-- Tree DFS END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->
