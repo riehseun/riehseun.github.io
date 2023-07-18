@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="/img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/monokai-sublime.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="/js/jquery.min.js" type="text/javascript"></script>
+<script src="/js/bootstrap.bundle.min.js" type="text/javascript"></script>
+<script src="/js/highlight.pack.js" type="text/javascript"></script>
+<script src="/js/include_html.js" type="text/javascript"></script>
+<script src="/js/mathjax.js" type="text/javascript"></script>
+<script src="/js/site.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<include src="/header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Software Engineering</h1>
+
+<!-- Union find BEGIN -->
+<div class="card mb-4" id="unionfind">
+  <div class="card-body">
+    <h2 class="card-title">Union find</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#unionfind-2">Number of islands</a></li>
+      <li><a href="#unionfind-1">Redundant connection I</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="unionfind-2">
+  <div class="card-body">
+    <h2 class="card-title">Number of islands (M) (Interview/Liked)</h2>
+
+<pre><code class="python">from collections import defaultdict, deque
+
+class Solution:
+    def numIslands(self, grid: List[List[str]]) -> int:
+
+        # Construct a graph.
+        # Count number of connnected component using BFS.
+
+        # Connected when a node is 1 and adjacent is also 1.
+
+        graph = defaultdict(list)
+        nodes = set()
+
+        n = len(grid)
+        m = len(grid[0])
+        for i in range(len(grid)):
+            for j, num in enumerate(grid[i]):
+                if num == "1":
+                    if (i,j) not in nodes:
+                        nodes.add((i,j))
+                    # Check right
+                    if j < m-1 and grid[i][j+1] == "1":
+                        graph[(i,j)].append((i, j+1))
+                        graph[(i,j+1)].append((i,j))
+                    # Check left
+                    if j > 0 and grid[i][j-1] == "1":
+                        graph[(i,j)].append((i, j-1))
+                        graph[(i,j-1)].append((i,j))
+                    # Check up
+                    if i > 0 and grid[i-1][j] == "1":
+                        graph[(i,j)].append((i-1, j))
+                        graph[(i-1,j)].append((i,j))
+                    # Check down
+                    if i < n-1 and grid[i+1][j] == "1":
+                        graph[(i,j)].append((i+1, j))
+                        graph[(i+1,j)].append((i,j))
+
+        explored = set()
+        count = 0
+        for (i,j) in nodes:
+            if (i,j) not in explored:
+                self.bfs(graph, explored, (i,j))
+                count += 1
+        return count
+
+    def bfs(self, graph, explored, start):
+        queue = deque()
+        queue.append(start)
+
+        while queue:
+            node = queue.popleft()
+            print(graph[node])
+            for child_node in graph[node]:
+                if child_node not in explored:
+                    explored.add(child_node)
+                    queue.append(child_node)
+</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/number-of-islands">200. Number of Islands</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="unionfind-1">
+  <div class="card-body">
+    <h2 class="card-title">Redundant connection (M)</h2>
+
+<pre><code class="python">class Solution:
+    def findRedundantConnection(self, edges: List[List[int]]) -> List[int]:
+
+        # Union-find.
+        # Consider an edge. If two nodes of the edge are already in the same component,
+        # that edge is redundant.
+
+        # Key represents each node and value represents the leader of group
+        # that the node belongs to.
+
+        # Initially all node have its own value as its leader.
+        group = {}
+        for edge in edges:
+            if edge[0] not in group:
+                group[edge[0]] = edge[0]
+            if edge[1] not in group:
+                group[edge[1]] = edge[1]
+
+        for edge in edges:
+
+            leader_first = self.find(group, edge[0])
+            leader_second = self.find(group, edge[1])
+
+            # If both nodes in edge already belong to the same leader,
+            # then the edge is redundant.
+            if leader_first == leader_second:
+                return edge
+
+            # Let the smallest node be the leader in that group.
+            if leader_first < leader_second:
+                self.union(group, edge[1], leader_first)
+            else:
+                self.union(group, edge[0], leader_second)
+
+        return []
+
+    def find(self, group, node):
+        return group[node]
+
+    def union(self, group, node, new_leader):
+
+        # Save the previous leader.
+        previous_leader = group[group[node]]
+
+        # The node's leader also gets the new leader.
+        group[group[node]] = new_leader
+
+        # All nodes that had the previous leader as leader must now have
+        # the new leader as leader.
+        for k,v in group.items():
+            if v == previous_leader:
+                group[k] = new_leader</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/redundant-connection">684. Redundant Connection</a>
+  </div>
+</div>
+<!-- Union find END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+</html>
