@@ -80,14 +80,14 @@
       <li>\( a^{<0>} = 0 \)</li>
       <li>\( a^{<1>} = g(W_{aa}a^{<0>} + W_{ax}a^{<1>} + b_{a}) \)</li>
       <li>\( y^{<1>} = g(W_{ya}a^{<1>} + b_{y}) \)</li>
-      <li>\( a^{&lt;t&gt;} = g(W_{aa}a^{&lt;t-1&gt;} + W_{ax}a^{&lt;t&gt;} + b_{a}) = g(W_{a}[a^{&lt;t-1&gt;}, x^{&lt;t&gt;}] + b_{a}) \)</li>
-      <li>\( y^{&lt;t&gt;} = g(W_{ya}a^{&lt;t&gt;} + b_{y}) = g(W_{y}[a^{&lt;t&gt;}] + b_{y}) \)</li>
+      <li>\( a^{\langle t \rangle} = g(W_{aa}a^{\langle t \rangle} + W_{ax}a^{\langle t \rangle} + b_{a}) = g(W_{a}[a^{\langle t-1 \rangle}, x^{\langle t \rangle}] + b_{a}) \)</li>
+      <li>\( y^{\langle t \rangle} = g(W_{ya}a^{\langle t \rangle} + b_{y}) = g(W_{y}[a^{\langle t \rangle}] + b_{y}) \)</li>
     </ul>
 
     <h3 class="card-title">Loss function</h3>
     <ul>
-      <li>\( L^{&lt;t&gt;}(\hat{y}^{&lt;t&gt;}, y^{&lt;t&gt;}) = -y^{&lt;t&gt;}log\hat{y}^{&lt;t&gt;} - (1-y^{&lt;t&gt;})log(1-\hat{y}^{&lt;t&gt;}) \)</li>
-      <li>\( L(\hat{y},y) = \displaystyle\sum_{t=1}^{T_{y}} L^{&lt;t&gt;}(\hat{y}^{&lt;t&gt;}, y^{&lt;t&gt;}) \)</li>
+      <li>\( L^{\langle t \rangle}(\hat{y}^{\langle t \rangle}, y^{\langle t \rangle}) = -y^{\langle t \rangle}log\hat{y}^{\langle t \rangle} - (1-y^{\langle t \rangle})log(1-\hat{y}^{\langle t \rangle}) \)</li>
+      <li>\( L(\hat{y},y) = \displaystyle\sum_{t=1}^{T_{y}} L^{\langle t \rangle}(\hat{y}^{\langle t \rangle}, y^{\langle t \rangle}) \)</li>
     </ul>
 
     <h3 class="card-title">RNN types</h3>
@@ -101,7 +101,17 @@
     <h3 class="card-title">Language model</h3>
     <ul>
       <li>Compute \( P(sentence) = P(y^{&lt;1&gt;} \dots y^{&lt;t&gt;}) \)</li>
+      <ul>
+        <li>Ex. P(The apple and pair salad) = \( 3.2 \times 10^{-13} \), P(The apple and peer salad) = \( 5.7 \times 10^{-13} \)</li>
+        <li>\( P(y^{<1>}, y^{<2>}, y^{<3>}) = P(y^{<1>})P(y^{<2>}|y^{<1>})P(y^{<3>}|y^{<1>},y^{<2>}) \)</li>
+      </ul>
       <li>Training set: large english corpus.</li>
+    </ul>
+
+    <h3 class="card-title">Vanishing gradients with RNNs</h3>
+    <ul>
+      <li>Ex. "the cats, which, ..., were full" vs "the cat, which, ..., was full"</li>
+      <li>Capturing long-term dependencies is hard.</li>
     </ul>
 
     <h3 class="card-title">Long short term memory</h3>
@@ -114,7 +124,7 @@
     <ul>
       <li>Tensor containing values between -1 to 1.</li>
       <li>Information from current time step that may be stored in current cell state.</li>
-      <li>\( \tilde{c}^{&lt;t&gt;} = tanh(W_{c}[a^{&lt;t-1&gt;}, x^{&lt;t&gt;}] + b_{c}) \)</li>
+      <li>\( \tilde{c}^{\langle t \rangle} = tanh(W_{c}[a^{\langle t-1 \rangle}, x^{\langle t \rangle}] + b_{c}) \)</li>
     </ul>
 
     <h4 class="card-title">Update gate</h4>
@@ -125,7 +135,7 @@
         <li>If unit in update gate is close to 0, it prevents the corresponding value in the candidate from being passed onto the hidden state.</li>
       </ul>
       <li>Decide what aspects of the candidate to add to the cell state.</li>
-      <li>\( \Gamma_{u} = \sigma(W_{u}[a^{&lt;t-1&gt;}, x^{&lt;t&gt;}] + b_{u}) \)</li>
+      <li>\( \Gamma_{u} = \sigma(W_{u}[a^{\langle t-1 \rangle}, x^{\langle t \rangle}] + b_{u}) \)</li>
     </ul>
 
     <h4 class="card-title">Forget gate</h4>
@@ -135,20 +145,20 @@
         <li>If unit in forget gate has value close to 0, LSTM will "forget" the stored state in the previous cell state.</li>
         <li>If unit in forget gate has value close to 1, LSTM will mostly remember the corresponding value in the stored state.</li>
       </ul>
-      <li>\( \Gamma_{f} = \sigma(W_{f}[a^{&lt;t-1&gt;}, x^{&lt;t&gt;}] + b_{f}) \)</li>
+      <li>\( \Gamma_{f} = \sigma(W_{f}[a^{\langle t-1 \rangle}, x^{\langle t \rangle}] + b_{f}) \)</li>
     </ul>
 
     <h4 class="card-title">Output gate</h4>
     <ul>
       <li>Decides what gets sent as the prediction (output) of the time step.</li>
-      <li>\( \Gamma_{o} = \sigma(W_{o}[a^{&lt;t-1&gt;}, x^{&lt;t&gt;}] + b_{o}) \)</li>
+      <li>\( \Gamma_{o} = \sigma(W_{o}[a^{\langle t-1 \rangle}, x^{\langle t \rangle}] + b_{o}) \)</li>
     </ul>
 
     <h4 class="card-title">Cell state</h4>
     <ul>
       <li>The "memory" that gets passed onto future time steps.</li>
       <li>The new cell state is a combination of the previous cell state and the candidate value.</li>
-      <li>\( c^{&lt;t&gt;} = \Gamma_{u} * \tilde{c}^{&lt;t&gt;} + \Gamma_{f} c^{&lt;t-1&gt;} \)</li>
+      <li>\( c^{\langle t \rangle} = \Gamma_{u} * \tilde{c}^{\langle t \rangle} + \Gamma_{f} c^{\langle t-1 \rangle} \)</li>
     </ul>
 
     <h4 class="card-title">Hidden state</h4>
@@ -156,11 +166,21 @@
       <li>Hidden state gets passed to the LSTM cell's next time step.</li>
       <li>Determines the three gates of the next time step.</li>
       <li>Hidden state is also used for the prediction.</li>
-      <li>\( a^{&lt;t&gt;} = \Gamma_{o} * tanh(c^{&lt;t&gt;}) \)</li>
+      <li>\( a^{\langle t \rangle} = \Gamma_{o} * tanh(c^{\langle t \rangle}) \)</li>
+    </ul>
+
+    <h4 class="card-title">Prediction</h4>
+    <ul>
+      <li>\( y_{pred}^{\langle t \rangle} = \textrm{softmax}(W_{y} a^{\langle t \rangle} + b_{y}) \)</li>
     </ul>
 
     <h3 class="card-title">Bidirectional RNN</h3>
     <ul>
+      <li>Getting information from the future</li>
+      <ul>
+        <li>Ex. He said, "Teddy bears are on sale!"</li>
+        <li>Ex. He said, "Teddy Roosevelt was a great President"</li>
+      </ul>
       <li>\( y^{&lt;t&gt;} = g(W_{y}[\overrightarrow{a}^{&lt;t&gt;}, \overleftarrow{a}^{&lt;t&gt;}] + b_{y}) \)</li>
     </ul>
 

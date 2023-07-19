@@ -43,27 +43,23 @@
 <div class="card mb-4" id="linux">
   <div class="card-body">
     <h2 class="card-title">Linux (Bash)</h2>
-    <p class="card-text"></p>
     <ul class="list-unstyled mb-0">
       <li><a href="#linux-1">Shell scripting</a></li>
-      <li><a href="#linux-2">Variable</a></li>
-      <li><a href="#linux-3">String</a></li>
-      <li><a href="#linux-4">Array</a></li>
+      <li><a href="#linux-2">File system</a></li>
+      <li><a href="#linux-3">Bash extra features</a></li>
+      <li><a href="#linux-4">Variable</a></li>
       <li><a href="#linux-5">Conditional</a></li>
       <li><a href="#linux-6">Loop</a></li>
+      <li><a href="#linux-7">Function</a></li>
+      <li><a href="#linux-8">String</a></li>
+      <li><a href="#linux-9">Array</a></li>
       <br>
 
       <li><a href="#linux-10">cut</a></li>
-      <!-- <li><a href="#linux-11">find</a></li> -->
-      <!-- <li><a href="#linux-12">grep</a></li> -->
       <li><a href="#linux-13">sed</a></li>
       <li><a href="#linux-14">awk</a></li>
-      <br>
-
       <li><a href="#linux-15">curl</a></li>
       <li><a href="#linux-16">wget</a></li>
-      <br>
-
       <li><a href="#linux-17">jq</a></li>
       <li><a href="#linux-18">yq</a></li>
 
@@ -78,9 +74,7 @@
       <li><a href="#linux-107">Color</a></li>
       <li><a href="#linux-108">Python Integration</a></li>
       <li><a href="#linux-109">Cron</a></li>
-      <li><a href="#linux-110">File system</a></li>
       <li><a href="#linux-111">Process and Thread</a></li>
-      <li><a href="#linux-112">I/O redirection</a></li>
     </ul>
   </div>
 </div>
@@ -293,64 +287,138 @@ esac</code></pre>
 
 <div class="card mb-4" id="linux-2">
   <div class="card-body">
-    <h2 class="card-title">Variable</h2>
+    <h2 class="card-title">File system</h2>
     <ul>
-      <li>Bash variables are case-sensitive, just like Unix.</li>
+      <li>Follows POSIX standard.</li>
+      <li>Case sensitive. (Unline Windows)</li>
+      <li>Root directory is at /.</li>
     </ul>
+
+    <h3 class="card-title">Bash commands</h3>
+    <ul>
+      <li>Built-in commands: <code>cd</code>, <code>pwd</code>, <code>history</code></li>
+      <li>Bash calls utility to execute: <code>ls</code>, <code>mount</code>, <code>find</code>, <code>grep</code></li>
+    </ul>
+
+    <h3 class="card-title">Command <code>history</code></h3>
+    <ul>
+      <li><code>history</code> displays all command history.</li>
+      <li><code>Ctrl+R</code> allowing searching over command history.</li>
+    </ul>
+
+    <h3 class="card-title">Utility <code>find</code></h3>
+    <ul>
+      <li><code>-type f</code> - search files only.</li>
+      <li><code>-type d</code> - search directories only.</li>
+      <li><code>-name &lt;pattern&gt;</code> - file or directory name to search for.</li>
+      <li><code>-path &lt;pattern&gt;</code> - path in which to search the file or directory for.</li>
+      <li><code>-a</code> - logical and.</li>
+      <li><code>-o</code> - logical or.</li>
+      <li><code>!</code> - logical not.</li>
+      <li><code>-exec &lt;command&gt; {} \;</code> - execute command on each object found.</li>
+      <li><code>-exec &lt;command&gt; {} +</code> - execute command once where all objects are input to the command.</li>
+    </ul>
+
+<pre><code class="bash"># Find files whose name contains "mail" in "/etc".
+find /etc -name "*mail*"
+
+# Find files whose content contains "mail" in "/".
+find ./ -type f -exec grep -Hn "mail" {} \;
+
+# Find files greater than 100M.
+find / -type f -size +100M
+
+# Find files modified in last two days.
+find . –mtime -2
+
+# List files greater than 100M.
+find / -type f -name *.tar.gz -size +100M -exec ls -l {} \;
+
+# Delete files greater than 100M.
+find / -type f -name *.tar.gz -size +100M -exec rm -f {} \;
+
+# Loop through results from "find".
+find / type -f -name ${filename} 2> /dev/null | while read line; do
+  # Do something with ${line}
+done</code></pre>
+
+    <h3 class="card-title">Utility <code>grep</code></h3>
+    <ul>
+      <li><code>v</code> - find all except the match</li>
+      <li><code>c</code> - get number of lines with match</li>
+      <li><code>i</code> - ignore case</li>
+      <li><code>R</code> - find matches recursively in files in directory</li>
+      <ul>
+        <li><code>R</code> is preferred over <code>r</code> because <code>grep</code> will follow symbolic links while searching.</li>
+      </ul>
+      <li><code>l</code> - show the list of files where there is match.</li>
+    </ul>
+
+<pre><code class="bash">grep &lt;options&gt; pattern &lt;files&gt;
+
+# Check if a string exists in a file.
+if greq -q ${string} ${file}; then
+  # Do something.
+fi</code></pre>
+
+    <h3 class="card-title">Ownership and permission</h3>
+    <ul>
+      <li>owner / grouup / all users</li>
+      <li>read(4) / write (2) / execute (1)</li>
+    </ul>
+<pre><code class="bash"># For example, "chmod 640" gives read and write permission to the owner, read permission to the group, no permission to all others
+chmod 640 $file</code></pre>
+
+    <h3 class="card-title">Softlink</h3>
+<pre><code class="bash"># To have "link1 -> file1"
+ln -s file1 link1
+ls -l file1 link1</code></pre>
+
+    <h3 class="card-title">Remove a file starting with dash.</h3>
+<pre><code class="bash">rm ./-file</code></pre>
+
+    <h3 class="card-title">Split and merge files.</h3>
+<pre><code class="bash"># Split file.tar.gz by 1000000000 (this produces xaa, xab, xac, ...)
+split -b 1000000000 file.tar.gz
+
+# Merge splitted files.
+cat x* > file.tar.gz</code></pre>
+
+    <h3 class="card-title">Remove a file except 'file_to_remove'.</h3>
+<pre><code class="bash">find . ! -name 'file_to_remove' -type f -exec rm -r {} +</code></pre>
   </div>
-
   <div class="card-footer text-muted">
-
+    Reference: <a href="https://www.educative.io/path/bash-programming">Bash Programming</a>
   </div>
 </div>
 
 <div class="card mb-4" id="linux-3">
   <div class="card-body">
-    <h2 class="card-title">String</h2>
+    <h2 class="card-title">Bash extra features</h2>
 
-<pre><code class="bash"># Remove two characters from the beginning for the string.
-string=${string:2}
+    <h3 class="card-title">I/O redirection</h3>
+    <ul>
+      <li>0: standard input stream.</li>
+      <li>1: standard output stream.</li>
+      <li>2: standard error stream.</li>
+    </ul>
 
-# Remove prefix from a string.
-string=${string#"prefix_to_remove"}
+    <h3 class="card-title">Pipeline</h3>
 
-# Remove path from a file.
-string=${string##*/}
+    <h3 class="card-title">Utility <code>xargs</code></h3>
 
-# Remove file from path.
-path="/path/to/file.txt"
-echo "${path%/*}/"
-mkdir -p "${path%/*}/"
-
-# Find and replace.
-${string/$match/$replace}
-
-# Find and replace for all occurance.
-${string//$match/$replace}
-
-# Split string by a delimiter "/".
-array_of_split_string=(${string//\//})
-first_element_after_split=${array_of_split_string[0]}
-second_element_after_split=${array_of_split_string[1]}</code></pre>
-  </div>
-
+<pre><code class="bash">find ~ -type f | xargs grep "bash"</code></pre>
   <div class="card-footer text-muted">
-
+    Reference: <a href="https://www.educative.io/path/bash-programming">Bash Programming</a>
   </div>
 </div>
 
 <div class="card mb-4" id="linux-4">
   <div class="card-body">
-    <h2 class="card-title">Array</h2>
-
-<pre><code class="bash"># Declare an array.
-array=("item1" "item2" "item3")
-
-# Add to an array.
-array+=("item4")
-
-# Assess an array element.
-element=${array[0]}</code></pre>
+    <h2 class="card-title">Variable</h2>
+    <ul>
+      <li>Bash variables are case-sensitive, just like Unix.</li>
+    </ul>
   </div>
 
   <div class="card-footer text-muted">
@@ -450,6 +518,73 @@ done</code></pre>
   </div>
 </div>
 
+<div class="card mb-4" id="linux-7">
+  <div class="card-body">
+    <h2 class="card-title">Function</h2>
+    <ul>
+      <li>Bash variables are case-sensitive, just like Unix.</li>
+    </ul>
+  </div>
+
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="linux-8">
+  <div class="card-body">
+    <h2 class="card-title">String</h2>
+
+<pre><code class="bash"># Remove two characters from the beginning for the string.
+string=${string:2}
+
+# Remove prefix from a string.
+string=${string#"prefix_to_remove"}
+
+# Remove path from a file.
+string=${string##*/}
+
+# Remove file from path.
+path="/path/to/file.txt"
+echo "${path%/*}/"
+mkdir -p "${path%/*}/"
+
+# Find and replace.
+${string/$match/$replace}
+
+# Find and replace for all occurance.
+${string//$match/$replace}
+
+# Split string by a delimiter "/".
+array_of_split_string=(${string//\//})
+first_element_after_split=${array_of_split_string[0]}
+second_element_after_split=${array_of_split_string[1]}</code></pre>
+  </div>
+
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="linux-9">
+  <div class="card-body">
+    <h2 class="card-title">Array</h2>
+
+<pre><code class="bash"># Declare an array.
+array=("item1" "item2" "item3")
+
+# Add to an array.
+array+=("item4")
+
+# Assess an array element.
+element=${array[0]}</code></pre>
+  </div>
+
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
 <div class="card mb-4" id="linux-10">
   <div class="card-body">
     <h2 class="card-title">cut</h2>
@@ -470,24 +605,6 @@ free | tr -s ' ' | sed '/^Mem/!d' | cut -d" " -f2 </code></pre>
 
   </div>
 </div>
-
-<!-- <div class="card mb-4" id="linux-11">
-  <div class="card-body">
-    <h2 class="card-title">find</h2>
-  </div>
-  <div class="card-footer text-muted">
-
-  </div>
-</div> -->
-
-<!-- <div class="card mb-4" id="linux-12">
-  <div class="card-body">
-    <h2 class="card-title">grep</h2>
-  </div>
-  <div class="card-footer text-muted">
-
-  </div>
-</div> -->
 
 <div class="card mb-4" id="linux-13">
   <div class="card-body">
@@ -1111,113 +1228,6 @@ ls -la /etc/cron.monthly</code></pre>
   </div>
 </div>
 
-<div class="card mb-4" id="linux-110">
-  <div class="card-body">
-    <h2 class="card-title">File system</h2>
-    <ul>
-      <li>Follows POSIX standard.</li>
-      <li>Case sensitive. (Unline Windows)</li>
-      <li>Root directory is at /.</li>
-    </ul>
-
-    <h3 class="card-title">Bash commands</h3>
-    <ul>
-      <li>Built-in commands: <code>cd</code>, <code>pwd</code>, <code>history</code></li>
-      <li>Bash calls utility to execute: <code>ls</code>, <code>mount</code>, <code>find</code>, <code>grep</code></li>
-    </ul>
-
-    <h3 class="card-title">Command <code>history</code></h3>
-    <ul>
-      <li><code>history</code> displays all command history.</li>
-      <li><code>Ctrl+R</code> allowing searching over command history.</li>
-    </ul>
-
-    <h3 class="card-title">Utility <code>find</code></h3>
-    <ul>
-      <li><code>-type f</code>: search files only.</li>
-      <li><code>-type d</code>: search directories only.</li>
-      <li><code>-name &lt;pattern&gt;</code>: file or directory name to search for.</li>
-      <li><code>-path &lt;pattern&gt;</code>: path in which to search the file or directory for.</li>
-      <li><code>-a</code>: logical and.</li>
-      <li><code>-o</code>: logical or.</li>
-      <li><code>!</code>: logical not.</li>
-      <li><code>-exec &lt;command&gt; {} \;</code>: execute command on each object found.</li>
-      <li><code>-exec &lt;command&gt; {} +</code>: execute command once where all objects are input to the command.</li>
-    </ul>
-
-<pre><code class="bash"># Find files whose name contains "mail" in "/etc".
-find /etc -name "*mail*"
-
-# Find files whose content contains "mail" in "/".
-find ./ -type f -exec grep -Hn "mail" {} \;
-
-# Find files greater than 100M.
-find / -type f -size +100M
-
-# Find files modified in last two days.
-find . –mtime -2
-
-# List files greater than 100M.
-find / -type f -name *.tar.gz -size +100M -exec ls -l {} \;
-
-# Delete files greater than 100M.
-find / -type f -name *.tar.gz -size +100M -exec rm -f {} \;
-
-# Loop through results from "find".
-find / type -f -name ${filename} 2> /dev/null | while read line; do
-  # Do something with ${line}
-done</code></pre>
-
-    <h3 class="card-title">Utility <code>grep</code></h3>
-    <ul>
-      <li><code>v</code> - find all except the match</li>
-      <li><code>c</code> - get number of lines with match</li>
-      <li><code>i</code> - ignore case</li>
-      <li><code>R</code> - find matches recursively in files in directory</li>
-      <ul>
-        <li><code>R</code> is preferred over <code>r</code> because <code>grep</code> will follow symbolic links while searching.</li>
-      </ul>
-      <li><code>l</code> - show the list of files where there is match.</li>
-    </ul>
-
-<pre><code class="bash">grep &lt;options&gt; pattern &lt;files&gt;
-
-# Check if a string exists in a file.
-if greq -q ${string} ${file}; then
-  # Do something.
-fi</code></pre>
-
-    <h3 class="card-title">Ownership and permission</h3>
-    <ul>
-      <li>owner / grouup / all users</li>
-      <li>read(4) / write (2) / execute (1)</li>
-    </ul>
-<pre><code class="bash"># For example, "chmod 640" gives read and write permission to the owner, read permission to the group, no permission to all others
-chmod 640 $file</code></pre>
-
-    <h3 class="card-title">Softlink</h3>
-<pre><code class="bash"># To have "link1 -> file1"
-ln -s file1 link1
-ls -l file1 link1</code></pre>
-
-    <h3 class="card-title">Remove a file starting with dash.</h3>
-<pre><code class="bash">rm ./-file</code></pre>
-
-    <h3 class="card-title">Split and merge files.</h3>
-<pre><code class="bash"># Split file.tar.gz by 1000000000 (this produces xaa, xab, xac, ...)
-split -b 1000000000 file.tar.gz
-
-# Merge splitted files.
-cat x* > file.tar.gz</code></pre>
-
-    <h3 class="card-title">Remove a file except 'file_to_remove'.</h3>
-<pre><code class="bash">find . ! -name 'file_to_remove' -type f -exec rm -r {} +</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/path/bash-programming">Bash Programming</a>
-  </div>
-</div>
-
 <div class="card mb-4" id="linux-111">
   <div class="card-body">
     <h2 class="card-title">Process and Thread</h2>
@@ -1244,19 +1254,6 @@ cat x* > file.tar.gz</code></pre>
   </div>
   <div class="card-footer text-muted">
 
-  </div>
-</div>
-
-<div class="card mb-4" id="linux-112">
-  <div class="card-body">
-    <h2 class="card-title">I/O redirection</h2>
-    <ul>
-      <li>0: standard input stream.</li>
-      <li>1: standard output stream.</li>
-      <li>2: standard error stream.</li>
-    </ul>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/path/bash-programming">Bash Programming</a>
   </div>
 </div>
 <!-- Linux END -->
