@@ -49,6 +49,8 @@
       <li><a href="#linkedlist-3">Copy list with random pointer</a></li>
       <li><a href="#linkedlist-4">Sort list</a></li>
       <li><a href="#linkedlist-5">Delete node in a linked list</a></li>
+      <li><a href="#linkedlist-6">Odd even linked list</a></li>
+
       <!-- <li><a href="#linkedlist-1">Linked list</a></li>
       <li><a href="#linkedlist-2">Reverse linked list</a></li>
       <li><a href="#linkedlist-3">Search</a></li>
@@ -70,7 +72,61 @@
   <div class="card-body">
     <h2 class="card-title">Add two numbers</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python"># Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:
+
+        prev = None
+        carry = 0
+
+        while l1 and l2:
+            val = (l1.val + l2.val + carry) % 10
+            print(val)
+            if l1.val + l2.val + carry >= 10:
+                carry = 1
+            else:
+                carry = 0
+            l1 = l1.next
+            l2 = l2.next
+
+            if not prev:
+                prev = ListNode(val, None)
+                head = prev
+            else:
+                prev.next = ListNode(val, None)
+                prev = prev.next
+
+        while l1:
+            val = (l1.val + carry) % 10
+            print(val)
+            if l1.val + carry >= 10:
+                carry = 1
+            else:
+                carry = 0
+            l1 = l1.next
+            prev.next = ListNode(val, None)
+            prev = prev.next
+
+        while l2:
+            val = (l2.val + carry) % 10
+            print(val)
+            if l2.val + carry >= 10:
+                carry = 1
+            else:
+                carry = 0
+            l2 = l2.next
+            prev.next = ListNode(val, None)
+            prev = prev.next
+
+        if carry == 1:
+            prev.next = ListNode(1, None)
+            prev = prev.next
+
+        return head</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/add-two-numbers">2. Add Two Numbers</a>
@@ -81,7 +137,33 @@
   <div class="card-body">
     <h2 class="card-title">Remove Nth node from end of list</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python"># Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def removeNthFromEnd(self, head: Optional[ListNode], n: int) -> Optional[ListNode]:
+
+        temp = head
+        length = 0
+        while temp:
+            temp = temp.next
+            length += 1
+
+        if length == 1:
+            return None
+
+        if length == n:
+            return head.next
+
+        temp = head
+        while length - n - 1 != 0:
+            temp = temp.next
+            n += 1
+
+        temp.next = temp.next.next
+        return head</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/remove-nth-node-from-end-of-list">19. Remove Nth Node From End of List</a>
@@ -92,7 +174,54 @@
   <div class="card-body">
     <h2 class="card-title">Copy list with random pointer</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">"""
+# Definition for a Node.
+class Node:
+    def __init__(self, x: int, next: 'Node' = None, random: 'Node' = None):
+        self.val = int(x)
+        self.next = next
+        self.random = random
+"""
+
+class Solution:
+    def copyRandomList(self, head: 'Optional[Node]') -> 'Optional[Node]':
+
+        if not head:
+            return head
+
+        original_head = head
+
+        # Duplicate each node in the linked list.
+        while head:
+            temp = head.next
+            head.next = Node(head.val)
+            if head.next:
+                head.next.next = temp
+
+            head = head.next.next
+
+        # Set random pointers for duplicated nodes.
+        head = original_head
+        while head:
+            if head.random:
+                head.next.random = head.random.next
+            head = head.next.next
+
+        # Remove original nodes.
+        head = original_head
+        original_new_head = None
+        while head:
+            if head.next:
+                temp = head.next
+                head.next = head.next.next
+                head = temp
+                if not original_new_head:
+                    original_new_head = head
+            else:
+                break
+
+        # return original_head
+        return original_new_head</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/copy-list-with-random-pointer">138. Copy List with Random Pointer</a>
@@ -103,7 +232,38 @@
   <div class="card-body">
     <h2 class="card-title">Sort list</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python"># Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def sortList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+
+        # Convert linked list into a list and sort it.
+        elements = []
+
+        original_head = head
+        while head:
+            elements.append(head.val)
+            head = head.next
+
+        elements.sort()
+
+        # Created new ;inked list based on sorted list.
+        head = original_head
+        prev = None
+        orignal_head = None
+        for num in elements:
+            node = ListNode(num)
+            if not prev:
+                prev = node
+                original_head = prev
+            else:
+                prev.next = node
+                prev = node
+
+        return original_head</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/sort-list">148. Sort List</a>
@@ -114,10 +274,87 @@
   <div class="card-body">
     <h2 class="card-title">Delete node in a linked list</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python"># Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def deleteNode(self, node):
+        """
+        :type node: ListNode
+        :rtype: void Do not return anything, modify node in-place instead.
+        """
+
+        # It is not possible to really delte this node.
+        # But, can copy data of next node to current node, then delete
+        # the next node
+
+        node.val = node.next.val
+        temp = node.next
+        node.next = node.next.next
+        temp.next = None</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/delete-node-in-a-linked-list">237. Delete Node in a Linked List</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="linkedlist-6">
+  <div class="card-body">
+    <h2 class="card-title">Odd even linked list (M) (Interview)</h2>
+
+<pre><code class="python"># Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def oddEvenList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+
+        # Jump 2 steps.
+
+        if not head:
+            return None
+
+        temp = head
+        prev = None
+        original_prev = None
+
+        while head:
+            node = ListNode(head.val)
+            print(node.val)
+            if not prev:
+                prev = node
+                original_prev = prev
+            else:
+                prev.next = node
+            prev = node
+
+            if head.next:
+                head = head.next.next
+            else:
+                break
+
+        head = temp
+        head = head.next
+
+        while head:
+            node = ListNode(head.val)
+            print(node.val)
+            prev.next = node
+            prev = node
+
+            if head.next:
+                head = head.next.next
+            else:
+                break
+
+        return original_prev</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/odd-even-linked-list">328. Odd Even Linked List</a>
   </div>
 </div>
 
