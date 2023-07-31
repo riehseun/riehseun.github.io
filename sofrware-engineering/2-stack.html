@@ -44,69 +44,21 @@
   <div class="card-body">
     <h2 class="card-title">Stack</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#stack-1">Stack</a></li>
-      <li><a href="#stack-2">Evaluate postfix expression</a></li>
-      <li><a href="#stack-4">Balanced parenthesis</a></li>
-      <li><a href="#stack-5">Spiral matrix</a></li>
-      <li><a href="#stack-6">Evaluate reverse polish notation</a></li>
-      <li><a href="#stack-7">Min stack</a></li>
-      <li><a href="#stack-8">Basic calculator II</a></li>
-      <li><a href="#stack-3">Next greater element</a></li>
+      <li><a href="#stack-">Valid parentheses</a></li>
+      <li><a href="#stack-">Longest valid parentheses</a></li>
+      <li><a href="#stack-">Spiral matrix</a></li>
+      <li><a href="#stack-">Largest rectangle in histogram</a></li>
+      <li><a href="#stack-">Evaluate reverse polish notation</a></li>
+      <li><a href="#stack-">Min stack</a></li>
+      <li><a href="#stack-">Basic calculator II</a></li>
+      <li><a href="#stack-">Next greater element</a></li>
     </ul>
   </div>
 </div>
 
-<div class="card mb-4" id="stack-1">
+<div class="card mb-4" id="stack-">
   <div class="card-body">
-    <h2 class="card-title">Stack</h2>
-
-<pre><code class="python"># Initialize a stack.
-stack = []
-
-# Adding elements at the end of a stack.
-stack.append('element')
-
-# Removing elements from the end of a stack.
-stack.pop()
-
-# Get the item at the front of a stack.
-stack[0]
-
-# Get the item at the end of a stack.
-stack[-1]</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-
-  </div>
-</div>
-
-<div class="card mb-4" id="stack-2">
-  <div class="card-body">
-    <h2 class="card-title">Evaluate postfix expression</h2>
-
-<pre><code class="python">def evaluate_post_fix(exp):
-
-    stack = []
-
-    for token in exp:
-
-        if token.isdigit():
-            stack.append(token)
-        else:
-            a = stack.pop()
-            b = stack.pop()
-            stack.append(str(eval(b + token + a)))
-
-    return int(float(stack.pop()))</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/path/ace-python-coding-interview">Ace the Python Coding Interview</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="stack-4">
-  <div class="card-body">
-    <h2 class="card-title">Valid Parentheses (E) (Interview/Liked)</h2>
+    <h2 class="card-title">Valid parentheses (E) (Interview/Liked)</h2>
 
 <pre><code class="python">class Solution:
     def isValid(self, s: str) -> bool:
@@ -147,7 +99,58 @@ stack[-1]</code></pre>
   </div>
 </div>
 
-<div class="card mb-4" id="stack-5">
+<div class="card mb-4" id="stack-">
+  <div class="card-body">
+    <h2 class="card-title">Longest valid parentheses (H) (Liked)</h2>
+
+<pre><code class="python">class Solution:
+    def longestValidParentheses(self, s: str) -> int:
+
+        # Store the index of unmatching parenthesis into a stack.
+        # Compute the longest difference of indexes in stack.
+        #    pop first item in the stack
+        #    the distance is end_index - second_last_index
+        #    pop second item in the stack
+        #    the distance is second_last_index - third_last_index
+        #    and so on
+        #    At the end, compare with first_index - start_index
+
+        # "()(()" -> 2
+
+        stack = []
+
+        for i in range(len(s)):
+            if s[i] == "(":
+                stack.append(("(", i))
+            if s[i] == ")":
+                if stack and stack[-1][0] == "(":
+                    stack.pop()
+                else:
+                    stack.append((")", i))
+
+        print(stack)
+
+        if not stack:
+            return len(s)
+
+        max_dist = 0
+        start_index = 0
+        end_index = len(s)  # Index is set to len(s), not len(s)-1 to account dist computation
+        while stack:
+            item = stack.pop()
+            dist = end_index - item[1] - 1  # Need -1 here to compute the longest parenthesis.
+            max_dist = max(max_dist, dist)
+            end_index = item[1]
+        max_dist = max(max_dist, end_index-start_index)
+
+        return max_dist</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://leetcode.com/problems/longest-valid-parentheses">32. Longest Valid Parentheses</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="stack-">
   <div class="card-body">
     <h2 class="card-title">Spiral matrix (M) (Interview/Liked)</h2>
 
@@ -193,7 +196,47 @@ stack[-1]</code></pre>
   </div>
 </div>
 
-<div class="card mb-4" id="stack-6">
+<div class="card mb-4" id="stack-">
+  <div class="card-body">
+    <h2 class="card-title">Largest rectangle in histogram (H) (Interview/Liked)</h2>
+
+<pre><code class="python">class Solution:
+    def largestRectangleArea(self, heights: List[int]) -> int:
+
+        # Store the index of first smaller element to the left of each element.
+        left = [-1] * len(heights)
+
+        for i in range(1, len(heights)):
+            p = i - 1
+
+            while p >= 0 and heights[p] >= heights[i]:
+                p = left[p]
+
+            left[i] = p
+
+        # Store the index of first smaller element to the right of each element.
+        right = [len(heights)] * len(heights)
+
+        for i in range(len(heights)-2, -1, -1):
+            p = i + 1
+
+            while p < len(heights) and heights[p] >= heights[i]:
+                p = right[p]
+
+            right[i] = p
+
+        max_area = 0
+        for i in range(len(heights)):
+            max_area = max(max_area, (right[i]-left[i]-1)*heights[i])
+
+        return max_area</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://leetcode.com/problems/largest-rectangle-in-histogram">84. Largest Rectangle in Histogram</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="stack-">
   <div class="card-body">
     <h2 class="card-title">Evaluate reverse polish notation (M) (Interview)</h2>
 
@@ -231,7 +274,7 @@ stack[-1]</code></pre>
   </div>
 </div>
 
-<div class="card mb-4" id="stack-7">
+<div class="card mb-4" id="stack-">
   <div class="card-body">
     <h2 class="card-title">Min stack (M) (Interview/Liked)</h2>
 
@@ -271,7 +314,7 @@ stack[-1]</code></pre>
   </div>
 </div>
 
-<div class="card mb-4" id="stack-8">
+<div class="card mb-4" id="stack-">
   <div class="card-body">
     <h2 class="card-title">Basic calculator II (M) (Interview)</h2>
 
@@ -314,7 +357,61 @@ stack[-1]</code></pre>
   </div>
 </div>
 
-<div class="card mb-4" id="stack-3">
+<div class="card mb-4" id="stack-">
+  <div class="card-body">
+    <h2 class="card-title">Remove duplicate letters (M)</h2>
+
+<pre><code class="python">class Solution:
+    def removeDuplicateLetters(self, s: str) -> str:
+
+        # Requirement is that when duplicates are found, need to determine
+        # which one(s) to remove
+
+        # bcab -> bca
+        # bcabc -> abc
+
+        # 1. Go through each char and append it to stack
+        #    Do not append item if already in stack
+        # 2. If char > stack.top, this is the right sequence,
+        #    so just continue appending char to stack
+        #    While char < stack.top,
+        #        If stack.top is unique element, we cannot remove it.
+        #        If stack.top is duplicate element, we should pop it
+        #        to get the smallest order
+        # 3. Use data structure to keep which char is duplicate
+
+        last_occurance = {}
+
+        for i in range(len(s)):
+            last_occurance[s[i]] = i
+
+        stack = []
+
+        for i in range(len(s)):
+            if not stack:
+                stack.append(s[i])
+                continue
+
+            if s[i] not in stack:
+                # Enforce ordering
+                while stack and s[i] < stack[-1]:
+                    # Check duplicate.
+                    if last_occurance[stack[-1]] > i:
+                        stack.pop()
+                    else:
+                        break
+                stack.append(s[i])
+
+            print(stack)
+
+        return ''.join(stack)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://leetcode.com/problems/remove-duplicate-letters">316. Remove Duplicate Letters</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="stack-">
   <div class="card-body">
     <h2 class="card-title">Next greater element (E)</h2>
 
@@ -373,7 +470,7 @@ stack[-1]</code></pre>
         return result</code></pre>
   </div>
   <div class="card-footer text-muted">
-    <a href="https://leetcode.com/problems/next-greater-element-i/">496. Next Greater Element I</a>
+    <a href="https://leetcode.com/problems/next-greater-element-i">496. Next Greater Element I</a>
   </div>
 </div>
 <!-- Stack END -->
