@@ -44,31 +44,7 @@
   <div class="card-body">
     <h2 class="card-title">Graph</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#graph-">Reconstruct Itinerary</a></li>
-      <li><a href="#graph-">Cracking the safe</a></li>
       <li><a href="#graph-">Sum of distances in tree</a></li>
-  </div>
-</div>
-
-<div class="card mb-4" id="graph-">
-  <div class="card-body">
-    <h2 class="card-title">Reconstruct Itinerary (H)</h2>
-
-<pre><code class="python"></code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/reconstruct-itinerary">332. Reconstruct Itinerary</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="graph-">
-  <div class="card-body">
-    <h2 class="card-title">Cracking the safe (H)</h2>
-
-<pre><code class="python"></code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/cracking-the-safe">753. Cracking the Safe</a>
   </div>
 </div>
 
@@ -76,7 +52,46 @@
   <div class="card-body">
     <h2 class="card-title">Sum of distances in tree (H)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def sumOfDistancesInTree(self, n: int, edges: List[List[int]]) -> List[int]:
+
+        # For each node, compute shortest distance to all other nodes
+
+        result = [0] * n
+        graph = defaultdict(list)
+
+        # Space O(n^2) every node is connected to all other nodes
+        for edge in edges:
+            graph[edge[0]].append(edge[1])
+            graph[edge[1]].append(edge[0])
+
+        # Time O(n^2*(n+m))
+        for i in range(n):
+            for j in range(n):
+                if i != j:
+                    dist = self.bfs(graph, i, j)
+                    result[i] += dist
+
+        return result
+
+    def bfs(self, graph, start, end):
+
+        explored = set()
+        explored.add(start)
+
+        queue = deque()
+        queue.append((start,0))
+
+        while queue:
+            node, dist = queue.popleft()
+            for next_node in graph[node]:
+                if next_node not in explored:
+                    if next_node == end:
+                        return dist + 1
+                    explored.add(next_node)
+                    queue.append((next_node, dist+1))
+
+        return None</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/sum-of-distances-in-tree">834. Sum of Distances in Tree</a>
