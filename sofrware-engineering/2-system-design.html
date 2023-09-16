@@ -45,17 +45,13 @@
     <h2 class="card-title">System design</h2>
     <ul class="list-unstyled mb-0">
       <li><a href="#system-design-">System design</a></li>
+      <li><a href="#system-design-">Non-functional requirements</a></li>
       <li><a href="#system-design-">Distributed system</a></li>
-      <li><a href="#system-design-">Scalability</a></li>
-      <li><a href="#system-design-">Reliability</a></li>
-      <li><a href="#system-design-">Availability</a></li>
       <li><a href="#system-design-">Quorum</a></li>
       <li><a href="#system-design-">CAP theorem</a></li>
-      <li><a href="#system-design-">Consistency</a></li>
       <li><a href="#system-design-">Isolation level</a></li>
       <li><a href="#system-design-">Anomaly</a></li>
       <li><a href="#system-design-">RPC</a></li>
-      <li><a href="#system-design-">Non-functional requirements</a></li>
       <li><a href="#system-design-">Back-of-the-envelop</a></li>
       <li><a href="#system-design-">Resource estimation</a></li>
     </ul>
@@ -66,25 +62,24 @@
   <div class="card-body">
     <h2 class="card-title">System design</h2>
     <ul>
-      <li>Discuss trade-off</li>
-      <ul>
-        <li>Consider 2-3 solutions.</li>
-        <li>Justify chosen decision.</li>
-      </ul>
       <li>Communicate</li>
       <ul>
-        <li>Ask to clarify the requirement, understand the scale and constraints.</li>
-        <li>Be open to feedbacks.</li>
+        <li>Ask to clarify the requirement, understand the scale and constraints</li>
+        <li>Be open to feedbacks</li>
       </ul>
       <li>Talking points</li>
       <ul>
-        <li>Describe components and their interactions.</li>
-        <li>Describe complete lifecycle of a request.</li>
         <li>Discuss trade-off and user experience.</li>
-        <li>Discuss potential bottlenecks.</li>
-        <li>Dicusss future problems as system scales.</li>
-        <li>Describe failover.</li>
-        <li>Discuss user experience when failure happens.</li>
+        <ul>
+          <li>Consider 2-3 solutions</li>
+          <li>Justify chosen decision</li>
+        </ul>
+        <li>Describe components and their interactions</li>
+        <li>Describe complete lifecycle of a request</li>
+        <li>Discuss potential bottlenecks</li>
+        <li>Dicusss future problems as system scales</li>
+        <li>Describe failover</li>
+        <li>Discuss user experience when failure happens</li>
         <li>Discuss peak load</li>
       </ul>
       <li>Building blocks</li>
@@ -100,7 +95,7 @@
         <li>Cache</li>
         <li>Front-end (web) servers</li>
         <ul>
-          <li>Servers static content</li>
+          <li>Serves static content</li>
         </ul>
         <li>Analytics</li>
         <li>Storage</li>
@@ -124,14 +119,206 @@
       </ul>
     </ul>
 
-    <h3 class="card-title">High level design</h3>
+    <!-- <h3 class="card-title">High level design</h3>
     <img class="img-fluid" class="card-img-top" src="/img/system-design/sd-cicd.png" alt="Card image cap">
 
-    <h3 class="card-title">Component design</h3>
+    <h3 class="card-title">Component design</h3> -->
 
   </div>
   <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/courses/system-design-interview-handbook">The System Design Interview Prep Handbook</a>
+  </div>
+</div>
 
+<div class="card mb-4" id="system-design-">
+  <div class="card-body">
+    <h2 class="card-title">Non-functional requirements</h2>
+
+    <h3 class="card-title">Availability</h3>
+    <ul>
+      <li>Percentage of time that the service is accessible to clients (Associated with time loss)</li>
+      <li>Ability of the system to remain functional despite failures</li>
+      <li>Achieved by replication (Keep multiple copies of data at preferrably different geographic location)</li>
+      <li>Reliability means availability, but the opposite is not true</li>
+    </ul>
+
+    <h4 class="card-title">Replication</h4>
+    <ul>
+      <li>Synchrounous - primary responds to client after receving acknowledgements from all backups</li>
+      <li>Asynchrounous - primary responds to client without receving acknowledgements from all backups</li>
+    </ul>
+
+    <h4 class="card-title">Single-master replication (Primary-backup replication)</h4>
+    <ul>
+      <li>Primary processes updates/writes locally and propagates to backups</li>
+      <li>Scalable for read-heavy (read can happen from any backups) but not so for write-heavy (Only primary can handle writes)</li>
+      <li>Statement based replication</li>
+      <ul>
+        <li>Problem: non-deterministic functions such as NOW() or RAND() lead to different values on different nodes</li>
+      </ul>
+      <li>Write-ahead log (WAL) shipping</li>
+      <ul>
+        <li>Primary node saves the query before executing it in a log file</li>
+        <li>Then, it uses these logs to copy data into the backup nodes</li>
+      </ul>
+      <li>Logical (row-based) log replication</li>
+      <ul>
+        <li>All backup nodes replicate the actual data changes</li>
+      </ul>
+    </ul>
+
+    <h4 class="card-title">Multi-master replication (multi-primary replication)</h4>
+    <ul>
+      <li>Multiple primary nodes that process the writes and send them to all other primary and backup nodes to replicate</li>
+      <li>Conflict can happen where mutiple nodes modify the same data</li>
+    </ul>
+
+    <h4 class="card-title">Leaderless replication</h4>
+    <ul>
+      <li>Always write or read from a majority (more than half) of the number of nodes in the system</li>
+      <li>The latest value is written to at least one of the nodes in the system</li>
+    </ul>
+
+    <h3 class="card-title">Reliability</h3>
+    <ul>
+      <li>Probability that the service will perform its functions (Associated with frequency and impact of failure)</li>
+      <li>Metrics are mean time between failures and mean time to repair</li>
+      <li>Redunduncy of both software components and data</li>
+    </ul>
+
+    <h3 class="card-title">Scalability</h3>
+    <ul>
+      <li>Ability to handle increasing workload without degrading performance (Capability to manage increased demand)</li>
+      <li>Workload can be number of requests or amounts of data</li>
+      <li>Compute load patterns - Consistent growth, constantly fluctuating loads, cyclical loads, unpredictable bursts</li>
+      <li>Scaling up (vertical scaling) - Adds more resources to a single instance</li>
+      <li>Scaling out (horizontal scaling) - Addition more instances</li>
+    </ul>
+
+    <h4 class="card-title">Strategies to achieve scalability and performance</h4>
+    <ul>
+      <li>Data partitioning - data partitions can be managed and accessed separately</li>
+      <li>Caching - store frequently used data for fast retrieval. Could be placed at database or application layer</li>
+      <li>Autoscaling - dynamically allocate resources to match performance requirements</li>
+      <li>Background jobs - tasks such as batch jobs, intensive processing tasks, and long-running processes should run as background jobs, decoupled from applicatio UI to minimize load</li>
+      <li>Messaging - requests can continue to flow-in without error if application can’t keep up</li>
+      <li>Scale units - define units for scaling</li>
+    </ul>
+
+    <h4 class="card-title">Vertical partitioning</h4>
+    <ul>
+      <li>Divides tables into different servers based on features of data (Split columns)</li>
+      <li>Problem when data experiences additional growth</li>
+      <li>Queries must hit multiple servers and join operations are needed</li>
+    </ul>
+
+    <h4 class="card-title">Horizontal partitioning (Sharding)</h4>
+    <ul>
+      <li>Puts different rows to different tables</li>
+      <li>Atomic operation is hard to achieve</li>
+      <li>It is cheaper to add more servers than growing the existing server as data increases</li>
+    </ul>
+
+    <h5 class="card-title">Range partitioning</h5>
+    <ul>
+      <li>Split dataset based on specific attribute</li>
+      <li>Range based query is easy to implement</li>
+      <li>May result in unbalanced servers</li>
+    </ul>
+
+    <h5 class="card-title">Hash partitioning</h5>
+    <ul>
+      <li>Apply hash function to some attribute of data and mod that hash value by the number of paritions</li>
+      <li>Uniform allocation of data across servers</li>
+      <li>Range based query is hard to implement</li>
+      <li>Adding new servers mean changing hash function and redistribution of data</li>
+    </ul>
+
+    <h5 class="card-title">Consistent hashing</h5>
+    <ul>
+      <li>Create conceptual ring of hashes from 0 to n−1, where n is the number of available hash values</li>
+      <li>Each node and request are put into the ring based on its hash value</li>
+      <li>Each request is served by the next node in the ring</li>
+      <li>When a new node is added to the ring, its next node need to share keys with the newly added node</li>
+      <li>Some node could be heavily loaded compared to others</li>
+    </ul>
+
+    <h6 class="card-title">Virtual node</h6>
+    <ul>
+      <li>Each node is put into multiple positions in the ring based on multiple hash functions</li>
+      <li>Each node can have different number of virtual nodes based on hardware capability</li>
+      <li>Load is more uniform</li>
+      <li>Used in Dynamo and Cassandra</li>
+    </ul>
+
+    <h6 class="card-title">Fixed number of partitions</h6>
+    <ul>
+      <li>Number of partitions is fixed when DB is setup</li>
+      <li>Higher number of partitions are created than the nodes</li>
+      <li>Paritions are assigned to nodes</li>
+      <li>If partition is too small, results in overhead. If partition is too large, rebalancing the nodes will be expensive</li>
+      <li>Used in Elasticsearch</li>
+    </ul>
+
+    <h6 class="card-title">Dynamic partitioning</h6>
+    <ul>
+      <li>When the size of a partition reaches the threshold, it is split into two partitions</li>
+      <li>Difficult to apply dynamic rebalancing while serving the reads and writes</li>
+      <li>Used in HBase and MongoDB</li>
+    </ul>
+
+    <h6 class="card-title">Partition proportionally to nodes</h6>
+    <ul>
+      <li>Number of partitions is proportionate to the number of nodes, so that every node has fixed partitions</li>
+      <li>As the number of nodes increases, the partitions shrink. Rebalancing between paritions may result in unfair split</li>
+      <li>Used in Cassandra</li>
+    </ul>
+
+    <h3 class="card-title">Consistency</h3>
+    <ul>
+      <li>Considers single object operations</li>
+    </ul>
+
+    <h4 class="card-title">Linearizability</h4>
+    <ul>
+      <li>Synchronous replication technique. (Acknowledgment is not sent to the client until the new value is written to all replicas)</li>
+      <li>Once an operation is complete and the ack is delivered to client, it is visible to all other clients</li>
+      <li>Ex. updating account password</li>
+    </ul>
+
+    <h4 class="card-title">Sequential consistency</h4>
+    <ul>
+      <li>Preserves the ordering specified by each client’s program</li>
+      <li>For example, we don't care what’s the ordering of posts between our friends. But, the posts from a single friend has to be displayed in the right order</li>
+    </ul>
+
+    <h4 class="card-title">Causal consistency</h4>
+    <ul>
+      <li>Operations that are not causally related can be seen in different orders</li>
+      <li>For example, comments and their sub-comments must appear in the right order</li>
+    </ul>
+
+    <h4 class="card-title">Eventual consistency</h4>
+    <ul>
+      <li>Do not need to return the latest write as long as the system eventually arrives at a stable state</li>
+      <li>Can achieve high availability</li>
+      <li>Ex. DNS, Cassandra</li>
+    </ul>
+
+    <h3 class="card-title">Maintainability</h3>
+    <ul>
+      <li>Probability that the service will restore its function (When broken)</li>
+      <li>Workload can be number of requests or amounts of data</li>
+      <li>Metrics are mean time to repair</li>
+    </ul>
+
+    <h3 class="card-title">Fault tolerance</h3>
+    <ul>
+      <li>Ability to continue to perform when some components fail</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
   </div>
 </div>
 
@@ -158,167 +345,6 @@
     <ul>
       <li>Stateless: maintains no state. Performs purely based on the inputs.</li>
       <li>Stateful: maintains and updates states. Results depend on this state.</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/courses/grokking-the-system-design-interview">Grokking the System Design Interview</a> | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="system-design-">
-  <div class="card-body">
-    <h2 class="card-title">Scalability</h2>
-    <ul>
-      <li>Capability to manage increased demand.</li>
-      <li>Compute load patterns - Consistent growth, constantly fluctuating loads, cyclical loads, unpredictable bursts.</li>
-      <li>Scale sets - Load balancer distributes requests across VMs. Uses health probe to determine availability of each VM by pinging it.</li>
-      <li>Scaling up (vertical scaling) - Adds more resources to a single instance.</li>
-      <li>Scaling out (horizontal scaling) - Addition more instances.</li>
-    </ul>
-
-    <h3 class="card-title">Strategies to achieve scalability and performance</h3>
-    <ul>
-      <li>Data partitioning - data partitions can be managed and accessed separately.</li>
-      <li>Caching - store frequently used data for fast retrieval. Could be placed at database or application layer.</li>
-      <li>Autoscaling - dynamically allocate resources to match performance requirements.</li>
-      <li>Background jobs - tasks such as batch jobs, intensive processing tasks, and long-running processes should run as background jobs, decoupled from applicatio UI to minimize load.</li>
-      <li>Messaging - requests can continue to flow-in without error if application can’t keep up.</li>
-      <li>Scale units - define units for scaling.</li>
-    </ul>
-
-    <h3 class="card-title">Vertical partitioning</h3>
-    <ul>
-      <li>Divides tables into different servers based on features of data. (Split columns)</li>
-      <li>Problem when data experiences additional growth.</li>
-      <li>Queries must hit multiple servers and join operations are needed.</li>
-    </ul>
-
-    <h3 class="card-title">Horizontal partitioning (Sharding)</h3>
-    <ul>
-      <li>Puts different rows to different tables.</li>
-      <li>Atomic operation is hard to achieve.</li>
-      <li>It is cheaper to add more servers than growing the existing server as data increases.</li>
-    </ul>
-
-    <h4 class="card-title">Range partitioning</h4>
-    <ul>
-      <li>Split dataset based on specific attribute.</li>
-      <li>Range based query is easy to implement.</li>
-      <li>May result in unbalanced servers.</li>
-    </ul>
-
-    <h4 class="card-title">Hash partitioning</h4>
-    <ul>
-      <li>Apply hash function to some attribute of data and mod that hash value by the number of paritions.</li>
-      <li>Uniform allocation of data across servers.</li>
-      <li>Range based query is hard to implement.</li>
-      <li>Adding new servers mean changing hash function and redistribution of data.</li>
-    </ul>
-
-    <h4 class="card-title">Consistent hashing</h4>
-    <ul>
-      <li>Create conceptual ring of hashes from 0 to n−1, where n is the number of available hash values.</li>
-      <li>Each node and request are put into the ring based on its hash value.</li>
-      <li>Each request is served by the next node in the ring.</li>
-      <li>When a new node is added to the ring, its next node need to share keys with the newly added node.</li>
-      <li>Some node could be heavily loaded compared to others.</li>
-    </ul>
-
-    <h5 class="card-title">Virtual node</h5>
-    <ul>
-      <li>Each node is put into multiple positions in the ring based on multiple hash functions.</li>
-      <li>Each node can have different number of virtual nodes based on hardware capability.</li>
-      <li>Load is more uniform.</li>
-      <li>Used in Dynamo and Cassandra.</li>
-    </ul>
-
-    <h5 class="card-title">Fixed number of partitions</h5>
-    <ul>
-      <li>Number of partitions is fixed when DB is setup.</li>
-      <li>Higher number of partitions are created than the nodes.</li>
-      <li>Paritions are assigned to nodes.</li>
-      <li>If partition is too small, results in overhead. If partition is too large, rebalancing the nodes will be expensive.</li>
-      <li>Used in Elasticsearch.</li>
-    </ul>
-
-    <h5 class="card-title">Dynamic partitioning</h5>
-    <ul>
-      <li>When the size of a partition reaches the threshold, it is split into two partitions.</li>
-      <li>Difficult to apply dynamic rebalancing while serving the reads and writes.</li>
-      <li>Used in HBase and MongoDB.</li>
-    </ul>
-
-    <h5 class="card-title">Partition proportionally to nodes</h5>
-    <ul>
-      <li>Number of partitions is proportionate to the number of nodes, so that every node has fixed partitions.</li>
-      <li>As the number of nodes increases, the partitions shrink. Rebalancing between paritions may result in unfair split.</li>
-      <li>Used in Cassandra.</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/courses/grokking-the-system-design-interview">Grokking the System Design Interview</a> | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="system-design-">
-  <div class="card-body">
-    <h2 class="card-title">Reliability</h2>
-    <ul>
-      <li>Delivering services even when some components fail.</li>
-      <li>Redunduncy of both software components and data.</li>
-      <li>Recovery point objective - Maximum duration of acceptable data loss. For example, 30 minutes of data or four hours of data.</li>
-      <li>Recovery time objective - Maximum duration of acceptable downtime.</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/courses/grokking-the-system-design-interview">Grokking the System Design Interview</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="system-design-">
-  <div class="card-body">
-    <h2 class="card-title">Availability</h2>
-    <ul>
-      <li>Ability of the system to remain functional despite failures.</li>
-      <li>Achieved by replication. (Keep multiple copies of data at preferrably different geographic location)</li>
-      <li>Reliability means availability, but the opposite is not true.</li>
-    </ul>
-
-    <h3 class="card-title">Replication</h3>
-    <ul>
-      <li>Synchrounous - primary responds to client after receving acknowledgements from all backups.</li>
-      <li>Asynchrounous - primary responds to client without receving acknowledgements from all backups.</li>
-    </ul>
-
-    <h3 class="card-title">Single-master replication (Primary-backup replication)</h3>
-    <ul>
-      <li>Primary processes updates/writes locally and propagates to backups.</li>
-      <li>Scalable for read-heavy (read can happen from any backups) but not so for write-heavy. (Only primary can handle writes)</li>
-      <li>Statement based replication</li>
-      <ul>
-        <li>Problem: non-deterministic functions such as NOW() or RAND() lead to different values on different nodes.</li>
-      </ul>
-      <li>Write-ahead log (WAL) shipping</li>
-      <ul>
-        <li>Primary node saves the query before executing it in a log file.</li>
-        <li>Then, it uses these logs to copy data into the backup nodes.</li>
-      </ul>
-      <li>Logical (row-based) log replication</li>
-      <ul>
-        <li>All backup nodes replicate the actual data changes.</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Multi-master replication (multi-primary replication)</h3>
-    <ul>
-      <li>Multiple primary nodes that process the writes and send them to all other primary and backup nodes to replicate.</li>
-      <li>Conflict can happen where mutiple nodes modify the same data.</li>
-    </ul>
-
-    <h3 class="card-title">Leaderless replication</h3>
-    <ul>
-      <li>Always write or read from a majority (more than half) of the number of nodes in the system.</li>
-      <li>The latest value is written to at least one of the nodes in the system.</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -370,44 +396,6 @@
     </ul>
 
     <p class="card-text"><strong>Systems that choose A over C can still support eventual consistency but no linearizability/sequential/casual!</strong></p>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/courses/grokking-the-system-design-interview">Grokking the System Design Interview</a> | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="system-design-">
-  <div class="card-body">
-    <h2 class="card-title">Consistency</h2>
-    <ul>
-      <li>Considers single object operations.</li>
-    </ul>
-
-    <h3 class="card-title">Linearizability</h3>
-    <ul>
-      <li>Synchronous replication technique. (Acknowledgment is not sent to the client until the new value is written to all replicas)</li>
-      <li>Once an operation is complete and the ack is delivered to client, it is visible to all other clients.</li>
-      <li>Ex. updating account password.</li>
-    </ul>
-
-    <h3 class="card-title">Sequential consistency</h3>
-    <ul>
-      <li>Preserves the ordering specified by each client’s program.</li>
-      <li>For example, we don't care what’s the ordering of posts between our friends. But, the posts from a single friend has to be displayed in the right order.</li>
-    </ul>
-
-    <h3 class="card-title">Causal consistency</h3>
-    <ul>
-      <li>Operations that are not causally related can be seen in different orders.</li>
-      <li>For example, comments and their sub-comments must appear in the right order.</li>
-    </ul>
-
-    <h3 class="card-title">Eventual consistency</h3>
-    <ul>
-      <li>Do not need to return the latest write as long as the system eventually arrives at a stable state.</li>
-      <li>Can achieve high availability.</li>
-      <li>Ex. DNS, Cassandra.</li>
-    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.educative.io/courses/grokking-the-system-design-interview">Grokking the System Design Interview</a> | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
@@ -513,46 +501,6 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="system-design-">
-  <div class="card-body">
-    <h2 class="card-title">Non-functional requirements</h2>
-
-    <h2 class="card-title">Availability</h2>
-    <ul>
-      <li>Percentage of time that the service is accessible to clients.</li>
-      <li>Associated with time loss.</li>
-    </ul>
-
-    <h2 class="card-title">Reliability</h2>
-    <ul>
-      <li>Probability that the service will perform its functions.</li>
-      <li>Associated with frequency and impact of failure.</li>
-      <li>Metrics are mean time between failures and mean time to repair.</li>
-    </ul>
-
-    <h2 class="card-title">Scalability</h2>
-    <ul>
-      <li>Ability to handle increasing workload without degrading performance.</li>
-      <li>Workload can be number of requests or amounts of data.</li>
-    </ul>
-
-    <h2 class="card-title">Maintainability</h2>
-    <ul>
-      <li>Probability that the service will restore its function. (When broken)</li>
-      <li>Workload can be number of requests or amounts of data.</li>
-      <li>Metrics are mean time to repair.</li>
-    </ul>
-
-    <h2 class="card-title">Fault tolerance</h2>
-    <ul>
-      <li>Ability to continue to perform when some components fail.</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-
   </div>
 </div>
 
