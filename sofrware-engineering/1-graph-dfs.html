@@ -65,16 +65,14 @@
             graph[edge[0]].append(edge[1])
             graph[edge[1]].append(edge[0])
 
-        # Time O(n^2*(n+m))
+        # Time O(n*(n+m))
         for i in range(n):
-            for j in range(n):
-                if i != j:
-                    dist = self.bfs(graph, i, j)
-                    result[i] += dist
+            distances = self.bfs(graph, i)
+            result[i] = sum(distances.values())
 
         return result
 
-    def bfs(self, graph, start, end):
+    def bfs(self, graph, start):
 
         explored = set()
         explored.add(start)
@@ -82,16 +80,17 @@
         queue = deque()
         queue.append((start,0))
 
+        distances = defaultdict(int)
+
         while queue:
             node, dist = queue.popleft()
+            distances[node] = dist
             for next_node in graph[node]:
                 if next_node not in explored:
-                    if next_node == end:
-                        return dist + 1
                     explored.add(next_node)
                     queue.append((next_node, dist+1))
 
-        return None</code></pre>
+        return distances</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/sum-of-distances-in-tree">834. Sum of Distances in Tree</a>
