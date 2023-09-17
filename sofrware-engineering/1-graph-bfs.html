@@ -56,7 +56,61 @@
   <div class="card-body">
     <h2 class="card-title">Word ladder II (H)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def findLadders(self, beginWord: str, endWord: str, wordList: List[str]) -> List[List[str]]:
+
+        # Construct a graph where edge consists of nodes (words differ by one char)
+        # BFS to compute shrotest distance
+
+        graph = defaultdict(list)
+        words = [beginWord] + wordList
+        n = len(words)
+
+        for i in range(n):
+            for j in range(i+1,n):
+                if self.check_adjacent_pair(words[i], words[j]):
+                    graph[words[i]].append(words[j])
+                    graph[words[j]].append(words[i])
+
+        print(graph)
+        return self.bfs(graph, beginWord, endWord)
+
+    def check_adjacent_pair(self, first_word, second_word):
+
+        differ_count = 0
+        i = 0
+        n = len(first_word)
+
+        for i in range(n):
+            if first_word[i] != second_word[i]:
+                if differ_count == 0:
+                    differ_count += 1
+                else:
+                    return False
+
+        return True
+
+
+    def bfs(self, graph, start, end):
+
+        explored = set()
+        explored.add(start)
+
+        queue = deque()
+        queue.append((start,[]))
+
+        while queue:
+            node, previous_nodes = queue.popleft()
+            for next_node in graph[node]:
+                if next_node == end:
+                    previous_nodes.append(end)
+                    return previous_nodes
+                if next_node not in explored:
+                    explored.add(next_node)
+                    previous_nodes.append(node)
+                    queue.append((next_node,previous_nodes))
+
+        return []</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/word-ladder-ii">126. Word Ladder II</a>
