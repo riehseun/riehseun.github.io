@@ -66,13 +66,15 @@
         words = [beginWord] + wordList
         n = len(words)
 
+        # Time O(n^2) length of each word is constant
+        # Space O(n)
         for i in range(n):
             for j in range(i+1,n):
                 if self.check_adjacent_pair(words[i], words[j]):
                     graph[words[i]].append(words[j])
                     graph[words[j]].append(words[i])
 
-        print(graph)
+        # Time O(n+m)
         return self.bfs(graph, beginWord, endWord)
 
     def check_adjacent_pair(self, first_word, second_word):
@@ -89,7 +91,6 @@
                     return False
 
         return True
-
 
     def bfs(self, graph, start, end):
 
@@ -119,7 +120,60 @@
   <div class="card-body">
     <h2 class="card-title">Word ladder (H)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def ladderLength(self, beginWord: str, endWord: str, wordList: List[str]) -> int:
+
+        # Construct a graph where edge consists of nodes (words differ by one char)
+        # BFS to compute shrotest distance
+
+        graph = defaultdict(list)
+        words = [beginWord] + wordList
+        n = len(words)
+
+        # Time O(n^2) length of each word is constant
+        # Space O(n)
+        for i in range(n):
+            for j in range(i+1,n):
+                if self.check_adjacent_pair(words[i], words[j]):
+                    graph[words[i]].append(words[j])
+                    graph[words[j]].append(words[i])
+
+        # Time O(n+m)
+        return self.bfs(graph, beginWord, endWord)
+
+    def check_adjacent_pair(self, first_word, second_word):
+
+        differ_count = 0
+        i = 0
+        n = len(first_word)
+
+        for i in range(n):
+            if first_word[i] != second_word[i]:
+                if differ_count == 0:
+                    differ_count += 1
+                else:
+                    return False
+
+        return True
+
+    def bfs(self, graph, start, end):
+
+        explored = set()
+        explored.add(start)
+
+        queue = deque()
+        queue.append((start,0))
+
+        while queue:
+            node, dist = queue.popleft()
+            for next_node in graph[node]:
+                if next_node == end:
+                    return dist+2
+                if next_node not in explored:
+                    explored.add(next_node)
+                    queue.append((next_node,dist+1))
+
+        return 0</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/word-ladder">127. Word Ladder</a>
@@ -130,7 +184,13 @@
   <div class="card-body">
     <h2 class="card-title">Remove invalid parentheses (H)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def removeInvalidParentheses(self, s: str) -> List[str]:
+
+        # Treat "s" as root. Construcut node by removing one parenthesis at a time
+        # The node must be a valid paranthesis expression
+        # Compute distance from root to child nodes
+        # Return child nodes with the minimum distance</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/remove-invalid-parentheses">301. Remove Invalid Parentheses</a>
