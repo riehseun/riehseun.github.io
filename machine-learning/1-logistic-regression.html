@@ -99,14 +99,14 @@
       <li>\( x \in R, y \in \{0,1\} \)</li>
       <li>\( m \) training examples such that \( \{ (x^{(1)},y^{(1)}) \dots (x^{(m)},y^{(m)}) \} \)</li>
       <li>X.shape = \( (n_{x},m) \), Y.shape = \( (1,m) \)</li>
-      <li>\( \hat{y} = \sigma (w^{T}w+b) \)</li>
+      <li>\( \hat{y} = \sigma (w^{T}X+b) \)</li>
       <ul>
         <li>Without \( \sigma \), it is just linear regression</li>
       </ul>
       <li>Loss function: \( L(\hat{y},y) = -(ylog\hat{y} + (1-y)log(1-\hat{y})) \)</li>
       <ul>
         <li>This loss function is convex, thus gradient descent can find the global optimum</li>
-        <li>\( L(\hat{y},y) = \frac{1}{2}(\hat{y}-y)^{2} \) something like this is not convex</li>
+        <li>For example, \( L(\hat{y},y) = \frac{1}{2}(\hat{y}-y)^{2} \) something like this is not convex</li>
       </ul>
       <li>Cost function: \( J(w,b) = \dfrac{1}{m}\displaystyle\sum_{i=1}^{m} L(\hat{y}^{(i)},y^{(i)}) \)</li>
     </ul>
@@ -136,6 +136,47 @@
       <li>Then, \( \textbf{dw} = \frac{1}{m}\textbf{x}\textbf{dz}^{T} \), \( \textbf{db} = \dfrac{1}{m}\displaystyle\sum_{1}^{m}dz^{(i)} \)</li>
       <li>Then, \( \textbf{w} = \textbf{w} - \alpha \textbf{dw} \), \( \textbf{b} = \textbf{b} - \alpha \textbf{db} \)</li>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.coursera.org/specializations/deep-learning?">Deep Learning Specialization</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="logistic-regression-">
+  <div class="card-body">
+    <h2 class="card-title">Implement</h2>
+
+<pre><code class="python">def load_dataset(train_set_location, test_set_location):
+
+    train_dataset = h5py.File(train_set_location, "r")
+    # These data sets are to be pre-preprocessed (Thus, appended "_orig")
+    train_set_x_orig = np.array(train_dataset["train_set_x"][:])  # Train set features
+    train_set_y_orig = np.array(train_dataset["train_set_y"][:])  # Train set labels
+
+    test_dataset = h5py.File(test_set_location, "r")
+    # These data sets are to be pre-preprocessed (Thus, appended "_orig")
+    test_set_x_orig = np.array(test_dataset["test_set_x"][:])  # Test set features
+    test_set_y_orig = np.array(test_dataset["test_set_y"][:])  # Test set labels
+
+    classes = np.array(test_dataset["list_classes"][:])  # List of classes
+
+    train_set_y_orig = train_set_y_orig.reshape((1, train_set_y_orig.shape[0]))
+    test_set_y_orig = test_set_y_orig.reshape((1, test_set_y_orig.shape[0]))
+
+    return train_set_x_orig, train_set_y_orig, test_set_x_orig, test_set_y_orig, classes
+
+# Load the data (cat/non-cat)
+train_set_location = 'data/train_catvnoncat.h5'
+test_set_location = 'data/test_catvnoncat.h5'
+train_set_x_orig, train_set_y, test_set_x_orig, test_set_y, classes = load_dataset(train_set_location, test_set_location)</code></pre>
+
+<pre><code class="python"># Reshape the training and test examples such that matrices are flattened into vectors
+train_set_x_flatten = train_set_x_orig.reshape(train_set_x_orig.shape[0], -1).T
+test_set_x_flatten = test_set_x_orig.reshape(test_set_x_orig.shape[0], -1).T
+
+# Center and standardize dataset dividing by the maximum value of a pixel channel
+train_set_x = train_set_x_flatten / 255
+test_set_x = test_set_x_flatten / 255</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.coursera.org/specializations/deep-learning?">Deep Learning Specialization</a>
