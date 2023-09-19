@@ -48,7 +48,6 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#logistic-regression-1">Logistic regression</a></li>
       <li><a href="#logistic-regression-2">Set up</a></li>
-      <li><a href="#logistic-regression-3">Gradient descent</a></li>
       <li><a href="#logistic-regression-4">Softmax regression</a></li>
     </ul>
   </div>
@@ -95,6 +94,8 @@
 <div class="card mb-4" id="logistic-regression-2">
   <div class="card-body">
     <h2 class="card-title">Set up</h2>
+
+    <h3 class="card-title">Forward prop</h3>
     <ul>
       <li>\( x \in R, y \in \{0,1\} \)</li>
       <li>\( m \) training examples such that \( \{ (x^{(1)},y^{(1)}) \dots (x^{(m)},y^{(m)}) \} \)</li>
@@ -110,17 +111,10 @@
       </ul>
       <li>Cost function: \( J(w,b) = \dfrac{1}{m}\displaystyle\sum_{i=1}^{m} L(\hat{y}^{(i)},y^{(i)}) \)</li>
     </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.coursera.org/specializations/deep-learning?">Deep Learning Specialization</a>
-  </div>
-</div>
 
-<div class="card mb-4" id="logistic-regression-3">
-  <div class="card-body">
-    <h2 class="card-title">Gradient descent</h2>
+    <h3 class="card-title">Backward prop</h3>
 
-    <h3 class="card-title">Single training example with \( n = 2 \) features</h3>
+    <h4 class="card-title">Single training example with \( n = 2 \) features</h4>
     <ul>
       <li>Let \( \hat{y} = a \), \( z = w_{1}x_{1} + w_{2}x_{2} + b \) </li>
       <li>\( da = \frac{dL}{da} = -\frac{y}{a} + \frac{1-y}{1-a} \)</li>
@@ -129,18 +123,55 @@
       <li>Then, \( w_{1} = w_{1} - \alpha dw_{1} \), \( w_{2} = w_{2} - \alpha dw_{2} \), \( b = b - \alpha db \)</li>
     </ul>
 
-    <h3 class="card-title">\( m \) training examples</h3>
+    <h4 class="card-title">\( m \) training examples</h4>
     <ul>
       <li>Let \( \textbf{a} = \sigma({\textbf{z}}) \) , \( \textbf{z} = \textbf{W}^{T}\textbf{x} + \textbf{b} \)</li>
       <li>\( \textbf{dz} = \textbf{a} - \textbf{y} \)</li>
       <li>Then, \( \textbf{dw} = \frac{1}{m}\textbf{x}\textbf{dz}^{T} \), \( \textbf{db} = \dfrac{1}{m}\displaystyle\sum_{1}^{m}dz^{(i)} \)</li>
       <li>Then, \( \textbf{w} = \textbf{w} - \alpha \textbf{dw} \), \( \textbf{b} = \textbf{b} - \alpha \textbf{db} \)</li>
     </ul>
+
+<pre><code class="python">def propagate(w, b, X, Y):
+
+    # Forward prop
+    m = X.shape[1]
+    A = sigmoid(np.dot(w.T, X) + b)
+    cost = -(np.dot(Y, np.log(A.T)) + np.dot((1-Y), np.log(1-A.T))) / m
+
+    # Backward prop
+    dw = np.dot(X, (A - Y).T) / m
+    db = np.sum(A - Y) / m
+
+    cost = np.squeeze(cost)
+    grads = {"dw": dw, "db": db}
+
+    return grads, cost</code></pre>
+
+<pre><code class="python">def optimize(w, b, X, Y, num_iterations, learning_rate, print_cost = False):
+
+    for i in range(num_iterations):
+
+        # Cost and gradient calculation
+        grads, cost = propagate(w, b, X, Y)
+
+        # Retrieve derivatives from grads
+        dw = grads["dw"]
+        db = grads["db"]
+
+        # Update rule
+        w = w - learning_rate * dw
+        b = b - learning_rate * db
+
+    params = {"w": w, "b": b}
+    grads = {"dw": dw, "db": db}
+
+    return params, grads, costs</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.coursera.org/specializations/deep-learning?">Deep Learning Specialization</a>
   </div>
 </div>
+
 
 <div class="card mb-4" id="logistic-regression-">
   <div class="card-body">
