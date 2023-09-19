@@ -187,10 +187,51 @@
 <pre><code class="python">class Solution:
     def removeInvalidParentheses(self, s: str) -> List[str]:
 
-        # Treat "s" as root. Construcut node by removing one parenthesis at a time
-        # The node must be a valid paranthesis expression
-        # Compute distance from root to child nodes
-        # Return child nodes with the minimum distance</code></pre>
+        # Treat "s" as root.
+        # If node is a valid paranthesis expression, add to result
+        # Else, construcut child nodes by removing one parenthesis at a time
+        # Keep distance from root to child nodes
+
+        explored = set()
+        explored.add(s)
+
+        queue = deque()
+        queue.append((s,0))
+
+        result = []
+        min_dist = len(s)
+
+        # Time O(n+m) n = len(s) ^ 2, m = len(s) ^ 2
+        # Space O(n)
+        while queue:
+            node, dist = queue.popleft()
+
+            if self.is_valid(node):
+                # If not the shortest distance
+                if dist > min_dist:
+                    return result
+                min_dist = min(min_dist, dist)
+                result.append(node)
+
+            else:
+                for i in range(len(node)):
+                    if node[i] == "(" or node[i] == ")":
+                        next_node = node[:i] + node[i+1:]
+                        if next_node not in explored:
+                            explored.add(next_node)
+                            queue.append((next_node,dist+1))
+
+        return result
+
+    def is_valid(self, string):
+
+        dic = {'(': 1, ')': -1}
+        count = 0
+        for char in string:
+            count += dic.get(char, 0)
+            if count < 0:
+                return False # early exit coz once count of ')' > '(', s can't be valid
+        return count == 0</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/remove-invalid-parentheses">301. Remove Invalid Parentheses</a>
