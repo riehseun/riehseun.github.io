@@ -66,31 +66,24 @@
         words = [beginWord] + wordList
         n = len(words)
 
+        # Construct a set that contains all words that differ by one char
+        # Space O(n * s) where s is length of word
+        all_words_differ_by_one_char = defaultdict(set)
+        for word in words:
+            for i in range(len(word)):
+                for c in 'abcdefghijklmnopqrstuvwxyz':
+                    all_words_differ_by_one_char[word].add(word[:i]+c+word[i+1:])
+
         # Time O(n^2) length of each word is constant
         # Space O(n)
         for i in range(n):
             for j in range(i+1,n):
-                if self.check_adjacent_pair(words[i], words[j]):
+                if words[j] in all_words_differ_by_one_char[words[i]]:
                     graph[words[i]].append(words[j])
                     graph[words[j]].append(words[i])
 
         # Time O(n+m)
         return self.bfs(graph, beginWord, endWord)
-
-    def check_adjacent_pair(self, first_word, second_word):
-
-        differ_count = 0
-        i = 0
-        n = len(first_word)
-
-        for i in range(n):
-            if first_word[i] != second_word[i]:
-                if differ_count == 0:
-                    differ_count += 1
-                else:
-                    return False
-
-        return True
 
     def bfs(self, graph, start, end):
 
@@ -98,18 +91,24 @@
         explored.add(start)
 
         queue = deque()
-        queue.append((start,[]))
+        queue.append((start,0,[]))
+
+        result = []
+        min_dist = 500
 
         while queue:
-            node, previous_nodes = queue.popleft()
+            node, dist, previous_nodes = queue.popleft()
             for next_node in graph[node]:
                 if next_node == end:
-                    return previous_nodes+[node]+[end]
+                    min_dist = min(min_dist, dist)
+                    path = previous_nodes+[node]+[end]
+                    if dist <= min_dist and path not in result:
+                        result.append(path)
                 if next_node not in explored:
                     explored.add(next_node)
-                    queue.append((next_node,previous_nodes+[node]))
+                    queue.append((next_node,dist+1,previous_nodes+[node]))
 
-        return []</code></pre>
+        return result</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/word-ladder-ii">126. Word Ladder II</a>
@@ -130,31 +129,24 @@
         words = [beginWord] + wordList
         n = len(words)
 
+        # Construct a set that contains all words that differ by one char
+        # Space O(n * s) where s is length of word
+        all_words_differ_by_one_char = defaultdict(set)
+        for word in words:
+            for i in range(len(word)):
+                for c in 'abcdefghijklmnopqrstuvwxyz':
+                    all_words_differ_by_one_char[word].add(word[:i]+c+word[i+1:])
+
         # Time O(n^2) length of each word is constant
         # Space O(n)
         for i in range(n):
             for j in range(i+1,n):
-                if self.check_adjacent_pair(words[i], words[j]):
+                if words[j] in all_words_differ_by_one_char[words[i]]:
                     graph[words[i]].append(words[j])
                     graph[words[j]].append(words[i])
 
         # Time O(n+m)
         return self.bfs(graph, beginWord, endWord)
-
-    def check_adjacent_pair(self, first_word, second_word):
-
-        differ_count = 0
-        i = 0
-        n = len(first_word)
-
-        for i in range(n):
-            if first_word[i] != second_word[i]:
-                if differ_count == 0:
-                    differ_count += 1
-                else:
-                    return False
-
-        return True
 
     def bfs(self, graph, start, end):
 
@@ -190,7 +182,7 @@
         # Treat "s" as root.
         # If node is a valid paranthesis expression, add to result
         # Else, construcut child nodes by removing one parenthesis at a time
-        # Keep distance from root to child nodes
+        # Keep track of distances from root to child nodes
 
         explored = set()
         explored.add(s)
@@ -235,17 +227,6 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/remove-invalid-parentheses">301. Remove Invalid Parentheses</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="graph-">
-  <div class="card-body">
-    <h2 class="card-title">Shortest path visiting all nodes (H)</h2>
-
-<pre><code class="python"></code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/shortest-path-visiting-all-nodes">847. Shortest Path Visiting All Nodes</a>
   </div>
 </div>
 <!-- Graph END -->
