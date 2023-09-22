@@ -63,6 +63,8 @@
         # BFS to compute shrotest distance
         # Because standard BFS wouldn't go to the node that is already explored,
         # Some path to solution will be missed!
+        # Modify BFS such that nodes are added to the "explored",
+        # AFTER all nodes in the same level are added to queue
 
         graph = defaultdict(list)
         words = [beginWord] + wordList
@@ -97,19 +99,25 @@
 
         result = []
         min_dist = 500
+        current_dist = 0
 
         while queue:
             node, dist, previous_nodes = queue.popleft()
+            if dist > current_dist:
+                for node in explored_in_this_level:
+                    explored.add(node)
+            current_dist = dist
+            explored_in_this_level = []
+
             for next_node in graph[node]:
                 if next_node == end:
-                    print(end)
                     min_dist = min(min_dist, dist)
                     path = previous_nodes+[node]+[end]
-                    print(path)
                     if dist <= min_dist and path not in result:
                         result.append(path)
+
                 if next_node not in explored:
-                    explored.add(next_node)
+                    explored_in_this_level.append(next_node)
                     queue.append((next_node,dist+1,previous_nodes+[node]))
 
         return result</code></pre>
