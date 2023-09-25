@@ -46,6 +46,7 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#graph-">Word ladder II</a></li>
       <li><a href="#graph-">Word ladder</a></li>
+      <li><a href="#graph-">Number of islands</a></li>
       <li><a href="#graph-">Remove invalid parentheses</a></li>
     </ul>
   </div>
@@ -213,6 +214,72 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/word-ladder">127. Word Ladder</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-">
+  <div class="card-body">
+    <h2 class="card-title">Number of islands (M) (Interview/Liked)</h2>
+
+<pre><code class="python">class Solution:
+    def numIslands(self, grid: List[List[str]]) -> int:
+
+        # Construct a graph
+        # Two nodes are connected when node is 1 and adjacent is also 1
+        # Count number of connnected component using BFS
+
+        graph = defaultdict(list)
+        nodes = set()
+
+        # Time O(nm)
+        # Space O(nm) worst case is that every number is 1
+        n = len(grid)
+        m = len(grid[0])
+        for i in range(n):
+            for j, num in enumerate(grid[i]):
+                if num == "1":
+                    if (i,j) not in nodes:
+                        nodes.add((i,j))
+                    # Check right
+                    if j < m-1 and grid[i][j+1] == "1":
+                        graph[(i,j)].append((i, j+1))
+                        graph[(i,j+1)].append((i,j))
+                    # Check left
+                    if j > 0 and grid[i][j-1] == "1":
+                        graph[(i,j)].append((i, j-1))
+                        graph[(i,j-1)].append((i,j))
+                    # Check up
+                    if i > 0 and grid[i-1][j] == "1":
+                        graph[(i,j)].append((i-1, j))
+                        graph[(i-1,j)].append((i,j))
+                    # Check down
+                    if i < n-1 and grid[i+1][j] == "1":
+                        graph[(i,j)].append((i+1, j))
+                        graph[(i+1,j)].append((i,j))
+
+        explored = set()
+        count = 0
+
+        # Time O(n+m) worst case is that every number is 1
+        for (i,j) in nodes:
+            if (i,j) not in explored:
+                self.bfs(graph, explored, (i,j))
+                count += 1
+        return count
+
+    def bfs(self, graph, explored, start):
+        queue = deque()
+        queue.append(start)
+
+        while queue:
+            node = queue.popleft()
+            for child_node in graph[node]:
+                if child_node not in explored:
+                    explored.add(child_node)
+                    queue.append(child_node)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/number-of-islands">200. Number of Islands</a>
   </div>
 </div>
 
