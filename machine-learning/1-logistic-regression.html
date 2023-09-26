@@ -95,15 +95,27 @@
   <div class="card-body">
     <h2 class="card-title">Set up</h2>
 
-    <h3 class="card-title">Forward prop</h3>
+    <h3 class="card-title">Parameters</h3>
     <ul>
       <li>\( x \in R, y \in \{0,1\} \)</li>
       <li>\( m \) training examples such that \( \{ (x^{(1)},y^{(1)}) \dots (x^{(m)},y^{(m)}) \} \)</li>
       <li>X.shape = \( (n_{x},m) \), Y.shape = \( (1,m) \)</li>
+      <li>\( X = \begin{bmatrix} \vdots & \vdots & \vdots \\ \vdots & \vdots & \vdots \\ x^{(1)} & x^{(2)} \ldots & x^{(m)} \\ \vdots & \vdots & \vdots \\ \vdots & \vdots & \vdots \end{bmatrix} \)</li>
+      <li>\( Y = \begin{bmatrix} y^{(1)} & y^{(2)} \ldots & y^{(m)} \end{bmatrix} \)</li>
+    </ul>
+
+    <h3 class="card-title">Forward prop</h3>
+    <ul>
       <li>\( \hat{y} = \sigma (w^{T}X+b) \)</li>
       <ul>
         <li>Without \( \sigma \), it is just linear regression</li>
       </ul>
+      <li>\( Z = \begin{bmatrix} z^{(1)} & z^{(2)} \ldots & z^{(m)} \end{bmatrix} = \begin{bmatrix} w^{T}x^{(1)}+b & w^{T}x^{(2)}+b \ldots & w^{T}x^{(m)}+b \end{bmatrix} = w^{T}X + \begin{bmatrix} b & b \ldots & b \end{bmatrix} = np.dot(W^{T},X)+b \)</li>
+      <li>\( A = \begin{bmatrix} a^{(1)} & a^{(2)} \ldots & a^{(m)} \end{bmatrix} = \sigma(Z) \)</li>
+    </ul>
+
+    <h3 class="card-title">Cost function</h3>
+    <ul>
       <li>Loss function: \( L(\hat{y},y) = -(ylog\hat{y} + (1-y)log(1-\hat{y})) \)</li>
       <ul>
         <li>This loss function is convex, thus gradient descent can find the global optimum</li>
@@ -123,6 +135,20 @@
     </ul>
 
     <h3 class="card-title">Backward prop</h3>
+    <ul>
+      <li>\( dZ = \begin{bmatrix} dz^{(1)} & dz^{(2)} \ldots & dz^{(m)} \end{bmatrix} = \begin{bmatrix} a^{(1)}-y^{(1)} & a^{(2)}-y^{(2)} \ldots & a^{(m)}-y^{(m)} \end{bmatrix} = A - Y \)</li>
+      <li>\( dw = \dfrac{1}{m}XdZ^{T} \)</li>
+      <li>\( db = \dfrac{1}{m}np.sum(dZ) \)</li>
+      <li>\( w := w - \alpha dw \)</li>
+      <li>\( b := b - \alpha db \)</li>
+    </ul>
+
+    <ul>
+      <li>Let \( \textbf{a} = \sigma({\textbf{z}}) \) , \( \textbf{z} = \textbf{W}^{T}\textbf{x} + \textbf{b} \)</li>
+      <li>\( \textbf{dz} = \textbf{a} - \textbf{y} \)</li>
+      <li>Then, \( \textbf{dw} = \frac{1}{m}\textbf{x}\textbf{dz}^{T} \), \( \textbf{db} = \dfrac{1}{m}\displaystyle\sum_{1}^{m}dz^{(i)} \)</li>
+      <li>Then, \( \textbf{w} = \textbf{w} - \alpha \textbf{dw} \), \( \textbf{b} = \textbf{b} - \alpha \textbf{db} \)</li>
+    </ul>
 
     <!-- <h4 class="card-title">Single training example with \( n = 2 \) features</h4>
     <ul>
@@ -132,27 +158,6 @@
       <li>Then, \( dw_{1} = x_{1}dz \), \( dw_{2} = x_{2}dz \), \( db = dz \)</li>
       <li>Then, \( w_{1} = w_{1} - \alpha dw_{1} \), \( w_{2} = w_{2} - \alpha dw_{2} \), \( b = b - \alpha db \)</li>
     </ul> -->
-
-    <h4 class="card-title">\( m \) training examples</h4>
-    <ul>
-      <li>Let \( \textbf{a} = \sigma({\textbf{z}}) \) , \( \textbf{z} = \textbf{W}^{T}\textbf{x} + \textbf{b} \)</li>
-      <li>\( \textbf{dz} = \textbf{a} - \textbf{y} \)</li>
-      <li>Then, \( \textbf{dw} = \frac{1}{m}\textbf{x}\textbf{dz}^{T} \), \( \textbf{db} = \dfrac{1}{m}\displaystyle\sum_{1}^{m}dz^{(i)} \)</li>
-      <li>Then, \( \textbf{w} = \textbf{w} - \alpha \textbf{dw} \), \( \textbf{b} = \textbf{b} - \alpha \textbf{db} \)</li>
-    </ul>
-
-    <h3 class="card-title">In summary (\( n \) features and \( m \) training data)</h3>
-    <ul>
-      <li>\( X = \begin{bmatrix} \vdots & \vdots & \vdots \\ \vdots & \vdots & \vdots \\ x^{(1)} & x^{(2)} \ldots & x^{(m)} \\ \vdots & \vdots & \vdots \\ \vdots & \vdots & \vdots \end{bmatrix} \)</li>
-      <li>\( Z = \begin{bmatrix} z^{(1)} & z^{(2)} \ldots & z^{(m)} \end{bmatrix} = \begin{bmatrix} w^{T}x^{(1)}+b & w^{T}x^{(2)}+b \ldots & w^{T}x^{(m)}+b \end{bmatrix} = w^{T}X + \begin{bmatrix} b & b \ldots & b \end{bmatrix} = np.dot(W^{T},X)+b \)</li>
-      <li>\( A = \begin{bmatrix} a^{(1)} & a^{(2)} \ldots & a^{(m)} \end{bmatrix} = \sigma(Z) \)</li>
-      <li>\( Y = \begin{bmatrix} y^{(1)} & y^{(2)} \ldots & y^{(m)} \end{bmatrix} \)</li>
-      <li>\( dZ = \begin{bmatrix} dz^{(1)} & dz^{(2)} \ldots & dz^{(m)} \end{bmatrix} = \begin{bmatrix} a^{(1)}-y^{(1)} & a^{(2)}-y^{(2)} \ldots & a^{(m)}-y^{(m)} \end{bmatrix} = A - Y \)</li>
-      <li>\( dw = \dfrac{1}{m}XdZ^{T} \)</li>
-      <li>\( db = \dfrac{1}{m}np.sum(dZ) \)</li>
-      <li>\( w := w - \alpha dw \)</li>
-      <li>\( b := b - \alpha db \)</li>
-    </ul>
 
 <pre><code class="python">def propagate(w, b, X, Y):
 
