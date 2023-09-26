@@ -58,6 +58,7 @@
       <li><a href="#graph-">Keys and rooms</a></li>
       <li><a href="#graph-">Possible bipartition</a></li>
       <li><a href="#graph-">Regions cut by slashes</a></li>
+      <li><a href="#graph-">Satisfiability of Equality Equations</a></li>
   </div>
 </div>
 
@@ -212,6 +213,70 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/regions-cut-by-slashes">959. Regions Cut By Slashes</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-">
+  <div class="card-body">
+    <h2 class="card-title">Satisfiability of equality equations (M)</h2>
+
+<pre><code class="python">class Solution:
+    def equationsPossible(self, equations: List[str]) -> bool:
+
+        # Create bi-directional graph for equations with ==
+        # Do DFS to compute subgraphs
+        # For equations with !=, if numbers are in the same subgraph, return False
+
+        graph = defaultdict(list)
+        all_nodes = set()
+        subgraphs = []
+        inequalities = []
+
+        for equation in equations:
+            if equation[1:3] == "==":
+                graph[equation[0]].append(equation[3])
+                graph[equation[3]].append(equation[0])
+                all_nodes.add(equation[0])
+                all_nodes.add(equation[3])
+            elif equation[1:3] == "!=":
+                inequalities.append((equation[0],equation[3]))
+
+        all_explored = set()
+        for node in all_nodes:
+            if node not in all_explored:
+                explored = self.dfs(graph, node)
+                all_explored.update(explored)
+                subgraphs.append(explored)
+
+        for a,b in inequalities:
+            if a == b:
+                return False
+
+            for subgraph in subgraphs:
+                if a in subgraph and b in subgraph:
+                    return False
+
+        return True
+
+    def dfs(self, graph, start):
+
+        explored = set()
+        explored.add(start)
+
+        stack = []
+        stack.append(start)
+
+        while stack:
+            node = stack.pop()
+            for next_node in graph[node]:
+                if next_node not in explored:
+                    explored.add(next_node)
+                    stack.append(next_node)
+
+        return explored</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/satisfiability-of-equality-equations">990. Satisfiability of Equality Equations</a>
   </div>
 </div>
 <!-- Graph END -->
