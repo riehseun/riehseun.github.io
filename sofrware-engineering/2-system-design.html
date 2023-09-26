@@ -1,4 +1,4 @@
-=<!DOCTYPE html>
+<!DOCTYPE html>
 
 <html lang="en">
 
@@ -45,6 +45,7 @@
     <h2 class="card-title">System design</h2>
     <ul class="list-unstyled mb-0">
       <li><a href="#system-design-">System design</a></li>
+      <li><a href="#system-design-">Building blocks</a></li>
       <li><a href="#system-design-">Non-functional requirements</a></li>
       <li><a href="#system-design-">Distributed system</a></li>
       <li><a href="#system-design-">Back-of-the-envelop</a></li>
@@ -129,13 +130,13 @@
 
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/courses/system-design-interview-handbook">The System Design Interview Prep Handbook</a> | System Design Interview, Alex Xu
+    Reference: <a href="https://www.educative.io/courses/system-design-interview-handbook">The System Design Interview Prep Handbook</a>
   </div>
 </div>
 
 <div class="card mb-4" id="system-design-">
   <div class="card-body">
-    <h2 class="card-title">System design</h2>
+    <h2 class="card-title">Building blocks</h2>
 
     <img class="img-fluid" class="card-img-top" src="/img/system-design/system-design1.png" alt="Card image cap">
 
@@ -193,136 +194,157 @@
       <li>Reliability means availability, but the opposite is not true</li>
     </ul>
 
+    <h4 class="card-title">Fail over</h4>
+    <ul>
+      <li>Acive-passive</li>
+      <ul>
+        <li>Heartbeats are sent from active to passive</li>
+        <li>If heartbeats are stopping, passive takes over IP address of active and resumes service</li>
+      </ul>
+      <li>Acive-active</li>
+      <ul>
+        <li>Both servers are managing traffic, spreading load between them</li>
+      </ul>
+    </ul>
+
     <h4 class="card-title">Replication</h4>
     <ul>
-      <li>Synchrounous - primary responds to client after receving acknowledgements from all backups</li>
-      <li>Asynchrounous - primary responds to client without receving acknowledgements from all backups</li>
-    </ul>
-
-    <h4 class="card-title">Single-master replication (Primary-backup replication)</h4>
-    <ul>
-      <li>Primary processes updates/writes locally and propagates to backups</li>
-      <li>Scalable for read-heavy (read can happen from any backups) but not so for write-heavy (Only primary can handle writes)</li>
-      <li>Statement based replication</li>
+      <li>Single-master replication / primary-backup replication</li>
       <ul>
-        <li>Problem: non-deterministic functions such as NOW() or RAND() lead to different values on different nodes</li>
+        <li>Primary processes updates/writes locally and propagates to backups</li>
+        <li>Scalable for read-heavy (read can happen from any backups) but not so for write-heavy (only primary can handle writes)</li>
+        <li>Statement based replication</li>
+        <ul>
+          <li>Problem: non-deterministic functions such as NOW() or RAND() lead to different values on different nodes</li>
+        </ul>
+        <li>Write-ahead log (WAL) shipping</li>
+        <ul>
+          <li>Primary node saves the query before executing it in a log file</li>
+          <li>Then, it uses these logs to copy data into the backup nodes</li>
+        </ul>
+        <li>Logical (row-based) log replication</li>
+        <ul>
+          <li>All backup nodes replicate the actual data changes</li>
+        </ul>
       </ul>
-      <li>Write-ahead log (WAL) shipping</li>
+      <li>Multi-master replication / multi-primary replication</li>
       <ul>
-        <li>Primary node saves the query before executing it in a log file</li>
-        <li>Then, it uses these logs to copy data into the backup nodes</li>
+        <li>Multiple primary nodes that process the writes and send them to all other primary and backup nodes to replicate</li>
+        <li>Conflict can happen where mutiple nodes modify the same data</li>
       </ul>
-      <li>Logical (row-based) log replication</li>
+      <li>Leaderless replication</li>
       <ul>
-        <li>All backup nodes replicate the actual data changes</li>
+        <li>Always write or read from a majority (more than half) of the number of nodes in the system</li>
+        <li>The latest value is written to at least one of the nodes in the system</li>
       </ul>
-    </ul>
-
-    <h4 class="card-title">Multi-master replication (multi-primary replication)</h4>
-    <ul>
-      <li>Multiple primary nodes that process the writes and send them to all other primary and backup nodes to replicate</li>
-      <li>Conflict can happen where mutiple nodes modify the same data</li>
-    </ul>
-
-    <h4 class="card-title">Leaderless replication</h4>
-    <ul>
-      <li>Always write or read from a majority (more than half) of the number of nodes in the system</li>
-      <li>The latest value is written to at least one of the nodes in the system</li>
-    </ul>
-
-    <h3 class="card-title">Reliability</h3>
-    <ul>
-      <li>Probability that the service will perform its functions (Associated with frequency and impact of failure)</li>
-      <li>Metrics are mean time between failures and mean time to repair</li>
-      <li>Redunduncy of both software components and data</li>
     </ul>
 
     <h3 class="card-title">Scalability</h3>
     <ul>
-      <li>Ability to handle increasing workload without degrading performance (Capability to manage increased demand)</li>
-      <li>Workload can be number of requests or amounts of data</li>
-      <li>Compute load patterns - Consistent growth, constantly fluctuating loads, cyclical loads, unpredictable bursts</li>
-      <li>Scaling up (vertical scaling) - Adds more resources to a single instance</li>
-      <li>Scaling out (horizontal scaling) - Addition more instances</li>
+      <li>Capability to manage increased demand (For example, number of requests or amounts of data)</li>
+      <ul>
+        <li>Performance problem - system is slow for a single user</li>
+        <li>Scailability problem - system is fast for a single user but slow under heavy load</li>
+      </ul>
+      <li>Vertical scaling / Scaling up - Adds more resources to a single instance</li>
+      <li>Horizontal scaling / scaling out - Addition more instances</li>
+      <li>Compute load patterns</li>
+      <ul>
+        <li>Consistent growth</li>
+        <li>Constantly fluctuating loads</li>
+        <li>Cyclical loads</li>
+        <li>Unpredictable bursts</li>
+      </ul>
     </ul>
 
-    <h4 class="card-title">Strategies to achieve scalability and performance</h4>
+    <h4 class="card-title">Data partitioning </h4>
     <ul>
-      <li>Data partitioning - data partitions can be managed and accessed separately</li>
-      <li>Caching - store frequently used data for fast retrieval. Could be placed at database or application layer</li>
-      <li>Autoscaling - dynamically allocate resources to match performance requirements</li>
-      <li>Background jobs - tasks such as batch jobs, intensive processing tasks, and long-running processes should run as background jobs, decoupled from applicatio UI to minimize load</li>
-      <li>Messaging - requests can continue to flow-in without error if application can’t keep up</li>
-      <li>Scale units - define units for scaling</li>
+      <li>Vertical partitioning</li>
+      <ul>
+        <li>Divides tables into different servers based on features of data (Split columns)</li>
+        <li>Problem when data experiences additional growth</li>
+        <li>Queries must hit multiple servers and join operations are needed</li>
+      </ul>
+      <li>Horizontal partitioning (Sharding)</li>
+      <ul>
+        <li>Puts different rows to different tables</li>
+        <li>Atomic operation is hard to achieve</li>
+        <li>It is cheaper to add more servers than growing the existing server as data increases</li>
+        <li>Range partitioning</li>
+        <ul>
+          <li>Split dataset based on specific attribute</li>
+          <li>Range based query is easy to implement</li>
+          <li>May result in unbalanced servers</li>
+        </ul>
+        <li>Hash partitioning</li>
+        <ul>
+          <li>Apply hash function to some attribute of data and mod that hash value by the number of paritions</li>
+          <li>Uniform allocation of data across servers</li>
+          <li>Range based query is hard to implement</li>
+          <li>Adding new servers mean changing hash function and redistribution of data</li>
+        </ul>
+        <li>Consistent hashing</li>
+        <ul>
+          <li>Create conceptual ring of hashes from 0 to n−1, where n is the number of available hash values</li>
+          <li>Each node and request are put into the ring based on its hash value</li>
+          <li>Each request is served by the next node in the ring</li>
+          <li>When a new node is added to the ring, its next node need to share keys with the newly added node</li>
+          <li>Some node could be heavily loaded compared to others</li>
+          <li>Virtual node</li>
+          <ul>
+            <li>Each node is put into multiple positions in the ring based on multiple hash functions</li>
+            <li>Each node can have different number of virtual nodes based on hardware capability</li>
+            <li>Load is more uniform</li>
+            <li>Used in Dynamo and Cassandra</li>
+          </ul>
+          <li>Fixed number of partitions</li>
+          <ul>
+            <li>Number of partitions is fixed when DB is setup</li>
+            <li>Higher number of partitions are created than the nodes</li>
+            <li>Paritions are assigned to nodes</li>
+            <li>If partition is too small, results in overhead. If partition is too large, rebalancing the nodes will be expensive</li>
+            <li>Used in Elasticsearch</li>
+          </ul>
+          <li>Dynamic partitioning</li>
+          <ul>
+            <li>When the size of a partition reaches the threshold, it is split into two partitions</li>
+            <li>Difficult to apply dynamic rebalancing while serving the reads and writes</li>
+            <li>Used in HBase and MongoDB</li>
+          </ul>
+          <li>Partition proportionally to nodes</li>
+          <ul>
+            <li>Number of partitions is proportionate to the number of nodes, so that every node has fixed partitions</li>
+            <li>As the number of nodes increases, the partitions shrink. Rebalancing between paritions may result in unfair split</li>
+            <li>Used in Cassandra</li>
+          </ul>
+        </ul>
+      </ul>
     </ul>
 
-    <h4 class="card-title">Vertical partitioning</h4>
+    <h4 class="card-title">Caching</h4>
     <ul>
-      <li>Divides tables into different servers based on features of data (Split columns)</li>
-      <li>Problem when data experiences additional growth</li>
-      <li>Queries must hit multiple servers and join operations are needed</li>
+      <li>Store frequently used data for fast retrieval</li>
+      <li>Could be placed at database or application layer</li>
     </ul>
 
-    <h4 class="card-title">Horizontal partitioning (Sharding)</h4>
+    <h4 class="card-title">Autoscaling</h4>
     <ul>
-      <li>Puts different rows to different tables</li>
-      <li>Atomic operation is hard to achieve</li>
-      <li>It is cheaper to add more servers than growing the existing server as data increases</li>
+      <li>Dynamically allocate resources to match performance requirements</li>
     </ul>
 
-    <h5 class="card-title">Range partitioning</h5>
+    <h4 class="card-title">Background jobs</h4>
     <ul>
-      <li>Split dataset based on specific attribute</li>
-      <li>Range based query is easy to implement</li>
-      <li>May result in unbalanced servers</li>
+      <li>Tasks such as batch jobs, intensive processing tasks, and long-running processes should run as background jobs, decoupled from application UI to minimize load</li>
     </ul>
 
-    <h5 class="card-title">Hash partitioning</h5>
+    <h4 class="card-title">Messaging</h4>
     <ul>
-      <li>Apply hash function to some attribute of data and mod that hash value by the number of paritions</li>
-      <li>Uniform allocation of data across servers</li>
-      <li>Range based query is hard to implement</li>
-      <li>Adding new servers mean changing hash function and redistribution of data</li>
+      <li>Requests can continue to flow-in without error if application can’t keep up</li>
     </ul>
 
-    <h5 class="card-title">Consistent hashing</h5>
+    <h4 class="card-title">Scale units</h4>
     <ul>
-      <li>Create conceptual ring of hashes from 0 to n−1, where n is the number of available hash values</li>
-      <li>Each node and request are put into the ring based on its hash value</li>
-      <li>Each request is served by the next node in the ring</li>
-      <li>When a new node is added to the ring, its next node need to share keys with the newly added node</li>
-      <li>Some node could be heavily loaded compared to others</li>
-    </ul>
-
-    <h6 class="card-title">Virtual node</h6>
-    <ul>
-      <li>Each node is put into multiple positions in the ring based on multiple hash functions</li>
-      <li>Each node can have different number of virtual nodes based on hardware capability</li>
-      <li>Load is more uniform</li>
-      <li>Used in Dynamo and Cassandra</li>
-    </ul>
-
-    <h6 class="card-title">Fixed number of partitions</h6>
-    <ul>
-      <li>Number of partitions is fixed when DB is setup</li>
-      <li>Higher number of partitions are created than the nodes</li>
-      <li>Paritions are assigned to nodes</li>
-      <li>If partition is too small, results in overhead. If partition is too large, rebalancing the nodes will be expensive</li>
-      <li>Used in Elasticsearch</li>
-    </ul>
-
-    <h6 class="card-title">Dynamic partitioning</h6>
-    <ul>
-      <li>When the size of a partition reaches the threshold, it is split into two partitions</li>
-      <li>Difficult to apply dynamic rebalancing while serving the reads and writes</li>
-      <li>Used in HBase and MongoDB</li>
-    </ul>
-
-    <h6 class="card-title">Partition proportionally to nodes</h6>
-    <ul>
-      <li>Number of partitions is proportionate to the number of nodes, so that every node has fixed partitions</li>
-      <li>As the number of nodes increases, the partitions shrink. Rebalancing between paritions may result in unfair split</li>
-      <li>Used in Cassandra</li>
+      <li>Define units for scaling</li>
     </ul>
 
     <h3 class="card-title">Consistency</h3>
@@ -330,9 +352,9 @@
       <li>Considers single object operations</li>
     </ul>
 
-    <h4 class="card-title">Linearizability</h4>
+    <h4 class="card-title">Strong consistency / linearizability</h4>
     <ul>
-      <li>Synchronous replication technique. (Acknowledgment is not sent to the client until the new value is written to all replicas)</li>
+      <li>Synchronous replication technique (Acknowledgment is not sent to the client until the new value is written to all replicas)</li>
       <li>Once an operation is complete and the ack is delivered to client, it is visible to all other clients</li>
       <li>Ex. updating account password</li>
     </ul>
@@ -356,6 +378,19 @@
       <li>Ex. DNS, Cassandra</li>
     </ul>
 
+    <h4 class="card-title">Weak consistency</h4>
+    <ul>
+      <li>Read may or may not see the written data</li>
+      <li>Ex. Memcached</li>
+    </ul>
+
+    <h3 class="card-title">Reliability</h3>
+    <ul>
+      <li>Probability that the service will perform its functions (Associated with frequency and impact of failure)</li>
+      <li>Metrics are mean time between failures and mean time to repair</li>
+      <li>Redunduncy of both software components and data</li>
+    </ul>
+
     <h3 class="card-title">Maintainability</h3>
     <ul>
       <li>Probability that the service will restore its function (When broken)</li>
@@ -369,7 +404,7 @@
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+    Reference: <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a> | <a href="https://github.com/donnemartin/system-design-primer">The System Design Primer</a>
   </div>
 </div>
 
@@ -412,23 +447,28 @@
 
     <h3 class="card-title">CAP theorem</h3>
     <ul>
-      <li>It is impossible to acheive all three at the same time. We can only have two out of three.</li>
-      <li>Consistency: all nodes see the same data at the same time.</li>
-      <li>Availability: system must be accessible even when nodes fail.</li>
-      <li>Partition tolerance: system must operate even when communications between nodes break.</li>
-    </ul>
-
-    <p class="card-text">In distributed system, If there is no partition tolerance, there is no consistency or availability. This means we can only choose between consistency or availability in distributed system.</p>
-    <ul>
-      <li>CA - RDBMS (Non-distributed system)</li>
-      <li>PA - Dynamo, Cassandra, CouchDB (BASE DBs choose availability - respond with local data w/o ensuring its the latest with peers)</li>
-      <li>PC - BigTable, HBase (ACID DBs choose consistency - refuse response if cannot check peers)</li>
+      <li>It is impossible to acheive all three at the same time. We can only have two out of three</li>
+      <ul>
+        <li>Consistency - all nodes see the same data at the same time, every read received the most recent write</li>
+        <li>Availability - system must be accessible even when nodes fail, every request receives a response</li>
+        <li>Partition tolerance - system must operate even when communications between nodes break</li>
+      </ul>
+      <li>Network is not reliable, thus we need to support partition tolerance</li>
+      <li>We can only choose between consistency or availability in distributed system</li>
+      <ul>
+        <li>CA - RDBMS (Non-distributed system)</li>
+        <li>AP - Dynamo, Cassandra, CouchDB (BASE DBs choose availability - respond with local data w/o ensuring its the latest with peers)</li>
+        <ul>
+          <li>Good choice if system can live with eventual consistency</li>
+        </ul>
+        <li>CP - BigTable, HBase (ACID DBs choose consistency - refuse to respond if cannot check peers)</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">PACELC theorem</h3>
     <ul>
-      <li>When there is no network partition during normal operation, then choose between latency or consistency.</li>
-      <li>To guarantee data consistency, the system will have to delay write operations until the data has been propagated across the system successfully, taking a latency hit.</li>
+      <li>When there is no network partition during normal operation, then choose between latency or consistency</li>
+      <li>To guarantee data consistency, the system will have to delay write operations until the data has been propagated across the system successfully, taking a latency hit</li>
       <li>PA system would go for L (latency) and PC system would go for C (consistency)</li>
     </ul>
 
