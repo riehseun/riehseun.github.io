@@ -55,6 +55,7 @@
       <li><a href="#graph-">Is graph bipartite?</a></li>
       <li><a href="#graph-">All paths from source to target</a></li>
       <li><a href="#graph-">Find eventual safe states</a></li>
+      <li><a href="#graph-">Sum of distances in tree</a></li>
       <li><a href="#graph-">Keys and rooms</a></li>
       <li><a href="#graph-">Possible bipartition</a></li>
       <li><a href="#graph-">Regions cut by slashes</a></li>
@@ -180,6 +181,55 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/find-eventual-safe-states">802. Find Eventual Safe States</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-">
+  <div class="card-body">
+    <h2 class="card-title">Sum of distances in tree (H)</h2>
+
+<pre><code class="python">class Solution:
+    def sumOfDistancesInTree(self, n: int, edges: List[List[int]]) -> List[int]:
+
+        # For each node, compute shortest distance to all other nodes
+
+        result = [0] * n
+        graph = defaultdict(list)
+
+        # Space O(n^2) every node is connected to all other nodes
+        for edge in edges:
+            graph[edge[0]].append(edge[1])
+            graph[edge[1]].append(edge[0])
+
+        # Time O(n*(n+m))
+        for i in range(n):
+            distances = self.dfs(graph, i)
+            result[i] = sum(distances.values())
+
+        return result
+
+    def dfs(self, graph, start):
+
+        explored = set()
+        explored.add(start)
+
+        stack = []
+        stack.append((start,0))
+
+        distances = defaultdict(int)
+
+        while stack:
+            node, dist = stack.pop()
+            distances[node] = dist
+            for next_node in graph[node]:
+                if next_node not in explored:
+                    explored.add(next_node)
+                    stack.append((next_node, dist+1))
+
+        return distances</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/sum-of-distances-in-tree">834. Sum of Distances in Tree</a>
   </div>
 </div>
 
