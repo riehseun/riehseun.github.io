@@ -48,7 +48,6 @@
       <li><a href="#neural-network-1">Neural network</a></li>
       <li><a href="#neural-network-2">Set up</a></li>
       <li><a href="#neural-network-3">Activation</a></li>
-      <li><a href="#neural-network-4">Gradient descent</a></li>
     </ul>
   </div>
 </div>
@@ -120,11 +119,88 @@ print(model)</code></pre> -->
       <li>\( A^{[2]} = g^{[2]}(Z^{[2]}) \)</li>
     </ul>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">def forward_propagation(X, parameters):
+    W1 = parameters["W1"]
+    b1 = parameters["b1"]
+    W2 = parameters["W2"]
+    b2 = parameters["b2"]
 
-<pre><code class="python"></code></pre>
+    Z1 = np.dot(W1, X) + b1
+    A1 = np.tanh(Z1)
+    Z2 = np.dot(W2, A1) + b2
+    A2 = sigmoid(Z2)
 
-<pre><code class="python"></code></pre>
+    cache = {"Z1": Z1,
+             "A1": A1,
+             "Z2": Z2,
+             "A2": A2}
+
+    return A2, cache</code></pre>
+
+<pre><code class="python">def compute_cost(A2, Y, parameters):
+
+    m = Y.shape[1]
+    logprobs = np.multiply(np.log(A2), Y) + np.multiply(np.log(1-A2), (1-Y))
+    cost = - np.sum(logprobs) / m
+
+    return cost</code></pre>
+
+    <ul>
+      <li>\( \textbf{dZ}^{[2]} = \textbf{A}^{[2]} - \textbf{Y} \)</li>
+      <li>\( \textbf{dW}^{[2]} = \frac{1}{m}\textbf{dZ}^{[2]}\textbf{A}^{[1]^{T}} \)</li>
+      <li>\( \textbf{db}^{[2]} = \frac{1}{m} \) np.sum \( (\textbf{dZ}^{[2]} \), axis=1, keepdims=True)</li>
+      <li>\( \textbf{dZ}^{[1]} = \textbf{w}^{[2]^{T}}\textbf{dZ}^{[2]} * \textbf{g}^{[1]^{'}}(\textbf{Z}^{[1]}) \)</li>
+      <li>\( \textbf{dW}^{[1]} = \frac{1}{m}\textbf{dZ}^{[1]}\textbf{X}^{T} \)</li>
+      <li>\( \textbf{db}^{[1]} = \frac{1}{m} \) np.sum \( (\textbf{dZ}^{[1]} \), axis=1, keepdims=True)</li>
+    </ul>
+
+<pre><code class="python">def backward_propagation(parameters, cache, X, Y):
+
+    m = X.shape[1]
+
+    W1 = parameters["W1"]
+    W2 = parameters["W2"]
+
+    A1 = cache["A1"]
+    A2 = cache["A2"]
+
+    dZ2 = A2 - Y
+    dW2 = np.dot(dZ2, A1.T) / m
+    db2 = np.sum(dZ2, axis=1, keepdims=True) / m
+    dZ1 = np.dot(W2.T, dZ2) * (1 - np.power(A1, 2))
+    dW1 = np.dot(dZ1, X.T) / m
+    db1 = np.sum(dZ1, axis=1, keepdims=True) / m
+
+    grads = {"dW1": dW1,
+             "db1": db1,
+             "dW2": dW2,
+             "db2": db2}
+
+    return grads</code></pre>
+
+<pre><code class="python">def update_parameters(parameters, grads, learning_rate = 1.2):
+
+    W1 = parameters["W1"]
+    b1 = parameters["b1"]
+    W2 = parameters["W2"]
+    b2 = parameters["b2"]
+
+    dW1 = grads["dW1"]
+    db1 = grads["db1"]
+    dW2 = grads["dW2"]
+    db2 = grads["db2"]
+
+    W1 = W1 - learning_rate * dW1
+    b1 = b1 - learning_rate * db1
+    W2 = W2 - learning_rate * dW2
+    b2 = b2 - learning_rate * db2
+
+    parameters = {"W1": W1,
+                  "b1": b1,
+                  "W2": W2,
+                  "b2": b2}
+
+    return parameters</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.coursera.org/specializations/deep-learning?">Deep Learning Specialization</a>
@@ -182,23 +258,6 @@ print(model)</code></pre> -->
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.educative.io/path/become-a-deep-learning-professional">Become a Deep Learning Professional</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="neural-network-4">
-  <div class="card-body">
-    <h2 class="card-title">Gradient descent</h2>
-    <ul>
-      <li>\( \textbf{dZ}^{[2]} = \textbf{A}^{[2]} - \textbf{Y} \)</li>
-      <li>\( \textbf{dW}^{[2]} = \frac{1}{m}\textbf{dZ}^{[2]}\textbf{A}^{[1]^{T}} \)</li>
-      <li>\( \textbf{db}^{[2]} = \frac{1}{m} \) np.sum \( (\textbf{dZ}^{[2]} \), axis=1, keepdims=True)</li>
-      <li>\( \textbf{dZ}^{[1]} = \textbf{w}^{[2]^{T}}\textbf{dZ}^{[2]} * \textbf{g}^{[1]^{'}}(\textbf{Z}^{[1]}) \)</li>
-      <li>\( \textbf{dW}^{[1]} = \frac{1}{m}\textbf{dZ}^{[1]}\textbf{X}^{T} \)</li>
-      <li>\( \textbf{db}^{[1]} = \frac{1}{m} \) np.sum \( (\textbf{dZ}^{[1]} \), axis=1, keepdims=True)</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.coursera.org/specializations/deep-learning?">Deep Learning Specialization</a>
   </div>
 </div>
 <!-- Neural network END -->
