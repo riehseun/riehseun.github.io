@@ -44,8 +44,120 @@
   <div class="card-body">
     <h2 class="card-title">Graph</h2>
     <ul class="list-unstyled mb-0">
-
+      <li><a href="#graph-">Course schedule</a></li>
+      <li><a href="#graph-">Course schedule II</a></li>
     </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-">
+  <div class="card-body">
+    <h2 class="card-title">Course schedule (M)</h2>
+
+<pre><code class="python">class Solution:
+    def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
+
+        # Each element in prerequisites is two nodes in directed graph
+        # If cycle, return False
+
+        graph = defaultdict(list)
+
+        # Time O(n)
+        # Space O(n)
+        for pair in prerequisites:
+            graph[pair[1]].append(pair[0])
+
+        # Time O(n^2)
+        for node in graph:
+            if self.dfs(node, graph):
+                return False
+
+        return True
+
+    def dfs(self, start, graph):
+
+        explored = set()
+        explored.add(start)
+
+        stack = []
+        stack.append(start)
+
+        while stack:
+            node = stack.pop()
+            if node in graph:
+                for next_node in graph[node]:
+                    if next_node not in explored:
+                        explored.add(next_node)
+                        stack.append(next_node)
+                    else:
+                        if next_node == start:
+                            return True
+
+        return False</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/course-schedule">207. Course Schedule</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-">
+  <div class="card-body">
+    <h2 class="card-title">Course schedule II (M)</h2>
+
+<pre><code class="python">class Solution:
+    def findOrder(self, numCourses: int, prerequisites: List[List[int]]) -> List[int]:
+
+        # Loop through n. Do DFS for each node
+        # 1. If a node is pre-requisite for a lot of courses, it will take long to
+        # finsh DFS
+        # 2. If a node is pre-requisite for only small number of course or even no
+        # course, DFS will finish quickly
+        # Remember the number of steps taken for DFS starting at each node
+
+        graph = defaultdict(set)
+
+        for edge in prerequisites:
+            graph[edge[1]].add(edge[0])
+
+        # Time O(n^2)
+        # Space O(n)
+        ordering = []
+        for i in range(numCourses):
+            count = self.dfs(i, graph)
+            # If cycle
+            if count == -1:
+                return []
+            ordering.append([count, i])
+
+        ordering.sort(key=lambda x:(-x[0]))
+
+        return [item[1] for item in ordering]
+
+    def dfs(self, start, graph):
+
+        explored = set()
+        explored.add(start)
+
+        stack = []
+        stack.append(start)
+
+        count = 1
+
+        while stack:
+            node = stack.pop()
+            for next_node in graph[node]:
+                if next_node not in explored:
+                    explored.add(next_node)
+                    stack.append(next_node)
+                    count += 1
+                else:
+                    if next_node == start:
+                        return -1
+
+        return count</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/course-schedule-ii">210. Course Schedule II</a>
   </div>
 </div>
 <!-- Graph END -->

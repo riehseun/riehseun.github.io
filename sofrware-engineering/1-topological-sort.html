@@ -44,8 +44,6 @@
   <div class="card-body">
     <h2 class="card-title">Topological sort</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#topological-sort-">Course schedule</a></li>
-      <li><a href="#topological-sort-">Course schedule II</a></li>
       <li><a href="#topological-sort-">Minimum height trees</a></li>
       <li><a href="#topological-sort-">Cat and mouse</a></li>
     </ul>
@@ -54,31 +52,52 @@
 
 <div class="card mb-4" id="topological-sort-">
   <div class="card-body">
-    <h2 class="card-title">Course schedule (M)</h2>
-
-<pre><code class="python"></code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/course-schedule">207. Course Schedule</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="topological-sort-">
-  <div class="card-body">
-    <h2 class="card-title">Course schedule II (M)</h2>
-
-<pre><code class="python"></code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/course-schedule-ii">210. Course Schedule II</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="topological-sort-">
-  <div class="card-body">
     <h2 class="card-title">Minimum height trees (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def findMinHeightTrees(self, n: int, edges: List[List[int]]) -> List[int]:
+
+        # Find all leaf nodes
+        # Remove all leaf nodes one at a time
+        # Last remaining node is the root|
+
+        if not edges:
+            ret = []
+            for i in range(n):
+                ret.append(i)
+            return ret
+
+        graph = defaultdict(list)
+
+        # Time O(n)
+        # Space O(n) since its a tree, there is no cycle
+        for edge in edges:
+            graph[edge[0]].append(edge[1])
+            graph[edge[1]].append(edge[0])
+
+        # Time O(n)
+        while len(graph) > 2:
+            leafs = self.get_leafs(graph)
+            self.remove_leafs(graph, leafs)
+
+        return graph.keys()
+
+    def get_leafs(self, graph):
+        leafs = []
+
+        for node in graph:
+            # Find leaf node
+            if len(graph[node]) == 1:
+                leafs.append(node)
+
+        return leafs
+
+    def remove_leafs(self, graph, leafs):
+        for node in leafs:
+            # Leaf only has one connected node
+            parent = graph[node][0]
+            graph[parent].remove(node)
+            del graph[node]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/minimum-height-trees">310. Minimum Height Trees</a>
