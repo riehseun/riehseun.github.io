@@ -21,11 +21,12 @@
 <link href="/css/site.css" rel="stylesheet">
 
 <!-- JavaScript -->
-<script src="/js/jquery.min.js" type="text/javascript"></script>
-<script src="/js/bootstrap.bundle.min.js" type="text/javascript"></script>
-<script src="/js/highlight.pack.js" type="text/javascript"></script>
+<script src="/js/jquery.min.js"></script>
+<script src="/js/bootstrap.bundle.min.js"></script>
+<script src="/js/highlight.pack.js"></script>
 <script src="/js/include_html.js" type="text/javascript"></script>
-<script src="/js/mathjax.js" type="text/javascript"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <script src="/js/site.js" type="text/javascript"></script>
 
 </head>
@@ -189,6 +190,53 @@
           <li>Dot product or cosine similarity is used to compute distances in embedding space (Euclidean distance is not used due to curse of dimensionality)</li>
           <li>Softmax is applied to distances to make them sum to 1</li>
         </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="visual-search-system-5">
+  <div class="card-body">
+    <h2 class="card-title">Evaluation</h2>
+    <ul>
+      <li>Offline</li>
+      <ul>
+        <li>MRR</li>
+        <ul>
+          <li>Consider only the first relevant item in each output list, then average them</li>
+          <li>\( MRR = \dfrac{1}{m} \displaystyle\sum_{i=1}^{m} \dfrac{1}{rank_{i}} \)</li>
+          <li>Cons: ignores other relevant items in the list other than the first one</li>
+        </ul>
+        <li>Recall@k</li>
+        <ul>
+          <li>Number of relevant items among top k items in the output list / total relevant items</li>
+          <li>Cons: denominator (total relevant items) can be very big, for example, in search systems. This negatively impacts recall value</li>
+        </ul>
+        <li>Precision@k</li>
+        <ul>
+          <li>Number of relevant items among top k items in the output list / k</li>
+          <li>Cons: does not consider ranking quality</li>
+        </ul>
+        <li>mAP</li>
+        <ul>
+          <li>AP - take a list of k item, averages precision@k at different value of k</li>
+          <li>AP is high if more relevant items are located at the top of list</li>
+          <li>mAP - compute AP for each output list, then average them</li>
+          <li>Cons: works well when each item is either relevant or irrelevant. Does not work well for relevance scores</li>
+        </ul>
+        <li>nDCG</li>
+        <ul>
+          <li>\( DCG_{p} = \displaystyle\sum_{i=1}^{p} \dfrac{rel_{i}}{log_{2}(i+1)} \) where \( rel_{i} \) is ground truth relevance score of image ranked at \( i \)</li>
+          <li>\( nDCG_{p} = \dfrac{DCG_{p}}{IDCG_{p}} \)</li>
+        </ul>
+      </ul>
+      <li>Online</li>
+      <ul>
+        <li>Click-through rate (CTR) = number of clicked images / total number of suggested images</li>
+        <li>Average daily/weekly/monthly time spent on suggested images</li>
       </ul>
     </ul>
   </div>
