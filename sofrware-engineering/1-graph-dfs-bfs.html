@@ -67,7 +67,73 @@
   <div class="card-body">
     <h2 class="card-title">Surrounded regions (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def solve(self, board: List[List[str]]) -> None:
+        """
+        Do not return anything, modify board in-place instead.
+        """
+
+        # Construct an undirected graph
+        # Two nodes are connected when node is O and adjacent is also O
+        # Graph will consist of subgraphs that are connected by Os
+        # Do DFS on these subgraphs to find if subgraphs are surrounded by X
+
+        graph = defaultdict(list)
+        all_o = set()
+
+        # Time O(nm)
+        # Space O(nm) worst case is that every coordicate is O
+        for i in range(len(board)):
+            for j in range(len(board[0])):
+                if board[i][j] == "O":
+                    # Check up
+                    if i != 0 and board[i-1][j] == "O":
+                        graph[(i,j)].append((i-1,j))
+                    # Check down
+                    if i != len(board)-1 and board[i+1][j] == "O":
+                        graph[(i,j)].append((i+1,j))
+                    # Check left
+                    if j != 0 and board[i][j-1] == "O":
+                        graph[(i,j)].append((i,j-1))
+                    # Check right
+                    if j != len(board[0])-1 and board[i][j+1] == "O":
+                        graph[(i,j)].append((i,j+1))
+                    all_o.add((i,j))
+
+        # Time O(nm+nm) where nm is the max number of nodes and edges if every coordicate is O
+        explored_so_far = set()
+        for i, j in all_o:
+            if (i,j) not in explored_so_far:
+                is_surrounded, explored = self.dfs(graph, (i,j), len(board)-1, len(board[0])-1)
+                explored_so_far.update(explored)
+                # If subgraph that consists of Os is surrounded,
+                # convert them to X
+                if is_surrounded:
+                    for (i,j) in explored:
+                        board[i][j] = "X"
+
+    def dfs(self, graph, start, row_len, col_len):
+        explored = set()
+        explored.add(start)
+
+        stack = []
+        stack.append(start)
+
+        while stack:
+            node = stack.pop()
+            # If O is at the boundary, then
+            # the subgraph that consists of Os is not surrounded
+            if node[0] == 0 \
+                or node[0] == row_len \
+                or node[1] == 0 \
+                or node[1] == col_len:
+                return False, explored
+            for child_node in graph[node]:
+                if child_node not in explored:
+                    explored.add(child_node)
+                    stack.append(child_node)
+
+        return True, explored</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/surrounded-regions">130. Surrounded Regions</a>
