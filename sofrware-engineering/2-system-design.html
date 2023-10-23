@@ -48,6 +48,8 @@
       <li><a href="#system-design-">Building blocks</a></li>
       <li><a href="#system-design-">Non-functional requirements</a></li>
       <li><a href="#system-design-">Distributed system</a></li>
+      <li><a href="#system-design-">Network</a></li>
+      <li><a href="#system-design-">Security</a></li>
       <li><a href="#system-design-">Back-of-the-envelop</a></li>
       <li><a href="#system-design-">Resource estimation</a></li>
     </ul>
@@ -142,14 +144,36 @@
 
     <h3 class="card-title">DNS</h3>
     <ul>
+      <li>Ex. CloudFlare, Route 53</li>
       <li>Maps domain names to IP addresses</li>
+      <li>Router or ISP tells which DNS server to contact for IP lookup</li>
       <li>Resource record</li>
       <ul>
         <li>A - hostname to IP address mapping</li>
-        <li>CNAME - alias to canonical hostname mapping</li>
+        <li>CNAME - alias to hostname (canonical) mapping</li>
+        <ul>
+          <table>
+            <tr>
+              <td>NAME</td>
+              <td>TYPE</td>
+              <td>VALUE</td>
+            </tr>
+            <tr>
+              <td>bar.example.com</td>
+              <td>CNAME</td>
+              <td>foo.example.com</td>
+            </tr>
+            <tr>
+              <td>foo.example.com</td>
+              <td>A</td>
+              <td>192.0.2.23</td>
+            </tr>
+          </table>
+          <li>The canonical (true) name of "bar.example.com" is "foo.example.com"</li>
+          <li>"foo.example.com" has A record pointing to IP address 192.0.2.23</li>
+        </ul>
       </ul>
-      <li>Ex. CloudFlare, Route 53</li>
-      <li>Router or ISP tells which DNS server to contact for IP lookup</li>
+
     </ul>
 
     <h4 class="card-title">FQDN (Fully Qualified Domain Name)</h4>
@@ -159,36 +183,13 @@
       <li>When connecting to a host, FQDN must be specified. Then, DNS server finds IP address from the hostname looking at DNS table</li>
     </ul>
 
-    <h4 class="card-title">Example</h4>
-    <table>
-      <tr>
-        <td>NAME</td>
-        <td>TYPE</td>
-        <td>VALUE</td>
-      </tr>
-      <tr>
-        <td>bar.example.com</td>
-        <td>CNAME</td>
-        <td>foo.example.com</td>
-      </tr>
-      <tr>
-        <td>foo.example.com</td>
-        <td>A</td>
-        <td>192.0.2.23</td>
-      </tr>
-    </table>
-    <ul>
-      <li>The canonical (true) name of "bar.example.com" is "foo.example.com"</li>
-      <li>"foo.example.com" has A record pointing to IP address 192.0.2.23</li>
-    </ul>
-
     <h4 class="card-title">DNS servers</h4>
     <ul>
       <li>DNS resolver - forward requests to the other DNS name servers</li>
       <ul>
         <li><code>/etc/resolv.conf</code> in Linux contains DNS resolver's IP address</li>
       </ul>
-      <li>Root-level name servers - return a list of top-level domain (TLD) servers that hold the IP addresses of the domain (Doamin is for example .com, .org, .io)</li>
+      <li>Root-level name servers - return a list of top-level domain (TLD) servers that hold the IP addresses of the domain (Domain is for example .com, .org, .io)</li>
       <li>Top-level domain (TLD) name servers - hold the IP addresses of authoritative name servers</li>
       <li>Authoritative name servers - provide the IP addresses of the web or application servers</li>
     </ul>
@@ -232,7 +233,7 @@
       <li>Yield higher availability</li>
       <li>SSL offload - client connects to load balancer via SSL, but redirect requests to servers are made via unencrypted HTTP to reduce load on the servers</li>
       <ul>
-        <li>Removes need to install X.509 certificates on each server</li>
+        <li>No need to install X.509 certificates on each server</li>
       </ul>
       <li>Caching - load balancer can cache popular requests</li>
     </ul>
@@ -267,14 +268,6 @@
       <li>Reliability - queries can still be served when some servers are down</li>
     </ul>
 
-    <h4 class="card-title">Relational model</h4>
-    <ul>
-      <li>Attribute - a column</li>
-      <li>Tuple - a row</li>
-      <li>Degree - number of columns</li>
-      <li>Cardinality - number of rows</li>
-    </ul>
-
     <h4 class="card-title">Data types</h4>
     <ul>
       <li>Structured - relational data</li>
@@ -282,21 +275,25 @@
       <li>Unstructured - photo, video, audio, text</li>
     </ul>
 
-    <h4 class="card-title">Delete Vs. Truncate</h4>
+    <h4 class="card-title">When to choose what</h4>
     <ul>
-      <li>Truncate - DDL (Data Definition Language), does not require commit to make the change permanent, deleted rows cannot be rolled back, always removes all rows from the table (Table structure remains intact)</li>
-      <li>Delete - DML (Data Manipulation Language), requires commit to make the change permanent. <strong>where</strong> clause can be used</li>
+      <li>SQL - ACID, data is unchanging</li>
+      <li>NoSQL - large amount of data with no structure, rapid development</li>
     </ul>
 
-    <h4 class="card-title">DB indexing</h4>
+    <h4 class="card-title">Relational model (SQL)</h4>
     <ul>
-      <li>Applying indexing on a field creates a data structure holding field value and pointer</li>
-      <li>Data structure gets sorted so that search time can be O(logn) with binary search</li>
-      <li>Fields with lots of duplicate values degrade benefits of indexing</li>
-      <li>Degrade write performance having to index data each time write happens</li>
+      <li>Ex. Oracle, DB2, Microsoft SQL Server, PostgreSQL, and MySQL</li>
+      <li>Terms</li>
+      <ul>
+        <li>Attribute - a column</li>
+        <li>Tuple - a row</li>
+        <li>Degree - number of columns</li>
+        <li>Cardinality - number of rows</li>
+      </ul>
     </ul>
 
-    <h4 class="card-title">Transaction (ACID)</h4>
+    <h5 class="card-title">Transaction (ACID)</h5>
     <ul>
       <li>Atomicity - either all is done or none is done</li>
       <li>Consistency - data is consistent before and after transaction</li>
@@ -304,13 +301,30 @@
       <li>Durablility - transactions are permanently saved</li>
     </ul>
 
-    <h4 class="card-title">Tokenization vs Encryption</h4>
+    <h5 class="card-title">Delete Vs. Truncate</h5>
     <ul>
-      <li>Tokenized data is irreversible. (Detokenization can only be done by the original tokenization system)</li>
-      <li>Encryption is reversible with the key</li>
+      <li>Truncate - DDL (Data Definition Language)</li>
+      <ul>
+        <li>Does not require commit to make the change permanent</li>
+        <li>Deleted rows cannot be rolled back</li>
+        <li>Always removes all rows from the table (Table structure remains intact)</li>
+      </ul>
+      <li>Delete - DML (Data Manipulation Language)</li>
+      <ul>
+        <li>Requires commit to make the change permanent</li>
+        <li><strong>where</strong> clause can be used</li>
+      </ul>
     </ul>
 
-    <h4 class="card-title">Key</h4>
+    <h5 class="card-title">DB indexing</h5>
+    <ul>
+      <li>Applying indexing on a field creates a data structure holding field value and pointer</li>
+      <li>Data structure gets sorted so that search time can be O(logn) with binary search</li>
+      <li>Fields with lots of duplicate values degrade benefits of indexing</li>
+      <li>Degrade write performance having to index data each time write happens</li>
+    </ul>
+
+    <h5 class="card-title">Key</h5>
     <ul>
       <li>Primary key - unique identifier which consists of a single attribute. Cannot be NULL</li>
       <li>Candidate key - columns together can uniquely identify a row</li>
@@ -322,24 +336,19 @@
       </ul>
     </ul>
 
-    <h4 class="card-title">Functional dependency</h4>
+    <h5 class="card-title">Functional dependency</h5>
     <ul>
       <li>Partial dependency - non-key attribute depends on subset of a composite primary key</li>
       <li>Transitive dependency - non-key attribute depends on another non-key attribute</li>
     </ul>
 
-    <h4 class="card-title">Normalization</h4>
+    <h5 class="card-title">Normalization</h5>
     <ul>
       <li>Process of determining how much redundancy exists in a table</li>
       <li>First normal form - attributes must have single value, not a set of values</li>
       <li>Second normal form - must not have partial dependency</li>
       <li>Third normal form - must not have transitive dependency</li>
       <li>Boyce-Codd normal form - If A->B and B is primary key, then A must also be primary key</li>
-    </ul>
-
-    <h4 class="card-title">SQL</h4>
-    <ul>
-      <li>Oracle, DB2, Microsoft SQL Server, PostgreSQL, and MySQL</li>
     </ul>
 
     <h4 class="card-title">NoSQL</h4>
@@ -371,12 +380,6 @@
       <ul>
         <li>Ex. Solr, ElasticSearch, Splunk</li>
       </ul>
-    </ul>
-
-    <h4 class="card-title">When to choose what</h4>
-    <ul>
-      <li>SQL - ACID, data is unchanging</li>
-      <li>NoSQL - large amount of data with no structure, rapid development</li>
     </ul>
 
     <h3 class="card-title">Cache</h3>
@@ -574,7 +577,7 @@
       <li>Considers single object operations</li>
     </ul>
 
-    <h4 class="card-title">Strong consistency / linearizability</h4>
+    <h4 class="card-title">Strong consistency (linearizability)</h4>
     <ul>
       <li>Synchronous replication technique (Acknowledgment is not sent to the client until the new value is written to all replicas)</li>
       <li>Once an operation is complete and the ack is delivered to client, it is visible to all other clients</li>
@@ -636,35 +639,35 @@
 
     <h3 class="card-title">Distributed system challenges</h3>
     <ul>
-      <li>Network asynchrony: messages take long to deliver, deliver out of order, or not deliver at all.</li>
-      <li>Partial failures: only some components fail.</li>
-      <li>Concurrency: execution of multiple computations intervene each other.</li>
+      <li>Network asynchrony - messages take long to deliver, deliver out of order, or not deliver at all</li>
+      <li>Partial failures - only some components fail</li>
+      <li>Concurrency - execution of multiple computations intervene each other</li>
     </ul>
 
     <h3 class="card-title">Failure types</h3>
     <ul>
-      <li>Fail-stop: a node halts and remains halted permanently. (Easiest scenario)</li>
-      <li>Crash: a node halts, but silently.</li>
-      <li>Omission: a node fails to respond to incoming requests.</li>
-      <li>Byzantine: a node exhibits arbitrary behavior.</li>
+      <li>Fail-stop - a node halts and remains halted permanently (Easiest scenario)</li>
+      <li>Crash - a node halts, but silently</li>
+      <li>Omission - a node fails to respond to incoming requests</li>
+      <li>Byzantine - a node exhibits arbitrary behavior</li>
     </ul>
 
     <h3 class="card-title">State</h3>
     <ul>
-      <li>Stateless: maintains no state. Performs purely based on the inputs.</li>
-      <li>Stateful: maintains and updates states. Results depend on this state.</li>
+      <li>Stateless - maintains no state. Performs purely based on the inputs</li>
+      <li>Stateful - maintains and updates states. Results depend on this state</li>
     </ul>
 
     <h3 class="card-title">Quorum</h3>
     <ul>
-      <li>We write data to the nodes that are only resposible for write operations. We read data from all nodes and return the latest value.</li>
+      <li>We write data to the nodes that are only resposible for write operations. We read data from all nodes and return the latest value</li>
       <ul>
-        <li>Write is successful when w-1 nodes respond. (Coordinator writes to itself first, so we get w writes in total)</li>
-        <li>Wait for r answers before returning the results to the client.</li>
+        <li>Write is successful when w-1 nodes respond (Coordinator writes to itself first, so we get w writes in total)</li>
+        <li>Wait for r answers before returning the results to the client</li>
       </ul>
-      <li>Quorum is achieved when R + W > N. At least one node should be both read and write so that readers could get the latest-written value.</li>
-      <li>If w > r, fast write but slow read because need to go to many nodes for a value.</li>
-      <li>If r > w, fast read but slow write because need to write to many nodes synchronously.</li>
+      <li>Quorum is achieved when R + W > N. At least one node should be both read and write so that readers could get the latest-written value</li>
+      <li>If w > r, fast write but slow read because need to go to many nodes for a value</li>
+      <li>If r > w, fast read but slow write because need to write to many nodes synchronously</li>
     </ul>
 
     <h3 class="card-title">CAP theorem</h3>
@@ -698,87 +701,301 @@
 
     <h3 class="card-title">Isolation level</h3>
     <ul>
-      <li>Considers multi object operations.</li>
+      <li>Considers multi object operations</li>
     </ul>
 
     <h4 class="card-title">Serializability</h4>
     <ul>
-      <li>Two transactions executed concurrently should give same result.</li>
-      <li>Prevents all anomalies.</li>
+      <li>Two transactions executed concurrently should give same result</li>
+      <li>Prevents all anomalies</li>
     </ul>
 
     <h4 class="card-title">Repeatable read</h4>
     <ul>
-      <li>Data once read by a transaction will not change throughout its course.</li>
+      <li>Data once read by a transaction will not change throughout its course</li>
     </ul>
 
     <h4 class="card-title">Snapshot isolation</h4>
     <ul>
-      <li>All reads made in a transaction see a consistent snapshot of the database.</li>
+      <li>All reads made in a transaction see a consistent snapshot of the database</li>
     </ul>
 
     <h4 class="card-title">Read committed</h4>
     <ul>
-      <li>Does not allows a transaction to read a data that has not yet been committed by other transaction.</li>
+      <li>Does not allows a transaction to read a data that has not yet been committed by other transaction</li>
     </ul>
 
     <h3 class="card-title">Anomaly</h3>
 
     <h4 class="card-title">Dirty write</h4>
     <ul>
-      <li>Transaction overwrites a value that was written by another transaction that is not committed yet.</li>
+      <li>Transaction overwrites a value that was written by another transaction that is not committed yet</li>
     </ul>
 
     <h4 class="card-title">Dirty read</h4>
     <ul>
-      <li>Transaction reads a value that was written by another transaction that is not committed yet.</li>
+      <li>Transaction reads a value that was written by another transaction that is not committed yet</li>
     </ul>
 
     <h4 class="card-title">Fuzzy or non-repeatable read</h4>
     <ul>
-      <li>Value is retrieved twice during a transaction and the value is different.</li>
+      <li>Value is retrieved twice during a transaction and the value is different</li>
     </ul>
 
     <h4 class="card-title">Phantom read</h4>
     <ul>
-      <li>For example, transaction of two queries runs to calculate the maximum and the average. However, another transaction intervenes to insert lots of record, thus making the first transaction return an average that is larger than the maximum.</li>
+      <li>For example, transaction of two queries runs to calculate the maximum and the average. However, another transaction intervenes to insert lots of record, thus making the first transaction return an average that is larger than the maximum</li>
     </ul>
 
     <h4 class="card-title">Lost update</h4>
     <ul>
-      <li>Two transactions read the same value and then try to update it to two different values.</li>
+      <li>Two transactions read the same value and then try to update it to two different values</li>
     </ul>
 
     <h4 class="card-title">Read skew</h4>
     <ul>
-      <li>A transaction can only see partial results of another transaction.</li>
+      <li>A transaction can only see partial results of another transaction</li>
     </ul>
 
     <h4 class="card-title">Dirty write</h4>
     <ul>
-      <li>Two transactions read the same data, but then modify disjoint sets of data.</li>
+      <li>Two transactions read the same data, but then modify disjoint sets of data</li>
     </ul>
 
     <h3 class="card-title">RPC</h3>
     <ul>
-      <li>For building applications on top of distributed system.</li>
+      <li>For building applications on top of distributed system</li>
     </ul>
 
     <h4 class="card-title">RPC process</h4>
     <ul>
-      <li>Client initiates client stub process by giving parameters.</li>
-      <li>Client stub converts the parameters into standardized format and packs them into a message.</li>
-      <li>Client RPC runtime delivers the message to the server over the network.</li>
-      <li>Server RPC runtime receives the message and passes it to the server stub.</li>
-      <li>Server stub unpacks the message to retrieve the parameters and calls the desired server routine.</li>
-      <li>Server stub packs the returned result into a message and sends it to RPC runtime at the server.</li>
-      <li>Server RPC runtime returns the packed result to Client RPC runtime over the network.</li>
-      <li>Client RPC runtime sends the result to the client stub.</li>
-      <li>Client stub unpacks the result.</li>
+      <li>Client initiates client stub process by giving parameters</li>
+      <li>Client stub converts the parameters into standardized format and packs them into a message</li>
+      <li>Client RPC runtime delivers the message to the server over the network</li>
+      <li>Server RPC runtime receives the message and passes it to the server stub</li>
+      <li>Server stub unpacks the message to retrieve the parameters and calls the desired server routine</li>
+      <li>Server stub packs the returned result into a message and sends it to RPC runtime at the server</li>
+      <li>Server RPC runtime returns the packed result to Client RPC runtime over the network</li>
+      <li>Client RPC runtime sends the result to the client stub</li>
+      <li>Client stub unpacks the result</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="system-design-">
+  <div class="card-body">
+    <h2 class="card-title">Network</h2>
+
+    <h3 class="card-title">Network Basics</h3>
+    <ul>
+      <li>Computers can connect to themselves via 127.0.0.1 (localhost)</li>
+      <li>"ipconfig" file provides very useful information</li>
+      <li>TCP allows multiple services to share the same physical computer via port</li>
+      <ul>
+        <li>21 - file transfer (FTP)</li>
+        <li>22 - secure shell (SSH)</li>
+        <li>25, 110 - email (SMTP, POP3)</li>
+        <li>80 - web (HTTP)</li>
+        <li>443 - secure web (HTTPS)</li>
+        <li>993, 995 - secure email</li>
+      </ul>
+      <li>UDP is better suited for streaming media and online games</li>
+    </ul>
+
+    <h3 class="card-title">TCP/IP</h3>
+    <ul>
+      <li>Application layer: where end-user applications live</li>
+      <ul>
+        <li>Presentation: encoding, encryption, compression</li>
+        <li>Session: manages user session</li>
+      </ul>
+      <li>Transport layer: segments data into smaller chunks (Also, add checksum to these chunks)</li>
+      <li>Network layer: transports packets</li>
+      <li>Data link layer: error detection/correction</li>
+      <li>Physical layer: hardware</li>
+    </ul>
+
+    <h3 class="card-title">CIDR</h3>
+    <ul>
+      <li>Classless Inter-Domain Routing (CIDR) is a range of IP addresses a network uses</li>
+    </ul>
+
+    <h3 class="card-title">IPv4</h3>
+    <ul>
+      <li>32-bit address space</li>
+      <li>Example: 192.0.2.0/24 (24 means 8-bits / 256 addresses after 192.0.2.0)</li>
+    </ul>
+    <ul>
+      <li>Class A - 10.0.0.0/8 - 16 Million Hosts</li>
+      <li>Class B - 10.0.0.0/16 - 65,000 Hosts</li>
+      <li>Class C - 10.0.0.0/24 - 254 Hosts</li>
+    </ul>
+
+    <h3 class="card-title">IPv6</h3>
+    <ul>
+      <li>128-bit address space</li>
+      <li>Example: 2001:db8::/32 (32 means 96-bits / 76 octillion addresses after 2001:db8::)</li>
+    </ul>
+
+    <h3 class="card-text">AJAX polling</h3>
+    <ul>
+      <li>Client repeatedly polls the server</li>
+      <li>A lot of response could be empty, causing HTTP overhead</li>
+    </ul>
+
+    <h3 class="card-text">Long-polling</h3>
+    <ul>
+      <li>Client sends request to server</li>
+      <li>Server holds the request rather than sending empty response</li>
+      <li>Server pushes information to client only when there is new data</li>
+    </ul>
+
+    <h3 class="card-text">WebSocket</h3>
+    <ul>
+      <li>Persistent connection between client and server</li>
+    </ul>
+
+    <h3 class="card-title">REST (Representational State Transfer)</h3>
+    <ul>
+      <li>Architecture for design network applications</li>
+      <li>Stateless, client-server, cacheable communcation</li>
+      <li>HTTP protocol is used</li>
+      <li>Simpler than RPC, Web Services (SOAP, WSDL)</li>
+      <li>Ex. www</li>
+    </ul>
+
+    <h3 class="card-title">namp</h3>
+    <ul>
+      <li>What machines are on our network</li>
+      <li>What ports are open on those machines</li>
+      <li>What operating systems are running on those machines</li>
+    </ul>
+
+    <pre><code class="bash">nmap -A &lt;CIDR&gt;  # For example, 192.168.0.0/24</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://docs.rackspace.com/support/how-to/using-cidr-notation-in-cloud-networks">Using CIDR notation in Cloud Networks</a> | <a href="https://techlibrary.hpe.com/docs/otlink-wo/CIDR-Conversion-Table.html">CIDR Conversion Table</a> | <a href="https://www.ipqualityscore.com/free-ip-lookup-proxy-vpn-test/lookup/block">IPv4 CIDR Address Blocks</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="system-design-">
+  <div class="card-body">
+    <h2 class="card-title">Security</h2>
+
+    <h3 class="card-title">A layered approach to security</h3>
+    <ul>
+      <li>Data - attackers are always after this</li>
+      <li>Application - free of vulnerabilities, application secrets in a secure storage medium</li>
+      <li>Compute - secure access to VMs, implement endpoint protection, keep systems patched and current</li>
+      <li>Networking - deny by default, implement secure connectivity to on-premises networks, restrict inbound internet access</li>
+      <li>Perimeter - use distributed denial of service (DDoS) protection, use perimeter firewalls to identify malicious attacks</li>
+      <li>Identity and access - use SSO and multi-factor authentication</li>
+      <li>Physical security - access to physical data centre with compute machines</li>
+    </ul>
+
+    <h3 class="card-title">Examples of security breaches and attacks</h3>
+    <ul>
+      <li>Data - exposing an encryption key or using weak encryption</li>
+      <li>Application - malicious code injection and execution. For example, SQL injection and cross-site scripting (XSS)</li>
+      <li>Compute - malware executing malicious code to compromise system</li>
+      <li>Networking - unnecessary open ports to the internet. For example, leaving SSH or RDP open to virtual machines to leading brute-force attacks against your systems</li>
+      <li>Perimeter - denial-of-service (DoS) attacks</li>
+      <li>Identity and access - Exposed credentials and toxic combinations of permissions and authorization</li>
+      <li>Physical security - unauthorized access to facilities</li>
+    </ul>
+
+    <h3 class="card-title">Authentication vs Authorization</h3>
+    <ul>
+      <li>Authentication - process of establishing identity of a person</li>
+      <li>Authorization - process of establishing what level of access an authenticated person has</li>
+    </ul>
+
+    <h3 class="card-title">Authentication strategy</h3>
+    <ul>
+      <li>Single sign-on - access across applications is granted to a single identity/user, simplifying security model</li>
+      <li>Multi-factor authentication - requires two or more elements for full authentication</li>
+    </ul>
+
+    <h3 class="card-title">Encryption</h3>
+    <ul>
+      <li>Encryption - process of making data unreadable and unusable to unauthorized viewers</li>
+      <li>Symmetric encryption - uses the same key to encrypt and decrypt the data</li>
+      <li>Asymmetric encryption - uses public key and private key pair. Can use one key to encrypt but need both keys to decrypt. Ex. Transport Layer Security (TLS) used in HTTPS</li>
+    </ul>
+
+    <h3 class="card-title">Security concerns</h3>
+    <ul>
+      <li>Input and outputs - always validate input. Always use parameterized queries. Always encode your output</li>
+      <li>Key Vault - store connection strings, secrets, passwords, certificates, access policies, file locks, and automation scripts</li>
+      <li>Framework - for example, Java/Javascript. Keep them updated</li>
+      <li>Dependencies - track vulnerabilities on your 3rd party dependencies</li>
+    </ul>
+
+    <h3 class="card-title">SSL (Secure Sockets Layer)</h3>
+    <ul>
+      <li>Ensure that all data passed between web server and browsers remain private</li>
+      <li>Web server creates private and public Key</li>
+      <li>User submits CSR (Certificate Signing Request), which includes public key, to Certification Authority</li>
+      <li>Then, CA will issue SSL certificate</li>
+      <li>Web server will match user's SSL certificate to its private Key</li>
+      <li>When broswer connects to secure site, it will check whether SSL certificate is not expired, and it is isseud by Certification Authority that browser trusts, and it is being used by the website for which it has been issued</li>
+    </ul>
+
+    <h3>SSL handshake</h3>
+    <ul>
+      <li>Client hello - client to server with TLS version</li>
+      <li>Server hello - server to client with configuration it picked</li>
+      <li>Server key exchange message - server to client with required information to generate pre-master secret</li>
+      <li>Certificate request - server to client with certificate type, algorithm, and authorities</li>
+      <li>Client certificate - client to server with certificate chain</li>
+      <li>Client key exchange message - client to server so that a common key can be generated. Both sides then generate a master secret using pre-master secret, which is then used to generate symmetric key to encrypt session data</li>
+    </ul>
+
+    <h3 class="card-title">Active directory</h3>
+    <ul>
+      <li>Directory service implementation that provide authentication, group and user management, policy administration, etc</li>
+      <li>It supports both Kerberos and LDAP</li>
+      <li>It also provides SSO</li>
+    </ul>
+
+    <h3 class="card-title">LDAP (LightWeight Directory Acess Protocol)</h3>
+    <ul>
+      <li>Open protocol used for directory service authentication</li>
+      <li>Relationship between AD and LDAP is similar to Apache and HTTP</li>
+    </ul>
+
+    <h3 class="card-title">Encoding</h3>
+    <ul>
+      <li>base36: [a-z ,0-9]</li>
+      <li>base62: [A-Z, a-z, 0-9]</li>
+      <li>base64: [A-Z, a-z ,0-9] plus '+' and '-'</li>
+    </ul>
+
+    <h3>OpenSSL (Generate JKS from SSL certificates)</h3>
+<pre><code class="bash">openssl pkcs12 -export -in &lt;your_cert&gt;.crt -inkey &lt;your_cert&gt;.key -out &lt;your_cert&gt;.p12
+keytool -importkeystore -srckeystore &lt;your_cert&gt;.p12 -srcstoretype PKCS12 -destkeystore &lt;your_cert&gt;.jks -deststoretype JKS -dname "CN:&lt;your_hostname&gt;"</code></pre>
+
+    <h3>OpenSSL command</h3>
+<pre><code class="bash"># Check common name.
+openssl x509 -noout -subject -in &lt;your_cert&gt;.crt
+
+# Check expiry date.
+openssl x509 -noout -enddate -in &lt;your_cert&gt;.crt
+
+# Check all subject alternative names.
+for i in $(openssl x509 -in &lt;your_cert&gt;.crt -noout -text | grep -A1 'Subject Alternative Name' | tail -n1 | tr -d ','); { echo $i | cut -f2 -d:; }</code></pre>
+
+    <h3 class="card-title">Tokenization vs Encryption</h3>
+    <ul>
+      <li>Tokenized data is irreversible (Detokenization can only be done by the original tokenization system)</li>
+      <li>Encryption is reversible with the key</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://medium.com/@kasunpdh/ssl-handshake-explained-4dabb87cdce">SSL Handshake explained</a> | <a href="https://www.varonis.com/blog/the-difference-between-active-directory-and-ldap/">The Difference Between Active Directory and LDAP</a>
   </div>
 </div>
 
