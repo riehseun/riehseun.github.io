@@ -155,7 +155,53 @@
   <div class="card-body">
     <h2 class="card-title">Evaluate division (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def calcEquation(self, equations: List[List[str]], values: List[float], queries: List[List[str]]) -> List[float]:
+
+        # Construct a graph such that
+        #   If a / b = 2.0, a->b has weight 2.0 and b->a has weight 0.5
+
+        graph = defaultdict(list)
+        nodes = set()
+
+        for equation, value in zip(equations, values):
+            graph[equation[0]].append((equation[1],value))
+            graph[equation[1]].append((equation[0],1/value))
+            nodes.add(equation[0])
+            nodes.add(equation[1])
+
+        result = []
+        for query in queries:
+            if query[0] == query[1] and query[0] in nodes:
+                result.append(1)
+            else:
+                result.append(self.dfs(graph, query[0], query[1]))
+
+        return result
+
+    # Number of nodes n = size of input array (equations)
+    # Number of edges m = size of input array (equations)
+    # Time O(nm)
+    # Space O(n)
+    def dfs(self, graph, start, end):
+
+        explored = set()
+        explored.add(start)
+
+        stack = []
+        stack.append((start, 1))
+
+        while stack:
+            node, ret_val = stack.pop()
+            for next_node, value in graph[node]:
+                if next_node not in explored:
+                    explored.add(next_node)
+                    stack.append((next_node, ret_val*value))
+
+                    if next_node == end:
+                        return ret_val*value
+
+        return -1</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/evaluate-division">399. Evaluate Division</a>
