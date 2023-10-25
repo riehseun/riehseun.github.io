@@ -44,19 +44,18 @@
     <h2 class="card-title">Elasticsearch</h2>
     <p class="card-text"></p>
     <ul class="list-unstyled mb-0">
-      <li><a href="#elasticsearch-1">Elasticsearch</a></li>
-      <li><a href="#elasticsearch-2">Endpoint</a></li>
-      <li><a href="#elasticsearch-3">Node role</a></li>
-      <li><a href="#elasticsearch-4">Multizone cluster with helm chart</a></li>
+      <li><a href="#elasticsearch-">Elasticsearch</a></li>
+      <li><a href="#elasticsearch-">Endpoint</a></li>
+      <li><a href="#elasticsearch-">Multizone cluster with helm chart</a></li>
     </ul>
   </div>
 </div>
 
-<div class="card mb-4" id="elasticsearch-1">
+<div class="card mb-4" id="elasticsearch-">
   <div class="card-body">
     <h2 class="card-title">Elasticsearch</h2>
     <ul>
-      <li>Automatically handles partitioning documents into shards, which are stored on multiple nodes.</li>
+      <li>Automatically handles partitioning documents into shards, which are stored on multiple nodes</li>
     </ul>
 
     <h3 class="card-title">Indices</h3>
@@ -64,57 +63,87 @@
 <p class="card-text">SQL -> Database -> Table -> Row/Column</p>
 <p class="card-text">Elasticsearch -> Index -> Type -> Document/Property</p>
 
+    <h3 class="card-title">Node role</h3>
+
+    <h4 class="card-title">Master</h4>
+    <ul>
+      <li>Deployment with fixed replicas (At least 3 for HA)</li>
+      <li>Holds metadata - data nodes, location, sharding, data replication</li>
+      <li>Creates/deletes index</li>
+      <li>Tracks nodes in the cluster</li>
+      <li>It is good idea to have nodes that are dedicated to master role only</li>
+      <li>Medium compute, low storage</li>
+    </ul>
+
+    <h4 class="card-title">Data</h4>
+    <ul>
+      <li>StatefulSets where each instance has PVC</li>
+      <li>Splits indices into shards and replicate information between nodes (To prevent data loss)</li>
+      <li>Types
+        <ul>
+          <li>data_hot - most recent and frequently searched data, fast read and write (High compute, low storage)</li>
+          <li>data_warm - typically holds data from recent weeks, updates are infrequent (Medium compute, medium storage)</li>
+          <li>data_cold - data is still searchable but node is optimized for lower storage cost than search speed (Low compute, high storage)</li>
+          <li>data_frozen - data is queried very rarely. Requires snapshot repository (Minimal compute, enough storage to handle snapshots)</li>
+        </ul>
+      </li>
+    </ul>
+
+    <h4 class="card-title">Ingest</h4>
+    <ul>
+      <li>Pre-precess documents before they are indexed (Can be used instead of Logstash)</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://www.elastic.co/blog/what-is-an-elasticsearch-index">What is an Elasticsearch Index?</a> | <a href="https://www.instaclustr.com/blog/understanding-and-configuring-elasticsearch-node-types/">Elasticsearch Basics</a>
+    Reference: <a href="https://www.elastic.co/blog/what-is-an-elasticsearch-index">What is an Elasticsearch Index?</a> | <a href="https://www.instaclustr.com/blog/understanding-and-configuring-elasticsearch-node-types/">Elasticsearch Basics</a> | <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-node.html">Node</a>
   </div>
 </div>
 
-<div class="card mb-4" id="elasticsearch-2">
+<div class="card mb-4" id="elasticsearch-">
   <div class="card-body">
     <h2 class="card-title">Endpoint</h2>
 
     <h3 class="card-title">General</h3>
 
-<pre><code class="bash"># Check cluster health.
+<pre><code class="bash"># Check cluster health
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_cluster/health?pretty"
 
-# View available API endpoints.
+# View available API endpoints
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_cat"
 
-# Create an API key and use it in the header.
+# Create an API key and use it in the header
 curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_security/api_key" -H "Content-Type: application/json" --date '{}'
 apiKey=&lt;encoded_api_key_from_above&gt;
 curl -k -H "Authorization: ApiKey $apiKey"</code></pre>
 
     <h3 class="card-title">License</h3>
 
-<pre><code class="bash"># Check license.
+<pre><code class="bash"># Check license
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_license"
 
-# Update licese. (With the license in "license.json" file)
+# Update licese (With the license in "license.json" file)
 curl -k -u &lt;username&gt;:&lt;password&gt; -X PUT "https://&lt;endpoint&gt;/_license" -H "Content-Type: application/json" -d @license.json</code></pre>
 
     <h3 class="card-title">Index</h3>
 
-<pre><code class="bash"># List all indices.
+<pre><code class="bash"># List all indices
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_cat/indices?v"
 
-# List few indices.
+# List few indices
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_cat/indices/&lt;index_name_1&gt;,&lt;index_name_2&gt;,&lt;index_name_3&gt;?v"
 
-# Create an index.
+# Create an index
 curl -k -u &lt;username&gt;:&lt;password&gt; -X PUT "https://&lt;endpoint&gt;/&lt;index_name&gt;?pretty"
 
-# Get an index.
+# Get an index
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/&lt;index_name&gt;?pretty"
 
-# Check index setting.
+# Check index setting
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/&lt;index_name&gt;/_settings?pretty"
 
-# Update index setting.
+# Update index setting
 
-# For example, temporarily setting number_of_replicas to 0 and refresh_interval to -1 (This disable reflecing written documents in index to users) is helping during the inital data load on index for it will speed up the indexing.
+# For example, temporarily setting number_of_replicas to 0 and refresh_interval to -1 (This disable reflecing written documents in index to users) is helping during the inital data load on index for it will speed up the indexing
 curl -k -u &lt;username&gt;:&lt;password&gt; -X PUT "https://&lt;endpoint&gt;/&lt;index_name&gt;/_settings?pretty" -H "Content-Type: application/json" -d '
 {
   "settings": {
@@ -123,7 +152,7 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X PUT "https://&lt;endpoint&gt;/&l
   }
 }'
 
-# To revert the index setting "refresh_interval" to default.
+# To revert the index setting "refresh_interval" to default
 curl -k -u &lt;username&gt;:&lt;password&gt; -X PUT "https://&lt;endpoint&gt;/&lt;index_name&gt;/_settings?pretty" -H "Content-Type: application/json" -d '
 {
   "settings": {
@@ -131,7 +160,7 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X PUT "https://&lt;endpoint&gt;/&l
   }
 }'
 
-# This setting make index to be located in a particular ES node.
+# This setting make index to be located in a particular ES node
 curl -k -u &lt;username&gt;:&lt;password&gt; -X PUT "https://&lt;endpoint&gt;/&lt;index_name&gt;/_settings?pretty" -H "Content-Type: application/json" -d '
 {
   "settings": {
@@ -143,21 +172,21 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X PUT "https://&lt;endpoint&gt;/&l
 
     <h3 class="card-title">Mapping</h3>
 
-<pre><code class="bash"># View mapping of an index.
+<pre><code class="bash"># View mapping of an index
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/&lt;index_name&gt;/_mapping?pretty"</code></pre>
 
     <h3 class="card-title">Document</h3>
 
-<pre><code class="bash"># Create a document.
+<pre><code class="bash"># Create a document
 curl -k -H "Authorization: ApiKey $apiKey" -X PUT "https://&lt;endpoint&gt;/&lt;index_name&gt;/_doc/&lt;document_id&gt;" -H "Content-Type: application/json" -d '&lt;JSON&gt;'
 
-# Check a document.
+# Check a document
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/&lt;index_name&gt;/_doc/&lt;document_id&gt;"
 
-# Count the number of documents in an index.
+# Count the number of documents in an index
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/&lt;index_name&gt;/_count?pretty"
 
-# Count the number of documents matching a query. (Partial match)
+# Count the number of documents matching a query (Partial match)
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/&lt;index_name&gt;/_count?pretty" -H "Content-Type: application/json" -d '
 {
   "query": {
@@ -167,7 +196,7 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/&l
   }
 }'
 
-# Count the number of documents matching a query. (Exact match)
+# Count the number of documents matching a query (Exact match)
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/&lt;index_name&gt;/_count?pretty" -H "Content-Type: application/json" -d '
 {
   "query": {
@@ -177,7 +206,7 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/&l
   }
 }'
 
-# Count the number of documents matching a ranged query.
+# Count the number of documents matching a ranged query
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/&lt;index_name&gt;/_count?pretty" -H "Content-Type: application/json" -d '
 {
   "query": {
@@ -192,24 +221,24 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/&l
 
     <h3 class="card-title">Snapshot</h3>
     <ul>
-      <li>The location of snapshot repo must exist.</li>
+      <li>The location of snapshot repo must exist</li>
       <ul>
-        <li>It can be local directory only if single node cluster.</li>
-        <li>It must be shared network directory if multi node cluster.</li>
-        <li>User "elasticsearch" must have write permission to this location.</li>
+        <li>It can be local directory only if single node cluster</li>
+        <li>It must be shared network directory if multi node cluster</li>
+        <li>User "elasticsearch" must have write permission to this location</li>
       </ul>
       <li>All nodes in the cluster must have "path.repo: &lt;snapshot_repo_location&gt;" in <code>elasticsearch.yml</code></li>
       <li><font color="#ff0000">Warning!</font> If using snapshot for data migration from one verison of Elasticsearch to another, migrated indices may not be readable/writable from the new cluster! (Reindex should be considered)</li>
     </ul>
 
-<pre><code class="bash"># List snapshot repositories.
+<pre><code class="bash"># List snapshot repositories
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_snapshot?pretty"
 
-# List snapshots in a snapshot repository.
+# List snapshots in a snapshot repository
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_cat/snapshots/&lt;snapshot_repo_name&gt;?pretty"
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_cat/snapshots/&lt;snapshot_repo_name&gt;/_status?pretty"
 
-# Create snapshot repository.
+# Create snapshot repository
 curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_snapshot/&lt;snapshot_repo_name&gt;" -H "Content-Type: application/json" -d '
 {
   "type": "fs",
@@ -218,22 +247,22 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_
   }
 }'
 
-# Delete snapshot repository.
+# Delete snapshot repository
 curl -k -u &lt;username&gt;:&lt;password&gt; -X DELETE "https://&lt;endpoint&gt;/_snapshot/&lt;snapshot_repo_name&gt;?pretty"
 
-# Create a snapshot. (All indices)
+# Create a snapshot (All indices)
 curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_snapshot/&lt;snapshot_repo_name&gt;/&lt;snapshot_name&gt;?wait_for_completion=false&pretty"
 
-# Create a snapshot. (Specific indices)
+# Create a snapshot (Specific indices)
 curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_snapshot/&lt;snapshot_repo_name&gt;/&lt;snapshot_name&gt; ?wait_for_completion=false&pretty" -H "Content-Type: application/json" -d '
 {
   "indices": "index1, index2"
 }'
 
-# Restore from a snapshot.
+# Restore from a snapshot
 curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_snapshot/&lt;snapshot_repo_name&gt;/&lt;snapshot_name&gt;/_restore?wait_for_completion=false&pretty"
 
-# Restore from a snapshot. (With a different indice names by appending "restored_" in front)
+# Restore from a snapshot (With a different indice names by appending "restored_" in front)
 curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_snapshot/&lt;snapshot_repo_name&gt;/&lt;snapshot_name&gt;/_restore?wait_for_completion=false&pretty" -H "Content-Type: application/json" -d '
 {
   "rename_pattern": "(.+)",
@@ -242,7 +271,7 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_
 
     <h3 class="card-title">Snapshot lifecycle management</h3>
 
-<pre><code class="bash"># Take a snapshot every hour.
+<pre><code class="bash"># Take a snapshot every hour
 curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_slm/policy/&lt;policy_name&gt;?pretty" -H "Content-Type: application/json" -d '
 {
   "schedule": "0 0 * * * ?",
@@ -259,15 +288,15 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_
   }
 }'
 
-# Check snapshot policy.
+# Check snapshot policy
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_slm/policy/&lt;policy_name&gt;?pretty"</code></pre>
 
     <h3 class="card-title">Reindex</h3>
     <ul>
-      <li><font color="#ff0000">Warning!</font> Reindexing does not preserve mappings. Indices must be pre-created with pre-defined mapping before reindexing takes place.</li>
+      <li><font color="#ff0000">Warning!</font> Reindexing does not preserve mappings. Indices must be pre-created with pre-defined mapping before reindexing takes place</li>
     </ul>
 
-    <p class="card-text">Used when copying document from one index to another index.</p>
+    <p class="card-text">Used when copying document from one index to another index</p>
 
 <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_reindex?wait_for_completion=false" -H "Content-Type: application/json" -d '
 {
@@ -279,7 +308,7 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_s
   }
 }'</code></pre>
 
-    <p class="card-text"><code>slice</code> can be used for parallel process. (This does not work when reindexing from remote cluster!)</p>
+    <p class="card-text"><code>slice</code> can be used for parallel process (This does not work when reindexing from remote cluster!)</p>
 
 <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_reindex?slice=auto&wait_for_completion=false" -H "Content-Type: application/json" -d '
 {
@@ -308,7 +337,7 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_s
   }
 }'</code></pre>
 
-    <p class="card-text">Ranged query can be used to re-index documents whose field has a value under certain range. (For example, between dates)</code></p>
+    <p class="card-text">Ranged query can be used to re-index documents whose field has a value under certain range (For example, between dates)</code></p>
 
 <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_reindex?wait_for_completion=false" -H "Content-Type: application/json" -d '
 {
@@ -333,7 +362,7 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_s
   }
 }'</code></pre>
 
-    <p class="card-text"><code>size</code> represents the number of documents in each batch. If each batch is greater than 100MB, Elasticsearch will report an error. This error needs to be handled by descreasing the number of documents in each batch so that the while batch does not exceed 100MB.</li></p>
+    <p class="card-text"><code>size</code> represents the number of documents in each batch. If each batch is greater than 100MB, Elasticsearch will report an error. This error needs to be handled by descreasing the number of documents in each batch so that the while batch does not exceed 100MB</li></p>
 
 <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_reindex?wait_for_completion=false" -H "Content-Type: application/json" -d '
 {
@@ -351,7 +380,7 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_s
   }
 }'</code></pre>
 
-    <p class="card-text"><code>scroll</code> can be used when there is timeouts during scroll search query due to oversharding, high resource utilization, or garbage collection issues. The default scroll timeout is set to 5 minutes.</p>
+    <p class="card-text"><code>scroll</code> can be used when there is timeouts during scroll search query due to oversharding, high resource utilization, or garbage collection issues. The default scroll timeout is set to 5 minutes</p>
 
 <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_reindex?scroll=1h&wait_for_completion=false" -H "Content-Type: application/json" -d '
 {
@@ -370,18 +399,18 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_s
 
     <h3 class="card-title">Clone</h3>
     <ul>
-      <li>Faster than reindex.</li>
-      <li>Preserves mapping.</li>
+      <li>Faster than reindex</li>
+      <li>Preserves mapping</li>
     </ul>
 
 <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/&lt;original_index&gt;/_clone/&lt;cloned_index&gt;?pretty"</code></pre>
 
     <h3 class="card-title">Split</h3>
     <ul>
-      <li>Splitting index into many shards makes search faster.</li>
+      <li>Splitting index into many shards makes search faster</li>
     </ul>
 
-<pre><code class="bash"># Before splitting, index must be marked as non-writable.
+<pre><code class="bash"># Before splitting, index must be marked as non-writable
 curl -k -u &lt;username&gt;:&lt;password&gt; -X PUT "https://&lt;endpoint&gt;/&lt;index_name&gt;/_settings?pretty" -H "Content-Type: application/json" -d '
 {
   "settings": {
@@ -398,7 +427,7 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/&
 
     <h3 class="card-title">Reroute</h3>
     <ul>
-      <li>Move index from one ES node to another.</li>
+      <li>Move index from one ES node to another</li>
     </ul>
 
 <pre><code class="bash">curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_cluster/_reroute?metrics=none&pretty" -H "Content-Type: application/json" -d '
@@ -427,42 +456,42 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/&
 
     <h3 class="card-title">Task</h3>
 
-<pre><code class="bash"># List tasks.
+<pre><code class="bash"># List tasks
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_tasks?pretty"
 
-# List a specific task.
+# List a specific task
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_tasks/&lt;task_name&gt;?pretty"
 
-# Cancel a specific task.
+# Cancel a specific task
 curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_tasks/&lt;task_name&gt;/_cancel?pretty"</code></pre>
 
     <h3 class="card-title">Shards</h3>
 
-<pre><code class="bash"># List shards.
+<pre><code class="bash"># List shards
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_cat/shards?v"</code></pre>
 
     <h3 class="card-title">Allocation</h3>
     <ul>
-      <li>Display disk allocation in each node.</li>
+      <li>Display disk allocation in each node</li>
     </ul>
 
-<pre><code class="bash"># List disk allcation.
+<pre><code class="bash"># List disk allcation
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_cat/allocation?v"
 
-# If there are unassigned shards, can use this to understand the reason.
+# If there are unassigned shards, can use this to understand the reason
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_cluster/allocation/explain?pretty"</code></pre>
 
     <h3 class="card-title">SSL certificates</h3>
 
-<pre><code class="bash"># List SSL certificates.
+<pre><code class="bash"># List SSL certificates
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_ssl/certificates"</code></pre>
 
     <h3 class="card-title">Role</h3>
 
-<pre><code class="bash"># List role.
+<pre><code class="bash"># List role
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_security/role"
 
-# Create role. (With all privileges to all indices)
+# Create role (With all privileges to all indices)
 curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_security/&lt;role_name&gt;" -H "Content-Type: application/json" -d '
 {
   "indicies": [
@@ -475,10 +504,10 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_
 
     <h3 class="card-title">User</h3>
 
-<pre><code class="bash"># List role.
+<pre><code class="bash"># List role
 curl -k -u &lt;username&gt;:&lt;password&gt; -X GET "https://&lt;endpoint&gt;/_security/user"
 
-# Create role. (With superuser)
+# Create role (With superuser)
 curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_security/&lt;user_name&gt;" -H "Content-Type: application/json" -d '
 {
   "password": "mypassword",
@@ -492,46 +521,7 @@ curl -k -u &lt;username&gt;:&lt;password&gt; -X POST "https://&lt;endpoint&gt;/_
   </div>
 </div>
 
-<div class="card mb-4" id="elasticsearch-3">
-  <div class="card-body">
-    <h2 class="card-title">Node role</h2>
-
-    <h3 class="card-title">Master</h3>
-    <ul>
-      <li>Deployment with fixed replicas. (At least 3 for HA)</li>
-      <li>Holds metadata: data nodes, location, sharding, data replication.</li>
-      <li>Creates/deletes index.</li>
-      <li>Tracks nodes in the cluster.</li>
-      <li>It is good idea to have nodes that are dedicated to master role only.</li>
-      <li>Medium compute, low storage.</li>
-    </ul>
-
-    <h3 class="card-title">Data</h3>
-    <ul>
-      <li>StatefulSets where each instance has PVC.</li>
-      <li>Splits indices into shards and replicate information between nodes. (To prevent data loss)</li>
-      <li>Types
-        <ul>
-          <li>data_hot: most recent and frequently searched data, fast read and write. (High compute, low storage)</li>
-          <li>data_warm: typically holds data from recent weeks, updates are infrequent. (Medium compute, medium storage)</li>
-          <li>data_cold: data is still searchable but node is optimized for lower storage cost than search speed. (Low compute, high storage)</li>
-          <li>data_frozen: data is queried very rarely. Requires snapshot repository. (Minimal compute, enough storage to handle snapshots)</li>
-        </ul>
-      </li>
-    </ul>
-
-    <h3 class="card-title">Ingest</h3>
-    <ul>
-      <li>Pre-precess documents before they are indexed. (Can be used instead of Logstash)</li>
-    </ul>
-
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-node.html">Node</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="elasticsearch-4">
+<div class="card mb-4" id="elasticsearch-">
   <div class="card-body">
     <h2 class="card-title">Multizone cluster with helm chart</h2>
 

@@ -43,70 +43,67 @@
   <div class="card-body">
     <h2 class="card-title">Salt</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#salt-1">Salt basic</a></li>
-      <li><a href="#salt-2">Salt state</a></li>
-      <li><a href="#salt-3">Salt best practice</a></li>
+      <li><a href="#salt-">Salt basic</a></li>
+      <li><a href="#salt-">Salt state</a></li>
+      <li><a href="#salt-">Salt best practice</a></li>
     </ul>
   </div>
 </div>
 
-<div class="card mb-4" id="salt-1">
+<div class="card mb-4" id="salt-">
   <div class="card-body">
     <h2 class="card-title">Salt basic</h2>
-    <p class="card-text"></p>
 
     <h3 class="card-text">Salt API</h3>
-<pre><code class="bash"># Test to see if Salt API is callable.
+<pre><code class="bash"># Test to see if Salt API is callable
 salt -a pam \* test.ping
 
-# Add credential(s) to call Salt API.
+# Add credential(s) to call Salt API
 /etc/salt/master.d/auth.conf
 
-# Restart Salt master.
+# Restart Salt master
 sudo service salt-master restart
 
-# Check logs.
+# Check logs
 /var/log/salt/master
 
-# Check minion configuration.
+# Check minion configuration
 /etc/salt/minion.d/minion.conf</code></pre>
 
     <h3 class="card-text">Salt call</h3>
-<pre><code class="python"># Sync salt modules from master to minion.
+<pre><code class="python"># Sync salt modules from master to minion
 sudo salt-call saltutil.sync
 
-# Run all states.
+# Run all states
 sudo salt-call state.highstate # Use "test=True" to run dry-run.
 
-# Run only a specific state.
+# Run only a specific state
 sudo salt-call state.apply &lt;state_name&gt; # Use "test=True" to run dry-run.
 
-# Find salt master from a minion.
+# Find salt master from a minion
 sudo salt-call grains.item master</code></pre>
 
     <h3 class="card-text">Salt grains</h3>
-<pre><code class="python"># Grains location.
+<pre><code class="python"># Grains location
 /etc/salt/grains</code></pre>
-
   </div>
   <div class="card-footer text-muted">
 
   </div>
 </div>
 
-<div class="card mb-4" id="salt-2">
+<div class="card mb-4" id="salt-">
   <div class="card-body">
     <h2 class="card-title">Salt state</h2>
-    <p class="card-text"></p>
 
-<pre><code class="python"># Set environment variable.
+<pre><code class="python"># Set environment variable
 &lt;state_name&gt;
   environ.setenv:
     - name: name
     - value: value
     - update_minion: True</code></pre>
 
-<pre><code class="python"># Copy files within the minion.
+<pre><code class="python"># Copy files within the minion
 &lt;state_name&gt;
   file.copy:
     - name:
@@ -114,49 +111,47 @@ sudo salt-call grains.item master</code></pre>
     - force: True # Overwrite the file even if it exists.
     - preserve: True # Retain user/group ownership.
 
-# Delete file/directory if exists.
+# Delete file/directory if exists
 &lt;state_name&gt;
   file.absent:
     - name: file or directory</code></pre>
 
-<pre><code class="python"># Install a group of packages.
-# Groups can be inspected by the following commands.
+<pre><code class="python"># Install a group of packages
+# Groups can be inspected by the following commands
 # yum groups list
 # yum groups info "&lt;group_name&gt;"
 &lt;state_name&gt;
   pkg.group_installed:
     - name: 'group name'</code></pre>
 
-<pre><code class="python"># Extract an archive to a specific directory.
+<pre><code class="python"># Extract an archive to a specific directory
 &lt;state_name&gt;
   archive.extracted:
     - name: &lt;location_to_extract_the_package&gt;
     - source: &lt;location_of_package&gt;</code></pre>
-
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://docs.saltproject.io/en/master/ref/states/all/index.html">STATE MODULES</a>
   </div>
 </div>
 
-<div class="card mb-4" id="salt-3">
+<div class="card mb-4" id="salt-">
   <div class="card-body">
     <h2 class="card-title">Salt best practice</h2>
-    <p class="card-text"></p>
 
-<pre><code class="python"># Assume this state exists already.
+<pre><code class="python"># Assume this state exists already
 &lt;install_rh-python36&gt;
   pkg.installed:
     - name: rh-python36
 
-# Do not.
+# Bad
 &lt;update_pip3&gt;
   cmd.run:
     - name: scl enable rh-python36 -- pip install --no-cache-dir --upgrade pip
     - require:
       - pkg: install_rh-python36
 
-# Do.
+# Good
 &lt;update_pip3&gt;
   pip.installed:
     - name: pip
@@ -166,12 +161,12 @@ sudo salt-call grains.item master</code></pre>
     - require:
       - pkg: install_rh-python36</code></pre>
 
-<pre><code class="python"># Do not.
+<pre><code class="python"># Bad
 &lt;install_java_alternative&gt;
   cmd.run:
     - name: alternatives --install /usr/bin/java java /usr/java/&lt;jdk_version&gt;/bin/java 1000
 
-# Do.
+# Good
 &lt;install_java_alternative&gt;
   alternatives.install:
     - name: java
@@ -179,29 +174,28 @@ sudo salt-call grains.item master</code></pre>
     - path: /usr/java/&lt;jdk_version&gt;/bin/java
     - priority: 1000</code></pre>
 
-<pre><code class="python"># Do not.
+<pre><code class="python"># Bad
 &lt;set_java_alternative&gt;
   cmd.run:
     - name: alternatives --set java /usr/java/&lt;jdk_version&gt;/bin/java
 
-# Do.
+# Goo
 &lt;set_java_alternative&gt;
   alternatives.set:
     - name: java
     - path: /usr/java/&lt;jdk_version&gt;/bin/java</code></pre>
 
-<pre><code class="python"># Do not.
+<pre><code class="python"># Bad
 &lt;selinux&gt;
   cmd.run:
     - name: restorecon -R -v /docker
     - onlyif: test -d /docker
 
-# Do.
+# Good
 &lt;restore_selinux&gt;
   selinux.fcontext_polocy_applied:
     - name: /docker
     - recursive: True</code></pre>
-
   </div>
   <div class="card-footer text-muted">
 

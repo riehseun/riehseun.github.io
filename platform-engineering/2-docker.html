@@ -43,35 +43,31 @@
   <div class="card-body">
     <h2 class="card-title">Docker</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#docker-1">Docker basic</a></li>
-      <li><a href="#docker-2">Docker commands</a></li>
-      <li><a href="#docker-3">Dockerfile</a></li>
-      <li><a href="#docker-4">Docker Examples</a></li>
-      <li><a href="#docker-5">Docker exit codes</a></li>
-      <li><a href="#docker-6">Configure Docker in Ubuntu</a></li>
-      <li><a href="#docker-7">Docker storage</a></li>
-      <li><a href="#docker-8">Docker issues</a></li>
-      <li><a href="#docker-9">GPU accelerated docker</a></li>
+      <li><a href="#docker-">Docker basic</a></li>
+      <li><a href="#docker-">Docker commands</a></li>
+      <li><a href="#docker-">Dockerfile</a></li>
+      <!-- <li><a href="#docker-4">Docker Examples</a></li> -->
+      <li><a href="#docker-">Docker tips</a></li>
+      <!-- <li><a href="#docker-9">GPU accelerated docker</a></li> -->
     </ul>
   </div>
 </div>
 
-<div class="card mb-4" id="docker-1">
+<div class="card mb-4" id="docker-">
   <div class="card-body">
     <h2 class="card-title">Docker basic</h2>
-    <p class="card-text"></p>
-
     <ul>
-      <li>Container is an isolated environment to build/run software packages. (container image is immutable)</li>
-      <li>Containters are highly configured processes (it is not lightweight). They leverage kernal features to isolate processes and shared OS kernal at the same time.</li>
-      <li>"cgroups" controls resources it can consume and namespaces control what process it can see.</li>
+      <li>Container is an isolated environment to build/run software packages (Container image is immutable)</li>
+      <li>Containters are highly configured processes (it is not lightweight)</li>
+      <lI>Containers leverage kernal features to isolate processes and shared OS kernal at the same time</li>
+      <li><strong>cgroups</strong> controls resources containers can consume and <strong>namespaces</strong> control what process containers can see</li>
     </ul>
 
     <h3 class="card-title">Container benefits</h3>
     <ul>
-      <li>Efficient use of hardware since they run w/o VM.</li>
-      <li>Isolation.</li>
-      <li>Application portability and ease of delievery.</li>
+      <li>Efficient use of hardware since they run w/o VM</li>
+      <li>Isolation</li>
+      <li>Application portability and ease of delievery</li>
     </ul>
 
     <h3 class="card-title">Docker lifecycle</h3>
@@ -81,42 +77,62 @@
 
     <h3 class="card-title">Kernel</h3>
     <ul>
-      <li>Namespaces: isolation (like hypervisor for VMs) like pid, net, mnt, ipc, user</li>
-      <li>Control groups: sets the resource limits (for each container, for example)</li>
-      <li>Containers, although isolated, share the single OS Kernel.</li>
-      <li>Containers get their own namespaces.</li>
+      <li>Namespaces - isolation (like hypervisor for VMs) like pid, net, mnt, ipc, user</li>
+      <li>Control groups - sets the resource limits (for each container, for example)</li>
+      <li>Containers, although isolated, share the single OS Kernel</li>
+      <li>Containers get their own namespaces</li>
     </ul>
 
     <h3 class="card-title">Docker Engine</h3>
     <ul>
-      <li>Docker Engine: client-server implementation where they run on the same host and communicate via REST API.</li>
-      <li>Docker client: provides docker CLI.</li>
-      <li>Docker server: daemon named dockerd, responds to client request.</li>
+      <li>Docker Engine - client-server implementation where they run on the same host and communicate via REST API</li>
+      <li>Docker client - provides docker CLI</li>
+      <li>Docker server - daemon named dockerd, responds to client request</li>
     </ul>
 
     <h3 class="card-title">/var/run/docker.sock</h3>
     <ul>
-      <li>Docker deamon listed this unix socket by default.</li>
-      <li>It is used to communicate with Docker deamon from within containers.</li>
+      <li>It is used to communicate with Docker deamon from within containers</li>
       <li>Containers need to "bind mount" /var/run/docker.sock file</li>
     </ul>
+
+    <h3 class="card-title">Docker exit codes</h3>
+    <ul>
+      <li>Code 0 - container does not have a foreground process attached</li>
+      <li>Code 1 - there is an application error</li>
+      <li>Code 137 - container received SIGKILL (docker kill) This could happen due to out of RAM.</li>
+      <li>Code 139 - container received SIGSEGV (segmentation fault)</li>
+      <li>Code 143 - container received SIGTERM (docker stop)</li>
+    </ul>
+
+    <h3 class="card-title">Docker storage</h3>
+    <p class="card-text">Docker images are stored in <strong>/var/lib/docker/overlay2</strong></p>
+<pre><code class="bash">docker system prune -a # Clean up container, network, image, build cache
+docker volumes prune # Remove unused volumes</code></pre>
+
+    <p class="card-text">Find an artifact (For example, log4j) in <strong>/var/lib/docker/overlay2</strong> that matches running images</p>
+<pre><code class="bash">find /var/lib/docker/overlay2 -name "log4j-core-2" > overlay.txt
+sed -i 's\merged.*/merged/' overlay.txt
+sed -i 's\diff.*/diff/' overlay.txt
+docker inspect $(docker ps -qa) | jq -r 'map([.Name, .GraphDriver.Data.MergedDir]) | .[] | "\(.[0])\t\(.[1])"' > docker-mappings.txt
+grep -Fwf overlay.txt docker-mappings.txt</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="Docker Architecture, Life Cycle of Docker Containers and Data Management">https://dev.to/docker/docker-architecture-life-cycle-of-docker-containers-and-data-management-1a9c</a>
+    Reference: <a href="https://dev.to/docker/docker-architecture-life-cycle-of-docker-containers-and-data-management-1a9c">Docker Architecture, Life Cycle of Docker Containers and Data Management</a> | <a href="https://betterprogramming.pub/understanding-docker-container-exit-codes-5ee79a1d58f6">Understanding Docker Container Exit Codes</a> | <a href="https://fabianlee.org/2021/04/08/docker-determining-container-responsible-for-largest-overlay-directories/">Docker: determining container responsible for largest overlay directories</a>
   </div>
 </div>
 
-<div class="card mb-4" id="docker-2">
+<div class="card mb-4" id="docker-">
   <div class="card-body">
     <h2 class="card-title">Docker commands</h2>
     <p class="card-text"></p>
-<pre><code class="bash"># Check docker installation.
+<pre><code class="bash"># Check docker installation
 docker info
 
-# See all containers in all states.
+# See all containers in all states
 docker ps -a
 
-# Builds Dockerfile and create new image.
+# Builds Dockerfile and create new image
 docker build -f &lt;Dockerfile_name&gt; -t &lt;Docker_image_name&gt; .
 
 # Tag and push image
@@ -126,65 +142,65 @@ docker push &lt;registry_name&gt;/&lt;image_name&gt;:&lt;tag&gt;
 # Restart a container
 docker restart &lt;image_name&gt;</code></pre>
 
-<pre><code class="bash"># Login to the container as root user.
+<pre><code class="bash"># Login to the container as root user
 docker exec -u 0 -it &lt;container_name&gt; bash
 
-# Login to the latest container.
+# Login to the latest container
 docker exec -it $(docker ps --latest --quiet) bash
 
-# Flag to map container port to host port.
+# Flag to map container port to host port
 --publish 80:8080
 
-# Map directories.-
+# Map directories
 docker run -v &lt;host_directory&gt;:&lt;container_directory&gt; -u 0 -dit &lt;container_name&gt;
 
-docker run --rm \ # Clean up container's file system after container exists.
-           --env VAR=value\ # Set environment variable.
-           -dit \ # Have the container up and running.
-           --entrypoint=/bin/bash \ # Override entry point if the main process finishes in the image and container exits.
-           --runtime=nvidia \ # NVIDIA container runtime. (GPU accelerated containers)
+docker run --rm \ # Clean up container's file system after container exists
+           --env VAR=value\ # Set environment variable
+           -dit \ # Have the container up and running
+           --entrypoint=/bin/bash \ # Override entry point if the main process finishes in the image and container exits
+           --runtime=nvidia \ # NVIDIA container runtime (GPU accelerated containers)
            --name=&lt;container_name&gt; \
            &lt;image_name&gt;:&lt;tag&gt;</code></pre>
 
-<pre><code class="bash"># Remove all exited containers.
+<pre><code class="bash"># Remove all exited containers
 docker rm -f $(docker ps -a -f status=exited -q)
 
-# Remove all exited containers including its volumes.
+# Remove all exited containers including its volumes
 docker rm -vf $(docker ps -a -f status=exited -q)
 
-# Stop all images, remove all images, and show images.
+# Stop all images, remove all images, and show images
 docker stop $(docker ps --latest --quiet) && docker rm $(docker ps -a -f status=exited -q) && docker ps -a</code></pre>
 
-<pre><code class="bash"># Remove an image.
-docker rmi &lt;Image_id&gt;
+<pre><code class="bash"># Remove an image
+docker rmi &lt;image_id&gt;
 
-# Remove dangling (tagged with &lt;none&gt;) images.
+# Remove dangling (tagged with &lt;none&gt;) images
 docker image prune -f
 
-# Remove unused (including dangling) images.
+# Remove unused (including dangling) images
 docker image prune -f -a
 
-# Remove all unused containers, volumes, networks and images.
+# Remove all unused containers, volumes, networks and images
 docker system prune -a --volumes
 
-# Remove all images.
+# Remove all images
 docker rmi -f $(docker images -a -q)
 
-# Check if an image exists. (replace my_image and my_tage in the code)
+# Check if an image exists (Replace my_image and my_tage in the code)
 if [[ "$(docker images -q my_image:my_tag 2> /dev/null)" == "" ]]; then
   # if an image exists, do something
 fi</code></pre>
 
-<pre><code class="bash"># Export an image.
+<pre><code class="bash"># Export an image
 docker save &lt;image_name&gt;:&lt;tag&gt; | gzip > my_image.tar.gz
 
-# Import an image.
+# Import an image
 docker load -i &lt;image_name&gt;.tar.gz
 
-# Copy file from container to host.
+# Copy file from container to host
 docker cp &lt;container_id&gt;:/container/path/file /host/path/</code></pre>
 
-<pre><code class="bash"># Assume docker-compose.yml exists.
+<pre><code class="bash"># Assume docker-compose.yml exists
 
 # Create images and run
 docker-compose up
@@ -196,20 +212,20 @@ docker volume prune -f
 docker-compose create $CONTAINER
 docker-compose start $CONTAINER</code></pre>
 
-<pre><code class="bash"># Display container information.
+<pre><code class="bash"># Display container information
 docker inspect &lt;container_name&gt;
 
-# Get the container IP.
+# Get the container IP
 docker inspect --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' &lt;container_name&gt;
 
-# Get All container IPs.
+# Get All container IPs
 docker inspect -f '{{.Name}} - {{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $(docker ps -aq)
 
-# Investigate docker logs.
+# Investigate docker logs
 docker logs -f &lt;container_name&gt;
 journalctl -u docker.service</code></pre>
 
-<pre><code class="bash"># Docker service.
+<pre><code class="bash"># Docker service
 docker service ls
 docker service rm &lt;service name&gt;
 docker service rm inspect --pretty &lt;service id&gt;</code></pre>
@@ -219,7 +235,7 @@ docker service rm inspect --pretty &lt;service id&gt;</code></pre>
   </div>
 </div>
 
-<div class="card mb-4" id="docker-3">
+<div class="card mb-4" id="docker-">
   <div class="card-body">
     <h2 class="card-title">Dockerfile</h2>
     <p class="card-text"></p>
@@ -268,7 +284,47 @@ CMD ["java", "-jar", "/app.jar"]</code></pre>
   </div>
 </div>
 
-<div class="card mb-4" id="docker-4">
+<div class="card mb-4" id="docker-">
+  <div class="card-body">
+
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="docker-">
+  <div class="card-body">
+    <h2 class="card-title">Docker tips</h2>
+
+    <h3 class="card-title">Configure Docker in Ubuntu</h3>
+    <p class="card-text">To use a private docker repository, add the following in <strong>/etc/docker/daemon.json</strong></p>
+<pre><code class="bash">{
+"insecure-registries": [&lt;YOUR_REPO_ADDRESS_INCLUDING_PORT_NUMBER&gt;]
+}</code></pre>
+    <p class="card-text">If you want to use secure repo with proper certificates, create this directory <strong>/etc/docker/cert.d/&lt;your_repo_address&gt;</strong> and copy certificates to this directory</p>
+    <p class="card-text">Do <code>docker login &lt;your_repo_address&gt;</code></p>
+    <p class="card-text">Finally, issue <code>sudo service docker restart</code></p>
+
+    <h3 class="card-title"><code>sudo systemctl start docker</code> fails</h3>
+
+<pre><code class="bash">systemctl status docker.service
+sudo dockerd --debug
+sudo journalctl -fu docker</code></pre>
+
+    <h3 class="card-title">failed to start daemon: error while opening volume store metadata datavase: timeout</h3>
+
+<pre><code class="bash">ps axf | grep docker
+# Then "kill -9 &lt;problematic docker process&gt;"
+
+sudo systemctl restart docker</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<!-- <div class="card mb-4" id="docker-4">
   <div class="card-body">
     <h2 class="card-title">Docker Examples</h2>
     <p class="card-text"></p>
@@ -305,82 +361,9 @@ docker run --network host -e SQLFQDN=$SQL_CONTAINER_IP,1433 -e SQLUSER=sqladmin 
   <div class="card-footer text-muted">
     Reference: <a href="https://docs.microsoft.com/en-us/sql/linux/quickstart-install-connect-docker?view=sql-server-ver15&pivots=cs1-bash">Run SQL Server container images with Docker</a> | <a href="https://docs.microsoft.com/en-us/sql/linux/sql-server-linux-setup-tools?view=sql-server-ver15">Install sqlcmd and bcp the SQL Server command-line tools on Linux</a>
   </div>
-</div>
+</div> -->
 
-<div class="card mb-4" id="docker-5">
-  <div class="card-body">
-    <h2 class="card-title">Docker exit codes</h2>
-    <p class="card-text"></p>
-    <ul>
-      <li>Code 0 - container does not have a foreground process attached</li>
-      <li>Code 1 - there is an application error</li>
-      <li>Code 137 - container received SIGKILL (docker kill) This could happen due to out of RAM.</li>
-      <li>Code 139 - container received SIGSEGV (segmentation fault)</li>
-      <li>Code 143 - container received SIGTERM (docker stop)</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://betterprogramming.pub/understanding-docker-container-exit-codes-5ee79a1d58f6">Understanding Docker Container Exit Codes</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="docker-6">
-  <div class="card-body">
-    <h2 class="card-title">Configure Docker in Ubuntu</h2>
-    <p class="card-text">To use a private docker repository, add the following in <strong>/etc/docker/daemon.json</strong></p>
-<pre><code class="bash">{
-"insecure-registries": [&lt;YOUR_REPO_ADDRESS_INCLUDING_PORT_NUMBER&gt;]
-}</code></pre>
-    <p class="card-text">If you want to use secure repo with proper certificates, create this directory <strong>/etc/docker/cert.d/&lt;YOUR_REPO_ADDRESS&gt;</strong> and copy certificates to this directory</p>
-    <p class="card-text">Do <strong>docker login &lt;YOUR_REPO_ADDRESS&gt;</strong></p>
-    <p class="card-text">Finally, issue <strong>sudo service docker restart</strong></p>
-  </div>
-  <div class="card-footer text-muted">
-
-  </div>
-</div>
-
-<div class="card mb-4" id="docker-7">
-  <div class="card-body">
-    <h2 class="card-title">Docker storage</h2>
-    <p class="card-text">Docker images are stored in <strong>/var/lib/docker/overlay2</strong></p>
-<pre><code class="bash">docker system prune -a # Clean up container, network, image, build cache
-docker volumes prune # Remove unused volumes</code></pre>
-
-    <p class="card-text">Find an artifact (For example, log4j) in <strong>/var/lib/docker/overlay2</strong> that matches running images</p>
-<pre><code class="bash">find /var/lib/docker/overlay2 -name "log4j-core-2" > overlay.txt
-sed -i 's\merged.*/merged/' overlay.txt
-sed -i 's\diff.*/diff/' overlay.txt
-docker inspect $(docker ps -qa) | jq -r 'map([.Name, .GraphDriver.Data.MergedDir]) | .[] | "\(.[0])\t\(.[1])"' > docker-mappings.txt
-grep -Fwf overlay.txt docker-mappings.txt</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://fabianlee.org/2021/04/08/docker-determining-container-responsible-for-largest-overlay-directories/">Docker: determining container responsible for largest overlay directories</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="docker-8">
-  <div class="card-body">
-    <h2 class="card-title">Docker issues</h2>
-
-<pre><code class="bash"># "sudo systemctl start docker" fails
-systemctl status docker.service
-sudo dockerd --debug
-sudo journalctl -fu docker
-
-# "failed to start daemon: error while opening volume store metadata datavase: timeout"
-ps axf | grep docker
-# Then "kill -9 &lt;problematic docker process&gt;"
-
-sudo systemctl restart docker</code></pre>
-
-  </div>
-  <div class="card-footer text-muted">
-
-  </div>
-</div>
-
-<div class="card mb-4" id="docker-9">
+<!-- <div class="card mb-4" id="docker-9">
   <div class="card-body">
     <h2 class="card-title">GPU accelerated docker</h2>
     <p class="card-text"></p>
@@ -422,7 +405,7 @@ sudo ln -s /usr/libexe/docker/docker-runc-current /usr/bin/docker-runc</code></p
   <div class="card-footer text-muted">
     Reference: <a href="https://github.com/NVIDIA/nvidia-container-runtime">nvidia-container-runtime</a>
   </div>
-</div>
+</div> -->
 <!-- Docker END -->
 
 </div> <!-- /.col-md-12 -->
