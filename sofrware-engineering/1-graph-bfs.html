@@ -48,6 +48,7 @@
       <li><a href="#graph-">Word ladder</a></li>
       <li><a href="#graph-">Number of islands</a></li>
       <li><a href="#graph-">Remove invalid parentheses</a></li>
+      <li><a href="#graph-">Number of provinces</a></li>
     </ul>
   </div>
 </div>
@@ -338,6 +339,62 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/remove-invalid-parentheses">301. Remove Invalid Parentheses</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-">
+  <div class="card-body">
+    <h2 class="card-title">Number of provinces (M)</h2>
+
+<pre><code class="python">class Solution:
+    def findCircleNum(self, isConnected: List[List[int]]) -> int:
+
+        # Constructed an undirected graph
+        # Compute connected component with BFS
+
+        graph = defaultdict(list)
+        n = len(isConnected[0])  # Number of cities
+
+        for i in range(len(isConnected)):
+            for j in range(len(isConnected[i])):
+                if isConnected[i][j] == 1:
+                    graph[i].append(j)
+                    graph[j].append(i)
+
+        explored_cities = set()
+        num_province = 0
+
+        # Time O(nm)
+        #  BFS will explored all nodes exactly once
+        #  Worst case is that all nodes are connected
+        # Space O(n)
+        for i in range(n):
+            if i not in explored_cities:
+                explored = self.bfs(graph, i)
+                explored_cities.update(explored)
+                num_province +=1
+
+        return num_province
+
+    def bfs(self, graph, start):
+
+        explored = set()
+        explored.add(start)
+
+        queue = deque()
+        queue.append(start)
+
+        while queue:
+            node = queue.popleft()
+            for next_node in graph[node]:
+                if next_node not in explored:
+                    explored.add(next_node)
+                    queue.append(next_node)
+
+        return explored</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/number-of-provinces">547. Number of Provinces</a>
   </div>
 </div>
 <!-- Graph END -->
