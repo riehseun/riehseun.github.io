@@ -152,7 +152,7 @@ print(model)</code></pre> -->
 
     <h3 class="card-title">Cost function</h3>
     <ul>
-      <li>Loss function \( L(\hat{y},y) = -(ylogA^{[2]} + (1-y)log(1-A^{[2]})) \)</li>
+      <li>Loss function \( L(\hat{y},y) = -\left( ylog(A^{[2]}) + (1-y)log(1-A^{[2]}) \right) \)</li>
       <li>Cost function \( J(w,b) = \dfrac{1}{m}\displaystyle\sum_{i=1}^{m} L(\hat{y}^{(i)},y^{(i)}) \)</li>
     </ul>
 
@@ -200,22 +200,6 @@ print(model)</code></pre> -->
 
     <h3 class="card-title">Full implementation</h3>
 
-<pre><code class="python">def initialize_parameters(n_x, n_h, n_y):
-
-    np.random.seed(1)
-
-    W1 = np.random.randn(n_h, n_x)*0.01
-    b1 = np.zeros((n_h, 1))
-    W2 = np.random.randn(n_y, n_h)*0.01
-    b2 = np.zeros((n_y, 1))
-
-    parameters = {"W1": W1,
-                  "b1": b1,
-                  "W2": W2,
-                  "b2": b2}
-
-    return parameters</code></pre>
-
 <pre><code class="python">def update_parameters(parameters, grads, learning_rate = 1.2):
 
     W1 = parameters["W1"]
@@ -249,13 +233,68 @@ print(model)</code></pre> -->
     parameters = initialize_parameters(n_x, n_h, n_y)
 
     for i in range(0, num_iterations):
-
         A2, cache = forward_propagation(X, parameters)
         cost = compute_cost(A2, Y, parameters)
         grads = backward_propagation(parameters, cache, X, Y)
         parameters = update_parameters(parameters, grads, learning_rate = 1.2)
 
     return parameters</code></pre>
+
+<pre><code class="python">def predict(parameters, X):
+
+    A2, cache = forward_propagation(X, parameters)
+    predictions = (A2 > 0.5)
+
+    return predictions</code></pre>
+
+<pre><code class="python">X, Y = load_planar_dataset()
+parameters = nn_model(X, Y, n_h = 4, num_iterations = 10000, print_cost=True)
+predictions = predict(parameters, X)</code></pre>
+
+    <h3 class="card-title">Helper functions</h3>
+
+<pre><code class="python">def load_planar_dataset():
+    np.random.seed(1)
+    m = 400  # number of examples
+    N = int(m/2)  # number of points per class
+    D = 2  # dimensionality
+    X = np.zeros((m,D))  # data matrix where each row is a single example
+    Y = np.zeros((m,1), dtype='uint8')  # labels vector (0 for red, 1 for blue)
+    a = 4  # maximum ray of the flower
+
+    for j in range(2):
+        ix = range(N*j,N*(j+1))
+        t = np.linspace(j*3.12,(j+1)*3.12,N) + np.random.randn(N)*0.2  # theta
+        r = a*np.sin(4*t) + np.random.randn(N)*0.2  # radius
+        X[ix] = np.c_[r*np.sin(t), r*np.cos(t)]
+        Y[ix] = j
+
+    X = X.T
+    Y = Y.T
+
+    return X, Y</code></pre>
+
+<pre><code class="python">def initialize_parameters(n_x, n_h, n_y):
+
+    np.random.seed(1)
+
+    W1 = np.random.randn(n_h, n_x)*0.01
+    b1 = np.zeros((n_h, 1))
+    W2 = np.random.randn(n_y, n_h)*0.01
+    b2 = np.zeros((n_y, 1))
+
+    parameters = {"W1": W1,
+                  "b1": b1,
+                  "W2": W2,
+                  "b2": b2}
+
+    return parameters</code></pre>
+
+<pre><code class="python">def sigmoid(z):
+
+    s = 1 / (1 + np.exp(-z))
+
+    return s</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.coursera.org/specializations/deep-learning?">Deep Learning Specialization</a>
@@ -379,10 +418,7 @@ print(model)</code></pre> -->
 <pre><code class="python">def compute_cost(AL, Y):
 
     m = Y.shape[1]
-
-    # Compute loss from aL and y
     cost = - ( np.dot(Y, np.log(AL.T)) + np.dot((1-Y), np.log(1-AL.T)) ) / m
-
     cost = np.squeeze(cost) # To make sure your cost's shape is what we expect (e.g. this turns [[17]] into 17).
 
     return cost</code></pre>
@@ -446,17 +482,6 @@ print(model)</code></pre> -->
 
     <h3 class="card-title">Full implementation</h3>
 
-<pre><code class="python">def initialize_parameters_deep(layer_dims):
-    np.random.seed(1)
-    parameters = {}
-    L = len(layer_dims)
-
-    for l in range(1, L):
-        parameters['W' + str(l)] = np.random.randn(layer_dims[l], layer_dims[l-1]) / np.sqrt(layer_dims[l-1]) #*0.01
-        parameters['b' + str(l)] = np.zeros((layer_dims[l], 1))
-
-    return parameters</code></pre>
-
 <pre><code class="python">def update_parameters(parameters, grads, learning_rate):
 
     L = len(parameters)
@@ -499,6 +524,84 @@ print(model)</code></pre> -->
             p[0,i] = 0
 
     return p</code></pre>
+
+<pre><code class="python"># Load the data. (cat/non-cat)
+train_set_location = 'data/train_catvnoncat.h5'
+test_set_location = 'data/test_catvnoncat.h5'
+train_set_x_orig, train_set_y, test_set_x_orig, test_set_y, classes = load_dataset(train_set_location, test_set_location)
+
+# Reshape the training and test examples such that matrices are flattened into vectors.
+train_set_x_flatten = train_set_x_orig.reshape(train_set_x_orig.shape[0], -1).T
+test_set_x_flatten = test_set_x_orig.reshape(test_set_x_orig.shape[0], -1).T
+
+# Center and standardize dataset dividing by the maximum value of a pixel channel.
+train_set_x = train_set_x_flatten / 255
+test_set_x = test_set_x_flatten / 255
+
+layers_dims = [12288, 20, 7, 5, 1] #  4-layer model
+parameters = L_layer_model(train_set_x, train_set_y, layers_dims, num_iterations = 2500, print_cost = True)
+pred_train = predict(train_x, train_y, parameters)
+pred_test = predict(test_x, test_y, parameters)</code></pre>
+
+    <h3 class="card-title">Helper functions</h3>
+
+<pre><code class="python">def load_dataset(train_set_location, test_set_location):
+
+    train_dataset = h5py.File(train_set_location, "r")
+    # These data sets are to be pre-preprocessed (Thus, appended "_orig")
+    train_set_x_orig = np.array(train_dataset["train_set_x"][:])  # Train set features
+    train_set_y_orig = np.array(train_dataset["train_set_y"][:])  # Train set labels
+
+    test_dataset = h5py.File(test_set_location, "r")
+    # These data sets are to be pre-preprocessed (Thus, appended "_orig")
+    test_set_x_orig = np.array(test_dataset["test_set_x"][:])  # Test set features
+    test_set_y_orig = np.array(test_dataset["test_set_y"][:])  # Test set labels
+
+    classes = np.array(test_dataset["list_classes"][:])  # List of classes
+
+    train_set_y_orig = train_set_y_orig.reshape((1, train_set_y_orig.shape[0]))
+    test_set_y_orig = test_set_y_orig.reshape((1, test_set_y_orig.shape[0]))
+
+    return train_set_x_orig, train_set_y_orig, test_set_x_orig, test_set_y_orig, classes</code></pre>
+
+<pre><code class="python">def initialize_parameters_deep(layer_dims):
+    np.random.seed(1)
+    parameters = {}
+    L = len(layer_dims)
+
+    for l in range(1, L):
+        parameters['W' + str(l)] = np.random.randn(layer_dims[l], layer_dims[l-1]) / np.sqrt(layer_dims[l-1]) #*0.01
+        parameters['b' + str(l)] = np.zeros((layer_dims[l], 1))
+
+    return parameters</code></pre>
+
+<pre><code class="python">def sigmoid(z):
+
+    s = 1 / (1 + np.exp(-z))
+
+    return s</code></pre>
+
+<pre><code class="python">def relu(x):
+
+    return np.maximum(0,x)</code></pre>
+
+<pre><code class="python">def sigmoid_backward(dA, cache):
+
+    Z = cache
+    s = 1/(1+np.exp(-Z))
+    dZ = dA * s * (1-s)
+
+    return dZ</code></pre>
+
+<pre><code class="python">def relu_backward(dA, cache):
+
+    Z = cache
+    dZ = np.array(dA, copy=True) # just converting dz to a correct object
+
+    # When z <= 0, you should set dz to 0 as well
+    dZ[Z <= 0] = 0
+
+    return dZ</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
