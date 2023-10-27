@@ -697,11 +697,15 @@
       <li>We can only choose between consistency or availability in distributed system</li>
       <ul>
         <li>CA - RDBMS (Non-distributed system)</li>
-        <li>AP - Dynamo, Cassandra, CouchDB (BASE DBs choose availability - respond with local data w/o ensuring its the latest with peers)</li>
+        <li>AP - Dynamo, Cassandra, CouchDB</li>
         <ul>
+          <li>BASE DBs choose availability - respond with local data w/o ensuring its the latest with peers</li>
           <li>Good choice if system can live with eventual consistency</li>
         </ul>
-        <li>CP - BigTable, HBase (ACID DBs choose consistency - refuse to respond if cannot check peers)</li>
+        <li>CP - BigTable, HBase</li>
+        <ul>
+          <li>ACID DBs choose consistency - refuse to respond if cannot check peers</li>
+        </ul>
       </ul>
     </ul>
 
@@ -712,87 +716,60 @@
       <li>PA system would go for L (latency) and PC system would go for C (consistency)</li>
     </ul>
 
-    <p class="card-text"><strong>Systems that choose A over C can still support eventual consistency but no linearizability/sequential/casual!</strong></p>
+    <p class="card-text"><strong>Systems that choose A over C can still support eventual consistency but no strong/sequential/casual!</strong></p>
 
     <h3 class="card-title">Isolation level</h3>
     <ul>
       <li>Considers multi object operations</li>
-    </ul>
-
-    <h4 class="card-title">Serializability</h4>
-    <ul>
-      <li>Two transactions executed concurrently should give same result</li>
-      <li>Prevents all anomalies</li>
-    </ul>
-
-    <h4 class="card-title">Repeatable read</h4>
-    <ul>
-      <li>Data once read by a transaction will not change throughout its course</li>
-    </ul>
-
-    <h4 class="card-title">Snapshot isolation</h4>
-    <ul>
-      <li>All reads made in a transaction see a consistent snapshot of the database</li>
-    </ul>
-
-    <h4 class="card-title">Read committed</h4>
-    <ul>
-      <li>Does not allows a transaction to read a data that has not yet been committed by other transaction</li>
+      <li>Serializability</li>
+      <ul>
+        <li>Two transactions executed concurrently should give same result</li>
+        <li>Prevents all anomalies</li>
+      </ul>
+      <li>Repeatable read</li>
+      <ul>
+        <li>Data once read by a transaction will not change throughout its course</li>
+      </ul>
+      <li>Snapshot isolation</li>
+      <ul>
+        <li>All reads made in a transaction see a consistent snapshot of the database</li>
+      </ul>
+      <li>Read committed</li>
+      <ul>
+        <li>Does not allows a transaction to read a data that has not yet been committed by other transaction</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Anomaly</h3>
-
-    <h4 class="card-title">Dirty write</h4>
     <ul>
-      <li>Transaction overwrites a value that was written by another transaction that is not committed yet</li>
-    </ul>
-
-    <h4 class="card-title">Dirty read</h4>
-    <ul>
-      <li>Transaction reads a value that was written by another transaction that is not committed yet</li>
-    </ul>
-
-    <h4 class="card-title">Fuzzy or non-repeatable read</h4>
-    <ul>
-      <li>Value is retrieved twice during a transaction and the value is different</li>
-    </ul>
-
-    <h4 class="card-title">Phantom read</h4>
-    <ul>
-      <li>For example, transaction of two queries runs to calculate the maximum and the average. However, another transaction intervenes to insert lots of record, thus making the first transaction return an average that is larger than the maximum</li>
-    </ul>
-
-    <h4 class="card-title">Lost update</h4>
-    <ul>
-      <li>Two transactions read the same value and then try to update it to two different values</li>
-    </ul>
-
-    <h4 class="card-title">Read skew</h4>
-    <ul>
-      <li>A transaction can only see partial results of another transaction</li>
-    </ul>
-
-    <h4 class="card-title">Dirty write</h4>
-    <ul>
-      <li>Two transactions read the same data, but then modify disjoint sets of data</li>
-    </ul>
-
-    <h3 class="card-title">RPC</h3>
-    <ul>
-      <li>For building applications on top of distributed system</li>
-    </ul>
-
-    <h4 class="card-title">RPC process</h4>
-    <ul>
-      <li>Client initiates client stub process by giving parameters</li>
-      <li>Client stub converts the parameters into standardized format and packs them into a message</li>
-      <li>Client RPC runtime delivers the message to the server over the network</li>
-      <li>Server RPC runtime receives the message and passes it to the server stub</li>
-      <li>Server stub unpacks the message to retrieve the parameters and calls the desired server routine</li>
-      <li>Server stub packs the returned result into a message and sends it to RPC runtime at the server</li>
-      <li>Server RPC runtime returns the packed result to Client RPC runtime over the network</li>
-      <li>Client RPC runtime sends the result to the client stub</li>
-      <li>Client stub unpacks the result</li>
+      <li>Dirty write</li>
+      <ul>
+        <li>Transaction overwrites a value that was written by another transaction that is not committed yet</li>
+      </ul>
+      <li>Dirty read</li>
+      <ul>
+        <li>Transaction reads a value that was written by another transaction that is not committed yet</li>
+      </ul>
+      <li>Fuzzy or non-repeatable read</li>
+      <ul>
+        <li>Value is retrieved twice during a transaction and the value is different</li>
+      </ul>
+      <li>Phantom read</li>
+      <ul>
+        <li>For example, transaction of two queries runs to calculate the maximum and the average. However, another transaction intervenes to insert lots of record, thus making the first transaction return an average that is larger than the maximum</li>
+      </ul>
+      <li>Lost update</li>
+      <ul>
+        <li>Two transactions read the same value and then try to update it to two different values</li>
+      </ul>
+      <li>Read skew</li>
+      <ul>
+        <li>A transaction can only see partial results of another transaction</li>
+      </ul>
+      <li>Dirty write</li>
+      <ul>
+        <li>Two transactions read the same data, but then modify disjoint sets of data</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -873,13 +850,43 @@
       <li>Persistent connection between client and server</li>
     </ul>
 
-    <h3 class="card-title">REST (Representational State Transfer)</h3>
+    <h3 class="card-title">Communication</h3>
     <ul>
-      <li>Architecture for design network applications</li>
-      <li>Stateless, client-server, cacheable communcation</li>
-      <li>HTTP protocol is used</li>
-      <li>Simpler than RPC, Web Services (SOAP, WSDL)</li>
-      <li>Ex. www</li>
+      <li>Hypertext transfer protocol (HTTP)</li>
+      <ul>
+        <li>GET, POST, PUT, PATCH, DELETE</li>
+        <li>Application layer protocal relying on TCP or UDP</li>
+      </ul>
+      <li>Transmission control protocol (TCP)</li>
+      <ul>
+        <li>Guarantees that packets arrive on destination in the correct order and without corruption</li>
+      </ul>
+      <li>User datagram protocol (UDP)</li>
+      <ul>
+        <li>Lower latency but packages may arrive on destination out of order or not at all</li>
+        <li>Used in video streaming, voice chat, multiplayer game</li>
+      </ul>
+      <li>Remote procedure call (RPC)</li>
+      <ul>
+        <li>Client initiates client stub process by giving parameters</li>
+        <li>Client stub converts the parameters into standardized format and packs them into a message</li>
+        <li>Client RPC runtime delivers the message to the server over the network</li>
+        <li>Server RPC runtime receives the message and passes it to the server stub</li>
+        <li>Server stub unpacks the message to retrieve the parameters and calls the desired server routine</li>
+        <li>Server stub packs the returned result into a message and sends it to RPC runtime at the server</li>
+        <li>Server RPC runtime returns the packed result to Client RPC runtime over the network</li>
+        <li>Client RPC runtime sends the result to the client stub</li>
+        <li>Client stub unpacks the result</li>
+        <li>Ex. Protobuf, Thrift, Avro</li>
+      </ul>
+      <li>Representational State Transfer (REST)</li>
+      <ul>
+        <li>Architecture for design network applications</li>
+        <li>Stateless, client-server, cacheable communcation</li>
+        <li>HTTP protocol is used</li>
+        <li>Simpler than RPC, Web Services (SOAP, WSDL)</li>
+        <li>Ex. www</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">namp</h3>
