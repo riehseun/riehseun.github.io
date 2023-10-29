@@ -49,7 +49,7 @@
       <li><a href="#graph-">Evaluate division</a></li>
       <!-- <li><a href="#graph-">Redundant connection</a></li> -->
       <!-- <li><a href="#graph-">Redundant connection II</a></li> -->
-      <li><a href="#graph-">Couples holding hands</a></li>
+      <!-- <li><a href="#graph-">Couples holding hands</a></li> -->
       <li><a href="#graph-">Is graph bipartite?</a></li>
       <li><a href="#graph-">All paths from source to target</a></li>
       <li><a href="#graph-">Find eventual safe states</a></li>
@@ -228,7 +228,7 @@
   </div>
 </div> -->
 
-<div class="card mb-4" id="graph-">
+<!-- <div class="card mb-4" id="graph-">
   <div class="card-body">
     <h2 class="card-title">Couples holding hands (H)</h2>
 
@@ -237,13 +237,64 @@
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/couples-holding-hands">765. Couples holding hands</a>
   </div>
-</div>
+</div> -->
 
 <div class="card mb-4" id="graph-">
   <div class="card-body">
     <h2 class="card-title">Is graph bipartite? (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def isBipartite(self, graph: List[List[int]]) -> bool:
+
+        # If parent node is in group A, put child nodes in group B
+        # If parent node is in group B, put child nodes in group A
+        # If child node is already explored and is in the same group
+        # as parent, return False
+
+        graph_list = graph
+        graph = defaultdict(list)
+
+        for i, nodes in enumerate(graph_list):
+            graph[i] = list(nodes)
+
+        result = True
+        # Graph may consist of many disconnected sub-graphs.
+        # Search from all starting nodes must yield True.
+        # Time O(n*(n+m))
+        for node in graph.keys():
+            result = result and self.bfs(graph, node)
+
+        return result
+
+    # Time O(n+m)
+    # Space O(n)
+    def bfs(self, graph, start):
+
+        explored = set()
+        explored.add(start)
+
+        queue = deque()
+        queue.append(start)
+
+        group = {}
+        # Put the first node in group a.
+        group[start] = "A"
+
+        while queue:
+            node = queue.popleft()
+            for next_node in graph[node]:
+                if next_node not in explored:
+                    explored.add(next_node)
+                    queue.append(next_node)
+                    if group[node] == "A":
+                        group[next_node] = "B"
+                    else:
+                        group[next_node] = "A"
+                else:
+                    if group[node] == group[next_node]:
+                        return False
+
+        return True</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/is-graph-bipartite">785. Is Graph Bipartite?</a>
