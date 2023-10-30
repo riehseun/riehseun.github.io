@@ -305,7 +305,45 @@
   <div class="card-body">
     <h2 class="card-title">All paths from source to target (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def allPathsSourceTarget(self, graph: List[List[int]]) -> List[List[int]]:
+
+        # Do DFS while keeping track of all parent nodes
+
+        graph_list = graph
+        graph = defaultdict(list)
+
+        for i, node in enumerate(graph_list):
+            graph[i] = list(node)
+
+        result = []
+
+        outputs = self.dfs(graph, 0, len(graph.keys())-1)
+        print(outputs)
+        for output in outputs:
+            if output[-1] == len(graph.keys())-1:
+                result.append(output)
+
+        return result
+
+    # Time O(n+m)
+    # Space O(n+m) store all paths leading to the last node
+    def dfs(self, graph, start, end):
+
+        stack = []
+        stack.append((start, [start]))
+
+        # Graph is acyclic, this no need to store "explored"
+
+        paths = []
+
+        while stack:
+            node, path = stack.pop()
+            paths.append(path)
+            for next_node in graph[node]:
+                stack.append((next_node, path+[next_node]))
+
+        return paths</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/all-paths-from-source-to-target">797. All Paths From Source to Target</a>
