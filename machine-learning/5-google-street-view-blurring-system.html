@@ -39,25 +39,270 @@
 <div class="col-md-12">
 <h1 class="my-4">Other</h1>
 
-<!-- Machine learning system design BEGIN -->
-<div class="card mb-4" id="machine-learning-system-design">
+<!-- Google street view blurring system BEGIN -->
+<div class="card mb-4" id="google-street-view-blurring-system">
   <div class="card-body">
     <h2 class="card-title">Machine learning system design</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#machine-learning-system-design-1">Machine learning system design</a></li>
+      <li><a href="#google-street-view-blurring-system-1">Clarify requirements</a></li>
+      <li><a href="#google-street-view-blurring-system-2">Frame problem as ML task</a></li>
+      <li><a href="#google-street-view-blurring-system-3">Data preparation</a></li>
+      <li><a href="#google-street-view-blurring-system-4">Model development</a></li>
+      <li><a href="#google-street-view-blurring-system-5">Evaluation</a></li>
+      <li><a href="#google-street-view-blurring-system-6">Deployment and serving</a></li>
     </ul>
   </div>
 </div>
 
-<div class="card mb-4" id="machine-learning-system-design-1">
+<div class="card mb-4" id="google-street-view-blurring-system-1">
   <div class="card-body">
-    <h2 class="card-title">Machine learning system design</h2>
+    <h2 class="card-title">Clarify requirements</h2>
+    <ul>
+      <li>Business objective</li>
+      <ul>
+        <li>Should the system protect user privacy? Yes</li>
+        <li>Should the detect human faces and license plates? Yes</li>
+        <li>Should the system handle bias w.r.t. race, gender, age, etc? No</li>
+      </ul>
+      <li>Features that the system supports</li>
+      <ul>
+        <li>Can users report images that are not correctly blurred? Yes</li>
+      </ul>
+      <li>Data</li>
+      <ul>
+        <li>Do we have annotated dataset? There are 1 million images with human faces and license plates manually annotated</li>
+      </ul>
+      <li>Constraints</li>
+      <li>Scale</li>
+      <li>Performance</li>
+      <ul>
+        <li>Should the system have low latency? No, images can be process offline</li>
+      </ul>
+    </ul>
   </div>
   <div class="card-footer text-muted">
-
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
   </div>
 </div>
-<!-- Machine learning system design END -->
+
+<div class="card mb-4" id="google-street-view-blurring-system-2">
+  <div class="card-body">
+    <h2 class="card-title">Frame problem as ML task</h2>
+    <ul>
+      <li>Define ML objective</li>
+      <ul>
+        <li>Accurately detect objects in images</li>
+        <li>Accurately identify objects of interest</li>
+      </ul>
+      <li>Specify input and output</li>
+      <ul>
+        <li>Input - images with zero or more onjects in it</li>
+        <li>Output - location of objects of interest</li>
+      </ul>
+      <li>Choose right ML category</li>
+      <ul>
+        <li>Object detection is regression problem</li>
+        <li>Object classification is classification problem</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="google-street-view-blurring-system-3">
+  <div class="card-body">
+    <h2 class="card-title">Data preparation</h2>
+    <ul>
+      <li>Data engineering</li>
+      <ul>
+        <li>Annotated dataset</li>
+        <ul>
+          <li>Image path</li>
+          <li>Objects - human face, license plate</li>
+          <li>Bounding boxes - x coordinate, y coordinate, width, height</li>
+        </ul>
+        <li>Street view images</li>
+        <ul>
+          <li>Image path</li>
+        </ul>
+      </ul>
+      <li>Feature engineering</li>
+      <ul>
+        <li>Data augmentation</li>
+        <ul>
+          <li>Random crop</li>
+          <li>Random saturation</li>
+          <li>Vertical/horizontal flip</li>
+          <li>Rotation/translation</li>
+          <li>Affline transformations</li>
+          <li>Changing brightness, saturation, contrast</li>
+        </ul>
+        <li>When rotating/flipping images, the ground truth bounding boxes must also be transformed</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="google-street-view-blurring-system-4">
+  <div class="card-body">
+    <h2 class="card-title">Model development</h2>
+    <ul>
+      <li>Model selection</li>
+      <ul>
+        <li>Two stages network</li>
+        <ul>
+          <li>Convolutional layer</li>
+          <li>Region proposal network (RPN)</li>
+          <li>Classifier</li>
+        </ul>
+      </ul>
+      <li>Model training</li>
+      <ul>
+        <li>Construct dataset</li>
+        <ul>
+          <li>Human label</li>
+          <ul>
+            <li>Expensive</li>
+            <li>Time consuming</li>
+          </ul>
+          <li>User interaction</li>
+          <ul>
+            <li>Data can be noisy due to user misclicks</li>
+            <li>Data can be sparce since lots of images may not have click data</li>
+          </ul>
+          <li>Self-supervision</li>
+          <ul>
+            <li>Constructed images differ from real data</li>
+            <li>We choose this since this is least expensive and fast</li>
+          </ul>
+        </ul>
+        <li>Choose loss function</li>
+        <ul>
+          <li>Constrastive loss function</li>
+          <ul>
+            <li>Dot product or cosine similarity is used to compute distances in embedding space</li>
+            <ul>
+              <li>Euclidean distance is not used due to curse of dimensionality</li>
+            </ul>
+            <li>Softmax is applied to distances to make them sum to 1</li>
+            <li>Cross-entropy is used to measure how close the probabilities are to the ground truth</li>
+          </ul>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="google-street-view-blurring-system-5">
+  <div class="card-body">
+    <h2 class="card-title">Evaluation</h2>
+    <ul>
+      <li>Offline</li>
+      <ul>
+        <li>MRR (Mean Reciprobal Rank)</li>
+        <ul>
+          <li>\( MRR = \dfrac{1}{m} \displaystyle\sum_{i=1}^{m} \dfrac{1}{rank_{i}} \) where \( {rank_{i}} \) is the position on which the first relevant item appears in the output list</li>
+          <li>Consider only the first relevant item in each output list, then average the reciprocal rank</li>
+          <li>Cons - ignores other relevant items in the list other than the first one</li>
+        </ul>
+        <li>Recall@k</li>
+        <ul>
+          <li>Number of relevant items in the output list (contaning top k items) / total relevant items in the dataset</li>
+          <li>Cons - denominator (total relevant items in the dataset) can be very big. This negatively impacts recall value</li>
+        </ul>
+        <li>Precision@k</li>
+        <ul>
+          <li>Number of relevant items in the output list (contaning top k items) / k</li>
+          <li>Cons - does not consider ranking quality</li>
+        </ul>
+        <li>mAP (Mean Average Precision)</li>
+        <ul>
+          <li>AP</li>
+          <ul>
+            <li>\( AP = \dfrac{\displaystyle\sum_{i=1}^{k} precision@i}{n} \) where \( n = \) total relevant items</li>
+            <li>Averages precision@k at different values of k</li>
+            <li>AP is high if more relevant items are located at the top of list</li>
+          </ul>
+          <li>mAP</li>
+          <ul>
+            <li>Compute AP for each output list, then average them</li>
+          </ul>
+          <li>Cons - works well when each item is either relevant or irrelevant. Does not work well for relevance scores</li>
+        </ul>
+        <li>nDCG (Normalized Discounted Cumulative Gain)</li>
+        <ul>
+          <li>\( DCG_{p} = \displaystyle\sum_{i=1}^{p} \dfrac{rel_{i}}{log_{2}(i+1)} \) where \( rel_{i} \) is ground truth relevance score of image ranked at \( i \)</li>
+          <li>\( nDCG_{p} = \dfrac{DCG_{p}}{IDCG_{p}} \) where \( {IDCG_{p}} \) is \( {DCG_{p}} \) of ideal ranking</li>
+          <li>Example</li>
+          <ul>
+            <li>Assume visual search system return images \( I1, I2, I3, I4 \) in the order of relevance</li>
+            <li>Assume human rates the images on scale of 0-3 such that \( I1=3, I2=2, I3=3, I4=0 \) (3 is highly relevant, 0 is merely relevant)</li>
+            <li>\( DCG_{p} = \frac{3}{log(1+1)} + \frac{2}{log(2+1)} + \frac{3}{log(3+1)} + \frac{0}{log(4+1)} = 3 + 1.262 + 1.5 + 0 = 5.762 \)</li>
+          </ul>
+          <li>Cons - nDCG does not penalize irrelevant search result</li>
+        </ul>
+      </ul>
+      <li>Online</li>
+      <ul>
+        <li>Click-through rate (CTR) = number of clicked images / total number of suggested images</li>
+        <li>Average daily/weekly/monthly time spent on suggested images</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="google-street-view-blurring-system-6">
+  <div class="card-body">
+    <h2 class="card-title">Deployment and serving</h2>
+
+    <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/google-street-view-blurring-system1.png" alt="Card image cap">
+    <ul>
+      <li>Indexing service</li>
+      <ul>
+        <li>Indexes the embeddings of new images so that NN search can easily find it</li>
+      </ul>
+      <li>Embedding generation service</li>
+      <ul>
+        <li>Preprocess the input images and use trained model to determine its embedding</li>
+      </ul>
+      <li>Re-ranking service</li>
+      <ul>
+        <li>Filters inappropriate results, removes duplicates, etc</li>
+      </ul>
+      <li>Nearest neighbor service</li>
+      <ul>
+        <li>Retrieve similar images from embedding space</li>
+        <li>Exact NN</li>
+        <ul>
+          <li>Time O(ND) where N is total number of points and D is dimension</li>
+          <li>N could be billions</li>
+        </ul>
+        <li>Approximate NN</li>
+        <ul>
+          <li>Time O(log(N)D)</li>
+          <li>Tree-based</li>
+          <li>Locality sensitive hashing (LSH)</li>
+          <li>Clustering-based</li>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+<!-- Google street view blurring system END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->
