@@ -46,6 +46,7 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#graph-">Course schedule</a></li>
       <li><a href="#graph-">Course schedule II</a></li>
+      <li><a href="#graph-">Find eventual safe states</a></li>
     </ul>
   </div>
 </div>
@@ -158,6 +159,85 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/course-schedule-ii">210. Course Schedule II</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-">
+  <div class="card-body">
+    <h2 class="card-title">Find eventual safe states (M)</h2>
+
+<pre><code class="python">class Solution:
+    def eventualSafeNodes(self, graph: List[List[int]]) -> List[int]:
+
+        # From each node, do DFS to check if there is cycle
+        # If there is cycle, make all nodes in that cycle as unsafe
+        # If a node is in the path of cycle, then the node is also unsafe
+        # Do DFS on all potentially safe nodes to again,
+        # and check if they visit unsafe nodes
+
+        graph_list = graph
+        graph = defaultdict(list)
+
+        for i, node in enumerate(graph_list):
+            graph[i] = list(node)
+
+
+        unsafe_nodes = set()
+        for i in graph.keys():
+            if i not in unsafe_nodes:
+                path = self.dfs(graph, i)
+                unsafe_nodes.update(set(path))
+
+        result = []
+        potential_safe_nodes = graph.keys() - list(unsafe_nodes)
+
+        for node in potential_safe_nodes:
+            if self.dfs_2(graph, node, unsafe_nodes):
+                result.append(node)
+
+        return result
+
+    def dfs(self, graph, start):
+
+        explored = set()
+        explored.add(start)
+
+        stack = []
+        stack.append((start, [start]))
+
+        while stack:
+            node, path = stack.pop()
+            for next_node in graph[node]:
+                if next_node not in explored:
+                    explored.add(next_node)
+                    stack.append((next_node, path+[next_node]))
+                else:
+                    if next_node == start or next_node == node:
+                        return path
+
+        return []
+
+    def dfs_2(self, graph, start, unsafe_nodes):
+
+        explored = set()
+        explored.add(start)
+
+        stack = []
+        stack.append(start)
+
+        while stack:
+            node = stack.pop()
+            for next_node in graph[node]:
+                if next_node not in explored:
+                    explored.add(next_node)
+                    stack.append(next_node)
+                if next_node in unsafe_nodes:
+                    return False
+
+        return True</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/find-eventual-safe-states">802. Find Eventual Safe States</a>
   </div>
 </div>
 <!-- Graph END -->

@@ -52,7 +52,6 @@
       <!-- <li><a href="#graph-">Couples holding hands</a></li> -->
       <li><a href="#graph-">Is graph bipartite?</a></li>
       <li><a href="#graph-">All paths from source to target</a></li>
-      <li><a href="#graph-">Find eventual safe states</a></li>
       <li><a href="#graph-">Sum of distances in tree</a></li>
       <li><a href="#graph-">Keys and rooms</a></li>
       <li><a href="#graph-">Possible bipartition</a></li>
@@ -258,8 +257,8 @@
             graph[i] = list(nodes)
 
         result = True
-        # Graph may consist of many disconnected sub-graphs.
-        # Search from all starting nodes must yield True.
+        # Graph may consist of many disconnected sub-graphs
+        # Search from all starting nodes must yield True
         # Time O(n*(n+m))
         for node in graph.keys():
             result = result and self.bfs(graph, node)
@@ -277,7 +276,7 @@
         queue.append(start)
 
         group = {}
-        # Put the first node in group a.
+        # Put the first node in group a
         group[start] = "A"
 
         while queue:
@@ -352,23 +351,12 @@
 
 <div class="card mb-4" id="graph-">
   <div class="card-body">
-    <h2 class="card-title">Find eventual safe states (M)</h2>
-
-<pre><code class="python"></code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/find-eventual-safe-states">802. Find Eventual Safe States</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="graph-">
-  <div class="card-body">
     <h2 class="card-title">Sum of distances in tree (H)</h2>
 
 <pre><code class="python">class Solution:
     def sumOfDistancesInTree(self, n: int, edges: List[List[int]]) -> List[int]:
 
-        # For each node, compute shortest distance to all other nodes
+        # For each node, compute distance to all other nodes
 
         result = [0] * n
         graph = defaultdict(list)
@@ -414,7 +402,40 @@
   <div class="card-body">
     <h2 class="card-title">Keys and rooms (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def canVisitAllRooms(self, rooms: List[List[int]]) -> bool:
+
+        # The room number is "from node" and key numbers are "to nodes"
+        # Do either DFS or BFS to see if all nodes can be visited
+
+        graph = defaultdict(list)
+
+        for i, keys in enumerate(rooms):
+            graph[i] = keys
+
+        explored = self.dfs(graph, 0)
+
+        if len(explored) == len(rooms):
+            return True
+
+        return False
+
+    def dfs(self, graph, start):
+
+        explored = set()
+        explored.add(start)
+
+        stack = []
+        stack.append(start)
+
+        while stack:
+            node = stack.pop()
+            for next_node in graph[node]:
+                if next_node not in explored:
+                    explored.add(next_node)
+                    stack.append(next_node)
+
+        return explored</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/keys-and-rooms">841. Keys and Rooms</a>
@@ -425,7 +446,59 @@
   <div class="card-body">
     <h2 class="card-title">Possible bipartition (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def possibleBipartition(self, n: int, dislikes: List[List[int]]) -> bool:
+
+        # Consider each element in dislikes as adjacent node in a graph
+        # Color each node in graph as "a" and "b" such that adjacent node
+        # cannot be in the same group
+        # Can use DFS or BFS
+
+        # Edge case
+        if not dislikes:
+            return True
+
+        graph = defaultdict(list)
+        nodes = set()
+
+        for edge in dislikes:
+            graph[edge[0]].append(edge[1])
+            nodes.add(edge[0])
+            nodes.add(edge[1])
+
+        for node in nodes:
+            if not self.dfs(graph, node):
+                return False
+
+        return True
+
+    def dfs(self, graph, start):
+
+        explored = set()
+        explored.add(start)
+
+        stack = []
+        stack.append(start)
+
+        group = defaultdict(str)
+        group[start] = "a"
+
+        while stack:
+            node = stack.pop()
+            for next_node in graph[node]:
+                if next_node not in explored:
+                    explored.add(next_node)
+                    stack.append(next_node)
+                    if group[node] == "a":
+                        group[next_node] = "b"
+                    else:
+                        group[next_node] = "a"
+
+                else:
+                    if group[node] == group[next_node]:
+                        return False
+
+        return True</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/possible-bipartition">886. Possible Bipartition</a>
