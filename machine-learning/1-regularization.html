@@ -47,7 +47,9 @@
     <p class="card-text"></p>
     <ul class="list-unstyled mb-0">
       <li><a href="#regularization-">Regularization</a></li>
+      <li><a href="#regularization-">3 layer network with regularization</a></li>
       <li><a href="#regularization-">Dropout</a></li>
+      <li><a href="#regularization-">3 layer network with dropout</a></li>
       <li><a href="#regularization-">Early stopping</a></li>
     </ul>
   </div>
@@ -93,6 +95,17 @@
         <li>\( w^{[l]} = w^{[l]} - \alpha dw^{[l]} \) remains the same</li>
       </ul>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://github.com/iamtodor/data-science-interview-questions-and-answers">Data science interview questions with answers</a> | <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="regularization-">
+  <div class="card-body">
+    <h2 class="card-title">3 layer network with regularization</h2>
+
+    <h3 class="card-title">Forward prop</h3>
 
 <pre><code class="python">def forward_propagation(X, parameters):
 
@@ -115,6 +128,11 @@
 
     return A3, cache</code></pre>
 
+    <h3 class="card-title">Cost function</h3>
+    <ul>
+      <li>\( J_{regularized} = \small \underbrace{-\frac{1}{m} \sum\limits_{i = 1}^{m} \large{(}\small y^{(i)}\log\left(a^{[L](i)}\right) + (1-y^{(i)})\log\left(1- a^{[L](i)}\right) \large{)} }_\text{cross-entropy cost} + \underbrace{\frac{1}{m} \frac{\lambda}{2} \sum\limits_l\sum\limits_k\sum\limits_j W_{k,j}^{[l]2} }_\text{L2 regularization cost} \)</li>
+    </ul>
+
 <pre><code class="python">def compute_cost_with_regularization(A3, Y, parameters, lambd):
 
     m = Y.shape[1]
@@ -129,6 +147,8 @@
     cost = cross_entropy_cost + L2_regularization_cost
 
     return cost</code></pre>
+
+    <h3 class="card-title">Backward prop</h3>
 
 <pre><code class="python">def backward_propagation_with_regularization(X, Y, cache, lambd):
 
@@ -178,7 +198,7 @@
     return parameters</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://github.com/iamtodor/data-science-interview-questions-and-answers">Data science interview questions with answers</a> | <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a>
+    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a>
   </div>
 </div>
 
@@ -211,6 +231,17 @@
       <li>Thus, the neuron become reluctant to put too much weight on one input feature</li>
       <li>Rather, it wants to spread out weights, leading to smaller weights</li>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="regularization-">
+  <div class="card-body">
+    <h2 class="card-title">3 layer network with dropout</h2>
+
+    <h3 class="card-title">Forward prop</h3>
 
 <pre><code class="python">def forward_propagation_with_dropout(X, parameters, keep_prob = 0.5):
 
@@ -245,6 +276,19 @@
     cache = (Z1, D1, A1, W1, b1, Z2, D2, A2, W2, b2, Z3, A3, W3, b3)
 
     return A3, cache</code></pre>
+
+    <h3 class="card-title">Cost function</h3>
+
+<pre><code class="python">def compute_cost(A, Y):
+
+    m = Y.shape[1]
+
+    logprobs = np.multiply(-np.log(A),Y) + np.multiply(-np.log(1 - A), 1 - Y)
+    cost = 1./m * np.nansum(logprobs)
+
+    return cost</code></pre>
+
+   <h3 class="card-title">Backward prop</h3>
 
 <pre><code class="python">def backward_propagation_with_dropout(X, Y, cache, keep_prob):
 
