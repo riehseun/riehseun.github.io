@@ -60,40 +60,41 @@
     <h2 class="card-title">Regularization</h2>
     <ul>
       <li>Prevents overfitting by introducing a tuning parameter into a model (Penalize weights being large)</li>
-      <li>L2 performs better than L1 in practice (L1 performs well on sparse data)</li>
-      <li>L2 is useful when features are correlated</li>
-      <li>L2 has analytical solution while L1 does not</li>
       <li>Feature normalization is necessary</li>
-    </ul>
-
-    <h3 class="card-title">Why regularization works</h3>
-    <ul>
-      <li>Larger \( \lambda \) leads to \( W \) to become smaller, reducing the impacts of hidden units</li>
-      <li>Smaller \( W \) also leads \( Z \) to become smaller. The activation function could more or less be linear function when Z is small. Thus, network does not compute complex function</li>
-    </ul>
-
-    <h3 class="card-title">Regularization in logistic regression</h3>
-    <ul>
-      <li>Cost function for L2 norm</li>
+      <li>Why regularization works</li>
       <ul>
-        <li>\( J(w,b) = \dfrac{1}{m}\displaystyle\sum_{i=1}^{m} L(\hat{y}^{(i)},y^{(i)}) + \dfrac{\lambda}{2m}||w||_{2}^{2} \)</li>
-        <li>\( ||w||^{2} = \displaystyle\sum_{j=1}^{n_{x}}w_{j}^{2} = w^{T}w \)</li>
-      </ul>
-      <li>Cost function for L1 norm</li>
-      <ul>
-        <li>\( J(w,b) = \dfrac{1}{m}\displaystyle\sum_{i=1}^{m} L(\hat{y}^{(i)},y^{(i)}) + \dfrac{\lambda}{2m}||w||_{1} \)</li>
+        <li>Larger \( \lambda \) leads to \( W \) to become smaller, reducing the impacts of hidden units</li>
+        <li>Smaller \( W \) also leads \( Z \) to become smaller</li>
+        <li>The activation function could more or less be linear function when Z is small</li>
+        <li>Thus, network does not compute complex function</li>
       </ul>
     </ul>
 
-    <h3 class="card-title">Regularization in neural network</h3>
+    <h3 class="card-title">L2 norm</h3>
     <ul>
-      <li>Cost function for Frobenius norm</li>
-      <ul>
-        <li>\( J(w,b) = \dfrac{1}{m}\displaystyle\sum_{i=1}^{m} L(\hat{y}^{(i)},y^{(i)}) + \dfrac{\lambda}{2m}\displaystyle\sum_{l=1}^{m}||w^{[l]}||_{F}^{2} \)</li>
-        <li>\( ||w^{[l]}||_{F}^{2} = \displaystyle\sum_{i=1}^{n^{[l-1]}}\displaystyle\sum_{j=1}^{n^{[l]}}(w_{ij}^{[l]})^{2} \)</li>
-        <li>Add \( \dfrac{\lambda}{m}w^{[l]} \) to \( dw^{[l]} \)</li>
-        <li>\( w^{[l]} = w^{[l]} - \alpha dw^{[l]} \) remains the same</li>
-      </ul>
+      <li>Used in logistic regression</li>
+      <li>Performs well on sparse data</li>
+      <li>Does not have analytical solution</li>
+      <li>\( J(w,b) = \dfrac{1}{m}\displaystyle\sum_{i=1}^{m} L(\hat{y}^{(i)},y^{(i)}) + \dfrac{\lambda}{2m}||w||_{1} \)</li>
+    </ul>
+
+    <h3 class="card-title">L2 norm</h3>
+    <ul>
+      <li>Used in logistic regression</li>
+      <li>Performs better than L1 in practice</li>
+      <li>Useful when features are correlated</li>
+      <li>Has analytical solution</li>
+      <li>\( J(w,b) = \dfrac{1}{m}\displaystyle\sum_{i=1}^{m} L(\hat{y}^{(i)},y^{(i)}) + \dfrac{\lambda}{2m}||w||_{2}^{2} \)</li>
+      <li>\( ||w||^{2} = \displaystyle\sum_{j=1}^{n_{x}}w_{j}^{2} = w^{T}w \)</li>
+    </ul>
+
+    <h3 class="card-title">Frobenius norm</h3>
+    <ul>
+      <li>Used in neural network</li>
+      <li>\( J(w,b) = \dfrac{1}{m}\displaystyle\sum_{i=1}^{m} L(\hat{y}^{(i)},y^{(i)}) + \dfrac{\lambda}{2m}\displaystyle\sum_{l=1}^{m}||w^{[l]}||_{F}^{2} \)</li>
+      <li>\( ||w^{[l]}||_{F}^{2} = \displaystyle\sum_{i=1}^{n^{[l-1]}}\displaystyle\sum_{j=1}^{n^{[l]}}(w_{ij}^{[l]})^{2} \)</li>
+      <li>Add \( \dfrac{\lambda}{m}w^{[l]} \) to \( dw^{[l]} \)</li>
+      <li>\( w^{[l]} = w^{[l]} - \alpha dw^{[l]} \) remains the same</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -209,6 +210,12 @@
       <li>Most effective regularization in neural network</li>
       <li>Nodes in each layer in randomly deactivated in forward pass</li>
       <li>In each iteration, only \( 1-\rho \) trained (Neurons are deactivated with probability \( \rho \))</li>
+      <li>Why dropout works</li>
+      <ul>
+        <li>For a paricular neuron, its inputs can get eliminiated</li>
+        <li>Thus, the neuron become reluctant to put too much weight on one input feature</li>
+        <li>Rather, it wants to spread out weights, leading to smaller weights</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Inverted dropout</h3>
@@ -223,13 +230,6 @@
       <li>Each layer in the network could have different <code>keep_prob</code>, but it will increase the number of hyperparameters to tune</li>
       <li>Dropout is not to be used during test time</li>
       <li>Cost function is no longer well-defined</li>
-    </ul>
-
-    <h3 class="card-title">Why dropout works</h3>
-    <ul>
-      <li>For a paricular neuron, its inputs can get eliminiated</li>
-      <li>Thus, the neuron become reluctant to put too much weight on one input feature</li>
-      <li>Rather, it wants to spread out weights, leading to smaller weights</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
