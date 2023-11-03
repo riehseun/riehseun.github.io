@@ -21,11 +21,12 @@
 <link href="/css/site.css" rel="stylesheet">
 
 <!-- JavaScript -->
-<script src="/js/jquery.min.js" type="text/javascript"></script>
-<script src="/js/bootstrap.bundle.min.js" type="text/javascript"></script>
-<script src="/js/highlight.pack.js" type="text/javascript"></script>
+<script src="/js/jquery.min.js"></script>
+<script src="/js/bootstrap.bundle.min.js"></script>
+<script src="/js/highlight.pack.js"></script>
 <script src="/js/include_html.js" type="text/javascript"></script>
-<script src="/js/mathjax.js" type="text/javascript"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <script src="/js/site.js" type="text/javascript"></script>
 
 </head>
@@ -187,35 +188,26 @@
       </ul>
       <li>Model training</li>
       <ul>
-        <li>Construct dataset</li>
+        <li>Regression loss</li>
         <ul>
-          <li>Human label</li>
-          <ul>
-            <li>Expensive</li>
-            <li>Time consuming</li>
-          </ul>
-          <li>User interaction</li>
-          <ul>
-            <li>Data can be noisy due to user misclicks</li>
-            <li>Data can be sparce since lots of images may not have click data</li>
-          </ul>
-          <li>Self-supervision</li>
-          <ul>
-            <li>Constructed images differ from real data</li>
-            <li>We choose this since this is least expensive and fast</li>
-          </ul>
+          <li>\( L_{reg} = \dfrac{1}{M}\displaystyle\sum_{i=1}^{M} \left[ (x_{i}-\hat{x}_{i})^{2} + (y_{i}-\hat{y}_{i})^{2} + (w_{i}-\hat{w}_{i})^{2} + (h_{i}-\hat{h}_{i})^{2} \right] \)</li>
+          <li>\( M \) - total number of predictions</li>
+          <li>\( x_{i} \) - ground truth top left x coordinate</li>
+          <li>\( \hat{x}_{i} \) - predicted top left x coordinate</li>
+          <li>\( y_{i} \) - ground truth top left y coordinate</li>
+          <li>\( \hat{y}_{i} \) - predicted top left y coordinate</li>
+          <li>\( w_{i} \) - ground truth width</li>
+          <li>\( \hat{w}_{i} \) - predicted width</li>
+          <li>\( h_{i} \) - ground truth height</li>
+          <li>\( \hat{h}_{i} \) - predicted height</li>
         </ul>
-        <li>Choose loss function</li>
+        <li>Classification loss</li>
         <ul>
-          <li>Constrastive loss function</li>
-          <ul>
-            <li>Dot product or cosine similarity is used to compute distances in embedding space</li>
-            <ul>
-              <li>Euclidean distance is not used due to curse of dimensionality</li>
-            </ul>
-            <li>Softmax is applied to distances to make them sum to 1</li>
-            <li>Cross-entropy is used to measure how close the probabilities are to the ground truth</li>
-          </ul>
+          <li>\( L_{cls} = -\dfrac{1}{M} \displaystyle\sum_{i=1}^{M} \displaystyle\sum_{c=1}^{C} y_{c}log\hat{y}_{c} \)</li>
+          <li>\( M \) - total number of detected bounding boxes</li>
+          <li>\( M \) - total number of classes</li>
+          <li>\( y_{i} \) - ground truth label for detection \( i \)</li>
+          <li>\( \hat{y}_{i} \) - predicted class label for detection \( i \)</li>
         </ul>
       </ul>
     </ul>
