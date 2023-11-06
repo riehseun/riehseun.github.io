@@ -44,89 +44,84 @@
   <div class="card-body">
     <h2 class="card-title">Google maps</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#google-maps-1">Google maps</a></li>
+      <li><a href="#google-maps-1">Requirement</a></li>
+      <li><a href="#google-maps-2">Estimation</a></li>
+      <li><a href="#google-maps-3">Storage schema</a></li>
+      <li><a href="#google-maps-4">High level design</a></li>
+      <li><a href="#google-maps-5">API</a></li>
+      <li><a href="#google-maps-6">Detailed design</a></li>
+      <li><a href="#google-maps-7">Evaluation</a></li>
+      <li><a href="#google-maps-8">Distinct component</a></li>
     </ul>
   </div>
 </div>
 
 <div class="card mb-4" id="google-maps-1">
   <div class="card-body">
-    <h2 class="card-title">Google Maps</h2>
+    <h2 class="card-title">Requirement</h2>
 
-    <h3 class="card-title">Requirement</h3>
-
-    <h4 class="card-title">Functional</h4>
+    <h3 class="card-title">Functional</h3>
     <ul>
-      <li>Users can identify current location.</li>
-      <li>Users can find the fastest route between start and end.</li>
-      <li>Users can listen to directions.</li>
+      <li>Users can identify current location</li>
+      <li>Users can find the fastest route between start and end</li>
+      <li>Users can listen to directions</li>
     </ul>
 
-    <h4 class="card-title">Non-functional</h4>
+    <h3 class="card-title">Non-functional</h3>
     <ul>
       <li>Availability</li>
       <li>Reliability</li>
       <li>Scalability</li>
       <li>Performance</li>
-      <ul>
-        <li>Route and direction should be suggested fast.</li>
-        <li>ETA should be accurate.</li>
-      </ul>
+      <li>Consistency</li>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
 
-    <h3 class="card-title">Estimation</h3>
+<div class="card mb-4" id="google-maps-2">
+  <div class="card-body">
+    <h2 class="card-title">Estimation</h2>
 
-    <h4 class="card-title">Server</h4>
+    <h3 class="card-title">Server</h3>
     <ul>
       <li>Assume</li>
       <ul>
-        <li>100M daily active users.</li>
-        <li>A single server can handle 10K connections.</li>
+        <li>100M active users</li>
+        <li>A single server can handle 10k connections per day</li>
       </ul>
-      <li>100M / 10K = 10,000 servers are needed.</li>
+      <li>100M / 10k = 10,000 servers are needed</li>
     </ul>
 
-    <h4 class="card-title">Storage</h4>
+    <h3 class="card-title">Storage</h3>
     <ul>
-      <li>Only one time storage is needed in the beginning. (Minimal changes after that)</li>
+      <li>Only one time storage is needed in the beginning (Minimal changes after that)</li>
     </ul>
 
-    <h4 class="card-title">Bandwidth</h4>
+    <h3 class="card-title">Bandwidth</h3>
     <ul>
       <li>Assume</li>
       <ul>
-        <li>Each user makes 100 requests per day.</li>
-        <li>Each request size is 100 bytes.</li>
-        <li>Each response size is 1MB.</li>
+        <li>Each user makes 100 requests per day</li>
+        <li>Each request size is 100 bytes</li>
+        <li>Each response size is 1MB</li>
       </ul>
-      <li>Incoming: (100M * 100 requests per day * 100 bytes per request * 8 bits) / 86400 = 92Mbps.</li>
-      <li>Outgoing: (100M * 100 requests per day * 1MB per response * 8 bits) / 86400 = 920Gbps.</li>
+      <li>Incoming - (100M * 100 requests per day * 100 bytes per request * 8 bits) / 86400 = 92Mbps</li>
+      <li>Outgoing - (100M * 100 requests per day * 1MB per response * 8 bits) / 86400 = 920Gbps</li>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
 
-    <h3 class="card-title">High level design</h3>
-    <img class="img-fluid" class="card-img-top" src="/img/system-design/google-map1.png" alt="Card image cap">
-    <ul>
-      <li>User enters start and end point. Start point can be user's current location.</li>
-      <ul>
-        <li>User request is forwarded to route finder service.</li>
-        <li>Route finder forwards requests to area search service.</li>
-        <li>Area search service finds the latitude/longitude for start and end location.</li>
-        <li>Graph processing service finds the shortest path and return it to route finder.</li>
-      </ul>
-      <li>Nagivator updates user location on the map as user is moving. It also provides directions to user.</li>
-      <li>When user deviates from the path, Pub-sub alerts area search service to recalculate the optimal path.</li>
-    </ul>
+<div class="card mb-4" id="google-maps-3">
+  <div class="card-body">
+    <h2 class="card-title">Storage schema</h2>
 
-    <h3 class="card-title">API</h3>
-    <ul>
-      <li>curr_location(location)</li>
-      <li>find_route(start, end, transport_type)</li>
-      <li>directions(curr_location, steps)</li>
-    </ul>
-
-    <h3 class="card-title">DB</h3>
-
-    <h4 class="card-title">Key-value store</h4>
+    <h3 class="card-title">Key-value store</h3>
     <ul>
       <li>Segment to server</li>
       <ul>
@@ -136,16 +131,16 @@
       <li>Belongs to segment</li>
       <ul>
         <li>segment_id (int)</li>
-        <li>coordinates (list): stores latitude and longitude.</li>
+        <li>coordinates (list) - stores latitude and longitude</li>
       </ul>
       <li>Neighbors</li>
       <ul>
         <li>segment_id (int)</li>
-        <li>neighbors (list): stores a list of segment IDs.</li>
+        <li>neighbors (list) - stores a list of segment IDs</li>
       </ul>
     </ul>
 
-    <h4 class="card-title">Graph DB</h4>
+    <h3 class="card-title">Graph DB</h3>
     <ul>
       <li>Graph data</li>
       <ul>
@@ -154,65 +149,196 @@
       </ul>
     </ul>
 
-    <h4 class="card-title">Relational DB</h4>
+    <h3 class="card-title">Relational DB</h3>
     <ul>
       <li>Rush hour</li>
       <ul>
         <li>segment_id (int)</li>
         <li>edge_id (int)</li>
         <li>hour_range (tuple)</li>
-        <li>rush_hour (bool): where there is congestion or not.</li>
+        <li>rush_hour (bool) - where there is congestion or not</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="google-maps-4">
+  <div class="card-body">
+    <h2 class="card-title">High level design</h2>
+
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/google-map1.png" alt="Card image cap">
+
+    <h3 class="card-title">Location finder</h3>
+    <ul>
+      <li>Finds current location of user and show it on map</li>
+    </ul>
+
+    <h3 class="card-title">Route finder</h3>
+    <ul>
+      <li>Finds path between two points</li>
+    </ul>
+
+    <h3 class="card-title">Navigator</h3>
+    <ul>
+      <li>Tracks user journey</li>
+      <li>Sends updated directions when user deviates from the path</li>
+    </ul>
+
+    <h3 class="card-title">Distributed search</h3>
+    <ul>
+      <li>Maps place names to lattitude & longitude</li>
+    </ul>
+
+    <h3 class="card-title">Area search service</h3>
+    <ul>
+      <li>Receives location of source and destination from distributed search</li>
+      <li>Finds optimal path from graph processing service</li>
+    </ul>
+
+    <h3 class="card-title">Graph processing service</h3>
+    <ul>
+      <li>Runs shortest path algorithm</li>
+    </ul>
+
+    <h3 class="card-title">Kafka</h3>
+    <ul>
+      <li>Listens to events and triggers services accordingly</li>
+      <ul>
+        <li>For example, when user deviates from the path, it calls area search service to compute new optimal path</li>
       </ul>
     </ul>
 
-    <h3 class="card-title">Component design</h3>
+    <h3 class="card-title">Workflow</h3>
+    <ul>
+      <li>User enters start and end point</li>
+      <li>Current location of user is found by location finder and this can be the start point</li>
+      <li>User request is forwarded to route finder service</li>
+      <li>Route finder forwards requests to area search service</li>
+      <li>Area search service finds the latitude/longitude of start and end location from distributed search</li>
+      <li>Graph processing service finds the shortest path and return it to route finder</li>
+      <li>Route finder displays the optimal path to user</li>
+      <li>Nagivator updates user location on the map as user is moving. It also provides directions to user</li>
+      <li>When user deviates from the path, Kafka alerts area search service to recalculate the optimal path</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="google-maps-5">
+  <div class="card-body">
+    <h2 class="card-title">API</h2>
+    <ul>
+      <li><code>curr_location(location)</code></li>
+      <ul>
+        <li>Display current location of user on the map</li>
+        <li><code>location</code></li>
+        <ul>
+          <li>Boolean to indicate if user location is turned on or off</li>
+          <li>If off, the service will ask user to turn on the location</li>
+        </ul>
+      </ul>
+      <li><code>find_route(start, end, transport_type)</code></li>
+      <ul>
+        <li>Computes optimal route between two points</li>
+        <ul>
+          <li><code>start</code> - start point in text format</li>
+          <li><code>end</code> - start point in text format</li>
+        </ul>
+      </ul>
+      <li><code>directions(curr_location, steps)</code></li>
+      <ul>
+        <li>Provides alerts of when and where to make turns</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="google-maps-6">
+  <div class="card-body">
+    <h2 class="card-title">Detailed design</h2>
+
     <img class="img-fluid" class="card-img-top" src="/img/system-design/google-map2.png" alt="Card image cap">
 
-    <h4 class="card-title">Sub-graphs</h4>
+    <h3 class="card-title">Sub-graphs</h3>
     <ul>
       <li>Computing distances between two points on the entire graph is super expensive.</li>
       <li>Precalculate the shortest distance between two points in sub-graphs. Also, cache most requested routes.</li>
       <li>Connect sub-graphs and run the shortest distance algorithm.</li>
     </ul>
 
-    <h4 class="card-title">Segment adder</h4>
+    <h3 class="card-title">Segment adder</h3>
     <ul>
       <li>Segment adder assigns unique ID to each segment.</li>
       <li>Segment is assigned to a server and segment adder gets the server_id.</li>
       <li>Key-value store keeps the segment to server mapping.</li>
     </ul>
 
-    <h4 class="card-title">ETA improvement</h4>
+    <h3 class="card-title">ETA improvement</h3>
+
     <img class="img-fluid" class="card-img-top" src="/img/system-design/google-map3.png" alt="Card image cap">
+
     <ul>
       <li>Pub-sub collects location data from all servers.</li>
       <li>Data analytics engine predicts traffic on the roads, identify hotspots. It then publishes analytics data to new pub-sub topic.</li>
       <li>Map update service updates the segment graphs.</li>
       <li>Graph preprocessing service recalculates new paths on the updated segment graph.</li>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
 
-    <h3 class="card-title">Evaluation</h3>
+<div class="card mb-4" id="google-maps-7">
+  <div class="card-body">
+    <h2 class="card-title">Evaluation</h2>
 
-    <h4 class="card-title">Availability</h4>
+    <h3 class="card-title">Availability</h3>
     <ul>
-      <li>Each segment is processed in a separate server.</li>
-      <li>Segments can be replicated.</li>
-      <li>Load balancer distributes requests to different segments.</li>
+      <li>Replication</li>
+      <ul>
+        <li>Replicate each server and DB</li>
+        <li>Replicate entire components to different zone or geographical region</li>
+      </ul>
+      <li>Fail over</li>
     </ul>
 
     <h4 class="card-title">Reliability</h4>
 
-    <h4 class="card-title">Scalability</h4>
+    <h3 class="card-title">Scalability</h3>
     <ul>
-      <li>Segments can easily be added.</li>
-      <li>Host segments on different servers.</li>
+      <li>Horizontal scaling</li>
+      <li>Data replication</li>>
     </ul>
 
     <h4 class="card-title">Performance</h4>
     <ul>
-      <li>Use of sub-graphs make computation faster than using entire graph.</li>
-      <li>Cache processed sub-graphs.</li>
+      <li>Use of sub-graphs make computation faster than using entire graph</li>
+      <li>Cache processed sub-graphs</li>
     </ul>
+
+    <h3 class="card-title">Consistency</h3>
+    <ul>
+      <li></li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="google-maps-8">
+  <div class="card-body">
+    <h2 class="card-title">Distinct component</h2>
+
   </div>
   <div class="card-footer text-muted">
     <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
