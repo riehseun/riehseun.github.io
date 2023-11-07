@@ -267,30 +267,34 @@
 
     <img class="img-fluid" class="card-img-top" src="/img/system-design/google-map2.png" alt="Card image cap">
 
-    <h3 class="card-title">Sub-graphs</h3>
+    <h3 class="card-title">Add segment</h3>
     <ul>
-      <li>Computing distances between two points on the entire graph is super expensive</li>
-      <li>Precalculate the shortest distance between two points in sub-graphs. Also, cache most requested routes</li>
-      <li>Connect sub-graphs and run the shortest distance algorithm</li>
-    </ul>
-
-    <h3 class="card-title">Segment adder</h3>
-    <ul>
+      <li>Each segment has its lat/long coordinates of boundary and the graph of road network</li>
       <li>Segment adder assigns unique ID to each segment</li>
-      <li>Segment is assigned to a server and segment adder gets the server_id</li>
-      <li>Key-value store keeps the segment to server mapping</li>
+      <li>Segment adder forwards segment information to server allocator</li>
+      <li>Server allocator maps segment to server, hosts the graph on the server, and returns server ID</li>
+      <li>Segment adder stores segment to server mapping in key-value store</li>
     </ul>
 
-
+    <h3 class="card-title">Handle user request</h3>
+    <ul>
+      <li>User provides source and destination</li>
+      <li>Distributed search finds lat/long coordicates of source and destination</li>
+      <li>Graph processing service finds the segment from lat/long coordicates</li>
+      <li>Graph processing service finds the server hosting the graph using segment ID</li>
+      <li>Graph processing service runs shortest path algorithm</li>
+    </ul>
 
     <img class="img-fluid" class="card-img-top" src="/img/system-design/google-map3.png" alt="Card image cap">
 
-    <h3 class="card-title">ETA improvement</h3>
+    <h3 class="card-title">Improve estimations using live data</h3>
     <ul>
+      <li>Websocker provides persistent connection between user devices and the servers</li>
+      <li>Load balancer balances the connection load</li>
       <li>Kafka collects location data from all servers</li>
-      <li>Data analytics engine predicts traffic on the roads, identify hotspots. It then publishes analytics data to new pub-sub topic</li>
-      <li>Map update service updates the segment graphs</li>
-      <li>Graph preprocessing service recalculates new paths on the updated segment graph</li>
+      <li>Data analytics engine uses ML to improve ETA. Then, it publishes result to pub-sub topic</li>
+      <li>Map update service listens for updates and updates segment graph</li>
+      <li>Graph preprocessing service recalculates the new paths on the updated segment graph</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -340,6 +344,27 @@
   <div class="card-body">
     <h2 class="card-title">Distinct component</h2>
 
+    <h3 class="card-title">Sub-graphs</h3>
+    <ul>
+      <li>Computing distances between two points on the entire graph is super expensive</li>
+      <li>Precalculate the shortest distance between two points in sub-graphs. Also, cache most requested routes</li>
+      <li>Connect sub-graphs and run the shortest distance algorithm</li>
+    </ul>
+
+    <h3 class="card-title">Segment adder</h3>
+    <ul>
+      <li>Segment adder assigns unique ID to each segment</li>
+      <li>Segment is assigned to a server and segment adder gets the server_id</li>
+      <li>Key-value store keeps the segment to server mapping</li>
+    </ul>
+
+    <h3 class="card-title">ETA improvement</h3>
+    <ul>
+      <li>Kafka collects location data from all servers</li>
+      <li>Data analytics engine predicts traffic on the roads, identify hotspots. It then publishes analytics data to new pub-sub topic</li>
+      <li>Map update service updates the segment graphs</li>
+      <li>Graph preprocessing service recalculates new paths on the updated segment graph</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
