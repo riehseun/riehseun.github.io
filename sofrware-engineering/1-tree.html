@@ -78,8 +78,8 @@ class Solution:
             root_node = preorder.pop(0)
             root_index = inorder.index(root_node)
             root = TreeNode(root_node)
-            root.left = self.buildTree(preorder, inorder[:root_index])
-            root.right = self.buildTree(preorder, inorder[root_index+1:])
+            root.left = self.buildTree(preorder[:len(inorder[:root_index])], inorder[:root_index])
+            root.right = self.buildTree(preorder[len(inorder[:root_index]):], inorder[root_index+1:])
 
             return root</code></pre>
   </div>
@@ -92,7 +92,32 @@ class Solution:
   <div class="card-body">
     <h2 class="card-title">Construct binary tree from inorder and postorder traversal (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python"># Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def buildTree(self, inorder: List[int], postorder: List[int]) -> Optional[TreeNode]:
+
+        # Postorder - left, right, root
+        # Inorder - left, root, right
+        # The very last number of preorder is always the root
+        # Numbers left of this root from inorder forms left subtree
+        # Numbers right of this root from inorder forms left subtree
+
+        # Time O(n) computation takes place on each node of tree
+
+        if inorder and postorder:
+
+            root_node = postorder.pop()
+            root_index = inorder.index(root_node)
+            root = TreeNode(root_node)
+            root.left = self.buildTree(inorder[:root_index], postorder[:len(inorder[:root_index])])
+            root.right = self.buildTree(inorder[root_index+1:], postorder[len(inorder[:root_index]):])
+
+            return root</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal">106. Construct Binary Tree from Inorder and Postorder Traversal</a>
