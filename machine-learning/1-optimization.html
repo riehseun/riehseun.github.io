@@ -80,9 +80,14 @@
     <ul>
       <li>Take \( W^{[1]}, b^{[1]} \dots W^{[L]}, b^{[L]} \) and reshape into a big vector \( \theta \)</li>
       <li>Take \( dW^{[1]}, db^{[1]} \dots dW^{[L]}, db^{[L]} \) and reshape into a big vector \( d\theta \)</li>
-      <li>For each \( i \), compute \( \dfrac{J(\theta_{1} \dots \theta_{i} + \epsilon), J(\theta_{1} \dots \theta_{i} - \epsilon)}{2\theta} \) where \( \epsilon = 10^{-7} \) and compare it against \( d\theta_{i} \)</li>
+      <li>For each \( i \)</li>
+      <ul>
+        <li>\( d\theta_{approx} = \dfrac{J(\theta_{1} \dots \theta_{i} + \epsilon) - J(\theta_{1} \dots \theta_{i} - \epsilon)}{2\theta} \approx \dfrac{\partial J}{\partial \theta_{i}} \) where \( \epsilon = 10^{-7} \) and compare it against \( d\theta_{i} \)</li>
+        <li>\( \dfrac{||d\theta_{approx}-d\theta||_{2}}{||d\theta_{approx}||_{2} + ||d\theta||_{2}} \approx 10^{-7} \) is good</li>
+        <li>Bigger than \( 10^{-3} \) means something wrong</li>
+      </ul>
       <li>Do not use gradient checking during training. Only use it when debugging</li>
-      <li>include regularization term in \( d\theta \) calculation</li>
+      <li>Include regularization term in \( d\theta \) calculation</li>
       <li>Gradient checking does not work with dropout</li>
     </ul>
   </div>
@@ -95,23 +100,23 @@
   <div class="card-body">
     <h2 class="card-title">Gradient descent</h2>
     <ul>
-      <li>Find values of parameters of function that minimize a cost function.</li>
-      <li>Used when parameters cannot be calculated analytically.</li>
-      <li>Take negative of gradients of a function at a point.</li>
-      <li>Repeatedly update that point until reaching an optimal point.</li>
-      <li>Error: difference between actual and predicted.</li>
-      <li>Loss: some aggregation of errors.</li>
-      <li>Learning rate: size of steps you want to take in particular direction.</li>
+      <li>Find values of parameters of function that minimize a cost function</li>
+      <li>Used when parameters cannot be calculated analytically</li>
+      <li>Take negative of gradients of a function at a point</li>
+      <li>Repeatedly update that point until reaching an optimal point</li>
+      <li>Error - difference between actual and predicted</li>
+      <li>Loss - some aggregation of errors</li>
+      <li>Learning rate-  size of steps you want to take in particular direction</li>
       <ul>
-        <li>Updated location = previous location + step size * number of steps.</li>
-        <li>Updated value = previous value - learning rate * gradient.</li>
+        <li>Updated location = previous location + step size * number of steps</li>
+        <li>Updated value = previous value - learning rate * gradient</li>
       </ul>
     </ul>
 
     <h3 class="card-title">Batch</h3>
     <ul>
-      <li>Run through all samples to do single update of parameters.</li>
-      <li>Used when training set is small. (Less than 2,000)</li>
+      <li>Run through all samples to do single update of parameters</li>
+      <li>Used when training set is small (Less than 2,000)</li>
     </ul>
 
 <pre><code class="python">for t in range(steps):
@@ -120,10 +125,10 @@
 
     <h3 class="card-title">Min-batch</h3>
     <ul>
-      <li>Run through subset of samples to do single update of parameters.</li>
-      <li>Subsets of both inputs and labelled outputs.</li>
-      <li>Typically, min-batch size is 64, 128, 256, 512.</li>
-      <li>Make sure each mini-batch \( X^{[t]}, Y^{[t]} \) fits in CPU/GPU memory.</li>
+      <li>Run through subset of samples to do single update of parameters</li>
+      <li>Subsets of both inputs and labelled outputs</li>
+      <li>Typically, min-batch size is 64, 128, 256, 512</li>
+      <li>Make sure each mini-batch \( X^{[t]}, Y^{[t]} \) fits in CPU/GPU memory</li>
     </ul>
 
 <pre><code class="python">for t in range(steps):
@@ -133,7 +138,7 @@
 
     <h3 class="card-title">Stochastic</h3>
     <ul>
-      <li>Run through one sample to do single update of parameters.</li>
+      <li>Run through one sample to do single update of parameters</li>
     </ul>
 
 <pre><code class="python">for t in range(steps):
@@ -143,13 +148,13 @@
 
     <h3 class="card-title">Learning rate decay</h3>
     <ul>
-      <li>Helps gradient descent converge by taking smaller steps as it approaches the minimum.</li>
+      <li>Helps gradient descent converge by taking smaller steps as it approaches the minimum</li>
     </ul>
 
     <h3 class="card-title">Local optima</h3>
     <ul>
-      <li>In high dimensions, when gradient is 0, it is almost always saddle points rather than local optima. (so it is unlikely for the optimization algorithm to stuck at bad local optima)</li>
-      <li>Plateaus (where derivatives are close to 0) can slow down the learning.</li>
+      <li>In high dimensions, when gradient is 0, it is almost always saddle points rather than local optima (So it is unlikely for the optimization algorithm to stuck at bad local optima)</li>
+      <li>Plateaus (where derivatives are close to 0) can slow down the learning</li>
     </ul>
 
 <pre><code class="python">import torch
