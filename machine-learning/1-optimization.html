@@ -133,6 +133,40 @@
       <li>Make sure each mini-batch \( X^{[t]}, Y^{[t]} \) fits in CPU/GPU memory</li>
     </ul>
 
+    <h4 class="card-title">Implementation</h4>
+    <ul>
+      <li>In one epoc, min-batch gradient descent take \( nb \) gradient descents rather than 1 </li>
+      <li>Let <code>num_epocs</code> \( = ep \)</li>
+      <li>Let <code>batch_size</code> \( = bs \)</li>
+      <li>Let <code>num_batches</code> \( = nb \)</li>
+      <li>for \( t = 1 \dots ep \)</li>
+      <ul>
+        <li>for \( t = 1 \dots nb \)</li>
+        <ul>
+          <li>Forward prop on \( X^{\{t\}} \)</li>
+          <ul>
+            <li>\( Z^{[1]} = w^{[1]}X^{\{t\}} + b^{[1]} \)</li>
+            <li>\( A^{[1]} = g^{[1]}(Z^{[1]}) \)</li>
+            <li>\( \vdots \)</li>
+            <li>\( A^{[L]} = g^{[L]}(Z^{[L]}) \)</li>
+          </ul>
+          <li>Compute cost</li>
+          <ul>
+            <li>\( J^{\{t\}} = \dfrac{1}{bs}\displaystyle\sum_{i=1}^{l}L(\hat{y}^{(i)}, y^{(i)}) + \dfrac{\lambda}{2bs}\displaystyle\sum_{l}||w^{[l]}||_{F}^{2} \)</li>
+          </ul>
+          <li>Backward prop</li>
+          <ul>
+            <li>Use \( J^{\{t\}}, X^{\{t\}}, Y^{\{t\}} \)</li>
+          </ul>
+          <li>Update parameter</li>
+          <ul>
+            <li>\( W^{[l]} = W^{[l]} - \alpha dW^{[l]} \)</li>
+            <li>\( b^{[l]} = b^{[l]} - \alpha db^{[l]} \)</li>
+          </ul>
+        </ul>
+      </ul>
+    </ul>
+
 <pre><code class="python">for t in range(steps):
     for mini_batch in get_batches(data, batch_size):
         dw = gradient(loss, mini_batch, w)
