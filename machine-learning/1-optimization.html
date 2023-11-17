@@ -293,6 +293,30 @@ if __name__ == "__main__":
       <li>At every step, update velocity, then update weights with the velocity</li>
     </ul>
 
+<pre><code class="python">def initialize_velocity(parameters):
+
+    L = len(parameters) // 2  # Number of layers in the neural networks
+    v = {}
+
+    # Initialize velocity
+    for l in range(L):
+        v["dW" + str(l+1)] = np.zeros((parameters["W" + str(l+1)].shape[0], parameters["W" + str(l+1)].shape[1]))
+        v["db" + str(l+1)] = np.zeros((parameters["b" + str(l+1)].shape[0], parameters["b" + str(l+1)].shape[1]))
+
+    return v</code></pre>
+
+<pre><code class="python">def update_parameters_with_momentum(parameters, grads, v, beta, learning_rate):
+
+    L = len(parameters) // 2  # Number of layers in the neural networks
+
+    for l in range(L):
+        v["dW" + str(l+1)] = beta * v["dW" + str(l+1)] + (1- beta) * grads["dW" + str(l+1)]
+        v["db" + str(l+1)] = beta * v["db" + str(l+1)] + (1- beta) * grads["db" + str(l+1)]
+        parameters["W" + str(l+1)] = parameters["W" + str(l+1)] - learning_rate * v["dW" + str(l+1)]
+        parameters["b" + str(l+1)] = parameters["b" + str(l+1)] - learning_rate * v["db" + str(l+1)]
+
+    return parameters, v</code></pre>
+
 <pre><code class="python">for t in range(steps):
     dw = gradient(loss, w)
     v = beta * v + (1-beta) * dw
@@ -339,6 +363,40 @@ if __name__ == "__main__":
         <li>\( \beta_{2} \) is commonly chosen to be \( 0.999 \)</li>
       </ul>
     </ul>
+
+<pre><code class="python">def initialize_adam(parameters):
+
+    L = len(parameters) // 2  # Number of layers in the neural networks
+    v = {}
+    s = {}
+
+    for l in range(L):
+        v["dW" + str(l+1)] = np.zeros((parameters["W" + str(l+1)].shape[0], parameters["W" + str(l+1)].shape[1]))
+        v["db" + str(l+1)] = np.zeros((parameters["b" + str(l+1)].shape[0], parameters["b" + str(l+1)].shape[1]))
+        s["dW" + str(l+1)] = np.zeros((parameters["W" + str(l+1)].shape[0], parameters["W" + str(l+1)].shape[1]))
+        s["db" + str(l+1)] = np.zeros((parameters["b" + str(l+1)].shape[0], parameters["b" + str(l+1)].shape[1]))
+
+    return v, s</code></pre>
+
+<pre><code class="python">def update_parameters_with_adam(parameters, grads, v, s, t, learning_rate = 0.01, beta1 = 0.9, beta2 = 0.999,  epsilon = 1e-8):
+
+    L = len(parameters) // 2  # Number of layers in the neural networks
+    v_corrected = {}
+    s_corrected = {}
+
+    for l in range(L):
+        v["dW" + str(l+1)] = beta1 * v["dW" + str(l+1)] + (1-beta1) * grads["dW" + str(l+1)]
+        v["db" + str(l+1)] = beta1 * v["db" + str(l+1)] + (1-beta1) * grads["db" + str(l+1)]
+        v_corrected["dW" + str(l+1)] = v["dW" + str(l+1)] / (1 - np.square(beta1))
+        v_corrected["db" + str(l+1)] = v["db" + str(l+1)] / (1 - np.square(beta1))
+        s["dW" + str(l+1)] = beta2 * s["dW" + str(l+1)] + (1-beta2) * np.square(grads["dW" + str(l+1)])
+        s["db" + str(l+1)] = beta2 * s["db" + str(l+1)] + (1-beta2) * np.square(grads["db" + str(l+1)])
+        s_corrected["dW" + str(l+1)] = s["dW" + str(l+1)] / (1 - np.square(beta2))
+        s_corrected["db" + str(l+1)] = s["db" + str(l+1)] / (1 - np.square(beta2))
+        parameters["W" + str(l+1)] = parameters["W" + str(l+1)] - learning_rate * v_corrected["dW" + str(l+1)] / ( np.sqrt(s_corrected["dW" + str(l+1)]) + epsilon)
+        parameters["b" + str(l+1)] = parameters["b" + str(l+1)] - learning_rate * v_corrected["db" + str(l+1)] / ( np.sqrt(s_corrected["db" + str(l+1)]) + epsilon)
+
+    return parameters, v, s</code></pre>
 
 <pre><code class="python">for t in range(steps):
     dw = gradient(loss, w)
