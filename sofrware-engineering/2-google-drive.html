@@ -39,128 +39,305 @@
 <div class="col-md-12">
 <h1 class="my-4">Software Engineering</h1>
 
-<!-- Google docs BEGIN -->
-<div class="card mb-4" id="google-docs">
+<!-- Google drive BEGIN -->
+<div class="card mb-4" id="google-drive">
   <div class="card-body">
-    <h2 class="card-title">Google docs</h2>
+    <h2 class="card-title">Google drive</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#google-docs-1">Google docs</a></li>
+      <li><a href="#google-drive-1">Requirement</a></li>
+      <li><a href="#google-drive-2">Estimation</a></li>
+      <!-- <li><a href="#google-drive-3">Storage schema</a></li> -->
+      <li><a href="#google-drive-4">High level design</a></li>
+      <li><a href="#google-drive-5">API</a></li>
+      <li><a href="#google-drive-6">Detailed design</a></li>
+      <li><a href="#google-drive-7">Evaluation</a></li>
+      <li><a href="#google-drive-8">Distinct component</a></li>
     </ul>
   </div>
 </div>
 
-<div class="card mb-4" id="google-docs-1">
+<div class="card mb-4" id="google-drive-1">
   <div class="card-body">
-    <h2 class="card-title">Google docs</h2>
+    <h2 class="card-title">Requirement</h2>
 
-    <h3 class="card-title">Requirement</h3>
-
-    <h4 class="card-title">Functional</h4>
+    <h3 class="card-title">Functional</h3>
     <ul>
-      <li>Multiple users can view/edit documents simultaneously.</li>
-      <li>Chaged made by a user should be propagated to other users.</li>
-      <li>Resolve conflicts when many users are updating the same portion.</li>
-      <li>Users can see view count of the document.</li>
-      <li>Users can see history of collaboration of the document.</li>
+      <li>What are the most important features? Upload/download files, sync files, send notification</li>
+      <li>Is this mobile app or web app? Both</li>
+      <li>What are supported file formats? Any file type</li>
+      <li>Do files need to be encrypted? Yes</li>
+      <li>Is there a file size limit? Yes, 10GB</li>
+      <li>How many users? 100M daily users</li>
     </ul>
 
-    <h4 class="card-title">Non-functional</h4>
+    <h3 class="card-title">Non-functional</h3>
     <ul>
-      <li>Availability.</li>
-      <li>Reliability.</li>
-      <li>Scalability.</li>
-      <li>Performance.</li>
+      <li>Availability</li>
+      <li>Reliability</li>
+      <li>Scalability</li>
+      <li>Performance</li>
+      <li>Consistency</li>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
 
-    <h3 class="card-title">Estimation</h3>
+<div class="card mb-4" id="google-drive-2">
+  <div class="card-body">
+    <h2 class="card-title">Estimation</h2>
 
-    <h4 class="card-title">Server</h4>
-    <ul>
-      <li>Assume</li>
-      <ul>
-        <li>100 M active users.</li>
-        <li>A single server can handle 10k connections per day.</li>
-      </ul>
-      <li>100M / 10k = 10,000 servers are needed.</li>
-    </ul>
-
-    <h4 class="card-title">Storage</h4>
+    <h3 class="card-title">Server</h3>
     <ul>
       <li>Assume</li>
       <ul>
-        <li>Each user creates 1 doc per day.</li>
-        <li>100M active users.</li>
-        <li>Each doc is 1MB.</li>
+        <li>100M active users</li>
+        <li>A single server can handle 10k connections per day</li>
       </ul>
-      <li>1 doc per day * 100M * 1MB = 100TB per day.</li>
+      <li>100M / 10k = 10,000 servers are needed</li>
     </ul>
 
-    <h4 class="card-title">Bandwidth</h4>
+    <h3 class="card-title">Storage</h3>
     <ul>
       <li>Assume</li>
       <ul>
-        <li>Each user views 10 doc per day.</li>
-        <li>10 * 100M / 86400 = 11574 doc views per second.</li>
+        <li>100M active users</li>
+        <li>Each user uploads 2 files per day</li>
+        <li>Each file is 1MB</li>
       </ul>
-      <li>Incoming: 100TB per day * 8 bits / 86400 seconds per day = 9.26Gbps.</li>
-      <li>Outgoing: 11574 * 1 MB * 8 = 92.6bps.</li>
+      <li>2 files per day * 100M * 2 * 1MB = 200TB per day</li>
     </ul>
 
-    <h3 class="card-title">High level design</h3>
+    <h3 class="card-title">Bandwidth</h3>
     <ul>
-      <li>When users collaborate, request is forwarded to operations queue. Conflict gets resolved here and data is batched.</li>
-      <li>Different versions of document is stored in time series DB.</li>
-      <li>Async operations like view count and comments are queued in pub-sub like Kafka.</li>
-      <li>App server supports document import/export.</li>
+      <li>Assume</li>
+      <ul>
+        <li>Read/write ratio is 1:1</li>
+      </ul>
+      <li>Incoming - 200TB per day * 8 bits / 86400 seconds per day = 18.51Gbps</li>
+      <li>Outgoing - 18.51Gbps</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="google-drive-4">
+  <div class="card-body">
+    <h2 class="card-title">High level design</h2>
+
+    <h3 class="card-title">Collaborative editing</h3>
+    <ul>
+      <li>Each request is forwarded to operations queue</li>
+      <li>Conflict gets resolved here</li>
+      <li>If no conflict, data is batched and sent to time series DB via session server</li>
+      <ul>
+        <li>Different versions of document can be retrieved from time series DB</li>
+      </ul>
+      <li>Images and videos are compressed before being sent to blob storage</li>
     </ul>
 
-    <h3 class="card-title">API</h3>
+    <h3 class="card-title">Async operations</h3>
+    <ul>
+      <li>Email, notification, view count, comments are queued in Kafka</li>
+      <li>API gateway generates these requests</li>
+    </ul>
 
-    <h3 class="card-title">DB</h3>
+    <h3 class="card-title">Suggesstions</h3>
+    <ul>
+      <li>NoSQL stores typically used words or phrases</li>
+      <li>Most frequently used words or phrases are stored in Redis</li>
+    </ul>
 
-    <h3 class="card-title">Component design</h3>
+    <h3 class="card-title">App server</h3>
+    <ul>
+      <li>Document format conversion</li>
+      <li>Import/export document</li></li>
+      <li>Feature extraction for typeahead service</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="google-drive-5">
+  <div class="card-body">
+    <h2 class="card-title">API</h2>
+    <ul>
+      <li><code>curr_location(location)</code></li>
+      <ul>
+        <li>Display current location of user on the map</li>
+        <li><code>location</code></li>
+        <ul>
+          <li>Boolean to indicate if user location is turned on or off</li>
+          <li>If off, the service will ask user to turn on the location</li>
+        </ul>
+      </ul>
+      <li><code>find_route(start, end, transport_type)</code></li>
+      <ul>
+        <li>Computes optimal route between two points</li>
+        <ul>
+          <li><code>start</code> - start point in text format</li>
+          <li><code>end</code> - start point in text format</li>
+        </ul>
+      </ul>
+      <li><code>directions(curr_location, steps)</code></li>
+      <ul>
+        <li>Provides alerts of when and where to make turns</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="google-drive-6">
+  <div class="card-body">
+    <h2 class="card-title">Detailed design</h2>
+
     <img class="img-fluid" class="card-img-top" src="/img/system-design/google-doc1.png" alt="Card image cap">
 
-    <h4 class="card-title">API gateway</h4>
+    <h3 class="card-title">API gateway</h3>
     <ul>
-      <li>Intercept all client requests.</li>
+      <li>Intercept all client requests</li>
+      <li>For example, edit request, comment on document, authentication, notification, data storing request</li>
     </ul>
 
-    <h4 class="card-title">Time series DB</h4>
+    <h3 class="card-title">App server</h3>
     <ul>
-      <li>Stores edit history.</li>
+      <li>Document format conversion</li>
+      <li>Import/export document</li>
     </ul>
 
-    <h4 class="card-title">Blob storage</h4>
+    <h3 class="card-title">Operations queue</h3>
     <ul>
-      <li>Stores images and videos in the document.</li>
+      <li>Small data caused by editing document is queued to be processed</li>
+      <ul>
+        <li>Characters, images, videos, comments are added to the queue</li>
+      </ul>
+      <li>WebSockets is used to observe live changes to the document</li>
+      <ul>
+        <li>Using HTTP to send lots of minor changes is inefficient</li>
+      </ul>
     </ul>
 
-    <h4 class="card-title">Operations queue</h4>
+    <h3 class="card-title">Session server</h3>
     <ul>
-      <li>Small data caused by editing document is queued to be processed.</li>
+      <li>Maintains document privilege of users</li>
     </ul>
 
-    <h4 class="card-title">Session server</h4>
+    <h3 class="card-title">RDBMS</h3>
     <ul>
-      <li>Maintains document privilege of users.</li>
+      <li>Stores user information, document information</li>
     </ul>
 
-    <h3 class="card-title">Evaluation</h3>
+    <h3 class="card-title">NoSQL</h3>
+    <ul>
+      <li>Stores user comment</li>
+    </ul>
 
-    <h4 class="card-title">Availability</h4>
+    <h3 class="card-title">Time series DB</h3>
+    <ul>
+      <li>Stores edit history</li>
+    </ul>
+
+    <h3 class="card-title">Blob storage</h3>
+    <ul>
+      <li>Stores images and videos in the document</li>
+    </ul>
+
+    <h3 class="card-title">Redis</h3>
+    <ul>
+      <li>Cache to store</li>
+      <ul>
+        <li>User session</li>
+        <li>Typeahead features</li>
+        <li>Frequently accesses documents</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">CDN</h3>
+    <ul>
+      <li>Cache images and videos</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="google-drive-7">
+  <div class="card-body">
+    <h2 class="card-title">Evaluation</h2>
+
+    <h3 class="card-title">Availability</h3>
+    <ul>
+      <li>Replication</li>
+      <ul>
+        <li>Replicate each server and DB</li>
+        <li>Replicate entire components to different zone or geographical region</li>
+      </ul>
+      <li>Fail over</li>
+    </ul>
 
     <h4 class="card-title">Reliability</h4>
 
-    <h4 class="card-title">Scalability</h4>
+    <h3 class="card-title">Scalability</h3>
+    <ul>
+      <li>Horizontal scaling</li>
+      <li>Data replication</li>
+      <ul>
+        <li>Horizontal sharding of RDBMS</li>
+      </ul>
+      <li>Different DB for different purpose</li>
+    </ul>
 
     <h4 class="card-title">Performance</h4>
+    <ul>
+      <li>Redis</li>
+      <li>CDN</li>
+      <li>Websocket instead of HTTP</li>
+      <li>Async operation for email, notification, view count, comment</li>
+    </ul>
+
+    <h3 class="card-title">Consistency</h3>
+    <ul>
+      <li>Strong consistency - everyone must see the same ordering of characters in the document</li>
+      <li>Time series DB preserves order of events</li>
+      <li>OT or CRDT can be used to resolve conflicts and push result to time series DB</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
-    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+    Reference: System Design Interview, Alex Xu
   </div>
 </div>
-<!-- Google docs END -->
+
+<div class="card mb-4" id="google-drive-8">
+  <div class="card-body">
+    <h2 class="card-title">Distinct component</h2>
+
+    <h3 class="card-title">Operational transformation (OT)</h3>
+    <ul>
+      <li>Commutativity - the order of applied operations does not affect the end result</li>
+      <li>Idempotency - similar operations that have been repeated apply only once</li>
+      <li>If conflict, OT resolves conflict, then pushes corrected state to end users</li>
+    </ul>
+
+    <h3 class="card-title">Conflict-free replicated data type (CRDT)</h3>
+    <ul>
+      <li>Assigns globally unique identifier to each character</li>
+      <li>Globally orders each character</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+<!-- Google drive END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->
