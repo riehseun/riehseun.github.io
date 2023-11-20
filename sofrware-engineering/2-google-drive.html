@@ -46,7 +46,7 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#google-drive-1">Requirement</a></li>
       <li><a href="#google-drive-2">Estimation</a></li>
-      <!-- <li><a href="#google-drive-3">Storage schema</a></li> -->
+      <li><a href="#google-drive-3">Storage schema</a></li>
       <li><a href="#google-drive-4">High level design</a></li>
       <li><a href="#google-drive-5">API</a></li>
       <li><a href="#google-drive-6">Detailed design</a></li>
@@ -124,38 +124,120 @@
   </div>
 </div>
 
+<div class="card mb-4" id="google-drive-3">
+  <div class="card-body">
+    <h2 class="card-title">Storage schema</h2>
+    <ul>
+      <li>RDBMS is chosen to achieve strong consistency</li>
+      <li>Strong consistency is needed for all users to see the same file information</li>
+    </ul>
+
+    <h3 class="card-title">Relational DB</h3>
+    <ul>
+      <li>User</li>
+      <ul>
+        <li>user_id (int, pk)</li>
+        <li>username (varchar)</li>
+        <li>created_at (datatime)</li>
+      </ul>
+      <li>Block</li>
+      <ul>
+        <li>block_id (int, pk)</li>
+        <li>file_version_id (int)</li>
+        <li>block_order (int)</li>
+      </ul>
+      <li>Device</li>
+      <ul>
+        <li>device_id (int, pk)</li>
+        <li>user_id (int)</li>
+        <li>last_logged_in_at (datetime)</li>
+      </ul>
+      <li>Workspace</li>
+      <ul>
+        <li>workspace_id (int, pk)</li>
+        <li>user_id (int)</li>
+        <li>created_at (datatime)</li>
+      </ul>
+      <li>File</li>
+      <ul>
+        <li>file_id (int, pk)</li>
+        <li>file_name (varchar)</li>
+        <li>path (varchar)</li>
+        <li>latest_version (int)</li>
+        <li>workspace_id (int, pk)</li>
+        <li>created_at (datatime)</li>
+        <li>last_modified (datatime)</li>
+      </ul>
+      <li>FileVersion</li>
+      <ul>
+        <li>file_version_id (int, pk)</li>
+        <li>file_id (int)</li>
+        <li>device_id (int)</li>
+        <li>version_number (int)</li>
+        <li>last_modified (datatime)</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+
 <div class="card mb-4" id="google-drive-4">
   <div class="card-body">
     <h2 class="card-title">High level design</h2>
 
-    <h3 class="card-title">Collaborative editing</h3>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/google-drive1.png" alt="Card image cap">
+
+    <h3 class="card-title">User</h3>
     <ul>
-      <li>Each request is forwarded to operations queue</li>
-      <li>Conflict gets resolved here</li>
-      <li>If no conflict, data is batched and sent to time series DB via session server</li>
-      <ul>
-        <li>Different versions of document can be retrieved from time series DB</li>
-      </ul>
-      <li>Images and videos are compressed before being sent to blob storage</li>
+      <li>Can either be browser or mobile app</li>
     </ul>
 
-    <h3 class="card-title">Async operations</h3>
+    <h3 class="card-title">Block servers</h3>
     <ul>
-      <li>Email, notification, view count, comments are queued in Kafka</li>
-      <li>API gateway generates these requests</li>
+      <li>Upload blocks to cloud storage</li>
+      <li>Each file is split into blocks, that gets a unique hash value</li>
+      <li>The hash values are stored in metadata DB</li>
+      <li>To reconstruct a file, blocked are joined in a particular order</li>
+      <li>Block size is typically 4MB</li>
     </ul>
 
-    <h3 class="card-title">Suggesstions</h3>
+    <h3 class="card-title">Cloud storage</h3>
     <ul>
-      <li>NoSQL stores typically used words or phrases</li>
-      <li>Most frequently used words or phrases are stored in Redis</li>
+      <li>Amazon S3 is chosen</li>
     </ul>
 
-    <h3 class="card-title">App server</h3>
+    <h3 class="card-title">Cold storage</h3>
     <ul>
-      <li>Document format conversion</li>
-      <li>Import/export document</li></li>
-      <li>Feature extraction for typeahead service</li>
+      <li>Storage used for inactive data</li>
+    </ul>
+
+    <h3 class="card-title">API servers</h3>
+    <ul>
+      <li>Authenticates users</li>
+      <li>Updates metadata</li>
+    </ul>
+
+    <h3 class="card-title">Metadata DB</h3>
+    <ul>
+      <li>Stores metadata of user, file, block, file version</li>
+    </ul>
+
+    <h3 class="card-title">Metadata cache</h3>
+    <ul>
+      <li>Some metadata is cached for fast retrieval</li>
+    </ul>
+
+    <h3 class="card-title">Notification service</h3>
+    <ul>
+      <li>Pub-sub like Kafka</li>
+      <li>Notifies clients when files are added/updated/removed so they can pull the latest change</li>
+    </ul>
+
+    <h3 class="card-title">Offline backup queue</h3>
+    <ul>
+      <li>When clients are offline, information is stored so that it can be synced when clients come back online</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -167,26 +249,25 @@
   <div class="card-body">
     <h2 class="card-title">API</h2>
     <ul>
-      <li><code>curr_location(location)</code></li>
+      <li><code>upload_file(data, upload_type)</code></li>
       <ul>
-        <li>Display current location of user on the map</li>
-        <li><code>location</code></li>
+        <li><code>data</code></li>
         <ul>
-          <li>Boolean to indicate if user location is turned on or off</li>
-          <li>If off, the service will ask user to turn on the location</li>
+          <li>Local file to be uploaded</li>
+        </ul>
+        <li><code>upload_type</code></li>
+        <ul>
+          <li><code>simple</code> - when the file size is small</li>
+          <li><code>resumable</code> - when the file size is large and network interruption is likely</li>
         </ul>
       </ul>
-      <li><code>find_route(start, end, transport_type)</code></li>
+      <li><code>download_file(path)</code></li>
+      <li><code>get_file_revision(path, limit)</code></li>
       <ul>
-        <li>Computes optimal route between two points</li>
+        <li><code>limit</code></li>
         <ul>
-          <li><code>start</code> - start point in text format</li>
-          <li><code>end</code> - start point in text format</li>
+          <li>Max number of revisions to retrieve</li>
         </ul>
-      </ul>
-      <li><code>directions(curr_location, steps)</code></li>
-      <ul>
-        <li>Provides alerts of when and where to make turns</li>
       </ul>
     </ul>
   </div>
@@ -199,7 +280,7 @@
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
 
-    <img class="img-fluid" class="card-img-top" src="/img/system-design/google-doc1.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/google-drive2.png" alt="Card image cap">
 
     <h3 class="card-title">API gateway</h3>
     <ul>
