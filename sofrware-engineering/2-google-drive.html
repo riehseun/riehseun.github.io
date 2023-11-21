@@ -293,31 +293,52 @@
       </ul>
     </ul>
 
-    <h3 class="card-title">Upload</h3>
+    <h3 class="card-title">Client uploads a file</h3>
     <ul>
-      <li></li>
-      <li></li>
+      <li>File metadata</li>
+      <ul>
+        <li>Cilent 1 Sends a request to add metadata of new file</li>
+        <li>New file metadata is added to metadata DB</li>
+        <li>Notification service notifies client 2 that the new file is being uploaded</li>
+      </ul>
+      <li>File upload</li>
+      <ul>
+        <li>Client 1 uploads file to block servers</li>
+        <li>Block servers process the file and upload blocks to cloud storage</li>
+        <li>Cloud storage calls API servers</li>
+        <li>API servers change file status to "uploaded" in metadata DB</li>
+        <li>Notification service notifies client 2 that the new file has been uploaded</li>
+      </ul>
     </ul>
 
-    <h3 class="card-title">Download</h3>
+    <h3 class="card-title">File is added or edited elsewhere</h3>
     <ul>
-      <li></li>
-      <li></li>
+      <li>Client 2 sends requests to API servers to fetch metadata</li>
+      <li>Client 2 sends requests to block servers to download blocks</li>
+      <li>Block servers retrieve blocks from cloud storage</li>
+      <li>Client 2 downloads all blocks to reconstruct the file</li>
     </ul>
 
     <h3 class="card-title">Notification service</h3>
     <ul>
-      <li></li>
+      <li>WebSocket</li>
+      <ul>
+        <li>Persistent connection between client and server</li>
+        <li>Communication is bi-directional</li>
+        <li>Suited for real-time communication like chat app</li>
+      </ul>
+      <li>Long polling (choose this over WebSocket)</li>
+      <ul>
+        <li>Communication for notificaiton service is not bi-directional</li>
+        <li>Notifications are sent infrequently</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Save storage space</h3>
     <ul>
-      <li></li>
-    </ul>
-
-    <h3 class="card-title">Failure handling</h3>
-    <ul>
-      <li></li>
+      <li>De-duplicate data blocks that have the same hash value</li>
+      <li>Set limits on number of versions to store</li>
+      <li>Move infrequently used data to cold storage</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
