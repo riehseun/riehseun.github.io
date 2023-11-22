@@ -39,25 +39,267 @@
 <div class="col-md-12">
 <h1 class="my-4">Other</h1>
 
-<!-- Machine learning system design BEGIN -->
-<div class="card mb-4" id="machine-learning-system-design">
+<!-- Youtube video search BEGIN -->
+<div class="card mb-4" id="youtube-video-search">
   <div class="card-body">
-    <h2 class="card-title">Machine learning system design</h2>
+    <h2 class="card-title">Youtube video search</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#machine-learning-system-design-1">Machine learning system design</a></li>
+      <li><a href="#youtube-video-search-1">Clarify requirements</a></li>
+      <li><a href="#youtube-video-search-2">Frame problem as ML task</a></li>
+      <li><a href="#youtube-video-search-3">Data preparation</a></li>
+      <li><a href="#youtube-video-search-4">Model development</a></li>
+      <li><a href="#youtube-video-search-5">Evaluation</a></li>
+      <li><a href="#youtube-video-search-6">Deployment and serving</a></li>
     </ul>
   </div>
 </div>
 
-<div class="card mb-4" id="machine-learning-system-design-1">
+<div class="card mb-4" id="youtube-video-search-1">
   <div class="card-body">
-    <h2 class="card-title">Machine learning system design</h2>
+    <h2 class="card-title">Clarify requirements</h2>
+    <ul>
+      <li>Business objective</li>
+      <ul>
+        <li>Can users search with text, image, video? Text search only</li>
+        <li>Does the system support videos, images, audios? Video only</li>
+        <li>How many languages are supported? English only</li>
+        <li>Do videos need to be personalized? No</li>
+      </ul>
+      <li>Features that the system supports</li>
+      <ul>
+        <li>Is the video determined by only the visual and textual (title and descritpion) content? Yes</li>
+      </ul>
+      <li>Data</li>
+      <ul>
+        <li>Do we have annotated dataset? There are 10 million pairs of &lt;video, text query&gt;</li>
+        <li>How many videos are available on the platform? 1B videos</li>
+      </ul>
+      <li>Constraints</li>
+      <li>Scale</li>
+      <li>Performance</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
-
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
   </div>
 </div>
-<!-- Machine learning system design END -->
+
+<div class="card mb-4" id="youtube-video-search-2">
+  <div class="card-body">
+    <h2 class="card-title">Frame problem as ML task</h2>
+    <ul>
+      <li>Define ML objective</li>
+      <ul>
+        <li>Rank videos based on the relevance to the text query</li>
+      </ul>
+      <li>Specify input and output</li>
+      <ul>
+        <li>Input - text query</li>
+        <li>Output - ranked list of videos</li>
+      </ul>
+      <li>Choose right ML category</li>
+      <ul>
+        <li>Visual search</li>
+        <li>Text search</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="youtube-video-search-3">
+  <div class="card-body">
+    <h2 class="card-title">Data preparation</h2>
+    <ul>
+      <li>Data engineering</li>
+      <ul>
+        <li>Annotated dataset</li>
+        <ul>
+          <li>Image path</li>
+          <li>Objects - human face, license plate</li>
+          <li>Bounding boxes - x coordinate, y coordinate, width, height</li>
+        </ul>
+        <li>Street view images</li>
+        <ul>
+          <li>Image path</li>
+        </ul>
+      </ul>
+      <li>Feature engineering</li>
+      <ul>
+        <li>Resize, scale, normalize</li>
+        <li>Data augmentation</li>
+        <ul>
+          <li>Ex. random crop, random saturation, vertical/horizontal flip, rotation/translation, affline transformations, changing brightness/saturation/contrast</li>
+          <li>When rotating/flipping images, the ground truth bounding boxes must also be transformed</li>
+          <li>Offline</li>
+          <ul>
+            <li>Augment image before training</li>
+            <li>Training is faster but requires additional storage</li>
+          </ul>
+          <li>Online</li>
+          <ul>
+            <li>Augment image on the fly during training</li>
+            <li>Training is slower but requires no additional storage</li>
+          </ul>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="youtube-video-search-4">
+  <div class="card-body">
+    <h2 class="card-title">Model development</h2>
+    <ul>
+      <li>Model selection</li>
+      <ul>
+        <li>Two stages network</li>
+        <ul>
+          <li>Convolutional layers</li>
+          <ul>
+            <li>Takes input image and produces feature map</li>
+          </ul>
+          <li>Region proposal network (RPN)</li>
+          <ul>
+            <li>Based on neural network</li>
+            <li>Takes feature map and produces candidate regions in the image</li>
+          </ul>
+          <li>Classifier</li>
+          <ul>
+            <li>Based on neural network</li>
+            <li>Takes feature map and candidate regions, and assigns an object class to each region</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>Model training</li>
+      <ul>
+        <li>Regression loss</li>
+        <ul>
+          <li>Measures how aligned the predicted bounding boxes are with the ground truth bounding boxes</li>
+          <li>Use mean squared error (MSE)</li>
+          <li>\( L_{reg} = \dfrac{1}{M}\displaystyle\sum_{i=1}^{M} \left[ (x_{i}-\hat{x}_{i})^{2} + (y_{i}-\hat{y}_{i})^{2} + (w_{i}-\hat{w}_{i})^{2} + (h_{i}-\hat{h}_{i})^{2} \right] \)</li>
+          <ul>
+            <li>\( M \) - total number of predictions</li>
+            <li>\( x_{i} \) - ground truth top left \( x \) coordinate</li>
+            <li>\( \hat{x}_{i} \) - predicted top left \( x \) coordinate</li>
+            <li>\( y_{i} \) - ground truth top left \( y \) coordinate</li>
+            <li>\( \hat{y}_{i} \) - predicted top left \( y \) coordinate</li>
+            <li>\( w_{i} \) - ground truth width</li>
+            <li>\( \hat{w}_{i} \) - predicted width</li>
+            <li>\( h_{i} \) - ground truth height</li>
+            <li>\( \hat{h}_{i} \) - predicted height</li>
+          </ul>
+        </ul>
+        <li>Classification loss</li>
+        <ul>
+          <li>Measures how accurate the predicted probabilities are for each detected object</li>
+          <li>Use log loss (cross-entropy)</li>
+          <li>\( L_{cls} = -\dfrac{1}{M} \displaystyle\sum_{i=1}^{M} \displaystyle\sum_{c=1}^{C} y_{c}log\hat{y}_{c} \)</li>
+          <ul>
+            <li>\( M \) - total number of detected bounding boxes</li>
+            <li>\( C \) - total number of classes</li>
+            <li>\( y_{i} \) - ground truth label for detection \( i \)</li>
+            <li>\( \hat{y}_{i} \) - predicted class label for detection \( i \)</li>
+          </ul>
+        </ul>
+        <li>Total loss</li>
+        <ul>
+          <li>\( L = L_{reg} + \lambda L_{cls} \)</li>
+          <li>\( \lambda \) - balancing parameter</li>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="youtube-video-search-5">
+  <div class="card-body">
+    <h2 class="card-title">Evaluation</h2>
+    <ul>
+      <li>Intersection over union (IoU)</li>
+      <ul>
+        <li>Measures overlap between detected and ground truth bounding boxes</li>
+      </ul>
+      <li>Offline</li>
+      <ul>
+        <li>Precision</li>
+        <ul>
+          <li>Correct detections / total detections</li>
+          <li>Need to pick an IoU threshold</li>
+        </ul>
+        <li>Average precision (AP)</li>
+        <ul>
+          <li>Calculate precision at different IoU threshold and compute the average</li>
+        </ul>
+        <li>Mean average precision (mAP)</li>
+        <ul>
+          <li>Average of average precision across all object classes</li>
+        </ul>
+      </ul>
+      <li>Online</li>
+      <ul>
+        <li>Number of user reports</li>
+        <li>Human annotators to check the blurred images</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="youtube-video-search-6">
+  <div class="card-body">
+    <h2 class="card-title">Deployment and serving</h2>
+
+    <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/youtube-video-search1.png" alt="Card image cap">
+    <ul>
+      <li>Batch inference pipeline</li>
+      <ul>
+        <li>Non-max suppression (NMS)</li>
+        <ul>
+          <li>Keep one bounding box out of many overlapping bounding boxes</li>
+        </ul>
+        <li>Preprocessing</li>
+        <ul>
+          <li>CPU intensive task</li>
+        </ul>
+        <li>Blurring service</li>
+        <ul>
+          <li>GPU intensive task</li>
+          <li>Identify all objects in the image</li>
+          <li>Resolve overlapping bounding boxes using NMS</li>
+          <li>Blur objects of interest</li>
+          <li>Store blurred images</li>
+        </ul>
+      </ul>
+      <li>Data pipeline</li>
+      <ul>
+        <li>Hard negative mining</li>
+        <ul>
+          <li>Negative examples created from incorrectly predicted examples</li>
+          <li>Model should perform better when trained with this dataset</li>
+        </ul>
+        <li>Preprocessing</li>
+        <ul>
+          <li>Resize, scale, normalize</li>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+<!-- Youtube video search END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->
