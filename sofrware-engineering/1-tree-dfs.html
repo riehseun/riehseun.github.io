@@ -273,7 +273,38 @@ class Solution:
   <div class="card-body">
     <h2 class="card-title">Flatten binary tree to linked list (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python"># Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def flatten(self, root: Optional[TreeNode]) -> None:
+        """
+        Do not return anything, modify root in-place instead.
+        """
+
+        # Do post-order traversing (right, root, left)
+        # Set root.left to None
+        # Set root.right to previous root
+
+        self.prev = None
+
+        # Time O(n) where n is number of nodes
+        # Space O(h) where h = n if worst case, h = log(n) if best case
+        def helper(root):
+
+            if root:
+                print(root.val)
+                helper(root.right)
+                helper(root.left)
+
+                root.left = None
+                root.right = self.prev
+                self.prev = root
+
+        helper(root)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/flatten-binary-tree-to-linked-list">114. Flatten Binary Tree to Linked List</a>
@@ -292,34 +323,35 @@ class Solution:
 #         self.right = right
 class Solution:
     def maxPathSum(self, root: Optional[TreeNode]) -> int:
-        max_sum = []
-        self.helper(root, max_sum)
-        return max(max_sum)
 
+        # If node is None, return 0
+        # Consider each node. Max sum at each node is the sum of
+        #   node value itself
+        #   max sum of left subtree
+        #   max sum of right subtree
+        # Also, in each node, the path can only take either left or right
 
-    def helper(self, node, max_sum):
+        self.max_sums = []
 
-        # Example:
-        #   -10
-        #  9    20
-        #     15   7
-        #
-        #   -10
-        #  9    42
+        # Time O(n) where n is number of nodes
+        # Space O(n) for each node, we are constructing its max sum
+        def helper(root):
 
-        if node is None:
-            return 0
+            if not root:
+                return 0
 
-        sum_from_left_subtree = max(self.helper(node.left, max_sum), 0)
-        sum_from_right_subtree = max(self.helper(node.right, max_sum), 0)
+            max_sum_left = max(helper(root.left), 0)
+            max_sum_right = max(helper(root.right), 0)
 
-        # At each node, the maximum sum can be constructed by.
-        max_sum.append(node.val+sum_from_left_subtree+sum_from_right_subtree)
+            max_sum = root.val + max_sum_left + max_sum_right
+            self.max_sums.append(max_sum)
 
-        # At each node, the path can only be constructed by taking
-        # either one of left or right child node.
-        max_path = node.val + max(sum_from_left_subtree, sum_from_right_subtree)
-        return max_path</code></pre>
+            max_path = root.val + max(max_sum_left, max_sum_right)
+            return max_path
+
+        helper(root)
+
+        return max(self.max_sums)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/binary-tree-maximum-path-sum">124. Binary Tree Maximum Path Sum</a>
