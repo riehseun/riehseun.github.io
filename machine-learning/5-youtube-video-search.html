@@ -37,7 +37,7 @@
 <div class="container">
 <div class="row">
 <div class="col-md-12">
-<h1 class="my-4">Other</h1>
+<h1 class="my-4">Machine learning</h1>
 
 <!-- Youtube video search BEGIN -->
 <div class="card mb-4" id="youtube-video-search">
@@ -252,30 +252,34 @@
   <div class="card-body">
     <h2 class="card-title">Evaluation</h2>
     <ul>
-      <li>Intersection over union (IoU)</li>
-      <ul>
-        <li>Measures overlap between detected and ground truth bounding boxes</li>
-      </ul>
       <li>Offline</li>
       <ul>
-        <li>Precision</li>
+        <li>Precision@k and mAP</li>
         <ul>
-          <li>Correct detections / total detections</li>
-          <li>Need to pick an IoU threshold</li>
+          <li>Precision@k = number of relevant items among the top k items in the ranked list / k</li>
+          <li>In the annotated dataset, the text query is associated to just one video. That means the numerator is either 1 or 0</li>
+          <li>Thus, these metrics are not useful</li>
         </ul>
-        <li>Average precision (AP)</li>
+        <li>Recall@k</li>
         <ul>
-          <li>Calculate precision at different IoU threshold and compute the average</li>
+          <li>Recall@k = number of relevant items among the top k items in the ranked list / total number of relevant videos</li>
+          <li>Total number of relevant videos is always 1</li>
+          <li>Then, recall@k = 1 if relevant video is in the top k items, 0 otherwise</li>
+          <ul>
+            <li>Picking k can be challenging</li>
+          </ul>
         </ul>
-        <li>Mean average precision (mAP)</li>
+        <li>MRR (Mean Reciprobal Rank)</li>
         <ul>
-          <li>Average of average precision across all object classes</li>
+          <li>\( MRR = \dfrac{1}{m} \displaystyle\sum_{i=1}^{m} \dfrac{1}{rank_{i}} \) where \( {rank_{i}} \) is the position on which the first relevant item appears in the output list</li>
+          <li>Consider only the first relevant item in each output list, then average the reciprocal rank</li>
         </ul>
       </ul>
       <li>Online</li>
       <ul>
-        <li>Number of user reports</li>
-        <li>Human annotators to check the blurred images</li>
+        <li>Click-through rate</li>
+        <li>Video completion rate</li>
+        <li>Total watch time</li>
       </ul>
     </ul>
   </div>
@@ -288,39 +292,17 @@
   <div class="card-body">
     <h2 class="card-title">Deployment and serving</h2>
 
-    <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/youtube-video-search1.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/youtube-video-search4.png" alt="Card image cap">
     <ul>
-      <li>Batch inference pipeline</li>
+      <li>Prediction pipeline</li>
       <ul>
-        <li>Non-max suppression (NMS)</li>
-        <ul>
-          <li>Keep one bounding box out of many overlapping bounding boxes</li>
-        </ul>
-        <li>Preprocessing</li>
-        <ul>
-          <li>CPU intensive task</li>
-        </ul>
-        <li>Blurring service</li>
-        <ul>
-          <li>GPU intensive task</li>
-          <li>Identify all objects in the image</li>
-          <li>Resolve overlapping bounding boxes using NMS</li>
-          <li>Blur objects of interest</li>
-          <li>Store blurred images</li>
-        </ul>
+        <li>Visual search</li>
+        <li>Text search</li>
+        <li>Fusing layer</li>
+        <li>Re-ranking service</li>
       </ul>
-      <li>Data pipeline</li>
-      <ul>
-        <li>Hard negative mining</li>
-        <ul>
-          <li>Negative examples created from incorrectly predicted examples</li>
-          <li>Model should perform better when trained with this dataset</li>
-        </ul>
-        <li>Preprocessing</li>
-        <ul>
-          <li>Resize, scale, normalize</li>
-        </ul>
-      </ul>
+      <li>Video indexing pipeline</li>
+      <li>Text indexing pipeline</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
