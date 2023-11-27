@@ -44,59 +44,84 @@
   <div class="card-body">
     <h2 class="card-title">Web crawler</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#web-crawler-1">Web crawler</a></li>
+      <li><a href="#web-crawler-1">Requirement</a></li>
+      <li><a href="#web-crawler-2">Estimation</a></li>
+      <!-- <li><a href="#web-crawler-3">Storage schema</a></li> -->
+      <li><a href="#web-crawler-4">High level design</a></li>
+      <!-- <li><a href="#web-crawler-5">API</a></li> -->
+      <li><a href="#web-crawler-6">Detailed design</a></li>
+      <li><a href="#web-crawler-7">Evaluation</a></li>
+      <li><a href="#web-crawler-8">Distinct component</a></li>
     </ul>
   </div>
 </div>
 
 <div class="card mb-4" id="web-crawler-1">
   <div class="card-body">
-    <h2 class="card-title">Web crawler</h2>
+    <h2 class="card-title">Requirement</h2>
 
-    <h3 class="card-title">Requirement</h3>
-
-    <h4 class="card-title">Functional</h4>
+    <h3 class="card-title">Functional</h3>
     <ul>
-      <li>Crawl all the web. (HTML and HTTP protocol only)</li>
-      <li>Store contents of URL in blob storage.</li>
-      <li>Regular scheduling to update records in blob storage.</li>
+      <li>What does web crawler need to do? Search engine indexing</li>
+      <li>How many web pages to crawl? 1B pages</li>
+      <li>What content types are in scpe? HTML only</li>
+      <li>Do we need to store HTML page? Yes for 5 yearss</li>
+      <li>What about duplicate content? Duplicate content should be ignored</li>
     </ul>
 
-    <h4 class="card-title">Non-functional</h4>
+    <h3 class="card-title">Non-functional</h3>
     <ul>
-      <li>Availability.</li>
-      <li>Reliability.</li>
-      <li>Scalability.</li>
-      <li>Performance.</li>
+      <li>Availability</li>
+      <li>Reliability</li>
+      <li>Scalability</li>
+      <li>Performance</li>
+      <li>Consistency</li>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
 
-    <h3 class="card-title">Estimation</h3>
+<div class="card mb-4" id="web-crawler-2">
+  <div class="card-body">
+    <h2 class="card-title">Estimation</h2>
 
-    <h4 class="card-title">Server</h4>
-    <ul>
-      <li>Assume</li>
-      <ul>
-        <li>100ms to traverse one page.</li>
-        <li>15B HTML pages.</li>
-        <li>100ms * 15B = 1.5Bs = 17361 days.</li>
-      </ul>
-      <li>To crawl the web in one day, we need 17361 servers.</li>
-    </ul>
-
-    <h4 class="card-title">Storage</h4>
+    <h3 class="card-title">Server</h3>
     <ul>
       <li>Assume</li>
       <ul>
-        <li>Page size including metadata is 100KB on average.</li>
+        <li>100ms to traverse one page</li>
+        <li>1B HTML pages</li>
       </ul>
-      <li>15B * 100KB = 1.5PB.</li>
+      <li>100ms * 1B = 100Ms = 1157 days</li>
+      <li>To crawl the web in one day, we need 1157 servers</li>
     </ul>
 
-    <h4 class="card-title">Bandwidth</h4>
+    <h3 class="card-title">Storage</h3>
     <ul>
-      <li>1.5PB * 8 / 86400 = 139Gbps.</li>
-      <li>139Gbps / 17361 = 8Mbps per server.</li>
+      <li>Assume</li>
+      <ul>
+        <li>1B HTML pages per month</li>
+        <li>Page size including metadata is 100KB on average</li>
+      </ul>
+      <li>1B * 100KB = 100TB</li>
+      <li>100TB per month = 6PM for 5 years</li>
     </ul>
+
+    <h3 class="card-title">Bandwidth</h3>
+    <ul>
+      <li>Incoming - 100TB * 8 / (86400 * 30) = 3Gbps</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="web-crawler-4">
+  <div class="card-body">
+    <h2 class="card-title">High level design</h2>
 
     <h3 class="card-title">High level design</h3>
     <ul>
@@ -108,11 +133,6 @@
       <li>Process downloaded document.</li>
     </ul>
 
-    <h3 class="card-title">API</h3>
-
-    <h3 class="card-title">DB</h3>
-
-    <h3 class="card-title">Component design</h3>
     <img class="img-fluid" class="card-img-top" src="/img/system-design/web-crawler1.png" alt="Card image cap">
 
     <h4 class="card-title">URL frontier (priority queue)</h4>
@@ -182,6 +202,170 @@
       <li>Check if URL is duplicates. (Multiple URL linking to the same document)</li>
       <li>Store checksum of URLs in carnonical forms into DB.</li>
     </ul> -->
+
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="web-crawler-6">
+  <div class="card-body">
+    <h2 class="card-title">Detailed design</h2>
+
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/web-crawler2.png" alt="Card image cap">
+
+    <h3 class="card-title">Block servers</h3>
+    <ul>
+      <li>A file is split into smaller blocks</li>
+      <li>Each block is compressed to reduce size</li>
+      <li>Each block is encrypted to ensure security</li>
+      <li>Each block is uploaded to cloud storage</li>
+      <ul>
+        <li>Delta sync - only the modified blocks are trasferred to cloud stroage</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Client uploads a file</h3>
+    <ul>
+      <li>File metadata</li>
+      <ul>
+        <li>Cilent 1 sends a request to add metadata of new file</li>
+        <li>New file metadata is added to metadata DB</li>
+        <li>Notification service notifies client 2 that the new file is being uploaded</li>
+      </ul>
+      <li>File upload</li>
+      <ul>
+        <li>Client 1 uploads file to block servers</li>
+        <li>Block servers process the file and upload blocks to cloud storage</li>
+        <li>Cloud storage calls API servers</li>
+        <li>API servers change file status to "uploaded" in metadata DB</li>
+        <li>Notification service notifies client 2 that the new file has been uploaded</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">File is added or edited elsewhere</h3>
+    <ul>
+      <li>Client 2 sends requests to API servers to fetch metadata</li>
+      <li>Client 2 sends requests to block servers to download blocks</li>
+      <li>Block servers retrieve blocks from cloud storage</li>
+      <li>Client 2 downloads all blocks to reconstruct the file</li>
+    </ul>
+
+    <h3 class="card-title">Notification service</h3>
+    <ul>
+      <li>WebSocket</li>
+      <ul>
+        <li>Persistent connection between client and server</li>
+        <li>Communication is bi-directional</li>
+        <li>Suited for real-time communication like chat app</li>
+      </ul>
+      <li>Long polling (choose this over WebSocket)</li>
+      <ul>
+        <li>Communication for notificaiton service is not bi-directional</li>
+        <li>Notifications are sent infrequently</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Save storage space</h3>
+    <ul>
+      <li>De-duplicate data blocks that have the same hash value</li>
+      <li>Set limits on number of versions to store</li>
+      <li>Move infrequently used data to cold storage</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="web-crawler-7">
+  <div class="card-body">
+    <h2 class="card-title">Evaluation</h2>
+
+    <h3 class="card-title">Availability</h3>
+    <ul>
+      <li>Replication</li>
+      <ul>
+        <li>Replicate each server and DB</li>
+        <li>Replicate entire components to different zone or geographical region</li>
+      </ul>
+      <li>Fail over</li>
+      <ul>
+        <li>Load balancer - active-passive, when heartbeat fails, the secondary takes the IP</li>
+        <li>Block servers - other block servers pick up the job</li>
+        <li>Cloud storage - S3 is replicated is multiple regions. Blocks can be fetched from different region if one region fails</li>
+        <li>API servers - traffic is redirected to other API servers via load balancer</li>
+        <li>Metadata cache - other cache servers serve the cache</li>
+        <li>Metadata DB</li>
+        <ul>
+          <li>Master - promote one slave to master</li>
+          <li>Slave - use anotehr slave for read operation</li>
+        </ul>
+        <li>Notification service - all clients reconnect to different server (This can be slow)</li>
+        <li>Offline backup queue - other queue can be subscribed by consumers</li>
+      </ul>
+    </ul>
+
+    <h4 class="card-title">Reliability</h4>
+    <ul>
+      <li>Data loss - regional backup of database using S3</li>
+    </ul>
+
+    <h3 class="card-title">Scalability</h3>
+    <ul>
+      <li>Horizontal scaling</li>
+      <li>Data replication</li>
+    </ul>
+
+    <h4 class="card-title">Performance</h4>
+    <ul>
+      <li>Use of metadata cache</li>
+      <li>Spliting files into blocks and delta update</li>
+    </ul>
+
+    <h3 class="card-title">Consistency</h3>
+    <ul>
+      <li>RDBMS is chosen to achieve strong consistency</li>
+      <li>Strong consistency is needed for all users to see the same file information</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="web-crawler-8">
+  <div class="card-body">
+    <h2 class="card-title">Distinct component</h2>
+
+    <h3 class="card-title">Sync conflict</h3>
+    <ul>
+      <li>When two users are trying to update the same file, conflict can happen</li>
+      <li>First user's update goes through while second user gets conflict</li>
+      <li>Second user is presented both copies of files (local copy and server copy) and user can either merge or override the file</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+<!-- Web crawler END -->
+
+<!-- Web crawler BEGIN -->
+<div class="card mb-4" id="web-crawler">
+  <div class="card-body">
+    <h2 class="card-title">Web crawler</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#web-crawler-1">Web crawler</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="web-crawler-1">
+  <div class="card-body">
+    <h2 class="card-title">Web crawler</h2>
+
 
     <h3 class="card-title">Evaluation</h3>
 

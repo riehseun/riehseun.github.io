@@ -47,6 +47,10 @@
       <li><a href="#tree-">Binary tree inorder traversal</a></li>
       <li><a href="#tree-">Validate Binary Search Tree</a></li>
       <li><a href="#tree-">Recover Binary Search Tree</a></li>
+      <li><a href="#tree-">Construct binary tree from preorder and inorder traversal</a></li>
+      <li><a href="#tree-">Construct binary tree from inorder and postorder traversal</a></li>
+      <li><a href="#tree-">Convert Sorted Array to Binary Search Tree</a></li>
+      <li><a href="#tree-">Convert sorted list to binary search tree</a></li>
       <li><a href="#tree-">Balanced Binary Tree</a></li>
       <li><a href="#tree-">Path sum II</a></li>
       <li><a href="#tree-">Flatten binary tree to linked list</a></li>
@@ -180,6 +184,161 @@ class Solution:
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/recover-binary-search-tree">99. Recover Binary Search Tree</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="tree-">
+  <div class="card-body">
+    <h2 class="card-title">Construct binary tree from preorder and inorder traversal (M)</h2>
+
+<pre><code class="python"># Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def buildTree(self, preorder: List[int], inorder: List[int]) -> Optional[TreexNode]:
+
+        # Preorder - root, left, right
+        # Inorder - left, root, right
+        # The very first number of preorder is always the root
+        # Numbers left of this root from inorder forms left subtree
+        # Numbers right of this root from inorder forms left subtree
+
+        # Time O(n) computation takes place on each node of tree
+
+        if inorder:
+
+            root_node = preorder.pop(0)
+            root_index = inorder.index(root_node)
+            root = TreeNode(root_node)
+            root.left = self.buildTree(preorder[:len(inorder[:root_index])], inorder[:root_index])
+            root.right = self.buildTree(preorder[len(inorder[:root_index]):], inorder[root_index+1:])
+
+            return root</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal">105. Construct Binary Tree from Preorder and Inorder Traversal</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="tree-">
+  <div class="card-body">
+    <h2 class="card-title">Construct binary tree from inorder and postorder traversal (M)</h2>
+
+<pre><code class="python"># Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def buildTree(self, inorder: List[int], postorder: List[int]) -> Optional[TreeNode]:
+
+        # Postorder - left, right, root
+        # Inorder - left, root, right
+        # The very last number of preorder is always the root
+        # Numbers left of this root from inorder forms left subtree
+        # Numbers right of this root from inorder forms left subtree
+
+        # Time O(n) computation takes place on each node of tree
+
+        if inorder and postorder:
+
+            root_node = postorder.pop()
+            root_index = inorder.index(root_node)
+            root = TreeNode(root_node)
+            root.left = self.buildTree(inorder[:root_index], postorder[:len(inorder[:root_index])])
+            root.right = self.buildTree(inorder[root_index+1:], postorder[len(inorder[:root_index]):])
+
+            return root</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal">106. Construct Binary Tree from Inorder and Postorder Traversal</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="tree-">
+  <div class="card-body">
+    <h2 class="card-title">Convert Sorted Array to Binary Search Tree (E)</h2>
+
+<pre><code class="python"># Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def sortedArrayToBST(self, nums: List[int]) -> Optional[TreeNode]:
+
+        # The middle element is always the root
+        # Everything on the left side constitute left subtree
+        # Everything on the right side constitute right subtree
+
+        # Time O(n) where n is len(nums)
+        if nums:
+            low = 0
+            high = len(nums)-1
+            mid = (low+high) // 2
+
+            root = TreeNode(nums[mid])
+            root.left = self.sortedArrayToBST(nums[:mid])
+            root.right = self.sortedArrayToBST(nums[mid+1:])
+
+            return root</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/convert-sorted-array-to-binary-search-tree">108. Convert Sorted Array to Binary Search Tree</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="tree-">
+  <div class="card-body">
+    <h2 class="card-title">Convert sorted list to binary search tree (M)</h2>
+
+<pre><code class="python"># Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def sortedListToBST(self, head: Optional[ListNode]) -> Optional[TreeNode]:
+
+        # The middle element is always the root
+        # Everything on the left side constitute left subtree
+        # Everything on the right side constitute right subtree
+
+        nums = []
+
+        while head:
+            nums.append(head.val)
+            head = head.next
+
+        return self.helper(nums)
+
+    def helper(self, nums):
+
+        # Time O(n) where n is len of the linked list
+        if nums:
+            low = 0
+            high = len(nums)-1
+            mid = (low+high) // 2
+
+            root = TreeNode(nums[mid])
+            root.left = self.helper(nums[:mid])
+            root.right = self.helper(nums[mid+1:])
+
+            return root</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/convert-sorted-list-to-binary-search-tree">109. Convert Sorted List to Binary Search Tree</a>
   </div>
 </div>
 
@@ -475,7 +634,49 @@ class Solution:
   <div class="card-body">
     <h2 class="card-title">Diameter of binary tree (E)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python"># Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def diameterOfBinaryTree(self, root: Optional[TreeNode]) -> int:
+
+        # Diameter of tree at a node is the sum of
+        #   Max height of right subtree
+        #   Max height of left subtree
+
+        self.max_diameter = 0
+
+        # Time O(n) where n is number of nodes
+        # Space O(h) where h = n if worst case, h = log(n) if best case
+
+        # Find max height of a tree
+        def helper(root):
+
+            if not root:
+                return 0
+
+            left = helper(root.left)
+            right = helper(root.right)
+
+            return max(left, right) + 1
+
+        def helper2(root):
+
+            if root:
+                max_height_from_left = helper(root.left) - 1
+                max_height_from_right = helper(root.right) - 1
+                diameter = max_height_from_left + max_height_from_right + 2
+
+                self.max_diameter = max(self.max_diameter, diameter)
+                helper2(root.left)
+                helper2(root.right)
+
+        helper2(root)
+
+        return self.max_diameter</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/diameter-of-binary-tree">543. Diameter of Binary Tree</a>
@@ -486,7 +687,49 @@ class Solution:
   <div class="card-body">
     <h2 class="card-title">Longest univalue path (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python"># Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def longestUnivaluePath(self, root: Optional[TreeNode]) -> int:
+
+        # Longest path at a node is
+        #  longest path of left subtree
+        #  longest path of right subtree
+
+        self.longest_path = 0
+
+        # Time O(n) where n is number of nodes
+        # Space O(h) where h = n if worst case, h = log(n) if best case
+
+        # Find max height of a tree only when the node values are the same
+        def helper(root, node_value):
+
+            if not root or root.val != node_value:
+                return 0
+
+            left = helper(root.left, node_value)
+            right = helper(root.right, node_value)
+
+            return max(left, right) + 1
+
+        def helper2(root):
+
+            if root:
+                path_length_from_left = helper(root.left, root.val) - 1
+                path_length_from_right = helper(root.right, root.val) - 1
+                path_legnth = path_length_from_left + path_length_from_right + 2
+                self.longest_path = max(self.longest_path, path_legnth)
+
+                helper2(root.left)
+                helper2(root.right)
+
+        helper2(root)
+
+        return self.longest_path</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/longest-univalue-path">687. Longest univalue path</a>
