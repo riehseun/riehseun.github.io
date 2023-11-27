@@ -123,7 +123,6 @@
   <div class="card-body">
     <h2 class="card-title">High level design</h2>
 
-    <h3 class="card-title">High level design</h3>
     <ul>
       <li>Worker gets a URL to work on.</li>
       <li>DNS is resolved to provide the IP address.</li>
@@ -135,74 +134,69 @@
 
     <img class="img-fluid" class="card-img-top" src="/img/system-design/web-crawler1.png" alt="Card image cap">
 
-    <h4 class="card-title">URL frontier (priority queue)</h4>
+    <h3 class="card-title">Seed URLs</h3>
     <ul>
-      <li>Contains all the remaining URLs to download.</li>
-      <li>Prioritize which URLs should be downloaded first.</li>
-      <li>Use BFS implemented by a queue.</li>
-      <li>Distributed into multiple servers.</li>
+      <li>Base URLs</li>
+    </ul>
+
+    <h3 class="card-title">URL frontier (priority queue)</h3>
+    <ul>
+      <li>Contains all the remaining URLs to download</li>
+      <li>Prioritize which URLs should be downloaded first</li>
+      <li>Use BFS implemented by a queue</li>
+      <li>Distributed into multiple servers</li>
       <ul>
-        <li>Each server maintains many queues such that each thread gets a queue.</li>
-        <li>Hash table maps carnonical hostname to thread number that run the queue.</li>
+        <li>Each server maintains many queues such that each thread gets a queue</li>
+        <li>Hash table maps carnonical hostname to thread number that run the queue</li>
       </ul>
-      <li>Due to huge size of URLs, need to store URLs into a disk.</li>
+      <li>Due to huge size of URLs, need to store URLs into a disk</li>
       <ul>
-        <li>Enqueue buffer, once filled, is dumped into disk.</li>
-        <li>Dequeue buffer keeps cache of URLs to be visited. It periodically reads from disk to fill the buffer.</li>
+        <li>Enqueue buffer, once filled, is dumped into disk</li>
+        <li>Dequeue buffer keeps cache of URLs to be visited. It periodically reads from disk to fill the buffer</li>
       </ul>
+    </ul>
+
+    <h3 class="card-title">Service host</h3>
+    <ul>
+      <li>Each worker dequeues URL from the URL frontier</li>
+      <li>Each worker uses DNS resolver to acquire web page's IP address</li>
+    </ul>
+
+    <h3 class="card-title">DNS resolver</h3>
+    <ul>
+      <li>Custom DNS resolver is needed because DNS lookup is time consuming process</li>
+      <li>Cache frequently used IP addresses within their TTL</li>
+    </ul>
+
+    <h3 class="card-title">Content parser</h3>
+    <ul>
+      <li>HTML is parsed and validated</li>
+    </ul>
+
+    <h3 class="card-title">Duplicate HTML eliminator</h3>
+    <ul>
+      <li>Checks if document is duplicate by checking the hash values of two web pages</li>
+    </ul>
+
+    <h3 class="card-title">URL extractor</h3>
+    <ul>
+      <li>Extracts links from HTML pages</li>
+    </ul>
+
+    <h3 class="card-title">URL filter</h3>
+    <ul>
+      <li>Exclude certain content types, file extensions, and blacklisted sites</li>
+    </ul>
+
+    <h3 class="card-title">Duplicate URL eliminator</h3>
+    <ul>
+      <li>Bloom filter or hash table is used</li>
     </ul>
 
     <h4 class="card-title">Relational DB</h4>
     <ul>
-      <li>Stores all the URLs with two associated parameters "priority" and "update frequency".</li>
+      <li>Stores all the URLs with two associated parameters "priority" and "update frequency"</li>
     </ul>
-
-    <h4 class="card-title">DNS resolver</h4>
-    <ul>
-      <li>Custom DNS resolver is needed because DNS lookup is time consuming process.</li>
-      <li>Cache frequently used IP addresses within their TTL.</li>
-    </ul>
-
-    <h4 class="card-title">HTML fetcher</h4>
-    <ul>
-      <li>Downloads documents corresponding to given URL using protocol like HTTP.</li>
-    </ul>
-
-    <h4 class="card-title">Service host</h4>
-    <ul>
-      <li>Each worker dequeues URL from the URL frontier.</li>
-      <li>Each worker uses DNS resolver to acquire web page's IP address.</li>
-    </ul>
-
-    <h4 class="card-title">Document input stream</h4>
-    <ul>
-      <li>Cache used to store the extracted document.</li>
-      <li>Prevents downloading the same document again.</li>
-      <li>Redis can be used to implement this.</li>
-    </ul>
-
-    <h4 class="card-title">Duplicate eliminator</h4>
-    <ul>
-      <li>Checks if document is duplicate.</li>
-      <li>Calculates 64-bit checksum of every processed document using MD5 or SHA and store it in DB.</li>
-    </ul>
-
-    <h4 class="card-title">Blob store</h4>
-    <ul>
-      <li>Stores fetched content and metadata.</li>
-    </ul>
-
-    <!-- <h4 class="card-title">URL filter</h4>
-    <ul>
-      <li>Blocks some websites so that crawler can ignore them.</li>
-    </ul>
-
-    <h4 class="card-title">URL de-dup</h4>
-    <ul>
-      <li>Check if URL is duplicates. (Multiple URL linking to the same document)</li>
-      <li>Store checksum of URLs in carnonical forms into DB.</li>
-    </ul> -->
-
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu
@@ -213,66 +207,7 @@
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
 
-    <img class="img-fluid" class="card-img-top" src="/img/system-design/web-crawler2.png" alt="Card image cap">
 
-    <h3 class="card-title">Block servers</h3>
-    <ul>
-      <li>A file is split into smaller blocks</li>
-      <li>Each block is compressed to reduce size</li>
-      <li>Each block is encrypted to ensure security</li>
-      <li>Each block is uploaded to cloud storage</li>
-      <ul>
-        <li>Delta sync - only the modified blocks are trasferred to cloud stroage</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Client uploads a file</h3>
-    <ul>
-      <li>File metadata</li>
-      <ul>
-        <li>Cilent 1 sends a request to add metadata of new file</li>
-        <li>New file metadata is added to metadata DB</li>
-        <li>Notification service notifies client 2 that the new file is being uploaded</li>
-      </ul>
-      <li>File upload</li>
-      <ul>
-        <li>Client 1 uploads file to block servers</li>
-        <li>Block servers process the file and upload blocks to cloud storage</li>
-        <li>Cloud storage calls API servers</li>
-        <li>API servers change file status to "uploaded" in metadata DB</li>
-        <li>Notification service notifies client 2 that the new file has been uploaded</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">File is added or edited elsewhere</h3>
-    <ul>
-      <li>Client 2 sends requests to API servers to fetch metadata</li>
-      <li>Client 2 sends requests to block servers to download blocks</li>
-      <li>Block servers retrieve blocks from cloud storage</li>
-      <li>Client 2 downloads all blocks to reconstruct the file</li>
-    </ul>
-
-    <h3 class="card-title">Notification service</h3>
-    <ul>
-      <li>WebSocket</li>
-      <ul>
-        <li>Persistent connection between client and server</li>
-        <li>Communication is bi-directional</li>
-        <li>Suited for real-time communication like chat app</li>
-      </ul>
-      <li>Long polling (choose this over WebSocket)</li>
-      <ul>
-        <li>Communication for notificaiton service is not bi-directional</li>
-        <li>Notifications are sent infrequently</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Save storage space</h3>
-    <ul>
-      <li>De-duplicate data blocks that have the same hash value</li>
-      <li>Set limits on number of versions to store</li>
-      <li>Move infrequently used data to cold storage</li>
-    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu
@@ -292,42 +227,30 @@
       </ul>
       <li>Fail over</li>
       <ul>
-        <li>Load balancer - active-passive, when heartbeat fails, the secondary takes the IP</li>
-        <li>Block servers - other block servers pick up the job</li>
-        <li>Cloud storage - S3 is replicated is multiple regions. Blocks can be fetched from different region if one region fails</li>
-        <li>API servers - traffic is redirected to other API servers via load balancer</li>
-        <li>Metadata cache - other cache servers serve the cache</li>
-        <li>Metadata DB</li>
-        <ul>
-          <li>Master - promote one slave to master</li>
-          <li>Slave - use anotehr slave for read operation</li>
-        </ul>
-        <li>Notification service - all clients reconnect to different server (This can be slow)</li>
-        <li>Offline backup queue - other queue can be subscribed by consumers</li>
+        <li></li>
+        <li></li>
       </ul>
     </ul>
 
     <h4 class="card-title">Reliability</h4>
     <ul>
-      <li>Data loss - regional backup of database using S3</li>
+      <li>Data loss</li>
     </ul>
 
     <h3 class="card-title">Scalability</h3>
     <ul>
       <li>Horizontal scaling</li>
-      <li>Data replication</li>
+      <li>Data partitioning - distribute based on hostname which contains URLs to visit, URL checksum, document checksum</li>
     </ul>
 
     <h4 class="card-title">Performance</h4>
     <ul>
-      <li>Use of metadata cache</li>
-      <li>Spliting files into blocks and delta update</li>
+      <li></li>
     </ul>
 
     <h3 class="card-title">Consistency</h3>
     <ul>
-      <li>RDBMS is chosen to achieve strong consistency</li>
-      <li>Strong consistency is needed for all users to see the same file information</li>
+      <li></li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -377,7 +300,7 @@
     <ul>
       <li>Data partitioning</li>
       <ul>
-        <li>Distribute based on hostname which contains URLs to visit, URL checksum, document checksum.</li>
+        <li>.</li>
       </ul>
     </ul>
 
