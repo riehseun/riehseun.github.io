@@ -123,16 +123,18 @@
   <div class="card-body">
     <h2 class="card-title">High level design</h2>
 
-    <ul>
-      <li>Worker gets a URL to work on.</li>
-      <li>DNS is resolved to provide the IP address.</li>
-      <li>Download the document.</li>
-      <li>Parse document contents to look for new URLs.</li>
-      <li>Add new URLs to unvisited URL list.</li>
-      <li>Process downloaded document.</li>
-    </ul>
-
     <img class="img-fluid" class="card-img-top" src="/img/system-design/web-crawler1.png" alt="Card image cap">
+    <ul>
+      <li>Add seed URLs to URL frontier</li>
+      <li>Service host fetches URLs from URL frontier</li>
+      <li>Service host gets IP addresses of URLs from DNS resolver and starts downloading</li>
+      <li>Content parser validates HTML pages</li>
+      <li>Duplicate HTML eliminator checks if HTML is already in storage</li>
+      <li>Duplicate URL eliminator checks if URL is already in storage</li>
+      <ul>
+        <li>If URL is not duplicate, it is added to URL frontier</li>
+      </ul>
+    </ul>
 
     <h3 class="card-title">Seed URLs</h3>
     <ul>
@@ -142,18 +144,6 @@
     <h3 class="card-title">URL frontier (priority queue)</h3>
     <ul>
       <li>Contains all the remaining URLs to download</li>
-      <li>Prioritize which URLs should be downloaded first</li>
-      <li>Use BFS implemented by a queue</li>
-      <li>Distributed into multiple servers</li>
-      <ul>
-        <li>Each server maintains many queues such that each thread gets a queue</li>
-        <li>Hash table maps carnonical hostname to thread number that run the queue</li>
-      </ul>
-      <li>Due to huge size of URLs, need to store URLs into a disk</li>
-      <ul>
-        <li>Enqueue buffer, once filled, is dumped into disk</li>
-        <li>Dequeue buffer keeps cache of URLs to be visited. It periodically reads from disk to fill the buffer</li>
-      </ul>
     </ul>
 
     <h3 class="card-title">Service host</h3>
@@ -207,7 +197,44 @@
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
 
+    <h3 class="card-title">URL frontier (priority queue)</h3>
+    <ul>
+      <li>Use BFS (DFS is not a good choice because depth can be very deep)</li>
+    </ul>
 
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/web-crawler2.png" alt="Card image cap">
+
+    <h4 class="card-title">Priority</h4>
+    <ul>
+      <li>Prioritizer computes priority of each URL</li>
+      <li>Each queue is assigned a priority</li>
+      <li>Queue selector has higher probability of picking queues with higher priority</li>
+    </ul>
+
+    <h4 class="card-title">Politeness</h4>
+    <ul>
+      <li>Download one page at a time from the same host</li>
+      <li>Each thread in service host has a queue and download URLs from that queue</li>
+      <li>Queue router ensures that each queue only contains URLs from the same host</li>
+      <li>Mapping table maps host (ex. wikipedia.com) to queue</li>
+      <li>Queue selector rotates worker threads that downloads webpages</li>
+    </ul>
+
+    <h4 class="card-title">Freshness</h4>
+    <ul>
+      <li>Recrawl is needed because webpates are updated</li>
+      <li>Recrawl URLs with higher priority first</li>
+    </ul>
+
+    <h4 class="card-title">Storage</h4>
+    <ul>
+      <li>Due to huge size of URLs, need to store URLs into a disk</li>
+      <li>But, disk is slow, thus introduce buffers in memory</li>
+      <ul>
+        <li>Enqueue buffer - once filled, written to disk</li>
+        <li>Dequeue buffer - keeps cache of URLs to be visited. It periodically reads from disk to fill the buffer</li>
+      </ul>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
