@@ -55,8 +55,7 @@
   <div class="card-body">
     <h2 class="card-title">Binary tree level order traversal (M) (Interview/Liked)</h2>
 
-<pre><code class="python">from collections import deque, defaultdict
-# Definition for a binary tree node.
+<pre><code class="python"># Definition for a binary tree node.
 # class TreeNode:
 #     def __init__(self, val=0, left=None, right=None):
 #         self.val = val
@@ -65,40 +64,40 @@
 class Solution:
     def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
 
+        # Do BFS
+
+        self.nodes = defaultdict(list)
+
+        # Time O(n) where n is number of nodes
+        # Space O(n) where n is number of nodes
+        def bfs(root):
+
+            explored = set()
+            explored.add(root)
+
+            queue = deque()
+            queue.append((root,0))
+
+            while queue:
+                root, depth = queue.popleft()
+                self.nodes[depth].append(root.val)
+                if root.left and root.left not in explored:
+                    explored.add(root.left)
+                    queue.append((root.left,depth+1))
+                if root.right and root.right not in explored:
+                    explored.add(root.right)
+                    queue.append((root.right,depth+1))
+
         if not root:
             return []
 
-        result = defaultdict(list)
-        self.bfs(root, result)
+        bfs(root)
 
-        final_result = []
-        for k,v in result.items():
-            final_result.append(v)
+        ret_val = []
+        for k,v in self.nodes.items():
+            ret_val.append(v)
 
-        return final_result
-
-    def bfs(self, root, result):
-        level = 0
-
-        queue = deque()
-        queue.append((root, root.val, level))
-
-        explored = set()
-        explored.add(root)
-
-        while queue:
-            node, node.val, level = queue.popleft()
-            result[level].append(node.val)
-            if node.left:
-                if node.left.val not in explored:
-                    explored.add(node.left)
-                    queue.append((node.left, node.left.val, level+1))
-            if node.right:
-                if root.right.val not in explored:
-                    explored.add(node.right)
-                    queue.append((node.right, node.right.val, level+1))
-
-        return result</code></pre>
+        return ret_val</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/binary-tree-level-order-traversal">102. Binary Tree Level Order Traversal</a>

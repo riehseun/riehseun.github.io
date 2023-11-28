@@ -75,25 +75,42 @@
 #         self.left = left
 #         self.right = right
 class Solution:
-    def inorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
+    def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
 
-        # Traverse tree
-        # Return the order as left, root, right
+        # Do BFS
 
-        inorder = []
-        self.helper(root, inorder)
-        return inorder
+        self.nodes = defaultdict(list)
 
-    # Time O(n) where n is number of nodes
-    # Space O(h) where h = n if worst case, h = log(n) if best case
-    def helper(self, root, inorder):
+        # Time O(n) where n is number of nodes
+        # Space O(n) where n is number of nodes
+        def bfs(root):
 
-        if root:
-            self.helper(root.left, inorder)
-            inorder.append(root.val)
-            self.helper(root.right, inorder)
+            explored = set()
+            explored.add(root)
 
-        return []</code></pre>
+            queue = deque()
+            queue.append((root,0))
+
+            while queue:
+                root, depth = queue.popleft()
+                self.nodes[depth].append(root.val)
+                if root.left and root.left not in explored:
+                    explored.add(root.left)
+                    queue.append((root.left,depth+1))
+                if root.right and root.right not in explored:
+                    explored.add(root.right)
+                    queue.append((root.right,depth+1))
+
+        if not root:
+            return []
+
+        bfs(root)
+
+        ret_val = []
+        for k,v in self.nodes.items():
+            ret_val.append(v)
+
+        return ret_val</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/binary-tree-inorder-traversal">94. Binary Tree Inorder Traversal</a>
