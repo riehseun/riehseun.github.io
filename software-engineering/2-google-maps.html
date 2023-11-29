@@ -46,12 +46,11 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#google-maps-1">Requirement</a></li>
       <li><a href="#google-maps-2">Estimation</a></li>
-      <li><a href="#google-maps-3">Storage schema</a></li>
-      <li><a href="#google-maps-4">High level design</a></li>
-      <li><a href="#google-maps-5">API</a></li>
+      <li><a href="#google-maps-3">High level design</a></li>
+      <li><a href="#google-maps-4">API</a></li>
+      <li><a href="#google-maps-5">Storage schema</a></li>
       <li><a href="#google-maps-6">Detailed design</a></li>
       <li><a href="#google-maps-7">Evaluation</a></li>
-      <li><a href="#google-maps-8">Distinct component</a></li>
     </ul>
   </div>
 </div>
@@ -118,54 +117,6 @@
 </div>
 
 <div class="card mb-4" id="google-maps-3">
-  <div class="card-body">
-    <h2 class="card-title">Storage schema</h2>
-
-    <h3 class="card-title">Key-value store</h3>
-    <ul>
-      <li>Segment to server</li>
-      <ul>
-        <li>segment_id (int)</li>
-        <li>server_id (int)</li>
-      </ul>
-      <li>Belongs to segment</li>
-      <ul>
-        <li>segment_id (int)</li>
-        <li>coordinates (list) - stores latitude and longitude</li>
-      </ul>
-      <li>Neighbors</li>
-      <ul>
-        <li>segment_id (int)</li>
-        <li>neighbors (list) - stores a list of segment IDs</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Graph DB</h3>
-    <ul>
-      <li>Graph data</li>
-      <ul>
-        <li>segment_id (int)</li>
-        <li>road_network (graph)</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Relational DB</h3>
-    <ul>
-      <li>Rush hour</li>
-      <ul>
-        <li>segment_id (int)</li>
-        <li>edge_id (int)</li>
-        <li>hour_range (tuple)</li>
-        <li>rush_hour (bool) - where there is congestion or not</li>
-      </ul>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a> | System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="google-maps-4">
   <div class="card-body">
     <h2 class="card-title">High level design</h2>
 
@@ -240,7 +191,7 @@
   </div>
 </div>
 
-<div class="card mb-4" id="google-maps-5">
+<div class="card mb-4" id="google-maps-4">
   <div class="card-body">
     <h2 class="card-title">API</h2>
     <ul>
@@ -264,6 +215,54 @@
       <li><code>directions(curr_location, steps)</code></li>
       <ul>
         <li>Provides alerts of when and where to make turns</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a> | System Design Interview Volume 2, Alex Xu & Sahn Lam
+  </div>
+</div>
+
+<div class="card mb-4" id="google-maps-5">
+  <div class="card-body">
+    <h2 class="card-title">Storage schema</h2>
+
+    <h3 class="card-title">Key-value store</h3>
+    <ul>
+      <li>Segment to server</li>
+      <ul>
+        <li>segment_id (int)</li>
+        <li>server_id (int)</li>
+      </ul>
+      <li>Belongs to segment</li>
+      <ul>
+        <li>segment_id (int)</li>
+        <li>coordinates (list) - stores latitude and longitude</li>
+      </ul>
+      <li>Neighbors</li>
+      <ul>
+        <li>segment_id (int)</li>
+        <li>neighbors (list) - stores a list of segment IDs</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Graph DB</h3>
+    <ul>
+      <li>Graph data</li>
+      <ul>
+        <li>segment_id (int)</li>
+        <li>road_network (graph)</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Relational DB</h3>
+    <ul>
+      <li>Rush hour</li>
+      <ul>
+        <li>segment_id (int)</li>
+        <li>edge_id (int)</li>
+        <li>hour_range (tuple)</li>
+        <li>rush_hour (bool) - where there is congestion or not</li>
       </ul>
     </ul>
   </div>
@@ -307,6 +306,20 @@
       <li>Map update service listens for updates and updates segment graph</li>
       <li>Graph preprocessing service recalculates the new paths on the updated segment graph</li>
     </ul>
+
+    <h3 class="card-title">Sub-graphs (Segment)</h3>
+    <ul>
+      <li>Computing distances between two points on the entire graph is super expensive</li>
+      <li>Precalculate the shortest distance between two points in sub-graphs. Also, cache most requested routes</li>
+      <li>Connect sub-graphs and run the shortest distance algorithm</li>
+    </ul>
+
+    <h3 class="card-title">Segment adder</h3>
+    <ul>
+      <li>Segment adder assigns unique ID to each segment</li>
+      <li>Segment is assigned to a server and segment adder gets the server_id</li>
+      <li>Key-value store keeps the segment to server mapping</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a> | System Design Interview Volume 2, Alex Xu & Sahn Lam
@@ -344,29 +357,6 @@
     <h3 class="card-title">Consistency</h3>
     <ul>
       <li></li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a> | System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="google-maps-8">
-  <div class="card-body">
-    <h2 class="card-title">Distinct component</h2>
-
-    <h3 class="card-title">Sub-graphs (Segment)</h3>
-    <ul>
-      <li>Computing distances between two points on the entire graph is super expensive</li>
-      <li>Precalculate the shortest distance between two points in sub-graphs. Also, cache most requested routes</li>
-      <li>Connect sub-graphs and run the shortest distance algorithm</li>
-    </ul>
-
-    <h3 class="card-title">Segment adder</h3>
-    <ul>
-      <li>Segment adder assigns unique ID to each segment</li>
-      <li>Segment is assigned to a server and segment adder gets the server_id</li>
-      <li>Key-value store keeps the segment to server mapping</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
