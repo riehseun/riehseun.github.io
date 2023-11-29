@@ -44,239 +44,19 @@
   <div class="card-body">
     <h2 class="card-title">Tree DFS</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#tree-">Binary tree inorder traversal</a></li>
-      <li><a href="#tree-">Validate Binary Search Tree</a></li>
-      <li><a href="#tree-">Recover Binary Search Tree</a></li>
-      <li><a href="#tree-">Construct binary tree from preorder and inorder traversal</a></li>
-      <li><a href="#tree-">Construct binary tree from inorder and postorder traversal</a></li>
-      <li><a href="#tree-">Convert Sorted Array to Binary Search Tree</a></li>
-      <li><a href="#tree-">Convert sorted list to binary search tree</a></li>
-      <li><a href="#tree-">Balanced Binary Tree</a></li>
-      <li><a href="#tree-">Path sum II</a></li>
-      <li><a href="#tree-">Flatten binary tree to linked list</a></li>
-      <li><a href="#tree-">Binary tree maximum path sum</a></li>
-      <li><a href="#tree-">Sum root to leaf numbers</a></li>
-      <li><a href="#tree-">Binary tree preorder traversal</a></li>
-      <li><a href="#tree-">Binary tree postorder traversal</a></li>
-      <li><a href="#tree-">Diameter of binary tree</a></li>
-      <li><a href="#tree-">Longest univalue path</a></li>
+      <li><a href="#tree-dfs">Convert Sorted Array to Binary Search Tree</a></li>
+      <li><a href="#tree-dfs">Convert sorted list to binary search tree</a></li>
+      <li><a href="#tree-dfs">Balanced Binary Tree</a></li>
+      <li><a href="#tree-dfs">Path sum II</a></li>
+      <li><a href="#tree-dfs">Binary tree maximum path sum</a></li>
+      <li><a href="#tree-dfs">Sum root to leaf numbers</a></li>
+      <li><a href="#tree-dfs">Diameter of binary tree</a></li>
+      <li><a href="#tree-dfs">Longest univalue path</a></li>
     </ul>
   </div>
 </div>
 
-<div class="card mb-4" id="tree-">
-  <div class="card-body">
-    <h2 class="card-title">Binary tree inorder traversal (E)</h2>
-
-<pre><code class="python"># Definition for a binary tree node.
-# class TreeNode:
-#     def __init__(self, val=0, left=None, right=None):
-#         self.val = val
-#         self.left = left
-#         self.right = right
-class Solution:
-    def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
-
-        # Do BFS
-
-        self.nodes = defaultdict(list)
-
-        # Time O(n) where n is number of nodes
-        # Space O(n) where n is number of nodes
-        def bfs(root):
-
-            explored = set()
-            explored.add(root)
-
-            queue = deque()
-            queue.append((root,0))
-
-            while queue:
-                root, depth = queue.popleft()
-                self.nodes[depth].append(root.val)
-                if root.left and root.left not in explored:
-                    explored.add(root.left)
-                    queue.append((root.left,depth+1))
-                if root.right and root.right not in explored:
-                    explored.add(root.right)
-                    queue.append((root.right,depth+1))
-
-        if not root:
-            return []
-
-        bfs(root)
-
-        ret_val = []
-        for k,v in self.nodes.items():
-            ret_val.append(v)
-
-        return ret_val</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/binary-tree-inorder-traversal">94. Binary Tree Inorder Traversal</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="tree-">
-  <div class="card-body">
-    <h2 class="card-title">Validate binary search tree (M)</h2>
-
-<pre><code class="python"># Definition for a binary tree node.
-# class TreeNode:
-#     def __init__(self, val=0, left=None, right=None):
-#         self.val = val
-#         self.left = left
-#         self.right = right
-class Solution:
-    def isValidBST(self, root: Optional[TreeNode]) -> bool:
-
-        # Convert to inorder traversal
-        # If find non-increasing sequence, return False
-
-        inorder = []
-        self.helper(root, inorder)
-
-        for i in range(len(inorder)-1):
-            if inorder[i] >= inorder[i+1]:
-                return False
-
-        return True
-
-    # Time O(n) where n is number of nodes
-    # Space O(h) where h = n if worst case, h = log(n) if best case
-    def helper(self, root, inorder):
-
-        if root:
-            self.helper(root.left, inorder)
-            inorder.append(root.val)
-            self.helper(root.right, inorder)
-
-        return []</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/validate-binary-search-tree">98. Validate Binary Search Tree</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="tree-">
-  <div class="card-body">
-    <h2 class="card-title">Recover binary search tree (M)</h2>
-
-<pre><code class="python"># Definition for a binary tree node.
-# class TreeNode:
-#     def __init__(self, val=0, left=None, right=None):
-#         self.val = val
-#         self.left = left
-#         self.right = right
-class Solution:
-    def recoverTree(self, root: Optional[TreeNode]) -> None:
-        """
-        Do not return anything, modify root in-place instead.
-        """
-
-        # Do inorder traversal
-        # During inorder traversal, find elements that need to be swapped
-
-        self.previous = TreeNode(-math.inf)
-        self.first = None
-        self.second = None
-
-        # Time O(n) where n is the number of nodes in tress
-        # Space O(h) where h = n if worst case, h = log(n) if best case
-        def helper(root):
-
-            if root:
-                helper(root.left)
-
-                if self.previous.val >= root.val:
-                    if not self.first:
-                        self.first = self.previous
-                    self.second = root
-                self.previous = root
-
-                helper(root.right)
-
-        helper(root)
-        self.first.val, self.second.val = self.second.val, self.first.val</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/recover-binary-search-tree">99. Recover Binary Search Tree</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="tree-">
-  <div class="card-body">
-    <h2 class="card-title">Construct binary tree from preorder and inorder traversal (M)</h2>
-
-<pre><code class="python"># Definition for a binary tree node.
-# class TreeNode:
-#     def __init__(self, val=0, left=None, right=None):
-#         self.val = val
-#         self.left = left
-#         self.right = right
-class Solution:
-    def buildTree(self, preorder: List[int], inorder: List[int]) -> Optional[TreexNode]:
-
-        # Preorder - root, left, right
-        # Inorder - left, root, right
-        # The very first number of preorder is always the root
-        # Numbers left of this root from inorder forms left subtree
-        # Numbers right of this root from inorder forms left subtree
-
-        # Time O(n) computation takes place on each node of tree
-
-        if inorder:
-
-            root_node = preorder.pop(0)
-            root_index = inorder.index(root_node)
-            root = TreeNode(root_node)
-            root.left = self.buildTree(preorder[:len(inorder[:root_index])], inorder[:root_index])
-            root.right = self.buildTree(preorder[len(inorder[:root_index]):], inorder[root_index+1:])
-
-            return root</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal">105. Construct Binary Tree from Preorder and Inorder Traversal</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="tree-">
-  <div class="card-body">
-    <h2 class="card-title">Construct binary tree from inorder and postorder traversal (M)</h2>
-
-<pre><code class="python"># Definition for a binary tree node.
-# class TreeNode:
-#     def __init__(self, val=0, left=None, right=None):
-#         self.val = val
-#         self.left = left
-#         self.right = right
-class Solution:
-    def buildTree(self, inorder: List[int], postorder: List[int]) -> Optional[TreeNode]:
-
-        # Postorder - left, right, root
-        # Inorder - left, root, right
-        # The very last number of preorder is always the root
-        # Numbers left of this root from inorder forms left subtree
-        # Numbers right of this root from inorder forms left subtree
-
-        # Time O(n) computation takes place on each node of tree
-
-        if inorder and postorder:
-
-            root_node = postorder.pop()
-            root_index = inorder.index(root_node)
-            root = TreeNode(root_node)
-            root.left = self.buildTree(inorder[:root_index], postorder[:len(inorder[:root_index])])
-            root.right = self.buildTree(inorder[root_index+1:], postorder[len(inorder[:root_index]):])
-
-            return root</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal">106. Construct Binary Tree from Inorder and Postorder Traversal</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="tree-">
+<div class="card mb-4" id="tree-dfs">
   <div class="card-body">
     <h2 class="card-title">Convert Sorted Array to Binary Search Tree (E)</h2>
 
@@ -310,7 +90,7 @@ class Solution:
   </div>
 </div>
 
-<div class="card mb-4" id="tree-">
+<div class="card mb-4" id="tree-dfs">
   <div class="card-body">
     <h2 class="card-title">Convert sorted list to binary search tree (M)</h2>
 
@@ -359,7 +139,7 @@ class Solution:
   </div>
 </div>
 
-<div class="card mb-4" id="tree-">
+<div class="card mb-4" id="tree-dfs">
   <div class="card-body">
     <h2 class="card-title">Balanced binary tree (E)</h2>
 
@@ -406,7 +186,7 @@ class Solution:
   </div>
 </div>
 
-<div class="card mb-4" id="tree-">
+<div class="card mb-4" id="tree-dfs">
   <div class="card-body">
     <h2 class="card-title">Path sum II (M)</h2>
 
@@ -444,49 +224,7 @@ class Solution:
   </div>
 </div>
 
-<div class="card mb-4" id="tree-">
-  <div class="card-body">
-    <h2 class="card-title">Flatten binary tree to linked list (M)</h2>
-
-<pre><code class="python"># Definition for a binary tree node.
-# class TreeNode:
-#     def __init__(self, val=0, left=None, right=None):
-#         self.val = val
-#         self.left = left
-#         self.right = right
-class Solution:
-    def flatten(self, root: Optional[TreeNode]) -> None:
-        """
-        Do not return anything, modify root in-place instead.
-        """
-
-        # Do post-order traversing (right, root, left)
-        # Set root.left to None
-        # Set root.right to previous root
-
-        self.prev = None
-
-        # Time O(n) where n is number of nodes
-        # Space O(h) where h = n if worst case, h = log(n) if best case
-        def helper(root):
-
-            if root:
-                print(root.val)
-                helper(root.right)
-                helper(root.left)
-
-                root.left = None
-                root.right = self.prev
-                self.prev = root
-
-        helper(root)</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/flatten-binary-tree-to-linked-list">114. Flatten Binary Tree to Linked List</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="tree-">
+<div class="card mb-4" id="tree-dfs">
   <div class="card-body">
     <h2 class="card-title">Binary tree maximum path sum (H) (Interview/Liked)</h2>
 
@@ -533,7 +271,7 @@ class Solution:
   </div>
 </div>
 
-<div class="card mb-4" id="tree-">
+<div class="card mb-4" id="tree-dfs">
   <div class="card-body">
     <h2 class="card-title">Sum root to leaf numbers (M)</h2>
 
@@ -579,75 +317,7 @@ class Solution:
   </div>
 </div>
 
-<div class="card mb-4" id="tree-">
-  <div class="card-body">
-    <h2 class="card-title">Binary tree preorder traversal (E)</h2>
-
-<pre><code class="python"># Definition for a binary tree node.
-# class TreeNode:
-#     def __init__(self, val=0, left=None, right=None):
-#         self.val = val
-#         self.left = left
-#         self.right = right
-class Solution:
-    def preorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
-
-        self.preorder = []
-
-        # Time O(n) where n is number of nodes
-        # Space O(h) where h = n if worst case, h = log(n) if best case
-        def helper(root):
-
-            if root:
-
-                self.preorder.append(root.val)
-                helper(root.left)
-                helper(root.right)
-
-        helper(root)
-
-        return self.preorder</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/binary-tree-preorder-traversal">144. Binary Tree Preorder Traversal</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="tree-">
-  <div class="card-body">
-    <h2 class="card-title">Binary tree postorder traversal (E)</h2>
-
-<pre><code class="python"># Definition for a binary tree node.
-# class TreeNode:
-#     def __init__(self, val=0, left=None, right=None):
-#         self.val = val
-#         self.left = left
-#         self.right = right
-class Solution:
-    def postorderTraversal(self, root: Optional[TreeNode]) -> List[int]:
-
-        self.postorder = []
-
-        # Time O(n) where n is number of nodes
-        # Space O(h) where h = n if worst case, h = log(n) if best case
-        def helper(root):
-
-            if root:
-
-                helper(root.left)
-                helper(root.right)
-                self.postorder.append(root.val)
-
-        helper(root)
-
-        return self.postorder</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/binary-tree-postorder-traversal">145. Binary Tree Postorder Traversal</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="tree-">
+<div class="card mb-4" id="tree-dfs">
   <div class="card-body">
     <h2 class="card-title">Diameter of binary tree (E)</h2>
 
@@ -700,7 +370,7 @@ class Solution:
   </div>
 </div>
 
-<div class="card mb-4" id="tree-">
+<div class="card mb-4" id="tree-dfs">
   <div class="card-body">
     <h2 class="card-title">Longest univalue path (M)</h2>
 
