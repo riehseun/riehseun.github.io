@@ -47,8 +47,6 @@
       <li><a href="#tree-">Same tree</a></li>
       <li><a href="#tree-">Symmetric tree</a></li>
       <li><a href="#tree-">Populating next right pointers in each node</a></li>
-      <li><a href="#tree-">Populating next right pointers in each node II</a></li>
-      <li><a href="#tree-">Binary tree right side view</a></li>
       <li><a href="#tree-">Invert binary tree</a></li>
       <li><a href="#tree-">Serialize and deserialize binary tree</a></li>
       <li><a href="#tree-">Range sum of bst</a></li>
@@ -157,22 +155,22 @@ class Node:
 class Solution:
     def connect(self, root: 'Optional[Node]') -> 'Optional[Node]':
 
-        temp = root
-        self.helper(root)
-        return temp
+        # Time O(n) where n is number of nodes
+        # Space O(h) where h = log(n)
+        def helper(root):
 
+            if root:
+                if root.left:
+                    root.left.next = root.right
+                    if root.next:
+                        root.right.next = root.next.left
 
-    def helper(self, root):
-        if not root:
-            return
+                helper(root.left)
+                helper(root.right)
 
-        if root.left:
-            root.left.next = root.right
-            if root.next:
-                root.right.next = root.next.left
+        helper(root)
 
-        self.helper(root.left)
-        self.helper(root.right)</code></pre>
+        return root</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/populating-next-right-pointers-in-each-node">116. Populating Next Right Pointers in Each Node</a>
@@ -181,31 +179,32 @@ class Solution:
 
 <div class="card mb-4" id="tree-">
   <div class="card-body">
-    <h2 class="card-title">Populating next right pointers in each node II</h2>
-
-<pre><code class="python"></code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/populating-next-right-pointers-in-each-node-ii">117. Populating Next Right Pointers in Each Node II</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="tree-">
-  <div class="card-body">
-    <h2 class="card-title">Binary tree right side view (M)</h2>
-
-<pre><code class="python"></code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/binary-tree-right-side-view">199. Binary Tree Right Side View</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="tree-">
-  <div class="card-body">
     <h2 class="card-title">Invert binary tree (E)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python"># Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+
+        # Time O(n) where n is number of nodes
+        # Space O(h) where h = n if worst case, h = log(n) if best case
+
+        def helper(root):
+
+            if root:
+
+                root.left, root.right = root.right, root.left
+
+                helper(root.left)
+                helper(root.right)
+
+        helper(root)
+
+        return root</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/invert-binary-tree">226. Invert Binary Tree</a>
@@ -279,10 +278,39 @@ class Codec:
   <div class="card-body">
     <h2 class="card-title">Range sum of bst (E)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python"># Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def rangeSumBST(self, root: Optional[TreeNode], low: int, high: int) -> int:
+
+        # Get all nodes
+
+        self.nodes = []
+
+        # Time O(n) where n is number of nodes
+        # Space O(h) where h = n if worst case, h = log(n) if best case
+        def helper(root):
+
+            if root:
+                self.nodes.append(root.val)
+                helper(root.left)
+                helper(root.right)
+
+        helper(root)
+
+        range_sum = 0
+        for node in self.nodes:
+            if node >= low and node <= high:
+                range_sum +=  node
+
+        return range_sum</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/longest-univalue-path">938. Range Sum of BST</a>
+    Reference: <a href="https://leetcode.com/problems/range-sum-of-bst">938. Range Sum of BST</a>
   </div>
 </div>
 <!-- Tree DFS/BFS END -->
