@@ -48,6 +48,8 @@
       <li><a href="#tree-bfs">Binary tree zigzag level order traversal</a></li>
       <li><a href="#tree-bfs">Binary tree level order traversal II</a></li>
       <li><a href="#tree-bfs">Minimum depth of binary tree</a></li>
+      <li><a href="#tree-bfs">Populating next right pointers in each node II</a></li>
+      <li><a href="#tree-bfs">Binary tree right side view</a></li>
     </ul>
   </div>
 </div>
@@ -266,6 +268,121 @@ class Solution:
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/minimum-depth-of-binary-tree">111. Minimum Depth of Binary Tree</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="tree-bfs">
+  <div class="card-body">
+    <h2 class="card-title">Populating next right pointers in each node II</h2>
+
+<pre><code class="python">"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val: int = 0, left: 'Node' = None, right: 'Node' = None, next: 'Node' = None):
+        self.val = val
+        self.left = left
+        self.right = right
+        self.next = next
+"""
+
+class Solution:
+    def connect(self, root: 'Node') -> 'Node':
+
+        # Do BFS
+        # Keep prev node at each level
+        # Reset prev to None when the depth changes
+
+        # Time O(n) where n is number of nodes
+        # Space O(n) where n is number of nodes
+        def bfs(root):
+
+            explored = set()
+            explored.add(root)
+
+            queue = deque()
+            queue.append((root,0))
+
+            prev = None
+            prev_depth = 0
+
+            while queue:
+                root, depth = queue.popleft()
+                if depth > prev_depth:
+                    prev = None
+                if root.left and root.left not in explored:
+                    explored.add(root.left)
+                    queue.append((root.left,depth+1))
+                    if prev:
+                        prev.next = root.left
+                    prev = root.left
+                    prev_depth = depth
+                if root.right and root.right not in explored:
+                    explored.add(root.right)
+                    queue.append((root.right,depth+1))
+                    if prev:
+                        prev.next = root.right
+                    prev = root.right
+                    prev_depth = depth
+
+        if not root:
+            return None
+
+        bfs(root)
+
+        return root</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/populating-next-right-pointers-in-each-node-ii">117. Populating Next Right Pointers in Each Node II</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="tree-bfs">
+  <div class="card-body">
+    <h2 class="card-title">Binary tree right side view (M)</h2>
+
+<pre><code class="python"># Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def rightSideView(self, root: Optional[TreeNode]) -> List[int]:
+
+        # Do BFS
+        # Pick only the right most
+
+        self.right_side_view = {}
+
+        # Time O(n) where n is number of nodes
+        # Space O(n) where n is number of nodes
+        def bfs(root):
+
+            explored = set()
+            explored.add(root)
+
+            queue = deque()
+            queue.append((root,0))
+
+            while queue:
+                root, depth = queue.popleft()
+                self.right_side_view[depth] = root.val
+                if root.left and root.left not in explored:
+                    explored.add(root.left)
+                    queue.append((root.left,depth+1))
+                if root.right and root.right not in explored:
+                    explored.add(root.right)
+                    queue.append((root.right,depth+1))
+
+        if not root:
+            return []
+
+        bfs(root)
+
+        return self.right_side_view.values()</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/binary-tree-right-side-view">199. Binary Tree Right Side View</a>
   </div>
 </div>
 <!-- Tree BFS END -->
