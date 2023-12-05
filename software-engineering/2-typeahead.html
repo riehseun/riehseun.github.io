@@ -44,46 +44,61 @@
   <div class="card-body">
     <h2 class="card-title">Typeahead</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#typeahead-1">Typeahead</a></li>
+      <li><a href="#typeahead-1">Requirement</a></li>
+      <li><a href="#typeahead-2">Estimation</a></li>
+      <li><a href="#typeahead-3">High level design</a></li>
+      <!-- <li><a href="#typeahead-4">API</a></li> -->
+      <!-- <li><a href="#typeahead-5">Storage schema</a></li> -->
+      <li><a href="#typeahead-6">Detailed design</a></li>
+      <li><a href="#typeahead-7">Evaluation</a></li>
     </ul>
   </div>
 </div>
 
 <div class="card mb-4" id="typeahead-1">
   <div class="card-body">
-    <h2 class="card-title">Typeahead</h2>
+    <h2 class="card-title">Requirement</h2>
 
-    <h3 class="card-title">Requirement</h3>
-
-    <h4 class="card-title">Functional</h4>
+    <h3 class="card-title">Functional</h3>
     <ul>
-      <li>Suggests top 10 terms starting with whatever user has typed.</li>
+      <li>How many suggestions should the system return> 10</li>
+      <li>What criteria is used to determine top 10 terms? popularity and historical query frequency</li>
+      <li>Should the system support spell check? No</li>
+      <li>Should the system support multi-language? No, english only</li>
+      <li>Should the system support capital letters and special characters? No, lower case only</li>
+      <li>How many daily active users? 10M</li>
+      <li>How many queries each user makes? 100</li>
     </ul>
 
-    <h4 class="card-title">Non-functional</h4>
+    <h3 class="card-title">Non-functional</h3>
     <ul>
-      <li>Availability.</li>
-      <li>Reliability.</li>
-      <li>Scalability.</li>
-      <li>Performance.</li>
-      <ul>
-        <li>Users should see suggestions within 200ms.</li>
-      </ul>
+      <li>Availability</li>
+      <li>Reliability</li>
+      <li>Scalability</li>
+      <li>Performance</li>
+      <li>Consistency</li>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
 
-    <h3 class="card-title">Estimation</h3>
+<div class="card mb-4" id="typeahead-2">
+  <div class="card-body">
+    <h2 class="card-title">Estimation</h2>
 
-    <h4 class="card-title">Server</h4>
+    <h3 class="card-title">Server</h3>
     <ul>
       <li>Assume</li>
       <ul>
-        <li>10B queries per day = 115740 queries per second.</li>
-        <li>A single server can handle 10K connections.</li>
+        <li>10B queries per day = 115740 queries per second</li>
+        <li>A single server can handle 10K connections</li>
       </ul>
-      <li>115740 / 10k = 12 servers are needed.</li>
+      <li>115740 / 10k = 12 servers are needed</li>
     </ul>
 
-    <h4 class="card-title">Storage</h4>
+    <h3 class="card-title">Storage</h3>
     <ul>
       <li>Assume</li>
       <ul>
@@ -95,7 +110,7 @@
       <li>1B per day * 10 * 2 = 20GB per day.</li>
     </ul>
 
-    <h4 class="card-title">Bandwidth</h4>
+    <h3 class="card-title">Bandwidth</h3>
     <ul>
       <li>Assume</li>
       <ul>
@@ -105,6 +120,234 @@
       <li>Incoming: 10B * 10 * 2 * 8 / 86400 = 18.5Mbps</li>
       <li>Outgoing: 10 * 10 * 18.5Mbps = 1.85Gbps</li>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="typeahead-3">
+  <div class="card-body">
+    <h2 class="card-title">High level design</h2>
+
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/typeahead1.png" alt="Card image cap">
+    <ul>
+      <li>Add seed URLs to URL frontier</li>
+      <li>Service host fetches URLs from URL frontier</li>
+      <li>Service host gets IP addresses of URLs from DNS resolver and starts downloading</li>
+      <li>Content parser validates HTML pages</li>
+      <li>Duplicate HTML eliminator checks if HTML is already in storage</li>
+      <li>Duplicate URL eliminator checks if URL is already in storage</li>
+      <ul>
+        <li>If URL is not duplicate, it is added to URL frontier</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Seed URLs</h3>
+    <ul>
+      <li>Base URLs</li>
+    </ul>
+
+    <h3 class="card-title">URL frontier (priority queue)</h3>
+    <ul>
+      <li>Contains all the remaining URLs to download</li>
+    </ul>
+
+    <h3 class="card-title">Service host</h3>
+    <ul>
+      <li>Each worker dequeues URL from the URL frontier</li>
+      <li>Each worker uses DNS resolver to acquire web page's IP address</li>
+    </ul>
+
+    <h3 class="card-title">DNS resolver</h3>
+    <ul>
+      <li>Custom DNS resolver is needed because DNS lookup is time consuming process</li>
+      <li>Cache frequently used IP addresses within their TTL</li>
+    </ul>
+
+    <h3 class="card-title">Content parser</h3>
+    <ul>
+      <li>HTML is parsed and validated</li>
+    </ul>
+
+    <h3 class="card-title">Duplicate HTML eliminator</h3>
+    <ul>
+      <li>Checks if document is duplicate by checking the hash values of two web pages</li>
+    </ul>
+
+    <h3 class="card-title">URL extractor</h3>
+    <ul>
+      <li>Extracts links from HTML pages</li>
+    </ul>
+
+    <h3 class="card-title">URL filter</h3>
+    <ul>
+      <li>Exclude certain content types, file extensions, and blacklisted sites</li>
+    </ul>
+
+    <h3 class="card-title">Duplicate URL eliminator</h3>
+    <ul>
+      <li>Bloom filter or hash table is used</li>
+    </ul>
+
+    <h4 class="card-title">URL storage</h4>
+    <ul>
+      <li>Stores already visited URLs</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="typeahead-6">
+  <div class="card-body">
+    <h2 class="card-title">Detailed design</h2>
+
+    <h3 class="card-title">URL frontier (priority queue)</h3>
+    <ul>
+      <li>Use BFS (DFS is not a good choice because depth can be very deep)</li>
+    </ul>
+
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/typeahead2.png" alt="Card image cap">
+
+    <h4 class="card-title">Priority</h4>
+    <ul>
+      <li>Prioritizer computes priority of each URL</li>
+      <li>Each queue is assigned a priority</li>
+      <li>Queue selector has higher probability of picking queues with higher priority</li>
+    </ul>
+
+    <h4 class="card-title">Politeness</h4>
+    <ul>
+      <li>Download one page at a time from the same host</li>
+      <li>Each thread in service host has a queue and download URLs from that queue</li>
+      <li>Queue router ensures that each queue only contains URLs from the same host</li>
+      <li>Mapping table maps host (ex. wikipedia.com) to queue</li>
+      <li>Queue selector rotates worker threads that downloads webpages</li>
+    </ul>
+
+    <h4 class="card-title">Freshness</h4>
+    <ul>
+      <li>Recrawl is needed because webpages are constantly updated</li>
+      <li>Recrawl URLs with higher priority first</li>
+    </ul>
+
+    <h4 class="card-title">Storage</h4>
+    <ul>
+      <li>Due to huge size of URLs, need to store URLs into a disk</li>
+      <li>But, disk is slow, thus introduce buffers in memory</li>
+      <ul>
+        <li>Enqueue buffer - once filled, written to disk</li>
+        <li>Dequeue buffer - keeps cache of URLs to be visited. It periodically reads from disk to fill the buffer</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Service host</h3>
+
+    <h4 class="card-title">Robots.txt</h4>
+    <ul>
+      <li>Specifies pages that are not allowed to be downloaded</li>
+    </ul>
+
+    <h4 class="card-title">Performance optimization</h4>
+    <ul>
+      <li>Crawl jobs are distributed into multiple servers, and each server runs multiple threads</li>
+      <li>Response from DNS resolver is cached in Service host</li>
+      <li>Place crawl servers close to website hosts in terms of geographical region</li>
+      <li>Enforce maximum wait time from the host</li>
+    </ul>
+
+    <h4 class="card-title">Robustness</h4>
+    <ul>
+      <li>Use consistent hashing to distribute load among crawl jobs</li>
+      <li>Save crawl states into disk (When failure happens, can resume from the saved state)</li>
+    </ul>
+
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="typeahead-7">
+  <div class="card-body">
+    <h2 class="card-title">Evaluation</h2>
+
+    <h3 class="card-title">Availability</h3>
+    <ul>
+      <li>Replication</li>
+      <ul>
+        <li>Replicate each server and DB</li>
+        <li>Replicate entire components to different zone or geographical region</li>
+      </ul>
+      <li>Fail over</li>
+      <ul>
+        <li></li>
+        <li></li>
+      </ul>
+    </ul>
+
+    <h4 class="card-title">Reliability</h4>
+    <ul>
+      <li>Data loss</li>
+    </ul>
+
+    <h3 class="card-title">Scalability</h3>
+    <ul>
+      <li>Horizontal scaling</li>
+      <li>Data partitioning - distribute based on hostname which contains URLs to visit, URL checksum, document checksum</li>
+    </ul>
+
+    <h4 class="card-title">Performance</h4>
+    <ul>
+      <li></li>
+    </ul>
+
+    <h3 class="card-title">Consistency</h3>
+    <ul>
+      <li></li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
+<!-- Typeahead END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="card mb-4" id="typeahead">
+  <div class="card-body">
+    <h2 class="card-title">Typeahead</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#typeahead-1">Typeahead</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="typeahead-1">
+  <div class="card-body">
+    <h2 class="card-title">Typeahead</h2>
 
     <h3 class="card-title">High level design</h3>
     <img class="img-fluid" class="card-img-top" src="/img/system-design/typeahead1.png" alt="Card image cap">
@@ -118,8 +361,6 @@
       <li>get_suggestions(prefix)</li>
       <li>add_to_database(query)</li>
     </ul>
-
-    <h3 class="card-title">DB</h3>
 
     <h3 class="card-title">Component design</h3>
     <img class="img-fluid" class="card-img-top" src="/img/system-design/typeahead2.png" alt="Card image cap">
@@ -192,30 +433,8 @@
         <li>Must query all servers and aggregate the result.</li>
       </ul>
     </ul>
-
-    <h3 class="card-title">Evaluation</h3>
-
-    <h4 class="card-title">Availability</h4>
-
-    <h4 class="card-title">Reliability</h4>
-
-    <h4 class="card-title">Scalability</h4>
-
-    <h4 class="card-title">Performance</h4>
-
   </div>
   <div class="card-footer text-muted">
     <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
   </div>
 </div>
-<!-- Typeahead END -->
-
-</div> <!-- /.col-md-12 -->
-</div> <!-- /.row -->
-</div> <!-- /.container -->
-
-<include src="/footer.html"></include>
-
-</body>
-
-</html>
