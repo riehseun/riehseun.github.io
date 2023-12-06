@@ -47,7 +47,7 @@
       <li><a href="#typeahead-1">Requirement</a></li>
       <li><a href="#typeahead-2">Estimation</a></li>
       <li><a href="#typeahead-3">High level design</a></li>
-      <!-- <li><a href="#typeahead-4">API</a></li> -->
+      <li><a href="#typeahead-4">API</a></li>
       <!-- <li><a href="#typeahead-5">Storage schema</a></li> -->
       <li><a href="#typeahead-6">Detailed design</a></li>
       <li><a href="#typeahead-7">Evaluation</a></li>
@@ -169,6 +169,8 @@
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
 
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/typeahead2.png" alt="Card image cap">
+
     <h3 class="card-title">Trie data structure</h3>
     <ul>
       <li>Root represents an empty string</li>
@@ -176,44 +178,84 @@
       <li>Each node also stores frequency that its prefix has been searched</li>
       <li>Each node also stores the top 10 most searched queries staring with its prefix</li>
       <li>The length of prefix is limited to 50 because users rarely type long query</li>
-      <li></li>
     </ul>
+
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/typeahead3.png" alt="Card image cap">
 
     <h3 class="card-title">Data gathering service</h3>
     <ul>
       <li>Analytics log</li>
+      <ul>
+        <li>Stores raw data of search queries</li>
+        <li>Logs are append-only and not indexed</li>
+      </ul>
       <li>Aggregators</li>
+      <ul>
+        <li>Aggregate a week amount of data</li>
+      </ul>
       <li>Aggregated data</li>
+      <ul>
+        <li>Aggregated weekly data</li>
+      </ul>
       <li>Workers</li>
+      <ul>
+        <li>Build trie data structure and stores it in Trie DB</li>
+      </ul>
       <li>Trie DB</li>
       <ul>
-        <li>Document store</li>
-        <li>Key-value store</li>
+        <li>Option 1 - document store</li>
+        <ul>
+          <li>Take a snapshot of weekly built trie, serialize it, and store serialized data in DB</li>
+          <li>MongoDB can be used</li>
+        </ul>
+        <li>Option 2 - key-value store</li>
+        <ul>
+          <li>Trie can be mapped to hash table</li>
+          <li>Prefix can be key and cache data can be value</li>
+        </ul>
       </ul>
       <li>Trie cache</li>
+      <ul>
+        <li>Keeps trie in memory for fast read</li>
+      </ul>
     </ul>
+
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/typeahead4.png" alt="Card image cap">
 
     <h3 class="card-title">Query service</h3>
     <ul>
       <li>AJAX request</li>
+      <ul>
+        <li>Sending/receiving a request/response does not refresh the web page</li>
+      </ul>
       <li>Browser caching</li>
+      <ul>
+        <li>Typeahead suggestions can be saved in browser cache</li>
+      </ul>
       <li>Data sampling</li>
+      <ul>
+        <li>Because logging every query is expensive, only 1 out of every N is logged in the system</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Trie operation</h3>
     <ul>
       <li>Create</li>
+      <ul>
+        <li>Trie is created by workers using aggregated weekly data</li>
+      </ul>
       <li>Update</li>
+      <ul>
+        <li>Option 1 - create new trie every week</li>
+        <li>Option 2 - update individual node directly. This is expensive because when a node is updated, all ancestors must also be updated</li>
+      </ul>
       <li>Delete</li>
+      <ul>
+        <li>Add a filter in front of trie cache to remove inappropriate suggestions</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Scale the storage</h3>
-
-
-
-
-
-
 
     <!-- <img class="img-fluid" class="card-img-top" src="/img/system-design/typeahead2.png" alt="Card image cap"> -->
 
@@ -322,12 +364,14 @@
 
     <h4 class="card-title">Performance</h4>
     <ul>
-      <li></li>
+      <li>AJAX request</li>
+      <li>Browser caching</li>
+      <li>Data sampling</li>
     </ul>
 
     <h3 class="card-title">Consistency</h3>
     <ul>
-      <li></li>
+      <li>Eventual consistency - users seeing different orders of suggestions do not matter much</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
