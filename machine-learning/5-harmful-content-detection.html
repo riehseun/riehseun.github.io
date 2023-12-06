@@ -97,6 +97,9 @@
       <ul>
         <li>Input - a post</li>
         <li>Output - probability that the post is harmful</li>
+      </ul>
+      <li>Choose right ML category</li>
+      <ul>
         <li>Late fusion</li>
         <ul>
           <li>Train, evaluate, improve each model independently</li>
@@ -110,13 +113,27 @@
           <li>Model considers all modalities together (If each modality is benign but the combination is harmful, model can capture this in unified feature vector)</li>
         </ul>
         <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/harmful-content-detection2.png" alt="Card image cap">
-      </ul>
-      <li>Choose right ML category</li>
-      <ul>
         <li>Single binary classifier</li>
+        <ul>
+          <li>Difficult to determine what kind of harmful content the post contains</li>
+        </ul>
+        <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/harmful-content-detection3.png" alt="Card image cap">
         <li>One binary classifier per harmful class</li>
+        <ul>
+          <li>Multiple models must be trained separately</li>
+        </ul>
+        <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/harmful-content-detection4.png" alt="Card image cap">
         <li>A multi-label classifier</li>
+        <ul>
+          <li>Each feature may need to be transformed differently</li>
+        </ul>
+        <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/harmful-content-detection5.png" alt="Card image cap">
         <li>Multi-task classifier</li>
+        <ul>
+          <li>Shared layers - transform input features into new ones</li>
+          <li>Task-specific layers</li>
+        </ul>
+        <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/harmful-content-detection6.png" alt="Card image cap">
       </ul>
     </ul>
   </div>
@@ -131,9 +148,9 @@
     <ul>
       <li>Data engineering</li>
       <ul>
-        <li>Users</li>
-        <li>Posts</li>
-        <li>User-post interations</li>
+        <li>Users - id, username, email</li>
+        <li>Posts - post_id, author_id, textual_content, image_path, video_path</li>
+        <li>User-post interations - user_id, post_id, interaction_type (impression / like / comment / share / report)</li>
       </ul>
       <li>Feature engineering</li>
       <ul>
@@ -141,11 +158,20 @@
         <ul>
           <li>Text preprocessing</li>
           <li>Vectorization</li>
+          <ul>
+            <li>Statistical methods like BoW and TF-IDF cannot capture semantics</li>
+            <li>BERT takes long time to produce text embeddings and is for english only</li>
+            <li>DistlimBERT can be used here</li>
+          </ul>
         </ul>
         <li>Image or video</li>
         <ul>
-          <li>Preprocessing</li>
+          <li>Preprocessing - decode, resize, normalize</li>
           <li>Feature extraction</li>
+          <ul>
+            <li>Image - CLIP's visual encoder, SimCLR</li>
+            <li>Video - VideoMoCo</li>
+          </ul>
         </ul>
         <li>User interation to the post</li>
         <ul>
