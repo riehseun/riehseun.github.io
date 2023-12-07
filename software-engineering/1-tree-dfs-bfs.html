@@ -224,6 +224,9 @@ class Solution:
 
 class Codec:
 
+    # Time O(n) where n is number of nodes
+    # Space O(h) where h = n if worst case, h = log(n) if best case
+
     def serialize(self, root):
         """Encodes a tree to a single string.
 
@@ -231,17 +234,21 @@ class Codec:
         :rtype: str
         """
 
-        def pre_order_traversal(node):
-            if node is not None:
-                tree.append(str(node.val))
-                pre_order_traversal(node.left)
-                pre_order_traversal(node.right)
-            else:
-                tree.append("X")
+        self.data = ""
 
-        tree = []
-        pre_order_traversal(root)
-        return " ".join(tree)
+        def helper(root):
+
+            if root:
+                self.data += str(root.val)
+                self.data += ","
+                helper(root.left)
+                helper(root.right)
+            else:
+                self.data += "#"
+                self.data += ","
+
+        helper(root)
+        return self.data[:len(self.data)-1]
 
     def deserialize(self, data):
         """Decodes your encoded data to tree.
@@ -250,19 +257,17 @@ class Codec:
         :rtype: TreeNode
         """
 
-        def decode():
-            val = next(values)
-            if val != "X":
-                node = TreeNode(int(val))
-                node.left = decode()
-                node.right = decode()
-                return node
-            else:
-                return None
+        data_array = data.split(",")
 
-        values = iter(data.split(" "))
-        print(data)
-        return decode()
+        def helper(data_array):
+            val = next(data_array)
+            if val != "#":
+                root = TreeNode(int(val))
+                root.left = helper(data_array)
+                root.right = helper(data_array)
+                return root
+
+        return helper(iter(data_array))
 
 # Your Codec object will be instantiated and called as such:
 # ser = Codec()
