@@ -122,6 +122,67 @@
   <div class="card-body">
     <h2 class="card-title">High level design</h2>
 
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/google-doc1.png" alt="Card image cap">
+    <ul>
+      <li>CDN - image and video are loaded from near user location</li>
+      <li>DNS - user provide FQDN and DNS server return public IP of load balancer</li>
+      <li>Load balancer - private IP is used to communicate</li>
+      <li>Servers - read/write servers scale separately depending on the load</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    <!-- Reference: <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a> -->
+  </div>
+</div>
+
+<div class="card mb-4" id="google-docs-4">
+  <div class="card-body">
+    <h2 class="card-title">API</h2>
+    <ul>
+      <li><code>create_doc(user_id)</code></li>
+      <li><code>append_to_doc(user_id, document_id, position, text, image_path, video_path)</code></li>
+      <li><code>delete_from_doc(user_id, document_id, position, text, image_path, video_path)</code></li>
+      <li><code>delete_doc(user_id, document_id)</code></li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    <!-- Reference: <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a> -->
+  </div>
+</div>
+
+<div class="card mb-4" id="google-docs-5">
+  <div class="card-body">
+    <h2 class="card-title">Storage schema</h2>
+    <ul>
+      <li>All users should see the same content. Thus, strong consistency is needed</li>
+      <li>RDBMS is chosen to store metadata</li>
+      <li>Blob storage is chosen to store actual document file, image, video</li>
+    </ul>
+
+    <h3 class="card-title">Relational DB</h3>
+    <ul>
+      <li>User</li>
+      <ul>
+        <li>user_id (int, pk)</li>
+        <li>username (varchar)</li>
+        <li>created_at (datatime)</li>
+      </ul>
+      <li>Document</li>
+      <ul>
+        <li>document_id (int, pk)</li>
+        <li>document_path (varchar)</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    <!-- Reference: <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a> -->
+  </div>
+</div>
+
+<div class="card mb-4" id="google-docs-6">
+  <div class="card-body">
+    <h2 class="card-title">Detailed design</h2>
+
     <h3 class="card-title">Collaborative editing</h3>
     <ul>
       <li>Each request is forwarded to operations queue</li>
@@ -145,23 +206,7 @@
       <li>Most frequently used words or phrases are stored in Redis</li>
     </ul>
 
-    <h3 class="card-title">App server</h3>
-    <ul>
-      <li>Document format conversion</li>
-      <li>Import/export document</li></li>
-      <li>Feature extraction for typeahead service</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="google-docs-6">
-  <div class="card-body">
-    <h2 class="card-title">Detailed design</h2>
-
-    <img class="img-fluid" class="card-img-top" src="/img/system-design/google-doc1.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/google-doc2.png" alt="Card image cap">
 
     <h3 class="card-title">API gateway</h3>
     <ul>
@@ -173,6 +218,7 @@
     <ul>
       <li>Document format conversion</li>
       <li>Import/export document</li>
+      <li>Feature extraction for typeahead service</li>
     </ul>
 
     <h3 class="card-title">Operations queue</h3>
@@ -254,12 +300,14 @@
       <li>Replication</li>
       <ul>
         <li>Replicate each server and DB</li>
-        <li>Replicate entire components to different zone or geographical region</li>
       </ul>
       <li>Fail over</li>
     </ul>
 
     <h4 class="card-title">Reliability</h4>
+    <ul>
+     <li>Replicate entire components to different zone or geographical region</li>
+    </ul>
 
     <h3 class="card-title">Scalability</h3>
     <ul>
