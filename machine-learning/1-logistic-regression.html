@@ -46,7 +46,7 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#logistic-regression-">Logistic regression</a></li>
       <li><a href="#logistic-regression-">Single layer network</a></li>
-      <li><a href="#logistic-regression-">Derivatives</a></li>
+      <li><a href="#logistic-regression-">Derivation</a></li>
       <li><a href="#logistic-regression-">Softmax regression</a></li>
       <!-- <li><a href="#logistic-regression-">Logistic regression problems</a></li> -->
     </ul>
@@ -95,27 +95,27 @@
   <div class="card-body">
     <h2 class="card-title">Single layer network</h2>
     <ul>
-      <li>\( m \) training examples such that \( \{ (x^{(1)},y^{(1)}) \dots (x^{(m)},y^{(m)}) \} \)</li>
-      <li>\( \textbf{X} = \begin{bmatrix} \vdots & \vdots & \vdots \\ \vdots & \vdots & \vdots \\ x^{(1)} & x^{(2)} \ldots & x^{(m)} \\ \vdots & \vdots & \vdots \\ \vdots & \vdots & \vdots \end{bmatrix} \)</li>
-      <li>\( \textbf{y} = \begin{bmatrix} y^{(1)} & y^{(2)} \ldots & y^{(m)} \end{bmatrix} \)</li>
+      <li>\( m \) training examples such that \( \{ (x_{i},y_{i}) \dots (x_{m},y_{m}) \} \)</li>
+      <li>\( \textbf{X} = \begin{bmatrix} \vdots & \vdots & \vdots \\ \vdots & \vdots & \vdots \\ x_{1} & x_{2} \ldots & x_{m} \\ \vdots & \vdots & \vdots \\ \vdots & \vdots & \vdots \end{bmatrix} \)</li>
+      <li>\( \textbf{y} = \begin{bmatrix} y_{1} & y_{2} \ldots & y_{m} \end{bmatrix} \)</li>
     </ul>
 
     <h3 class="card-title">Parameters</h3>
     <ul>
-      <li>Number of features \( n_{x} = n^{[0]} \)</li>
+      <li>Number of features \( n^{[0]} \)</li>
       <li>Number of output units \( n^{[1]} = 1 \)</li>
     </ul>
 
     <h3 class="card-title">Dimensions</h3>
     <ul>
-      <li>\( X \).shape = \( (n_{x},m) \)</li>
-      <li>\( y \).shape = \( (1,m) \)</li>
+      <li>\( X \).shape = \( (n^{[0]}, m) \)</li>
+      <li>\( y \).shape = \( (1, m) \)</li>
     </ul>
 
     <h3 class="card-title">Forward prop</h3>
     <ul>
-      <li>\( \textbf{Z} = \begin{bmatrix} z^{(1)} & z^{(2)} \ldots & z^{(m)} \end{bmatrix} = \begin{bmatrix} w^{T}x^{(1)}+b & w^{T}x^{(2)}+b \ldots & w^{T}x^{(m)}+b \end{bmatrix} = \textbf{W}^{T}\textbf{X} + \begin{bmatrix} b & b \ldots & b \end{bmatrix} \)</li>
-      <li>\( \hat{y} = \textbf{A} = \begin{bmatrix} a^{(1)} & a^{(2)} \ldots & a^{(m)} \end{bmatrix} = \sigma(\textbf{Z}) = \sigma (\textbf{W}^{T}\textbf{X}+b) \)</li>
+      <li>\( \textbf{Z} = \begin{bmatrix} z_{1} & z_{2} \ldots & z_{m} \end{bmatrix} = \begin{bmatrix} w^{T}x_{1}+b & w^{T}x_{2}+b \ldots & w^{T}x_{m}+b \end{bmatrix} = \textbf{W}^{T}\textbf{X} + \begin{bmatrix} b & b \ldots & b \end{bmatrix} \)</li>
+      <li>\( \hat{y} = \textbf{A} = \begin{bmatrix} a_{1} & a_{2} \ldots & a_{m} \end{bmatrix} = \sigma(\textbf{Z}) = \sigma (\textbf{W}^{T}\textbf{X}+\textbf{b}) \)</li>
       <ul>
         <li>Without \( \sigma \), it is just linear regression</li>
       </ul>
@@ -141,7 +141,7 @@ A = sigmoid(Z)</code></pre>
           <li>We want \( \hat{y} \) small as possible ( \( y \approx 0 \) )</li>
         </ul>
       </ul>
-      <li>Cost function \( J(w,b) = \dfrac{1}{m}\displaystyle\sum_{i=1}^{m} L(\hat{y}^{(i)},y^{(i)}) \)</li>
+      <li>Cost function \( J(w,b) = \dfrac{1}{m}\displaystyle\sum_{i=1}^{m} L(\hat{y}_{i},y_{i}) \)</li>
     </ul>
 
 <pre><code class="python">m = X.shape[1]
@@ -150,11 +150,11 @@ cost = np.squeeze(cost)</code></pre>
 
     <h3 class="card-title">Backward prop</h3>
     <ul>
-      <li>\( dZ = \begin{bmatrix} dz^{(1)} & dz^{(2)} \ldots & dz^{(m)} \end{bmatrix} = \begin{bmatrix} a^{(1)}-y^{(1)} & a^{(2)}-y^{(2)} \ldots & a^{(m)}-y^{(m)} \end{bmatrix} = A - Y \)</li>
-      <li>\( dw = \dfrac{1}{m}XdZ^{T} \)</li>
-      <li>\( db = \dfrac{1}{m}np.sum(dZ) \)</li>
-      <li>\( w := w - \alpha dw \)</li>
-      <li>\( b := b - \alpha db \)</li>
+      <li>\( \textbf{dZ} = \begin{bmatrix} dz_{1} & dz_{2} \ldots & dz_{m} \end{bmatrix} = \begin{bmatrix} a_{1}-y_{1} & a_{2}-y_{2} \ldots & a_{m}-y_{m} \end{bmatrix} = \textbf{A} - \textbf{Y} \)</li>
+      <li>\( \textbf{dW} = \dfrac{1}{m}\textbf{X}\textbf{dZ}^{T} \)</li>
+      <li>\( \textbf{db} = \dfrac{1}{m}np.sum(\textbf{dZ}) \)</li>
+      <li>\( \textbf{W} := \textbf{W} - \alpha \textbf{dW} \)</li>
+      <li>\( \textbf{b} := \textbf{b} - \alpha \textbf{db} \)</li>
     </ul>
 
 <pre><code class="python">m = X.shape[1]
@@ -296,7 +296,7 @@ d = model(train_set_x, train_set_y, test_set_x, test_set_y, num_iterations = 200
 
 <div class="card mb-4" id="logistic-regression-">
   <div class="card-body">
-    <h2 class="card-title">Derivatives</h2>
+    <h2 class="card-title">Derivation</h2>
 
     <h3 class="card-title">Consider m=1 and n=2</h3>
     <ul>
