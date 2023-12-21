@@ -130,12 +130,12 @@
       <li>Run through subset of samples to do single update of parameters</li>
       <li>Subsets of both inputs and labelled outputs</li>
       <li>Typically, min-batch size is 64, 128, 256, 512</li>
-      <li>Make sure each mini-batch \( X^{[t]}, Y^{[t]} \) fits in CPU/GPU memory</li>
+      <li>Make sure each mini-batch \( \textbf{X}^{[t]}, \textbf{y}^{[t]} \) fits in CPU/GPU memory</li>
     </ul>
 
     <h4 class="card-title">How to get min-batches</h4>
     <ul>
-      <li>Shuffle the training set \( X \) and \( Y \)</li>
+      <li>Shuffle the training set \( \textbf{X} \) and \( \textbf{y} \)</li>
       <li>Partition the shuffled set into min-batches</li>
     </ul>
 
@@ -177,25 +177,25 @@
       <ul>
         <li>for \( t = 1 \dots nb \)</li>
         <ul>
-          <li>Forward prop on \( X^{\{t\}} \)</li>
+          <li>Forward prop on \( \textbf{X}^{\{t\}} \)</li>
           <ul>
-            <li>\( Z^{[1]} = w^{[1]}X^{\{t\}} + b^{[1]} \)</li>
-            <li>\( A^{[1]} = g^{[1]}(Z^{[1]}) \)</li>
+            <li>\( \textbf{Z}^{[1]} = \textbf{W}^{[1]}\textbf{X}^{\{t\}} + \textbf{b}^{[1]} \)</li>
+            <li>\( \textbf{A}^{[1]} = g^{[1]}(\textbf{Z}^{[1]}) \)</li>
             <li>\( \vdots \)</li>
-            <li>\( A^{[L]} = g^{[L]}(Z^{[L]}) \)</li>
+            <li>\( \textbf{A}^{[L]} = g^{[L]}(\textbf{Z}^{[L]}) \)</li>
           </ul>
           <li>Compute cost</li>
           <ul>
-            <li>\( J^{\{t\}} = \dfrac{1}{bs}\displaystyle\sum_{i=1}^{l}L(\hat{y}^{(i)}, y^{(i)}) + \dfrac{\lambda}{2bs}\displaystyle\sum_{l}||w^{[l]}||_{F}^{2} \)</li>
+            <li>\( J^{\{t\}} = \dfrac{1}{bs}\displaystyle\sum_{i=1}^{l}L(\hat{y}^{(i)}, y^{(i)}) + \dfrac{\lambda}{2bs}\displaystyle\sum_{l}||\textbf{W}^{[l]}||_{F}^{2} \)</li>
           </ul>
           <li>Backward prop</li>
           <ul>
-            <li>Use \( J^{\{t\}}, X^{\{t\}}, Y^{\{t\}} \)</li>
+            <li>Use \( J^{\{t\}}, \textbf{X}^{\{t\}}, \textbf{y}^{\{t\}} \)</li>
           </ul>
           <li>Update parameter</li>
           <ul>
-            <li>\( W^{[l]} = W^{[l]} - \alpha dW^{[l]} \)</li>
-            <li>\( b^{[l]} = b^{[l]} - \alpha db^{[l]} \)</li>
+            <li>\( \textbf{W}^{[l]} = \textbf{W}^{[l]} - \alpha \textbf{dW}^{[l]} \)</li>
+            <li>\( \textbf{b}^{[l]} = \textbf{b}^{[l]} - \alpha \textbf{db}^{[l]} \)</li>
           </ul>
         </ul>
       </ul>
@@ -276,16 +276,16 @@ if __name__ == "__main__":
 
     <h3 class="card-title">Momentum</h3>
     <ul>
-      <li>On vertical axis, we want slower learning & reduce oscilation ( \( b \) direction )</li>
-      <li>But on horizontal axis, we want faster learning ( \( W \) direction )</li>
-      <li>Initialize \( V_{dW} = V_{db} = 0 \)</li>
+      <li>On vertical axis, we want slower learning & reduce oscilation ( \( \textbf{b} \) direction )</li>
+      <li>But on horizontal axis, we want faster learning ( \( \textbf{W} \) direction )</li>
+      <li>Initialize \( \textbf{V}_{dW} = \textbf{V}_{db} = 0 \)</li>
       <li>On each iteration \( t \)</li>
       <ul>
-        <li>Compute \( dW \) and \( db \)</li>
-        <li>\( V_{dW} = \beta V_{dW} + (1-\beta) dW \)</li>
-        <li>\( V_{db} = \beta V_{db} + (1-\beta) db \)</li>
-        <li>\( W = W - \alpha V_{dW} \)</li>
-        <li>\( b = b - \alpha V_{db} \)</li>
+        <li>Compute \( \textbf{dW} \) and \( \textbf{db} \)</li>
+        <li>\( \textbf{V}_{dW} = \beta \textbf{V}_{dW} + (1-\beta) \textbf{dW} \)</li>
+        <li>\( \textbf{V}_{db} = \beta \textbf{V}_{db} + (1-\beta) \textbf{db} \)</li>
+        <li>\( \textbf{W} = \textbf{W} - \alpha \textbf{V}_{dW} \)</li>
+        <li>\( \textbf{b} = \textbf{b} - \alpha \textbf{V}_{db} \)</li>
         <li>\( \beta \) is commonly chosen to be \( 0.9 \)</li>
       </ul>
       <li>On vertical direction, the derivates will average out to zero</li>
@@ -325,12 +325,12 @@ if __name__ == "__main__":
     <h3 class="card-title">RMSprop</h3>
     <ul>
       <li>RMSprop has the same motivation as momentum</li>
-      <li>Initialize \( S_{dW} = S_{db} = 0 \)</li>
+      <li>Initialize \( \textbf{S}_{dW} = \textbf{S}_{db} = 0 \)</li>
       <li>On each iteration \( t \)</li>
       <ul>
-        <li>Compute \( dW \) and \( db \)</li>
-        <li>\( S_{dW} = \beta S_{dW} + (1-\beta) dW^{2} \) (Square is applied to element-wise)</li>
-        <li>\( S_{db} = \beta S_{db} + (1-\beta) db^{2} \) (Square is applied to element-wise)</li>
+        <li>Compute \( \textbf{dW} \) and \( \textbf{db} \)</li>
+        <li>\( \textbf{S}_{dW} = \beta \textbf{S}_{dW} + (1-\beta) \textbf{dW}^{2} \) (Square is applied to element-wise)</li>
+        <li>\( \textbf{S}_{db} = \beta \textbf{S}_{db} + (1-\beta) \textbf{db}^{2} \) (Square is applied to element-wise)</li>
         <li>\( W = W - \alpha \frac{dW}{\sqrt{S_{dW}}+\epsilon} \)</li>
         <li>\( b = b - \alpha \frac{db}{\sqrt{S_{db}}+\epsilon} \)</li>
         <li>\( \epsilon \) is in order not to divide by zero</li>
