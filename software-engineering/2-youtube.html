@@ -119,12 +119,56 @@
   <div class="card-body">
     <h2 class="card-title">High level design</h2>
 
+    <h3 class="card-title">Video upload</h3>
+
     <img class="img-fluid" class="card-img-top" src="/img/system-design/youtube1.png" alt="Card image cap">
     <ul>
-      <li>User uploads video.</li>
-      <li>Server sends video to encoder.</li>
-      <li>Server sends user data and metadata to relational DB.</li>
-      <li>Encoder encodes video and store it in object storage.</li>
+      <li>User</li>
+      <li>Load balancer</li>
+      <li>API servers</li>
+      <ul>
+        <li>All requests go through API server except video streaming</li>
+      </ul>
+      <li>Medatada DB</li>
+      <ul>
+        <li>Stores video metadata</li>
+      </ul>
+      <li>Medatada cache</li>
+      <ul>
+        <li>Caches video metadata</li>
+      </ul>
+      <li>Original storage</li>
+      <ul>
+        <li>Blob storage that stores original videos</li>
+      </ul>
+      <li>Encoding servers</li>
+      <ul>
+        <li>Converts videos into formats that is easier to stream</li>
+      </ul>
+      <li>Encoded storage</li>
+      <ul>
+        <li>Blob storage that stores encoded videos</li>
+      </ul>
+      <li>CDN</li>
+      <ul>
+        <li>Caches videos</li>
+      </ul>
+      <li>Completion queue</li>
+      <ul>
+        <li>Stores video encoding completion events</li>
+      </ul>
+      <li>Completion handler</li>
+      <ul>
+        <li>Dequeues events and updates metadata DB</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Video stream</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/youtube2.png" alt="Card image cap">
+    <ul>
+      <li>Videos are streamed from CDN directly</li>
+      <li>Edge server closest to users will deliver the video</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
