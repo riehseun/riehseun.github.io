@@ -103,45 +103,32 @@
 
 <pre><code class="python">class Solution:
     def findSubstring(self, s: str, words: List[str]) -> List[int]:
+
+        # Because substring contains all the strings, the length
+        # of substring is combined length of all words
+        # Move the window and check if all words are in the window
+
+        # Time O(1) size of substrings and words are fixed
+        # Space O(1)
+        def helper(substring, words):
+
+            substring_splitted = []
+            for i in range(0, len(substring), len(words[0])):
+                substring_splitted.append(substring[i:i+len(words[0])])
+
+            words.sort()
+            substring_splitted.sort()
+            if substring_splitted == words:
+                return True
+            return False
+
+        length = len(words[0]) * len(words)
         result = []
 
-        # For this problem, all words have the same length.
-        word_length = len(words[0])
-        substring_length = word_length * len(words)
-        words_converted_to_dict = {}
-        for word in words:
-            if word in words_converted_to_dict:
-                words_converted_to_dict[word] += 1
-            else:
-                words_converted_to_dict[word] = 0
-
-        # Example: "goodgoodbestword"
-        #          ["word","good","best","word"]
-
-        # Run sliding window of substring through s.
-        # Time: O(kn) where k = n / word_legnth.
-        # Space: O(k) where k = n / word_legnth.
-        for i in range(len(s)-substring_length+1):
-            # print(i)
-            # print(s[i:i+substring_length])
-
-            # Check s[i:substring_length] can be constructed by words.
-            # If so, append i to result.
-
-            string_splitted_into_words = {}
-            string = s[i:i+substring_length]
-            j = 0
-            while j < len(string):
-                word = string[j:j+word_length]
-                # Increment the occurance by 1.
-                if word in string_splitted_into_words:
-                    string_splitted_into_words[word] += 1
-                # Initialize the occurance to 0.
-                else:
-                    string_splitted_into_words[word] = 0
-                j += word_length
-
-            if words_converted_to_dict == string_splitted_into_words:
+        # Time O(n) n = len(s)
+        # Space O(n)
+        for i in range(len(s)-length+1):
+            if helper(s[i:i+length], words):
                 result.append(i)
 
         return result</code></pre>
