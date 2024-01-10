@@ -146,77 +146,53 @@
 <pre><code class="python">class Solution:
     def minWindow(self, s: str, t: str) -> str:
 
-        # Time: O(len(s))
-        # Space: O(len(t))
+        # Use start and end pointer to iterate s
+        # Move end pointer until all chars in t are in the substring
+        # If all chars in t are in the substring
+        #   Move start pointer while substring is still valid and remember the substring
+        #   If substring is not valid, move the endpoint
 
-        # Prepare start and end pointers and two hash tables for s and t.
-        # Compute occurance of each character in t and store it in a hash table.
-        # Iterate s by incrementing the end pointer until the substring contains all chars in t. Remember this substring.
-        # This substring may not be the "minimum" window substring. Now increment the start pointer.
-        #   If the substring contains all chars in t, keep incrementing the start pointer. (as long as start <= end)
-        #   Otherwise, increment the end pointer.
-
-        # In count_s, we will store the count of only the characters
-        # that exist in t.
-        count_s = {}
-        count_t = {}
-
-        min_length = len(s) + 1
-        min_substring = ""
-
-        for c in t:
-            if c not in count_t:
-                count_t[c] = 0
-            count_t[c] += 1
+        # How to keep track whether all chars are in substring
+        #   Use a hash table store the count of each char in t
+        #   The substring has to have the exact count for each char in t
 
         start = 0
         end = 0
+        min_length = len(s)
+        min_window_substring = ""
 
-        while start <= end and end <= len(s):
+        count_t = defaultdict(int)
+        for c in t:
+            count_t[c] += 1
+        count_s = defaultdict(int)
+        end_pointer_moved = True
 
-            is_valid_substring = True
-            for k,v in count_t.items():
-                if k not in count_s \
-                    or (k in count_s and count_s[k] < count_t[k]):
-                    is_valid_substring = False
+        # Time O(n*m) n = len(s) m = len(t)
+        # Space O(n) n = len(s)
+        while start <= end and end < len(s):
 
-            if is_valid_substring:
-
-                if end - start < min_length:
-                    min_length = end - start
-                    min_substring = s[start:end]
-
-                # Whenever "start" pointer moves forward, must remove
-                # the previous chracter from count_s set.
-                # This block must come before incrementing the start pointer!
-                if s[start] in count_t:
-                    if count_s[s[start]] > 1:
-                        count_s[s[start]] -= 1
-                    else:
-                        del count_s[s[start]]
-
-                start += 1
-
+            substring = s[start:end+1]
+            if end_pointer_moved:
+                count_s[s[end]] += 1
             else:
-                # If covered the last character in s,
-                # increment the start pointer until it reaches the end.
-                if end == len(s):
-                    start += 1
-                else:
-                    # Update count_s dictionary each time "end" pointer moves.
-                    # This block must come before incrementing the end pointer!
-                    if s[end] in count_t:
-                        if s[end] not in count_s:
-                            count_s[s[end]] = 0
-                        count_s[s[end]] += 1
+                count_s[s[start-1]] -= 1
 
-                    end += 1
+            valid_substring = True
+            for k,v in count_t.items():
+                if k not in count_s or v > count_s[k]:
+                    valid_substring = False
 
-        return min_substring
+            if valid_substring:
+                if len(substring) <= min_length:
+                    min_window_substring = substring
+                    min_length = len(substring)
+                end_pointer_moved = False
+                start += 1
+            else:
+                end_pointer_moved = True
+                end += 1
 
-minWindow("" , "ABC")
-minWindow("ABCD" , "")
-minWindow("ABCDDA" , "ABCEF")  # Number of unique chars in t is greater than the number of unique chars in s.</code></pre>
+        return min_window_substring</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/minimum-window-substring">76. Minimum Window Substring</a>
