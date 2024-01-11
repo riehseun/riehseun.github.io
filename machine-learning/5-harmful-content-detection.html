@@ -108,6 +108,7 @@
         <ul>
           <li>Single model to train, so there is no need to separate training dataset</li>
           <li>Model considers all modalities together (If each modality is benign but the combination is harmful, model can capture this in unified feature vector)</li>
+          <li>Model needs to learn complex relationship between modalities, requiring large set of data</li>
         </ul>
         <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/harmful-content-detection2.png" alt="Card image cap">
       </ul>
@@ -132,7 +133,10 @@
         <li>Multi-task classifier</li>
         <ul>
           <li>Shared layers - transform input features into new ones</li>
-          <li>Task-specific layers</li>
+          <li>Task specific layers - each classification head transforms features in optiaml way to predict a specific harm probability</li>
+          <li>Single model is used, thus training is less expensive</li>
+          <li>Shared layers transform features so that they are beneficial for each task. This prevents redundant computations</li>
+          <li>Training data for each task contributes to learning other tasks</li>
         </ul>
         <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/harmful-content-detection6.png" alt="Card image cap">
         <li>Final design</li>
@@ -151,9 +155,26 @@
     <ul>
       <li>Data engineering</li>
       <ul>
-        <li>Users - id, username, email</li>
-        <li>Posts - post_id, author_id, textual_content, image_path, video_path</li>
-        <li>User-post interations - user_id, post_id, interaction_type (impression / like / comment / share / report)</li>
+        <li>Users</li>
+        <ul>
+          <li>id</li>
+          <li>username</li>
+          <li>email</li>
+        </ul>
+        <li>Posts</li>
+        <ul>
+          <li>post_id</li>
+          <li>author_id</li>
+          <li>textual_content</li>
+          <li>image_path,</li>
+          <li>video_path</li>
+        </ul>
+        <li>User-post interations</li>
+        <ul>
+          <li>user_id</li>
+          <li>post_id</li>
+          <li>interaction_type (impression / like / comment / share / report)</li>
+        </ul>
       </ul>
       <li>Feature engineering</li>
       <ul>
@@ -170,7 +191,7 @@
         <li>Image or video</li>
         <ul>
           <li>Preprocessing - decode, resize, normalize</li>
-          <li>Feature extraction</li>
+          <li>Feature extraction - convert unstructured data into feature vector</li>
           <ul>
             <li>Image - CLIP's visual encoder, SimCLR</li>
             <li>Video - VideoMoCo</li>
@@ -178,7 +199,7 @@
         </ul>
         <li>User interation to the post</li>
         <ul>
-          <li>Number of likes, shares, comments, reports</li>
+          <li>Number of likes, shares, comments, reports - scale these values to speed up convergence during training</li>
           <li>Comments</li>
         </ul>
         <li>Author features</li>
@@ -192,8 +213,8 @@
           <li>Author's demographics</li>
           <ul>
             <li>Age</li>
-            <li>Gender</li>
-            <li>City and country</li>
+            <li>Gender - use one-hot encoding</li>
+            <li>City and country - use embedding layer to represent these as feature vectors</li>
           </ul>
           <li>Account information</li>
           <ul>
@@ -203,8 +224,8 @@
         </ul>
         <li>Contexual information</li>
         <ul>
-          <li>Time of day</li>
-          <li>Device</li>
+          <li>Time of day - use one-hot encoding</li>
+          <li>Device - use one-hot encoding</li>
         </ul>
         <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/harmful-content-detection8.png" alt="Card image cap">
       </ul>
