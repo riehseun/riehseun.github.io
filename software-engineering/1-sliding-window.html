@@ -207,30 +207,23 @@
 
 <pre><code class="python">class Solution:
     def findRepeatedDnaSequences(self, s: str) -> List[str]:
-        # Time: O(k*len(s))
-        # Space: O(len(s)-k) where number of substring to store is len(s)-k
 
-        # Use hash table to store occurances of all substrings with length k.
+        # Move the window of 10 chars
+        # Store the substring seen in hash table
 
-        k = 10
-        substrings = set()
-        result = set()
+        count = defaultdict(int)
 
-        for i in range(0, len(s)-k+1):
-            substring = s[i:i+k]
-            # To save set space, use hash of substring
-            # Instead of the actual substring.
-            if hash(substring) not in substrings:
-                substrings.add(hash(substring))
-            # Substring is repeated.
-            else:
-                result.add(substring)
+        # Time O(n) n = len(s)
+        # Space O(n)
+        for i in range(len(s)-9):
+            count[s[i:i+10]] += 1
 
-        return result
+        result = []
+        for k,v in count.items():
+            if v > 1:
+                result.append(k)
 
-findRepeatedDnaSequences("abcedfuef")  # k is greater than len(s).
-findRepeatedDnaSequences("abcedfuefe")  # k is equal to len(s).
-findRepeatedDnaSequences("")</code></pre>
+        return result</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/repeated-dna-sequences">187. Repeated DNA Sequences</a>
@@ -244,39 +237,40 @@ findRepeatedDnaSequences("")</code></pre>
 <pre><code class="python">class Solution:
     def minSubArrayLen(self, target: int, nums: List[int]) -> int:
 
-        # Time O(n)
-        # Space O(1)
-        # n = length of nums
+        # Move the end pointer until sum(subarray) >= target
+        # Move the start pointer while sum(subarray) >= target
+        #   Remeber the size of subarray
+        #   If sum(subarray) < target, move the end pointer
 
-        if sum(nums) < target:
+        # Corner case
+        if target > sum(nums):
             return 0
-
-        min_length = len(nums)
 
         start = 0
         end = 0
+        min_length = len(nums)
+        sum_subarray = 0
+        end_pointer_moved = True
 
-        # Move end pointer until the sum is >= target.
-        # Then, move start pointer until the sum is < target.
-        # Continue until both start and end finish.
-
+        # Time O(n) n = len(nums)
+        # Space O(1)
         while start <= end and end < len(nums):
 
-            if sum(nums[start:end+1]) >= target:
-                min_length = min(min_length, end-start+1)
-                start += 1
+            subarray = nums[start:end+1]
+            if end_pointer_moved:
+                sum_subarray += nums[end]
             else:
-                # If end pointer reached the end of string.
-                if end == len(nums) - 1:
-                    start += 1
-                else:
-                    end += 1
+                sum_subarray -= nums[start-1]
 
-        return min_length
+            if sum_subarray < target:
+                end += 1
+                end_pointer_moved = True
+            else:
+                min_length = min(min_length, len(subarray))
+                start += 1
+                end_pointer_moved = False
 
-minSubArrayLen(12, [])
-minSubArrayLen(0, [1])
-minSubArrayLen(9, [2,2])  # Edge case.</code></pre>
+        return min_length</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/minimum-size-subarray-sum/">209. Minimum Size Subarray Sum</a>
