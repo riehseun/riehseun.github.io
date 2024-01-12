@@ -284,21 +284,21 @@
 
     <img class="img-fluid" class="card-img-top" src="/img/system-design/youtube4.png" alt="Card image cap">
 
-    <h3 class="card-title">Preprocessor</h3>
+    <h4 class="card-title">Preprocessor</h4>
     <ul>
       <li>Split videos to chunk of frames</li>
       <li>Generates DAG</li>
       <li>Cache segmented videos</li>
     </ul>
 
-    <h3 class="card-title">DAG scheduler</h3>
+    <h4 class="card-title">DAG scheduler</h4>
     <ul>
       <li>Split DAG into tasks and put them into queue</li>
     </ul>
 
     <img class="img-fluid" class="card-img-top" src="/img/system-design/youtube5.png" alt="Card image cap">
 
-    <h3 class="card-title">Resource manager</h3>
+    <h4 class="card-title">Resource manager</h4>
     <ul>
       <li>Task scheduler - picks optimal task/worker</li>
       <li>Task queue - contains tasks to be executed</li>
@@ -306,21 +306,46 @@
       <li>Running queue - contains running tasks and workers info</li>
     </ul>
 
-    <h3 class="card-title">Task workers</h3>
+    <h4 class="card-title">Task workers</h4>
     <ul>
       <li>Run tasks defined in DAG</li>
     </ul>
 
-    <h3 class="card-title">Temp storage</h3>
+    <h4 class="card-title">Temp storage</h4>
     <ul>
       <li>Cache is used for metadata</li>
       <li>Blob storage is used for video or audio</li>
       <li>Temp storage is freed up once the corresponding video processing is complete</li>
     </ul>
 
-    <h3 class="card-title">Encoded video</h3>
+    <h4 class="card-title">Encoded video</h4>
     <ul>
       <li>Final output of encoding pipeline</li>
+    </ul>
+
+    <h3 class="card-title">Optimization</h3>
+    <ul>
+      <li>Split videos into small chunks and perform parallel upload</li>
+      <li>Place upload centers close to users</li>
+      <li>Between orignal storage, encoding servers, encoded stroage, place message queues</li>
+      <ul>
+        <li>Encoding module does not need to wait for the download module to finish</li>
+        <li>Encoding module can execute jobs in parallel</li>
+      </ul>
+      <img class="img-fluid" class="card-img-top" src="/img/system-design/youtube6.png" alt="Card image cap">
+      <li>Use pre-signed URL / Shared Access Signiture</li>
+      <ul>
+        <li>User makes HTTP request to API server to obtain pre-signed URL</li>
+        <li>User uploads videos using pre-signed URL</li>
+      </ul>
+      <img class="img-fluid" class="card-img-top" src="/img/system-design/youtube7.png" alt="Card image cap">
+      <li>Optimize CDN usage</li>
+      <ul>
+        <li>Only serve popular videos from CDN</li>
+        <li>For less popular videos, don't need to store them in CDN</li>
+        <li>Short videos can be encoded on demand</li>
+        <li>Some videos are only popular in certain regions and they don't need to be replicated in other regions</li>
+      </ul>
     </ul>
 
     <!-- <img class="img-fluid" class="card-img-top" src="/img/system-design/youtube2.png" alt="Card image cap">
