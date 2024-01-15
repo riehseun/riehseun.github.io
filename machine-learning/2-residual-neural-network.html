@@ -126,6 +126,42 @@
       <li>ReLU</li>
     </ul>
 
+<pre><code class="python">def identity_block(X, f, filters, stage, block):
+    """
+    Args:
+    X -- (m, n_H_prev, n_W_prev, n_C_prev)
+    f -- integer, shape of the middle CONV's window
+    filters -- number of filters
+    stage -- integer, used to name the layers
+    block -- string/character, used to name the layers
+
+    Returns:
+    X -- (n_H, n_W, n_C)
+    """
+
+    conv_name_base = 'res' + str(stage) + block + '_branch'
+    bn_name_base = 'bn' + str(stage) + block + '_branch'
+    F1, F2, F3 = filters
+
+    # Save the input value
+    X_shortcut = X
+
+    X = Conv2D(filters = F1, kernel_size = (1, 1), strides = (1,1), padding = 'valid', name = conv_name_base + '2a', kernel_initializer = glorot_uniform(seed=0))(X)
+    X = BatchNormalization(axis = 3, name = bn_name_base + '2a')(X)
+    X = Activation('relu')(X)
+
+    X = Conv2D(filters = F2, kernel_size = (f, f), strides = (1,1), padding = 'same', name = conv_name_base + '2b', kernel_initializer = glorot_uniform(seed=0))(X)
+    X = BatchNormalization(axis = 3, name = bn_name_base + '2b')(X)
+    X = Activation('relu')(X)
+
+    X = Conv2D(filters = F3, kernel_size = (1, 1), strides = (1,1), padding = 'valid', name = conv_name_base + '2c', kernel_initializer = glorot_uniform(seed=0))(X)
+    X = BatchNormalization(axis = 3, name = bn_name_base + '2c')(X)
+
+    X = Add()([X_shortcut,X])
+    X = Activation('relu')(X)
+
+    return X</code></pre>
+
     <h3 class="card-title">Convolutional block</h3>
 
     <img class="img-fluid" class="card-img-top" src="/img/machine-learning/residual-neural-network2.png" alt="Card image cap">
@@ -187,6 +223,46 @@
     <ul>
       <li>ReLU</li>
     </ul>
+
+<pre><code class="python">def convolutional_block(X, f, filters, stage, block, s = 2):
+    """
+    Args:
+    X -- (m, n_H_prev, n_W_prev, n_C_prev)
+    f -- integer, shape of the middle CONV's window
+    filters -- number of filters
+    stage -- integer, used to name the layers
+    block -- string/character, used to name the layers
+    s -- stride
+
+    Returns:
+    X -- (n_H, n_W, n_C)
+    """
+
+    conv_name_base = 'res' + str(stage) + block + '_branch'
+    bn_name_base = 'bn' + str(stage) + block + '_branch'
+    F1, F2, F3 = filters
+
+    # Save the input value
+    X_shortcut = X
+
+    X = Conv2D(F1, (1, 1), strides = (s,s), padding = 'valid', name = conv_name_base + '2a', kernel_initializer = glorot_uniform(seed=0))(X)
+    X = BatchNormalization(axis = 3, name = bn_name_base + '2a')(X)
+    X = Activation('relu')(X)
+
+    X = Conv2D(F2, (f, f), strides = (1,1), padding = 'same', name = conv_name_base + '2b', kernel_initializer = glorot_uniform(seed=0))(X)
+    X = BatchNormalization(axis = 3, name = bn_name_base + '2b')(X)
+    X = Activation('relu')(X)
+
+    X = Conv2D(F3, (1, 1), strides = (1,1), padding = 'valid', name = conv_name_base + '2c', kernel_initializer = glorot_uniform(seed=0))(X)
+    X = BatchNormalization(axis = 3, name = bn_name_base + '2c')(X)
+
+    X_shortcut = Conv2D(F3, (1, 1), strides = (s,s), padding = 'valid', name = conv_name_base + '1', kernel_initializer = glorot_uniform(seed=0))(X_shortcut)
+    X_shortcut = BatchNormalization(axis = 3, name = bn_name_base + '1')(X_shortcut)
+
+    X = Add()([X_shortcut,X])
+    X = Activation('relu')(X)
+
+    return X</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
