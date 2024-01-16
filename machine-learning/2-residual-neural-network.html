@@ -358,6 +358,44 @@
     model = Model(inputs = X_input, outputs = X, name='ResNet50')
 
     return model</code></pre>
+
+<pre><code class="python">def load_dataset():
+    train_dataset = h5py.File('path/to/train_signs.h5', "r")
+    train_set_x_orig = np.array(train_dataset["train_set_x"][:])  # Your train set features
+    train_set_y_orig = np.array(train_dataset["train_set_y"][:])  # Your train set labels
+
+    test_dataset = h5py.File('path/to/test_signs.h5', "r")
+    test_set_x_orig = np.array(test_dataset["test_set_x"][:])  # Your test set features
+    test_set_y_orig = np.array(test_dataset["test_set_y"][:])  # Your test set labels
+
+    classes = np.array(test_dataset["list_classes"][:]) # the list of classes
+
+    train_set_y_orig = train_set_y_orig.reshape((1, train_set_y_orig.shape[0]))
+    test_set_y_orig = test_set_y_orig.reshape((1, test_set_y_orig.shape[0]))
+
+    return train_set_x_orig, train_set_y_orig, test_set_x_orig, test_set_y_orig, classes</code></pre>
+
+<pre><code class="python">def convert_to_one_hot(Y, C):
+
+    Y = np.eye(C)[Y.reshape(-1)].T
+
+    return Y</code></pre>
+
+<pre><code class="python">X_train_orig, Y_train_orig, X_test_orig, Y_test_orig, classes = load_dataset()
+
+# Normalize image vectors
+X_train = X_train_orig/255.
+X_test = X_test_orig/255.
+
+# Convert training and test labels to one hot matrices
+Y_train = convert_to_one_hot(Y_train_orig, 6).T
+Y_test = convert_to_one_hot(Y_test_orig, 6).T
+
+model.fit(X_train, Y_train, epochs = 2, batch_size = 32)
+
+preds = model.evaluate(X_test, Y_test)
+print ("Loss = " + str(preds[0]))
+print ("Test Accuracy = " + str(preds[1]))</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
