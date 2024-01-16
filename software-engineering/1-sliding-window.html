@@ -337,69 +337,61 @@
 
 <div class="card mb-4" id="sliding-window-">
   <div class="card-body">
-    <h2 class="card-title">Longest substring with at least K repeating characters (M) (Interview)</h2>
+    <h2 class="card-title">Longest substring with at least K repeating characters (M) (Interview) [divide-and-conquer]</h2>
 
-<pre><code class="python">from collections import defaultdict
-
-class Solution:
+<pre><code class="python">class Solution:
     def longestSubstring(self, s: str, k: int) -> int:
 
-        # Time O(nlogn)
-        # n = length of s
+        # Find characters whose occurence is less than k in s
+        # Using one of the characters from above, divide the string into two substrings
+        # Recurse on those two substrings
 
-        # Find characters whose occurance is less than k.
-        # Find substrings that does not include those chars and meet the
-        # criteria of at least k repeating chars.
-        # Keep track of the length of those good substrings.
+        def helper(s, k, length_of_good_substring):
+
+            bad_chars = get_bad_chars(s, k)
+
+            # The entire string is a good string
+            if not bad_chars:
+                length_of_good_substring[s] = len(s)
+                return
+
+            start = 0
+
+            for i in range(len(s)):
+                # Check previous good string when hitting a bad char
+                if s[i] in bad_chars:
+                    if s[start:i] not in length_of_good_substring:
+                        helper(s[start:i], k, length_of_good_substring)
+
+                    start = i + 1
+
+            # Check previous good string at the end
+            helper(s[start:len(s)], k, length_of_good_substring)
+
+        def get_bad_chars(s, k):
+
+            char = defaultdict(int)
+
+            for i in s:
+                char[i] += 1
+
+            bad_chars = set()
+
+            for key,val in char.items():
+                if val < k:
+                    bad_chars.add(key)
+
+            return bad_chars
 
         length_of_good_substring = {}
 
-        self.helper(s, k, length_of_good_substring)
+        helper(s, k, length_of_good_substring)
 
         max_len = 0
         for key, val in length_of_good_substring.items():
             max_len = max(max_len, val)
 
-        return max_len
-
-    def helper(self, s, k, length_of_good_substring):
-
-        # Time O(n)
-        # Space O(n)
-        bad_chars = self.get_bad_chars(s, k)
-
-        # The entire string is a good string.
-        if not bad_chars:
-            length_of_good_substring[s] = len(s)
-            return
-
-        start = 0
-
-        for i in range(len(s)):
-            # Check previous good string whenever hitting a bad char.
-            if s[i] in bad_chars:
-                if s[start:i] not in length_of_good_substring:
-                    self.helper(s[start:i], k, length_of_good_substring)
-
-                start = i + 1
-
-        # Check previous good string at the end.
-        self.helper(s[start:len(s)], k, length_of_good_substring)
-
-    def get_bad_chars(self, s, k):
-
-        char = defaultdict(int)
-
-        for i in s:
-            char[i] += 1
-
-        bad_chars = set()
-
-        for key,val in char.items():
-            if val < k:
-                bad_chars.add(key)
-
-        return bad_chars</code></pre>
+        return max_len</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/longest-substring-with-at-least-k-repeating-characters">395. Longest Substring with At Least K Repeating Characters</a>
