@@ -280,32 +280,34 @@
   <div class="card-body">
     <h2 class="card-title">Sliding window maximumw (H) (Interview/Liked)</h2>
 
-<pre><code class="python">from collections import deque
-
-class Solution:
+<pre><code class="python">class Solution:
     def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
 
-        # Time: O(n) where n is list length.
-        # Space: O(k)
-        # n = length of nums
+        # Move the start and end pointer by 1
+        # Compute the max in the subarray and store it
+        #   1. Slicing array and computing the max is O(k^2)
+        #   2. Use queue to add and remove items and compute max in the queue O(k)
 
-        # Keep the maximum number at the front of the queue. (We can do this by popping out all smaller numbers than the current number)
-        # First, compute the maximum number in the first window.
-        # Then, everytime a window moves.
-        #   Pop out all smaller numbers than the current number.
-        #   Remove previous number, which is now outside of the window, from the queue.
-        #   Append the first item in the queue to the result.
+        # Keep the maximum number at the front of the queue (We can do this by popping out all smaller numbers than the current number)
+        # First, compute the maximum number in the first window
+        # Then, everytime a window moves
+        #   Pop out all smaller numbers than the current number
+        #   Remove previous number, which is now outside of the window, from the queue
+        #   Append the first item in the queue to the result
+
+        # Time O(n) n = len(nums)
+        # Space O(k)
 
         result = []
         queue = deque()
 
-        # Compute the maximum in the first window.
+        # Compute the maximum in the first window
         for i in range(k):
 
             # Pop out all smaller items than the current item
-            # by removing last items in the queue.
+            # by removing last items in the queue
             # Then the first itme in the queue will always
-            # contains the maximum item.
+            # contains the maximum item
             while queue and nums[queue[-1]] < nums[i]:
                 queue.pop()
             queue.append(i)
@@ -320,17 +322,13 @@ class Solution:
             queue.append(i)
 
             # Remove all indexes in the queue that is before
-            # and outside than the current window.
+            # and outside than the current window
             while queue and queue[0] <= (i - k):
                 queue.popleft()
 
             result.append(nums[queue[0]])
 
-        return result
-
-maxSlidingWindow([1,2], 3)  # Window size is greater than the list length.
-maxSlidingWindow([1,2], 0)  # Window size is zero.
-maxSlidingWindow([], 0)  # Window size and list length are zero.</code></pre>
+        return result</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/sliding-window-maximum/">239. Sliding Window Maximum</a>
