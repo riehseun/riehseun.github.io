@@ -465,55 +465,37 @@
   <div class="card-body">
     <h2 class="card-title">Find all anagrams in a string (M) (Liked)</h2>
 
-<pre><code class="python">lass Solution:
+<pre><code class="python">class Solution:
     def findAnagrams(self, s: str, p: str) -> List[int]:
-        result = []
 
-        # Keep track of occurance of each char in p.
-        count_p = {}
+        # Move the window of length of p through s
+        # Maintain a dictionary to track character count of each window
+
+        # Time O(n) n = len(s)
+        # Space O(m) m = len(p)
+
+        # Corner case
+        if len(p) > len(s):
+            return []
+
+        p_char_count = defaultdict(int)
         for char in p:
-            if char not in count_p:
-                count_p[char] = 1
-            else:
-                count_p[char] += 1
+            p_char_count[char] += 1
 
-        # Keep track of occurance of each char in the very beginning
-        # substring of s whose length equals to p.
-        count_s = {}
-        for char in s[0:len(p)]:
-            if char not in count_s:
-                count_s[char] = 1
-            else:
-                count_s[char] += 1
+        char_count = defaultdict(int)
+        for i in range(0, len(p)):
+            char_count[s[i]] += 1
 
-        start = 0
-        end = len(p)
+        result = []
+        for i in range(0, len(s)-len(p)+1):
 
-        # Time O(len(s)-len(p))
-        # Space O(len(p))
-        while end <= len(s):
-
-            if count_p == count_s:
-                result.append(start)
-
-            if end == len(s):
-                break
-
-            char_to_remove = s[start]
-            char_to_add = s[end]
-            start += 1
-            end += 1
-
-            # Adjust "count_s" hash table
-            if count_s[char_to_remove] == 1:
-                del count_s[char_to_remove]
-            else:
-                count_s[char_to_remove] -= 1
-
-            if char_to_add in count_s:
-                count_s[char_to_add] += 1
-            else:
-                count_s[char_to_add] = 1
+            if char_count == p_char_count:
+                result.append(i)
+            if i < len(s)-len(p):
+                char_count[s[i+len(p)]] += 1
+                char_count[s[i]] -= 1
+                if char_count[s[i]] == 0:
+                    del char_count[s[i]]
 
         return result</code></pre>
   </div>
