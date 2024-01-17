@@ -174,11 +174,11 @@
   <div class="card-body">
     <h2 class="card-title">Storage schema</h2>
 
-    <h3 class="card-title">Relational DB</h3>
+    <h3 class="card-title">MongoDB</h3>
     <ul>
       <li>Need to store users</li>
       <li>Need to store mapping between original URL and short URL</li>
-      <li>Since there is no relationship between records and ready heavy, No SQL should be chosen (MongoDB)</li>
+      <li>Since there is no relationship between records and ready heavy, No SQL should be chosen</li>
     </ul>
 
     <h4 class="card-title">URL</h4>
@@ -205,6 +205,43 @@
 <div class="card mb-4" id="tinyurl-6">
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
+
+    <h3 class="card-title">Hashing</h3>
+    <ul>
+      <li>100M URLs generated per day (from Estimation)</li>
+      <li>Assume we want to run service for 10 yeears</li>
+      <li>Then, 100M * 10 * 365 = 365B URLs are needed</li>
+      <li>0-9, A-Z, a-z have 10+26+26 = 62 chars</li>
+      <li>62^n >= 365B, n = 7 should be the length of short URL</li>
+    </ul>
+
+    <h3 class="card-title">Hash function</h3>
+    <ul>
+      <li>Ex. CRC32, MD5, SHA-1</li>
+      <li>These functions generate hash values that are too long for our purpose</li>
+    </ul>
+
+    <h3 class="card-title">Base 62 conversion</h3>
+    <ul>
+      <li>Requires unique ID generator</li>
+    </ul>
+
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/tinyurl2.png" alt="Card image cap">
+
+    <h3 class="card-title">Short URL</h3>
+    <ul>
+      <li>Long URL is entered</li>
+      <li>Web server checks to see if long URL is in DB. If yes, return short URL</li>
+      <li>If not, generate new ID. Then, convert ID to short URL</li>
+      <li>Save short URL to DB and return short URL</li>
+    </ul>
+
+    <h3 class="card-title">Redirect URL</h3>
+    <ul>
+      <li>User clicks short URL</li>
+      <li>Web server checks the cache to see if long URL exist</li>
+      <li>If not, long URL is fetched from DB</li>
+    </ul>
 
     <!-- <h4 class="card-title">Encoding</h4>
     <ul>
@@ -276,12 +313,12 @@
 
     <h4 class="card-title">Performance</h4>
     <ul>
-      <li>CDN</li>
+      <li></li>
     </ul>
 
     <h3 class="card-title">Consistency</h3>
     <ul>
-      <li>Eventual consistency - no need to show the same instances and ordering of videos to all users</li>
+      <li></li>
     </ul>
 
     <!-- <h4 class="card-title">Availability</h4>
