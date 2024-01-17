@@ -79,6 +79,12 @@
         <li>\( a^{[l+2]} = g(z^{[l+2]}+W_{s}a^{[l]}) \) where \( W_{s} \) is used to adjust the dimension of \( a^{[l]} \)</li>
       </ul>
     </ul>
+
+    <h3 class="card-title">Packages</h3>
+
+<pre><code class="python">from keras import layers
+from keras.layers import Input, Add, Dense, Activation, ZeroPadding2D, BatchNormalization, Flatten, Conv2D, AveragePooling2D, MaxPooling2D
+from keras.models import Model</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
@@ -92,48 +98,53 @@
     <img class="img-fluid" class="card-img-top" src="/img/machine-learning/residual-neural-network1.png" alt="Card image cap">
 
     <ul>
-      <li>CONV2D</li>
+      <li>Upper path is short cut path and lower path is main path</li>
+      <li>Batch norm is to speed up the training</li>
+      <li>First component</li>
       <ul>
-        <li>Filter - \( (1,1) \)</li>
-        <li>Stride - \( (1,1) \)</li>
-        <li>Padding - valid</li>
+        <li>CONV2D</li>
+        <ul>
+          <li>Filter - \( (1,1) \)</li>
+          <li>Stride - \( (1,1) \)</li>
+          <li>Padding - valid</li>
+        </ul>
+        <li>Batch Norm</li>
+        <ul>
+          <li>Normalizes channel axix</li>
+        </ul>
+        <li>ReLU</li>
       </ul>
-      <li>Batch Norm</li>
+      <li>Second component</li>
       <ul>
-        <li>Normalizes channel axix</li>
+        <li>CONV2D</li>
+        <ul>
+          <li>Filter - \( (f,f) \)</li>
+          <li>Stride - \( (1,1) \)</li>
+          <li>Padding - same</li>
+        </ul>
+        <li>Batch Norm</li>
+        <ul>
+          <li>Normalizes channel axix</li>
+        </ul>
+        <li>ReLU</li>
       </ul>
-      <li>ReLU</li>
-    </ul>
-
-    <ul>
-      <li>CONV2D</li>
+      <li>Third component</li>
       <ul>
-        <li>Filter - \( (f,f) \)</li>
-        <li>Stride - \( (1,1) \)</li>
-        <li>Padding - same</li>
+        <li>CONV2D</li>
+        <ul>
+          <li>Filter - \( (1,1) \)</li>
+          <li>Stride - \( (1,1) \)</li>
+          <li>Padding - valid</li>
+        </ul>
+        <li>Batch Norm</li>
+        <ul>
+          <li>Normalizes channel axix</li>
+        </ul>
       </ul>
-      <li>Batch Norm</li>
+      <li>Final step</li>
       <ul>
-        <li>Normalizes channel axix</li>
+        <li>ReLU</li>
       </ul>
-      <li>ReLU</li>
-    </ul>
-
-    <ul>
-      <li>CONV2D</li>
-      <ul>
-        <li>Filter - \( (1,1) \)</li>
-        <li>Stride - \( (1,1) \)</li>
-        <li>Padding - valid</li>
-      </ul>
-      <li>Batch Norm</li>
-      <ul>
-        <li>Normalizes channel axix</li>
-      </ul>
-    </ul>
-
-    <ul>
-      <li>ReLU</li>
     </ul>
 
 <pre><code class="python">def identity_block(X, f, filters, stage, block):
@@ -184,61 +195,65 @@
     <img class="img-fluid" class="card-img-top" src="/img/machine-learning/residual-neural-network2.png" alt="Card image cap">
 
     <ul>
+      <li>Short cut path has Conv2D layer, which is used to resize input (\ X \) to different dimension</li>
+      <li>First component</li>
+      <ul>
       <li>CONV2D</li>
-      <ul>
-        <li>Filter - \( (1,1) \)</li>
-        <li>Stride - \( (s,s) \)</li>
-        <li>Padding - valid</li>
+        <ul>
+          <li>Filter - \( (1,1) \)</li>
+          <li>Stride - \( (s,s) \)</li>
+          <li>Padding - valid</li>
+        </ul>
+        <li>Batch Norm</li>
+        <ul>
+          <li>Normalizes channel axix</li>
+        </ul>
+        <li>ReLU</li>
       </ul>
-      <li>Batch Norm</li>
+      <li>Second component</li>
       <ul>
-        <li>Normalizes channel axix</li>
-      </ul>
-      <li>ReLU</li>
-    </ul>
-
-    <ul>
       <li>CONV2D</li>
-      <ul>
-        <li>Filter - \( (f,f) \)</li>
-        <li>Stride - \( (1,1) \)</li>
-        <li>Padding - same</li>
+        <ul>
+          <li>Filter - \( (f,f) \)</li>
+          <li>Stride - \( (1,1) \)</li>
+          <li>Padding - same</li>
+        </ul>
+        <li>Batch Norm</li>
+        <ul>
+          <li>Normalizes channel axix</li>
+        </ul>
+        <li>ReLU</li>
       </ul>
-      <li>Batch Norm</li>
+      <li>Third component</li>
       <ul>
-        <li>Normalizes channel axix</li>
+        <li>CONV2D</li>
+        <ul>
+          <li>Filter - \( (1,1) \)</li>
+          <li>Stride - \( (1,1) \)</li>
+          <li>Padding - valid</li>
+        </ul>
+        <li>Batch Norm</li>
+        <ul>
+          <li>Normalizes channel axix</li>
+        </ul>
       </ul>
-      <li>ReLU</li>
-    </ul>
-
-    <ul>
-      <li>CONV2D</li>
+      <li>Short cut component</li>
       <ul>
-        <li>Filter - \( (1,1) \)</li>
-        <li>Stride - \( (1,1) \)</li>
-        <li>Padding - valid</li>
+        <li>CONV2D</li>
+        <ul>
+          <li>Filter - \( (1,1) \)</li>
+          <li>Stride - \( (s,s) \)</li>
+          <li>Padding - valid</li>
+        </ul>
+        <li>Batch Norm</li>
+        <ul>
+          <li>Normalizes channel axix</li>
+        </ul>
       </ul>
-      <li>Batch Norm</li>
+      <li>Final step</li>
       <ul>
-        <li>Normalizes channel axix</li>
+        <li>ReLU</li>
       </ul>
-    </ul>
-
-    <ul>
-      <li>CONV2D</li>
-      <ul>
-        <li>Filter - \( (1,1) \)</li>
-        <li>Stride - \( (s,s) \)</li>
-        <li>Padding - valid</li>
-      </ul>
-      <li>Batch Norm</li>
-      <ul>
-        <li>Normalizes channel axix</li>
-      </ul>
-    </ul>
-
-    <ul>
-      <li>ReLU</li>
     </ul>
 
 <pre><code class="python">def convolutional_block(X, f, filters, stage, block, s = 2):
