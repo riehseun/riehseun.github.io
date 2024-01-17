@@ -402,7 +402,59 @@
   <div class="card-body">
     <h2 class="card-title">Longest repeating character replacement (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def characterReplacement(self, s: str, k: int) -> int:
+
+        # Find longest substring whose chars differ by max k
+        # Initialize start and end pointer
+        # Move end pointer while the string is valid
+        # When string is invalid, move start pointer
+
+        # While the window is moving, remove and add char into a dictionary
+
+        def helper(substring, k, char_count):
+
+            max_char = ""
+            max_count = 0
+            for key, val in char_count.items():
+                if val > max_count:
+                    max_char = key
+                    max_count = val
+
+            diff_count = 0
+            for key, val in char_count.items():
+                if key != max_char:
+                    diff_count += val
+
+            if k >= diff_count:
+                return True
+            return False
+
+        start = 0
+        end = 0
+        max_length = 0
+        char_count = defaultdict(int)
+        end_pointer_moved = True
+
+        # Time O(nd) n = len(s) d = size of dictionary
+        # Space O(d)
+        while start <= end and end < len(s):
+
+            substring = s[start:end+1]
+            if end_pointer_moved:
+                char_count[s[end]] += 1
+            else:
+                char_count[s[start-1]] -= 1
+
+            if helper(substring, k, char_count):
+                max_length = max(max_length, len(substring))
+                end += 1
+                end_pointer_moved = True
+            else:
+                start += 1
+                end_pointer_moved = False
+
+        return max_length</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/longest-repeating-character-replacement">424. Longest Repeating Character Replacement</a>
