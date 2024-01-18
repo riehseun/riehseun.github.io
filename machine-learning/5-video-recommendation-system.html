@@ -157,33 +157,67 @@
     <ul>
       <li>Data engineering</li>
       <ul>
-        <li>Annotated dataset</li>
+        <li>Video</li>
         <ul>
-          <li>Image path</li>
-          <li>Objects - human face, license plate</li>
-          <li>Bounding boxes - x coordinate, y coordinate, width, height</li>
+          <li>video_id</li>
+          <li>length</li>
+          <li>manual_tags</li>
+          <li>manual_title</li>
+          <li>likes</li>
+          <li>views</li>
+          <li>language</li>
         </ul>
-        <li>Street view images</li>
+        <li>User</li>
         <ul>
-          <li>Image path</li>
+          <li>user_id</li>
+          <li>username</li>
+          <li>age</li>
+          <li>gender</li>
+          <li>city</li>
+          <li>country</li>
+          <li>language</li>
+        </ul>
+        <li>User-video interation</li>
+        <ul>
+          <li>user_id</li>
+          <li>video_id</li>
+          <li>interaction_type - like/impression/watch/search/comment</li>
         </ul>
       </ul>
       <li>Feature engineering</li>
       <ul>
-        <li>Resize, scale, normalize</li>
-        <li>Data augmentation</li>
+        <li>Video feature</li>
         <ul>
-          <li>Ex. random crop, random saturation, vertical/horizontal flip, rotation/translation, affline transformations, changing brightness/saturation/contrast</li>
-          <li>When rotating/flipping images, the ground truth bounding boxes must also be transformed</li>
-          <li>Offline</li>
+          <li>video_id - categorical data, use embedding layer</li>
+          <li>length</li>
+          <li>language - categorical data, use embedding layer</li>
+          <li>manual_tags - use CBOW</li>
+          <li>manual_titles - use BERT</li>
+          <li>Data augmentation</li>
+        </ul>
+        <li>User feature</li>
+        <ul>
+          <li>User demographics</li>
           <ul>
-            <li>Augment image before training</li>
-            <li>Training is faster but requires additional storage</li>
+            <li>user_id</li>
+            <li>age</li>
+            <li>gender</li>
+            <li>language</li>
+            <li>city</li>
+            <li>county</li>
           </ul>
-          <li>Online</li>
+          <li>Contextual information</li>
           <ul>
-            <li>Augment image on the fly during training</li>
-            <li>Training is slower but requires no additional storage</li>
+            <li>time_of_day - use bucketize + one-hot encoding</li>
+            <li>device - use one-hot encoding</li>
+            <li>day_of_week - use embedding</li>
+          </ul>
+          <li>User-historical interactions</li>
+          <ul>
+            <li>search_history - use BERT</li>
+            <li>liked_videos - use embedding layer</li>
+            <li>watch_videos - use embedding layer</li>
+            <li>impressions - use embedding layer</li>
           </ul>
         </ul>
       </ul>
@@ -200,23 +234,33 @@
     <ul>
       <li>Model selection</li>
       <ul>
-        <li>Two stages network</li>
+        <li>Matrix factorization</li>
         <ul>
-          <li>Convolutional layers</li>
+          <li>Feedback matrix</li>
           <ul>
-            <li>Takes input image and produces feature map</li>
+            <li>2D matrix mapping user and video where value of 1 means the user find the video relevant</li>
+            <li>Relevancy can be defined using both explicit and implicit feedback</li>
+            <li>Explicit feedback - user likes or shares. Data is sparse</li>
+            <li>Implicit feedback - user clicks or watch time. Data might be noisy</li>
           </ul>
-          <li>Region proposal network (RPN)</li>
+          <li>Matrix factorization model</li>
           <ul>
-            <li>Based on neural network</li>
-            <li>Takes feature map and produces candidate regions in the image</li>
+            <li>An embedding model</li>
+            <li>Learns to map each user into embedding vector and each video into embedding vector such that their distance represents their relevance</li>
+            <li>Decomposes feedback matric into two lower dimensional matrices, where one represents the user embedding and the other represents video embedding</li>
           </ul>
-          <li>Classifier</li>
+          <li>Matrix factorization training</li>
           <ul>
-            <li>Based on neural network</li>
-            <li>Takes feature map and candidate regions, and assigns an object class to each region</li>
+            <li>Randomly initializes two embedding matrices</li>
+            <li>Mimimizes the loss between predicted scores matrix and feedback matrix</li>
+            <ul>
+              <li>Squared distance over observed user-video pairs</li>
+              <li>Squared distance over observed and unobserved user-video pairs</li>
+              <li>Weighted combination of squared distance over observed and unobserved user-video pairs</li>
+            </ul>
           </ul>
         </ul>
+        <li>Two tower neural network</li>
       </ul>
       <li>Model training</li>
       <ul>
