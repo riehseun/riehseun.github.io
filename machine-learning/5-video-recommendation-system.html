@@ -255,9 +255,44 @@
             <li>Mimimizes the loss between predicted scores matrix and feedback matrix</li>
             <ul>
               <li>Squared distance over observed user-video pairs</li>
+              <ul>
+                <li>\( \text{loss} = \displaystyle\sum_{(i,j) \in \text{obs}} (A_{ij}-U_{i}V_{j})^{2} \)</li>
+                <li>Loss function does not penalize for bad prediction on unobserved pairs</li>
+              </ul>
               <li>Squared distance over observed and unobserved user-video pairs</li>
+              <ul>
+                <li>\( \text{loss} = \displaystyle\sum_{(i,j)} (A_{ij}-U_{i}V_{j})^{2} \)</li>
+                <li>Unobserved pairs dominate observed pairs during training because feedback matrix is sparce</li>
+              </ul>
               <li>Weighted combination of squared distance over observed and unobserved user-video pairs</li>
+              <ul>
+                <li>\( \text{loss} = \displaystyle\sum_{(i,j) \in \text{obs}} (A_{ij}-U_{i}V_{j})^{2} + w\displaystyle\sum_{(i,j) \notin \text{obs}} (A_{ij}-U_{i}V_{j})^{2} \)</li>
+                <li>\( w \) is a hyperparameter</li>
+              </ul>
             </ul>
+          </ul>
+          <li>Matrix factorization optimization</li>
+          <ul>
+            <li>Weighted alternating least squares (WALS) - specific to matrix factorization</li>
+            <ul>
+              <li>Fix one embedding matrix \( U \) and optimize the other embedding matrix \( V \)</li>
+              <li>Fix the other embedding matrix \( V \) and optimize the embedding matrix \( U \)</li>
+              <li>Repeat</li>
+            </ul>
+          </ul>
+          <li>Matrix factorization inference</li>
+          <ul>
+            <li>Take a dot product between user and video embeddings</li>
+          </ul>
+          <li>Pros</li>
+          <ul>
+            <li>Fast training because there are only two embedding matrices to learn</li>
+            <li>Fast serving because learned embeddings are static</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Only relies on user-video interactions, not using other features such as user age, language, etc</li>
+            <li>Handling new users is difficult</li>
           </ul>
         </ul>
         <li>Two tower neural network</li>
