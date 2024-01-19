@@ -341,29 +341,27 @@
     <h2 class="card-title">Evaluation</h2>
     <ul>
       <li>Intersection over union (IoU)</li>
-      <ul>
-        <li>Measures overlap between detected and ground truth bounding boxes</li>
-      </ul>
       <li>Offline</li>
       <ul>
-        <li>Precision</li>
+        <li>Precision@k</li>
         <ul>
-          <li>Correct detections / total detections</li>
-          <li>Need to pick an IoU threshold</li>
-        </ul>
-        <li>Average precision (AP)</li>
-        <ul>
-          <li>Calculate precision at different IoU threshold and compute the average</li>
+          <li>Number of relevant video in top k recommended videos / top k recommended videos</li>
         </ul>
         <li>Mean average precision (mAP)</li>
         <ul>
           <li>Average of average precision across all object classes</li>
         </ul>
+        <li>Diversity</li>
+        <ul>
+          <li>How dissimilar recommended videos are to each other</li>
+        </ul>
       </ul>
       <li>Online</li>
       <ul>
-        <li>Number of user reports</li>
-        <li>Human annotators to check the blurred images</li>
+        <li>Click-through rate</li>
+        <li>The number of completed videos</li>
+        <li>Total watch time</li>
+        <li>Explicit user feedback</li>
       </ul>
     </ul>
   </div>
@@ -376,38 +374,23 @@
   <div class="card-body">
     <h2 class="card-title">Deployment and serving</h2>
 
-    <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/youtube-recommendation-system1.png" alt="Card image cap">
+    <!-- <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/youtube-recommendation-system1.png" alt="Card image cap"> -->
     <ul>
-      <li>Batch inference pipeline</li>
+      <li>Candidate generation</li>
       <ul>
-        <li>Non-max suppression (NMS)</li>
-        <ul>
-          <li>Keep one bounding box out of many overlapping bounding boxes</li>
-        </ul>
-        <li>Preprocessing</li>
-        <ul>
-          <li>CPU intensive task</li>
-        </ul>
-        <li>Blurring service</li>
-        <ul>
-          <li>GPU intensive task</li>
-          <li>Identify all objects in the image</li>
-          <li>Resolve overlapping bounding boxes using NMS</li>
-          <li>Blur objects of interest</li>
-          <li>Store blurred images</li>
-        </ul>
+        <li>Narrow down videos from potentiall billions to thousands</li>
+        <li>Use model that does not rely on video feature for efficiency</li>
+        <li>Two-tower neural network with collaborative filtering can be used</li>
+        <li>Use more than one candidate generation to capture popular or trending videos</li>
       </ul>
-      <li>Data pipeline</li>
+      <li>Ranking</li>
       <ul>
-        <li>Hard negative mining</li>
-        <ul>
-          <li>Negative examples created from incorrectly predicted examples</li>
-          <li>Model should perform better when trained with this dataset</li>
-        </ul>
-        <li>Preprocessing</li>
-        <ul>
-          <li>Resize, scale, normalize</li>
-        </ul>
+        <li>Takes user and candidate videos as input, scores each video, and outputs a ranked list of videos</li>
+        <li>Two-tower neural network with content-based filtering can be used</li>
+      </ul>
+      <li>Re-ranking</li>
+      <ul>
+        <li>Filter out certain videos like misinformation, violence, nudity, hates</li>
       </ul>
     </ul>
   </div>
