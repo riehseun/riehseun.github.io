@@ -293,47 +293,42 @@
           <ul>
             <li>Only relies on user-video interactions, not using other features such as user age, language, etc</li>
             <li>Handling new users is difficult</li>
+            <li>Model performance is lower</li>
           </ul>
         </ul>
         <li>Two tower neural network</li>
+        <ul>
+          <li>Construct dataset</li>
+          <ul>
+            <li>For each pair of (user-related features, video-related features)</li>
+            <ul>
+              <li>Positive - if user likes video or watches at least half of it</li>
+              <li>Negative - if user dislikes video or just pick random videos</li>
+            </ul>
+          </ul>
+          <li>Choose loss function</li>
+          <ul>
+            <li>This is binary classification, thus use cross-entropy</li>
+          </ul>
+          <li>Inference</li>
+          <ul>
+            <li>Use ANN to find most relevant videos for a given user from their embeddings</li>
+          </ul>
+          <li>Pros</li>
+          <ul>
+            <li>Utilizes user features</li>
+            <li>Capable of handling new users</li>
+            <li>Model performance is higher</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Slow serving having to compute user embeddings at query time</li>
+            <li>Slow inference if using content-based filtering because model needs to tranform video features to video embeddings</li>
+            <li>More learning paramaters, thus traning is more expensive</li>
+          </ul>
+        </ul>
       </ul>
       <li>Model training</li>
-      <ul>
-        <li>Regression loss</li>
-        <ul>
-          <li>Measures how aligned the predicted bounding boxes are with the ground truth bounding boxes</li>
-          <li>Use mean squared error (MSE)</li>
-          <li>\( L_{reg} = \dfrac{1}{M}\displaystyle\sum_{i=1}^{M} \left[ (x_{i}-\hat{x}_{i})^{2} + (y_{i}-\hat{y}_{i})^{2} + (w_{i}-\hat{w}_{i})^{2} + (h_{i}-\hat{h}_{i})^{2} \right] \)</li>
-          <ul>
-            <li>\( M \) - total number of predictions</li>
-            <li>\( x_{i} \) - ground truth top left \( x \) coordinate</li>
-            <li>\( \hat{x}_{i} \) - predicted top left \( x \) coordinate</li>
-            <li>\( y_{i} \) - ground truth top left \( y \) coordinate</li>
-            <li>\( \hat{y}_{i} \) - predicted top left \( y \) coordinate</li>
-            <li>\( w_{i} \) - ground truth width</li>
-            <li>\( \hat{w}_{i} \) - predicted width</li>
-            <li>\( h_{i} \) - ground truth height</li>
-            <li>\( \hat{h}_{i} \) - predicted height</li>
-          </ul>
-        </ul>
-        <li>Classification loss</li>
-        <ul>
-          <li>Measures how accurate the predicted probabilities are for each detected object</li>
-          <li>Use log loss (cross-entropy)</li>
-          <li>\( L_{cls} = -\dfrac{1}{M} \displaystyle\sum_{i=1}^{M} \displaystyle\sum_{c=1}^{C} y_{c}log\hat{y}_{c} \)</li>
-          <ul>
-            <li>\( M \) - total number of detected bounding boxes</li>
-            <li>\( C \) - total number of classes</li>
-            <li>\( y_{i} \) - ground truth label for detection \( i \)</li>
-            <li>\( \hat{y}_{i} \) - predicted class label for detection \( i \)</li>
-          </ul>
-        </ul>
-        <li>Total loss</li>
-        <ul>
-          <li>\( L = L_{reg} + \lambda L_{cls} \)</li>
-          <li>\( \lambda \) - balancing parameter</li>
-        </ul>
-      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
