@@ -44,76 +44,81 @@
   <div class="card-body">
     <h2 class="card-title">Whatsapp</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#whatsapp-1">Whatsapp</a></li>
+      <li><a href="#whatsapp-1">Requirement</a></li>
+      <li><a href="#whatsapp-2">Estimation</a></li>
+      <li><a href="#whatsapp-3">High level design</a></li>
+      <li><a href="#whatsapp-4">API</a></li>
+      <li><a href="#whatsapp-5">Storage schema</a></li>
+      <li><a href="#whatsapp-6">Detailed design</a></li>
+      <li><a href="#whatsapp-7">Evaluation</a></li>
     </ul>
   </div>
 </div>
 
 <div class="card mb-4" id="whatsapp-1">
   <div class="card-body">
-    <h2 class="card-title">Whatsapp</h2>
+    <h2 class="card-title">Requirement</h2>
 
-    <h3 class="card-title">Requirement</h3>
-
-    <h4 class="card-title">Functional</h4>
+    <h3 class="card-title">Functional</h3>
     <ul>
-      <li>Supports 1-on-1 conversation between users.</li>
-      <li>Persists chat history.</li>
-      <li>Acknowledgs sent, delivered, and read.</li>
-      <li>Supports sharing of images and videos.</li>
-      <li>Notifies offline users of new messages when they come online.</li>
+      <li>Should the system support group chat? Yes</li>
+      <li>Should the system support voice chat? No</li>
+      <li>How many daily active users? 100M</li>
+      <li>Is there a limit on group members? Yes, 100</li>
+      <li>Is there a limit on chat size? Yes, 100k chars</li>
+      <li>How long shoud we store chat history? Indefinitely</li>
+      <li>What devices should we support? Web, mobile</li>
+      <li>Should we support sending images and videos? No, text only</li>
     </ul>
 
-    <h4 class="card-title">Non-functional</h4>
+    <h3 class="card-title">Non-functional</h3>
     <ul>
-      <li>Availability.</li>
-      <ul>
-        <li>Can be compromised for causal consistency.</li>
-      </ul>
-      <li>Reliability.</li>
-      <li>Scalability.</li>
-      <li>Performance.</li>
-      <ul>
-        <li>Users should receive messages with low latency.</li>
-      </ul>
-      <li>Security.</li>
-      <ul>
-        <li>Messages must be secured.</li>
-      </ul>
+      <li>Availability</li>
+      <li>Reliability</li>
+      <li>Scalability</li>
+      <li>Performance</li>
+      <li>Consistency</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="whatsapp-2">
+  <div class="card-body">
+    <h2 class="card-title">Estimation</h2>
+
+    <h3 class="card-title">Server</h3>
+    <ul>
+      <li>Assume 100M daily active users</li>
+      <li>Assume a single server can handle 10K connections</li>
+      <li>100M / 10K = 10,000 servers are needed</li>
     </ul>
 
-    <h3 class="card-title">Estimation</h3>
-
-    <h4 class="card-title">Server</h4>
+    <h3 class="card-title">Storage</h3>
     <ul>
-      <li>Assume</li>
-      <ul>
-        <li>1B connections per day.</li>
-        <li>A single server can handle 10M connections per day.</li>
-      </ul>
-      <li>1B/10M = 100 servers are needed.</li>
+      <li>Assume 10B messages per day</li>
+      <li>Assume Each message is 100 bytes</li>
+      <li>10B per day * 100 bytes = 1TB per day</li>
     </ul>
 
-    <h4 class="card-title">Storage</h4>
+    <h3 class="card-title">Bandwidth</h3>
     <ul>
-      <li>Assume</li>
-      <ul>
-        <li>100B messages per day.</li>
-        <li>Each message is 100 bytes.</li>
-        <li>Whatsapp keeps messages for 30 days only.</li>
-      </ul>
-      <li>100B per day * 100 bytes = 10TB per day.</li>
-      <li>300TB per month.</li>
+      <li>Incoming: 1TB per day * 8 bits / 86400 seconds per day = 92.6Mbps</li>
+      <li>Outgoing: same as incoming</li>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
 
-    <h4 class="card-title">Bandwidth</h4>
-    <ul>
-      <li>Incoming: 10TB per day * 8 bits / 86400 seconds per day = 926 Mbps.</li>
-      <li>Outgoing: same as incoming.</li>
-    </ul>
+<div class="card mb-4" id="whatsapp-3">
+  <div class="card-body">
+    <h2 class="card-title">High level design</h2>
 
-    <h3 class="card-title">High level design</h3>
-    <img class="img-fluid" class="card-img-top" src="/img/system-design/whatsapp1.png" alt="Card image cap">
+    <!-- <img class="img-fluid" class="card-img-top" src="/img/system-design/whatsapp1.png" alt="Card image cap">
     <ul>
       <li>When user A sends a message to user B</li>
       <ul>
@@ -122,25 +127,52 @@
         <li>B receives the message and sends ack back to the server.</li>
         <li>Server notifies A that the message has been delivered.</li>
       </ul>
-    </ul>
+    </ul> -->
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
 
-    <h3 class="card-title">API</h3>
+<div class="card mb-4" id="whatsapp-4">
+  <div class="card-body">
+    <h2 class="card-title">API</h2>
     <ul>
-      <li>send_msessage(sender_ID, reciever_ID, type, text=none, media_object=none)</li>
-      <li>get_message(user_Id)</li>
-      <li>upload_file(file_type, file)</li>
-      <li>download_file(user_id, file_id)</li>
+      <li><code>send_msessage(sender_id, reciever_id, text)</code></li>
+      <ul>
+        <li></li>
+        <li><code></code></li>
+      </ul>
+      <li><code>get_message(user_Id)</code></li>
+      <ul>
+        <li></li>
+        <li></li>
+      </ul>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
 
-    <h3 class="card-title">DB</h3>
+<div class="card mb-4" id="whatsapp-5">
+  <div class="card-body">
+    <h2 class="card-title">Storage schema</h2>
     <ul>
-      <li>RDBMS (MySQL) or NoSQL (MongoDB) are not good because we need to do frequent read/write.</li>
-      <li>Choose wide-column DB like HBase. HBase stores data into memory buffer and move data into disk when buffer is full. This works well with variable-sized data.</li>
-      <li>Store multiple copies of data in different servers.</li>
+      <li>RDBMS (MySQL) or NoSQL (MongoDB) are not good because we need to do frequent read/write</li>
+      <li>Choose wide-column DB like HBase. HBase stores data into memory buffer and move data into disk when buffer is full. This works well with variable-sized data</li>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
 
-    <h3 class="card-title">Component design</h3>
-    <img class="img-fluid" class="card-img-top" src="/img/system-design/whatsapp2.png" alt="Card image cap">
+<div class="card mb-4" id="whatsapp-6">
+  <div class="card-body">
+    <h2 class="card-title">Detailed design</h2>
+
+    <!-- <img class="img-fluid" class="card-img-top" src="/img/system-design/whatsapp2.png" alt="Card image cap">
 
     <h4 class="card-title">Websocket server</h4>
     <ul>
@@ -179,28 +211,56 @@
     <ul>
       <li>Message service sends messages to Kafka, to be saved for further processing.</li>
       <li>Group is topic, sender is producer, and receiver is consumer.</li>
-    </ul>
+    </ul> -->
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
 
-    <h3 class="card-title">Evaluation</h3>
+<div class="card mb-4" id="whatsapp-7">
+  <div class="card-body">
+    <h2 class="card-title">Evaluation</h2>
 
-    <h4 class="card-title">Availability</h4>
+    <h3 class="card-title">Availability</h3>
     <ul>
-      <li>Websocket servers are replicated.</li>
+      <li>Replication</li>
+      <ul>
+        <li>Replicate each server and DB</li>
+        <li>Replicate entire components to different zone or geographical region</li>
+      </ul>
+      <li>Fail over</li>
+      <ul>
+        <li></li>
+        <li></li>
+      </ul>
     </ul>
 
     <h4 class="card-title">Reliability</h4>
+    <ul>
+      <li>Data loss</li>
+    </ul>
 
-    <h4 class="card-title">Scalability</h4>
+    <h3 class="card-title">Scalability</h3>
+    <ul>
+      <li>Horizontal scaling</li>
+      <li>Data partitioning</li>
+    </ul>
 
     <h4 class="card-title">Performance</h4>
     <ul>
-      <li>Low latency via web socket servers and cache.</li>
-      <li>Low latency via CDN.</li>
+      <!-- <li>Low latency via web socket servers and cache</li> -->
+      <!-- <li>Low latency via CDN</li> -->
+    </ul>
     </ul>
 
+    <h3 class="card-title">Consistency</h3>
+    <ul>
+      <li></li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
-    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+    Reference: System Design Interview, Alex Xu
   </div>
 </div>
 <!-- Whatsapp END -->
