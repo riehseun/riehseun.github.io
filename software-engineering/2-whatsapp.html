@@ -251,14 +251,40 @@
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
 
-    <!-- <img class="img-fluid" class="card-img-top" src="/img/system-design/whatsapp2.png" alt="Card image cap">
-
-    <h4 class="card-title">Websocket server</h4>
+    <h3 class="card-title">Service discovery</h3>
     <ul>
-      <li>Web socket server keeps connection open with all active users.</li>
-      <li>These servers provide a port to every online user.</li>
-      <li>Web socket manager maintains mapping between port and user.</li>
+      <li>Recommend the best chat server for the user</li>
     </ul>
+
+    <h3 class="card-title">1-on-1 chat</h3>
+    <ul>
+      <li>User A sends message to chat server 1</li>
+      <li>Chat server 1 obtains message ID from ID generator</li>
+      <li>Chat server 1 sends message to message queue</li>
+      <li>Message is stored in key-value store</li>
+      <li>If user B is online, message is forwarded to chat server 2 where user B is connected</li>
+      <li>If user B is offline, push notification is send to user B from push notification server</li>
+      <li>Chat server 2 forwards messsage to user B</li>
+    </ul>
+
+    <h3 class="card-title">Message synchronization</h3>
+    <ul>
+      <li>Different devices owned by the same user are connected to the same chat server</li>
+      <li>Each device keeps the lastest message ID</li>
+      <li>Each device reads from key-value store when</li>
+      <ul>
+        <li>The recipient ID equals the current user ID</li>
+        <li>Latest message ID is less than message IDs in key-value store</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Group chat</h3>
+    <ul>
+      <li>Message from user A is copied to messaage queues for user B and user C</li>
+      <li>Message queues server as an inbox for each user</li>
+    </ul>
+
+    <!-- <img class="img-fluid" class="card-img-top" src="/img/system-design/whatsapp2.png" alt="Card image cap">
 
     <h4 class="card-title">Message service</h4>
     <ul>
