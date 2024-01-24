@@ -133,6 +133,36 @@
       <li>IoU = Size of intersection / size of union</li>
       <li>In general, correct if IoU is greater than or equal to 0.5</li>
     </ul>
+
+<pre><code class="python">def iou(box1, box2):
+    """
+    Args:
+    box1 -- first box with coordinates (box1_x1, box1_y1, box1_x2, box1_y2)
+    box2 -- second box with coordinates (box2_x1, box2_y1, box2_x2, box2_y2)
+
+    Retunrs:
+    iou --
+    """
+
+    (box1_x1, box1_y1, box1_x2, box1_y2) = box1
+    (box2_x1, box2_y1, box2_x2, box2_y2) = box2
+
+    xi1 = max(box1_x1, box2_x1)
+    yi1 = max(box1_y1, box2_y1)
+    xi2 = min(box1_x2, box2_x2)
+    yi2 = min(box1_y2, box2_y2)
+
+    inter_width = xi2 - xi1
+    inter_height = yi2 - yi1
+    inter_area = max(inter_width, 0) * max(inter_height, 0)
+
+    box1_area = (box1_x2 - box1_x1) * (box1_y2 - box1_y1)
+    box2_area = (box2_x2 - box2_x1) * (box2_y2 - box2_y1)
+    union_area = box1_area + box2_area - inter_area
+
+    iou = inter_area / union_area
+
+    return iou</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
@@ -147,6 +177,8 @@
       <li>Pick the box with the largest probability and discard all other boxes that overlap with it</li>
     </ul>
 
+    <img class="img-fluid" class="card-img-top" src="/img/machine-learning/object-recognition1.png" style="width: 600px; height: 300px" alt="Card image cap">
+
     <h3 class="card-title">Algorithm</h3>
     <ul>
       <li>Discard all boxes that are \( p_{c} \le 0.6 \)</li>
@@ -156,6 +188,31 @@
         <li>Discard any remaining box  with \( \text{IoU} \ge 0.5 \) with the box in the above step</li>
       </ul>
     </ul>
+
+<pre><code class="python">def yolo_non_max_suppression(scores, boxes, classes, max_boxes = 10, iou_threshold = 0.5):
+    """
+    Args:
+    scores -- tensor of shape (None,)
+    boxes -- tensor of shape (None, 4)
+    classes -- tensor of shape (None,)
+    max_boxes -- maximum number of predicted boxes
+    iou_threshold --
+
+    Returns:
+    scores -- tensor of shape (, None)
+    boxes -- tensor of shape (4, None)
+    classes -- tensor of shape (, None)
+    """
+
+    max_boxes_tensor = K.variable(max_boxes, dtype='int32')
+    K.get_session().run(tf.variables_initializer([max_boxes_tensor]))
+    nms_indices = tf.image.non_max_suppression(boxes, scores, max_boxes_tensor, iou_threshold=iou_threshold, name=None)
+
+    scores = K.gather(scores, nms_indices)
+    boxes = K.gather(boxes, nms_indices)
+    classes = K.gather(classes, nms_indices)
+
+    return scores, boxes, classes</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
@@ -241,7 +298,6 @@
       <li>Input - batch of images</li>
       <li>Output - a list of bounding boxes with recognized images</li>
       <li>Example - IMAGE \( (m, 608, 608, 3) \) -> DEEP CNN -> ENCODING \( (m, 19, 19, 5, 85) = (m, n_{W}, n_{H}, \text{number of anchor boxes}, n_{C}) \) </li>
-
     </ul>
 
     <h3 class="card-title">Apply non-max suppression</h3>
@@ -250,6 +306,76 @@
       <li>Get rid of low probability predictions</li>
       <li>For each class, use non-max suppression to generate final result</li>
     </ul>
+
+<pre><code class="python">def yolo_boxes_to_corners(box_xy, box_wh):
+
+    box_mins = box_xy - (box_wh / 2.)
+    box_maxes = box_xy + (box_wh / 2.)
+
+    return K.concatenate([
+        box_mins[..., 1:2],  # y_min
+        box_mins[..., 0:1],  # x_min
+        box_maxes[..., 1:2],  # y_max
+        box_maxes[..., 0:1]  # x_max
+    ])</code></pre>
+
+<pre><code class="python">def yolo_filter_boxes(box_confidence, boxes, box_class_probs, threshold = .6):
+    """
+    Args:
+    box_confidence -- tensor of shape (19, 19, 5, 1)
+    boxes -- tensor of shape (19, 19, 5, 4)
+    box_class_probs -- tensor of shape (19, 19, 5, 80)
+    threshold --
+
+    Returns:
+    scores -- tensor of shape (None,)
+    boxes -- tensor of shape (None, 4)
+    classes -- tensor of shape (None,)
+    """
+
+    box_scores = box_confidence * box_class_probs
+    box_classes = K.argmax(box_scores, axis=-1)
+    box_class_scores = K.max(box_scores, axis=-1, keepdims=False)
+    filtering_mask = box_class_scores >= threshold
+
+    scores = tf.boolean_mask(box_class_scores, filtering_mask)
+    boxes = tf.boolean_mask(boxes, filtering_mask)
+    classes = tf.boolean_mask(box_classes, filtering_mask)
+
+    return scores, boxes, classes</code></pre>
+
+<pre><code class="python">def scale_boxes(boxes, image_shape):
+
+    height = image_shape[0]
+    width = image_shape[1]
+    image_dims = K.stack([height, width, height, width])
+    image_dims = K.reshape(image_dims, [1, 4])
+    boxes = boxes * image_dims
+
+    return boxes</code></pre>
+
+<pre><code class="python">def yolo_eval(yolo_outputs, image_shape = (720., 1280.), max_boxes=10, score_threshold=.6, iou_threshold=.5):
+    """
+    Arg:
+    yolo_outputs -- output of the encoding model
+    image_shape -- tensor of shape (2,) containing the input shape, in this notebook we use (608., 608.) (has to be float32 dtype)
+    max_boxes -- maximum number of predicted boxes
+    score_threshold --
+    iou_threshold --
+
+    Returns:
+    scores -- tensor of shape (None, )
+    boxes -- tensor of shape (None, 4)
+    classes -- tensor of shape (None,)
+    """
+
+    box_confidence, box_xy, box_wh, box_class_probs = yolo_outputs
+    boxes = yolo_boxes_to_corners(box_xy, box_wh)
+    scores, boxes, classes = yolo_filter_boxes(box_confidence, boxes, box_class_probs, score_threshold)
+    boxes = scale_boxes(boxes, image_shape)
+    scores, boxes, classes = yolo_non_max_suppression(scores, boxes, classes, max_boxes, iou_threshold)
+
+    return scores, boxes, classes</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
