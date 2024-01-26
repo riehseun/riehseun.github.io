@@ -46,9 +46,6 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#object-recognition-">Object localization</a></li>
       <li><a href="#object-recognition-">Object detection</a></li>
-      <li><a href="#object-recognition-">Bounding box predictions</a></li>
-      <li><a href="#object-recognition-">Non-max suppression</a></li>
-      <li><a href="#object-recognition-">Anchor boxes</a></li>
       <li><a href="#object-recognition-">YOLO</a></li>
       <li><a href="#object-recognition-">Region proposal (R-CNN)</a></li>
     </ul>
@@ -75,6 +72,87 @@
         <li>If \( p_{c} = 0 \) we don't care about rest of the values. In this case, loss becomes just \( (\hat{y}_{1} - y_{1})^{2} \)</li>
       </ul>
     </ul>
+
+    <h3 class="card-title">Bounding box predictions</h3>
+    <ul>
+      <li>Split the image into smaller grid cells. For example \( 3 \times 3 = 9 \) grid cells</li>
+      <li>For each grid cell, compute \( y \) vector</li>
+      <li>Midpoint of each object is used to determine the grid that the object belongs</li>
+      <li>\( b_{x}, b_{y} \) are between \( 0 \) and \( 1 \)</li>
+      <li>\( b_{w}, b_{h} \) could be greater than \( 1 \)</li>
+    </ul>
+
+    <img class="img-fluid" class="card-img-top" src="/img/machine-learning/object-recognition2.png" style="width: 600px; height: 300px" alt="Card image cap">
+
+    <h3 class="card-title">Anchor boxes</h3>
+    <ul>
+      <li>What if we want each grid to detect multiple objects?</li>
+      <li>Stack the vector \( y \) vertically (which represents each anchor box for specific object) to create one large vertor \( y \)</li>
+      <li>Each object in training image is assigned to grid cell that contains object's midpoint and anchor box for the grid cell with highest IoU</li>
+      <li>In practice, overlapping happens rarely. People empirically choose anchor box width and height</li>
+      <li>Example, \( y \) is \( 3 \times 3 \times 2 \times 8 \) (3 by 3 grid cells, 2 anchor boxes)</li>
+      <ul>
+        <li></li>
+        <li>\( \begin{bmatrix}
+    p_{c} \\
+    b_{x} \\
+    b_{y} \\
+    b_{w} \\
+    b_{h} \\
+    c_{1} \\
+    c_{2} \\
+    c_{3} \\
+    p_{c} \\
+    b_{x} \\
+    b_{y} \\
+    b_{w} \\
+    b_{h} \\
+    c_{1} \\
+    c_{2} \\
+    c_{3}
+\end{bmatrix} \)</li>
+      </ul>
+      <li>If grid contains no object</li>
+      <ul>
+        <li>\( \begin{bmatrix}
+    0 \\
+    ? \\
+    ? \\
+    ? \\
+    ? \\
+    ? \\
+    ? \\
+    ? \\
+    0 \\
+    ? \\
+    ? \\
+    ? \\
+    ? \\
+    ? \\
+    ? \\
+    ?
+\end{bmatrix} \)</li>
+      </ul>
+      <li>If grid contains an object \( c = 2 \) and the second anchor box has higher IoU than the first anchor box</li>
+      <ul>
+        <li>\( \begin{bmatrix}
+      0 \\
+      ? \\
+      ? \\
+      ? \\
+      ? \\
+      ? \\
+      ? \\
+      ? \\
+      1 \\
+      b_{x} \\
+      b_{y} \\
+      b_{w} \\
+      b_{h} \\
+      0 \\
+      1 \\
+      0
+  \end{bmatrix} \)</li>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
@@ -110,23 +188,77 @@
 
 <div class="card mb-4" id="object-recognition-">
   <div class="card-body">
-    <h2 class="card-title">Bounding box predictions</h2>
+    <h2 class="card-title">YOLO</h2>
     <ul>
-      <li>Split the image into smaller grid cells. For example \( 3 \times 3 = 9 \) grid cells</li>
-      <li>For each grid cell, compute \( y \) vector</li>
-      <li>Midpoint of each object is used to determine the grid that the object belongs</li>
-      <li>\( b_{x}, b_{y} \) are between \( 0 \) and \( 1 \)</li>
-      <li>\( b_{w}, b_{h} \) could be greater than \( 1 \)</li>
+      <li>Requires only one forward prop to make prediction</li>
+      <li>Input - batch of images</li>
+      <li>Output - a list of bounding boxes with recognized images</li>
+      <li>Example</li>
+      <ul>
+        <li>IMAGE \( (m, 608, 608, 3) \) -> DEEP CNN -> ENCODING \( (m, 19, 19, 5, 85) = (m, n_{W}, n_{H}, \text{number of anchor boxes}, n_{C}) \)</li>
+      </ul>
     </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
-  </div>
-</div>
 
-<div class="card mb-4" id="object-recognition-">
-  <div class="card-body">
-    <h2 class="card-title">Non-max suppression</h2>
+    <!-- <h3 class="card-title">Apply non-max suppression</h3>
+    <ul>
+      <li>For each grid cell, get 2 predicted bounding boxes</li>
+      <li>Get rid of low probability predictions</li>
+      <li>For each class, use non-max suppression to generate final result</li>
+    </ul> -->
+
+<pre><code class="python">def yolo_boxes_to_corners(box_xy, box_wh):
+
+    box_mins = box_xy - (box_wh / 2.)
+    box_maxes = box_xy + (box_wh / 2.)
+
+    return K.concatenate([
+        box_mins[..., 1:2],  # y_min
+        box_mins[..., 0:1],  # x_min
+        box_maxes[..., 1:2],  # y_max
+        box_maxes[..., 0:1]  # x_max
+    ])</code></pre>
+
+    <h3 class="card-title">Filter boxes</h3>
+    <ul>
+      <li>Get rid of any boxes whose class score is less than the threshold</li>
+    </ul>
+
+<pre><code class="python">def yolo_filter_boxes(box_confidence, boxes, box_class_probs, threshold = .6):
+    """
+    Args:
+    box_confidence -- tensor of shape (19, 19, 5, 1)
+    boxes -- tensor of shape (19, 19, 5, 4)
+    box_class_probs -- tensor of shape (19, 19, 5, 80)
+    threshold --
+
+    Returns:
+    scores -- tensor of shape (None,)
+    boxes -- tensor of shape (None, 4)
+    classes -- tensor of shape (None,)
+    """
+
+    box_scores = box_confidence * box_class_probs
+    box_classes = K.argmax(box_scores, axis=-1)
+    box_class_scores = K.max(box_scores, axis=-1, keepdims=False)
+    filtering_mask = box_class_scores >= threshold
+
+    scores = tf.boolean_mask(box_class_scores, filtering_mask)
+    boxes = tf.boolean_mask(boxes, filtering_mask)
+    classes = tf.boolean_mask(box_classes, filtering_mask)
+
+    return scores, boxes, classes</code></pre>
+
+<pre><code class="python">def scale_boxes(boxes, image_shape):
+
+    height = image_shape[0]
+    width = image_shape[1]
+    image_dims = K.stack([height, width, height, width])
+    image_dims = K.reshape(image_dims, [1, 4])
+    boxes = boxes * image_dims
+
+    return boxes</code></pre>
+
+    <h3 class="card-title">Non-max suppression</h3>
     <ul>
       <li>Cleans up multiple detections of same object</li>
       <li>Pick the box with the largest probability and discard all other boxes that overlap with it</li>
@@ -134,7 +266,7 @@
 
     <img class="img-fluid" class="card-img-top" src="/img/machine-learning/object-recognition1.png" style="width: 600px; height: 300px" alt="Card image cap">
 
-    <h3 class="card-title">Intersection over union</h3>
+    <h4 class="card-title">Intersection over union</h4>
     <ul>
       <li>Measure of the overlap between two bounding boxes (One is ground truth box and the other is prediction box)</li>
       <li>IoU = Size of intersection / size of union</li>
@@ -171,7 +303,7 @@
 
     return iou</code></pre>
 
-    <h3 class="card-title">Algorithm</h3>
+    <h4 class="card-title">Algorithm</h4>
     <ul>
       <li>Discard all boxes that are \( p_{c} \le 0.6 \)</li>
       <li>While there are remaining boxes</li>
@@ -205,146 +337,6 @@
     classes = K.gather(classes, nms_indices)
 
     return scores, boxes, classes</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="object-recognition-">
-  <div class="card-body">
-    <h2 class="card-title">Anchor boxes</h2>
-    <ul>
-      <li>What if we want each grid to detect multiple objects?</li>
-      <li>Stack the vector \( y \) vertically (which represents each anchor box for specific object) to create one large vertor \( y \)</li>
-      <li>Each object in training image is assigned to grid cell that contains object's midpoint and anchor box for the grid cell with highest IoU</li>
-      <li>In practice, overlapping happens rarely. People empirically choose anchor box width and height</li>
-      <li>Example, \( y \) is \( 3 \times 3 \times 2 \times 8 \) (3 by 3 grid cells, 2 anchor boxes)</li>
-      <li>\( \begin{bmatrix}
-    p_{c} \\
-    b_{x} \\
-    b_{y} \\
-    b_{w} \\
-    b_{h} \\
-    c_{1} \\
-    c_{2} \\
-    c_{3} \\
-    p_{c} \\
-    b_{x} \\
-    b_{y} \\
-    b_{w} \\
-    b_{h} \\
-    c_{1} \\
-    c_{2} \\
-    c_{3}
-\end{bmatrix} \)</li>
-      <li>If grid contains no object</li>
-      <li>\( \begin{bmatrix}
-    0 \\
-    ? \\
-    ? \\
-    ? \\
-    ? \\
-    ? \\
-    ? \\
-    ? \\
-    0 \\
-    ? \\
-    ? \\
-    ? \\
-    ? \\
-    ? \\
-    ? \\
-    ?
-\end{bmatrix} \)</li>
-      <li>If grid contains an object \( c = 2 \) and the second anchor box has higher IoU than the first anchor box</li>
-      <li>\( \begin{bmatrix}
-    0 \\
-    ? \\
-    ? \\
-    ? \\
-    ? \\
-    ? \\
-    ? \\
-    ? \\
-    1 \\
-    b_{x} \\
-    b_{y} \\
-    b_{w} \\
-    b_{h} \\
-    0 \\
-    1 \\
-    0
-\end{bmatrix} \)</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="object-recognition-">
-  <div class="card-body">
-    <h2 class="card-title">YOLO</h2>
-    <ul>
-      <li>Input - batch of images</li>
-      <li>Output - a list of bounding boxes with recognized images</li>
-      <li>Example - IMAGE \( (m, 608, 608, 3) \) -> DEEP CNN -> ENCODING \( (m, 19, 19, 5, 85) = (m, n_{W}, n_{H}, \text{number of anchor boxes}, n_{C}) \) </li>
-    </ul>
-
-    <h3 class="card-title">Apply non-max suppression</h3>
-    <ul>
-      <li>For each grid cell, get 2 predicted bounding boxes</li>
-      <li>Get rid of low probability predictions</li>
-      <li>For each class, use non-max suppression to generate final result</li>
-    </ul>
-
-<pre><code class="python">def yolo_boxes_to_corners(box_xy, box_wh):
-
-    box_mins = box_xy - (box_wh / 2.)
-    box_maxes = box_xy + (box_wh / 2.)
-
-    return K.concatenate([
-        box_mins[..., 1:2],  # y_min
-        box_mins[..., 0:1],  # x_min
-        box_maxes[..., 1:2],  # y_max
-        box_maxes[..., 0:1]  # x_max
-    ])</code></pre>
-
-<pre><code class="python">def yolo_filter_boxes(box_confidence, boxes, box_class_probs, threshold = .6):
-    """
-    Args:
-    box_confidence -- tensor of shape (19, 19, 5, 1)
-    boxes -- tensor of shape (19, 19, 5, 4)
-    box_class_probs -- tensor of shape (19, 19, 5, 80)
-    threshold --
-
-    Returns:
-    scores -- tensor of shape (None,)
-    boxes -- tensor of shape (None, 4)
-    classes -- tensor of shape (None,)
-    """
-
-    box_scores = box_confidence * box_class_probs
-    box_classes = K.argmax(box_scores, axis=-1)
-    box_class_scores = K.max(box_scores, axis=-1, keepdims=False)
-    filtering_mask = box_class_scores >= threshold
-
-    scores = tf.boolean_mask(box_class_scores, filtering_mask)
-    boxes = tf.boolean_mask(boxes, filtering_mask)
-    classes = tf.boolean_mask(box_classes, filtering_mask)
-
-    return scores, boxes, classes</code></pre>
-
-<pre><code class="python">def scale_boxes(boxes, image_shape):
-
-    height = image_shape[0]
-    width = image_shape[1]
-    image_dims = K.stack([height, width, height, width])
-    image_dims = K.reshape(image_dims, [1, 4])
-    boxes = boxes * image_dims
-
-    return boxes</code></pre>
 
 <pre><code class="python">def yolo_eval(yolo_outputs, image_shape = (720., 1280.), max_boxes=10, score_threshold=.6, iou_threshold=.5):
     """
