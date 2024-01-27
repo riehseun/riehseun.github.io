@@ -18,13 +18,13 @@ let questionIndex = -1;
 let submittedAnswers = {};
 
 const CORRECT_BONUS = 10;
-const MAX_QUESTIONS = 9;
+const MAX_QUESTIONS = 100;
 
 fetch('./questions.json')
 .then(res => {
     return res.json(); 
 })
-.then( loadedQuestions => {
+.then(loadedQuestions => {
     questions = loadedQuestions;
     startGame();
 
@@ -35,16 +35,17 @@ fetch('./questions.json')
 startGame = () => {
     questionCounter = 0;
     score = 0;
-    availableQuestions = questions; 
+    // availableQuestions = questions;
+    availableQuestions = shuffle(questions);
+    console.log(availableQuestions)
 
     getNewQuestion();
     game.classList.remove("hidden");
     loader.classList.add("hidden");
-    
 };
 
 getNewQuestion = () => {
-    if (availableQuestions.length === 0 || questionCounter >= MAX_QUESTIONS){
+    if (availableQuestions.length === 0) {
         localStorage.setItem("mostRecentScore", score);
         return window.location.assign("index.html");  //go to the end page
     };
@@ -62,7 +63,9 @@ getNewQuestion = () => {
 
     choices.forEach((choice, index) => {
         const number = choice.dataset['number'];
+        console.log(number)
         choice.innerText = currentQuestion['choice' + number];
+        console.log(choice.innerText)
         if (choice.innerText === "") {
             choice.disabled = true;
             choiceContainer[index].disabled = true;
@@ -114,3 +117,14 @@ incrementScore = num => {
     score += num;
     scoreText.innerText = score;
 };
+
+function shuffle(sourceArray) {
+    for (var i = 0; i < sourceArray.length - 1; i++) {
+        var j = i + Math.floor(Math.random() * (sourceArray.length - i));
+
+        var temp = sourceArray[j];
+        sourceArray[j] = sourceArray[i];
+        sourceArray[i] = temp;
+    }
+    return sourceArray;
+}
