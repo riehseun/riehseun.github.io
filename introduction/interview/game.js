@@ -3,14 +3,11 @@ const codeBlock = document.getElementById("code-block");
 const choices = Array.from(document.getElementsByClassName("choice-text"));
 const choiceContainer = Array.from(document.getElementsByClassName("choice-container"));
 const progressText = document.getElementById("progressText");
-const scoreText = document.getElementById("score");
 const progressFull = document.getElementsByClassName("progressBarFull");
 const loader = document.getElementById("loader");
 const game = document.getElementById("game");
 
 let currentQuestion = {};
-let acceptingAnswers = false;
-let score = 0;
 let quesitonCounter = 0;
 let availableQuestions =[];
 let questions = [];
@@ -18,7 +15,6 @@ let questionIndex = -1;
 let submittedAnswers = {};
 
 const CORRECT_BONUS = 10;
-const MAX_QUESTIONS = 100;
 
 fetch('./questions.json')
 .then(res => {
@@ -26,6 +22,7 @@ fetch('./questions.json')
 })
 .then(loadedQuestions => {
     questions = loadedQuestions;
+    num_questions = Object.keys(questions).length;
     startGame();
 
 }).catch( err => {
@@ -35,9 +32,7 @@ fetch('./questions.json')
 startGame = () => {
     questionCounter = 0;
     score = 0;
-    // availableQuestions = questions;
     availableQuestions = shuffle(questions);
-    console.log(availableQuestions)
 
     getNewQuestion();
     game.classList.remove("hidden");
@@ -45,79 +40,35 @@ startGame = () => {
 };
 
 getNewQuestion = () => {
-    if (availableQuestions.length === 0) {
-        localStorage.setItem("mostRecentScore", score);
+    if (questionCounter >= num_questions) {
         return window.location.assign("index.html");  //go to the end page
     };
     
     questionCounter ++;
-    progressText.innerHTML = `Question ${questionCounter}/${MAX_QUESTIONS}`;
-    progressBarFull.style.width = `${(questionCounter / MAX_QUESTIONS) * 100}%`;
+    console.log(questionCounter)
+    progressText.innerHTML = `Question ${questionCounter}/${num_questions}`;
+    progressBarFull.style.width = `${(questionCounter / num_questions) * 100}%`;
 
     questionIndex++;
     currentQuestion = availableQuestions[questionIndex];
     question.innerHTML = currentQuestion.question;
-    if (currentQuestion.code) {
-        codeBlock.src = currentQuestion.code;
-    }
 
     choices.forEach((choice, index) => {
-        const number = choice.dataset['number'];
-        console.log(number)
-        choice.innerText = currentQuestion['choice' + number];
-        console.log(choice.innerText)
-        if (choice.innerText === "") {
-            choice.disabled = true;
-            choiceContainer[index].disabled = true;
-        } else {
-            choice.disabled = false;
-            choiceContainer[index].disabled = false;
-        }
+        choice.innerText = "Next"
     });
-
-    acceptingAnswers = true;
 
     clickAnswer();
 };
 
 function clickAnswer() {
     choices.forEach((choice, index) => {
-        if (!(choiceContainer[index].disabled)) {
-            choice.addEventListener('click', e => {
-                if(!acceptingAnswers) return;
+        choice.addEventListener('click', e => {
+            getNewQuestion();
+         });
 
-                acceptingAnswers = false;
-                const selectedChoice = e.target;
-                const selectedAnswer = selectedChoice.dataset["number"];  
-         
-                 let classToApply = "incorrect";
-                 if (selectedAnswer == currentQuestion.answer) {
-                     classToApply = "correct";
-                 };
-                 if (classToApply === "correct") {
-                     incrementScore(CORRECT_BONUS);
-                 };
-         
-                 submittedAnswers['Q' + (questionIndex + 1)] = (classToApply === 'correct' ? 'O' : 'X');
-                 sessionStorage.setItem('submittedAnswers', JSON.stringify(submittedAnswers));
-                 
-                 selectedChoice.parentElement.classList.add(classToApply);
-
-                 setTimeout(() => {
-                     selectedChoice.parentElement.classList.remove(classToApply);
-                     getNewQuestion();
-                 }, 1000);
-                
-             });
-        }
     });
 }
       
-incrementScore = num => {
-    score += num;
-    scoreText.innerText = score;
-};
-
 function shuffle(sourceArray) {
     for (var i = 0; i < sourceArray.length - 1; i++) {
         var j = i + Math.floor(Math.random() * (sourceArray.length - i));
