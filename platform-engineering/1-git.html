@@ -45,11 +45,19 @@
     <h2 class="card-title">GIT</h2>
     <ul class="list-unstyled mb-0">
       <li><a href="#git-">Branching strategy</a></li>
-      <li><a href="#git-">Git concets</a></li>
+      <li><a href="#git-">Git concepts</a></li>
       <li><a href="#git-">Git commands</a></li>
-      <li><a href="#git-">Squashing commits</a></li>
-      <li><a href="#git-">Branching</a></li>
-      <li><a href="#git-">Revert</a></li>
+      <ul>
+        <li><a href="#git-">Setup</a></li>
+        <li><a href="#git-">Manage project</a></li>
+        <li><a href="#git-">Snapshotting</a></li>
+        <li><a href="#git-">Branching</a></li>
+        <li><a href="#git-">Update</a></li>
+        <li><a href="#git-">Inspect</a></li>
+        <li><a href="#git-">Debug</a></li>
+        <li><a href="#git-">Patch</a></li>
+        <li><a href="#git-">Admin</a></li>
+      </ul>
     </ul>
   </div>
 </div>
@@ -103,7 +111,6 @@
       <li><code>HEAD</code> - last commit of current branch</li>
     </ul>
 
-    <h3 class="card-title">Fork vs Clone</h3>
     <ul>
       <li><code>Fork</code> - creates server side copy of repository</li>
       <li><code>Clone</code> - gets local copy of repository of a server including history and branches</li>
@@ -156,6 +163,11 @@ git reset origin/master
 git remote add origin &lt;remote_url&gt;</code></pre>
 
     <h3 class="card-title">git clone</h3>
+
+    <h4 class="card-title">Copy a repo to another repo</h4>
+
+<pre><code class="bash">git clone --bare --quiet &lt;git_clone_url_to_copy_from&gt;
+git push --mirror --quiet &lt;git_clone_url_to_copy_into&gt;</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: Pro Git, Scott Chacon & Ben Straub
@@ -202,10 +214,23 @@ git diff --staged</code></pre>
 <div class="card mb-4" id="git-">
   <div class="card-body">
     <h2 class="card-title">Branching</h2>
+    <ul>
+      <li><code>HEAD</code> (and branch) moves forward in each commit</li>
+      <li><code>detached HEAD</code> means that <code>HEAD</code> pointer is not pointing to a branch, but rather a commit id</li>
+    </ul>
 
     <h3 class="card-title">git branch</h3>
 
     <h3 class="card-title">git checkout</h3>
+
+    <pre><code class="bash"># Pull code from a particular branch on remote repository into your local workspace
+git pull origin &lt;branch&gt;
+
+# Create a new branch whose code base will be your local workspace
+git checkout -b &lt;branch&gt;
+
+# Check out code base from a particular branch
+git checkout &lt;branch&gt;</code></pre>
 
     <h3 class="card-title">git merge</h3>
 
@@ -214,6 +239,11 @@ git diff --staged</code></pre>
     <h3 class="card-title">git log</h3>
 
     <h3 class="card-title">git stash</h3>
+
+<pre><code class="bash"># Moving uncommited changes to a new branch
+git stash
+git checkout -b &lt;branch_name&gt;
+git stash apply</code></pre>
 
     <h3 class="card-title">git tag</h3>
   </div>
@@ -228,11 +258,29 @@ git diff --staged</code></pre>
 
     <h3 class="card-title">git fetch</h3>
 
+<pre><code class="bash"># Update tracking of remote branches
+git fetch
+
+# Remove local branches that do not exist in remote
+git fetch --prune
+
+# Display local and remote branches
+git branch -a
+
+# Remove all untracked files
+git clean -f</code></pre>
+
     <h3 class="card-title">git pull</h3>
 
     <h3 class="card-title">git push</h3>
 
     <h3 class="card-title">git remote</h3>
+
+    <h4 class="card-title">Sync two repos</h4>
+
+<pre><code class="bash"># First clone the original repo and cd into its root
+git remote add upstream &lt;clone_url&gt;  # "clone_url" should be url of sync repo
+git push upstream &lt;branch_name&gt;  # "branch_name" should a branch in sync repo</code></pre>
 
     <h3 class="card-title">git archive</h3>
 
@@ -281,7 +329,77 @@ git diff --staged</code></pre>
 
     <h3 class="card-title">git rebase</h3>
 
+    <h4 class="card-title">Squashing commits</h4>
+    <ul>
+      <li>When there are too many commits, it may be hard for other people to review your pull requests</li>
+    </ul>
+
+<pre><code class="bash"># Search your commit history and pick the one you want to squash commits from
+git log --oneline  # Or, git log --pretty=format:"%h%x09%an%x09%ad%x09%s"
+
+# This opens nano editor
+# Use reword/pick/squash to specify what you want to do for each commit
+# Usually, "r" the first commit at the top and "s" the rest of commits (For example, to avoid "Cannot 'squash' without a previous commit" error)
+# Ctrl-O &amp; Ctrl-T will write your changes.
+git rebase -p -i &lt;commit_hash&gt;
+
+# Observe that commits have been squashed
+git log --oneline   # Or, git log --pretty=format:"%h%x09%an%x09%ad%x09%s"
+
+# This opens nano editor. Enter new commit message. Ctrl-O &amp; Ctrl-T will write your changes
+git commit --amend
+
+# Finally push the changes to your branch
+git push -f origin &lt;branch&gt;</code></pre>
+
     <h3 class="card-title">git revert</h3>
+
+    <h4 class="card-title">Revert changes in local branch</h4>
+
+<pre><code class="bash"># Show lost commits
+git reflog
+
+# Revert to a deleted commit. (Assuming &lt;commit_hash&gt; was retrieved from the output of "git reflog")
+git reset --hard &lt;commit_hash&gt;
+
+# Revert to previous commit in the remote
+git reset --hard &lt;commit_hash&gt;
+git push -f origin &lt;branch&gt;
+
+# Discard changes in a particualr file. / Restore a deleted file
+git checkout HEAD &lt;file&gt;
+
+# Force overwrite local with remote
+git fetch --all
+git reset --hard origin/&lt;branch_name&gt;
+
+# &lt;commit_hash&gt; should come from &lt;source_branch&gt;. Last two steps are to clean up the &lt;source_branch&gt;
+git checkout &lt;target_branch&gt;
+git cherry-pick &lt;commit_hash&gt;
+git checkout &lt;source_branch&gt;
+git reset --hard HEAD~1 </code></pre>
+<!-- probably should use "git branch | grep -v "master" | xargs git branch -D "-->
+
+    <h4 class="card-title">Revert a merged PR</h4>
+
+<pre><code class="bash"># Checkout a branch from master (Ex. git checkout -b revert)
+
+# This reverts a particular commit
+git revert -m 1 &lt;commit_hash_of_PR_to_revert&gt;
+
+# This reverts everything up to but not including commit_hash
+git revert -m 1 &lt;commit_hash&gt;..HEAD
+
+# Then push the reverted changes to the branch
+git push origin revert
+
+# Finally, raise a PR from revert to master</code></pre>
+
+    <h4 class="card-title">Revert a single file</h4>
+
+<pre><code class="bash">git checkout &lt;commit_hash_of_file_to_revert_to&gt; -- &lt;file_including_path&gt;
+git commit -am &lt;commit_message&gt;
+git push origin &lt;branch_name&gt;</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: Pro Git, Scott Chacon & Ben Straub
@@ -301,15 +419,9 @@ git diff --staged</code></pre>
   </div>
 </div>
 
-<div class="card mb-4" id="git-">
+<!-- <div class="card mb-4" id="git-">
   <div class="card-body">
-
-    <h3 class="card-title">Copy a repo to another repo</h3>
-
-<pre><code class="bash">git clone --bare --quiet &lt;git_clone_url_to_copy_from&gt;
-git push --mirror --quiet &lt;git_clone_url_to_copy_into&gt;</code></pre>
-
-    <h3 class="card-title"></h3>
+    <h2 class="card-title">Others</h2>
 
 <pre><code class="bash"># Show files that have added, modified, and deleted
 git status
@@ -337,21 +449,6 @@ git tag -d &lt;tag&gt;
 # Delete a tag from remote repository
 git push origin -d &lt;tag&gt;</code></pre>
 
-    <h3 class="card-title">Moving uncommited changes to a new branch</h3>
-    <ul>
-      <li>Useful when accidently made changes to the master branch</li>
-    </ul>
-
-<pre><code class="bash">git stash
-git checkout -b &lt;branch_name&gt;
-git stash apply</code></pre>
-
-    <h3 class="card-title">Sync two repos</h3>
-
-<pre><code class="bash"># First clone the original repo and cd into its root
-git remote add upstream &lt;clone_url&gt;  # "clone_url" should be url of sync repo
-git push upstream &lt;branch_name&gt;  # "branch_name" should a branch in sync repo</code></pre>
-
     <h3 class="card-title">.gitignore</h3>
     <ul>
       <li>https://github.com/github/gitignore</li>
@@ -360,129 +457,7 @@ git push upstream &lt;branch_name&gt;  # "branch_name" should a branch in sync r
   <div class="card-footer text-muted">
 
   </div>
-</div>
-
-<div class="card mb-4" id="git-">
-  <div class="card-body">
-    <h2 class="card-title">Squashing commits</h2>
-    <p class="card-text">When there are too many commits, it may be hard for other people to review your pull requests. Squashing commits comes handy</p>
-
-<pre><code class="bash"># Search your commit history and pick the one you want to squash commits from
-git log --oneline  # Or, git log --pretty=format:"%h%x09%an%x09%ad%x09%s"
-
-# This opens nano editor
-# Use reword/pick/squash to specify what you want to do for each commit
-# Usually, "r" the first commit at the top and "s" the rest of commits (For example, to avoid "Cannot 'squash' without a previous commit" error)
-# Ctrl-O &amp; Ctrl-T will write your changes.
-git rebase -p -i &lt;commit_hash&gt;
-
-# Observe that commits have been squashed
-git log --oneline   # Or, git log --pretty=format:"%h%x09%an%x09%ad%x09%s"
-
-# This opens nano editor. Enter new commit message. Ctrl-O &amp; Ctrl-T will write your changes
-git commit --amend
-
-# Finally push the changes to your branch
-git push -f origin &lt;branch&gt;</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: Pro Git, Scott Chacon & Ben Straub
-  </div>
-</div>
-
-<div class="card mb-4" id="git-">
-  <div class="card-body">
-    <h2 class="card-title">Branching</h2>
-    <ul>
-      <li><code>HEAD</code> (and branch) moves forward in each commit</li>
-      <li><code>detached HEAD</code> means that <code>HEAD</code> pointer is not pointing to a branch, but rather a commit id</li>
-    </ul>
-
-    <h3 class="card-title"></h3>
-
-<pre><code class="bash"># Pull code from a particular branch on remote repository into your local workspace
-git pull origin &lt;branch&gt;
-
-# Create a new branch whose code base will be your local workspace
-git checkout -b &lt;branch&gt;
-
-# Check out code base from a particular branch
-git checkout &lt;branch&gt;</code></pre>
-
-    <h3 class="card-title">Branch management</h3>
-
-<pre><code class="bash"># Update tracking of remote branches
-git fetch
-
-# Remove local branches that do not exist in remote
-git fetch --prune
-
-# Display local and remote branches
-git branch -a
-
-# Remove all untracked files
-git clean -f</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-
-  </div>
-</div>
-
-<div class="card mb-4" id="git-">
-  <div class="card-body">
-    <h2 class="card-title">Revert</h2>
-
-    <h3 class="card-title">Revert changes in local branch</h3>
-
-<pre><code class="bash"># Show lost commits
-git reflog
-
-# Revert to a deleted commit. (Assuming &lt;commit_hash&gt; was retrieved from the output of "git reflog")
-git reset --hard &lt;commit_hash&gt;
-
-# Revert to previous commit in the remote
-git reset --hard &lt;commit_hash&gt;
-git push -f origin &lt;branch&gt;
-
-# Discard changes in a particualr file. / Restore a deleted file
-git checkout HEAD &lt;file&gt;
-
-# Force overwrite local with remote
-git fetch --all
-git reset --hard origin/&lt;branch_name&gt;
-
-# &lt;commit_hash&gt; should come from &lt;source_branch&gt;. Last two steps are to clean up the &lt;source_branch&gt;
-git checkout &lt;target_branch&gt;
-git cherry-pick &lt;commit_hash&gt;
-git checkout &lt;source_branch&gt;
-git reset --hard HEAD~1 </code></pre>
-<!-- probably should use "git branch | grep -v "master" | xargs git branch -D "-->
-
-    <h3 class="card-title">Revert a merged PR</h3>
-
-<pre><code class="bash"># Checkout a branch from master (Ex. git checkout -b revert)
-
-# This reverts a particular commit
-git revert -m 1 &lt;commit_hash_of_PR_to_revert&gt;
-
-# This reverts everything up to but not including commit_hash
-git revert -m 1 &lt;commit_hash&gt;..HEAD
-
-# Then push the reverted changes to the branch
-git push origin revert
-
-# Finally, raise a PR from revert to master</code></pre>
-
-    <h3 class="card-title">Revert a single file</h3>
-
-<pre><code class="bash">git checkout &lt;commit_hash_of_file_to_revert_to&gt; -- &lt;file_including_path&gt;
-git commit -am &lt;commit_message&gt;
-git push origin &lt;branch_name&gt;</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-
-  </div>
-</div>
+</div> -->
 <!-- Git END -->
 
 </div> <!-- /.col-md-12 -->
