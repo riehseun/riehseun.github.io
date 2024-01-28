@@ -283,26 +283,34 @@
 
 <pre><code class="python">class Solution:
     def trap(self, height: List[int]) -> int:
-        # Water that each block i can contain is
-        # min(max_height_left_side, max_height_right_side) - height[i]
 
-        max_left = 0
-        max_right = 0
-        left = 0
-        right = len(height)-1
-        area = 0
+        # Water that bar i can contain is
+        # min(max height from left side, max height from right side) - height[i]
+        # Initialize start and end pointer at each end
+        # Memorize maximum from left and right while coming towards the middle
 
-        while left <= right:
-            if height[left] < height[right]:
-                max_left = max(max_left, height[left])
-                area += (max_left-height[left])
-                left += 1
+        water = 0
+        start = 0
+        end = len(height) - 1
+        max_from_left = height[start]
+        max_from_right = height[end]
+
+        # Time O(n) n = len(height)
+        # Space O(1)
+        while start < end:
+
+            max_from_left = max(max_from_left, height[start])
+            max_from_right = max(max_from_right, height[end])
+            if max_from_left < max_from_right:
+                if height[start] < max_from_left:
+                    water += (max_from_left-height[start])
+                start += 1
             else:
-                max_right = max(max_right, height[right])
-                area += (max_right-height[right])
-                right -= 1
+                if height[end] < max_from_right:
+                    water += (max_from_right-height[end])
+                end -= 1
 
-        return area</code></pre>
+        return water</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/trapping-rain-water">42. Trapping Rain Water</a>
