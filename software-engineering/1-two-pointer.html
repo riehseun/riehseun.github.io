@@ -234,7 +234,43 @@
   <div class="card-body">
     <h2 class="card-title">Next permutation (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def nextPermutation(self, nums: List[int]) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+
+        # Find the largest i-1 such that nums[i-1] < nums[i]
+        #   Find the largest index j > i-1 such that nums[i-1] < nums[j]
+        #   Swap that nums[j], nums[i-1]
+        #   Then reverse the right side of the array, which is nums[i:]
+        # When such numbers do not exist
+        #   Reverse the entire array
+
+        is_swapped = False
+
+        # Time O(n) n = len(nums)
+        # Space O(1)
+        for i in range(len(nums)-1, 0, -1):
+            if nums[i-1] < nums[i]:
+
+                for j in range(len(nums)-1, i-1, -1):
+                    if nums[i-1] < nums[j]:
+                        nums[i-1], nums[j] = nums[j], nums[i-1]
+                        break
+
+                start = 0
+                end = len(nums[i:]) - 1
+                while start < end:
+                    nums[i+start], nums[i+end] = nums[i+end], nums[i+start]
+                    start += 1
+                    end -= 1
+
+                is_swapped = True
+                break
+
+        if not is_swapped:
+            nums.sort()</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/next-permutation">31. Next Permutation</a>
