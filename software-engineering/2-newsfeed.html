@@ -119,6 +119,13 @@
   <div class="card-body">
     <h2 class="card-title">High level design</h2>
 
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/newsfeed1.png" alt="Card image cap">
+    <ul>
+      <li>Post service - stores posts in cache and DB</li>
+      <li>Fanout service - push new content to users' friends' newsfeed. Feed is stored in cache for fast retrieval</li>
+      <li>Notification service - informs friends about the new feeds via push notification</li>
+      <li>Newsfeed service - fetches newsfeed from cache</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu
@@ -129,12 +136,11 @@
   <div class="card-body">
     <h2 class="card-title">API</h2>
     <ul>
-      <li><code>send_msessage(sender_id, reciever_id, text)</code></li>
+      <li><code>post_feed(user_id, content)</code></li>
       <ul>
-        <li></li>
-        <li><code></code></li>
+        <li><code>content</code> - feed content</li>
       </ul>
-      <li><code>get_message(user_Id)</code></li>
+      <li><code>get_feed(user_id)</code></li>
       <ul>
         <li></li>
         <li></li>
@@ -149,43 +155,48 @@
 <div class="card mb-4" id="newsfeed-5">
   <div class="card-body">
     <h2 class="card-title">Storage schema</h2>
-
-    <h3 class="card-title">Chat history</h3>
     <ul>
-      <li>RDBMS (MySQL) or NoSQL (MongoDB)</li>
-      <ul>
-        <li>Not ideal because we need to do frequent read/write</li>
-      </ul>
-      <li>Key-value store</li>
-      <ul>
-        <li>Horizontal scaling is easy</li>
-        <li>Low latency when accessing data</li>
-        <li>Wide-column DB like HBase</li>
-        <ul>
-          <li>HBase stores data into memory buffer and move data into disk when buffer is full, which works well with variable-sized data</li>
-        </ul>
-      </ul>
+      <li>Use relational database</li>
+      <li>Use a graph database only for the relationships between users</li>
     </ul>
 
-    <h3 class="card-title">Message</h3>
+    <h3 class="card-title">User</h3>
     <ul>
-      <li>message_id - int</li>
-      <li>message_from - int</li>
-      <li>message_to - int</li>
-      <li>content - string</li>
-      <li>created_at - timestamp</li>
+      <li>user_id (int, pk)</li>
+      <li>name (string)</li>
+      <li>email (string)</li>
+      <li>created_at (timestamp)</li>
     </ul>
 
-    <h3 class="card-title">Group message</h3>
+    <h3 class="card-title">Feed</h3>
     <ul>
-      <li>channel_id - int</li>
-      <li>message_id - int</li>
-      <ul>
-        <li>Use local sequence number generator because IDs only need to be unique within a group</li>
-      </ul>
-      <li>used_id - int</li>
-      <li>content - string</li>
-      <li>created_at - timestamp</li>
+      <li>feed_id (int, pk)</li>
+      <li>user_id (int)</li>
+      <li>content (string)</li>
+      <li>num_likes (int)</li>
+      <li>created_at (timestamp)</li>
+    </ul>
+
+    <h3 class="card-title">Media</h3>
+    <ul>
+      <li>media_id (int, pk)</li>
+      <li>description (string)</li>
+      <li>path (string)</li>
+      <li>created_at (timestamp)</li>
+    </ul>
+
+    <h3 class="card-title">User (Vertex)</h3>
+    <ul>
+      <li>user_id (int, pk)</li>
+      <li>properties (json)</li>
+    </ul>
+
+    <h3 class="card-title">Relationship (Edge)</h3>
+    <ul>
+      <li>relation_id (int, pk)</li>
+      <li>from (user_id)</li>
+      <li>to (user_id)</li>
+      <li>properties (json)</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -254,77 +265,8 @@
   <div class="card-body">
     <h2 class="card-title">Newsfeed</h2>
 
-    <h3 class="card-title">High level design</h3>
-    <img class="img-fluid" class="card-img-top" src="/img/system-design/newsfeed1.png" alt="Card image cap">
-    <ul>
-      <li>Feed is generated via aggregating friends and followers posts.</li>
-      <li>Feed is published and stored in cache and DB.</li>
-    </ul>
-
-    <h3 class="card-title">API</h3>
-    <ul>
-      <li>generate_feed(user_id)</li>
-      <li>get_feed(user_id, count)</li>
-    </ul>
-
-    <h3 class="card-title">DB</h3>
-    <ul>
-      <li>Use relational database.</li>
-      <li>Use a graph database only for the relationships between users.</li>
-    </ul>
-
-    <h4 class="card-title">Entity</h4>
-    <ul>
-      <li>entity_id (int, pk)</li>
-      <li>name (varchar)</li>
-      <li>name (description)</li>
-      <li>creation_date (datetime)</li>
-    </ul>
-
-    <h4 class="card-title">User</h4>
-    <ul>
-      <li>user_id (int, pk)</li>
-      <li>name (varchar)</li>
-      <li>email (varchar)</li>
-      <li>creation_date (datetime)</li>
-    </ul>
-
-    <h4 class="card-title">Feed item</h4>
-    <ul>
-      <li>feed_item_id (int, pk)</li>
-      <li>user_id (int)</li>
-      <li>entity_id (int)</li>
-      <li>content (varchar)</li>
-      <li>num_likes (int)</li>
-      <li>creation_date (datetime)</li>
-    </ul>
-
-    <h4 class="card-title">Media</h4>
-    <ul>
-      <li>media_id (int, pk)</li>
-      <li>description (varchar)</li>
-      <li>path (varchar)</li>
-      <li>creation_date (datetime)</li>
-    </ul>
-
-    <h4 class="card-title">User (Vertex)</h4>
-    <ul>
-      <li>user_id (int, pk)</li>
-      <li>properties (JSON)</li>
-    </ul>
-
-    <h4 class="card-title">Relationship (Edge)</h4>
-    <ul>
-      <li>relation_id (int, pk)</li>
-      <li>from (user_id)</li>
-      <li>to (user_id)</li>
-      <li>properties (JSON)</li>
-    </ul>
-
     <h3 class="card-title">Component design</h3>
     <img class="img-fluid" class="card-img-top" src="/img/system-design/newsfeed2.png" alt="Card image cap">
-    <br>
-    <br>
 
     <h4 class="card-title">Newsfeed generation service</h4>
     <ul>
@@ -369,28 +311,6 @@
     <ul>
       <li>Blob storage to store all media.</li>
     </ul> -->
-
-    <h3 class="card-title">Evaluation</h3>
-
-    <h4 class="card-title">Availability</h4>
-    <ul>
-      <li>Redundant servers and data replication.</li>
-      <li>Load balancer.</li>
-    </ul>
-
-    <h4 class="card-title">Reliability</h4>
-
-    <h4 class="card-title">Scalability</h4>
-    <ul>
-      <li>Independent components can scale independently.</li>
-    </ul>
-
-    <h4 class="card-title">Performance</h4>
-    <ul>
-      <li>Cache servers.</li>
-      <li>CDN.</li>
-    </ul>
-
   </div>
   <div class="card-footer text-muted">
     <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
