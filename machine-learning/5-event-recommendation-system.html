@@ -39,25 +39,356 @@
 <div class="col-md-12">
 <h1 class="my-4">Other</h1>
 
-<!-- Machine learning system design BEGIN -->
-<div class="card mb-4" id="machine-learning-system-design">
+<!-- Event recommendation systemn BEGIN -->
+<div class="card mb-4" id="event-recommendation-system">
   <div class="card-body">
     <h2 class="card-title">Machine learning system design</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#machine-learning-system-design-1">Machine learning system design</a></li>
+      <li><a href="#event-recommendation-system-1">Clarify requirements</a></li>
+      <li><a href="#event-recommendation-system-2">Frame problem as ML task</a></li>
+      <li><a href="#event-recommendation-system-3">Data preparation</a></li>
+      <li><a href="#event-recommendation-system-4">Model development</a></li>
+      <li><a href="#event-recommendation-system-5">Evaluation</a></li>
+      <li><a href="#event-recommendation-system-6">Deployment and serving</a></li>
     </ul>
   </div>
 </div>
 
-<div class="card mb-4" id="machine-learning-system-design-1">
+<div class="card mb-4" id="event-recommendation-system-1">
   <div class="card-body">
-    <h2 class="card-title">Machine learning system design</h2>
+    <h2 class="card-title">Clarify requirements</h2>
+    <ul>
+      <li>Business objective</li>
+      <ul>
+        <li>What is the business objective? Increase event ticket sales</li>
+        <li>Can we access user's current location? Yes</li>
+        <li>Can users become friends with one another? Yes</li>
+        <li>How can the distance and eta between two location be calculated? Assume we have access to Google API to do that</li>
+      </ul>
+      <li>Features that the system supports</li>
+      <ul>
+        <li>What kinds of features are available for an event? descriptiom, price, location, date and time, etc</li>
+      </ul>
+      <li>Data</li>
+      <ul>
+        <li>Do we have annotated dataset? No, but user-event interaction data is available</li>
+      </ul>
+      <li>Constraints</li>
+      <li>Scale</li>
+      <ul>
+        <li>How many events are there on platform> 10M per month</li>
+      </ul>
+      <li>Performance</li>
+      <ul>
+        <li></li>
+      </ul>
+    </ul>
   </div>
   <div class="card-footer text-muted">
-
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
   </div>
 </div>
-<!-- Machine learning system design END -->
+
+<div class="card mb-4" id="event-recommendation-system-2">
+  <div class="card-body">
+    <h2 class="card-title">Frame problem as ML task</h2>
+    <ul>
+      <li>Define ML objective</li>
+      <ul>
+        <li>Maximize the number of event registrations</li>
+      </ul>
+      <li>Specify input and output</li>
+      <ul>
+        <li>Input - user</li>
+        <li>Output - a list of events sorted by relevance score</li>
+      </ul>
+      <li>Choose right ML category</li>
+      <ul>
+        <li>Learning to Rank (LTR)</li>
+        <ul>
+          <li>Pointwise LTR</li>
+          <ul>
+            <li></li>
+          </ul>
+          <li>Pairwise LTR</li>
+          <ul>
+            <li></li>
+          </ul>
+          <li>Listwise LTR</li>
+          <ul>
+            <li></li>
+          </ul>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="event-recommendation-system-3">
+  <div class="card-body">
+    <h2 class="card-title">Data preparation</h2>
+    <ul>
+      <li>Data engineering</li>
+      <ul>
+        <li>Video</li>
+        <ul>
+          <li>video_id</li>
+          <li>length</li>
+          <li>manual_tags</li>
+          <li>manual_title</li>
+          <li>likes</li>
+          <li>views</li>
+          <li>language</li>
+        </ul>
+        <li>User</li>
+        <ul>
+          <li>user_id</li>
+          <li>username</li>
+          <li>age</li>
+          <li>gender</li>
+          <li>city</li>
+          <li>country</li>
+          <li>language</li>
+        </ul>
+        <li>User-video interation</li>
+        <ul>
+          <li>user_id</li>
+          <li>video_id</li>
+          <li>interaction_type - like/impression/watch/search/comment</li>
+        </ul>
+      </ul>
+      <li>Feature engineering</li>
+      <ul>
+        <li>Video feature</li>
+        <ul>
+          <li>video_id - categorical data, embedding layer</li>
+          <li>length</li>
+          <li>language - categorical data, embedding layer</li>
+          <li>manual_tags - CBOW for each tag and aggregate</li>
+          <li>title - BERT</li>
+        </ul>
+        <li>User feature</li>
+        <ul>
+          <li>User demographics</li>
+          <ul>
+            <li>user_id - embedding layer</li>
+            <li>age - bucketize + one-hot encoding</li>
+            <li>gender - one-hot encoding</li>
+            <li>language - embedding layer</li>
+            <li>city - embedding layer</li>
+            <li>country- embedding layer</li>
+          </ul>
+          <li>Contextual information</li>
+          <ul>
+            <li>day_of_week - embedding</li>
+            <li>time_of_day - bucketize + one-hot encoding</li>
+            <li>device - one-hot encoding</li>
+          </ul>
+          <li>User-historical interactions</li>
+          <ul>
+            <li>search_history - BERT</li>
+            <li>liked_videos - embedding layer</li>
+            <li>watched_videos - embedding layer</li>
+            <li>impressions - embedding layer</li>
+          </ul>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="event-recommendation-system-4">
+  <div class="card-body">
+    <h2 class="card-title">Model development</h2>
+    <ul>
+      <li>Model selection</li>
+      <ul>
+        <li>Matrix factorization</li>
+        <ul>
+          <li>Collaborative filtering method because only the user interaction data with video is used</li>
+        </ul>
+        <li>Two tower neural network</li>
+        <ul>
+          <li>Can utilize all of user features, video features, interaction data</li>
+          <li>Can be used as collaborative filtering by providing just video id rather than video features</li>
+          <li>Cannot be used as content-based filtering because interaction data is needed</li>
+        </ul>
+      </ul>
+      <li>Model training</li>
+      <ul>
+        <li>Matrix factorization</li>
+        <ul>
+          <li>Feedback matrix</li>
+          <ul>
+            <li>2D matrix mapping user and video where value of 1 means the user find the video relevant</li>
+            <li>Relevancy can be defined using both explicit and implicit feedback</li>
+            <li>Explicit feedback - user likes or shares. Data is sparse</li>
+            <li>Implicit feedback - user clicks or watch time. Data might be noisy</li>
+          </ul>
+          <li>Matrix factorization model</li>
+          <ul>
+            <li>An embedding model</li>
+            <li>Learns to map each user into embedding vector and each video into embedding vector such that their distance represents their relevance</li>
+            <li>Decomposes feedback matric into two lower dimensional matrices, where one represents the user embedding and the other represents video embedding</li>
+          </ul>
+          <li>Matrix factorization training</li>
+          <ul>
+            <li>Randomly initializes two embedding matrices</li>
+            <li>Mimimizes the loss between predicted scores matrix and feedback matrix</li>
+            <ul>
+              <li>Squared distance over observed user-video pairs</li>
+              <ul>
+                <li>\( \text{loss} = \displaystyle\sum_{(i,j) \in \text{obs}} (A_{ij}-U_{i}V_{j})^{2} \)</li>
+                <li>Loss function does not penalize for bad prediction on unobserved pairs</li>
+              </ul>
+              <li>Squared distance over observed and unobserved user-video pairs</li>
+              <ul>
+                <li>\( \text{loss} = \displaystyle\sum_{(i,j)} (A_{ij}-U_{i}V_{j})^{2} \)</li>
+                <li>Unobserved pairs dominate observed pairs during training because feedback matrix is sparce</li>
+              </ul>
+              <li>Weighted combination of squared distance over observed and unobserved user-video pairs</li>
+              <ul>
+                <li>\( \text{loss} = \displaystyle\sum_{(i,j) \in \text{obs}} (A_{ij}-U_{i}V_{j})^{2} + w\displaystyle\sum_{(i,j) \notin \text{obs}} (A_{ij}-U_{i}V_{j})^{2} \)</li>
+                <li>\( w \) is a hyperparameter</li>
+              </ul>
+            </ul>
+          </ul>
+          <li>Matrix factorization optimization</li>
+          <ul>
+            <li>Weighted alternating least squares (WALS) - specific to matrix factorization</li>
+            <ul>
+              <li>Fix one embedding matrix \( U \) and optimize the other embedding matrix \( V \)</li>
+              <li>Fix the other embedding matrix \( V \) and optimize the embedding matrix \( U \)</li>
+              <li>Repeat</li>
+            </ul>
+          </ul>
+          <li>Matrix factorization inference</li>
+          <ul>
+            <li>Take a dot product between user and video embeddings</li>
+          </ul>
+          <li>Pros</li>
+          <ul>
+            <li>Fast training because there are only two embedding matrices to learn</li>
+            <li>Fast serving because learned embeddings are static</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Only relies on user-video interactions, not using other features such as user age, language, etc</li>
+            <li>Handling new users is difficult</li>
+            <li>Model performance is lower</li>
+          </ul>
+        </ul>
+        <li>Two tower neural network</li>
+        <ul>
+          <li>Construct dataset</li>
+          <ul>
+            <li>For each pair of (user-related features represented by embedding, video-related features represented by embedding)</li>
+            <ul>
+              <li>Positive - if user likes video or watches at least half of it</li>
+              <li>Negative - if user dislikes video or just pick random videos</li>
+            </ul>
+          </ul>
+          <li>Choose loss function</li>
+          <ul>
+            <li>This is binary classification, thus use cross-entropy</li>
+          </ul>
+          <li>Inference</li>
+          <ul>
+            <li>Use ANN to find most relevant videos for a given user from their embeddings</li>
+          </ul>
+          <li>Pros</li>
+          <ul>
+            <li>Utilizes user features</li>
+            <li>Capable of handling new users</li>
+            <li>Model performance is higher</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Slow serving having to compute user embeddings at query time</li>
+            <li>Slow inference if using content-based filtering because model needs to tranform video features to video embeddings</li>
+            <li>More learning paramaters, thus traning is more expensive</li>
+          </ul>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="event-recommendation-system-5">
+  <div class="card-body">
+    <h2 class="card-title">Evaluation</h2>
+    <ul>
+      <li>Offline</li>
+      <ul>
+        <li>Precision@k</li>
+        <ul>
+          <li>Number of relevant video in top k recommended videos / top k recommended videos</li>
+        </ul>
+        <li>Mean average precision (mAP)</li>
+        <ul>
+          <li>Average of average precision across all object classes</li>
+        </ul>
+        <li>Diversity</li>
+        <ul>
+          <li>How dissimilar recommended videos are to each other</li>
+        </ul>
+      </ul>
+      <li>Online</li>
+      <ul>
+        <li>Click-through rate</li>
+        <li>The number of completed videos</li>
+        <li>Total watch time</li>
+        <li>Explicit user feedback</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="event-recommendation-system-6">
+  <div class="card-body">
+    <h2 class="card-title">Deployment and serving</h2>
+
+    <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/video-recommendation-system1.png" alt="Card image cap">
+    <ul>
+      <li>Candidate generation</li>
+      <ul>
+        <li>Narrow down videos from billions to thousands</li>
+        <li>Use model that does not rely on video feature for efficiency</li>
+        <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/video-recommendation-system2.png" alt="Card image cap">
+        <li>Two-tower neural network without video features (collaborative filtering) can be used to capture relevant videos</li>
+        <li>Use additional candidate generations to capture popular and trending videos</li>
+        <li>Then use content-based filtering to further narrow down the videos</li>
+      </ul>
+      <li>Ranking</li>
+      <ul>
+        <li>Takes user and candidate videos as input, scores each video, and outputs a ranked list of videos</li>
+        <li>Accuracy is more important than efficiency</li>
+        <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/video-recommendation-system3.png" alt="Card image cap">
+        <li>Two-tower neural network using both user and video features can be used</li>
+      </ul>
+      <li>Re-ranking</li>
+      <ul>
+        <li>Filter out certain videos like misinformation, clickbait, violence, nudity, hates</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+<!-- Event recommendation system END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->
