@@ -387,8 +387,6 @@
   <div class="card-body">
     <h2 class="card-title">YOLO</h2>
 
-    <h3 class="card-title">Load a pretrained model</h3>
-
 <pre><code class="python">def read_classes(classes_path):
     with open(classes_path) as f:
         class_names = f.readlines()
@@ -404,9 +402,18 @@ def read_anchors(anchors_path):
         anchors = np.array(anchors).reshape(-1, 2)
     return anchors
 
-anchors = read_anchors("/path/to/file/anchors.txt")</code></pre>
+anchors = read_anchors("/path/to/file/anchors.txt")
 
-<pre><code class="python">yolo_model = load_model("/path/to/model/yolo.h5")</code></pre>
+image_shape = (720., 1280.)</code></pre>
+
+    <h3 class="card-title">Load a pretrained model</h3>
+
+<pre><code class="python">yolo_model = load_model("/path/to/model/yolo.h5")
+
+# yolo_head implementation is at https://github.com/allanzelener/YAD2K/blob/master/yad2k/models/keras_yolo.py
+yolo_outputs = yolo_head(yolo_model.output, anchors, len(class_names))
+
+scores, boxes, classes = yolo_eval(yolo_outputs, image_shape)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
