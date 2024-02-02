@@ -245,7 +245,7 @@
             <li>4 - more than 2000</li>
           </ul>
           <li>Price similarity - difference between event price and price of previous events that user registered</li>
-          <li>Similarity between event description and description of previous events that user registered</li>
+          <li>Similarity between event description and description of previous events that user registered</li>=
         </ul>
         <li>Other points</li>
         <ul>
@@ -268,111 +268,102 @@
     <ul>
       <li>Model selection</li>
       <ul>
-        <li>Matrix factorization</li>
+        <li>Logistic regression</li>
         <ul>
-          <li>Collaborative filtering method because only the user interaction data with video is used</li>
+          <li>Pros</li>
+          <ul>
+            <li>Fast inference</li>
+            <li>Fast training</li>
+            <li>Interpretable</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Non-linear problems can't be solved</li>
+            <li>Cannot handle dependency between features</li>
+          </ul>
         </ul>
-        <li>Two tower neural network</li>
+        <li>Decision tree</li>
         <ul>
-          <li>Can utilize all of user features, video features, interaction data</li>
-          <li>Can be used as collaborative filtering by providing just video id rather than video features</li>
-          <li>Cannot be used as content-based filtering because interaction data is needed</li>
+          <li>Pros</li>
+          <ul>
+            <li>Fast inference</li>
+            <li>Fast training</li>
+            <li>Interpretable</li>
+            <li>Little dataprep required</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Non-optimal decision boundry</li>
+            <li>Overfitting due to model being sensitive to small variations in input data</li>
+          </ul>
+          <li>Bagging</li>
+          <ul>
+            <li>Train models in parallel on subsets of training data, then combine predictions to make final prediction</li>
+            <li>Pros</li>
+            <ul>
+              <li>Reduce model sensitivity to change in data</li>
+              <li>Train in parallel, thus fast training</li>
+              <li>Inputs are processed in parallel, thus fast inference</li>
+            </ul>
+            <li>Cons</li>
+            <ul>
+              <li>Does not solve underfitting</li>
+            </ul>
+            <li>Ex. random forest</li>
+          </ul>
+          <li>Boosting</li>
+          <ul>
+            <li>Train weak classifiers in sequence, that perform slightly better than random guess</li>
+            <li>Pros</li>
+            <ul>
+              <li>Reduce both bias and variance</li>
+            </ul>
+            <li>Cons</li>
+            <ul>
+              <li>Slower traning and infernce</li>
+            </ul>
+            <li>Ex. Adaboost, XGBoost</li>
+          </ul>
+          <li>Boosting</li>
+          <ul>
+            <li>Use GradientBoost to improve decision trees</li>
+          </ul>
+          <li>Pros</li>
+          <ul>
+            <li>Reduce both bias and variance</li>
+            <li>Little dataprep required</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Lots of hyperparameters to tune</li>
+            <li>Not suitable for continual learning from streaming data</li>
+          </ul>
+          <li>Ex. XGBoost</li>
+        </ul>
+        <li>Neural network</li>
+        <li>Pros</li>
+        <ul>
+          <li>Continual learning</li>
+          <li>can handle unstructured data</li>
+        </ul>
+        <li>Cons</li>
+        <ul>
+          <li>Computationally expensive</li>
+          <li>Lots of dataprep</li>
+          <li>Large training data is needed</li>
+          <li>Not interpretable</li>
         </ul>
       </ul>
       <li>Model training</li>
       <ul>
-        <li>Matrix factorization</li>
+        <li>Construct dataset</li>
         <ul>
-          <li>Feedback matrix</li>
-          <ul>
-            <li>2D matrix mapping user and video where value of 1 means the user find the video relevant</li>
-            <li>Relevancy can be defined using both explicit and implicit feedback</li>
-            <li>Explicit feedback - user likes or shares. Data is sparse</li>
-            <li>Implicit feedback - user clicks or watch time. Data might be noisy</li>
-          </ul>
-          <li>Matrix factorization model</li>
-          <ul>
-            <li>An embedding model</li>
-            <li>Learns to map each user into embedding vector and each video into embedding vector such that their distance represents their relevance</li>
-            <li>Decomposes feedback matric into two lower dimensional matrices, where one represents the user embedding and the other represents video embedding</li>
-          </ul>
-          <li>Matrix factorization training</li>
-          <ul>
-            <li>Randomly initializes two embedding matrices</li>
-            <li>Mimimizes the loss between predicted scores matrix and feedback matrix</li>
-            <ul>
-              <li>Squared distance over observed user-video pairs</li>
-              <ul>
-                <li>\( \text{loss} = \displaystyle\sum_{(i,j) \in \text{obs}} (A_{ij}-U_{i}V_{j})^{2} \)</li>
-                <li>Loss function does not penalize for bad prediction on unobserved pairs</li>
-              </ul>
-              <li>Squared distance over observed and unobserved user-video pairs</li>
-              <ul>
-                <li>\( \text{loss} = \displaystyle\sum_{(i,j)} (A_{ij}-U_{i}V_{j})^{2} \)</li>
-                <li>Unobserved pairs dominate observed pairs during training because feedback matrix is sparce</li>
-              </ul>
-              <li>Weighted combination of squared distance over observed and unobserved user-video pairs</li>
-              <ul>
-                <li>\( \text{loss} = \displaystyle\sum_{(i,j) \in \text{obs}} (A_{ij}-U_{i}V_{j})^{2} + w\displaystyle\sum_{(i,j) \notin \text{obs}} (A_{ij}-U_{i}V_{j})^{2} \)</li>
-                <li>\( w \) is a hyperparameter</li>
-              </ul>
-            </ul>
-          </ul>
-          <li>Matrix factorization optimization</li>
-          <ul>
-            <li>Weighted alternating least squares (WALS) - specific to matrix factorization</li>
-            <ul>
-              <li>Fix one embedding matrix \( U \) and optimize the other embedding matrix \( V \)</li>
-              <li>Fix the other embedding matrix \( V \) and optimize the embedding matrix \( U \)</li>
-              <li>Repeat</li>
-            </ul>
-          </ul>
-          <li>Matrix factorization inference</li>
-          <ul>
-            <li>Take a dot product between user and video embeddings</li>
-          </ul>
-          <li>Pros</li>
-          <ul>
-            <li>Fast training because there are only two embedding matrices to learn</li>
-            <li>Fast serving because learned embeddings are static</li>
-          </ul>
-          <li>Cons</li>
-          <ul>
-            <li>Only relies on user-video interactions, not using other features such as user age, language, etc</li>
-            <li>Handling new users is difficult</li>
-            <li>Model performance is lower</li>
-          </ul>
+          <li>(user, event) pair from interaction data where 1 if user registered for the event and 0 otherwise</li>
+          <li>Data will highly be imbalanced, this use undersampling</li>
         </ul>
-        <li>Two tower neural network</li>
+        <li>Choose loss function</li>
         <ul>
-          <li>Construct dataset</li>
-          <ul>
-            <li>For each pair of (user-related features represented by embedding, video-related features represented by embedding)</li>
-            <ul>
-              <li>Positive - if user likes video or watches at least half of it</li>
-              <li>Negative - if user dislikes video or just pick random videos</li>
-            </ul>
-          </ul>
-          <li>Choose loss function</li>
-          <ul>
-            <li>This is binary classification, thus use cross-entropy</li>
-          </ul>
-          <li>Inference</li>
-          <ul>
-            <li>Use ANN to find most relevant videos for a given user from their embeddings</li>
-          </ul>
-          <li>Pros</li>
-          <ul>
-            <li>Utilizes user features</li>
-            <li>Capable of handling new users</li>
-            <li>Model performance is higher</li>
-          </ul>
-          <li>Cons</li>
-          <ul>
-            <li>Slow serving having to compute user embeddings at query time</li>
-            <li>Slow inference if using content-based filtering because model needs to tranform video features to video embeddings</li>
-            <li>More learning paramaters, thus traning is more expensive</li>
-          </ul>
+          <li>Binary classification, thus use cross-entropy</li>
         </ul>
       </ul>
     </ul>
