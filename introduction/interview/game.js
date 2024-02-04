@@ -1,6 +1,7 @@
 const question = document.getElementById("question");
 const codeBlock = document.getElementById("code-block");
-const choices = Array.from(document.getElementsByClassName("choice-text"));
+// const choices = Array.from(document.getElementsByClassName("choice-text"));
+const choice = document.getElementsByClassName("choice-text")
 const choiceContainer = Array.from(document.getElementsByClassName("choice-container"));
 const progressText = document.getElementById("progressText");
 const progressFull = document.getElementsByClassName("progressBarFull");
@@ -24,14 +25,12 @@ fetch('./questions.json')
     questions = loadedQuestions;
     num_questions = Object.keys(questions).length;
     startGame();
-
 }).catch( err => {
     console.error(err);
 })
 
 startGame = () => {
     questionCounter = 0;
-    score = 0;
     availableQuestions = shuffle(questions);
 
     getNewQuestion();
@@ -53,19 +52,26 @@ getNewQuestion = () => {
     currentQuestion = availableQuestions[questionIndex];
     question.innerHTML = currentQuestion.question;
 
-    choices.forEach((choice, index) => {
-        choice.innerText = "Next"
-    });
+    // choices.forEach((choice, index) => {
+    //     choice.innerText = "Next"
+    // });
+    choice.innerText = "Next"
 
     clickAnswer();
 };
 
 function clickAnswer() {
-    choices.forEach((choice, index) => {
-        choice.addEventListener('click', e => {
-            getNewQuestion();
-         });
+    // choices.forEach((choice, index) => {
+    //     choice.addEventListener('click', e => {
+    //         // setTimeout(() => {
+    //         //     getNewQuestion();
+    //         // }, 1000);
+    //         setTimeout(getNewQuestion, 1000)
+    //     });
+    // });
 
+    choice.addEventListener("click", function() {
+        setTimeout(getNewQuestion, 1000)
     });
 }
       
