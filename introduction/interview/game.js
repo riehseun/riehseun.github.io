@@ -1,7 +1,7 @@
 const question = document.getElementById("question");
 const codeBlock = document.getElementById("code-block");
-// const choices = Array.from(document.getElementsByClassName("choice-text"));
-const choice = document.getElementsByClassName("choice-text")
+const choices = Array.from(document.getElementsByClassName("choice-text"));
+// const choice = document.getElementsByClassName("choice-text")
 const choiceContainer = Array.from(document.getElementsByClassName("choice-container"));
 const progressText = document.getElementById("progressText");
 const progressFull = document.getElementsByClassName("progressBarFull");
@@ -36,6 +36,12 @@ startGame = () => {
     getNewQuestion();
     game.classList.remove("hidden");
     loader.classList.add("hidden");
+
+    choices.forEach((choice, index) => {
+        choice.addEventListener('click', e => {
+            setTimeout(getNewQuestion, 500)
+        });
+    });
 };
 
 getNewQuestion = () => {
@@ -52,28 +58,10 @@ getNewQuestion = () => {
     currentQuestion = availableQuestions[questionIndex];
     question.innerHTML = currentQuestion.question;
 
-    // choices.forEach((choice, index) => {
-    //     choice.innerText = "Next"
-    // });
-    choice.innerText = "Next"
-
-    clickAnswer();
-};
-
-function clickAnswer() {
-    // choices.forEach((choice, index) => {
-    //     choice.addEventListener('click', e => {
-    //         // setTimeout(() => {
-    //         //     getNewQuestion();
-    //         // }, 1000);
-    //         setTimeout(getNewQuestion, 1000)
-    //     });
-    // });
-
-    choice.addEventListener("click", function() {
-        setTimeout(getNewQuestion, 1000)
+    choices.forEach((choice, index) => {
+        choice.innerText = "Next"
     });
-}
+};
       
 function shuffle(sourceArray) {
     for (var i = 0; i < sourceArray.length - 1; i++) {
