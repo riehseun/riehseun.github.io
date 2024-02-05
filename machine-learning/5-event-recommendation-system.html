@@ -379,25 +379,29 @@
     <ul>
       <li>Offline</li>
       <ul>
-        <li>Precision@k</li>
+        <li>Precision@k or recall@k</li>
         <ul>
-          <li>Number of relevant video in top k recommended videos / top k recommended videos</li>
+          <li>Not good because these don't consider ranking quality</li>
         </ul>
-        <li>Mean average precision (mAP)</li>
+        <li>MRR</li>
         <ul>
-          <li>Average of average precision across all object classes</li>
+          <li>Considers only the first item, thus not good</li>
         </ul>
-        <li>Diversity</li>
+        <li>nDCG</li>
         <ul>
-          <li>How dissimilar recommended videos are to each other</li>
+          <li>Works well when the score is non-binary, thus not good</li>
+        </ul>
+        <li>mAP</li>
+        <ul>
+          <li>Works well when the score is binary, thus the best choice</li>
         </ul>
       </ul>
       <li>Online</li>
       <ul>
-        <li>Click-through rate</li>
-        <li>The number of completed videos</li>
-        <li>Total watch time</li>
-        <li>Explicit user feedback</li>
+        <li>Click-through rate = total number of clicked events / total number of impressions</li>
+        <li>Conversion rate = total number of event registration / total number of impressions</li>
+        <li>Bookmark rate</li>
+        <li>Revenue life</li>
       </ul>
     </ul>
   </div>
@@ -410,27 +414,25 @@
   <div class="card-body">
     <h2 class="card-title">Deployment and serving</h2>
 
-    <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/video-recommendation-system1.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/event-recommendation-system1.png" alt="Card image cap">
     <ul>
-      <li>Candidate generation</li>
+      <li>Online learning pipeline</li>
       <ul>
-        <li>Narrow down videos from billions to thousands</li>
-        <li>Use model that does not rely on video feature for efficiency</li>
-        <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/video-recommendation-system2.png" alt="Card image cap">
-        <li>Two-tower neural network without video features (collaborative filtering) can be used to capture relevant videos</li>
-        <li>Use additional candidate generations to capture popular and trending videos</li>
-        <li>Then use content-based filtering to further narrow down the videos</li>
+        <li>Continuously train new models with new data, evaluate trained model, and deploy them</li>
       </ul>
-      <li>Ranking</li>
+      <li>Prediction pipeline</li>
       <ul>
-        <li>Takes user and candidate videos as input, scores each video, and outputs a ranked list of videos</li>
-        <li>Accuracy is more important than efficiency</li>
-        <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/video-recommendation-system3.png" alt="Card image cap">
-        <li>Two-tower neural network using both user and video features can be used</li>
-      </ul>
-      <li>Re-ranking</li>
-      <ul>
-        <li>Filter out certain videos like misinformation, clickbait, violence, nudity, hates</li>
+        <li>Event filtering</li>
+        <ul>
+          <li>Narrow down 1M events to a small subset</li>
+          <li>Simple rules can be used</li>
+        </ul>
+        <li>Ranking service</li>
+        <ul>
+          <li>Computes features for each &lt;user, event&gt; pair</li>
+          <li>Sorts events based on probabilities computed by the model</li>
+          <li>Ouputs top k most relevent events</li>
+        </ul>
       </ul>
     </ul>
   </div>
