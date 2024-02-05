@@ -56,15 +56,15 @@
 
     <h3 class="card-title">One shot learning</h3>
     <ul>
-      <li>Learn from one example to recognize the person again.</li>
+      <li>Learn from one example to recognize the person again</li>
       <li>Learn similarity function (Degree of difference between images)</li>
     </ul>
 
     <h3 class="card-title">Siamese network</h3>
     <ul>
-      <li>Run two identitcal convolutional neural network on two different input images.</li>
-      <li>If two images are of the same person, want difference of encoding to be small.</li>
-      <li>If two images are of the different person, want difference of encoding to be large.</li>
+      <li>Run two identitcal convolutional neural network on two different input images</li>
+      <li>If two images are of the same person, want difference of encoding to be small</li>
+      <li>If two images are of the different person, want difference of encoding to be large</li>
     </ul>
 
     <h3 class="card-title">Triplet loss</h3>
@@ -75,7 +75,7 @@
       <li>\( ||f(A)-f(P)||^{2} - ||f(A)-f(N)||^{2} + \alpha \le 0 \)</li>
       <li>Loss function \( L(A,P,N) = max(||f(A)-f(P)||^{2} - ||f(A)-f(N)||^{2} + \alpha, 0) \)</li>
       <li>Cost function \( J = \displaystyle\sum_{i=1}^{m} L(A^{(i)}, N^{(i)}, P^{(i)}) \)</li>
-      <li>Choose triplets that are hard to train. (If A,P,N are chosen randomly, gradient descent won't do well)</li>
+      <li>Choose triplets that are hard to train (If A,P,N are chosen randomly, gradient descent won't do well)</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -95,20 +95,48 @@
     <h3 class="card-title">Cost function for generated</h3>
     <ul>
       <li>\( J(G) = \alpha J_{content}(C,G) + \beta J_{style}(S,G) \)</li>
-      <li>1. Initialize \( G \) randomly.</li>
-      <li>2. Use gradient descent to minimize \( J(G) \) randomly.</li>
+<pre><code class="python">def total_cost(j_content, j_style, alpha = 10, beta = 40):
+    return alpha * j_content + beta * j_style</code></pre>
+      <li>1. Initialize \( G \) randomly</li>
+      <li>2. Use gradient descent to minimize \( J(G) \) randomly</li>
       <ul>
-        <li>\( G = G - \frac{\partial}{\partial G} J(G) \)</li>
+        <li>\( G = G - \dfrac{\partial}{\partial G} J(G) \)</li>
       </ul>
     </ul>
 
     <h3 class="card-title">Cost function for content</h3>
     <ul>
-      <li>Say you use hidden layer \( l \) to compute content cost.</li>
-      <li>Use pre-trained ConvNet like VGG.</li>
-      <li>Let \( a^{[l](C)}, a^{[l](G)} \) be the activation of  layer \( l \).</li>
-      <li>If \( a^{[l](C)}, a^{[l](G)} \) are similar, both images have simialr content.</li>
-      <li>\( J_{content}(C,G) = \frac{1}{2}||a^{[l](C)} - a^{[l](G)}||^{2} \)</li>
+      <li>Say you use hidden layer \( l \) to compute content cost from a pre-trained ConvNet like VGG</li>
+      <ul>
+        <li>Shallower layers tend to detect lower-level features such as edges and simple textures</li>
+        <li>Deeper layers tend to detect higher-level features such as more complex textures and object classes</li>
+        <li>Choosung a middle layer (neither too shallow or too deep) will likely yield the most visually pleasing result</li>
+      </ul>
+      <li>Set image C as the input to pretrained VGG and run forward prop</li>
+      <li>Set image G as the input to pretrained VGG and run forward prop</li>
+      <li>Let \( a^{[l](C)}, a^{[l](G)} \) be the activation of  layer \( l \)</li>
+      <ul>
+        <li>If \( a^{[l](C)}, a^{[l](G)} \) are similar, both images have simialr content</li>
+      </ul>
+      <li>\( J_{content}(C,G) = \dfrac{1}{4 \times n_{H} \times n_{W} \times n_{C}}||a^{[l](C)} - a^{[l](G)}||^{2} \)</li>
+<pre><code class="python">def compute_content_cost(a_C, a_G):
+    """
+    Args:
+    a_C -- tensor of dimension (1, n_H, n_W, n_C)
+    a_G -- tensor of dimension (1, n_H, n_W, n_C)
+
+    Returns:
+    J_content
+    """
+
+    m, n_H, n_W, n_C = a_G.get_shape().as_list()
+
+    a_C_unrolled = tf.reshape(a_C, [m, tf.multiply(n_H, n_W), n_C])
+    a_G_unrolled = tf.reshape(a_G, [m, tf.multiply(n_H, n_W), n_C])
+
+    J_content = tf.reduce_sum(tf.square(tf.subtract(a_C_unrolled, a_G_unrolled))) / (4 * n_H * n_W * n_C)
+
+    return J_content</code></pre>
     </ul>
 
     <h3 class="card-title">Cost function for style</h3>
@@ -119,6 +147,68 @@
       <li>\( G_{kk'}^{[l][G]} = \displaystyle\sum_{i=1}^{n_{H}^{[l]}}\displaystyle\sum_{j=1}^{n_{W}^{[l]}} a_{ijk}^{[l][G]} a_{ijk'}^{[l][G]} \)</li>
       <li>\( J_{style}^{[l]}(S,G) = ||G^{[l][G]}-G^{[l][S]}||_{F}^{2} \)</li>
       <li>\( J_{style}(S,G) = \displaystyle\sum_{l} \lambda^{[l]} J_{style}^{[l]}(S,G) \)</li>
+<pre><code class="python">def gram_matrix(A):
+    """
+    Args:
+    A -- matrix of shape (n_C, n_H*n_W)
+
+    Returns:
+    GA -- Gram matrix of A, of shape (n_C, n_C)
+    """
+
+    GA = tf.matmul(A, tf.transpose(A))
+
+    return GA</code></pre>
+
+<pre><code class="python">def compute_layer_style_cost(a_S, a_G):
+    """
+    Args:
+    a_S -- tensor of dimension (1, n_H, n_W, n_C)
+    a_G -- tensor of dimension (1, n_H, n_W, n_C)
+
+    Returns:
+    J_style_layer -- tensor representing a scalar value
+    """
+
+    m, n_H, n_W, n_C = a_G.get_shape().as_list()
+
+    a_S = tf.transpose(tf.reshape(a_S, [tf.multiply(n_H, n_W), n_C]))
+    a_G = tf.transpose(tf.reshape(a_G, [tf.multiply(n_H, n_W), n_C]))
+
+    GS = gram_matrix(a_S)
+    GG = gram_matrix(a_G)
+
+    J_style_layer = tf.reduce_sum(tf.square(tf.subtract(GS, GG))) / (4*n_H*n_W*n_H*n_W*n_C*n_C)
+
+    return J_style_layer</code></pre>
+
+<pre><code class="python">def compute_style_cost(model, style_layers):
+    """
+    Args:
+    model -- our tensorflow model
+    style_layers -- list of the names of the layers and a coefficient
+
+    Returns:
+    j_style -- tensor representing a scalar value
+    """
+
+    j_style = 0
+
+    for layer_name, coeff in style_layers:
+
+        # Select the output tensor of the currently selected layer
+        out = model[layer_name]
+
+        # Set a_S to be the hidden layer activation from the layer we have selected, by running the session on out
+        a_S = sess.run(out)
+
+        a_G = out
+
+        j_style_layer = compute_layer_style_cost(a_S, a_G)
+
+        j_style += coeff * j_style_layer
+
+    return j_style</code></pre>
     </ul>
   </div>
   <div class="card-footer text-muted">
