@@ -69,7 +69,48 @@
   <div class="card-body">
     <h2 class="card-title">Valid sudoku (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def isValidSudoku(self, board: List[List[str]]) -> bool:
+
+        n = len(board)
+        seen = set()
+
+        # Time O(1) size of board is fixed
+        # Space O(1)
+
+        # Validate row
+        for i in range(n):
+            for j in range(n):
+                if board[i][j].isdigit():
+                    if board[i][j] not in seen:
+                        seen.add(board[i][j])
+                    else:
+                        return False
+            seen = set()
+
+        # Validate col
+        for j in range(n):
+            for i in range(n):
+                if board[i][j].isdigit():
+                    if board[i][j] not in seen:
+                        seen.add(board[i][j])
+                    else:
+                        return False
+            seen = set()
+
+        # Validate square from each top left index
+        for i in range(0, n, 3):
+            for j in range(0, n, 3):
+                for k in range(0,3):
+                    for l in range(0,3):
+                        if board[i+k][j+l].isdigit():
+                            if board[i+k][j+l] not in seen:
+                                seen.add(board[i+k][j+l])
+                            else:
+                                return False
+                seen = set()
+
+        return True</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/valid-sudoku">36. Valid Sudoku</a>
@@ -80,7 +121,30 @@
   <div class="card-body">
     <h2 class="card-title">Rotate image (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def rotate(self, matrix: List[List[int]]) -> None:
+        """
+        Do not return anything, modify matrix in-place instead.
+        """
+
+        # First reverse up & down
+        # Second, swap index i and j
+
+        # Time O(n^2) n = len(row) or n = len(col)
+        # Space O(1)
+
+        n = len(matrix)
+        start = 0
+        end = n - 1
+
+        while start < end:
+            matrix[start], matrix[end] = matrix[end], matrix[start]
+            start += 1
+            end -= 1
+
+        for i in range(n):
+            for j in range(i+1, n):
+                matrix[i][j], matrix[j][i] = matrix[j][i], matrix[i][j]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/rotate-image">48. Rotate Image</a>
@@ -91,7 +155,46 @@
   <div class="card-body">
     <h2 class="card-title">Spiral matrix (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def spiralOrder(self, matrix: List[List[int]]) -> List[int]:
+
+        # Remove rows and columns from the matrix while moving spiral
+        # The order is
+        #   Remove first row
+        #   Remove last col
+        #   Remove last row
+        #   Remove first col
+        # Repeat
+
+        result = []
+
+        # Time O(nm) poppping all elements from matrix
+        # Space O(nm) storing the result
+
+        while matrix:
+            nums = matrix.pop(0)  # Remove first row
+            result += nums
+
+            if matrix and matrix[0]:
+                for row in matrix:
+                    num = row.pop()  # Remove last col
+                    result += [num]
+
+            if matrix:
+                nums = matrix.pop()  # Remove last row
+                # Ensure the order that numbers are appended to the result
+                nums.reverse()
+                result += nums
+
+            if matrix and matrix[0]:
+                # Ensure the order that numbers are appended to the result
+                matrix_copy = matrix.copy()
+                matrix_copy.reverse()
+                for row in matrix_copy:
+                    num = row.pop(0)  # Remove first col
+                    result += [num]
+
+        return result</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/spiral-matrix">54. Spiral Matrix</a>
