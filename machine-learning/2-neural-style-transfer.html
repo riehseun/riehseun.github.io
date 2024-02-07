@@ -130,7 +130,7 @@
       <ul>
         <li>Shallower layers tend to detect lower-level features such as edges and simple textures</li>
         <li>Deeper layers tend to detect higher-level features such as more complex textures and object classes</li>
-        <li>Choosung a middle layer (neither too shallow or too deep) will likely yield the most visually pleasing result</li>
+        <li>Choosing a middle layer (neither too shallow or too deep) will likely yield the most visually pleasing result</li>
       </ul>
       <li>Set image C as the input to pretrained VGG and run forward prop</li>
       <li>Set image G as the input to pretrained VGG and run forward prop</li>
@@ -169,12 +169,10 @@
   <div class="card-body">
     <h3 class="card-title">Cost function for style</h3>
     <ul>
-      <li>Let \( a_{i,j,k}^{[l]} \) activation at \( (i,j,k) \)</li>
-      <li>\( G^{[l]} \) is \( n_{c}^{[l]} \times n_{c}^{[l]} \)</li>
-      <li>\( G_{kk'}^{[l][S]} = \displaystyle\sum_{i=1}^{n_{H}^{[l]}}\displaystyle\sum_{j=1}^{n_{W}^{[l]}} a_{ijk}^{[l][S]} a_{ijk'}^{[l][S]} \)</li>
-      <li>\( G_{kk'}^{[l][G]} = \displaystyle\sum_{i=1}^{n_{H}^{[l]}}\displaystyle\sum_{j=1}^{n_{W}^{[l]}} a_{ijk}^{[l][G]} a_{ijk'}^{[l][G]} \)</li>
-      <li>\( J_{style}^{[l]}(S,G) = ||G^{[l][G]}-G^{[l][S]}||_{F}^{2} \)</li>
-      <li>\( J_{style}(S,G) = \displaystyle\sum_{l} \lambda^{[l]} J_{style}^{[l]}(S,G) \)</li>
+      <li>Capture the style from layer \( l \)</li>
+      <li>Minimize the distance between Gram matrix of "style" image S and Gram matrix of "generated" image G</li>
+      <li>\( J_{style}^{[l]}(S,G) = \dfrac{1}{4 \times n_{C}^{2} \times n_{H} \times n_{W}^{2}} \displaystyle\sum _{i=1}^{n_{C}}\displaystyle\sum_{j=1}^{n_{C}}(G_{i,j}^{[l][G]}-G_{i,j}^{[l][S]})^2 \)</li>
+    </ul>
 
 <pre><code class="python">def gram_matrix(A):
     """
@@ -211,6 +209,20 @@
 
     return J_style_layer</code></pre>
 
+    <h3 class="card-title">Merge style costs from several different layers</h3>
+    <ul>
+      <li>Each layer will be given weights ( \( \lambda^{[l]} \) ) that reflect how much each layer will contribute to the style</li>
+      <li>\( J_{style}(S,G) = \displaystyle\sum_{l} \lambda^{[l]} J_{style}^{[l]}(S,G) \)</li>
+      <li>\( \displaystyle\sum_{l}^{L}\lambda^{[l]} = 1 \)</li>
+    </ul>
+
+<pre><code class="python">STYLE_LAYERS = [
+    ('conv1_1', 0.2),
+    ('conv2_1', 0.2),
+    ('conv3_1', 0.2),
+    ('conv4_1', 0.2),
+    ('conv5_1', 0.2)]</code></pre>
+
 <pre><code class="python">def compute_style_cost(model, style_layers):
     """
     Args:
@@ -218,26 +230,29 @@
     style_layers -- list of the names of the layers and a coefficient
 
     Returns:
-    j_style -- tensor representing a scalar value
+    J_style -- tensor representing a scalar value
     """
 
-    j_style = 0
+    J_style = 0
 
     for layer_name, coeff in style_layers:
 
-        # Select the output tensor of the currently selected layer
+        # Select the activation (the output tensor) of the current layer
         out = model[layer_name]
 
-        # Set a_S to be the hidden layer activation from the layer we have selected, by running the session on out
+        # Get the style of the style image "S" from the current layer
         a_S = sess.run(out)
 
+        # Get the style of the generated image "G" from the current layer
         a_G = out
 
-        j_style_layer = compute_layer_style_cost(a_S, a_G)
+        # Compute the "style cost" for the current layer
+        J_style_layer = compute_layer_style_cost(a_S, a_G)
 
-        j_style += coeff * j_style_layer
+        # Add the weighted style cost to the overall style cost (J_style)
+        J_style += coeff * J_style_layer
 
-    return j_style</code></pre>
+    return J_style</code></pre>
     </ul>
   </div>
   <div class="card-footer text-muted">
