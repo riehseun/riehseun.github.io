@@ -61,13 +61,16 @@
       <li>Business objective</li>
       <ul>
         <li>What is the business objective? Increase event ticket sales</li>
-        <li>Can we access user's current location? Yes</li>
         <li>Can users become friends with one another? Yes</li>
-        <li>How can the distance and eta between two location be calculated? Assume we have access to Google API to do that</li>
+        <li>Can users invite other users to events? Yes</li>
+        <li>Can users RSVP to events? RSVP is out of scope</li>
+        <li>Is event free or paid? Both</li>
       </ul>
       <li>Features that the system supports</li>
       <ul>
-        <li>What kinds of features are available for an event? descriptiom, price, location, date and time, etc</li>
+        <li>How can the distance and eta between two location be calculated? Assume we have access to Google API to do that</li>
+        <li>Can we access user's current location? Yes</li>
+        <li>What kinds of features are available for an event? description, price, location, date and time, etc</li>
       </ul>
       <li>Data</li>
       <ul>
@@ -76,7 +79,8 @@
       <li>Constraints</li>
       <li>Scale</li>
       <ul>
-        <li>How many events are there on platform> 10M per month</li>
+        <li>How many active users are there on platform? 1M per day</li>
+        <li>How many events are there on platform? 1M per month</li>
       </ul>
       <li>Performance</li>
       <ul>
@@ -113,16 +117,19 @@
           <li>Pairwise LTR</li>
           <ul>
             <li>Take two items, and predict which item is more relevant to the query</li>
+            <li>Ex. RankNet, LambdaRank, LambdaMART</li>
           </ul>
           <li>Listwise LTR</li>
           <ul>
             <li>Predict the optimal ordering of entire items given the query</li>
+            <li>Ex. SoftRank, ListNet, AdaRank</li>
           </ul>
           <li>Pairwise and listwise produce more accurate results but they are more expensive to train</li>
           <li>Use pointwise with binary classification predicting whether user will register the event or not</li>
         </ul>
         <li>Events are short-lived, thus not many historical interaction are available</li>
         <li>Intrinsically have cold-start and new-item problem</li>
+        <li>Focus on extracting as many features as possible</li>
       </ul>
     </ul>
   </div>
@@ -156,6 +163,7 @@
           <li>city</li>
           <li>country</li>
           <li>language</li>
+          <li>timezone</li>
         </ul>
         <li>Friend</li>
         <ul>
@@ -177,7 +185,7 @@
           <ul>
             <li>90 to 100 - No car needed</li>
             <li>70 to 89 - Very walkable</li>
-            <li>5 to 69 - Somewhat walkable</li>
+            <li>50 to 69 - Somewhat walkable</li>
             <li>25 to 49 - Car-dependent</li>
             <li>0 to 24 - Requires a car</li>
           </ul>
@@ -197,7 +205,7 @@
             <li>4 - 50 to 100 miles</li>
             <li>5 - more than 100 miles</li>
           </ul>
-          <li>Distance similarity - difference between distance to event and distance to previous events that user registered</li>
+          <li>Distance similarity - difference between distance to event and average distance to previous events that user registered</li>
         </ul>
         <li>Time</li>
         <ul>
@@ -244,8 +252,11 @@
             <li>3 - 500 to 1999</li>
             <li>4 - more than 2000</li>
           </ul>
-          <li>Price similarity - difference between event price and price of previous events that user registered</li>
-          <li>Similarity between event description and description of previous events that user registered</li>=
+          <li>Price similarity - difference between event price and average price of previous events that user registered</li>
+          <li>Similarity between event description and description of previous events that user registered</li>
+          <ul>
+            <li>Convert event description to numerical vector using TF-ID and compute similarity using cosine distance</li>
+          </ul>
         </ul>
         <li>Other points</li>
         <ul>
@@ -324,27 +335,27 @@
             </ul>
             <li>Ex. Adaboost, XGBoost</li>
           </ul>
-          <li>Boosting</li>
+          <li>GBDT</li>
           <ul>
             <li>Use GradientBoost to improve decision trees</li>
+            <li>Pros</li>
+            <ul>
+              <li>Reduce both bias and variance</li>
+              <li>Little dataprep required</li>
+            </ul>
+            <li>Cons</li>
+            <ul>
+              <li>Lots of hyperparameters to tune</li>
+              <li>Not suitable for continual learning from streaming data</li>
+            </ul>
+            <li>Ex. XGBoost</li>
           </ul>
-          <li>Pros</li>
-          <ul>
-            <li>Reduce both bias and variance</li>
-            <li>Little dataprep required</li>
-          </ul>
-          <li>Cons</li>
-          <ul>
-            <li>Lots of hyperparameters to tune</li>
-            <li>Not suitable for continual learning from streaming data</li>
-          </ul>
-          <li>Ex. XGBoost</li>
         </ul>
         <li>Neural network</li>
         <li>Pros</li>
         <ul>
           <li>Continual learning</li>
-          <li>can handle unstructured data</li>
+          <li>Can handle unstructured data</li>
         </ul>
         <li>Cons</li>
         <ul>
@@ -358,8 +369,8 @@
       <ul>
         <li>Construct dataset</li>
         <ul>
-          <li>(user, event) pair from interaction data where 1 if user registered for the event and 0 otherwise</li>
-          <li>Data will highly be imbalanced, this use undersampling</li>
+          <li>&lt;user, event&gt; pair from interaction data where 1 if user registered for the event and 0 otherwise</li>
+          <li>Data will highly be imbalanced, thus use undersampling</li>
         </ul>
         <li>Choose loss function</li>
         <ul>
