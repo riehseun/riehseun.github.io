@@ -110,6 +110,7 @@
       <ul>
         <li>Validates email, phone number, etc</li>
         <li>Queries cache or DB to fetch data to render a notification</li>
+        <li>Serves as rate limiter</li>
       </ul>
       <li>Message queues</li>
       <ul>
@@ -162,6 +163,14 @@
       <li>user_id (int)</li>
       <li>last_logged_in_at (timestamp)</li>
     </ul>
+
+    <h3 class="card-title">Notification</h3>
+    <ul>
+      <li>notification_id (int, pk)</li>
+      <li>user_id (int)</li>
+      <li>channel (string) - push notification, SMS, email</li>
+      <li>opt-in (boolean) - whether user agreed to receive notification using the corresponding channel</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu
@@ -172,7 +181,16 @@
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
 
-    <img class="img-fluid" class="card-img-top" src="/img/system-design/notification-service2.png" alt="Card image cap">
+    <h3 class="card-title">Retry</h3>
+    <ul>
+      <li>Workers store notification data in notification log DB</li>
+      <li>When third party fails to send notification, the notification is added to message queue for retrying</li>
+    </ul>
+
+    <h3 class="card-title">De-duplication</h3>
+    <ul>
+      <li>When notification arrives, check event ID. If event ID is seen before, discard it</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu
