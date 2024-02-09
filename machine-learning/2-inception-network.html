@@ -43,7 +43,7 @@
   <div class="card-body">
     <h2 class="card-title">Inception network</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#inception-network-">Face recognition</a></li>
+      <li><a href="#inception-network-">Face verification</a></li>
       <li><a href="#inception-network-">1x1 convolution</a></li>
       <li><a href="#inception-network-">Inception network</a></li>
   </div>
@@ -51,9 +51,52 @@
 
 <div class="card mb-4" id="inception-network-">
   <div class="card-body">
-    <h2 class="card-title">Face recognition</h2>
+    <h2 class="card-title">Face verification</h2>
+    <ul>
+      <li>1:1 matching problem</li>
+      <li>Given two images, compare distance between two encodings to determine if they are the same person</li>
+      <img class="img-fluid" class="card-img-top" src="/img/machine-learning/inception-network1.png" style="width: 900px; height: 300px" alt="Card image cap">
+    </ul>
 
-    <h3 class="card-title">One shot learning</h3>
+    <h3 class="card-title">Triplet loss</h3>
+    <ul>
+      <li>Anchor iamge, Positive image (Same person from the anchor image), Nagative image (Different person from the anchor image)</li>
+      <li>Want \( A \) be closer to \( P \) than \( N \) by at least \( \alpha \)</li>
+      <ul>
+        <li>Pick \( \alpha = 0.2 \)</li>
+        <li>\( ||f(A)-f(P)||^{2} - ||f(A)-f(N)||^{2} + \alpha \le 0 \)</li>
+      </ul>
+      <li>Loss function</li>
+      <ul>
+        <li>\( L(A,P,N) = max(||f(A)-f(P)||^{2} - ||f(A)-f(N)||^{2} + \alpha, 0) \)</li>
+      </ul>
+      <li>Cost function</li>
+      <ul>
+        <li>\( J = \displaystyle\sum_{i=1}^{m} L(A^{(i)}, N^{(i)}, P^{(i)}) \)</li>
+      </ul>
+      <li>Choose triplets that are hard to train (If \( A,P,N \) are chosen randomly, gradient descent won't do well)</li>
+    </ul>
+
+<pre><code class="python">def triplet_loss(y_true, y_pred, alpha = 0.2):
+    """
+    Args:
+    y_true --
+    y_pred -- anchor of shape (None, 128), positive of shape (None, 128), negative of shape (None, 128)
+
+    Returns:
+    loss --
+    """
+
+    anchor, positive, negative = y_pred[0], y_pred[1], y_pred[2]
+
+    pos_dist = tf.reduce_sum(tf.square(tf.subtract(anchor, positive)), axis=-1)
+    neg_dist = tf.reduce_sum(tf.square(tf.subtract(anchor, negative)), axis=-1)
+    basic_loss = tf.add(tf.subtract(pos_dist, neg_dist), alpha)
+    loss = tf.reduce_sum(tf.maximum(basic_loss, 0), axis=-1)
+
+    return loss</code></pre>
+
+    <!-- <h3 class="card-title">One shot learning</h3>
     <ul>
       <li>Learn from one example to recognize the person again</li>
       <li>Learn similarity function (Degree of difference between images)</li>
@@ -64,18 +107,9 @@
       <li>Run two identitcal convolutional neural network on two different input images</li>
       <li>If two images are of the same person, want difference of encoding to be small</li>
       <li>If two images are of the different person, want difference of encoding to be large</li>
-    </ul>
+    </ul> -->
 
-    <h3 class="card-title">Triplet loss</h3>
-    <ul>
-      <li>Anchor iamge</li>
-      <li>Positive image (Same person from the anchor image)</li>
-      <li>Nagative image (Different person from the anchor image)</li>
-      <li>\( ||f(A)-f(P)||^{2} - ||f(A)-f(N)||^{2} + \alpha \le 0 \)</li>
-      <li>Loss function \( L(A,P,N) = max(||f(A)-f(P)||^{2} - ||f(A)-f(N)||^{2} + \alpha, 0) \)</li>
-      <li>Cost function \( J = \displaystyle\sum_{i=1}^{m} L(A^{(i)}, N^{(i)}, P^{(i)}) \)</li>
-      <li>Choose triplets that are hard to train (If A,P,N are chosen randomly, gradient descent won't do well)</li>
-    </ul>
+
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
