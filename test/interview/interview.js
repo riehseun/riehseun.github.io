@@ -17,7 +17,9 @@ let submittedAnswers = {};
 
 const CORRECT_BONUS = 10;
 
-fetch('./questions.json')
+var question_file = './behavioral.json'
+
+fetch(question_file)
 .then(res => {
     return res.json(); 
 })
