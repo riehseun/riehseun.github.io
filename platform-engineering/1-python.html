@@ -553,7 +553,7 @@ set_A.update(set_B)</code></pre>
       <li>Iterable - object that has <code>_iter_</code> method defined</li>
       <li>Iterator - object that has both <code>_iter_</code> and <code>_next_</code> methods defined</li>
       <ul>
-        <li><code>_iter_</code> returns iterator object</li>
+        <li><code>_iter_</code> returns iterator object itself</li>
         <li><code>_next_</code> returns the next element</li>
       </ul>
     </ul>
@@ -564,32 +564,59 @@ set_A.update(set_B)</code></pre>
       <ul>
         <li>You can iterate only once (Values are not stored in memory)</li>
       </ul>
+      <li>Return intermediate results</li>
+      <li>Used when streaming data buffers</li>
     </ul>
+
+<pre><code class="python">def fibonacci():
+    a, b = 0, 1
+    while True:
+        yield b
+        a, b = b, a + b
+
+fib = fibonacci()
+next(fib)  # 1
+next(fib)  # 1
+next(fib)  # 2
+[next(fib) for i in range(10)]  # [3, 5, 8, 13, 21, 34, 55, 89, 144, 233]</code></pre>
 
     <h3 class="card-title">Decorator</h3>
     <ul>
-      <li>Any function that receives a function and returns an enhanced one</li>
+      <li>Function that receives a function and returns an enhanced one</li>
     </ul>
 
-<pre><code class="python">class WithDecorators:
-
-    @staticmethod
-    def some_static_method():
-        print("this is static method")
-
-    @classmethod
-    def some_class_method(cls):
-        print("this is class method")</code></pre>
-
-    <!-- <h3 class="card-title"><code>itertools</code></h3>
-    <ul>
-      <li>Most iterators that comes with <code>itertools</code> are finite although there are three that are infinite</li>
-    </ul> -->
+<pre><code class="python">def mydecorator(function):
+    def wrapped(*args, **kwargs):
+        # do some stuff before the original
+        # function gets called
+        result = function(*args, **kwargs)
+        # do some stuff after function call and
+        # return the result
+        return result
+    # return wrapper as a decorated function
+    return wrapped</code></pre>
 
     <h3 class="card-title">Context managers</h3>
     <ul>
-      <li></li>
+      <li>Use of <code>with</code> keyword</li>
     </ul>
+
+<pre><code class="python"># Bad
+hosts = open('/etc/hosts')
+try:
+    for line in hosts:
+        if line.startswith('#'):
+            continue
+        print(line.strip())
+finally:
+    hosts.close()</code></pre>
+
+<pre><code class="python"># Good
+with open('/etc/hosts') as hosts:
+    for line in hosts:
+        if line.startswith('#'):
+            continue
+        print(line.strip())</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: Expert Python Programming, Michał Jaworski & Tarek Ziadé
