@@ -216,7 +216,30 @@
   <div class="card-body">
     <h2 class="card-title">Set matrix zeroes (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def setZeroes(self, matrix: List[List[int]]) -> None:
+        """
+        Do not return anything, modify matrix in-place instead.
+        """
+
+        # First find rows and cols that needs to be set to zero
+
+        rows = {}
+        cols = {}
+
+        # Time O(nm) where n = number of rows, m = number of cols
+        # Space O(max(n,m))
+
+        for i in range(len(matrix)):
+            for j in range(len(matrix[i])):
+                if matrix[i][j] == 0:
+                    rows[i] = True
+                    cols[j] = True
+
+        for i in range(len(matrix)):
+            for j in range(len(matrix[i])):
+                if i in rows or j in cols:
+                    matrix[i][j] = 0</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/set-matrix-zeroes">73. Set Matrix Zeroes</a>
@@ -227,7 +250,51 @@
   <div class="card-body">
     <h2 class="card-title">Search a 2D matrix (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+
+        # Compare target with the first and last integer of middle row
+        #   If target < first integer
+        #     Search on upper half of rows
+        #   If target > last integer
+        #     Search on lower half of row
+        #   If first integer <= target <= last integer
+        #     Do binary search on the current row
+
+        # Time O(log(n)*log(m)) n = number of rows, m = number of cols
+        # Space O(1)
+        def helper(sorted_array, number):
+
+            n = len(sorted_array)
+            if n == 0:
+                return False
+            mid = n // 2
+
+            if number < sorted_array[mid]:
+                return helper(sorted_array[:mid], number)
+            elif number > sorted_array[mid]:
+                return helper(sorted_array[mid+1:], number)
+            else:
+                return True
+
+        n = len(matrix)
+
+        if n == 0:
+            return False
+
+        if n == 1:
+            print(f"matrix: {matrix}, target: {target}")
+            return helper(matrix[0], target)
+
+        m = len(matrix[0])
+        mid = n // 2
+
+        if target < matrix[mid][0]:
+            return self.searchMatrix(matrix[:mid], target)
+        elif target > matrix[mid][m-1]:
+            return self.searchMatrix(matrix[mid+1:], target)
+        else:
+            return helper(matrix[mid], target)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/search-a-2d-matrix">74. Search a 2D Matrix</a>
