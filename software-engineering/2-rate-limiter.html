@@ -105,8 +105,6 @@
   <div class="card-body">
     <h2 class="card-title">High level design</h2>
 
-    <img class="img-fluid" class="card-img-top" src="/img/system-design/rate-limiter1.png" alt="Card image cap">
-
     <h3 class="card-title">Throttling</h3>
     <ul>
       <li>Hard - when exceed 500 (for example) the request is discarded</li>
@@ -122,6 +120,15 @@
       <ul>
         <li>For example, API gateway performs rate limiting, SSL termination, authentication, IP whitelisting, service static content, etc</li>
       </ul>
+    </ul>
+
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/rate-limiter1.png" alt="Card image cap">
+
+    <h3 class="card-title">Redis</h3>
+    <ul>
+      <li>Cache is chosen because DB is too slow</li>
+      <li>INCR - increments stored counter by 1</li>
+      <li>EXPIRE - sets a timeout for the counter. If timeout expires, counter is deleted</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -153,25 +160,87 @@
 
     <img class="img-fluid" class="card-img-top" src="/img/system-design/rate-limiter2.png" alt="Card image cap">
 
-    <h4 class="card-title">Throttle rule DB</h4>
+    <h3 class="card-title">Token bucket algorithm</h3>
     <ul>
-      <li>Stores rules, where each rule has number of requests allowed for each client per unit time.</li>
+      <li>Tokens are added to bucket periodically at pre-defined rate</li>
+      <li>If bucket is full, extra tokens will overflow</li>
+      <li>Each request consumes one token</li>
+      <li>If not enough tokens, request is dropped</li>
+      <li>Different buckets for differet API endpoints are needed</li>
+      <li>If throttle based on IP addresses, each IP needs a bucket</li>
+      <li>Global bucket may be needed, which is shared by all requests, if system allows only certain number of requests per second</li>
+      <li>Pros</li>
+      <ul>
+        <li>Memory efficient</li>
+        <li>Can handle burst of traffic</li>
+      </ul>
+      <li>Cons</li>
+      <ul>
+        <li>Two parameters (bucket size and token refill rate) are hard to tune</li>
+      </ul>
+      <li>Ex. Amazon, Stripe</li>
     </ul>
 
-    <h4 class="card-title">Throttle rule retriever</h4>
+    <h3 class="card-title">Leaking bucket algorithm</h3>
     <ul>
-      <li>periodically checks for modifications of the rules in DB.</li>
+      <li>Similar to token bucket algorithm, but uses queues instead</li>
+      <li>Pre-defined rate of how many request can be processed at a time</li>
+      <li>Pros</li>
+      <ul>
+        <li>Memory efficient</li>
+        <li>Stable outflow</li>
+      </ul>
+      <li>Cons</li>
+      <ul>
+        <li>Burst of traffic will cause later requests to be rate limited</li>
+        <li>Two parameters (queue size and outflow rate) are hard to tune</li>
+      </ul>
+      <li>Ex. Shopify</li>
     </ul>
 
-    <h4 class="card-title">Throttle rule cache</h4>
+    <h3 class="card-title">Fixed window counter algorithm</h3>
     <ul>
-      <li>Cache frequently retrived rules from DB.</li>
+      <li>Each time window get a counter</li>
+      <li>Each requests increments counter by one</li>
+      <li>When reaching threshold, new requests are dropped until new time window starts</li>
+      <li>Pros</li>
+      <ul>
+        <li>Memory efficient</li>
+      </ul>
+      <li>Cons</li>
+      <ul>
+        <li>Burst of traffic at the edge of window can cause more requests than allowed to go through</li>
+      </ul>
     </ul>
 
-    <h4 class="card-title">Client identifier builder</h4>
+    <h3 class="card-title">Sliding window log algorithm</h3>
     <ul>
-      <li>Generate unique identifier for each request.</li>
-      <li>This ID is used as key in DB.</li>
+      <li>Request timestamps are kept in a cache like Redis and added to a log</li>
+      <li>When a request comes in, remove all timestamps older than the start of current time window</li>
+      <li>If log size is equal or smaller than allowed acount, request is accpeted. Otherwise, it is dropped</li>
+      <li>Pros</li>
+      <ul>
+        <li>Accurate</li>
+      </ul>
+      <li>Cons</li>
+      <ul>
+        <li>Memory inefficient because timestamps of rejected request may still be in memory</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Sliding window counter algorithm</h3>
+    <ul>
+      <li>Mixes previous two approches</li>
+      <li>Request in current window + requests in previous window * overlap percentage of rolling window and previous window</li>
+      <li>Pros</li>
+      <ul>
+        <li>Memory efficient</li>
+        <li>Smooths out spikes in traffic because rate is based on the average rate of previous window</li>
+      </ul>
+      <li>Cons</li>
+      <ul>
+        <li>Assumes that requests in previous window are evenly distributed</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
