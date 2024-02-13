@@ -442,7 +442,54 @@
 
     return loss</code></pre>
 
+    <h3 class="card-title">Load pre-trained model</h3>
 
+<pre><code class="python">def load_weights_from_FaceNet(FRmodel):
+    # Load weights from csv files (which was exported from Openface torch model)
+    weights = WEIGHTS
+    weights_dict = load_weights()
+
+    # Set layer weights of the model
+    for name in weights:
+        if FRmodel.get_layer(name) != None:
+            FRmodel.get_layer(name).set_weights(weights_dict[name])
+        elif model.get_layer(name) != None:
+            model.get_layer(name).set_weights(weights_dict[name])</code></pre>
+
+<pre><code class="python">def load_weights():
+    # Set weights path
+    dirPath = './weights'
+    fileNames = filter(lambda f: not f.startswith('.'), os.listdir(dirPath))
+    paths = {}
+    weights_dict = {}
+
+    for n in fileNames:
+        paths[n.replace('.csv', '')] = dirPath + '/' + n
+
+    for name in WEIGHTS:
+        if 'conv' in name:
+            conv_w = genfromtxt(paths[name + '_w'], delimiter=',', dtype=None)
+            conv_w = np.reshape(conv_w, conv_shape[name])
+            conv_w = np.transpose(conv_w, (2, 3, 1, 0))
+            conv_b = genfromtxt(paths[name + '_b'], delimiter=',', dtype=None)
+            weights_dict[name] = [conv_w, conv_b]
+        elif 'bn' in name:
+            bn_w = genfromtxt(paths[name + '_w'], delimiter=',', dtype=None)
+            bn_b = genfromtxt(paths[name + '_b'], delimiter=',', dtype=None)
+            bn_m = genfromtxt(paths[name + '_m'], delimiter=',', dtype=None)
+            bn_v = genfromtxt(paths[name + '_v'], delimiter=',', dtype=None)
+            weights_dict[name] = [bn_w, bn_b, bn_m, bn_v]
+        elif 'dense' in name:
+            dense_w = genfromtxt(dirPath+'/dense_w.csv', delimiter=',', dtype=None)
+            dense_w = np.reshape(dense_w, (128, 736))
+            dense_w = np.transpose(dense_w, (1, 0))
+            dense_b = genfromtxt(dirPath+'/dense_b.csv', delimiter=',', dtype=None)
+            weights_dict[name] = [dense_w, dense_b]
+
+    return weights_dict</code></pre>
+
+<pre><code class="python">FRmodel.compile(optimizer = 'adam', loss = triplet_loss, metrics = ['accuracy'])
+load_weights_from_FaceNet(FRmodel)</code></pre>
 
     <!-- <h3 class="card-title">One shot learning</h3>
     <ul>
@@ -456,8 +503,6 @@
       <li>If two images are of the same person, want difference of encoding to be small</li>
       <li>If two images are of the different person, want difference of encoding to be large</li>
     </ul> -->
-
-
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
