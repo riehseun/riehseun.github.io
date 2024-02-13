@@ -491,6 +491,85 @@
 <pre><code class="python">FRmodel.compile(optimizer = 'adam', loss = triplet_loss, metrics = ['accuracy'])
 load_weights_from_FaceNet(FRmodel)</code></pre>
 
+<pre><code class="python">def img_to_encoding(image_path, model):
+    img1 = cv2.imread(image_path, 1)
+    img = img1[...,::-1]
+    img = np.around(np.transpose(img, (2,0,1))/255.0, decimals=12)
+    x_train = np.array([img])
+    embedding = model.predict_on_batch(x_train)
+    return embedding</code></pre>
+
+<pre><code class="python">database = {}
+database["danielle"] = img_to_encoding("/path/to/danielle.png", FRmodel)
+database["younes"] = img_to_encoding("/path/to/younes.jpg", FRmodel)
+database["tian"] = img_to_encoding("/path/to/tian.jpg", FRmodel)
+database["andrew"] = img_to_encoding("/path/to/andrew.jpg", FRmodel)
+database["kian"] = img_to_encoding("/path/to/kian.jpg", FRmodel)
+database["dan"] = img_to_encoding("/path/to/dan.jpg", FRmodel)
+database["sebastiano"] = img_to_encoding("/path/to/sebastiano.jpg", FRmodel)
+database["bertrand"] = img_to_encoding("/path/to/bertrand.jpg", FRmodel)
+database["kevin"] = img_to_encoding("/path/to/kevin.jpg", FRmodel)
+database["felix"] = img_to_encoding("/path/to/felix.jpg", FRmodel)
+database["benoit"] = img_to_encoding("/path/to/benoit.jpg", FRmodel)
+database["arnaud"] = img_to_encoding("/path/to/arnaud.jpg", FRmodel)</code></pre>
+
+<pre><code class="python">def verify(image_path, identity, database, model):
+    """
+    Arg:
+    image_path --
+    identity -- string
+    database -- mapping between name (strings) and encodings (vectors)
+    model -- inception model instance in Keras
+
+    Returns:
+    dist --
+    door_open -- True if verified. False otherwise.
+    """
+
+    encoding = img_to_encoding(image_path, model)
+    dist = np.linalg.norm(database[identity]-encoding, ord=2)
+
+    if dist < 0.7:
+        door_open = True
+    else:
+        door_open = False
+
+    return dist, door_open</code></pre>
+
+<pre><code class="python">verify("/path/to/image.png", "younes", database, FRmodel)
+verify("/path/to/image.png", "kian", database, FRmodel)</code></pre>
+
+<pre><code class="python">def who_is_it(image_path, database, model):
+    """
+    Args:
+    image_path --
+    database --
+    model -- inception model instance in Keras
+
+    Returns:
+    min_dist --
+    identity -- name prediction for the person from input image
+    """
+
+    encoding = img_to_encoding(image_path, model)
+    min_dist = 100
+
+    for (name, db_enc) in database.items():
+
+        dist = np.linalg.norm(database[name] - encoding, ord=2)
+        if dist < min_dist:
+            min_dist = dist
+            identity = name
+
+    if min_dist > 0.7:
+        print("Not in the database.")
+    else:
+        print ("it's " + str(identity) + ", the distance is " + str(min_dist))
+
+    return min_dist, identity</code></pre>
+
+<pre><code class="python">who_is_it("/path/to/image.png", database, FRmodel)</code></pre>
+
     <!-- <h3 class="card-title">One shot learning</h3>
     <ul>
       <li>Learn from one example to recognize the person again</li>
