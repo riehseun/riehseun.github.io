@@ -44,7 +44,8 @@
     <h2 class="card-title">Inception network</h2>
     <ul class="list-unstyled mb-0">
       <li><a href="#inception-network-">Inception network</a></li>
-      <li><a href="#inception-network-">Face verification</a></li>
+      <li><a href="#inception-network-">Encode face images into a 128-dimensional vector</a></li>
+      <li><a href="#inception-network-">Face recognition</a></li>
   </div>
 </div>
 
@@ -52,7 +53,7 @@
   <div class="card-body">
     <h2 class="card-title">Inception network</h2>
     <ul>
-      <li>With \( (28 \times 28 \times 192) \) input image, apply 3 different convolutions and 1 max-pooling.</li>
+      <li>With \( (28 \times 28 \times 192) \) input image, apply 3 different convolutions and 1 max-pooling</li>
       <ul>
         <li>\( (28 \times 28 \times 192) \) image * \( 1 \times 1 \) = \( (28 \times 28 \times 64) \)</li>
         <li>\( (28 \times 28 \times 192) \) image * \( 3 \times 3 \) (same) = \( (28 \times 28 \times 128) \)</li>
@@ -70,18 +71,25 @@
 
     <h3 class="card-title">Reduce computational overhead using 1x1 convolution</h3>
     <ul>
-      <li>Input: \( 28 \times 28 \times 192 \)</li>
+      <li>Input - \( 28 \times 28 \times 192 \)</li>
       <ul>
         <li>Use \( 1 \times 1, 16, 1 \times 1 \times 192 \)</li>
       </ul>
-      <li>Bottleneck block: \( 28 \times 28 \times 16 \)</li>
+      <li>Bottleneck block - \( 28 \times 28 \times 16 \)</li>
       <ul>
         <li>Use \( 5 \times 5, 32, 5 \times 5 \times 16 \)</li>
       </ul>
       <li>\( 28 \times 28 \times 32 \)</li>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
+  </div>
+</div>
 
-    <h3 class="card-title">Encode face images into a 128-dimensional vector</h3>
+<div class="card mb-4" id="inception-network-">
+  <div class="card-body">
+    <h2 class="card-title">Encode face images into a 128-dimensional vector</h2>
 
 <pre><code class="python">FRmodel = faceRecoModel(input_shape=(3, 96, 96))</code></pre>
 
@@ -397,18 +405,44 @@
 
 <div class="card mb-4" id="inception-network-">
   <div class="card-body">
-    <h2 class="card-title">Face verification</h2>
+    <h2 class="card-title">Face recognition</h2>
+
+    <h3 class="card-title">Face verification</h3>
     <ul>
       <li>1:1 matching problem</li>
       <li>Given two images, compare distance between two encodings to determine if they are the same person</li>
       <img class="img-fluid" class="card-img-top" src="/img/machine-learning/inception-network1.png" style="width: 900px; height: 300px" alt="Card image cap">
     </ul>
 
+    <h3 class="card-title">Face recognition</h3>
+    <ul>
+      <li>1:k matching problem</li>
+    </ul>
+
+    <h3 class="card-title">One shot learning</h3>
+    <ul>
+      <li>Learn from one example to recognize the person again</li>
+      <li>Learn similarity function (Degree of difference between images)</li>
+    </ul>
+
+    <h3 class="card-title">Siamese network</h3>
+    <ul>
+      <li>Run two identitcal convolutional neural network on two different input images</li>
+      <li>If two images are of the same person, want difference of encoding to be small</li>
+      <li>If two images are of the different person, want difference of encoding to be large</li>
+    </ul>
+
     <h3 class="card-title">Triplet loss</h3>
     <ul>
-      <li>Anchor iamge, Positive image (Same person from the anchor image), Nagative image (Different person from the anchor image)</li>
+      <li>Three types of images</li>
+      <ul>
+        <li>Anchor iamge</li>
+        <li>Positive image (Same person from the anchor image)</li>
+        <li>Nagative image (Different person from the anchor image)</li>
+      </ul>
       <li>Want \( A \) be closer to \( P \) than \( N \) by at least \( \alpha \)</li>
       <ul>
+        <li>\( \alpha \) is a margin to avoid parameters being all zeros</li>
         <li>Pick \( \alpha = 0.2 \)</li>
         <li>\( ||f(A)-f(P)||^{2} - ||f(A)-f(N)||^{2} + \alpha \le 0 \)</li>
       </ul>
@@ -569,19 +603,6 @@ verify("/path/to/image.png", "kian", database, FRmodel)</code></pre>
     return min_dist, identity</code></pre>
 
 <pre><code class="python">who_is_it("/path/to/image.png", database, FRmodel)</code></pre>
-
-    <!-- <h3 class="card-title">One shot learning</h3>
-    <ul>
-      <li>Learn from one example to recognize the person again</li>
-      <li>Learn similarity function (Degree of difference between images)</li>
-    </ul>
-
-    <h3 class="card-title">Siamese network</h3>
-    <ul>
-      <li>Run two identitcal convolutional neural network on two different input images</li>
-      <li>If two images are of the same person, want difference of encoding to be small</li>
-      <li>If two images are of the different person, want difference of encoding to be large</li>
-    </ul> -->
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
