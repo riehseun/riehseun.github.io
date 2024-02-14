@@ -154,7 +154,19 @@
       <li>Feature engineering</li>
       <ul>
         <li>Ad</li>
+        <ul>
+          <li>advertiser_id - embedding</li>
+          <li>category - CBOW</li>
+          <li>image/video - SimCLR</li>
+          <li>total impressions/clicks on the Ad</li>
+          <li>total impressions/clicks on the Ad supplied by an advertiser</li>
+        </ul>
         <li>User</li>
+        <ul>
+          <li>age, gender, city, country</li>
+          <li>device, time of day</li>
+          <li>cliked Ads, user's historical engagement statistics</li>
+        </ul>
       </ul>
     </ul>
   </div>
@@ -183,77 +195,103 @@
             <li>Cannot handle dependency between features</li>
           </ul>
         </ul>
-        <li>Decision tree</li>
+        <li>Feature crossing + LR</li>
         <ul>
+          <li>Create new feature by combining existing features</li>
+          <li>This way, non-linear relationship can be captured</li>
           <li>Pros</li>
           <ul>
-            <li>Fast inference</li>
-            <li>Fast training</li>
-            <li>Interpretable</li>
-            <li>Little dataprep required</li>
+            <li>Capture feature interations better</li>
           </ul>
           <li>Cons</li>
           <ul>
-            <li>Non-optimal decision boundry</li>
-            <li>Overfitting due to model being sensitive to small variations in input data</li>
+            <li>Manual process to choose features to be crossed, which also requires domain knowledge</li>
+            <li>Cannot still capture complex interactions</li>
+            <li>When original features are sparse, cardinality of crossed features become very sparse</li>
           </ul>
-        </ul>
-        <li>Bagging</li>
-        <ul>
-          <li>Train models in parallel on subsets of training data, then combine predictions to make final prediction</li>
-          <li>Pros</li>
-          <ul>
-            <li>Reduce model sensitivity to change in data</li>
-            <li>Train in parallel, thus fast training</li>
-            <li>Inputs are processed in parallel, thus fast inference</li>
-          </ul>
-          <li>Cons</li>
-          <ul>
-            <li>Does not solve underfitting</li>
-          </ul>
-          <li>Ex. random forest</li>
-        </ul>
-        <li>Boosting</li>
-        <ul>
-          <li>Train weak classifiers in sequence, that perform slightly better than random guess</li>
-          <li>Pros</li>
-          <ul>
-            <li>Reduce both bias and variance</li>
-          </ul>
-          <li>Cons</li>
-          <ul>
-            <li>Slower traning and infernce</li>
-          </ul>
-          <li>Ex. Adaboost, XGBoost</li>
         </ul>
         <li>GBDT</li>
         <ul>
-          <li>Use GradientBoost to improve decision trees</li>
           <li>Pros</li>
           <ul>
-            <li>Reduce both bias and variance</li>
-            <li>Little dataprep required</li>
+            <li>Interpretable</li>
           </ul>
           <li>Cons</li>
           <ul>
-            <li>Lots of hyperparameters to tune</li>
-            <li>Not suitable for continual learning from streaming data</li>
+            <li>Not suitable for continual learning</li>
+            <li>Cannot train embedding layers</li>
           </ul>
-          <li>Ex. XGBoost</li>
+        </ul>
+        <li>GBDT + LR</li>
+        <ul>
+          <li>Use GBDT just to select features and also extract features</li>
+          <li>Pros</li>
+          <ul>
+            <li>Extracted features are more predictive</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Not suitable for continual learning</li>
+            <li>Cannot capture complex interactions</li>
+          </ul>
         </ul>
         <li>Neural network</li>
         <ul>
+          <li>Single NN - use original features as input and NN outputs the click probability</li>
+          <li>Two-tower NN - user encoder and ad encoder are used. Similarity between user and ad embeddings is used to determine relevance</li>
           <li>Pros</li>
           <ul>
-            <li>Continual learning</li>
-            <li>Can handle unstructured data</li>
+            <li></li>
           </ul>
           <li>Cons</li>
           <ul>
-            <li>Computationally expensive</li>
-            <li>Lots of dataprep</li>
-            <li>Large training data is needed</li>
-            <li>Not interpretable</li>
+            <li>Most features are filled with zero</li>
+          </ul>
+        </ul>
+        <li>Deep & cross network (DCN)</li>
+        <ul>
+          <li>Deep network - use DNN to learn complex features</li>
+          <li>Cross network - automatically captures feature interactions and learns good feature crosses</li>
+          <li>Outputs of deep and cross network are concatenated to make final predictions</li>
+          <li>Pros</li>
+          <ul>
+            <li>More effective than NN because it implicitylu learns feature crosses</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Cross network only models certain feature interactions</li>
+          </ul>
+        </ul>
+        <li>Factorization machines (FM)</li>
+        <ul>
+          <li>Learn embedding vector for each feature to find all pairwise feature interactions</li>
+          <li>\( \hat{y}(x) = w_{0} + \displaystyle\sum_{i} w_{i}x_{i} + \displaystyle\sum_{i}\displaystyle\sum_{j} &lt;v_{i}, v_{j}&gt; x_{i}x_{j} \)</li>
+          <ul>
+            <li>\( x_{i} \) - ith feature</li>
+            <li>\( w_{i} \) - learned weight</li>
+            <li>\( v_{i} \) - embedding of ith feature</li>
+            <li>\( &lt;v_{i}, v_{j}&gt; \) - dot product between two embeddings</li>
+          </ul>
+          <li>Pros</li>
+          <ul>
+            <li>Captures pairwise feature interactions</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Cannot learn sophisticated higher-order feature interactions</li>
+          </ul>
+        </ul>
+        <li>Deep factorization machines (DeepFM)</li>
+        <ul>
+          <li>DNN capture sophisticated higher-order features</li>
+          <li>FM captures low-level pairwise feature interactions</li>
+          <li>Pros</li>
+          <ul>
+            <li></li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li></li>
           </ul>
         </ul>
       </ul>
@@ -261,8 +299,7 @@
       <ul>
         <li>Construct dataset</li>
         <ul>
-          <li>&lt;user, event&gt; pair from interaction data where 1 if user registered for the event and 0 otherwise</li>
-          <li>Data will highly be imbalanced, thus use undersampling</li>
+          <li>If user clicks the Ad in less than \( t \) seconds after Ad is shown, positive. Otherwise, negative</li>
         </ul>
         <li>Choose loss function</li>
         <ul>
