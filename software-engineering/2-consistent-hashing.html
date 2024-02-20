@@ -39,87 +39,161 @@
 <div class="col-md-12">
 <h1 class="my-4">Software Engineering</h1>
 
-<!-- Rate limiter BEGIN -->
-<div class="card mb-4" id="rate-limiter">
+<!-- Consistent hashing BEGIN -->
+<div class="card mb-4" id="consistent-hashing">
   <div class="card-body">
-    <h2 class="card-title">Rate limiter</h2>
+    <h2 class="card-title">Consistent hashing</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#rate-limiter-1">Rate limiter</a></li>
+      <li><a href="#consistent-hashing-1">Requirement</a></li>
+      <li><a href="#consistent-hashing-2">Estimation</a></li>
+      <li><a href="#consistent-hashing-3">High level design</a></li>
+      <!-- <li><a href="#consistent-hashing-4">API</a></li> -->
+      <!-- <li><a href="#consistent-hashing-5">Storage schema</a></li> -->
+      <li><a href="#consistent-hashing-6">Detailed design</a></li>
+      <li><a href="#consistent-hashing-7">Evaluation</a></li>
     </ul>
   </div>
 </div>
 
-<div class="card mb-4" id="rate-limiter-1">
+<div class="card mb-4" id="consistent-hashing-1">
   <div class="card-body">
-    <h2 class="card-title">Rate limiter</h2>
-    <ul>
-      <li>Prevent resource starvation. (DDOS attack)</li>
-      <li>Manage policies and quotas.</li>
-      <li>Avoid excess costs.</li>
-    </ul>
+    <h2 class="card-title">Requirement</h2>
 
-    <h3 class="card-title">Throttling</h3>
-    <ul>
-      <li>Hard: for example, when exceed 500, the request is discarded.</li>
-      <li>Soft: for example, allow 5% beyong the limit, such as 525.</li>
-      <li>Dynamic: for example, allow additional requests as long as there is free resource.</li>
-    </ul>
+    <h3 class="card-title">Functional</h3>
 
-    <h3 class="card-title">Where to place rate limiter</h3>
-    <ul>
-      <li>Client: not safe and configuration can be difficult.</li>
-      <li>Server: a viable option.</li>
-      <li>Middleware: between client and server.</li>
-    </ul>
-
-    <h3 class="card-title">Requirement</h3>
-
-    <h4 class="card-title">Functional</h4>
-    <ul>
-      <li>Limit number of requests a client can send within time window.</li>
-      <li>Make the number of requests within time window configurable.</li>
-      <li>Clients should get error message when threshold is reached.</li>
-    </ul>
-
-    <h4 class="card-title">Non-functional</h4>
+    <h3 class="card-title">Non-functional</h3>
     <ul>
       <li>Availability</li>
-      <li>Low latency</li>
+      <li>Reliability</li>
       <li>Scalability</li>
-    </ul>
-
-    <h3 class="card-title">High level design</h3>
-    <img class="img-fluid" class="card-img-top" src="/img/system-design/rate-limiter1.png" alt="Card image cap">
-
-    <h3 class="card-title">Component design</h3>
-    <img class="img-fluid" class="card-img-top" src="/img/system-design/rate-limiter2.png" alt="Card image cap">
-
-    <h4 class="card-title">Throttle rule DB</h4>
-    <ul>
-      <li>Stores rules, where each rule has number of requests allowed for each client per unit time.</li>
-    </ul>
-
-    <h4 class="card-title">Throttle rule retriever</h4>
-    <ul>
-      <li>periodically checks for modifications of the rules in DB.</li>
-    </ul>
-
-    <h4 class="card-title">Throttle rule cache</h4>
-    <ul>
-      <li>Cache frequently retrived rules from DB.</li>
-    </ul>
-
-    <h4 class="card-title">Client identifier builder</h4>
-    <ul>
-      <li>Generate unique identifier for each request.</li>
-      <li>This ID is used as key in DB.</li>
+      <li>Performance</li>
+      <li>Consistency</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
-    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+    Reference: System Design Interview, Alex Xu
   </div>
 </div>
-<!-- Rate limiter END -->
+
+<div class="card mb-4" id="consistent-hashing-2">
+  <div class="card-body">
+    <h2 class="card-title">Estimation</h2>
+
+    <h3 class="card-title">Server</h3>
+
+    <h3 class="card-title">Storage</h3>
+
+    <h3 class="card-title">Bandwidth</h3>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="consistent-hashing-3">
+  <div class="card-body">
+    <h2 class="card-title">High level design</h2>
+
+    <h3 class="card-title">Basic method</h3>
+    <ul>
+      <li>Server index = hash % N, where N = number of servers</li>
+      <li>Client must contact server with particular index to fetch the key</li>
+      <li>When adding/removing servers, most keys need to be redistributed</li>
+    </ul>
+
+    <h3 class="card-title">Consistent hashing</h3>
+    <ul>
+      <li>When adding/removing servers, k/n keys need to be redistributed on average where k = number of keys and n = number of slots</li>
+      <li>To find the server where a key is stored, go clockwise from the position of the key until a server is found</li>
+      <li>Each server may contain different number of keys</li>
+    </ul>
+
+    <h3 class="card-title">Consistent hashing with virtual nodes</h3>
+    <ul>
+      <li>To find the server where a key is stored, go clockwise from the position of the key until a virtual node is found</li>
+      <li>As number of virtual nodes increases, the key distribution becomes more balanced</li>
+    </ul>
+
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+
+<!-- <div class="card mb-4" id="consistent-hashing-4">
+  <div class="card-body">
+    <h2 class="card-title">API</h2>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div> -->
+
+<!-- <div class="card mb-4" id="consistent-hashing-5">
+  <div class="card-body">
+    <h2 class="card-title">Storage schema</h2>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div> -->
+
+<div class="card mb-4" id="consistent-hashing-6">
+  <div class="card-body">
+    <h2 class="card-title">Detailed design</h2>
+
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="consistent-hashing-7">
+  <div class="card-body">
+    <h2 class="card-title">Evaluation</h2>
+
+    <h3 class="card-title">Availability</h3>
+    <ul>
+      <li>Replication</li>
+      <ul>
+        <li>Replicate each server and DB</li>
+        <li>Replicate entire components to different zone or geographical region</li>
+      </ul>
+      <li>Fail over</li>
+      <ul>
+        <li></li>
+        <li></li>
+      </ul>
+    </ul>
+
+    <h4 class="card-title">Reliability</h4>
+    <ul>
+      <li>Data loss</li>
+    </ul>
+
+    <h3 class="card-title">Scalability</h3>
+    <ul>
+      <li>Horizontal scaling</li>
+      <li>Data partitioning</li>
+    </ul>
+
+    <h4 class="card-title">Performance</h4>
+    <ul>
+      <li></li>
+      <li></li>
+    </ul>
+    </ul>
+
+    <h3 class="card-title">Consistency</h3>
+    <ul>
+      <li></li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+<!-- Consistent hashing END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->
