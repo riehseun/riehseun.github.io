@@ -53,8 +53,8 @@
   <div class="card-body">
     <h2 class="card-title">Recurrent neural network</h2>
     <ul>
-      <li>Process the input (word in a sentence) timestep by timestep.</li>
-      <li>First need to extract numerical features from text data.</li>
+      <li>Process the input (word in a sentence) timestep by timestep</li>
+      <li>First need to extract numerical features from text data</li>
       <ul>
         <li>Ex. bag of words, N-grams, word embeddings</li>
       </ul>
@@ -62,8 +62,8 @@
 
     <h3 class="card-title">Why not standard network</h3>
     <ul>
-      <li>Inputs and outputs can be of different lengths in different examples.</li>
-      <li>Does not share features learned across different positions of text.</li>
+      <li>Inputs and outputs can be of different lengths in different examples</li>
+      <li>Does not share features learned across different positions of text</li>
     </ul>
 
     <!-- <ul>
@@ -91,10 +91,18 @@
 
     <h3 class="card-title">RNN types</h3>
     <ul>
-      <li>One to many (Ex. music generation)</li>
-      <li>Many to one (Ex. sentiment classification)</li>
-      <li>Many to many (Ex. named entity recognition)</li>
-      <li>Many to many (Ex. machine translation)</li>
+      <li>One to many</li>
+      <ul>
+        <li>Ex. music generation</li>
+      </ul>
+      <li>Many to one</li>
+      <ul>
+        <li>Ex. sentiment classification</li>
+      </ul>
+      <li>Many to many</li>
+      <ul>
+        <li>Ex. named entity recognition, machine translation</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Language model</h3>
@@ -104,67 +112,67 @@
         <li>Ex. P(The apple and pair salad) = \( 3.2 \times 10^{-13} \), P(The apple and peer salad) = \( 5.7 \times 10^{-13} \)</li>
         <li>\( P(y^{<1>}, y^{<2>}, y^{<3>}) = P(y^{<1>})P(y^{<2>}|y^{<1>})P(y^{<3>}|y^{<1>},y^{<2>}) \)</li>
       </ul>
-      <li>Training set: large english corpus.</li>
+      <li>Training set - large english corpus</li>
     </ul>
 
     <h3 class="card-title">Vanishing gradients with RNNs</h3>
     <ul>
       <li>Ex. "the cats, which, ..., were full" vs "the cat, which, ..., was full"</li>
-      <li>Capturing long-term dependencies is hard.</li>
+      <li>Capturing long-term dependencies is hard</li>
     </ul>
 
     <h3 class="card-title">Long short term memory</h3>
     <ul>
-      <li>Addresses vanishing gradient.</li>
-      <li>If exploding gradient, apply gradient clipping.</li>
+      <li>Addresses vanishing gradient</li>
+      <li>If exploding gradient, apply gradient clipping</li>
     </ul>
 
     <h4 class="card-title">Candidate value</h4>
     <ul>
-      <li>Tensor containing values between -1 to 1.</li>
-      <li>Information from current time step that may be stored in current cell state.</li>
+      <li>Tensor containing values between -1 to 1</li>
+      <li>Information from current time step that may be stored in current cell state</li>
       <li>\( \tilde{c}^{\langle t \rangle} = tanh(W_{c}[a^{\langle t-1 \rangle}, x^{\langle t \rangle}] + b_{c}) \)</li>
     </ul>
 
     <h4 class="card-title">Update gate</h4>
     <ul>
-      <li>Tensor containing values between 0 and 1.</li>
+      <li>Tensor containing values between 0 and 1</li>
       <ul>
-        <li>If unit in update gate is close to 1, it allows the value of the candidate to be passed onto the hidden state.</li>
-        <li>If unit in update gate is close to 0, it prevents the corresponding value in the candidate from being passed onto the hidden state.</li>
+        <li>If unit in update gate is close to 1, it allows the value of the candidate to be passed onto the hidden state</li>
+        <li>If unit in update gate is close to 0, it prevents the corresponding value in the candidate from being passed onto the hidden state</li>
       </ul>
-      <li>Decide what aspects of the candidate to add to the cell state.</li>
+      <li>Decide what aspects of the candidate to add to the cell state</li>
       <li>\( \Gamma_{u} = \sigma(W_{u}[a^{\langle t-1 \rangle}, x^{\langle t \rangle}] + b_{u}) \)</li>
     </ul>
 
     <h4 class="card-title">Forget gate</h4>
     <ul>
-      <li>Tensor containing values between 0 and 1.</li>
+      <li>Tensor containing values between 0 and 1</li>
       <ul>
-        <li>If unit in forget gate has value close to 0, LSTM will "forget" the stored state in the previous cell state.</li>
-        <li>If unit in forget gate has value close to 1, LSTM will mostly remember the corresponding value in the stored state.</li>
+        <li>If unit in forget gate has value close to 0, LSTM will "forget" the stored state in the previous cell state</li>
+        <li>If unit in forget gate has value close to 1, LSTM will mostly remember the corresponding value in the stored state</li>
       </ul>
       <li>\( \Gamma_{f} = \sigma(W_{f}[a^{\langle t-1 \rangle}, x^{\langle t \rangle}] + b_{f}) \)</li>
     </ul>
 
     <h4 class="card-title">Output gate</h4>
     <ul>
-      <li>Decides what gets sent as the prediction (output) of the time step.</li>
+      <li>Decides what gets sent as the prediction (output) of the time step</li>
       <li>\( \Gamma_{o} = \sigma(W_{o}[a^{\langle t-1 \rangle}, x^{\langle t \rangle}] + b_{o}) \)</li>
     </ul>
 
     <h4 class="card-title">Cell state</h4>
     <ul>
-      <li>The "memory" that gets passed onto future time steps.</li>
-      <li>The new cell state is a combination of the previous cell state and the candidate value.</li>
+      <li>The "memory" that gets passed onto future time steps</li>
+      <li>The new cell state is a combination of the previous cell state and the candidate value</li>
       <li>\( c^{\langle t \rangle} = \Gamma_{u} * \tilde{c}^{\langle t \rangle} + \Gamma_{f} c^{\langle t-1 \rangle} \)</li>
     </ul>
 
     <h4 class="card-title">Hidden state</h4>
     <ul>
-      <li>Hidden state gets passed to the LSTM cell's next time step.</li>
-      <li>Determines the three gates of the next time step.</li>
-      <li>Hidden state is also used for the prediction.</li>
+      <li>Hidden state gets passed to the LSTM cell's next time step</li>
+      <li>Determines the three gates of the next time step</li>
+      <li>Hidden state is also used for the prediction</li>
       <li>\( a^{\langle t \rangle} = \Gamma_{o} * tanh(c^{\langle t \rangle}) \)</li>
     </ul>
 
@@ -190,7 +198,7 @@
     </ul> -->
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a> | <a href="https://www.educative.io/path/become-a-deep-learning-professional">Become a Deep Learning Professional</a>
+    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a>
   </div>
 </div>
 <!-- Recurrent neural network END -->
