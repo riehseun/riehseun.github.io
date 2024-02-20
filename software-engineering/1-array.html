@@ -299,7 +299,28 @@
   <div class="card-body">
     <h2 class="card-title">Longest consecutive sequence (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def longestConsecutive(self, nums: List[int]) -> int:
+
+        # Assume duplicates are not counted
+        # Convert nums to set (to reduce search time to O(1))
+        # For each element, check
+        #   If element-1 is not in the set, then this is start of sequence
+        #     Then, recursively check if element+1 is in the set
+
+        nums = set(nums)
+        max_length = 0
+
+        # Time O(n) n = len(nums)
+        # Space O(1)
+        for num in nums:
+            if num-1 not in nums:
+                length = 0
+                elem = num
+                while elem in nums:
+                    elem += 1
+                    length += 1
+                max_length = max(max_length, length)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/longest-consecutive-sequence">128. Longest Consecutive Sequence</a>
@@ -310,7 +331,38 @@
   <div class="card-body">
     <h2 class="card-title">Maximum product subarray (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def maxProduct(self, nums: List[int]) -> int:
+
+        # Reset the product when seeing 0 in the array
+        # Otherwise, compute the product and remember the largest
+
+        # Time O(n) n = len(nums)
+        # Space O(1)
+        def helper(nums):
+            largest = -math.inf
+            product = 1
+            is_default_product = True
+
+            for num in nums:
+                if num == 0:
+                    product = 1
+                else:
+                    product *= num
+                    # For example, 1 is result of (-1)(-1)
+                    if product == 1:
+                        is_default_product = False
+                largest = max(largest, product)
+
+            if largest == 1 and is_default_product:
+                return 0
+
+            return largest
+
+        a = helper(nums)
+        nums.reverse()
+        b = helper(nums)
+        return max(a, b)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/maximum-product-subarray">152. Maximum Product Subarray</a>
