@@ -76,12 +76,94 @@
 
     <h3 class="card-title">Forward prop</h3>
     <ul>
-      <li>\( a^{<0>} = 0 \)</li>
-      <li>\( a^{<1>} = g(W_{aa}a^{<0>} + W_{ax}a^{<1>} + b_{a}) \)</li>
-      <li>\( y^{<1>} = g(W_{ya}a^{<1>} + b_{y}) \)</li>
-      <li>\( a^{\langle t \rangle} = g(W_{aa}a^{\langle t \rangle} + W_{ax}a^{\langle t \rangle} + b_{a}) = g(W_{a}[a^{\langle t-1 \rangle}, x^{\langle t \rangle}] + b_{a}) \)</li>
-      <li>\( y^{\langle t \rangle} = g(W_{ya}a^{\langle t \rangle} + b_{y}) = g(W_{y}[a^{\langle t \rangle}] + b_{y}) \)</li>
+      <li>Repeated use of a single cell by the number of time steps \( T_{x} \)</li>
+      <ul>
+        <li>\( a^{\langle 0 \rangle} = 0 \)</li>
+        <li>\( a^{\langle 1 \rangle} = \text{tanh}(W_{aa}a^{\langle 0 \rangle} + W_{ax}a^{\langle 1 \rangle} + b_{a}) \)</li>
+        <li>\( \hat{y}^{\langle 1 \rangle} = \text{softmax}(W_{ya}a^{\langle 1 \rangle} + b_{y}) \)</li>
+        <li>\( \dots \)</li>
+        <li>\( a^{\langle t \rangle} = \text{tanh}(W_{aa}a^{\langle t-1 \rangle} + W_{ax}a^{\langle t \rangle} + b_{a}) = \text{tanh}(W_{a}[a^{\langle t-1 \rangle}, x^{\langle t \rangle}] + b_{a}) \)</li>
+        <li>\( \hat{y}^{\langle t \rangle} = \text{softmax}(W_{ya}a^{\langle t \rangle} + b_{y}) = \text{softmax}(W_{y}a^{\langle t \rangle} + b_{y}) \)</li>
+      </ul>
+      <li>Each cell takes two inputs at each time step</li>
+      <ul>
+        <li>\( a^{\langle t-1 \rangle} \) - the hidden state from the previous cell</li>
+        <li>\( x^{\langle t \rangle} \) - current time-step's input data</li>
+      </ul>
+      <li>Each cell produces two outputs at each time step</li>
+      <ul>
+        <li>\( a^{\langle t \rangle} \) - a hidden state</li>
+        <li>\( y^{\langle t \rangle} \) - a prediction</li>
+      </ul>
+      <li>The weights and biases \( W_{aa}, b_{a}, W_{ax}, b_{x} \) are re-used each time step</li>
     </ul>
+
+<pre><code class="python">def rnn_cell_forward(xt, a_prev, parameters):
+    """
+    Args:
+    xt -- input data at timestep "t", of shape (n_x, m)
+    a_prev -- hidden state at timestep "t-1", of shape (n_a, m)
+    parameters -- python dictionary containing
+                  Wax -- weight matrix multiplying the input, of shape (n_a, n_x)
+                  Waa -- weight matrix multiplying the hidden state, of shape (n_a, n_a)
+                  Wya -- weight matrix relating the hidden-state to the output, of shape (n_y, n_a)
+                  ba -- bias, of shape (n_a, 1)
+                  by -- bias relating the hidden-state to the output, of shape (n_y, 1)
+    Returns:
+    a_next -- next hidden state, of shape (n_a, m)
+    yt_pred -- prediction at timestep "t", of shape (n_y, m)
+    cache -- values needed for the backward pass (a_next, a_prev, xt, parameters)
+    """
+
+    Wax = parameters["Wax"]
+    Waa = parameters["Waa"]
+    Wya = parameters["Wya"]
+    ba = parameters["ba"]
+    by = parameters["by"]
+
+    a_next = np.tanh(np.dot(Waa, a_prev) + np.dot(Wax, xt) + ba)
+    yt_pred = softmax(np.dot(Wya, a_next) + by)
+    cache = (a_next, a_prev, xt, parameters)
+
+    return a_next, yt_pred, cache</code></pre>
+
+<pre><code class="python">def rnn_forward(x, a0, parameters):
+    """
+    Arg:
+    x -- input data for every time-step, of shape (n_x, m, T_x)
+    a0 -- Initial hidden state, of shape (n_a, m)
+    parameters -- python dictionary containing
+                  Wax -- weight matrix multiplying the input, of shape (n_a, n_x)
+                  Waa -- weight matrix multiplying the hidden state, of shape (n_a, n_a)
+                  Wya -- weight matrix relating the hidden-state to the output, of shape (n_y, n_a)
+                  ba -- bias, of shape (n_a, 1)
+                  by -- bias relating the hidden-state to the output, of shape (n_y, 1)
+
+    Returns:
+    a -- hidden states for every time-step, of shape (n_a, m, T_x)
+    y_pred -- predictions for every time-step, of shape (n_y, m, T_x)
+    caches -- values needed for the backward pass (list of caches, x)
+    """
+
+    caches = []
+
+    n_x, m, T_x = x.shape
+    n_y, n_a = parameters["Wya"].shape
+
+    a = np.zeros((n_a, m, T_x))
+    y_pred = np.zeros((n_y, m, T_x))
+
+    a_next = a0
+
+    for t in range(T_x):
+        a_next, yt_pred, cache = rnn_cell_forward(x[:,:,t], a[:,:,t], parameters)
+        a[:,:,t] = a_next
+        y_pred[:,:,t] = yt_pred
+        caches.append(cache)
+
+    caches = (caches, x)
+
+    return a, y_pred, caches</code></pre>
 
     <h3 class="card-title">Loss function</h3>
     <ul>
