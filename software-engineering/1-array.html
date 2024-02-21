@@ -373,7 +373,22 @@
   <div class="card-body">
     <h2 class="card-title">Rotate array (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def rotate(self, nums: List[int], k: int) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+
+        # New index is (i+k) & len(nums)
+
+        # Time O(n) n - len(nums)
+        # Space O(n)
+        nums_copy = nums[:]
+        for i, num in enumerate(nums):
+            new_index = (i+k) % len(nums)
+            nums[new_index] = nums_copy[i]
+
+        return nums</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/rotate-array">189. Rotate Array</a>
@@ -384,7 +399,30 @@
   <div class="card-body">
     <h2 class="card-title">Product of array except self (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def productExceptSelf(self, nums: List[int]) -> List[int]:
+
+        # Compute the running products from both sides
+
+        # Time O(n) n = len(nums)
+        # Space O(n)
+        products_from_left = defaultdict(int)
+        products_from_left[-1] = 1
+
+        for i, num in enumerate(nums):
+            products_from_left[i] = products_from_left[i-1] * num
+
+        products_from_right = defaultdict(int)
+        products_from_right[len(nums)] = 1
+
+        for i in range(len(nums)-1, -1, -1):
+            products_from_right[i] = products_from_right[i+1] * nums[i]
+
+        result = []
+        for i, num in enumerate(nums):
+            result.append(products_from_left[i-1]*products_from_right[i+1])
+
+        return result</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/product-of-array-except-self">238. Product of Array Except Self</a>
