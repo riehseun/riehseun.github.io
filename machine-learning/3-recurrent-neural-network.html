@@ -544,7 +544,63 @@
 
     return gradients</code></pre>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">def lstm_backward(da, caches):
+    """
+    Args:
+    da -- gradients w.r.t the hidden states, of shape (n_a, m, T_x)
+    caches --
+
+    Returns:
+    gradients -- python dictionary containing
+                 dxt -- gradient of input data at time-step t, of shape (n_x, m)
+                 da_prev -- gradient w.r.t. the previous hidden state, of shape (n_a, m)
+                 dc_prev -- gradient w.r.t. the previous memory state, of shape (n_a, m, T_x)
+                 dWf -- gradient w.r.t. the weight matrix of the forget gate, of shape (n_a, n_a + n_x)
+                 dWi -- gradient w.r.t. the weight matrix of the update gate, of shape (n_a, n_a + n_x)
+                 dWc -- gradient w.r.t. the weight matrix of the memory gate, of shape (n_a, n_a + n_x)
+                 dWo -- gradient w.r.t. the weight matrix of the output gate, of shape (n_a, n_a + n_x)
+                 dbf -- gradient w.r.t. biases of the forget gate, of shape (n_a, 1)
+                 dbi -- gradient w.r.t. biases of the update gate, of shape (n_a, 1)
+                 dbc -- gradient w.r.t. biases of the memory gate, of shape (n_a, 1)
+                 dbo -- gradient w.r.t. biases of the output gate, of shape (n_a, 1)
+    """
+
+    (caches, x) = caches
+    (a1, c1, a0, c0, f1, i1, cc1, o1, x1, parameters) = caches[0]
+
+    n_a, m, T_x = da.shape
+    n_x, m = x1.shape
+
+    dx = np.zeros((n_x, m, T_x))
+    da0 = np.zeros((n_a, m))
+    da_prevt = np.zeros((n_a, m))
+    dc_prevt = np.zeros((n_a, m))
+    dWf = np.zeros((n_a, n_a + n_x))
+    dWi = np.zeros((n_a, n_a + n_x))
+    dWc = np.zeros((n_a, n_a + n_x))
+    dWo = np.zeros((n_a, n_a + n_x))
+    dbf = np.zeros((n_a, 1))
+    dbi = np.zeros((n_a, 1))
+    dbc = np.zeros((n_a, 1))
+    dbo = np.zeros((n_a, 1))
+
+    for t in reversed(range(T_x)):
+        gradients = lstm_cell_backward(da[:,:,t]+da_prevt,dc_prevt,caches[t])
+        dx[:, :, t] = gradients['dxt']
+        dWf = dWf+gradients['dWf']
+        dWi = dWi+gradients['dWi']
+        dWc = dWc+gradients['dWc']
+        dWo = dWo+gradients['dWo']
+        dbf = dbf+gradients['dbf']
+        dbi = dbi+gradients['dbi']
+        dbc = dbc+gradients['dbc']
+        dbo = dbo+gradients['dbo']
+
+    da0 = gradients['da_prev']
+
+    gradients = {"dx": dx, "da0": da0, "dWf": dWf, "dbf": dbf, "dWi": dWi, "dbi": dbi, "dWc": dWc, "dbc": dbc, "dWo": dWo, "dbo": dbo}
+
+    return gradients</code></pre>
 
     <h3 class="card-title">Bidirectional RNN</h3>
     <ul>
