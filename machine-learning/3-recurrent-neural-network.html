@@ -185,10 +185,17 @@
     <h3 class="card-title">Loss function</h3>
     <ul>
       <li>\( L^{\langle t \rangle}(\hat{y}^{\langle t \rangle}, y^{\langle t \rangle}) = -y^{\langle t \rangle}log\hat{y}^{\langle t \rangle} - (1-y^{\langle t \rangle})log(1-\hat{y}^{\langle t \rangle}) \)</li>
-      <li>\( L(\hat{y},y) = \displaystyle\sum_{t=1}^{T_{y}} L^{\langle t \rangle}(\hat{y}^{\langle t \rangle}, y^{\langle t \rangle}) \)</li>
+      <li>\( J(\hat{y},y) = \displaystyle\sum_{t=1}^{T_{y}} L^{\langle t \rangle}(\hat{y}^{\langle t \rangle}, y^{\langle t \rangle}) \)</li>
     </ul>
 
     <h3 class="card-title">Backward prop</h3>
+    <ul>
+      <li>\( dW_{ax} = da_{\text{next}} * (1-\tanh^2(W_{ax}x^{\langle t \rangle}+W_{aa} a^{\langle t-1 \rangle} + b_{a}) ) x^{\langle t \rangle T} \)</li>
+      <li>\( dW_{aa} = da_{\text{next}} * (1-\tanh^2(W_{ax}x^{\langle t \rangle}+W_{aa} a^{\langle t-1 \rangle} + b_{a}) ) a^{\langle t-1 \rangle T} \)</li>
+      <li>\( db_{a} = da_{\text{next}} * \displaystyle\sum_{\text{batch}}(1-\tanh^2(W_{ax}x^{\langle t \rangle} + W_{aa} a^{\langle t-1 \rangle} + b_{a})) \)</li>
+      <li>\( dx^{\langle t \rangle} = da_{\text{next}} * {W_{ax}}^T (1-\tanh^2(W_{ax}x^{\langle t \rangle}+W_{aa} a^{\langle t-1 \rangle} + b_{a})) \)</li>
+      <li>\( da_{\text{prev}} = da_{\text{next}} * {W_{aa}}^T (1-\tanh^2(W_{ax}x^{\langle t \rangle}+W_{aa} a^{\langle t-1 \rangle} + b_{a})) \)</li>
+    </ul>
 
 <pre><code class="python">def rnn_cell_backward(da_next, cache):
     """
