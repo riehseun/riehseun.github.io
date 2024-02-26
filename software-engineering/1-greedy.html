@@ -64,18 +64,21 @@
 <pre><code class="python">class Solution:
     def jump(self, nums: List[int]) -> int:
 
+        # At each index, compute the farthest index it can reach
+        # Fartest index is the max of the two
+        #   Fartest from previous indexes
+        #   Fartest from the current index
+
         # Time O(n)
         # Space O(1)
-        # Compute farthest jump in each interation and update current jump to farthest jump when needed.
-
-        farthest_jump = 0  # Farthest index we can reach.
-        current_jump = 0  # End index of current jump.
+        farthest_index = 0
+        current_index = 0
         num_jumps = 0
 
         for i in range(len(nums)-1):
-            farthest_jump = max(farthest_jump, nums[i]+i)
-            if i == current_jump:
-                current_jump = farthest_jump
+            farthest_index = max(farthest_index, nums[i]+i)
+            if i == current_index:
+                current_index = farthest_index
                 num_jumps += 1
 
         return num_jumps</code></pre>
@@ -92,20 +95,26 @@
 <pre><code class="python">class Solution:
     def canJump(self, nums: List[int]) -> bool:
 
+        # At each index, compute the farthest index it can reach
+        # Fartest index is the max of the two
+        #   Fartest from previous indexes
+        #   Fartest from the current index
+        # If at any point, current number is 0 and farthest index of all
+        # previous indices cannot reach beyoud the current number, return False
+
         # Time O(n)
         # Space O(1)
 
-        # Loop backwards and update target index.
-        # Target number is initially at last index.
-
-        target_index = len(nums)-1
-
-        for i in range(len(nums)-2, -1, -1):
-            if nums[i] + i >= target_index:
-                target_index = i
-
-        if target_index == 0:
+        if len(nums) == 1:
             return True
+
+        farthest_index = 0
+        for i in range(len(nums)-1):
+            farthest_index = max(farthest_index, nums[i]+i)
+            if nums[i] == 0 and farthest_index <= i:
+                return False
+            if farthest_index >= len(nums)-1:
+                return True
 
         return False</code></pre>
   </div>
