@@ -191,29 +191,24 @@
 <pre><code class="python">class Solution:
     def canCompleteCircuit(self, gas: List[int], cost: List[int]) -> int:
 
-        # Time: O(n)
-        # Space: O(1)
+        # Since there is unique solution, check from each index
+        # If total cost > total gas, there is no solution
+        # Find the first index where the accumulated gas is positive
 
-        # If sum(gas) >= sum(cost), there is enough gas to make a trip from at least one index.
-        # Solution is guaranteed to be unique from the problem.
-
-        # If this condition is not met, there is at least one index
-        # where the trip can be started with enough gas.
-
-        if sum(gas) < sum(cost):
+        if sum(cost) > sum(gas):
             return -1
 
-        n = len(gas)
+        # Time O(n) n = len(gas)
+        # Space O(1)
+        index = 0
         accumulated_gas = 0
-        starting_index = 0
-
-        for i in range(n):
+        for i in range(len(gas)):
             accumulated_gas += (gas[i]-cost[i])
             if accumulated_gas < 0:
                 accumulated_gas = 0
-                starting_index = i + 1
+                index = i + 1
 
-        return starting_index</code></pre>
+        return index </code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/gas-station">134. Gas Station</a>
@@ -224,7 +219,30 @@
   <div class="card-body">
     <h2 class="card-title">Candy (H)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def candy(self, ratings: List[int]) -> int:
+
+        # At index i,
+        #   If ratings[i] > ratings[i-1], candy[i] > candy[i-1]
+        #   If ratings[i] > ratings[i+1], candy[i] > candy[i+1]
+        # Initialize candy array to all 1
+        # Go though the candy array from left to right incrementing candies
+        # Go though the candy array from right to left incrementing candies
+
+        n = len(ratings)
+        candies = [1] * n
+
+        # Time O(n) n = len(ratings)
+        # Space O(n)
+        for i in range(1, n):
+            if ratings[i] > ratings[i-1]:
+                candies[i] = candies[i-1] + 1
+
+        for j in range(n-2, -1, -1):
+            if ratings[j] > ratings[j+1] and candies[j] <= candies[j+1]:
+                candies[j] = candies[j+1] + 1
+
+        return sum(candies)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/candy">135. Candy</a>
