@@ -142,6 +142,67 @@
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
 
+    <h3 class="card-title">Data partition</h3>
+    <ul>
+      <li>Use consistent hasing to partition data into multiple servers</li>
+    </ul>
+
+    <h3 class="card-title">Data replication</h3>
+    <ul>
+      <li>Replicate data into multiple (N) servers for high availability and reliability</li>
+      <li>From consistent hashing, first place a key in the ring</li>
+      <li>Then, walk clock-wise and store data in the first N physical servers that are located in different data center (Not the first N nodes or servers within the same data center)</li>
+      <li></li>
+    </ul>
+
+    <h3 class="card-title">Consistency</h3>
+    <ul>
+      <li>N = number of replicas</li>
+      <li>W = 1 means that coordinates need just one acknowledgement to consider write to be successful (It does not mean data is written on one server)</li>
+      <li>W = 1 or R = 1 makes operations to return quickly</li>
+      <li>W > 1 or R > 1 offers better consistency but operation is slower</li>
+      <li>W + R > N guarantees strong consistency because there is at least one overlapping node that has the latest data (Ex. N = 3, W = 2, R = 2)</li>
+      <li>W = N and R = 1 is optimized for fast read</li>
+      <li>W = 1 and R = N is optimized for fast write</li>
+    </ul>
+
+    <h3 class="card-title">Versioning</h3>
+    <ul>
+      <li>Key-value store can adopt eventual consistency</li>
+      <li>Vector clock, which is pairs of server Id and version number, associated with each data item can be used to resolve inconsistency between data replica</li>
+      <li>Example</li>
+      <ul>
+        <li>A client writes data1, which is handled by server1 - D1[(s1, 1)]</li>
+        <li>Another client reads data1 and updates it to data2, which is handled by server1 - D2[(s1, 2)]</li>
+        <li>Another client reads data2 and updates it to data3, which is handled by server2 - D3[(s1, 2), (s2, 1)]</li>
+        <li>Another client reads data2 and updates it to data4, which is handled by server3 - D4[(s1, 2), (s3, 1)]</li>
+        <li>When another client reads D3 and D4, it finds a conflict and resolve it, which is handled by server1 - D5[(s1, 3), (s2, 1), (s3, 1)]</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Failure</h3>
+    <ul>
+      <li></li>
+      <li></li>
+    </ul>
+
+    <h3 class="card-title">Architecture</h3>
+    <ul>
+      <li></li>
+      <li></li>
+    </ul>
+
+    <h3 class="card-title">Write path</h3>
+    <ul>
+      <li></li>
+      <li></li>
+    </ul>
+
+    <h3 class="card-title">Read path</h3>
+    <ul>
+      <li></li>
+      <li></li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu
