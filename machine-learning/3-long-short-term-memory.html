@@ -65,24 +65,40 @@
 
     <h3 class="card-title">Candidate value</h3>
     <ul>
+      <li>Information from current time step that may be stored in current cell state \( c^{\langle t \rangle} \)</li>
       <li>Tensor containing values between -1 to 1</li>
-      <li>Information from current time step that may be stored in current cell state</li>
-      <li>\( \tilde{c}^{\langle t \rangle} = tanh(W_{c}[a^{\langle t-1 \rangle}, x^{\langle t \rangle}] + b_{c}) \)</li>
+      <li>\( \tilde{c}^{\langle t \rangle} = \text{tanh}(W_{c}[a^{\langle t-1 \rangle}, x^{\langle t \rangle}] + b_{c}) \)</li>
+    </ul>
+
+    <h3 class="card-title">Cell state</h3>
+    <ul>
+      <li>The memory that gets passed onto future time steps</li>
+      <li>The new cell state is a combination of the previous cell state and the candidate value</li>
+      <li>\( c^{\langle t \rangle} = \Gamma_{u} * \tilde{c}^{\langle t \rangle} + \Gamma_{f} c^{\langle t-1 \rangle} \)</li>
+    </ul>
+
+    <h3 class="card-title">Hidden state</h3>
+    <ul>
+      <li>Hidden state gets passed to the LSTM cell's next time step</li>
+      <li>Determines the three gates of the next time step</li>
+      <li>Hidden state is also used for the prediction</li>
+      <li>\( a^{\langle t \rangle} = \Gamma_{o} * tanh(c^{\langle t \rangle}) \)</li>
     </ul>
 
     <h3 class="card-title">Update gate</h3>
     <ul>
+      <li>Decides what parts of a candidate tensor \( \tilde{c}^{\langle t \rangle} \) are passed onto the cell state \( c^{\langle t \rangle} \)</li>
       <li>Tensor containing values between 0 and 1</li>
       <ul>
         <li>If unit in update gate is close to 1, it allows the value of the candidate to be passed onto the hidden state</li>
         <li>If unit in update gate is close to 0, it prevents the corresponding value in the candidate from being passed onto the hidden state</li>
       </ul>
-      <li>Decide what aspects of the candidate to add to the cell state</li>
       <li>\( \Gamma_{u}^{\langle t \rangle} = \sigma(W_{u}[a^{\langle t-1 \rangle}, x^{\langle t \rangle}] + b_{u}) \)</li>
     </ul>
 
     <h3 class="card-title">Forget gate</h3>
     <ul>
+      <li>When memory of the previous state becomes outdated, forget that outdated state</li>
       <li>Tensor containing values between 0 and 1</li>
       <ul>
         <li>If unit in forget gate has value close to 0, LSTM will "forget" the stored state in the previous cell state</li>
@@ -97,24 +113,10 @@
       <li>\( \Gamma_{o}^{\langle t \rangle} = \sigma(W_{o}[a^{\langle t-1 \rangle}, x^{\langle t \rangle}] + b_{o}) \)</li>
     </ul>
 
-    <h3 class="card-title">Cell state</h3>
-    <ul>
-      <li>The "memory" that gets passed onto future time steps</li>
-      <li>The new cell state is a combination of the previous cell state and the candidate value</li>
-      <li>\( c^{\langle t \rangle} = \Gamma_{u} * \tilde{c}^{\langle t \rangle} + \Gamma_{f} c^{\langle t-1 \rangle} \)</li>
-    </ul>
-
-    <h3 class="card-title">Hidden state</h3>
-    <ul>
-      <li>Hidden state gets passed to the LSTM cell's next time step</li>
-      <li>Determines the three gates of the next time step</li>
-      <li>Hidden state is also used for the prediction</li>
-      <li>\( a^{\langle t \rangle} = \Gamma_{o} * tanh(c^{\langle t \rangle}) \)</li>
-    </ul>
-
     <h3 class="card-title">Prediction</h3>
     <ul>
-      <li>\( y_{pred}^{\langle t \rangle} = \textrm{softmax}(W_{y} a^{\langle t \rangle} + b_{y}) \)</li>
+      <li>Ex. softmax</li>
+      <li>\( y_{pred}^{\langle t \rangle} = \text{softmax}(W_{y} a^{\langle t \rangle} + b_{y}) \)</li>
     </ul>
 
     <h3 class="card-title">Forward prop</h3>
