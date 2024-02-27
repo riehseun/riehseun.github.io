@@ -45,6 +45,7 @@
     <h2 class="card-title">Recurrent neural network</h2>
     <ul class="list-unstyled mb-0">
       <li><a href="#recurrent-neural-network-">Recurrent neural network</a></li>
+      <li><a href="#recurrent-neural-network-">Example - generate names</a></li>
     </ul>
   </div>
 </div>
@@ -304,6 +305,83 @@
       </ul>
       <li>Training set - large english corpus</li>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="recurrent-neural-network-">
+  <div class="card-body">
+    <h2 class="card-title">Example - generate names</h2>
+    <ul>
+      <li>Initialize parameters</li>
+      <li>Run loop</li>
+      <ul>
+        <li>Forward propagation</li>
+        <li>Compute cost</li>
+        <li>Backward propagation</li>
+        <li>Clip the gradients</li>
+        <li>Update parameters</li>
+      </ul>
+      <li>Return the learned parameters</li>
+    </ul>
+
+<pre><code class="python">def clip(gradients, maxValue):
+    """
+    Args:
+    gradients -- contains the gradients "dWaa", "dWax", "dWya", "db", "dby"
+    maxValue -- everything above this number is set to this number, and everything less than -maxValue is set to -maxValue
+
+    Returns:
+    gradients -- a dictionary with the clipped gradients
+    """
+
+    dWaa, dWax, dWya, db, dby = gradients['dWaa'], gradients['dWax'], gradients['dWya'], gradients['db'], gradients['dby']
+
+    for gradient in [dWax, dWaa, dWya, db, dby]:
+        gradient = np.clip(gradient, -maxValue, maxValue, out=gradient)
+
+    gradients = {"dWaa": dWaa, "dWax": dWax, "dWya": dWya, "db": db, "dby": dby}
+
+    return gradients</code></pre>
+
+<pre><code class="python">def optimize(X, Y, a_prev, parameters, learning_rate = 0.01):
+    """
+    Arguments:
+    X -- list of integers, where each integer is a number that maps to a character in the vocabulary
+    Y -- list of integers, exactly the same as X but shifted one index to the left
+    a_prev -- previous hidden state
+    parameters -- python dictionary containing
+                  Wax -- weight matrix multiplying the input, of shape (n_a, n_x)
+                  Waa -- weight matrix multiplying the hidden state, of shape (n_a, n_a)
+                  Wya -- weight matrix relating the hidden-state to the output, of shape (n_y, n_a)
+                  b --  bias, of shape (n_a, 1)
+                  by -- bias relating the hidden-state to the output, of shape (n_y, 1)
+    learning_rate --
+
+    Returns:
+    loss --
+    gradients -- python dictionary containing
+                 dWax -- gradients of input-to-hidden weights, of shape (n_a, n_x)
+                 dWaa -- gradients of hidden-to-hidden weights, of shape (n_a, n_a)
+                 dWya -- gradients of hidden-to-output weights, of shape (n_y, n_a)
+                 db -- gradients of bias vector, of shape (n_a, 1)
+                 dby -- gradients of output bias vector, of shape (n_y, 1)
+    a[len(X)-1] -- the last hidden state, of shape (n_a, 1)
+    """
+
+    loss, cache = rnn_forward(X, Y, a_prev, parameters)
+
+    gradients, a = rnn_backward(X, Y, parameters, cache)
+
+    gradients = clip(gradients, 5)
+
+    parameters = update_parameters(parameters, gradients, learning_rate)
+
+    return loss, gradients, a[len(X)-1]</code></pre>
+
+<pre><code class="python"></code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a>
