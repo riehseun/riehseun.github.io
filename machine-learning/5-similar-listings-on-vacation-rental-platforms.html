@@ -49,7 +49,8 @@
       <li><a href="#similar-listings-on-vacation-rental-platform-3">Data preparation</a></li>
       <li><a href="#similar-listings-on-vacation-rental-platform-4">Model development</a></li>
       <li><a href="#similar-listings-on-vacation-rental-platform-5">Evaluation</a></li>
-      <li><a href="#similar-listings-on-vacation-rental-platform-6">Deployment and serving</a></li>    </ul>
+      <li><a href="#similar-listings-on-vacation-rental-platform-6">Deployment and serving</a></li>
+    </ul>
   </div>
 </div>
 
@@ -59,28 +60,26 @@
     <ul>
       <li>Business objective</li>
       <ul>
-        <li>What is the business objective? Maximize revenue</li>
-        <li>Where are the Ads placed? (pop up, timeline, etc?) Timeline only</li>
-        <li>Can the same Ad be shown to the same user more than once? Yes</li>
-        <li>Does every Ad generate the same revenue? Yes</li>
+        <li>What is the business objective? Increase number of bookings</li>
+        <li>What is definition of similarity? When two listings are in same neighborhood, city, price range, etc</li>
+        <li>Should the listing be personalized to users? No</li>
+        <li></li>
       </ul>
       <li>Features that the system supports</li>
       <ul>
-        <li>Can users report or hide the Ads? Yes</li>
-        <li>Can we access user's current location? Yes</li>
+        <li></li>
       </ul>
       <li>Data</li>
       <ul>
-        <li>Is annotated datset available? No, data is from user-ad interaction only</li>
-        <li>Can we assume impression without clicks, hide, report as negative examples? Yes</li>
+        <li>Is annotated datset available? No, data is from user-listing interaction only</li>
       </ul>
       <li>Constraints</li>
       <ul>
-        <li>Should the model be trained continuously? Yes</li>
+        <li></li>
       </ul>
       <li>Scale</li>
       <ul>
-        <li></li>
+        <li>How many listings are there in the platform? 5M</li>
       </ul>
       <li>Performance</li>
       <ul>
@@ -99,16 +98,20 @@
     <ul>
       <li>Define ML objective</li>
       <ul>
-        <li>Predict if an Ad will be clicked</li>
+        <li>Predict which listing the user will click next, given the listing that user is currently viewing</li>
       </ul>
       <li>Specify input and output</li>
       <ul>
-        <li>Input - user</li>
-        <li>Output - a list of Ads sorted by likelihood of being clicked</li>
+        <li>Input - listing that user is currently viewing</li>
+        <li>Output - a list of listings ranked by probability of being clicked</li>
       </ul>
       <li>Choose right ML category</li>
       <ul>
-        <li>Pointwise LTR with binary classification</li>
+        <li>Session-based recommendation system</li>
+        <ul>
+          <li>Map each listing into embedding vector</li>
+          <li>Embeddings are close when the two listings frequently co-occur in user's browsing history</li>
+        </ul>
       </ul>
     </ul>
   </div>
@@ -123,13 +126,14 @@
     <ul>
       <li>Data engineering</li>
       <ul>
-        <li>Ad</li>
+        <li>Listing</li>
         <ul>
-          <li>ad_id</li>
-          <li>advertiser_id</li>
-          <li>category</li>
-          <li>image_path</li>
-          <li>video_path</li>
+          <li>listing_id</li>
+          <li>host_id</li>
+          <li>price</li>
+          <li>rating</li>
+          <li>city</li>
+          <li>country</li>
         </ul>
         <li>User</li>
         <ul>
@@ -142,43 +146,23 @@
           <li>language</li>
           <li>timezone</li>
         </ul>
-        <li>User-ad interation</li>
+        <li>User-listing interation</li>
         <ul>
           <li>user_id</li>
-          <li>ad_id</li>
+          <li>listing_id</li>
           <li>interaction_type - impression/click/conversion</li>
-          <li>dwell_time</li>
+          <li>timestamp</li>
+          <li>position_of_the_listing_in_the_displayed_list</li>
         </ul>
       </ul>
       <li>Feature engineering</li>
       <ul>
-        <li>Ad</li>
+        <li>Model only utilizes browsing history</li>
+        <li>Search session</li>
         <ul>
-          <li>advertiser_id - embedding</li>
-          <li>category - CBOW</li>
-          <li>image/video - SimCLR</li>
-          <li>total impressions/clicks on the Ad</li>
-          <li>total impressions/clicks on the Ad supplied by an advertiser</li>
-        </ul>
-        <li>User</li>
-        <ul>
-          <li>Demographics</li>
-          <ul>
-            <li>Age</li>
-            <li>Gender</li>
-            <li>City</li>
-            <li>Country</li>
-          </ul>
-          <li>Context</li>
-          <ul>
-            <li>Device</li>
-            <li>Time of day</li>
-          </ul>
-          <li>Interaction</li>
-          <ul>
-            <li>Cliked Ads - embedding</li>
-            <li>User's historical engagement statistics - scale</li>
-          </ul>
+          <li>session_id</li>
+          <li>clicked_listing_ids</li>
+          <li>booked_listing_ids</li>
         </ul>
       </ul>
     </ul>
@@ -194,130 +178,17 @@
     <ul>
       <li>Model selection</li>
       <ul>
-        <li>Logistic regression</li>
-        <ul>
-          <li>Pros</li>
-          <ul>
-            <li>Fast inference</li>
-            <li>Fast training</li>
-            <li>Interpretable</li>
-          </ul>
-          <li>Cons</li>
-          <ul>
-            <li>Non-linear problems can't be solved</li>
-            <li>Cannot handle dependency between features</li>
-          </ul>
-        </ul>
-        <li>Feature crossing + LR</li>
-        <ul>
-          <li>Create new feature by combining existing features</li>
-          <li>This way, non-linear relationship can be captured</li>
-          <li>Pros</li>
-          <ul>
-            <li>Capture feature interations better</li>
-          </ul>
-          <li>Cons</li>
-          <ul>
-            <li>Manual process to choose features to be crossed, which also requires domain knowledge</li>
-            <li>Cannot still capture complex interactions</li>
-            <li>When original features are sparse, cardinality of crossed features become very sparse</li>
-          </ul>
-        </ul>
-        <li>GBDT</li>
-        <ul>
-          <li>Pros</li>
-          <ul>
-            <li>Interpretable</li>
-          </ul>
-          <li>Cons</li>
-          <ul>
-            <li>Not suitable for continual learning</li>
-            <li>Cannot train embedding layers</li>
-          </ul>
-        </ul>
-        <li>GBDT + LR</li>
-        <ul>
-          <li>Use GBDT just to select features and also extract features</li>
-          <li>Pros</li>
-          <ul>
-            <li>Extracted features are more predictive</li>
-          </ul>
-          <li>Cons</li>
-          <ul>
-            <li>Not suitable for continual learning</li>
-            <li>Cannot train embedding layers</li>
-          </ul>
-        </ul>
-        <li>Neural network</li>
-        <ul>
-          <li>Single NN - NN takes original features as input and outputs the click probability</li>
-          <li>Two-tower NN - user encoder and Ad encoder are used. Similarity between user and Ad mbeddings is used to determine relevance</li>
-          <li>Pros</li>
-          <ul>
-            <li></li>
-          </ul>
-          <li>Cons</li>
-          <ul>
-            <li>Because feature space is usually sparse, most features are filled with zeros</li>
-            <li>Difficult to capture all pairwise feature interactions due to large number of features</li>
-          </ul>
-        </ul>
-        <li>Deep & cross network (DCN)</li>
-        <ul>
-          <li>Deep network - use DNN to learn complex features</li>
-          <li>Cross network - automatically captures feature interactions and learns good feature crosses</li>
-          <li>Outputs of deep and cross network are concatenated to make final predictions</li>
-          <li>Pros</li>
-          <ul>
-            <li>More effective than NN because it implicitly learns feature crosses</li>
-          </ul>
-          <li>Cons</li>
-          <ul>
-            <li>Cross network only models certain feature interactions</li>
-          </ul>
-        </ul>
-        <li>Factorization machines (FM)</li>
-        <ul>
-          <li>Learn embedding vector for each feature to find all pairwise feature interactions</li>
-          <li>\( \hat{y}(x) = w_{0} + \displaystyle\sum_{i} w_{i}x_{i} + \displaystyle\sum_{i}\displaystyle\sum_{j} &lt;v_{i}, v_{j}&gt; x_{i}x_{j} \)</li>
-          <ul>
-            <li>\( x_{i} \) - ith feature</li>
-            <li>\( w_{i} \) - learned weight</li>
-            <li>\( v_{i} \) - embedding of ith feature</li>
-            <li>\( &lt;v_{i}, v_{j}&gt; \) - dot product between two embeddings</li>
-          </ul>
-          <li>Pros</li>
-          <ul>
-            <li>Captures pairwise feature interactions</li>
-          </ul>
-          <li>Cons</li>
-          <ul>
-            <li>Cannot learn sophisticated higher-order feature interactions</li>
-          </ul>
-        </ul>
-        <li>Deep factorization machines (DeepFM)</li>
-        <ul>
-          <li>DNN captures sophisticated higher-order features</li>
-          <li>FM captures low-level pairwise feature interactions</li>
-          <li>Pros</li>
-          <ul>
-            <li></li>
-          </ul>
-          <li>Cons</li>
-          <ul>
-            <li></li>
-          </ul>
-        </ul>
+        <li>Neural networking to learn embeddings</li>
       </ul>
       <li>Model training</li>
       <ul>
         <li>Construct dataset</li>
         <ul>
-          <li>If user clicks the Ad in less than \( t \) seconds after Ad is shown, positive. Otherwise, negative</li>
+          <li>Negative sampling</li>
         </ul>
         <li>Choose loss function</li>
         <ul>
-          <li>Binary classification, thus use cross-entropy</li>
+          <li></li>
         </ul>
       </ul>
     </ul>
@@ -333,41 +204,7 @@
     <ul>
       <li>Offline</li>
       <ul>
-        <li>Cross-entropy</li>
-        <ul>
-          <li>Ground truth</li>
-          <ul>
-            <li>Ad1 - 1 (clicked)</li>
-            <li>Ad2 - 0 (not clicked)</li>
-            <li>Ad3 - 1 (clicked)</li>
-          </ul>
-          <li>Model A</li>
-          <ul>
-            <li>Ad1 - p(click) = 0.8</li>
-            <li>Ad2 - p(click) = 0.3</li>
-            <li>Ad3 - p(click) = 0.95</li>
-          </ul>
-          <li>Model B</li>
-          <ul>
-            <li>Ad1 - p(click) = 0.2</li>
-            <li>Ad2 - p(click) = 0.6</li>
-            <li>Ad3 - p(click) = 0.6</li>
-          </ul>
-          <li>Cross-entropy</li>
-          <ul>
-            <li>\( \text{CE} = -\displaystyle\sum_{i} y_{i}log\hat{y_{i}} + (1-y_{i})log(1-\hat{y_{i}}) \)</li>
-            <li>\( \text{CE_A} = -(1log0.8 + (1-0)log(1-0.3) +1log0.95) = 0.273 \)</li>
-            <li>\( \text{CE_B} = -(1log0.2 + (1-0)log(1-0.6) +1log0.6) = 1.319 \)</li>
-          </ul>
-        </ul>
-        <li>Normalized cross-entropy</li>
-        <ul>
-          <li>Compares the model with a baseline that always predicts background CTR</li>
-          <li>Assume CTR is the training data is 0.6</li>
-          <li>\( \text{CE_baseline} = -(1log0.6 + (1-0)log(1-0.6) +1log0.6) = 0.842 \)</li>
-          <li>NCE = CE_A / CE_baseline = 0.273 / 0.842 = 0.324</li>
-          <li>0.324 is less than 1, thus model A outperforms the baseline</li>
-        </ul>
+        <li></li>
       </ul>
       <li>Online</li>
       <ul>
@@ -389,30 +226,9 @@
 
     <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/similar-listings-on-vacation-rental-platform1.png" alt="Card image cap">
     <ul>
-      <li>Data preparation pipeline</li>
-      <ul>
-        <li>Batch feature computation</li>
-        <ul>
-          <li>Ex. Ad's image and category are static features</li>
-          <li>Computes features periodically with batch jobs and stores them in a feature store</li>
-        </ul>
-        <li>Online feature computation</li>
-        <ul>
-          <li>Ex. number of Ads impressions and clicks are static features</li>
-          <li>Computes features at query time</li>
-        </ul>
-      </ul>
-      <li>Continual learning pipeline</li>
-      <ul>
-        <li>Fine-tunes model on new training data</li>
-      </ul>
-      <li>Prediction pipeline</li>
-      <ul>
-        <li>Some features that model uses are dynamic, thus need to use online inference</li>
-        <li>Ranking service interacts with the same feature store and online feature computation</li>
-        <li>Once both static and dynamic features are obtained, ranking service outputs click probability for each candidate Ad</li>
-        <li>Re-ranking services modifies the ranked list based on additional rules</li>
-      </ul>
+      <li>Training pipeline</li>
+      <li>Indexing pipeline</li>
+      <li>Predidction pipeline</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
