@@ -256,13 +256,14 @@
 <pre><code class="python">class Solution:
     def numRescueBoats(self, people: List[int], limit: int) -> int:
 
+        # Sort the array
+        # If the sum of lightest and heaviest is less than or equal to limit,
+        #   Increment lightest and decrement heaviest.
+        # Else
+        #   Only decrement heaviest.
+
         # Time: O(nlogn)
         # Space: O(1)
-
-        # Sort the array.
-        # If the sum of lightest and heaviest is less than or equal to limit, increment lightest and decrement heaviest.
-        # If not, only decrement heaviest.
-
         people.sort()
         lightest = 0
         heaviest = len(people) - 1
@@ -288,7 +289,28 @@
   <div class="card-body">
     <h2 class="card-title">Minimum domino rotations for equal row (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def minDominoRotations(self, tops: List[int], bottoms: List[int]) -> int:
+
+        # For each number in tops and bottoms,
+        # store its indices in a hash table
+
+        # Time O(n) n = len(tops)
+        # Space O(n)
+        tops_dict = defaultdict(list)
+        bottoms_dict = defaultdict(list)
+
+        for i, item in enumerate(tops):
+            tops_dict[item].append(i)
+
+        for i, item in enumerate(bottoms):
+            bottoms_dict[item].append(i)
+
+        for num in range(1,7):
+            if len(set(tops_dict[num]+bottoms_dict[num])) >= len(tops):
+                return len(tops) - max(len(tops_dict[num]), len(bottoms_dict[num]))
+
+        return -1</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/minimum-domino-rotations-for-equal-row">1007. Minimum Domino Rotations For Equal Row</a>
@@ -302,25 +324,26 @@
 <pre><code class="python">class Solution:
     def twoCitySchedCost(self, costs: List[List[int]]) -> int:
 
-        # Time O(nlogn)
+        # Sort based on difference between cost A and cost B
+        # Big difference would mean its cheaper to send to A than B
+        # Send the first half of sorted array to A and rest to B
+
+        # Time O(nlogn) n = len(costs)
         # Space O(n)
 
-        # First half of sorted array will be the ones that would save the most cost by travelling to A rather than B.
+        cost_array = []
+        for cost_a, cost_b in costs:
+            cost_array.append([cost_a-cost_b, cost_a, cost_b])
 
-        array = []
+        cost_array.sort(key = lambda x: x[0])
 
-        for cost in costs:
-            array.append([cost[0]-cost[1], cost[0], cost[1]])
-
-        array.sort(key = lambda x: x[0])
-
-        n = int(len(costs)/2)
-
+        h = len(costs) // 2
         total_cost = 0
-        for i in range(n):
-            total_cost += array[i][1]
-        for i in range(n,2*n):
-            total_cost += array[i][2]
+
+        for i in range(h):
+            total_cost += cost_array[i][1]
+        for i in range(h, 2*h):
+            total_cost += cost_array[i][2]
 
         return total_cost</code></pre>
   </div>
