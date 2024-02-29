@@ -315,6 +315,7 @@
   <div class="card-body">
     <h2 class="card-title">Example - generate names</h2>
     <ul>
+      <li>Goal is to learn patterns from existing data to generate new names</li>
       <li>Initialize parameters</li>
       <li>Run loop</li>
       <ul>
@@ -323,15 +324,29 @@
         <li>Backward propagation</li>
         <li>Clip the gradients</li>
         <li>Update parameters</li>
+        <li>Sample predictions at each time step and pass it to the next RNN-cell unit</li>
       </ul>
       <li>Return the learned parameters</li>
     </ul>
+
+    <h3 class="card-title">Gradient clipping</h3>
+    <ul>
+      <li>For example, if N = 10</li>
+      <ul>
+        <li>The range is [-10, 10]</li>
+        <li>If any component of the gradient vector is greater than 10, it is set to 10</li>
+        <li>If any component of the gradient vector is less than -10, it is set to -10</li>
+        <li>If any components are between -10 and 10, they keep their original values</li>
+      </ul>
+    </ul>
+
+    <img class="img-fluid" class="card-img-top" src="/img/machine-learning/recurrent-neural-network1.png" style="width: 600px; height: 200px" alt="Card image cap">
 
 <pre><code class="python">def clip(gradients, maxValue):
     """
     Args:
     gradients -- contains the gradients "dWaa", "dWax", "dWya", "db", "dby"
-    maxValue -- everything above this number is set to this number, and everything less than -maxValue is set to -maxValue
+    maxValue --
 
     Returns:
     gradients -- a dictionary with the clipped gradients
@@ -345,6 +360,8 @@
     gradients = {"dWaa": dWaa, "dWax": dWax, "dWya": dWya, "db": db, "dby": dby}
 
     return gradients</code></pre>
+
+    <h3 class="card-title">Sampling</h3>
 
 <pre><code class="python">def sample(parameters, char_to_index, seed):
     """
@@ -467,7 +484,7 @@
 
         loss = smooth(loss, curr_loss)
 
-        # Every 2000 Iteration, generate "n" characters thanks to sample() to check if the model is learning properly
+        # Every 2000 Iteration, generate "n" characters
         if j % 2000 == 0:
 
             print('Iteration: %d, Loss: %f' % (j, loss) + '\n')
