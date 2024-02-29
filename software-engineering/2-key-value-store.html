@@ -182,26 +182,58 @@
 
     <h3 class="card-title">Failure</h3>
     <ul>
-      <li></li>
-      <li></li>
+      <li>Failure detection - gossip protocol</li>
+      <ul>
+        <li>Each node maintains node membership list (member_id, heartbeat_counter)</li>
+        <li>Each node periodically increments its heartbeat counter</li>
+        <li>Each node periodically sends heartbeats to a set of random node, which in turn propagate to another set of nodes</li>
+        <li>Once nodes receive heartbeats, membership list is updated to the latest</li>
+        <li>If heartbeat has not been increased for more than pre-defined period, node is considered offline</li>
+      </ul>
+      <li>Temporary failure - sloppy quorum</li>
+      <ul>
+        <li>System chooses first W servers for writes and first R servers for reads on hash ring</li>
+        <li>Offline servers are ignored</li>
+        <li>When a server is unavailable, another server processes request temporarily. When server is back up, changes is pushed back to achieve data consistency</li>
+      </ul>
+      <li>Permanent failure</li>
+      <ul>
+        <li>Merkle tree</li>
+        <ul>
+          <li>Distribute keys into buckets</li>
+          <li>Hash keys in all the buckets</li>
+          <li>Create a single hash node per bucket</li>
+          <li>Build tree upwards</li>
+        </ul>
+        <li>Compare two Merkle trees by first comparing root, then left child, then right child</li>
+        <li>Only synchronize buckets where keys are different</li>
+        <li>Limit keys in each bucket to seomthing like 1000</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Architecture</h3>
     <ul>
-      <li></li>
-      <li></li>
+      <li>Nodes are distributed on hash ring</li>
+      <li>One of the nodes serves as a coordinator</li>
+      <li>Client communicates with the coordinator</li>
     </ul>
+
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/key-value-store1.png" alt="Card image cap">
 
     <h3 class="card-title">Write path</h3>
     <ul>
-      <li></li>
-      <li></li>
+      <li>Write request is saved on commit log file</li>
+      <li>Data is saved in memory cache</li>
+      <li>When memory cache is full, data is flushed to SSTable</li>
     </ul>
+
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/key-value-store2.png" alt="Card image cap">
 
     <h3 class="card-title">Read path</h3>
     <ul>
-      <li></li>
-      <li></li>
+      <li>Check if data is in memory cache</li>
+      <li>If not, check bloom filter to find SSTable that contains the key</li>
+      <li>SSTable returns the data</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
