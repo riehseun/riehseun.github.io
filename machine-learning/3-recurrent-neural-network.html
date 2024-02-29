@@ -362,6 +362,18 @@
     return gradients</code></pre>
 
     <h3 class="card-title">Sampling</h3>
+    <ul>
+      <li>Set \( x^{\langle 1 \rangle} = \vec{0} \), which is the default input before generating any characters</li>
+      <li>Also, set \( a^{\langle 0 \rangle} = \vec{0} \)</li>
+      <li>Run one step of forward propagation to get \( a^{\langle 1 \rangle} \) and \( \hat{y}^{\langle 1 \rangle} \)</li>
+      <ul>
+        <li>\( a^{\langle t+1 \rangle} = \tanh(W_{ax}  x^{\langle t+1 \rangle } + W_{aa} a^{\langle t \rangle } + b) \)</li>
+        <li>\( z^{\langle t + 1 \rangle } = W_{ya}  a^{\langle t + 1 \rangle } + b_y \)</li>
+        <li>\( \hat{y}^{\langle t+1 \rangle } = \text{softmax}(z^{\langle t + 1 \rangle }) \)</li>
+      </ul>
+      <li>Pick the next character's index according to the probability distribution specified by \( \hat{y}^{\langle t+1 \rangle } \)</li>
+      <li>Overwrite the variable <code>x</code>, which currently stores \( x^{\langle t \rangle } \), with \( x^{\langle t + 1 \rangle } \)</li>
+    </ul>
 
 <pre><code class="python">def sample(parameters, char_to_index, seed):
     """
@@ -382,10 +394,7 @@
     a_prev = np.zeros((n_a, 1))
 
     indices = []
-
-    # Flag to detect a newline character
-    idx = -1
-
+    idx = -1  # Flag to detect a newline character
     counter = 0
     newline_character = char_to_index['\n']
 
