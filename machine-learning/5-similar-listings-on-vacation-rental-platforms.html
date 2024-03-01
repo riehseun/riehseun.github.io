@@ -71,7 +71,7 @@
       </ul>
       <li>Data</li>
       <ul>
-        <li>Is annotated datset available? No, data is from user-listing interaction only</li>
+        <li>Is annotated datset available? No, only user-listing interaction data is available</li>
       </ul>
       <li>Constraints</li>
       <ul>
@@ -98,7 +98,7 @@
     <ul>
       <li>Define ML objective</li>
       <ul>
-        <li>Predict which listing the user will click next, given the listing that user is currently viewing</li>
+        <li>Given currently viewed listing, predict which listing will be clicked next</li>
       </ul>
       <li>Specify input and output</li>
       <ul>
@@ -162,7 +162,7 @@
         <ul>
           <li>session_id</li>
           <li>clicked_listing_ids</li>
-          <li>booked_listing_ids</li>
+          <li>booked_listing_id</li>
         </ul>
       </ul>
     </ul>
@@ -186,7 +186,7 @@
         <ul>
           <li>Negative sampling</li>
           <ul>
-            <li>Move sliding window through search sessions</li>
+            <li>Move a sliding window through search sessions</li>
             <li>As the sliding window moves, use central listing and its nearby listings as positive pairs</li>
             <li>As the sliding window moves, use central listing and randomly sampled listings as negative pairs</li>
             <li>Positive pairs have ground truth label 1 and negative pairs have ground truth label 0</li>
@@ -242,8 +242,31 @@
     <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/similar-listings-on-vacation-rental-platform1.png" alt="Card image cap">
     <ul>
       <li>Training pipeline</li>
+      <ul>
+        <li>Fine-tunes the model using new listings and user-listing interactions</li>
+      </ul>
       <li>Indexing pipeline</li>
+      <ul>
+        <li>Pre-compute and store embeddings of all listings in index table</li>
+        <li>When model is re-trained, re-compute all embeddings using new model and updates index table</li>
+      </ul>
       <li>Predidction pipeline</li>
+      <ul>
+        <li>Embedding fetcher service</li>
+        <ul>
+          <li>If input listing was seen during training, its embedding is already available in index table. Then, it just fetches embedding from index table</li>
+          <li>If input listing was not seen during training, use the embeddings of geographically nearby listings</li>
+        </ul>
+        <li>Nearest neighbor service</li>
+        <ul>
+          <li>With 5M listings on the platform, use ANN</li>
+        </ul>
+        <li>Re-ranking service</li>
+        <ul>
+          <li>Apply user filters (Ex. price, etc) to remove listings</li>
+          <li>Listings in cities other than currently viewed listing can also be removed</li>
+        </ul>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">

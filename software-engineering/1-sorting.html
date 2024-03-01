@@ -51,13 +51,11 @@
   </div>
 </div>
 
-
-
 <div class="card mb-4" id="sorting-2">
   <div class="card-body">
     <h2 class="card-title">Maximum gap (H)</h2>
 
-<pre><code class="python"></code>class Solution:
+<pre><code class="python">class Solution:
     def maximumGap(self, nums: List[int]) -> int:
 
         # Time O(nlogn)
@@ -68,7 +66,7 @@
         for i in range(len(nums)-1):
             max_diff = max(max_diff, abs(nums[i]-nums[i+1]))
 
-        return max_diff</pre>
+        return max_diff</pre></code>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/maximum-gap">164. Maximum Gap</a>
@@ -79,7 +77,42 @@
   <div class="card-body">
     <h2 class="card-title">Largest number (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def largestNumber(self, nums: List[int]) -> str:
+
+        # Do a quicksort
+        # When comparing two numbers check if "AB" > "BA"
+
+        if sum(nums) == 0:
+            return "0"
+
+        # Time O(nlogn) n = len(nums)
+        # Space O(1)
+        def quicksort(nums, l, r):
+            if l >= r:
+                return
+            pos = partition(nums, l, r)
+            quicksort(nums, l, pos-1)
+            quicksort(nums, pos+1, r)
+
+        def partition(nums, l, r):
+            low = l
+            while l < r:
+                if compare(nums[l], nums[r]):
+                    nums[l], nums[low] = nums[low], nums[l]
+                    low += 1
+                l += 1
+            nums[low], nums[r] = nums[r], nums[low]
+            return low
+
+        def compare(x, y):
+            return str(x) + str(y) > str(y) + str(x)
+
+        quicksort(nums, 0, len(nums)-1)
+        result = ""
+        for num in nums:
+            result += str(num)
+        return result</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/largest-number">179. Largest Number</a>

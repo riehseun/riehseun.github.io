@@ -1,8 +1,6 @@
 const question = document.getElementById("question");
 const codeBlock = document.getElementById("code-block");
 const choices = Array.from(document.getElementsByClassName("choice-text"));
-// const choice = document.getElementsByClassName("choice-text")
-const choiceContainer = Array.from(document.getElementsByClassName("choice-container"));
 const progressText = document.getElementById("progressText");
 const progressFull = document.getElementsByClassName("progressBarFull");
 const loader = document.getElementById("loader");
@@ -13,11 +11,27 @@ let quesitonCounter = 0;
 let availableQuestions =[];
 let questions = [];
 let questionIndex = -1;
-let submittedAnswers = {};
 
-const CORRECT_BONUS = 10;
-
-var question_file = './behavioral.json'
+var path = window.location.pathname
+var page = path.split("/").pop()
+if (page == "behavioral.html") {
+    var question_file = './behavioral.json'
+}
+else if (page == "algorithm.html") {
+    var question_file = './algorithm.json'
+}
+else if (page == "system-design.html") {
+    var question_file = './system-design.json'
+}
+else if (page == "machine-learning.html") {
+    var question_file = './machine-learning.json'
+}
+else if (page == "machine-learning-system-design.html") {
+    var question_file = './machine-learning-system-design.json'
+}
+else if (page == "platform-engineering.html") {
+    var question_file = './platform-engineering.json'
+}
 
 fetch(question_file)
 .then(res => {
@@ -52,7 +66,6 @@ getNewQuestion = () => {
     };
     
     questionCounter ++;
-    console.log(questionCounter)
     progressText.innerHTML = `Question ${questionCounter}/${num_questions}`;
     progressBarFull.style.width = `${(questionCounter / num_questions) * 100}%`;
 
