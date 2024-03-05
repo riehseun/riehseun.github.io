@@ -44,71 +44,175 @@
   <div class="card-body">
     <h2 class="card-title">Sequencer</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#sequencer-1">Sequencer</a></li>
+      <li><a href="#sequencer-1">Requirement</a></li>
+      <!-- <li><a href="#sequencer-2">Estimation</a></li> -->
+      <li><a href="#sequencer-3">High level design</a></li>
+      <!-- <li><a href="#sequencer-4">API</a></li> -->
+      <!-- <li><a href="#sequencer-5">Storage schema</a></li> -->
+      <li><a href="#sequencer-6">Detailed design</a></li>
+      <li><a href="#sequencer-7">Evaluation</a></li>
     </ul>
   </div>
 </div>
 
 <div class="card mb-4" id="sequencer-1">
   <div class="card-body">
-    <h2 class="card-title">Sequencer</h2>
+    <h2 class="card-title">Requirement</h2>
 
-    <h3 class="card-title">Requirement</h3>
-
-    <h4 class="card-title">Functional</h4>
+    <h3 class="card-title">Functional</h3>
     <ul>
-      <li>Generate unqiue identifier.</li>
-      <li>Length is limited to 64 bits.</li>
+      <li>How does Id look like? Must be unique and sortable</li>
+      <li>Does Id contain only numbers? Yes</li>
+      <li>Does Id need to increment by 1? Not necessarily</li>
+      <li>How long can Id be? Should fit into 64 bit</li>
+      <li>How many Ids does the system need? 10k per second</li>
     </ul>
 
-    <h4 class="card-title">Non-functional</h4>
+    <h3 class="card-title">Non-functional</h3>
     <ul>
       <li>Availability</li>
+      <li>Reliability</li>
       <li>Scalability</li>
-    </ul>
-
-    <h3 class="card-title">Component design</h3>
-
-    <h4 class="card-title">UUID</h4>
-    <ul>
-      <li>128-bit number, which makes the primary-key indexing slower.</li>
-      <li>There is a chance of duplication.</li>
-    </ul>
-
-    <h4 class="card-title">Database</h4>
-    <ul>
-      <li>Adding/removing servers can result in duplicated IDs.</li>
-    </ul>
-
-    <h4 class="card-title">Range handler</h4>
-    <ul>
-      <li>Best solution for sequencer not requiring casality.</li>
-    </ul>
-
-    <h4 class="card-title">Unix timestamp</h4>
-    <ul>
-      <li>For concurrent event, duplicate IDs are generated.</li>
-    </ul>
-
-    <h4 class="card-title">Twitter Snowflake</h4>
-    <ul>
-      <li>IDs generated duing dead periods are wasted.</li>
-      <li>Casality can be broken when clocks on the servers drift and Network Time Protocol tries to synchronize them.</li>
-    </ul>
-
-    <h4 class="card-title">Vector clock</h4>
-    <ul>
-      <li>Big storage is required when there are lots of nodes.</li>
-    </ul>
-
-    <h4 class="card-title">Google TrueTime</h4>
-    <ul>
-      <li>When asked current time, it reports earliest and latest time possible.</li>
-      <li>Casality cannot be inferred when two intervals overlap.</li>
+      <li>Performance</li>
+      <li>Consistency</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
-    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+
+<!-- <div class="card mb-4" id="sequencer-2">
+  <div class="card-body">
+    <h2 class="card-title">Estimation</h2>
+
+    <h3 class="card-title">Server</h3>
+
+    <h3 class="card-title">Storage</h3>
+
+    <h3 class="card-title">Bandwidth</h3>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div> -->
+
+<div class="card mb-4" id="sequencer-3">
+  <div class="card-body">
+    <h2 class="card-title">High level design</h2>
+
+    <h3 class="card-title">Multi-master replication</h3>
+    <ul>
+      <li>Use DB's auto-increment feature</li>
+      <li>Instead of increment by 1, increment by k, where k is number of DB servers in use</li>
+      <ul>
+        <li>Server 1 increment like 1, 3, 5, etc</li>
+        <li>Server 2 increment like 2, 4, 6, etc</li>
+      </ul>
+      <li>Does not scale well when servers are added or removed</li>
+    </ul>
+
+    <h3 class="card-title">UUID</h3>
+    <ul>
+      <li>No coordication between servers needed, thus no synchronization issue</li>
+      <li>128 bits number, which is greater than 64 bits requirement</li>
+      <li>Id contains non-numeric characters</li>
+    </ul>
+
+    <h3 class="card-title">Ticket server</h3>
+    <ul>
+      <li>Single DB (ticekt server) generates primary keys</li>
+      <li>Ticket server is SPOF</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+
+<!-- <div class="card mb-4" id="sequencer-4">
+  <div class="card-body">
+    <h2 class="card-title">API</h2>
+
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div> -->
+
+<!-- <div class="card mb-4" id="sequencer-5">
+  <div class="card-body">
+    <h2 class="card-title">Storage schema</h2>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div> -->
+
+<div class="card mb-4" id="sequencer-6">
+  <div class="card-body">
+    <h2 class="card-title">Detailed design</h2>
+
+    <h3 class="card-title">Twitter snowflake</h3>
+    <ul>
+      <li>Divide Id into different sections</li>
+      <ul>
+        <li>1 bit - 0</li>
+        <li>41 bits - timestamp, miliseconds since the epoch or custom epoch</li>
+        <li>5 bits - datacenter Id, 2^5 = 32 data centers</li>
+        <li>5 bits - machine Id, 2^5 = 32 machines per data centers</li>
+        <li>12 bits - sequence number, every machine increments sequence number by 1. The number is reset to 0 every milisecond</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="sequencer-7">
+  <div class="card-body">
+    <h2 class="card-title">Evaluation</h2>
+
+    <h3 class="card-title">Availability</h3>
+    <ul>
+      <li>Replication</li>
+      <ul>
+        <li>Replicate each server and DB</li>
+        <li>Replicate entire components to different zone or geographical region</li>
+      </ul>
+      <li>Fail over</li>
+      <ul>
+        <li></li>
+        <li></li>
+      </ul>
+    </ul>
+
+    <h4 class="card-title">Reliability</h4>
+    <ul>
+      <li>Data loss</li>
+    </ul>
+
+    <h3 class="card-title">Scalability</h3>
+    <ul>
+      <li>Horizontal scaling</li>
+      <li>Data partitioning</li>
+    </ul>
+
+    <h4 class="card-title">Performance</h4>
+    <ul>
+      <li></li>
+      <li></li>
+    </ul>
+    </ul>
+
+    <h3 class="card-title">Consistency</h3>
+    <ul>
+      <li></li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
   </div>
 </div>
 <!-- Sequencer END -->

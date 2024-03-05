@@ -107,6 +107,11 @@
       </ul>
       <li>Choose right ML category</li>
       <ul>
+        <li>Recommendation system</li>
+        <ul>
+          <li>Relies on user's historical interaction</li>
+          <li>For this problem, recently viewed listings are more informative than those in the past</li>
+        </ul>
         <li>Session-based recommendation system</li>
         <ul>
           <li>Map each listing into embedding vector</li>
@@ -178,7 +183,9 @@
     <ul>
       <li>Model selection</li>
       <ul>
-        <li>Neural networking to learn embeddings</li>
+        <li>Neural network to learn embeddings</li>
+        <li>Initialize embeddings to random vectors</li>
+        <li>As sliding window moves, embeddings of central listing become close to embedding of nearby listings and far from embeddings of listings outside the window</li>
       </ul>
       <li>Model training</li>
       <ul>
@@ -194,11 +201,16 @@
         </ul>
         <li>Choose loss function</li>
         <ul>
-          <li>\( \displaystyle\sum_{(c,p) \in D_{p}} \text{log} \dfrac{1}{1+e^{-E_{p}E_{c}}} + \displaystyle\sum_{(c,n) \in D_{n}} \text{log} \dfrac{1}{1+e^{E_{p}E_{c}}} + \displaystyle\sum_{(c,b) \in D_{booked}} \text{log} \dfrac{1}{1+e^{-E_{b}E_{c}}} + \displaystyle\sum_{(c,n) \in D_{hard}} \text{log} \dfrac{1}{1+e^{E_{n}E_{c}}} \)</li>
+          <li>\( \displaystyle\sum_{(c,p) \in D_{p}} \text{log} \dfrac{1}{1+e^{-E_{c}E_{p}}} + \displaystyle\sum_{(c,n) \in D_{n}} \text{log} \dfrac{1}{1+e^{E_{c}E_{n}}} + \displaystyle\sum_{(c,b) \in D_{booked}} \text{log} \dfrac{1}{1+e^{-E_{c}E_{b}}} + \displaystyle\sum_{(c,n) \in D_{hard}} \text{log} \dfrac{1}{1+e^{E_{c}E_{n}}} \)</li>
           <li>First term computes loss over positive pairs</li>
           <li>Second term computes loss over negative pairs</li>
           <li>Third term helps push embeddings of central listing closer to embeddings of eventually booked listings</li>
           <li>Third term helps push embeddings of central listing away from embeddings of random listings</li>
+          <li>\( c \) - central listing</li>
+          <li>\( p \) - positive listing (co-occured with \( c \))</li>
+          <li>\( n \) - negative listing (did not co-occur with \( c \))</li>
+          <li>\( b \) - eventually booked listing</li>
+          <li>\( D_{\text{hard}} \) - pair of contral and negative listng (that are from the same region as the central listing)</li>
         </ul>
       </ul>
     </ul>
