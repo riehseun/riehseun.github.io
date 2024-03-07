@@ -39,140 +39,69 @@
 <div class="col-md-12">
 <h1 class="my-4">Machine Learning</h1>
 
-<!-- Attention BEGIN -->
+<!-- Gradient boosting BEGIN -->
 <div class="card mb-4" id="subject">
   <div class="card-body">
-    <h2 class="card-title">Attention</h2>
+    <h2 class="card-title">Gradient boosting</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#attention-">Attention</a></li>
-      <li><a href="#attention-">Example - translate human readable dates to machine readable dates</a></li>
+      <li><a href="#gradient-boosting-">Gradient boosting</a></li>
     </ul>
   </div>
 </div>
 
-<div class="card mb-4" id="attention-">
+<div class="card mb-4" id="gradient-boosting-">
   <div class="card-body">
-    <h2 class="card-title">Attention</h2>
-
-    <h3 class="card-title">One step attention</h3>
-
-    <img class="img-fluid" class="card-img-top" src="/img/machine-learning/attention1.png" style="width: 500px; height: 500px" alt="Card image cap">
-
-<pre><code class="python">repeator = RepeatVector(Tx)
-concatenator = Concatenate(axis=-1)
-densor1 = Dense(10, activation = "tanh")
-densor2 = Dense(1, activation = "relu")
-activator = Activation(softmax, name='attention_weights')
-dotor = Dot(axes = 1)
-
-def one_step_attention(a, s_prev):
-    """
-    Args:
-    a -- hidden state output of the Bi-LSTM, of shape (m, Tx, 2*n_a)
-    s_prev -- previous hidden state of the (post-attention) LSTM, of shape (m, n_s)
-
-    Returns:
-    context -- input of the next (post-attetion) LSTM cell
-    """
-
-    s_prev = repeator(s_prev)
-    concat = concatenator([a, s_prev])
-    e = densor1(concat)
-    energies = densor2(e)
-    alphas = activator(energies)
-    context = dotor([alphas, a])
-
-    return context</code></pre>
-
-    <h3 class="card-title">Attention model</h3>
-
-    <img class="img-fluid" class="card-img-top" src="/img/machine-learning/attention2.png" style="width: 700px; height: 500px" alt="Card image cap">
-
-<pre><code class="python">def model(Tx, Ty, n_a, n_s, human_vocab_size, machine_vocab_size):
-    """
-    Args:
-    Tx -- length of the input sequence
-    Ty -- length of the output sequence
-    n_a -- hidden state size of the Bi-LSTM
-    n_s -- hidden state size of the post-attention LSTM
-    human_vocab_size -- size of the dictionary "human_vocab"
-    machine_vocab_size -- size of the dictionary "machine_vocab"
-
-    Returns:
-    model --
-    """
-
-    X = Input(shape=(Tx, human_vocab_size))
-    s0 = Input(shape=(n_s,), name='s0')
-    c0 = Input(shape=(n_s,), name='c0')
-    s = s0
-    c = c0
-
-    outputs = []
-
-    a = Bidirectional(LSTM(n_a, return_sequences=True))(X)
-
-    for t in range(Ty):
-        context = one_step_attention(a, s)
-        s, _, c = post_activation_LSTM_cell(context, initial_state = [s0, c0])
-        out = output_layer(c)
-        outputs.append(out)
-
-    model = Model(inputs=[X, s0, c0], outputs=outputs)
-
-    return model</code></pre>
-
-    <!-- <h3 class="card-title">Encoder-decoder</h3>
+    <h2 class="card-title">Gradient boosting</h2>
     <ul>
-      <li>Similar to language model (Can be considered as conditional language model)</li>
-      <li>Encoder is usually LSTM or BiLSTM</li>
-      <li>Pass final state of encoder into decoder</li>
-      <li>Input tokes for encoder - input sequence</li>
-      <li>Input tokes for decoder - ground truth tokens</li>
+      <li>AdaBoost</li>
+      <ul>
+        <li>Each new tree adjusts its weights based on errors from the previous trees</li>
+      </ul>
+      <li>Gradient boosting</li>
+      <ul>
+        <li>Fits each new tree entirely based on errors from the previous trees</li>
+      </ul>
     </ul>
 
-    <h3 class="card-title">Beam search</h3>
+    <h3 class="card-title">Hyperparameters</h3>
     <ul>
-      <li></li>
-    </ul> -->
-
-    <!-- <h3 class="card-title">Attention</h3>
-    <ul>
-      <li>Let the decoder decide which encoder outputs are most useful for decoder at current time step</li>
-      <li>Something like mini NN - decoder's current state and encoder outputs are used as inputs and produces context vector as ouput</li>
-      <li>During training, we have access to ground truth tokens, which are used input for decoder</li>
-      <li>During inference, we only have access to input sequence. In this case, input for decoder at each time is just decoder's output token from previous time step</li>
-    </ul> -->
-
-    <!-- <li>Uses both input (encoder hidden state) and output (decoder hidden state)</li>
-      <li>Keys and values are pairs, and they both have diemesion N.</li>
-      <li>N comes from input and quries come from output.</li> -->
-
-    <!-- <h3 class="card-title">Teacher forcing</h3>
-    <ul>
-      <li>At each step making a prediction, peek into the right answer and feed it into the next time step</li>
-      <li>Input is represented by and target is represented by 1</li>
-      <li>Input token is fed into input coder, and is transformed to key and value vector</li>
-      <li>Target token goes into pre-attention decoder, is transformed to query vector Q</li>
-    </ul> -->
+      <li>learning_rate</li>
+      <ul>
+        <li><pre><code class="python">n_estimators = [30, 300, 3000]
+learning_rates = [0.001, 0.01, 0.05, 0.1, 0.15, 0.2, 0.3, 0.5, 1.0]
+for i in n_estimators:
+    for j in learning_rates:
+        gbr = GradientBoostingRegressor(max_depth=2, n_estimators=i, random_state=2, learning_rate=i)
+        gbr.fit(X_train, Y_train)
+        y_pred = gbr.predict(X_test)
+        rmse = MSE(y_test, y_pred) ** 0.5</code></pre></li>
+      </ul>
+      <li>max_depth</li>
+      <li>subsample</li>
+      <ul>
+        <li>Each tree only select certain percentages of samples</li>
+        <li>When subsample is not 1.0, it is considered as stochastic gradient descent</li>
+      </ul>
+      <li>RandomizedSearchCV</li>
+      <ul>
+        <li><pre><code class="python">from sklearn.model_selection import RandomizedSearchCV
+params = {'subsample': [0.65, 0.7, 0.75], 'n_estimators': [300, 500, 1000], 'learning_rate': [0.05, 0.075, 0.1]}
+gbr = GradientBoostingRegressor(max_depth=3, random_state=2)
+rand_reg = RandomizedSearchCV(gbr, params, n_iter=10, scoring='neg_mean_squared_error', cv=5, n_jobs=1, random_state=2)
+rand_reg.fit(X_train, Y_train)
+best_model = rand_reg.best_estimator_
+best_params = rand_reg.best_params_
+best_score = np.sqrt(-rand_reg.best_score_)
+y_pred = best_model.predict(X_test)
+rmse_test = MSE(y_test, y_pred) ** 0.5</code></pre></li>
+      </ul>
+    </ul>
   </div>
   <div class="card-footer text-muted">
-    <!-- Reference: <a href="https://www.deeplearning.ai/courses/natural-language-processing-specialization/">Natural Language Processing Specialization</a> -->
-    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a>
+    Reference: Hands-On Gradient Boosting with XGBoost and scikit-learn, Corey Wade
   </div>
 </div>
-
-<div class="card mb-4" id="attention-">
-  <div class="card-body">
-    <h2 class="card-title">Example - translate human readable dates to machine readable dates</h2>
-
-
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a>
-  </div>
-</div>
-<!-- Attention END -->
+<!-- Gradient boosting END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->

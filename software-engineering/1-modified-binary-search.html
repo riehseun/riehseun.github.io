@@ -64,40 +64,40 @@
 
 <pre><code class="python">class Solution:
     def search(self, nums: List[int], target: int) -> int:
-        return self.binary_search(nums, 0, len(nums)-1, target)
 
-    def binary_search(self, nums, low, high, target):
+        # Binary search
+        # If mid >= low
+        #   If low <= target <= mid, search between low and mid
+        #   Else, search between mid and high
+        # If mid < low
+        #   If mid <= target <= high, search between mid and high
+        #   Else, search between low and mid
 
         # Time: O(logn)
         # Space: O(1)
 
-        # If regular binary search.
-        # if target > nums[mid]:
-        #     return binary_search(nums, mid+1, high, target)
-        # elif target < nums[mid]:
-        #     return binary_search(nums, low, mid-1, target)
-        # else:
-        #     return mid
+        def binary_search(nums, low, high, target):
 
-        if low > high:
-            return -1
+            if low > high:
+                return -1
 
-        mid = low + (high - low) / 2
-        mid = int(mid)
+            mid = low + (high-low) // 2
 
-        if nums[mid] == target:
-            return mid
+            if nums[mid] == target:
+                return mid
 
-        if nums[low] <= nums[mid]:
-            if nums[low] <= target and target < nums[mid]:
-                return self.binary_search(nums, low, mid-1, target)
+            if nums[mid] >= nums[low]:
+                if nums[low] <= target < nums[mid]:
+                    return binary_search(nums, low, mid-1, target)
+                else:
+                    return binary_search(nums, mid+1, high, target)
             else:
-                return self.binary_search(nums, mid+1, high, target)
-        else:
-            if nums[mid] < target and target <= nums[high]:
-                return self.binary_search(nums, mid+1, high, target)
-            else:
-                return self.binary_search(nums, low, mid-1, target)</code></pre>
+                if nums[mid] < target <= nums[high]:
+                    return binary_search(nums, mid+1, high, target)
+                else:
+                    return binary_search(nums, low, mid-1, target)
+
+        return binary_search(nums, 0, len(nums)-1, target)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/search-in-rotated-sorted-array">33. Search in Rotated Sorted Array</a>
@@ -110,38 +110,42 @@
 
 <pre><code class="python">class Solution:
     def searchRange(self, nums: List[int], target: int) -> List[int]:
-        return self.binary_search(nums, 0, len(nums)-1, target)
 
-    def binary_search(self, nums, low, high, target):
+        # Binary search to find location of a target first
+        # Then, search left and right of the target
 
-        if low > high:
-            return [-1, -1]
+        # Time: O(logn)
+        # Space: O(1)
 
-        mid = low + (high - low) / 2
-        mid = int(mid)
+        def binary_search(nums, low, high, target):
 
-        if target > nums[mid]:
-            return self.binary_search(nums, mid+1, high, target)
-        elif target < nums[mid]:
-            return self.binary_search(nums, low, mid-1, target)
-        else:
-            # return mid
-            start = mid
-            while nums[mid] == nums[start]:
-                start -= 1
-                if start < 0:
-                    break
-            start += 1
+            if low > high:
+                return [-1, -1]
 
-            end = mid
-            while nums[mid] == nums[end]:
-                end += 1
-                if end >= len(nums):
-                    break
-            end -= 1
+            mid = low + (high-low) // 2
 
-            return [start, end]</code></pre>
+            if target > nums[mid]:
+                return binary_search(nums, mid+1, high, target)
+            elif target < nums[mid]:
+                return binary_search(nums, low, mid-1, target)
+            else:
+                start = mid
+                while nums[mid] == nums[start]:
+                    start -= 1
+                    if start < 0:
+                        break
+                start += 1
 
+                end = mid
+                while nums[mid] == nums[end]:
+                    end += 1
+                    if end >= len(nums):
+                        break
+                end -= 1
+
+                return [start, end]
+
+        return binary_search(nums, 0, len(nums)-1, target)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array">34. Find First and Last Position of Element in Sorted Array</a>
@@ -228,22 +232,25 @@
 <pre><code class="python">class Solution:
     def findPeakElement(self, nums: List[int]) -> int:
 
-        # Binary search trying to find local max.
-        return self.helper(0, len(nums)-1, nums)
+        # Binary search trying to find local max
 
-    def helper(self, low, high, nums):
+        # Time O(logn)
+        # Space O(1)
 
-        # mid = low + (high-low) // 2
-        mid1 = int((low+high)/2)
-        mid2 = mid1 + 1
+        def helper(low, high, nums):
 
-        if low == high:
-            return low
+            mid1 = int((low+high)/2)
+            mid2 = mid1 + 1
 
-        if nums[mid1] > nums[mid2]:
-            return self.helper(low, mid1, nums)
-        else:
-            return self.helper(mid2, high, nums)</code></pre>
+            if low == high:
+                return low
+
+            if nums[mid1] > nums[mid2]:
+                return helper(low, mid1, nums)
+            else:
+                return helper(mid2, high, nums)
+
+        return helper(0, len(nums)-1, nums)</code></pre>
 
   </div>
   <div class="card-footer text-muted">

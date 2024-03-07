@@ -60,14 +60,16 @@
     <ul>
       <li>Business objective</li>
       <ul>
-        <li>What is the business objective? Increase number of bookings</li>
-        <li>What is definition of similarity? When two listings are in same neighborhood, city, price range, etc</li>
-        <li>Should the listing be personalized to users? No</li>
-        <li></li>
+        <li>What is the business objective? Make users engaged</li>
+        <li>What kinds of posts should users see? unseen posts and posts with unseen comments</li>
+        <li>what does a post consist of? Text, image, video</li>
+        <li>What type of user engagement are we looking for? click, like, share, comment, etc</li>
       </ul>
       <li>Features that the system supports</li>
       <ul>
-        <li></li>
+        <li>Can users make friends with each other? Yes</li>
+        <li>Can users block other users? Yes</li>
+        <li>Can users hide posts? Yes</li>
       </ul>
       <li>Data</li>
       <ul>
@@ -79,11 +81,12 @@
       </ul>
       <li>Scale</li>
       <ul>
-        <li>How many listings are there in the platform? 5M</li>
+        <li>How many users are there in the platform? 3M</li>
+        <li>How many daily active users are there in the platform? 2M and each user checks posts twice a day</li>
       </ul>
       <li>Performance</li>
       <ul>
-        <li></li>
+        <li>How fast should the system work? Posts should show up under 200ms</li>
       </ul>
     </ul>
   </div>
@@ -98,24 +101,33 @@
     <ul>
       <li>Define ML objective</li>
       <ul>
-        <li>Given currently viewed listing, predict which listing will be clicked next</li>
+        <li>Maximize both implicit (dewll time or user clicks) and explict (likes or shares) reactions</li>
+        <ul>
+          <li>Implicit reactions often does not reflect user's true opinion about a post</li>
+          <li>Explicit reactions offen don't happen because not many users actually press like button even though they like a post</li>
+          <li>Assign weight to each reaction</li>
+          <ul>
+            <li>Click: 1</li>
+            <li>Like: 5</li>
+            <li>Comment: 10</li>
+            <li>Share: 20</li>
+            <li>Friendship request: 30</li>
+            <li>Hide: -20</li>
+            <li>Block: -50</li>
+          </ul>
+        </ul>
       </ul>
       <li>Specify input and output</li>
       <ul>
-        <li>Input - listing that user is currently viewing</li>
-        <li>Output - a list of listings ranked by probability of being clicked</li>
+        <li>Input - user</li>
+        <li>Output - ranked list of unseen posts or posts with unseen comments</li>
       </ul>
       <li>Choose right ML category</li>
       <ul>
-        <li>Recommendation system</li>
+        <li>Pointwise leanring to rank (LTR)</li>
         <ul>
-          <li>Relies on user's historical interaction</li>
-          <li>For this problem, recently viewed listings are more informative than those in the past</li>
-        </ul>
-        <li>Session-based recommendation system</li>
-        <ul>
-          <li>Map each listing into embedding vector</li>
-          <li>Embeddings are close when the two listings frequently co-occur in user's browsing history</li>
+          <li>Use binary classifier for each category (click clasifier, like classifier, etc)</li>
+          <li>Compute linear combination of probabilties from classifiers and weights assigned for each category, which gives a final score</li>
         </ul>
       </ul>
     </ul>
@@ -131,14 +143,15 @@
     <ul>
       <li>Data engineering</li>
       <ul>
-        <li>Listing</li>
+        <li>Post</li>
         <ul>
-          <li>listing_id</li>
-          <li>host_id</li>
-          <li>price</li>
-          <li>rating</li>
-          <li>city</li>
-          <li>country</li>
+          <li>post_id</li>
+          <li>author_id</li>
+          <li>text</li>
+          <li>tags</li>
+          <li>image</li>
+          <li>video</li>
+          <li>timestamp</li>
         </ul>
         <li>User</li>
         <ul>
@@ -151,23 +164,46 @@
           <li>language</li>
           <li>timezone</li>
         </ul>
-        <li>User-listing interation</li>
+        <li>User-post interation</li>
         <ul>
           <li>user_id</li>
-          <li>listing_id</li>
-          <li>interaction_type - impression/click/conversion</li>
+          <li>post_id</li>
+          <li>interaction_type - click/like/share/etc</li>
           <li>timestamp</li>
-          <li>position_of_the_listing_in_the_displayed_list</li>
+        </ul>
+        <li>Friendship</li>
+        <ul>
+          <li>user_id_1</li>
+          <li>user_id_2</li>
+          <li>timstamp</li>
         </ul>
       </ul>
       <li>Feature engineering</li>
       <ul>
-        <li>Model only utilizes browsing history</li>
-        <li>Search session</li>
+        <li>Post</li>
         <ul>
-          <li>session_id</li>
-          <li>clicked_listing_ids</li>
-          <li>booked_listing_id</li>
+          <li>text - BERT</li>
+          <li>image/video - ResNet, CLIP</li>
+          <li>like/share/replies - scale them to similar range</li>
+          <li>tags</li>
+          <ul>
+            <li>Use Viterbi to tokenzie hashtags into different words</li>
+            <li>Use feature hashing to convert words to Ids</li>
+            <li>Use TF-IDF or word2vec to vectorize tags</li>
+          </ul>
+          <li>post's age - bucketize + one-host</li>
+        </ul>
+        <li>User</li>
+        <ul>
+          <li>Demographics - age, gender, country, etc</li>
+          <li>Contextual - device, time of the day, etc</li>
+          <li>User-post interactions - extract features from each post that user interacted with</li>
+          <li>Mentioned in a post - binary value 0 or 1</li>
+        </ul>
+        <li>User-author</li>
+        <ul>
+          <li>like/click/comment/share rate</li>
+          <li>length of friendship</li>
         </ul>
       </ul>
     </ul>
