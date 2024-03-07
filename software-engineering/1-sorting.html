@@ -81,6 +81,9 @@
     def largestNumber(self, nums: List[int]) -> str:
 
         # Do a quicksort
+        #   Pick a pivot
+        #   Put elements smaller than pivot to left of pivot
+        #   Put elements larger than pivot to right of pivot
         # When comparing two numbers check if "AB" > "BA"
 
         if sum(nums) == 0:
@@ -96,14 +99,17 @@
             quicksort(nums, pos+1, r)
 
         def partition(nums, l, r):
-            low = l
-            while l < r:
-                if compare(nums[l], nums[r]):
-                    nums[l], nums[low] = nums[low], nums[l]
-                    low += 1
-                l += 1
-            nums[low], nums[r] = nums[r], nums[low]
-            return low
+
+            p = random.randint(l,r)
+
+            for i in range(l,r+1):
+                if compare(nums[i],nums[p]) and i > p:
+                    nums[i], nums[p] =  nums[p], nums[i]
+                if not compare(nums[i],nums[p]) and i < p:
+                    nums[i], nums[p] =  nums[p], nums[i]
+                p = i
+
+            return p
 
         def compare(x, y):
             return str(x) + str(y) > str(y) + str(x)
@@ -123,7 +129,37 @@
   <div class="card-body">
     <h2 class="card-title">Sort an array (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def sortArray(self, nums: List[int]) -> List[int]:
+
+        # Do a quicksort
+        #   Pick a pivot
+        #   Put elements smaller than pivot to left of pivot
+        #   Put elements larger than pivot to right of pivot
+
+        def quicksort(nums, l, r):
+            if l >= r:
+                return
+            pos = partition(nums, l, r)
+            quicksort(nums, l, pos-1)
+            quicksort(nums, pos+1, r)
+
+        def partition(nums, l, r):
+
+            p = random.randint(l,r)
+
+            for i in range(l,r+1):
+                if nums[i] < nums[p] and i > p:
+                    nums[i], nums[p] =  nums[p], nums[i]
+                if nums[i] > nums[p] and i < p:
+                    nums[i], nums[p] =  nums[p], nums[i]
+                p = i
+
+            return p
+
+        quicksort(nums, 0, len(nums)-1)
+
+        return nums</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/sort-an-array">912. Sort an Array</a>
