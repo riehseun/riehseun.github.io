@@ -37,27 +37,255 @@
 <div class="container">
 <div class="row">
 <div class="col-md-12">
-<h1 class="my-4">Other</h1>
+<h1 class="my-4">Machine Learning</h1>
 
-<!-- Machine learning system design BEGIN -->
-<div class="card mb-4" id="machine-learning-system-design">
+<!-- Personalized news feed BEGIN -->
+<div class="card mb-4" id="personalized-news-feed">
   <div class="card-body">
-    <h2 class="card-title">Machine learning system design</h2>
+    <h2 class="card-title">Personalized news feed</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#machine-learning-system-design-1">Machine learning system design</a></li>
+      <li><a href="#personalized-news-feed-1">Clarify requirements</a></li>
+      <li><a href="#personalized-news-feed-2">Frame problem as ML task</a></li>
+      <li><a href="#personalized-news-feed-3">Data preparation</a></li>
+      <li><a href="#personalized-news-feed-4">Model development</a></li>
+      <li><a href="#personalized-news-feed-5">Evaluation</a></li>
+      <li><a href="#personalized-news-feed-6">Deployment and serving</a></li>
     </ul>
   </div>
 </div>
 
-<div class="card mb-4" id="machine-learning-system-design-1">
+<div class="card mb-4" id="personalized-news-feed-1">
   <div class="card-body">
-    <h2 class="card-title">Machine learning system design</h2>
+    <h2 class="card-title">Clarify requirements</h2>
+    <ul>
+      <li>Business objective</li>
+      <ul>
+        <li>What is the business objective? Increase number of bookings</li>
+        <li>What is definition of similarity? When two listings are in same neighborhood, city, price range, etc</li>
+        <li>Should the listing be personalized to users? No</li>
+        <li></li>
+      </ul>
+      <li>Features that the system supports</li>
+      <ul>
+        <li></li>
+      </ul>
+      <li>Data</li>
+      <ul>
+        <li>Is annotated datset available? No, only user-listing interaction data is available</li>
+      </ul>
+      <li>Constraints</li>
+      <ul>
+        <li></li>
+      </ul>
+      <li>Scale</li>
+      <ul>
+        <li>How many listings are there in the platform? 5M</li>
+      </ul>
+      <li>Performance</li>
+      <ul>
+        <li></li>
+      </ul>
+    </ul>
   </div>
   <div class="card-footer text-muted">
-
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
   </div>
 </div>
-<!-- Machine learning system design END -->
+
+<div class="card mb-4" id="personalized-news-feed-2">
+  <div class="card-body">
+    <h2 class="card-title">Frame problem as ML task</h2>
+    <ul>
+      <li>Define ML objective</li>
+      <ul>
+        <li>Given currently viewed listing, predict which listing will be clicked next</li>
+      </ul>
+      <li>Specify input and output</li>
+      <ul>
+        <li>Input - listing that user is currently viewing</li>
+        <li>Output - a list of listings ranked by probability of being clicked</li>
+      </ul>
+      <li>Choose right ML category</li>
+      <ul>
+        <li>Recommendation system</li>
+        <ul>
+          <li>Relies on user's historical interaction</li>
+          <li>For this problem, recently viewed listings are more informative than those in the past</li>
+        </ul>
+        <li>Session-based recommendation system</li>
+        <ul>
+          <li>Map each listing into embedding vector</li>
+          <li>Embeddings are close when the two listings frequently co-occur in user's browsing history</li>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="personalized-news-feed-3">
+  <div class="card-body">
+    <h2 class="card-title">Data preparation</h2>
+    <ul>
+      <li>Data engineering</li>
+      <ul>
+        <li>Listing</li>
+        <ul>
+          <li>listing_id</li>
+          <li>host_id</li>
+          <li>price</li>
+          <li>rating</li>
+          <li>city</li>
+          <li>country</li>
+        </ul>
+        <li>User</li>
+        <ul>
+          <li>user_id</li>
+          <li>username</li>
+          <li>age</li>
+          <li>gender</li>
+          <li>city</li>
+          <li>country</li>
+          <li>language</li>
+          <li>timezone</li>
+        </ul>
+        <li>User-listing interation</li>
+        <ul>
+          <li>user_id</li>
+          <li>listing_id</li>
+          <li>interaction_type - impression/click/conversion</li>
+          <li>timestamp</li>
+          <li>position_of_the_listing_in_the_displayed_list</li>
+        </ul>
+      </ul>
+      <li>Feature engineering</li>
+      <ul>
+        <li>Model only utilizes browsing history</li>
+        <li>Search session</li>
+        <ul>
+          <li>session_id</li>
+          <li>clicked_listing_ids</li>
+          <li>booked_listing_id</li>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="personalized-news-feed-4">
+  <div class="card-body">
+    <h2 class="card-title">Model development</h2>
+    <ul>
+      <li>Model selection</li>
+      <ul>
+        <li>Neural network to learn embeddings</li>
+        <li>Initialize embeddings to random vectors</li>
+        <li>As sliding window moves, embeddings of central listing become close to embedding of nearby listings and far from embeddings of listings outside the window</li>
+      </ul>
+      <li>Model training</li>
+      <ul>
+        <li>Construct dataset</li>
+        <ul>
+          <li>Negative sampling</li>
+          <ul>
+            <li>Move a sliding window through search sessions</li>
+            <li>As the sliding window moves, use central listing and its nearby listings as positive pairs</li>
+            <li>As the sliding window moves, use central listing and randomly sampled listings as negative pairs</li>
+            <li>Positive pairs have ground truth label 1 and negative pairs have ground truth label 0</li>
+          </ul>
+        </ul>
+        <li>Choose loss function</li>
+        <ul>
+          <li>\( \displaystyle\sum_{(c,p) \in D_{p}} \text{log} \dfrac{1}{1+e^{-E_{c}E_{p}}} + \displaystyle\sum_{(c,n) \in D_{n}} \text{log} \dfrac{1}{1+e^{E_{c}E_{n}}} + \displaystyle\sum_{(c,b) \in D_{booked}} \text{log} \dfrac{1}{1+e^{-E_{c}E_{b}}} + \displaystyle\sum_{(c,n) \in D_{hard}} \text{log} \dfrac{1}{1+e^{E_{c}E_{n}}} \)</li>
+          <li>First term computes loss over positive pairs</li>
+          <li>Second term computes loss over negative pairs</li>
+          <li>Third term helps push embeddings of central listing closer to embeddings of eventually booked listings</li>
+          <li>Third term helps push embeddings of central listing away from embeddings of random listings</li>
+          <li>\( c \) - central listing</li>
+          <li>\( p \) - positive listing (co-occured with \( c \))</li>
+          <li>\( n \) - negative listing (did not co-occur with \( c \))</li>
+          <li>\( b \) - eventually booked listing</li>
+          <li>\( D_{\text{hard}} \) - pair of contral and negative listng (that are from the same region as the central listing)</li>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="personalized-news-feed-5">
+  <div class="card-body">
+    <h2 class="card-title">Evaluation</h2>
+    <ul>
+      <li>Offline</li>
+      <ul>
+        <li>Average rank of eventually booked listing</li>
+        <ul>
+          <li>Model computes similarities between the first clicked listing and other listings in the embedding space</li>
+          <li>Once similarities are computed, listings are ranked</li>
+          <li>Average the rank of eventually booked listings across all sessions</li>
+        </ul>
+      </ul>
+      <li>Online</li>
+      <ul>
+        <li>Click-through rate = total number of clicked Ads / total number of shown Ads</li>
+        <li>Conversion rate = total number of conversions / total number of impressions</li>
+        <li>Hide rate</li>
+        <li>Revenue life</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="personalized-news-feed-6">
+  <div class="card-body">
+    <h2 class="card-title">Deployment and serving</h2>
+
+    <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/personalized-news-feed1.png" alt="Card image cap">
+    <ul>
+      <li>Training pipeline</li>
+      <ul>
+        <li>Fine-tunes the model using new listings and user-listing interactions</li>
+      </ul>
+      <li>Indexing pipeline</li>
+      <ul>
+        <li>Pre-compute and store embeddings of all listings in index table</li>
+        <li>When model is re-trained, re-compute all embeddings using new model and updates index table</li>
+      </ul>
+      <li>Predidction pipeline</li>
+      <ul>
+        <li>Embedding fetcher service</li>
+        <ul>
+          <li>If input listing was seen during training, its embedding is already available in index table. Then, it just fetches embedding from index table</li>
+          <li>If input listing was not seen during training, use the embeddings of geographically nearby listings</li>
+        </ul>
+        <li>Nearest neighbor service</li>
+        <ul>
+          <li>With 5M listings on the platform, use ANN</li>
+        </ul>
+        <li>Re-ranking service</li>
+        <ul>
+          <li>Apply user filters (Ex. price, etc) to remove listings</li>
+          <li>Listings in cities other than currently viewed listing can also be removed</li>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+<!-- Personalized news feed END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->
