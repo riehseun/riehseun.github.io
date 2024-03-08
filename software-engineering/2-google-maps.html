@@ -63,12 +63,14 @@
     <ul>
       <li>How many total users in the system? 1B</li>
       <li>How many daily users in the system? 100M</li>
-      <li>What is the main function of the system? Find best route from source and destination, including ETA</li>
+      <li>What is the main function of the system? Location update, navigation, ETA, map rendering</li>
+      <li>What is the size of road data? terrabytes</li>
+      <li>Should the system consider traffic conditions? Yes</li>
+      <li>Should the system support different travel mode like driving, walking, public transit? Yes</li>
+      <li>Should the system support multi-stop directions? No</li>
+      <li>Should the system support business photos and videos? No</li>
       <li>Should the system show the route as user moves? Yes</li>
       <li>Should the system show new route when user deviates from the path? Yes</li>
-      <!-- <li>Users can identify current location</li>
-      <li>Users can find the fastest route between start and end, including ETA</li>
-      <li>Users can see their route on the map</li> -->
     </ul>
 
     <h3 class="card-title">Non-functional</h3>
@@ -81,7 +83,7 @@
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a> | System Design Interview Volume 2, Alex Xu & Sahn Lam
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
   </div>
 </div>
 
@@ -89,31 +91,52 @@
   <div class="card-body">
     <h2 class="card-title">Estimation</h2>
 
-    <h3 class="card-title">Server</h3>
-    <ul>
-      <li>Assume each server can handle 10k connections</li>
-      <li>100M / 10k = 10,000 servers are needed</li>
-    </ul>
-
     <h3 class="card-title">Storage</h3>
     <ul>
-      <li>Only one time storage is needed in the beginning (Minimal changes after that)</li>
+      <li>Map tiling</li>
+      <ul>
+        <li>Geo coding</li>
+        <ul>
+          <li>Convert each address to a pair of latitude and longitude</li>
+        </ul>
+        <li>Geo hashing</li>
+        <ul>
+          <li>Encode geographical area with digits</li>
+          <li>Each geographical area is considered as a tile</li>
+        </ul>
+      </ul>
+      <li>Map rendering</li>
+      <ul>
+        <li>Clients only download relevant tiles for the area</li>
+      </ul>
+      <li>Metadata - negligible</li>
+      <li>Road info - assume terrabytes</li>
+      <li>World map</li>
+      <ul>
+        <li>At zoom level 21, there are 2^21 = 4.3 trillion tiles</li>
+        <li>Assume each 256 by 265 tile image is 100KB</li>
+        <li>Then, higest zoom level would have 430PB</li>
+        <li>Assume 90% of world surfaces are ocean, desert, mountains, etc</li>
+        <li>Then, 430PB * 0.1 = 43PB</li>
+        <li>The subsequent zoom level would have \( 43 + \dfrac{43}{4} + \dfrac{43}{16} + \dfrac{43}{64} + \dots \) = ? PB</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Bandwidth</h3>
     <ul>
       <li>Assume</li>
       <ul>
-        <li>Each user makes 100 requests per day</li>
-        <li>Each request size is 100 bytes</li>
-        <li>Each response size is 1MB</li>
+        <li>Assume each user uses navigation 1 hour per day</li>
+        <li>Then, 100M * 1hr = 100M hours per day = 360B seconds per day</li>
+        <li>Assume each GPS update is sent every 10 seconds on average</li>
+        <li>Then, 360B / 10 = 36B GPS updates per day</li>
+        <li>Assume both request and response is 100 bytes</li>
       </ul>
-      <li>Incoming - (100M * 100 requests per day * 100 bytes per request * 8 bits) / 86400 = 92Mbps</li>
-      <li>Outgoing - (100M * 100 requests per day * 1MB per response * 8 bits) / 86400 = 920Gbps</li>
+      <li>Incoming/Outgoing - 36B * 100 bytes * 8 / 86400 = ? bps</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a> | System Design Interview Volume 2, Alex Xu & Sahn Lam
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
   </div>
 </div>
 
@@ -188,7 +211,7 @@
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a> | System Design Interview Volume 2, Alex Xu & Sahn Lam
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
   </div>
 </div>
 
@@ -224,7 +247,7 @@
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a> | System Design Interview Volume 2, Alex Xu & Sahn Lam
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
   </div>
 </div>
 
@@ -272,7 +295,7 @@
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a> | System Design Interview Volume 2, Alex Xu & Sahn Lam
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
   </div>
 </div>
 
@@ -327,7 +350,7 @@
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a> | System Design Interview Volume 2, Alex Xu & Sahn Lam
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
   </div>
 </div>
 
@@ -374,7 +397,7 @@
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a> | System Design Interview Volume 2, Alex Xu & Sahn Lam
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
   </div>
 </div>
 <!-- Google maps END -->
