@@ -156,7 +156,29 @@
   <div class="card-body">
     <h2 class="card-title">Search insert position (E) (Liked)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def searchInsert(self, nums: List[int], target: int) -> int:
+
+        # Binary search
+
+        # Time: O(logn)
+        # Space: O(1)
+
+        def binary_search(nums, low, high, target):
+
+            mid = low + (high-low) // 2
+
+            if low > high:
+                return low
+
+            if nums[mid] == target:
+                return mid
+            elif nums[mid] > target:
+                return binary_search(nums, low, mid-1, target)
+            else:
+                return binary_search(nums, mid+1, high, target)
+
+        return binary_search(nums, 0, len(nums)-1, target)</code></pre>
 
   </div>
   <div class="card-footer text-muted">
@@ -233,24 +255,25 @@
     def findPeakElement(self, nums: List[int]) -> int:
 
         # Binary search trying to find local max
+        # If nums[mid] < nums[mid+1], there must be a peak in right half
+        # If nums[mid] > nums[mid+1], there must be a peak in left half
 
         # Time O(logn)
         # Space O(1)
 
-        def helper(low, high, nums):
+        def binary_search(low, high, nums):
 
-            mid1 = int((low+high)/2)
-            mid2 = mid1 + 1
+            mid = low + (high-low) // 2
 
             if low == high:
                 return low
 
-            if nums[mid1] > nums[mid2]:
-                return helper(low, mid1, nums)
+            if nums[mid] > nums[mid+1]:
+                return binary_search(low, mid, nums)
             else:
-                return helper(mid2, high, nums)
+                return binary_search(mid+1, high, nums)
 
-        return helper(0, len(nums)-1, nums)</code></pre>
+        return binary_search(0, len(nums)-1, nums)</code></pre>
 
   </div>
   <div class="card-footer text-muted">
