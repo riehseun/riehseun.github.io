@@ -190,33 +190,7 @@
   <div class="card-body">
     <h2 class="card-title">Search in rotated sorted array II (M)</h2>
 
-<pre><code class="python">class Solution:
-    def search(self, nums: List[int], target: int) -> bool:
-        return self.search_helper(nums, 0, len(nums)-1, target)
-
-    def search_helper(self, arr, low, high, t):
-
-        # Time: O(logn)
-        # Space: O(1)
-
-        if low > high:
-            return False
-
-        mid = low + (high-low) // 2
-
-        if arr[mid] == t:
-            return True
-
-        if arr[low] <= arr[mid]:
-            if arr[low] <= t and t < arr[mid]:
-                return self.search_helper(arr, low, mid-1, t)
-            else:
-                return self.search_helper(arr, mid+1, high, t)
-        else:
-            if arr[mid] < t and t <= arr[high]:
-                return self.search_helper(arr, mid+1, high, t)
-            else:
-                return self.search_helper(arr, low, mid-1, t)</code></pre>
+<pre><code class="python"></code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/search-in-rotated-sorted-array-ii">81. Search in Rotated Sorted Array II</a>
@@ -227,7 +201,39 @@
   <div class="card-body">
     <h2 class="card-title">Find minimum in rotated sorted array (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def findMin(self, nums: List[int]) -> int:
+
+        # Binary search
+        # Find a mid point first
+        # If mid+1 < mid, return mid+1
+        # If mid < mid-1, return mid
+        # If nums[high] > mid, search left half
+        # If nums[high] < mid, search right half
+
+        # Time: O(logn)
+        # Space: O(1)
+
+        def binary_search(nums, low, high):
+
+            if low > high:
+                return -1
+
+            mid = low + (high-low) // 2
+
+            if nums[mid+1] < nums[mid]:
+                return nums[mid+1]
+            if nums[mid] < nums[mid-1]:
+                return nums[mid]
+
+            if nums[mid] < nums[high]:
+                return binary_search(nums, low, mid-1)
+            else:
+                return binary_search(nums, mid+1, high)
+
+        if len(nums) <= 2:
+            return min(nums)
+        return binary_search(nums, 0, len(nums)-1)</code></pre>
 
   </div>
   <div class="card-footer text-muted">
