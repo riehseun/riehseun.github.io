@@ -173,9 +173,9 @@
       </ul>
       <li>CDN serves as a cache of map tiles</li>
       <li>Map tile service takes user location and zoom level as inputs and return 9 URLs of tiles</li>
-      <li>
+      <ul>
         <li>Return value includes the tile to render and 8 surrounding tiles</li>
-      </li>
+      </ul>
       <li>User downloads the tiles from CDN</li>
     </ul>
 
@@ -251,7 +251,39 @@
   <div class="card-body">
     <h2 class="card-title">Storage schema</h2>
 
-    <h3 class="card-title">Key-value store</h3>
+    <h3 class="card-title">Road info</h3>
+    <ul>
+      <li>Graph data is represented as adjacency list</li>
+      <li>Serialize adjacency lists into binary files</li>
+      <li>Use S3 to store data and cache it on the servers</li>
+    </ul>
+
+    <h3 class="card-title">User location data</h3>
+    <ul>
+      <li>Use Cassandra for write-heavy workload and availability over consistency</li>
+      <ul>Schema</ul>
+      <ul>
+        <li>Key - (user_id, timestamp)</li>
+        <li>Value - (latitude, longitude)</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Geocoding DB</h3>
+    <ul>
+      <li>Use Redis for read-heavy workload</li>
+      <ul>Schema</ul>
+      <ul>
+        <li>place_id</li>
+        <li>location</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">World map</h3>
+    <ul>
+      <li>Use S3 and cache it on CDN</li>
+    </ul>
+
+    <!-- <h3 class="card-title">Key-value store</h3>
     <ul>
       <li>Segment to server</li>
       <ul>
@@ -288,7 +320,7 @@
         <li>hour_range (tuple)</li>
         <li>rush_hour (bool) - where there is congestion or not</li>
       </ul>
-    </ul>
+    </ul> -->
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
@@ -301,7 +333,49 @@
 
     <img class="img-fluid" class="card-img-top" src="/img/system-design/google-map2.png" alt="Card image cap">
 
-    <h3 class="card-title">Add segment</h3>
+    <h3 class="card-title">Location service</h3>
+    <ul>
+      <li>Other services consume location data from Kafka</li>
+    </ul>
+
+    <h3 class="card-title">Map rendering</h3>
+    <ul>
+      <li>WebGL - instead of sending images over network, send vectors (paths and polygons)</li>
+      <li>Compressed vector data is much smaller than compressed images</li>
+      <li>Zooming experience is much better with vectors</li>
+    </ul>
+
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/google-map3.png" alt="Card image cap">
+
+    <h3 class="card-title">Navigation service</h3>
+    <ul>
+      <li>Geocoding service</li>
+      <ul>
+        <li>Converts location name to lat/long pair</li>
+      </ul>
+      <li>Routing planner service</li>
+      <ul>
+        <li>Computes suggested routes using other services</li>
+      </ul>
+      <li>Shortest path service</li>
+      <ul>
+        <li>Returns top k shortest paths without considering traffic or current conditions</li>
+      </ul>
+      <li>ETA service</li>
+      <ul>
+        <li>Computes ETA for each route using ML from current traffic and historical data</li>
+      </ul>
+      <li>Ranker</li>
+      <ul>
+        <li>Applies filters defined by user like avoid tolls or highways</li>
+      </ul>
+      <li>Traffic update service</li>
+      <ul>
+        <li>Updates traffic DB so that ETA service can compute accurate estimates</li>
+      </ul>
+    </ul>
+
+    <!-- <h3 class="card-title">Add segment</h3>
     <ul>
       <li>Each segment has its lat/long boundary coordinates and the graph of road network</li>
       <li>Segment adder assigns unique ID to each segment</li>
@@ -317,11 +391,9 @@
       <li>Graph processing service finds the segment from lat/long coordicates</li>
       <li>Graph processing service finds the server hosting the graph using segment ID</li>
       <li>Graph processing service runs shortest path algorithm</li>
-    </ul>
+    </ul> -->
 
-    <img class="img-fluid" class="card-img-top" src="/img/system-design/google-map3.png" alt="Card image cap">
-
-    <h3 class="card-title">Improve estimations using live data</h3>
+    <!-- <h3 class="card-title">Improve estimations using live data</h3>
     <ul>
       <li>Websocker provides persistent connection between user devices and the servers</li>
       <li>Load balancer balances the connection load</li>
@@ -343,7 +415,7 @@
       <li>Segment adder assigns unique ID to each segment</li>
       <li>Segment is assigned to a server and segment adder gets the server_id</li>
       <li>Key-value store keeps the segment to server mapping</li>
-    </ul>
+    </ul> -->
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
