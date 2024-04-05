@@ -57,14 +57,14 @@
       <li><a href="#kubernetes-10">Kubernetes common issues</a></li>
       <br>
 
-      <li><a href="#kubernetes-21">Namespace</a> - virtual clusters supported by the same physical cluster.</li>
-      <li><a href="#kubernetes-22">Deployment</a> - declarative updates for Pod and ReplicaSet including rollouts and rollbacks.</li>
-      <li><a href="#kubernetes-23">ReplicaSet</a> - creates Pods. (should not be manipulated, Deployment should be used instead)</li>
-      <li><a href="#kubernetes-24">StatefulSet</a> - similar to Deployment, but provides uniqueness and ordering of Pods.</li>
-      <li><a href="#kubernetes-25">DaemonSet</a> - exactly one Pod per Node. Deleting it clean up Pods.</li>
-      <li><a href="#kubernetes-26">Job</a> - create short living Pods. Deleting it clean up Pods.</li>
-      <li><a href="#kubernetes-27">Cron Job</a> - create Jobs on repeating schedule.</li>
-      <li><a href="#kubernetes-28">Pod</a> - smallest deployable unit.</li>
+      <li><a href="#kubernetes-21">Namespace</a> - virtual clusters supported by the same physical cluster</li>
+      <li><a href="#kubernetes-22">Deployment</a> - declarative updates for Pod and ReplicaSet including rollouts and rollbacks</li>
+      <li><a href="#kubernetes-23">ReplicaSet</a> - creates Pods (should not be manipulated, Deployment should be used instead)</li>
+      <li><a href="#kubernetes-24">StatefulSet</a> - similar to Deployment, but provides uniqueness and ordering of Pods</li>
+      <li><a href="#kubernetes-25">DaemonSet</a> - exactly one Pod per Node. Deleting it clean up Pods</li>
+      <li><a href="#kubernetes-26">Job</a> - create short living Pods. Deleting it clean up Pods</li>
+      <li><a href="#kubernetes-27">Cron Job</a> - create Jobs on repeating schedule</li>
+      <li><a href="#kubernetes-28">Pod</a> - smallest deployable unit</li>
       <ul>
         <li><a href="#kubernetes-101">Init containers</a></li>
         <li><a href="#kubernetes-102">Pod Topology Spread Constraints</a></li>
@@ -75,23 +75,24 @@
         <li><a href="#kubernetes-107">Service Account</a></li>
         <li><a href="#kubernetes-108">SecurityContext</a></li>
         <li><a href="#kubernetes-109">Labels, selectors, and annotations</a></li>
+        <li><a href="#kubernetes-110">Node affinity</a></li>
       </ul>
       <br>
 
-      <li><a href="#kubernetes-31">Ingress Controller</a> - specification of Ingress.</li>
-      <li><a href="#kubernetes-32">Ingress</a> - provides external access to Service. (Need ingress controller)</li>
-      <li><a href="#kubernetes-33">Service</a> - manages traffic to Pods.</li>
-      <li><a href="#kubernetes-34">Network Policy</a> - denie/allows traffic to/from Pods.</li>
+      <li><a href="#kubernetes-31">Ingress Controller</a> - specification of Ingress</li>
+      <li><a href="#kubernetes-32">Ingress</a> - provides external access to Service (Need ingress controller)</li>
+      <li><a href="#kubernetes-33">Service</a> - manages traffic to Pods</li>
+      <li><a href="#kubernetes-34">Network Policy</a> - denie/allows traffic to/from Pods</li>
       <li><a href="#kubernetes-35">CoreDNS</a></li>
       <br>
 
       <li><a href="#kubernetes-41">Volumes</a></li>
-      <li><a href="#kubernetes-42">Persistent Volumes</a> - piece of storage, simialr to Node.</li>
-      <li><a href="#kubernetes-45">Volume Snapshot</a> - request for a snapshot.</li>
+      <li><a href="#kubernetes-42">Persistent Volumes</a> - piece of storage, simialr to Node</li>
+      <li><a href="#kubernetes-45">Volume Snapshot</a> - request for a snapshot</li>
       <br>
 
-      <li><a href="#kubernetes-51">ConfigMap</a> - configuration data separate from app code. Must be in the same namespace with Pod.</li>
-      <li><a href="#kubernetes-52">Secret</a> - similar to ConfigMap but specifically for confidential data.</li>
+      <li><a href="#kubernetes-51">ConfigMap</a> - configuration data separate from app code. Must be in the same namespace with Pod</li>
+      <li><a href="#kubernetes-52">Secret</a> - similar to ConfigMap but specifically for confidential data</li>
       <li><a href="#kubernetes-53">RBAC</a>
       <br>
     </ul>
@@ -105,48 +106,46 @@
   <div class="card-body">
     <h2 class="card-title">Kubernetes basic</h2>
     <ul>
-      <li>Orchestrator of cloud-native microservices applications.</li>
-      <li>Kubernetes abstracts runtime via container runtime interface (CRI).
-        <ul>
-          <li>Container runtime code exists outside of Kubernetes.</li>
-          <li>Container runtime code interacts with Kubernetes in standardized way.</li>
-        </ul>
-      </li>
-      <li><code>containerd</code> is most commonly used runtime.
-        <ul>
-          <li>It is stripped-down version of Docker with just the stuff that Kubernetes needs.</li>
-        </ul>
-      </li>
+      <li>Orchestrator of cloud-native microservices applications</li>
+      <li>Kubernetes abstracts runtime via container runtime interface (CRI)</li>
+      <ul>
+        <li>Container runtime code exists outside of Kubernetes</li>
+        <li>Container runtime code interacts with Kubernetes in standardized way</li>
+      </ul>
+      <li><code>containerd</code> is most commonly used runtime</li>
+      <ul>
+        <li>It is stripped-down version of Docker with just the stuff that Kubernetes needs</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Control plane</h3>
     <ul>
-      <li>Running 3 or 5 replicated masters in an HA configuration is recommended.</li>
+      <li>Running 3 or 5 replicated masters in an HA configuration is recommended</li>
       <li>kube-apiserver</li>
       <ul>
-        <li>Exposes Kubernetes API.</li>
-        <li>All communication, between all components, must go through the API server.</li>
+        <li>Exposes Kubernetes API</li>
+        <li>All communication, between all components, must go through the API server</li>
       </ul>
       <li>Cluster store</li>
       <ul>
-        <li>based on <strong>etcd</strong>, a popular distributed database.</li>
-        <li>Stores cluster data.</li>
-        <li>Should run between 3-5 etcd replicas for high availability.</li>
+        <li>based on <strong>etcd</strong>, a popular distributed database</li>
+        <li>Stores cluster data</li>
+        <li>Should run between 3-5 etcd replicas for high availability</li>
       </ul>
       <li>kube-scheduler</li>
       <ul>
-        <li>Assigns Pods to Nodes.</li>
+        <li>Assigns Pods to Nodes</li>
       </ul>
       <li>kube-controller-manager</li>
       <ul>
-        <li>Node controller: notice and respond when Nodes are down.</li>
-        <li>Replication controller: ensures correct number of Pods are running.</li>
-        <li>Endpoint controller: populates Endpoint object.</li>
-        <li>Service account & token controller: creates accounts and API tokens for new namespaces.</li>
+        <li>Node controller - notice and respond when Nodes are down</li>
+        <li>Replication controller - ensures correct number of Pods are running</li>
+        <li>Endpoint controller - populates Endpoint object</li>
+        <li>Service account & token controller - creates accounts and API tokens for new namespaces</li>
       </ul>
       <li>cluster-controller-manager</li>
       <ul>
-        <li>Cloud specific control logic.</li>
+        <li>Cloud specific control logic</li>
       </ul>
     </ul>
 
@@ -154,13 +153,13 @@
     <ul>
       <li>kubelet</li>
       <ul>
-        <li>Registers the node with the cluster.</li>
-        <li>Watches the API server for new work assignments.</li>
+        <li>Registers the node with the cluster</li>
+        <li>Watches the API server for new work assignments</li>
       </ul>
 
       <li>kube-proxy</li>
       <ul>
-        <li>Local cluster network rules.</li>
+        <li>Local cluster network rules</li>
       </ul>
 
       <li>Container runtime</li>
@@ -171,8 +170,8 @@
 
     <h3 class="card-title">DNS</h3>
     <ul>
-      <li>Kubernetes cluster has an internal DNS service.</li>
-      <li>This DNS service has a static IP address.</li>
+      <li>Kubernetes cluster has an internal DNS service</li>
+      <li>This DNS service has a static IP address</li>
     </ul>
 
     <h3 class="card-title">Kubernetes manifest</h3>
@@ -185,17 +184,17 @@
 
     <h4 class="card-title">kind</h4>
     <ul>
-      <li>Type of object being deployed.</li>
+      <li>Type of object being deployed</li>
     </ul>
 
     <h4 class="card-title">metadata</h4>
     <ul>
-      <li>Define name, label, namepsace.</li>
+      <li>Define name, label, namepsace</li>
     </ul>
 
     <h4 class="card-title">spec</h4>
     <ul>
-      <li>Define container(s).</li>
+      <li>Define container(s)</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -207,8 +206,8 @@
   <div class="card-body">
     <h2 class="card-title">Kubectl</h2>
     <ul>
-      <li>Should have only 1 minor version difference from the cluster version.</li>
-      <li>Converts commands into JSON payload required by API server.</li>
+      <li>Should have only 1 minor version difference from the cluster version</li>
+      <li>Converts commands into JSON payload required by API server</li>
     </ul>
 
     <h3 class="card-title">Cluster</h3>
@@ -230,19 +229,19 @@ kubectl config view | grep namespace</code></pre>
 
     <h3 class="card-title">Namespace</h3>
 
-<pre><code class="bash"># List namespace.
+<pre><code class="bash"># List namespace
 kubectl get ns
 
 # If "Unable to connect to the server: x509: certificate signed by unknown authority"
 kubectl get ns --insecure-skip-tls-verify
 
-# Delete namespace.
+# Delete namespace
 kubectl delete namespace &lt;namespace&gt;
 
-# Delete a namespace label.
+# Delete a namespace label
 kubectl label namespaces &lt;namespace&gt; &lt;label&gt;-
 
-# Find all resources in a namespace.
+# Find all resources in a namespace
 kubectl api-resources --verbs=list --namespaced -o name | xargs -n 1 kubectl get --show-kind --ignore-not-found -n &lt;namespace&gt;</code></pre>
 
 <!-- <pre><code class="bash"># Inspace all namespaces.
@@ -257,79 +256,79 @@ kubectl get rolebindings,clusterrolebindings \
 
     <h3 class="card-title">Image and container</h3>
 
-<pre><code class="bash"># List all images.
+<pre><code class="bash"># List all images
 kubectl get pods --all-namespaces -o jsonpath="{.items[*].spec.containers[*].image}" | tr -s '[[:space:]]' '\n' | sort | uniq -c
 
-# Find containers in a pod.
+# Find containers in a pod
 kubectl get pods &lt;pod_name&gt; -n &lt;namespace&gt; -o jsonpath='{.spec.containers[*].name}'
 
-# Get image used in deployment or daemonset.
+# Get image used in deployment or daemonset
 kubectl get deployments/ds -n &lt;namespace&gt; -o yaml | grep image
 
-# Debug init container.
+# Debug init container
 kubectl get pod &lt;pod_name&gt; --template '{{.status.initContainerStatuses}}'
 kubectl logs &lt;pod_name&gt;; -c &lt;init_container_name&gt;</code></pre>
 
     <h3 class="card-title">Pod</h3>
 
-<pre><code class="bash"># Get all pods in current namespace.
+<pre><code class="bash"># Get all pods in current namespace
 kubectl get pod
 
-# View Pod-Node assignment.
+# View Pod-Node assignment
 kubectl get pod -o wide
 
-# List pods matching specific label.
+# List pods matching specific label
 kubectl get pods -l app=myapp
 
-# List pods matching specific node.
+# List pods matching specific node
 kubectl get pods --all-namespaces -o wide --field-selector spec.nodeName=&lt;node_name&gt;
 
-# View desired state and current observed state.
+# View desired state and current observed state
 kubectl get pod &lt;pod_name&gt; -o=yaml
 
-# View overview of object.
+# View overview of object
 kubectl describe pod &lt;pod_name&gt;
 
-# Check pod status periodically.
+# Check pod status periodically
 watch -n &lt;nubmer_of_seconds&gt; kubectl get pod
 
-# Exec into a pod.
+# Exec into a pod
 kubectl exec -it &lt;pod_name&gt; -- /bin/bash
 
-# Exec into a pod. (In windows using Git Bash)
+# Exec into a pod (In windows using Git Bash)
 echo alias kubectl="/path/to/kubectl.exe" >> ~/.bashrc
 winpty kubectl exec -it &lt;pod_name&gt; -- sh
 
-# Temporarily disable pod.
+# Temporarily disable pod
 kubectl scale --replicas=0 deployment/&lt;deployment_name&gt;
 
-# Rasons for Pod failure.
+# Rasons for Pod failure
 kubectl get pod &lt;pod_name&gt; -o go-template="{{range .status.containerStatuses}}{{.lastState.terminated.message}}{{end}}"
 
-# Port forward to access app runnig inside a pod/deployment from localhost.
+# Port forward to access app runnig inside a pod/deployment from localhost
 kubectl port-forward &lt;pod_name&gt; &lt;localhost_port&gt;:&lt;container_port&gt;</code></pre>
 
     <h3 class="card-title">Deployment</h3>
 
-<pre><code class="bash"># Check Deployment rollout status.
+<pre><code class="bash"># Check Deployment rollout status
 kubectl rollout status deployment/&lt;deployment_name&gt;
 
-# Check the labels generated for each Pod.
+# Check the labels generated for each Pod
 kubectl get pods --show-labels
 
-# To update an iamge, run one of the following. ("--record" flag makes K8s document revision history)
+# To update an iamge, run one of the following ("--record" flag makes K8s document revision history)
 kubectl --record deployment.apps/nginx-deployment set image deployment.v1.apps/&lt;deployment_name&gt; &lt;image_name&gt;=&lt;image_name&gt;:&lt;new_image_version&gt;
 kubectl set image deployment/&lt;deployment_name&gt; &lt;image_name&gt;=&lt;image_name&gt;:&lt;new_image_version&gt; --record</code></pre>
 
     <h4 class="card-title">Deployment rollback</h4>
 
-<pre><code class="bash"># Check the revisions of Deployment.
+<pre><code class="bash"># Check the revisions of Deployment
 kubectl rollout history deployment.v1.apps/&lt;deployment_name&gt;
 
-# To see the details of each revision.
+# To see the details of each revision
 kubectl rollout history deployment.v1.apps/&lt;deployment_name&gt; --revision=&lt;revision_number&gt;
 
-# Rollback to a specific version.
+# Rollback to a specific version
 kubectl rollout undo deployment.v1.apps/&lt;deployment_name&gt; --to-revision=&lt;revision_number&gt;</code></pre>
 
     <h4 class="card-title">Deployment scaling</h4>
@@ -337,13 +336,13 @@ kubectl rollout undo deployment.v1.apps/&lt;deployment_name&gt; --to-revision=&l
       <li>Deployment Controller balances additional replicas in the existing ReplicaSets</li>
     </ul>
 
-<pre><code class="bash"># Scale a Deployment.
+<pre><code class="bash"># Scale a Deployment
 kubectl scale deployment.v1.apps/&lt;deployment_name&gt; --replicas=&lt;number_of_replicas&gt;
 
-# Setup autoscaler for Deployment and choose the minimum and maximum number of Pods.
+# Setup autoscaler for Deployment and choose the minimum and maximum number of Pods
 kubectl autoscale deployment.v1.apps/&lt;deployment_name&gt; --min=&lt;min_number_of_replicas&gt; --max=&lt;max_number_of_replicas&gt; --cpu-percent=&lt;percentage_of_cpu&gt;
 
-# Rollback to a specific version.
+# Rollback to a specific version
 kubectl rollout undo deployment.v1.apps/&lt;deployment_name&gt; --to-revision=&lt;min_number_of_replicas&gt;</code></pre>
 
     <h4 class="card-title">Pause and resume Deployment</h4>
@@ -351,66 +350,66 @@ kubectl rollout undo deployment.v1.apps/&lt;deployment_name&gt; --to-revision=&l
       <li>Can apply multiple fixes in between pausing and resuming without triggering unnecessary rollouts</li>
     </ul>
 
-<pre><code class="bash"># To pause the Deployment.
+<pre><code class="bash"># To pause the Deployment
 kubectl rollout pause deployment.v1.apps/&lt;deployment_name&gt;
 
-# Can update the image.
+# Can update the image
 kubectl set image deployment.v1.apps/&lt;deployment_name&gt; --revision=&lt;revision_number&gt;
 
-# Can update the resources.
+# Can update the resources
 kubectl set resources deployment.v1.apps/&lt;deployment_name&gt; -c=nginx --limits=cpu=&lt;cpu&gt;,memory=&lt;memory&gt;
 
-# To resume the Deployment.
+# To resume the Deployment
 kubectl rollout resume deployment.v1.apps/&lt;deployment_name&gt;</code></pre>
 
     <h3 class="card-title">PV/PVC</h3>
 
-<pre><code class="bash"># Show PVC on all namespaces.
+<pre><code class="bash"># Show PVC on all namespaces
 kubectl get pvc -A
 
-# Show PVC on current namespace.
+# Show PVC on current namespace
 kubectl get pvc
 
-# Update PV Reclaim Policy. (to Retain)
+# Update PV Reclaim Policy (To Retain)
 kubectl patch pv &lt;pv_name&gt; -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'</code></pre>
 
     <h3 class="card-title">Log</h3>
 
-<pre><code class="bash"># Inspect pod logs.
+<pre><code class="bash"># Inspect pod logs
 kubectl logs &lt;pod_name&gt; &lt;container_name&gt;
 
-# Inspect previous pod logs.
+# Inspect previous pod logs
 kubectl logs &lt;pod_name&gt; &lt;container_name&gt; -p</code></pre>
 
     <h3 class="card-title">Node</h3>
 
 <pre><code class="bash">kubectl get nodes --show-labels
 
-# Drain and delete a node.
+# Drain and delete a node
 kubectl drain &lt;node_name&gt; --ignore-daemonsets --delete-local-data
 kubectl delete node &lt;node_name&gt;
 
-# This could be preferred over draining a node.
+# This could be preferred over draining a node
 kubectl cordon &lt;node_name&gt;
 kubectl uncordon &lt;node_name&gt;
 
-# Check node capacity.
+# Check node capacity
 kubectl get nodes -o yaml | egrep '\sname:|cpu:|memory:'
 kubectl get nodes -o json | jq '.items[] | {name: .metadata.name, cap: .status.capacity}'</code></pre>
 
     <h4 class="card-title">How to exec into a container as root</h4>
 
-<pre><code class="bash"># 1. Find the node on which the pod is running.
+<pre><code class="bash"># 1. Find the node on which the pod is running
 kubectl get pods -o wide -n &lt;namespace&gt;
 
-# 2. Describe the pod.
+# 2. Describe the pod
 kubectl describe pod &lt;pod_name&gt; -n &lt;namespace&gt;
 
-# 3. Get the container ID.
+# 3. Get the container ID
 
-# 4. SSH into the node.
+# 4. SSH into the node
 
-# 5. Exec into the pod.
+# 5. Exec into the pod
 docker exec -u root -it &lt;container_id&gt;</code></pre>
 
     <h3 class="card-title">Endpoints</h3>
@@ -419,7 +418,7 @@ docker exec -u root -it &lt;container_id&gt;</code></pre>
 
     <h3 class="card-title">ConfigMap</h3>
 
-<pre><code class="bash"># Create ConfigMap from a file.
+<pre><code class="bash"># Create ConfigMap from a file
 kubectl create cm &lt;configmap_name&gt;--from-file &lt;filename&gt;</code></pre>
 
     <h3 class="card-title">Secrets</h3>
@@ -439,15 +438,15 @@ kubectl get secret -n &lt;namespace&gt; &lt;secret_name&gt; -o go-template='{{in
 
     <h3 class="card-title">Spoofing</h3>
     <ul>
-      <li>Pretending to be someone.</li>
-      <li>Kubernetes components communicate each other using TLS.</li>
-      <li>Certificate is issued by the internal Kubernetes CA.</li>
+      <li>Pretending to be someone</li>
+      <li>Kubernetes components communicate each other using TLS</li>
+      <li>Certificate is issued by the internal Kubernetes CA</li>
     </ul>
 
     <h3 class="card-title">Tampering</h3>
     <ul>
-      <li>Changing something in a malicious way.</li>
-      <li>Can enforce readonly to certain directory.</li>
+      <li>Changing something in a malicious way</li>
+      <li>Can enforce readonly to certain directory</li>
     </ul>
 
 <pre><code class="yaml">apiVersion: v1
@@ -463,19 +462,19 @@ spec:
 
     <h3 class="card-title">Repudiation</h3>
     <ul>
-      <li>Non-repudiation is proving certain actions were carried out by certain individuals.</li>
-      <li>API server has audit logs.</li>
+      <li>Non-repudiation is proving certain actions were carried out by certain individuals</li>
+      <li>API server has audit logs</li>
     </ul>
 
     <h3 class="card-title">Information Disclosure</h3>
     <ul>
-      <li>Secrets can be encrypted.</li>
-      <li>Encryption key is stored in nodes but storing it outside the cluster is recommended.</li>
+      <li>Secrets can be encrypted</li>
+      <li>Encryption key is stored in nodes but storing it outside the cluster is recommended</li>
     </ul>
 
     <h3 class="card-title">Denial of Service</h3>
     <ul>
-      <li>Can limit number of pods.</li>
+      <li>Can limit number of pods</li>
     </ul>
 
 <pre><code class="yaml">apiVersion: v1
@@ -488,8 +487,8 @@ spec:
 
     <h3 class="card-title">Elevation of Privilege</h3>
     <ul>
-      <li>Gaining higher access than what is granted.</li>
-      <li>Can use RBAC.</li>
+      <li>Gaining higher access than what is granted</li>
+      <li>Can use RBAC</li>
     </ul>
 
     <h3 class="card-title">User in Pod</h3>
@@ -499,13 +498,13 @@ kind: Pod
 metadata:
   name: my-pod
 spec:
-  securityContext:  # Applies to all containers in this Pod.
+  securityContext:  # Applies to all containers in this Pod
     runAsUser: 1000 # Non-root user
   containers:
   - name: my-container
     image: my-image
     securityContext:
-      runAsUser: 2000  # Overrides the Pod setting.</code></pre>
+      runAsUser: 2000  # Overrides the Pod setting</code></pre>
 
     <h3 class="card-title">Prevent privilege escalation by containers</h3>
 
@@ -531,12 +530,12 @@ spec:
 
     <h3 class="card-title">Horizontal Pod Autoscaler</h3>
     <ul>
-      <li>Dynamically scales Pods in a Deployment based on demand.</li>
+      <li>Dynamically scales Pods in a Deployment based on demand</li>
     </ul>
 
     <h3 class="card-title">Cluster Autoscaler</h3>
     <ul>
-      <li>Dynamically scales nodes based on demand.</li>
+      <li>Dynamically scales nodes based on demand</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -547,59 +546,62 @@ spec:
 <div class="card mb-4" id="kubernetes-5">
   <div class="card-body">
     <h2 class="card-title">Helm</h2>
-    <p class="card-text">Helps packaging K8s manifest files.</p>
+    <p class="card-text">Helps packaging K8s manifest files</p>
     <ul>
-      <li><code>Chart.yaml</code> - chart information such as apiVersion, chart name, chart version.</li>
-      <li><code>values.yaml</code> - configuration values for the chart.</li>
-      <li><code>templates/</code> - k8s manifest files.</li>
+      <li><code>Chart.yaml</code> - chart information such as apiVersion, chart name, chart version</li>
+      <li><code>values.yaml</code> - configuration values for the chart</li>
+      <li><code>templates/</code> - k8s manifest files</li>
     </ul>
 
     <h3 class="card-title">Helm limitation</h3>
     <ul>
-      <li>When users manually changes resources deployed by Helm, Helm does not know the change and the next Helm deployment will fail.</li>
-      <li>Uninstalling helm chart does not delete PVC. Those need to be cleaned up separately.</li>
+      <li>When users manually changes resources deployed by Helm, Helm does not know the change and the next Helm deployment will fail</li>
+      <li>Uninstalling helm chart does not delete PVC. Those need to be cleaned up separately</li>
     </ul>
 
     <h3 class="card-text">Helm command</h3>
-<pre><code class="bash"># Lint helm values yaml.
+
+<pre><code class="bash"># Lint helm values yaml
 helm lint -f &lt;values.yaml&gt;
 
-# Dry run.
+# Dry run
 helm install -n &lt;namespace&gt; &lt;release_name&gt; --dry-run --debug . -f &lt;values.yaml&gt;
 
-# Deploy.
+# Deploy
 helm install -n &lt;namespace&gt; &lt;release_name&gt; . -f &lt;values.yaml&gt;
 
-# Upgrade.
+# Upgrade
 helm upgrade -n &lt;namespace&gt; &lt;release_name&gt; . -f &lt;values.yaml&gt;
 
-# Undeploy.
+# Undeploy
 helm uninstall -n &lt;namespace&gt; &lt;release_name&gt;
 
-# List helm releases.
+# List helm releases
 helm list -n &lt;namespace&gt;
 helm ls --all-namespaces
 
-# Check helm release.
+# Check helm release
 helm status &lt;release_name&gt;
 
-# Get helm values of previous deployment.
+# Get helm values of previous deployment
 helm get values &lt;release_name&gt; -n &lt;namespace&gt;
 
-# Check helm history.
+# Check helm history
 helm history &lt;release_name&gt; -n &lt;namespace&gt;
 
-# Rollback to previous version.
+# Rollback to previous version
 helm rollback &lt;release_name&gt; -n &lt;namespace&gt; &lt;version&gt;</code></pre>
 
     <h3 class="card-text">Helm syntax</h3>
-<pre><code class="yaml"># Lowercase the result, then wrap it in double quotes.
+
+<pre><code class="yaml"># Lowercase the result, then wrap it in double quotes
 value: {{ include "mytpl" . | lower | quote }}
 
-# Being a new line and indent 8 spaces.
+# Being a new line and indent 8 spaces
 {{ Values.myValue | nindent 8 }}</code></pre>
 
     <h3 class="card-text">Conditions</h3>
+
 <pre><code class="yaml">apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -624,6 +626,7 @@ data:
   mug: "true"</code></pre>
 
     <h3 class="card-text">Variable scoping</h3>
+
 <pre><code class="yaml">apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -643,6 +646,7 @@ release: {{ $.Release.Name }}
 {{- end }}</code></pre>
 
     <h3 class="card-text">Loop</h3>
+
 <pre><code class="yaml"># Assume "values.yaml"
 favorite:
   drink: coffee
@@ -684,14 +688,16 @@ data:
     - "Onions"</code></pre>
 
     <h3 class="card-text">Predefined values</h3>
+
 <pre><code class="bash">Release.Name
 Release.Namespace
 Release.Service # Always "Helm"
 Chart</code></pre>
 
     <h3 class="card-text">Common issues</h3>
+
 <pre><code class="bash"># Error: rendered manifests contain a resource that already exists
-# Reason #1: deployment was initially done by helm, but deleted by kubectl.
+# Reason #1: deployment was initially done by helm, but deleted by kubectl
 # Solution:
 kubectl get crd
 kubectl get delete &lt;crd1&gt; &lt;crd2&gt; &lt;crd3&gt; ...
@@ -702,7 +708,7 @@ kubectl patch namespace &lt;namespace&gt; --patch-file &lt;updated_yaml_to_use&g
 kubectl annotate &lt;kind&gt; &lt;name&gt; meta.helm.sh/release-namespace=&lt;helm_will_tell_you_what_to_put_here&gt; # For example, kind can be "namespace", name can be "namespace name".
 kubectl annotate &lt;kind&gt; &lt;name&gt; meta.helm.sh/release-name=&lt;helm_will_tell_you_what_to_put_here&gt;</code></pre>
 
-<pre><code class="bash"># "updated_yaml_to_use" should look like.
+<pre><code class="bash"># "updated_yaml_to_use" should look like
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -713,12 +719,11 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}</code></pre>
 
-<pre><code class="bash"># Error: UPGRADE FAILED: another operation (kill/upgrade/rollback) is in progress.
-# Reason: "helm status &lt;release_name&gt;" or "helm history &lt;release_name&gt;" will show that the last helm install is still pending.
+<pre><code class="bash"># Error: UPGRADE FAILED: another operation (kill/upgrade/rollback) is in progress
+# Reason: "helm status &lt;release_name&gt;" or "helm history &lt;release_name&gt;" will show that the last helm install is still pending
 # Solution:
 helm uninstall &lt;release_name&gt;
 </code></pre>
-
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://helm.sh/docs/topics/charts">Charts</a>
@@ -728,8 +733,9 @@ helm uninstall &lt;release_name&gt;
 <div class="card mb-4" id="kubernetes-6">
   <div class="card-body">
     <h2 class="card-title">Skaffold</h2>
-    <p class="card-text">Simple pipeline for CI/CD targeting K8s.</p>
-<pre><code class="bash"># Run skaffold.
+    <p class="card-text">Simple pipeline for CI/CD targeting K8s</p>
+
+<pre><code class="bash"># Run skaffold
 skaffold run -f &lt;skaffold.yaml&gt;</code></pre>
 
 <pre><code class="bash"># This is equivalent to
@@ -741,7 +747,7 @@ portForward:
   port: 8080
   localPort: 9000</code></pre>
 
-<pre><code class="bash"># Build docker locally.
+<pre><code class="bash"># Build docker locally
 build:
   artifacts:
   - image: gcr.io/k8s-skaffold/example
@@ -772,12 +778,12 @@ deploy:
 <div class="card mb-4" id="kubernetes-7">
   <div class="card-body">
     <h2 class="card-title">Datadog and kube state metric</h2>
-    <p class="card-text">Datadog: collects logs from K8s infrastructure (nodes, API server, etc).</p>
+    <p class="card-text">Datadog: collects logs from K8s infrastructure (nodes, API server, etc)</p>
     <ul>
-      <li>Agent: K8s DeamonSet. Collects logs from each node.</li>
-      <li>Cluster agent: K8s Deployment. Monitors API server. Deployed in a set of 3, 5, ... to achieve redundancy.</li>
+      <li>Agent: K8s DeamonSet. Collects logs from each node</li>
+      <li>Cluster agent: K8s Deployment. Monitors API server. Deployed in a set of 3, 5, ... to achieve redundancy</li>
     </ul>
-    <p class="card-text">KSM: listens to K8s API server and generates metrics.</p>
+    <p class="card-text">KSM: listens to K8s API server and generates metrics</p>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://github.com/kubernetes/kube-state-metrics">kube-state-metrics</a>
@@ -787,12 +793,11 @@ deploy:
 <div class="card mb-4" id="kubernetes-8">
   <div class="card-body">
     <h2 class="card-title">Kured</h2>
-
     <ul>
-      <li>Kubernetes REbook Daemon. DaemonSet that performs safe node reboots when needed. (indicated by package management system)</li>
-      <li>Only one node reboots at a time.</li>
-      <li>Drains nodes before reboot.</li>
-      <li>Check if <code>/var/run/reboot-required</code> every 6 minutes by default.</li>
+      <li>Kubernetes REbook Daemon. DaemonSet that performs safe node reboots when needed (indicated by package management system)</li>
+      <li>Only one node reboots at a time</li>
+      <li>Drains nodes before reboot</li>
+      <li>Check if <code>/var/run/reboot-required</code> every 6 minutes by default</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -806,15 +811,15 @@ deploy:
 
     <h3 class="card-title">Service mesh</h3>
     <ul>
-      <li>Automatically encrypt traffic between microservices.</li>
-      <li>Provide application network telemetry and observability.</li>
-      <li>Provide advanced traffic control.</li>
+      <li>Automatically encrypt traffic between microservices</li>
+      <li>Provide application network telemetry and observability</li>
+      <li>Provide advanced traffic control</li>
     </ul>
 
     <h3 class="card-title">Istio</h3>
     <ul>
-      <li>Injected into applications as sidecar containers.</li>
-      <li>Sets up rules to intercept all network traffic entering and exiting the Pod.</li>
+      <li>Injected into applications as sidecar containers</li>
+      <li>Sets up rules to intercept all network traffic entering and exiting the Pod</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -828,12 +833,13 @@ deploy:
 
     <h3 class="card-title">CrashLoopBackedOff &#38; Back-off restarting failed containers</h3>
     <ul>
-      <li>If liveness probe is defined, see if it succeeds.</li>
-      <li>Check resource memory.</li>
-      <li>Check <code>command</code> and <code>args</code> to see if container is set to exit soon.</li>
+      <li>If liveness probe is defined, see if it succeeds</li>
+      <li>Check resource memory</li>
+      <li>Check <code>command</code> and <code>args</code> to see if container is set to exit soon</li>
     </ul>
 
     <h3 class="card-title">How to remove a namespace that is stuck on terminating</h3>
+
 <pre><code class="bash">kubectl get namesapce &lt;stuck_namespace&gt; -o json > temp.json
 
 # Update "temp.json" such that "finalizers" array is empty. For example,
@@ -848,7 +854,7 @@ kubectl replace --raw "/api/v1/namespaces/&lt;stuck_namespace&gt;/finalize" -f .
     <h3 class="card-title">Kubectl command fails</h3>
     <ul>
       <li>Error from server (InternalError): an error on the server ("") has prevented the request from succeeding</li>
-      <li>check proxy setting.</li>
+      <li>check proxy setting</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -860,12 +866,12 @@ kubectl replace --raw "/api/v1/namespaces/&lt;stuck_namespace&gt;/finalize" -f .
   <div class="card-body">
     <h2 class="card-title">Namespace</h2>
     <ul>
-      <li>Pods in different namespaces can still communicate each other.</li>
+      <li>Pods in different namespaces can still communicate each other</li>
       <ul>
-        <li>Pod can use short name if Service is in the same namespace.</li>
-        <li>Pod must use FQDN if Service is in a different namespace.</li>
+        <li>Pod can use short name if Service is in the same namespace</li>
+        <li>Pod must use FQDN if Service is in a different namespace</li>
       </ul>
-      <li>Every cluster has subnets and every namespace partitions this subnets.</li>
+      <li>Every cluster has subnets and every namespace partitions this subnets</li>
     </ul>
 
 <pre><code class="yaml">apiVersion: v1
@@ -885,12 +891,12 @@ metadata:
   <div class="card-body">
     <h2 class="card-title">Deployments</h2>
     <ul>
-      <li>Provides declarative updates for Pods.</li>
-      <li>Provides rolling update (zero downtime) by creating new ReplicaSets whenever change is made.</li>
-      <li>Provides rollbacks by maintaining old ReplicaSets.</li>
-      <li>Deployment Controller change an actual state to a desired state at a controlled rate.</li>
-      <li>Deployment ensures that at least 75% of Pods are up while they are being updated.</li>
-      <li>It also ensures that at most 125% of the desired number of Pods are up.</li>
+      <li>Provides declarative updates for Pods</li>
+      <li>Provides rolling update (zero downtime) by creating new ReplicaSets whenever change is made</li>
+      <li>Provides rollbacks by maintaining old ReplicaSets</li>
+      <li>Deployment Controller change an actual state to a desired state at a controlled rate</li>
+      <li>Deployment ensures that at least 75% of Pods are up while they are being updated</li>
+      <li>It also ensures that at most 125% of the desired number of Pods are up</li>
     </ul>
 
     <h3 class="card-title">Create a Deployment</h3>
@@ -929,18 +935,18 @@ spec:
     <img class="img-fluid" class="card-img-top" src="/img/kubernetes/kubernetes12.png" alt="Card image cap">
 
     <ul class="list-unstyled mb-0">
-      <li>NAME - names of Deployments in the namespace.</li>
-      <li>READY - how many replicas of the application are available to users.</li>
-      <li>UP TO DATE - number of replicas updated to achieve the desired state.</li>
-      <li>AVAILABLE - how many replicas of the application are available to users.</li>
-      <li>AGE - amount of time the appliation has been running.</li>
+      <li>NAME - names of Deployments in the namespace</li>
+      <li>READY - how many replicas of the application are available to users</li>
+      <li>UP TO DATE - number of replicas updated to achieve the desired state</li>
+      <li>AVAILABLE - how many replicas of the application are available to users</li>
+      <li>AGE - amount of time the appliation has been running</li>
     </ul>
 
     <h3 class="card-title">Rollover</h3>
     <ul>
-      <li>Everytime a new Deployment is observed by Deployment Controller, a ReplicaSet is created to bring up the desired Pods.</li>
-      <li>If Deployment is updated, the existing ReplicaSet that control Pods whose labels match <code>.spec.selector</code> but whose template does not match <code>.spec.template</code> are scaled down.</li>
-      <li>Eventually, new ReplicaSet is scaled to <code>.spec.replicas</code> and all old ReplicaSets is scaled to 0.</li>
+      <li>Everytime a new Deployment is observed by Deployment Controller, a ReplicaSet is created to bring up the desired Pods</li>
+      <li>If Deployment is updated, the existing ReplicaSet that control Pods whose labels match <code>.spec.selector</code> but whose template does not match <code>.spec.template</code> are scaled down</li>
+      <li>Eventually, new ReplicaSet is scaled to <code>.spec.replicas</code> and all old ReplicaSets is scaled to 0</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -952,9 +958,9 @@ spec:
   <div class="card-body">
     <h2 class="card-title">ReplicaSet</h2>
     <ul>
-      <li>Generally, ReplicaSet should not be manipulated. Rather, Deployment should be used.</li>
-      <li>ReplicaSet is mapped to Pod by Pod's metadata.ownerReferences field.</li>
-      <li>Runs a background reconciliation loop, constantly checking whether the right number of Pod are present.</li>
+      <li>Generally, ReplicaSet should not be manipulated. Rather, Deployment should be used</li>
+      <li>ReplicaSet is mapped to Pod by Pod's metadata.ownerReferences field</li>
+      <li>Runs a background reconciliation loop, constantly checking whether the right number of Pod are present</li>
     </ul>
 
     <h3 class="card-title">Scale-down a ReplicaSet</h3>
@@ -968,11 +974,11 @@ spec:
     <h3 class="card-title">kubectl get replicaset</h3>
     <img class="img-fluid" class="card-img-top" src="/img/kubernetes/kubernetes13.png" alt="Card image cap">
     <ul class="list-unstyled mb-0">
-      <li>NAME - names of ReplicaSets in the namespace.</li>
-      <li>DESIRED - desired number of replicas in the application.</li>
-      <li>CURRENT - how many applications are currently running.</li>
-      <li>READY - how many replicas of the application are available to users.</li>
-      <li>AGE - amount of time the appliation has been running.</li>
+      <li>NAME - names of ReplicaSets in the namespace</li>
+      <li>DESIRED - desired number of replicas in the application</li>
+      <li>CURRENT - how many applications are currently running</li>
+      <li>READY - how many replicas of the application are available to users</li>
+      <li>AGE - amount of time the appliation has been running</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -984,35 +990,35 @@ spec:
   <div class="card-body">
     <h2 class="card-title">StatefulSet</h2>
     <ul>
-      <li>Predictable and persistent Pod names, DNS hostnames, volume bindings.</li>
-      <li>Create one Pod at a time and always wait for previous Pods to be running and ready before creating the next.</li>
+      <li>Predictable and persistent Pod names, DNS hostnames, volume bindings</li>
+      <li>Create one Pod at a time and always wait for previous Pods to be running and ready before creating the next</li>
       <ul>
-        <li>This is the same for delete.</li>
+        <li>This is the same for delete</li>
       </ul>
-      <li>When a StatefulSet Pod is created, any volumes it needs are created at the same time and named in a way to connect them to the right Pod.</li>
+      <li>When a StatefulSet Pod is created, any volumes it needs are created at the same time and named in a way to connect them to the right Pod</li>
     </ul>
 
     <h3 class="card-title">Use cases</h3>
     <ul>
-      <li>Clustered apps that store data cannot have multiple replicas go down at the same time.</li>
+      <li>Clustered apps that store data cannot have multiple replicas go down at the same time</li>
     </ul>
 
     <h3 class="card-title">Limitations</h3>
     <ul>
-      <li>Retention policy of PersistentVolumes must be defined in the StorageClass.</li>
-      <li>Deleting StatefulSet does not delete volumns associated with it.</li>
+      <li>Retention policy of PersistentVolumes must be defined in the StorageClass</li>
+      <li>Deleting StatefulSet does not delete volumns associated with it</li>
       <ul>
-        <li>When scaling down, Pod is gone but PVC is still alive.</li>
-        <li>When scaling up, Pod is attached to surviving PVC.</li>
+        <li>When scaling down, Pod is gone but PVC is still alive</li>
+        <li>When scaling up, Pod is attached to surviving PVC</li>
       </ul>
-      <li>StatefulSet requires Headless Service for the network identity of the Pods.</li>
-      <li>StatefulSet does not guarantee on the termination of Pods when Statefulset gets deleted. This means Pods do not get terminated in order.</li>
+      <li>StatefulSet requires Headless Service for the network identity of the Pods</li>
+      <li>StatefulSet does not guarantee on the termination of Pods when Statefulset gets deleted. This means Pods do not get terminated in order</li>
     </ul>
 
     <h3 class="card-title">Headless service</h3>
     <ul>
-      <li>Creates predictable and stable DNS entries for every Pod that matches the StatefulSets label selector.</li>
-      <li>Service must set the value <code>clusterIP</code> to <code>None</code>.</li>
+      <li>Creates predictable and stable DNS entries for every Pod that matches the StatefulSets label selector</li>
+      <li>Service must set the value <code>clusterIP</code> to <code>None</code></li>
     </ul>
 
     <h3 class="card-title">Example</h3>
@@ -1032,7 +1038,7 @@ spec:
   ports:
   - port: 80
     name: web
-  clusterIP: None  # Only difference between headless service and regular service is this field.
+  clusterIP: None  # Only difference between headless service and regular service is this field
   selector:
     app: my-headless-service
 
@@ -1044,13 +1050,13 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: my-statefulset  # Has to match .spec.template.metadata.labels.
-  serviceName: my-headless-service  # Has to be the name of headless service.
+      app: my-statefulset  # Has to match .spec.template.metadata.labels
+  serviceName: my-headless-service  # Has to be the name of headless service
   replicas: 3  # by default is 1.
   template:
     metadata:
       labels:
-        app: my-statefulset  # Has to match .spec.selector.matchLabels.
+        app: my-statefulset  # Has to match .spec.selector.matchLabels
     spec:
       terminationGracePeriodSeconds: 10
       containers:
@@ -1073,7 +1079,7 @@ spec:
 
     <h3 class="card-title">Recreate Pod from Statefulset with new volume</h3>
 
-<pre><code class="bash"># The terminal will get stuck after issuing this command.
+<pre><code class="bash"># The terminal will get stuck after issuing this command
 kubectl delete pvc &lt;pvc_name&gt;
 
 # Do this on a different terminal.
@@ -1979,6 +1985,43 @@ spec:
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/labels">Labels and Selectors</a> | <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations">Annotations</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="kubernetes-110">
+  <div class="card-body">
+    <h2 class="card-title">Node affinity</h2>
+    <ul>
+      <li>requiredDuringSchedulingIgnoredDuringExecution - pod must be assgined to nodes with matching label</li>
+      <li>preferredDuringSchedulingIgnoredDuringExecution - pod preferably assgined to nodes with matching label</li>
+    </ul>
+
+<pre><code class="yaml">spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: &lt;key_of_label&gt;
+            operator: In
+            values:  # This is OR relationship
+            - &lt;value1_of_label&gt;
+            - &lt;value2_of_label&gt;</code></pre>
+
+<pre><code class="yaml">spec:
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 1
+        preference:
+          matchExpressions:
+          - key: &lt;key_of_label&gt;
+            operator: In
+            values:
+            - &lt;value_of_label&gt;</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node">Assigning Pods to Nodess</a>
   </div>
 </div>
 
