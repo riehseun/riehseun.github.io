@@ -56,7 +56,52 @@
   <div class="card-body">
     <h2 class="card-title">Max points on a line (H)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def maxPoints(self, points: List[List[int]]) -> int:
+
+        # Calculate all possible equation using two points
+        # Then, group pairs of points by equation
+
+        # Corner case - if single point, return 1
+        if len(points) == 1:
+            return 1
+
+        equation = defaultdict(list)
+
+        # Time O(n^2) n = len(points)
+        # Space O(n^2) worst case is that all pairs of points have distinct slope
+        for i in range(len(points)):
+            for j in range(i+1, len(points)):
+                slope_numerator = points[i][1]-points[j][1]
+                slope_denominator = points[i][0]-points[j][0]
+                # Vertical line
+                if slope_denominator == 0:
+                    slope = math.inf
+                    b = points[i][0]
+                else:
+                    slope = slope_numerator/slope_denominator
+                    b = points[i][1] - slope*points[i][0]
+                equation[(slope,b)].append((points[i],points[j]))
+
+        print(f"equation: {equation}")
+
+        max_num = 0
+        for key, val in equation.items():
+            if len(val) > max_num:
+                max_num = len(val)
+                candidate = val
+
+        print(f"candidate: {candidate}")
+
+        points = []
+        for coordinates in candidate:
+            if coordinates[0] not in points:
+                points.append(coordinates[0])
+            if coordinates[1] not in points:
+                points.append(coordinates[1])
+
+        print(f"points: {points}")
+        return len(points)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/max-points-on-a-line">149. Max Points on a Line</a>
