@@ -37,27 +37,277 @@
 <div class="container">
 <div class="row">
 <div class="col-md-12">
-<h1 class="my-4">Other</h1>
+<h1 class="my-4">Machine Learning</h1>
 
-<!-- Machine learning system design BEGIN -->
-<div class="card mb-4" id="machine-learning-system-design">
+<!-- People you may know BEGIN -->
+<div class="card mb-4" id="people-you-may-know">
   <div class="card-body">
-    <h2 class="card-title">Machine learning system design</h2>
+    <h2 class="card-title">People you may know</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#machine-learning-system-design-1">Machine learning system design</a></li>
+      <li><a href="#people-you-may-know-1">Clarify requirements</a></li>
+      <li><a href="#people-you-may-know-2">Frame problem as ML task</a></li>
+      <li><a href="#people-you-may-know-3">Data preparation</a></li>
+      <li><a href="#people-you-may-know-4">Model development</a></li>
+      <li><a href="#people-you-may-know-5">Evaluation</a></li>
+      <li><a href="#people-you-may-know-6">Deployment and serving</a></li>
     </ul>
   </div>
 </div>
 
-<div class="card mb-4" id="machine-learning-system-design-1">
+<div class="card mb-4" id="people-you-may-know-1">
   <div class="card-body">
-    <h2 class="card-title">Machine learning system design</h2>
+    <h2 class="card-title">Clarify requirements</h2>
+    <ul>
+      <li>Business objective</li>
+      <ul>
+        <li>What is the business objective? Make users engaged</li>
+        <li>What kinds of posts should users see? unseen posts and posts with unseen comments</li>
+        <li>what does a post consist of? Text, image, video</li>
+        <li>What type of user engagement are we looking for? click, like, share, comment, etc</li>
+      </ul>
+      <li>Features that the system supports</li>
+      <ul>
+        <li>Can users make friends with each other? Yes</li>
+        <li>Can users block other users? Yes</li>
+        <li>Can users hide posts? Yes</li>
+      </ul>
+      <li>Data</li>
+      <ul>
+        <li>Is annotated datset available? No, only user-post interaction data is available</li>
+      </ul>
+      <li>Constraints</li>
+      <ul>
+        <li></li>
+      </ul>
+      <li>Scale</li>
+      <ul>
+        <li>How many users are there in the platform? 3M</li>
+        <li>How many daily active users are there in the platform? 2M and each user checks posts twice a day</li>
+      </ul>
+      <li>Performance</li>
+      <ul>
+        <li>How fast should the system work? Posts should show up under 200ms</li>
+      </ul>
+    </ul>
   </div>
   <div class="card-footer text-muted">
-
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
   </div>
 </div>
-<!-- Machine learning system design END -->
+
+<div class="card mb-4" id="people-you-may-know-2">
+  <div class="card-body">
+    <h2 class="card-title">Frame problem as ML task</h2>
+    <ul>
+      <li>Define ML objective</li>
+      <ul>
+        <li>Maximize both implicit (dewll time or user clicks) and explict (likes or shares) reactions</li>
+        <ul>
+          <li>Implicit reactions often do not reflect user's true opinion about a post</li>
+          <li>Explicit reactions offen do not occur because not many users actually press like buttons or share posts</li>
+          <li>Assign weight to each reaction and consider weighted score of reactions</li>
+          <ul>
+            <li>Click: 1</li>
+            <li>Like: 5</li>
+            <li>Comment: 10</li>
+            <li>Share: 20</li>
+            <li>Friendship request: 30</li>
+            <li>Hide: -20</li>
+            <li>Block: -50</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>Specify input and output</li>
+      <ul>
+        <li>Input - user</li>
+        <li>Output - ranked list of unseen posts or posts with unseen comments</li>
+      </ul>
+      <li>Choose right ML category</li>
+      <ul>
+        <li>Pointwise leanring to rank (LTR)</li>
+        <ul>
+          <li>Use binary classifier for each category (click clasifier, like classifier, etc)</li>
+          <li>Compute linear combination of probabilties from classifiers and weights assigned for each category, which gives a final score</li>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="people-you-may-know-3">
+  <div class="card-body">
+    <h2 class="card-title">Data preparation</h2>
+    <ul>
+      <li>Data engineering</li>
+      <ul>
+        <li>Post</li>
+        <ul>
+          <li>post_id</li>
+          <li>author_id</li>
+          <li>text</li>
+          <li>tags</li>
+          <li>image</li>
+          <li>video</li>
+          <li>timestamp</li>
+        </ul>
+        <li>User</li>
+        <ul>
+          <li>user_id</li>
+          <li>username</li>
+          <li>age</li>
+          <li>gender</li>
+          <li>city</li>
+          <li>country</li>
+          <li>language</li>
+          <li>timezone</li>
+        </ul>
+        <li>User-post interation</li>
+        <ul>
+          <li>user_id</li>
+          <li>post_id</li>
+          <li>interaction_type - click/like/share/etc</li>
+          <li>timestamp</li>
+        </ul>
+        <li>Friendship</li>
+        <ul>
+          <li>user_id_1</li>
+          <li>user_id_2</li>
+          <li>timstamp</li>
+        </ul>
+      </ul>
+      <li>Feature engineering</li>
+      <ul>
+        <li>Post</li>
+        <ul>
+          <li>text - BERT</li>
+          <li>image/video - ResNet, CLIP</li>
+          <li>like/share/replies - scale them to similar range</li>
+          <li>tags</li>
+          <ul>
+            <li>Use Viterbi to tokenzie hashtags into different words</li>
+            <li>Use feature hashing to convert words to Ids</li>
+            <li>Use TF-IDF or word2vec to vectorize tags</li>
+          </ul>
+          <li>post's age - bucketize + one-hot</li>
+        </ul>
+        <li>User</li>
+        <ul>
+          <li>Demographics - age, gender, country, etc</li>
+          <li>Contextual - device, time of the day, etc</li>
+          <li>User-post interactions - extract features from each post that user interacted with</li>
+          <li>Mentioned in a post - binary value 0 or 1</li>
+        </ul>
+        <li>User-author</li>
+        <ul>
+          <li>like/click/comment/share rate</li>
+          <li>length of friendship</li>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="people-you-may-know-4">
+  <div class="card-body">
+    <h2 class="card-title">Model development</h2>
+    <ul>
+      <li>Model selection</li>
+      <ul>
+        <li>Neural network</li>
+        <ul>
+          <li>To fine-tune pre-trained models</li>
+          <li>To use embeddings to represent categorical features</li>
+          <li>To deal with text/image/video data</li>
+        </ul>
+        <li>N independent DNNs</li>
+        <ul>
+          <li>Expenseive to train</li>
+          <li>For less frequent reactions, there may not be enough data</li>
+        </ul>
+        <li>Multi-task DNNs</li>
+        <ul>
+          <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/personalized-newsfeed1.png" alt="Card image cap">
+          <li>For passive users, extract the following features</li>
+          <ul>
+            <li>Dwell time</li>
+            <li>Skip - if user spends less than t seconds, then post is assumed to be skipped</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>Model training</li>
+      <ul>
+        <li>Construct dataset</li>
+        <ul>
+          <li>Upsample negative data points for each reaction type</li>
+        </ul>
+        <li>Choose loss function</li>
+        <ul>
+          <li>Use MAE / MSE for regression task for dwell time prediction</li>
+          <li>Use cross-entropy for other binary classification predictions</li>
+          <li>\( \text{loss} = \lambda L_{\text{dwell}} + L_{\text{skip}} + L_{\text{like}} + \dots + L_{\text{share}} \)</li>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="people-you-may-know-5">
+  <div class="card-body">
+    <h2 class="card-title">Evaluation</h2>
+    <ul>
+      <li>Offline</li>
+      <ul>
+        <li>ROC-AUC</li>
+      </ul>
+      <li>Online</li>
+      <ul>
+        <li>Click-through rate = total number of clicked posts / total number of impressions</li>
+        <li>Reaction rate = number of liked/shared/commented/hidden/blocked/skipped posts / total number of impressions</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="people-you-may-know-6">
+  <div class="card-body">
+    <h2 class="card-title">Deployment and serving</h2>
+
+    <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/personalized-newsfeed2.png" alt="Card image cap">
+    <ul>
+      <li>Predidction pipeline</li>
+      <ul>
+        <li>Retrieval service</li>
+        <ul>
+          <li>Retrieves unseen posts or posts with unseen comments</li>
+        </ul>
+        <li>Ranking service</li>
+        <ul>
+          <li>Rank posts by score</li>
+        </ul>
+        <li>Re-ranking service</li>
+        <ul>
+          <li>Apply user filters</li>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+<!-- People you may know END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->
