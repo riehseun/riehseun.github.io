@@ -44,111 +44,169 @@
   <div class="card-body">
     <h2 class="card-title">Distributed message queue</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#distributed-message-queue-1">Distributed message queue</a></li>
+      <li><a href="#distributed-message-queue-1">Requirement</a></li>
+      <!-- <li><a href="#distributed-message-queue-2">Estimation</a></li> -->
+      <li><a href="#distributed-message-queue-3">High level design</a></li>
+      <!-- <li><a href="#distributed-message-queue-4">API</a></li> -->
+      <!-- <li><a href="#distributed-message-queue-5">Storage schema</a></li> -->
+      <li><a href="#distributed-message-queue-6">Detailed design</a></li>
+      <li><a href="#distributed-message-queue-7">Evaluation</a></li>
     </ul>
   </div>
 </div>
 
 <div class="card mb-4" id="distributed-message-queue-1">
   <div class="card-body">
-    <h2 class="card-title">Distributed message queue</h2>
+    <h2 class="card-title">Requirement</h2>
+
+    <h3 class="card-title">Functional</h3>
     <ul>
-      <li>Component between producers and consumers.</li>
-      <li>Performance: enables asynchronous communication between producers and consumers, eliminating speed difference.</li>
-      <li>Realibility: producers and consumers can fail independently without affecting one another.</li>
+      <li>What is format of messages? Text messages only</li>
+      <li>What is size of messages? KBs</li>
+      <li>Should messages be repeatedly consumed? Yes by different consumers</li>
+      <li>Should messages be consumed in the same order that they arrived? Yes</li>
+      <li>Should data be persisted? Yes for two weeks</li>
+      <li>How many producers and consumers should the system support? As many as it can</li>
+      <li>Should we support at most once, at least once, or exactly once? All of them</li>
+      <li>Should the system have both high throughput and low latency? Yes</li>
     </ul>
 
-    <h4 class="card-title">Best effort ordering</h4>
-    <ul>
-      <li>Messages are ordered by the arrival time to the queue.</li>
-    </ul>
-
-    <h4 class="card-title">Strict ordering</h4>
-    <ul>
-      <li>Messages are ordered by the creation time from the producer.</li>
-    </ul>
-
-    <h3 class="card-title">Requirement</h3>
-
-    <h4 class="card-title">Functional</h4>
-    <ul>
-      <li>Create and delete queue.</li>
-      <li>Send, retrieve, delete message.</li>
-    </ul>
-
-    <h4 class="card-title">Non-functional</h4>
+    <h3 class="card-title">Non-functional</h3>
     <ul>
       <li>Availability</li>
-      <li>Durability</li>
+      <li>Reliability</li>
       <li>Scalability</li>
       <li>Performance</li>
-    </ul>
-
-    <h3 class="card-title">High level design</h3>
-    <img class="img-fluid" class="card-img-top" src="/img/system-design/distributed-message-queue1.png" alt="Card image cap">
-
-    <h4 class="card-title">Frontend servers</h4>
-    <ul>
-      <li>Validate requests.</li>
-      <li>Perform authentication and authorization.</li>
-      <li>Stores metadata in cache.</li>
-      <li>Dispatch requests to backend servers and metadata service.</li>
-      <li>Remove duplicate requests.</li>
-    </ul>
-
-    <h4 class="card-title">Metadata service</h4>
-    <ul>
-      <li>Handles metadata stored in metadata store and cache whenever queue is created or deleted.</li>
-      <li>Frontend servers check the cache first. It miss occurs, then data is retrived from store and cache is updated accordingly.</li>
-    </ul>
-
-    <h3 class="card-title">Component design</h3>
-
-    <h4 class="card-title">Backend service</h4>
-    <ul>
-      <li>Message is replicated to achieve avilability.</li>
-      <li>Internal cluster manager - manages the assignment of queues within a cluster.</li>
-      <li>External cluster manager - manages the assignment of queues across clusters.</li>
-      <li>Primary-secondary model</li>
-      <ul>
-        <li>Each node is primary host of collection of queues.</li>
-        <li>Frontend server talks to metadata service to determine primary host for each request.</li>
-        <li>Internal cluster manager maps primary host, secondary hosts, and queues.</li>
-      </ul>
-      <li>A cluster of independent hosts</li>
-      <ul>
-        <li>Several clusters of multiple nodes.</li>
-        <li>Frontend server talks to metadata service to determine the cluster for each request.</li>
-        <li>External cluster manager maps clusters and queues.</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Evaluation</h3>
-
-    <h4 class="card-title">Durability</h4>
-    <ul>
-      <li>Queue's metadata is replicated to different nodes.</li>
-      <li>Messages are replicated to to different queues residing on different nodes.</li>
-    </ul>
-
-    <h4 class="card-title">Scalability</h4>
-    <ul>
-      <li>Frontend servers, backend servers, metadata cache, metadata store can scale horizontally.</li>
-    </ul>
-
-    <h4 class="card-title">Durability</h4>
-    <ul>
-      <li>Load balancer routes traffic around failed nodes.</li>
-      <li>Metadata and messages are replicated on different nodes.</li>
-    </ul>
-
-    <h4 class="card-title">Performce</h4>
-    <ul>
-      <li>Use of cache.</li>
+      <li>Consistency</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
-    <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
+  </div>
+</div>
+
+<!-- <div class="card mb-4" id="distributed-message-queue-2">
+  <div class="card-body">
+    <h2 class="card-title">Estimation</h2>
+
+    <h3 class="card-title">Server</h3>
+
+    <h3 class="card-title">Storage</h3>
+
+    <h3 class="card-title">Bandwidth</h3>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
+  </div>
+</div> -->
+
+<div class="card mb-4" id="distributed-message-queue-3">
+  <div class="card-body">
+    <h2 class="card-title">High level design</h2>
+
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/distributed-message-queue1.png" alt="Card image cap">
+
+    <h3 class="card-title">Producer</h3>
+    <ul>
+      <li>Topic organizes messages</li>
+      <li>Sends messages to a partition of a topic</li>
+    </ul>
+
+    <h3 class="card-title">Consumer groups</h3>
+    <ul>
+      <li>Each group can subscribe one or more topics</li>
+    </ul>
+
+    <h3 class="card-title">Brokers</h3>
+    <ul>
+      <li>Holds partitions of topics</li>
+      <li>Data storage - persists messages in a form of partitions</li>
+      <li>State storage - manages consumer states</li>
+      <li>Metadata stroage - persists configuration of topics</li>
+    </ul>
+
+    <h3 class="card-title">Coordination service</h3>
+    <ul>
+      <li>Service discovery - checks which brokers are alive</li>
+      <li>Leader election - only one broker serves as active controller at a time, which assigns partitions in the cluster. Apache ZooKeeper or etcd are commonly used as leader elector</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
+  </div>
+</div>
+
+<!-- <div class="card mb-4" id="distributed-message-queue-4">
+  <div class="card-body">
+    <h2 class="card-title">API</h2>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
+  </div>
+</div> -->
+
+<!-- <div class="card mb-4" id="distributed-message-queue-5">
+  <div class="card-body">
+    <h2 class="card-title">Storage schema</h2>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
+  </div>
+</div> -->
+
+<div class="card mb-4" id="distributed-message-queue-6">
+  <div class="card-body">
+    <h2 class="card-title">Detailed design</h2>
+
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
+  </div>
+</div>
+
+<div class="card mb-4" id="distributed-message-queue-7">
+  <div class="card-body">
+    <h2 class="card-title">Evaluation</h2>
+
+    <h3 class="card-title">Availability</h3>
+    <ul>
+      <li>Replication</li>
+      <ul>
+        <li>Replicate each server and DB</li>
+        <li>Replicate entire components to different zone or geographical region</li>
+      </ul>
+      <li>Fail over</li>
+      <ul>
+        <li></li>
+        <li></li>
+      </ul>
+    </ul>
+
+    <h4 class="card-title">Reliability</h4>
+    <ul>
+      <li>Data loss</li>
+    </ul>
+
+    <h3 class="card-title">Scalability</h3>
+    <ul>
+      <li>Horizontal scaling</li>
+      <li>Data partitioning</li>
+    </ul>
+
+    <h4 class="card-title">Performance</h4>
+    <ul>
+      <li></li>
+      <li></li>
+    </ul>
+    </ul>
+
+    <h3 class="card-title">Consistency</h3>
+    <ul>
+      <li></li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
   </div>
 </div>
 <!-- Distributed message queue END -->
