@@ -158,6 +158,47 @@
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
 
+    <h3 class="card-title">Data storage</h3>
+    <ul>
+      <li>Traffic pattern of message queue</li>
+      <ul>
+        <li>Both read-heavy and write-heavy</li>
+        <li>No update or delete operation</li>
+        <li>Mostly sequential read/write access</li>
+      </ul>
+      <li>Database is hard to be suitable for both read-heavy and write-heavy access pattern</li>
+      <li>Write-ahead log (WAL) has pure sequential read/write access pattern</li>
+      <ul>
+        <li>Messages can be stored as WAL on disk</li>
+        <li>Disks are slow for random access but it can be fast for sequential access</li>
+        <li>New messages are appended to the tail of a partition</li>
+        <li>Partition is divied into segments where active segments serve writes and inactive serve reads</li>
+        <li>Old inactive segments can be truncated</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Message data structure</h3>
+    <ul>
+      <li>key - used to determine the partition of message by hash(key) % number_of_partitions</li>
+      <li>value - payload of message</li>
+      <li>topic - topic that message belongs to</li>
+      <li>partition - partition id that message belongs to</li>
+      <li>offset - position of message in partition</li>
+      <li>timestamp - timestamp of when message was stored</li>
+      <li>size - size of message</li>
+      <li>crc - cyclic redundancy check used to ensure data integrity</li>
+    </ul>
+
+    <h3 class="card-title">Batching</h3>
+    <ul>
+      <li>Message queue</li>
+      <ul>
+        <li>There is trade-off between throughput and latency</li>
+        <li>Smaller batch size (thus, small throughput) leads to low latency or vice-versa</li>
+      </ul>
+      <li>Producer</li>
+      <li>Consumer</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
