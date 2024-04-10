@@ -197,7 +197,43 @@
         <li>Smaller batch size (thus, small throughput) leads to low latency or vice-versa</li>
       </ul>
       <li>Producer</li>
+      <ul>
+        <img class="img-fluid" class="card-img-top" src="/img/system-design/distributed-message-queue2.png" alt="Card image cap">
+        <li>Batching buffers messages in memory and send out larger batches in a single request, which increases throughput</li>
+        <li>Routing decides which replica/partition should the message go to</li>
+        <li>Leader replica receives the message and follower replica pull data from leader</li>
+      </ul>
       <li>Consumer</li>
+      <ul>
+        <li>Brokers push data to consumers</li>
+        <ul>
+          <li>Pros</li>
+          <ul>
+            <li>Messages are propagated immediately, thus lower latency</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Consumers could be overwhelmed</li>
+          </ul>
+        </ul>
+        <li>Consumers pull data from brokers</li>
+        <ul>
+          <li>Pros</li>
+          <ul>
+            <li>Consumers can control consumption rate, which is suitable for batch processing</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Requires long polling, which waits some time for new messages</li>
+          </ul>
+        </ul>
+        <img class="img-fluid" class="card-img-top" src="/img/system-design/distributed-message-queue3.png" alt="Card image cap">
+        <li>A new consumer wants to join group 1 and subscribe to topic A</li>
+        <li>All consumers in the same group connect to the same broker</li>
+        <li>Coordinator assignes partition 2 to consumer</li>
+        <li>Consumer fetches message from the last consumed offset, which is managed by state storage</li>
+        <li>Consumer processes messages and commits the offset to the broker</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
