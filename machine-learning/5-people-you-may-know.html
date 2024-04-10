@@ -158,28 +158,27 @@
       <ul>
         <li>User</li>
         <ul>
-          <li>text - BERT</li>
-          <li>image/video - ResNet, CLIP</li>
-          <li>like/share/replies - scale them to similar range</li>
-          <li>tags</li>
+          <li>Demographic</li>
+          <li>Number of connections, followers, followings, pending requests</li>
+          <li>Account's age</li>
+          <li>Number of received reactions</li>
+        </ul>
+        <li>User-user affinity</li>
+        <ul>
+          <li>Education and work</li>
           <ul>
-            <li>Use Viterbi to tokenzie hashtags into different words</li>
-            <li>Use feature hashing to convert words to Ids</li>
-            <li>Use TF-IDF or word2vec to vectorize tags</li>
+            <li>Schools in common</li>
+            <li>Contemporaries at school</li>
+            <li>Same major</li>
+            <li>Number of companies in common</li>
+            <li>Same industry</li>
           </ul>
-          <li>post's age - bucketize + one-hot</li>
-        </ul>
-        <li>User</li>
-        <ul>
-          <li>Demographics - age, gender, country, etc</li>
-          <li>Contextual - device, time of the day, etc</li>
-          <li>User-post interactions - extract features from each post that user interacted with</li>
-          <li>Mentioned in a post - binary value 0 or 1</li>
-        </ul>
-        <li>User-author</li>
-        <ul>
-          <li>like/click/comment/share rate</li>
-          <li>length of friendship</li>
+          <li>Social</li>
+          <ul>
+            <li>Profile visits</li>
+            <li>Number of mutual connections</li>
+            <li>Time discounted mutual connections</li>
+          </ul>
         </ul>
       </ul>
     </ul>
@@ -195,39 +194,17 @@
     <ul>
       <li>Model selection</li>
       <ul>
-        <li>Neural network</li>
-        <ul>
-          <li>To fine-tune pre-trained models</li>
-          <li>To use embeddings to represent categorical features</li>
-          <li>To deal with text/image/video data</li>
-        </ul>
-        <li>N independent DNNs</li>
-        <ul>
-          <li>Expenseive to train</li>
-          <li>For less frequent reactions, there may not be enough data</li>
-        </ul>
-        <li>Multi-task DNNs</li>
-        <ul>
-          <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/personalized-newsfeed1.png" alt="Card image cap">
-          <li>For passive users, extract the following features</li>
-          <ul>
-            <li>Dwell time</li>
-            <li>Skip - if user spends less than t seconds, then post is assumed to be skipped</li>
-          </ul>
-        </ul>
+        <li>Graph neural network</li>
       </ul>
       <li>Model training</li>
       <ul>
         <li>Construct dataset</li>
         <ul>
-          <li>Upsample negative data points for each reaction type</li>
+          <li>Create a snapshot of the graph at time t</li>
+          <li>Compute initial node features and edge features of the graph</li>
+          <li>Create labels</li>
         </ul>
         <li>Choose loss function</li>
-        <ul>
-          <li>Use MAE / MSE for regression task for dwell time prediction</li>
-          <li>Use cross-entropy for other binary classification predictions</li>
-          <li>\( \text{loss} = \lambda L_{\text{dwell}} + L_{\text{skip}} + L_{\text{like}} + \dots + L_{\text{share}} \)</li>
-        </ul>
       </ul>
     </ul>
   </div>
@@ -242,12 +219,12 @@
     <ul>
       <li>Offline</li>
       <ul>
-        <li>ROC-AUC</li>
+        <li>GNN - ROC-AUC</li>
+        <li>PYMK - mAP</li>
       </ul>
       <li>Online</li>
       <ul>
-        <li>Click-through rate = total number of clicked posts / total number of impressions</li>
-        <li>Reaction rate = number of liked/shared/commented/hidden/blocked/skipped posts / total number of impressions</li>
+        <li>Total number of connection requests accepted in the last X days</li>
       </ul>
     </ul>
   </div>
@@ -260,24 +237,7 @@
   <div class="card-body">
     <h2 class="card-title">Deployment and serving</h2>
 
-    <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/personalized-newsfeed2.png" alt="Card image cap">
-    <ul>
-      <li>Predidction pipeline</li>
-      <ul>
-        <li>Retrieval service</li>
-        <ul>
-          <li>Retrieves unseen posts or posts with unseen comments</li>
-        </ul>
-        <li>Ranking service</li>
-        <ul>
-          <li>Rank posts by score</li>
-        </ul>
-        <li>Re-ranking service</li>
-        <ul>
-          <li>Apply user filters</li>
-        </ul>
-      </ul>
-    </ul>
+    <img class="img-fluid" class="card-img-top" src="/img/machine-learning-system-design/people-you-may-know1.png" alt="Card image cap">
   </div>
   <div class="card-footer text-muted">
     Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
