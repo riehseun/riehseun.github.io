@@ -121,14 +121,17 @@
     <ul>
       <li>Holds partitions of topics</li>
       <li>Data storage - persists messages in a form of partitions</li>
-      <li>State storage - manages consumer states</li>
-      <li>Metadata stroage - persists configuration of topics</li>
     </ul>
 
-    <h3 class="card-title">Coordination service</h3>
+    <h3 class="card-title">Zookeeper</h3>
     <ul>
-      <li>Service discovery - checks which brokers are alive</li>
-      <li>Leader election - only one broker serves as active controller at a time, which assigns partitions in the cluster. Apache ZooKeeper or etcd are commonly used as leader elector</li>
+      <li>Metadata stroage - persists configuration of topics</li>
+      <li>State storage - manages consumer states</li>
+      <li>Coordination service</li>
+      <ul>
+        <li>Service discovery - checks which brokers are alive</li>
+        <li>Leader election - only one broker serves as active controller at a time, which assigns partitions in the cluster. Apache ZooKeeper or etcd are commonly used as leader elector</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -226,14 +229,58 @@
           <ul>
             <li>Requires long polling, which waits some time for new messages</li>
           </ul>
+          <li>Workflow</li>
+          <ul>
+            <img class="img-fluid" class="card-img-top" src="/img/system-design/distributed-message-queue3.png" alt="Card image cap">
+            <li>A new consumer wants to join group 1 and subscribe to topic A</li>
+            <li>All consumers in the same group connect to the same broker</li>
+            <li>Coordinator assignes partition 2 to consumer</li>
+            <li>Consumer fetches message from the last consumed offset, which is managed by state storage</li>
+            <li>Consumer processes messages and commits the offset to the broker</li>
+          </ul>
         </ul>
-        <img class="img-fluid" class="card-img-top" src="/img/system-design/distributed-message-queue3.png" alt="Card image cap">
-        <li>A new consumer wants to join group 1 and subscribe to topic A</li>
-        <li>All consumers in the same group connect to the same broker</li>
-        <li>Coordinator assignes partition 2 to consumer</li>
-        <li>Consumer fetches message from the last consumed offset, which is managed by state storage</li>
-        <li>Consumer processes messages and commits the offset to the broker</li>
+        <li>Consumer rebalancing</li>
+        <ul>
+          <li>Decides which consumer is responsible for which subset of partitions</li>
+          <li>Needed when consumer joins, consumer leaves, consumer crashes, paritions are adjusted</li>
+          <img class="img-fluid" class="card-img-top" src="/img/system-design/distributed-message-queue4.png" alt="Card image cap">
+          <li>Each consumer belongs to a group. Each consumer finds the coordinator by hashing the group name. All consumers from the same group are connected to the same coordinator</li>
+          <li>Coordinator elects new leader for the group</li>
+          <li>Leader generates new partition dispatch plan and reports it back to coordinator. Coordinator broadcasts the plan to other consumers in the group</li>
+        </ul>
       </ul>
+    </ul>
+
+    <h3 class="card-title">Replication</h3>
+    <ul>
+      <li>For example, each partition having 3 replica means that 1 leader and 2 followers are distributed in different brokers</li>
+      <li>Messages are only written to the leader, and followers sync messages from leader</li>
+      <li>In-sync replica - replicas that are in-sync with the leader</li>
+      <li>ACK=all</li>
+      <ul>
+        <li>Producer get ACK when all in-sync replicas received the message</li>
+        <li>High latency but strong message durability</li>
+      </ul>
+      <li>ACK=1</li>
+      <ul>
+        <li>Producer get ACK when leader received the message</li>
+        <li>Low latency but occasional data loss</li>
+      </ul>
+      <li>ACK=0</li>
+      <ul>
+        <li>Produces send messages to leader without waiting for any ACK</li>
+        <li>Suitable for collecting metrics or logging data</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Scalability</h3>
+    <ul>
+      <li></li>
+    </ul>
+
+    <h3 class="card-title">Data delivery semantics</h3>
+    <ul>
+      <li></li>
     </ul>
   </div>
   <div class="card-footer text-muted">
