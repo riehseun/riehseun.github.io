@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="/img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/monokai-sublime.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="/js/jquery.min.js" type="text/javascript"></script>
+<script src="/js/bootstrap.bundle.min.js" type="text/javascript"></script>
+<script src="/js/highlight.pack.js" type="text/javascript"></script>
+<script src="/js/include_html.js" type="text/javascript"></script>
+<script src="/js/mathjax/tex-chtml.js" type="text/javascript"></script>
+<script src="/js/site.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<include src="/header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Software Engineering</h1>
+
+<!-- Proximity Service BEGIN -->
+<div class="card mb-4" id="proximity-service">
+  <div class="card-body">
+    <h2 class="card-title">Proximity Service</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#proximity-service-1">Requirement</a></li>
+      <li><a href="#proximity-service-2">Estimation</a></li>
+      <li><a href="#proximity-service-3">High level design</a></li>
+      <li><a href="#proximity-service-4">API</a></li>
+      <li><a href="#proximity-service-5">Storage schema</a></li>
+      <li><a href="#proximity-service-6">Detailed design</a></li>
+      <li><a href="#proximity-service-7">Evaluation</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="proximity-service-1">
+  <div class="card-body">
+    <h2 class="card-title">Requirement</h2>
+
+    <h3 class="card-title">Functional</h3>
+    <ul>
+      <li>What is the radius of search? User can specify the radius and We can only care about businesses within that radius</li>
+      <li>What is the maxium radius allowed? 20km</li>
+      <li>Can user change the radius on UI? Yes, we should support these options (0.5km, 1km, 2km, 5km, 20km)</li>
+      <li>How is business information get added or updated? Business owners can add or udpate business info</li>
+    </ul>
+
+    <h3 class="card-title">Non-functional</h3>
+    <ul>
+      <li>Availability</li>
+      <li>Reliability</li>
+      <li>Scalability</li>
+      <li>Performance</li>
+      <li>Consistency</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
+  </div>
+</div>
+
+<div class="card mb-4" id="proximity-service-2">
+  <div class="card-body">
+    <h2 class="card-title">Estimation</h2>
+
+    <h3 class="card-title">Server</h3>
+
+    <h3 class="card-title">Storage</h3>
+
+    <h3 class="card-title">Bandwidth</h3>
+    <ul>
+      <li>Assume 100M daily active users</li>
+      <li>Assume each user makes 5 queries per day</li>
+      <li>Incoming - 100M * 5 / 86400 = x queries per second</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
+  </div>
+</div>
+
+<div class="card mb-4" id="proximity-service-3">
+  <div class="card-body">
+    <h2 class="card-title">High level design</h2>
+
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/proximity-service1.png" alt="Card image cap">
+
+    <h3 class="card-title">Location based service</h3>
+    <ul>
+      <li>Read heavy service with no write requests</li>
+      <li>High QPS</li>
+      <li>Stateless, thus can easily scale horizontally</li>
+    </ul>
+
+    <h3 class="card-title">Business service</h3>
+    <ul>
+      <li>Write QPS is not high</li>
+      <li>Viewing businesses (read QPS) can be high during peak hours</li>
+    </ul>
+
+    <h3 class="card-title">Business service</h3>
+    <ul>
+      <li>Write operation is written to primary and propagated to replicas</li>
+      <li>Consistency is not a concern since businesses don't need to be udpated real time</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
+  </div>
+</div>
+
+<div class="card mb-4" id="proximity-service-4">
+  <div class="card-body">
+    <h2 class="card-title">API</h2>
+    <ul>
+      <li>GET /v1/search/nearby - return businesses</li>
+      <li>GET /v1/businesses/id - return detailed info about a business</li>
+      <li>POST /v1/businesses - add a business</li>
+      <li>PUT /v1/businesses/id - update a business</li>
+      <li>DELETE /v1/businesses/id - delete a business</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
+  </div>
+</div>
+
+<div class="card mb-4" id="proximity-service-5">
+  <div class="card-body">
+    <h2 class="card-title">Storage schema</h2>
+    <ul>
+      <li>Ready is heavy due to seaching businesses and viewing business information</li>
+      <li>Write is low</li>
+      <li>Choose MySQL</li>
+    </ul>
+
+    <h3 class="card-title">Business</h3>
+    <ul>
+      <li>business_id (int, pk)</li>
+      <li>address</li>
+      <li>city</li>
+      <li>state</li>
+      <li>country</li>
+      <li>latitude</li>
+      <li>longitude</li>
+    </ul>
+
+    <h3 class="card-title">Geo index</h3>
+    <ul>
+      <li></li>
+      <li></li>
+      <li></li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
+  </div>
+</div>
+
+<div class="card mb-4" id="proximity-service-6">
+  <div class="card-body">
+    <h2 class="card-title">Detailed design</h2>
+
+    <h3 class="card-title">Data storage</h3>
+    <ul>
+      <li>Traffic pattern of message queue</li>
+      <ul>
+        <li>Both read-heavy and write-heavy</li>
+        <li>No update or delete operation</li>
+        <li>Mostly sequential read/write access</li>
+      </ul>
+      <li>Database is hard to be suitable for both read-heavy and write-heavy access pattern</li>
+      <li>Write-ahead log (WAL) has pure sequential read/write access pattern</li>
+      <ul>
+        <li>Messages can be stored as WAL on disk</li>
+        <li>Disk is slow for random access but it can be fast for sequential access</li>
+        <li>New messages are appended to the tail of a partition</li>
+        <li>Partition is divided into segments where active segments serve writes and inactive segments serve reads</li>
+        <li>Old inactive segments can be truncated</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Message data structure</h3>
+    <ul>
+      <li>key - used to determine the partition of message by hash(key) % number_of_partitions</li>
+      <li>value - payload of message</li>
+      <li>topic - topic that message belongs to</li>
+      <li>partition - partition id that message belongs to</li>
+      <li>offset - position of message in partition</li>
+      <li>timestamp - timestamp of when message was stored</li>
+      <li>size - size of message</li>
+      <li>crc - cyclic redundancy check used to ensure data integrity</li>
+    </ul>
+
+    <h3 class="card-title">Batching</h3>
+    <ul>
+      <li>Message queue</li>
+      <ul>
+        <li>There is trade-off between throughput and latency</li>
+        <li>Smaller batch size (thus, small throughput) leads to low latency and vice-versa</li>
+      </ul>
+      <li>Producer</li>
+      <ul>
+        <img class="img-fluid" class="card-img-top" src="/img/system-design/proximity-service2.png" alt="Card image cap">
+        <li>Batching buffers messages in memory and send out larger batches in a single request, which increases throughput</li>
+        <li>Routing decides which replica/partition should the message go to</li>
+        <li>Leader replica receives the message and follower replicas pull data from leader</li>
+      </ul>
+      <li>Consumer</li>
+      <ul>
+        <li>Brokers push data to consumers</li>
+        <ul>
+          <li>Pros</li>
+          <ul>
+            <li>Messages are propagated immediately, thus lower latency</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Consumers could be overwhelmed</li>
+          </ul>
+        </ul>
+        <li>Consumers pull data from brokers</li>
+        <ul>
+          <li>Pros</li>
+          <ul>
+            <li>Consumers can control consumption rate, which is suitable for batch processing</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Requires long polling, that waits some time for new messages</li>
+          </ul>
+          <li>Workflow</li>
+          <ul>
+            <img class="img-fluid" class="card-img-top" src="/img/system-design/proximity-service3.png" alt="Card image cap">
+            <li>A new consumer wants to join group 1 and subscribes to topic A</li>
+            <li>All consumers in the same group connect to the same broker</li>
+            <li>Coordinator assigns partition 2 to consumer</li>
+            <li>Consumer fetches message from the last consumed offset, which is managed by state storage</li>
+            <li>Consumer processes messages and commits the offset to the broker</li>
+          </ul>
+        </ul>
+        <li>Consumer rebalancing</li>
+        <ul>
+          <li>Decides which consumer is responsible for which subset of partitions</li>
+          <li>Needed when consumer joins, consumer leaves, consumer crashes, paritions are adjusted</li>
+          <img class="img-fluid" class="card-img-top" src="/img/system-design/proximity-service4.png" alt="Card image cap">
+          <li>Each consumer belongs to a group. Each consumer finds the coordinator by hashing the group name. All consumers from the same group are connected to the same coordinator</li>
+          <li>Coordinator elects new leader for the group</li>
+          <li>Leader generates new partition dispatch plan and reports it back to coordinator. Coordinator broadcasts the plan to other consumers in the group</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Replication</h3>
+    <ul>
+      <li>For example, each partition having 3 replica means that 1 leader and 2 followers are distributed in different brokers</li>
+      <li>Messages are only written to the leader, and followers sync messages from leader</li>
+      <li>In-sync replica - replicas that are in-sync with the leader</li>
+      <li>ACK=all</li>
+      <ul>
+        <li>Producers get ACK when all in-sync replicas received the message</li>
+        <li>High latency but strong message durability</li>
+      </ul>
+      <li>ACK=1</li>
+      <ul>
+        <li>Producers get ACK when leader received the message</li>
+        <li>Low latency but occasional data loss</li>
+      </ul>
+      <li>ACK=0</li>
+      <ul>
+        <li>Producers send messages to leader without waiting for any ACK</li>
+        <li>Suitable for collecting metrics or logging data</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Scalability</h3>
+    <ul>
+      <li>Each partition of each topic will have specific number of replicas that are spread across different brokers</li>
+      <li>When a broker is added or removed, replicas will be re-distributed</li>
+      <li>When a partition is added to a topic, messages will also be persisted in the newly added partition</li>
+      <li>When a partition is removed from a topic, producers only send messages to remaining partitions but consumers still consume from removed partition during certain retention period</li>
+    </ul>
+
+    <h3 class="card-title">Data delivery semantics</h3>
+    <ul>
+      <li>At most once</li>
+      <ul>
+        <li>ACK=0</li>
+        <li>Consumer fetches the message and commits the offset before data is processed</li>
+        <li>If consumer crashes just after offset commit, message will not be re-consumed</li>
+      </ul>
+      <li>At least once</li>
+      <ul>
+        <li>ACK=1 or ACK=all</li>
+        <li>Consumer fetches the message and commits the offset only after data is processed</li>
+        <li>If consumer fails to process the message, it will re-consume the message (There is no data loss)</li>
+        <li>If consumer processes the message but fails to commit offset to broker, it will re-consume the message (There will be duplicates)</li>
+      </ul>
+      <li>Exactly once</li>
+      <ul>
+        <li>High cost for system performance and complexity</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
+  </div>
+</div>
+
+<div class="card mb-4" id="proximity-service-7">
+  <div class="card-body">
+    <h2 class="card-title">Evaluation</h2>
+
+    <h3 class="card-title">Availability</h3>
+    <ul>
+      <li>Replication</li>
+      <ul>
+        <li>Replicate each server and DB</li>
+        <li>Replicate entire components to different zone or geographical region</li>
+      </ul>
+      <li>Fail over</li>
+      <ul>
+        <li></li>
+        <li></li>
+      </ul>
+    </ul>
+
+    <h4 class="card-title">Reliability</h4>
+    <ul>
+      <li>Data loss</li>
+    </ul>
+
+    <h3 class="card-title">Scalability</h3>
+    <ul>
+      <li>Horizontal scaling</li>
+      <li>Data partitioning</li>
+    </ul>
+
+    <h4 class="card-title">Performance</h4>
+    <ul>
+      <li></li>
+      <li></li>
+    </ul>
+    </ul>
+
+    <h3 class="card-title">Consistency</h3>
+    <ul>
+      <li></li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
+  </div>
+</div>
+<!-- Proximity Service END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+</html>
