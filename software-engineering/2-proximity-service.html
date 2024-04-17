@@ -229,145 +229,32 @@
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
 
-    <h3 class="card-title">Data storage</h3>
+    <h3 class="card-title">Scaling DB</h3>
     <ul>
-      <li>Traffic pattern of message queue</li>
+      <li>Business table</li>
       <ul>
-        <li>Both read-heavy and write-heavy</li>
-        <li>No update or delete operation</li>
-        <li>Mostly sequential read/write access</li>
+        <li>Shard based on business ID</li>
       </ul>
-      <li>Database is hard to be suitable for both read-heavy and write-heavy access pattern</li>
-      <li>Write-ahead log (WAL) has pure sequential read/write access pattern</li>
+      <li>Geospatial index table (Geohash)</li>
       <ul>
-        <li>Messages can be stored as WAL on disk</li>
-        <li>Disk is slow for random access but it can be fast for sequential access</li>
-        <li>New messages are appended to the tail of a partition</li>
-        <li>Partition is divided into segments where active segments serve writes and inactive segments serve reads</li>
-        <li>Old inactive segments can be truncated</li>
+        <li>geohash</li>
+        <li>business_id</li>
+        <li>The table is not large, thus have multiple read replicas instead of sharding</li>
       </ul>
     </ul>
 
-    <h3 class="card-title">Message data structure</h3>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/proximity-service2.png" alt="Card image cap">
+
+    <h3 class="card-title">Caching</h3>
     <ul>
-      <li>key - used to determine the partition of message by hash(key) % number_of_partitions</li>
-      <li>value - payload of message</li>
-      <li>topic - topic that message belongs to</li>
-      <li>partition - partition id that message belongs to</li>
-      <li>offset - position of message in partition</li>
-      <li>timestamp - timestamp of when message was stored</li>
-      <li>size - size of message</li>
-      <li>crc - cyclic redundancy check used to ensure data integrity</li>
+      <li>Pre-compute list of business IDs for a given geohash and store it in key-value store like Redis</li>
+      <li>Cache data on Redis on different geohash precisions (Ex. 4, 5, 6)</li>
     </ul>
 
-    <h3 class="card-title">Batching</h3>
+    <h3 class="card-title">Region and availability zones</h3>
     <ul>
-      <li>Message queue</li>
-      <ul>
-        <li>There is trade-off between throughput and latency</li>
-        <li>Smaller batch size (thus, small throughput) leads to low latency and vice-versa</li>
-      </ul>
-      <li>Producer</li>
-      <ul>
-        <img class="img-fluid" class="card-img-top" src="/img/system-design/proximity-service2.png" alt="Card image cap">
-        <li>Batching buffers messages in memory and send out larger batches in a single request, which increases throughput</li>
-        <li>Routing decides which replica/partition should the message go to</li>
-        <li>Leader replica receives the message and follower replicas pull data from leader</li>
-      </ul>
-      <li>Consumer</li>
-      <ul>
-        <li>Brokers push data to consumers</li>
-        <ul>
-          <li>Pros</li>
-          <ul>
-            <li>Messages are propagated immediately, thus lower latency</li>
-          </ul>
-          <li>Cons</li>
-          <ul>
-            <li>Consumers could be overwhelmed</li>
-          </ul>
-        </ul>
-        <li>Consumers pull data from brokers</li>
-        <ul>
-          <li>Pros</li>
-          <ul>
-            <li>Consumers can control consumption rate, which is suitable for batch processing</li>
-          </ul>
-          <li>Cons</li>
-          <ul>
-            <li>Requires long polling, that waits some time for new messages</li>
-          </ul>
-          <li>Workflow</li>
-          <ul>
-            <img class="img-fluid" class="card-img-top" src="/img/system-design/proximity-service3.png" alt="Card image cap">
-            <li>A new consumer wants to join group 1 and subscribes to topic A</li>
-            <li>All consumers in the same group connect to the same broker</li>
-            <li>Coordinator assigns partition 2 to consumer</li>
-            <li>Consumer fetches message from the last consumed offset, which is managed by state storage</li>
-            <li>Consumer processes messages and commits the offset to the broker</li>
-          </ul>
-        </ul>
-        <li>Consumer rebalancing</li>
-        <ul>
-          <li>Decides which consumer is responsible for which subset of partitions</li>
-          <li>Needed when consumer joins, consumer leaves, consumer crashes, paritions are adjusted</li>
-          <img class="img-fluid" class="card-img-top" src="/img/system-design/proximity-service4.png" alt="Card image cap">
-          <li>Each consumer belongs to a group. Each consumer finds the coordinator by hashing the group name. All consumers from the same group are connected to the same coordinator</li>
-          <li>Coordinator elects new leader for the group</li>
-          <li>Leader generates new partition dispatch plan and reports it back to coordinator. Coordinator broadcasts the plan to other consumers in the group</li>
-        </ul>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Replication</h3>
-    <ul>
-      <li>For example, each partition having 3 replica means that 1 leader and 2 followers are distributed in different brokers</li>
-      <li>Messages are only written to the leader, and followers sync messages from leader</li>
-      <li>In-sync replica - replicas that are in-sync with the leader</li>
-      <li>ACK=all</li>
-      <ul>
-        <li>Producers get ACK when all in-sync replicas received the message</li>
-        <li>High latency but strong message durability</li>
-      </ul>
-      <li>ACK=1</li>
-      <ul>
-        <li>Producers get ACK when leader received the message</li>
-        <li>Low latency but occasional data loss</li>
-      </ul>
-      <li>ACK=0</li>
-      <ul>
-        <li>Producers send messages to leader without waiting for any ACK</li>
-        <li>Suitable for collecting metrics or logging data</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Scalability</h3>
-    <ul>
-      <li>Each partition of each topic will have specific number of replicas that are spread across different brokers</li>
-      <li>When a broker is added or removed, replicas will be re-distributed</li>
-      <li>When a partition is added to a topic, messages will also be persisted in the newly added partition</li>
-      <li>When a partition is removed from a topic, producers only send messages to remaining partitions but consumers still consume from removed partition during certain retention period</li>
-    </ul>
-
-    <h3 class="card-title">Data delivery semantics</h3>
-    <ul>
-      <li>At most once</li>
-      <ul>
-        <li>ACK=0</li>
-        <li>Consumer fetches the message and commits the offset before data is processed</li>
-        <li>If consumer crashes just after offset commit, message will not be re-consumed</li>
-      </ul>
-      <li>At least once</li>
-      <ul>
-        <li>ACK=1 or ACK=all</li>
-        <li>Consumer fetches the message and commits the offset only after data is processed</li>
-        <li>If consumer fails to process the message, it will re-consume the message (There is no data loss)</li>
-        <li>If consumer processes the message but fails to commit offset to broker, it will re-consume the message (There will be duplicates)</li>
-      </ul>
-      <li>Exactly once</li>
-      <ul>
-        <li>High cost for system performance and complexity</li>
-      </ul>
+      <li>For example, users from US West should be connected to data centers in US West</li>
+      <li>High density regions (Ex. Japan, Korea) should be in separate regions</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
