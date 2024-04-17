@@ -69,7 +69,7 @@
       <li><a href="#dynamicprogramming-">Best time to buy and sell stock IV</a></li>
       <li><a href="#dynamicprogramming-">House robber</a></li>
       <li><a href="#dynamicprogramming-">Coin change</a></li>
-      <li><a href="#dynamicprogramming-">Partition equal subset sum</a></li>
+      <li><a href="#dynamicprogramming-">Partition equal subset su=m</a></li>
       <li><a href="#dynamicprogramming-">Target sum</a></li>
       <li><a href="#dynamicprogramming-">Race car</a></li>
       <li><a href="#dynamicprogramming-">Nth tribonacci number</a></li>
@@ -282,9 +282,9 @@
                 else:
                     dp[i][j] = dp[i-1][j] + dp[i][j-1]
 
-        for i in range(m+1):
-            for j in range(n+1):
-                print(dp[i][j])
+        # for i in range(m+1):
+        #     for j in range(n+1):
+        #         print(dp[i][j])
 
         return dp[m][n]</code></pre>
   </div>
@@ -297,7 +297,45 @@
   <div class="card-body">
     <h2 class="card-title">Unique paths II (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def uniquePathsWithObstacles(self, obstacleGrid: List[List[int]]) -> int:
+
+        # Each cell container the number of unique path leading
+        # up to it. The value at a cell is the addition of its left
+        # and up cell
+        #   0 1 2 3 4 5 6 7
+        # 0 0 0 0 0 0 0 0 0
+        # 1 0 1 1 1 1 1 1 1
+        # 2 0 1 2 3 4 5 6 7
+        # 3 0 1 3 6 10 15 21 28
+
+        m = len(obstacleGrid)
+        n = len(obstacleGrid[0])
+
+        dp = [[0]*(n+1) for _ in range(m+1)]
+
+        # Time O(mn)
+        # Space O(mn)
+        for i in range(1,m+1):
+            for j in range(1,n+1):
+                if i == 1 and j == 1:
+                    # If obstacle is at the entrance
+                    if obstacleGrid[i-1][j-1] == 1:
+                        break
+                    else:
+                        dp[i][j] = 1
+                else:
+                    # If obstacle exists
+                    if obstacleGrid[i-1][j-1] == 1:
+                        dp[i][j] = 0
+                    else:
+                        dp[i][j] = dp[i-1][j] + dp[i][j-1]
+
+        # for i in range(m+1):
+        #     for j in range(n+1):
+        #         print(dp[i][j])
+
+        return dp[m][n]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/unique-paths-ii">63. Unique Paths II</a>
@@ -308,7 +346,38 @@
   <div class="card-body">
     <h2 class="card-title">Minimum path sum (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def minPathSum(self, grid: List[List[int]]) -> int:
+
+        #   0 1 2 3 4 5 6 7
+        # 0 0 0 0 0 0 0 0 0
+        # 1 0 1
+        # 2 0
+        # 3 0
+
+        m = len(grid)
+        n = len(grid[0])
+
+        dp = [[0]*(n+1) for _ in range(m+1)]
+
+        # Time O(mn)
+        # Space O(mn)
+        for i in range(1,m+1):
+            for j in range(1,n+1):
+                if i == 1 and j == 1:
+                    dp[i][j] = grid[i-1][j-1]  # grid[0][0]
+                elif i == 1 and j > 1:
+                    dp[i][j] = grid[i-1][j-1] + dp[i][j-1]
+                elif i > 1 and j == 1:
+                    dp[i][j] = grid[i-1][j-1] + dp[i-1][j]
+                elif i > 1 and j > 1:
+                    dp[i][j] = grid[i-1][j-1] + min(dp[i-1][j], dp[i][j-1])
+
+        # for i in range(m+1):
+        #     for j in range(n+1):
+        #         print(dp[i][j])
+
+        return dp[m][n]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/minimum-path-sum">64. Minimum Path Sum</a>
