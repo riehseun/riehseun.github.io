@@ -65,6 +65,7 @@
       <li>What is the maxium radius allowed? 20km</li>
       <li>Can user change the radius on UI? Yes, we should support these options (0.5km, 1km, 2km, 5km, 20km)</li>
       <li>How is business information get added or updated? Business owners can add or udpate business info</li>
+      <li>Should the system update or refresh search result as users are moving and the location is being updated? No</li>
     </ul>
 
     <h3 class="card-title">Non-functional</h3>
@@ -93,7 +94,7 @@
     <ul>
       <li>Assume 100M daily active users</li>
       <li>Assume each user makes 5 queries per day</li>
-      <li>Incoming - 100M * 5 / 86400 = x queries per second</li>
+      <li>Incoming - (100M * 5 / 86400) queries per second</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -120,7 +121,7 @@
       <li>Viewing businesses (read QPS) can be high during peak hours</li>
     </ul>
 
-    <h3 class="card-title">Business service</h3>
+    <h3 class="card-title">Database cluster</h3>
     <ul>
       <li>Write operation is written to primary and propagated to replicas</li>
       <li>Consistency is not a concern since businesses don't need to be udpated real time</li>
@@ -131,7 +132,7 @@
       <li>Two dimensional search</li>
       <ul>
         <li>Draw a circle in pre-defined radius</li>
-        <li>Long search time having to scan the whole DB</li>
+        <li>Need to scan the whole DB, thus long search time </li>
         <li>Building indices on latitude and longitude does not help because indexing works on one dimension only</li>
       </ul>
       <li>Evenly divided grid</li>
@@ -168,7 +169,6 @@
       <li>Google S2</li>
       <ul>
         <li>Maps a sphere into 1D index based on Hilbert curve</li>
-        <li></li>
       </ul>
     </ul>
   </div>
@@ -197,7 +197,7 @@
   <div class="card-body">
     <h2 class="card-title">Storage schema</h2>
     <ul>
-      <li>Ready is heavy due to seaching businesses and viewing business information</li>
+      <li>Read is heavy due to seaching businesses and viewing business information</li>
       <li>Write is low</li>
       <li>Choose MySQL</li>
     </ul>
@@ -215,9 +215,8 @@
 
     <h3 class="card-title">Geo index</h3>
     <ul>
-      <li></li>
-      <li></li>
-      <li></li>
+      <li>Geohash</li>
+      <li>business_id</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -237,13 +236,9 @@
       </ul>
       <li>Geospatial index table (Geohash)</li>
       <ul>
-        <li>geohash</li>
-        <li>business_id</li>
         <li>The table is not large, thus have multiple read replicas instead of sharding</li>
       </ul>
     </ul>
-
-    <img class="img-fluid" class="card-img-top" src="/img/system-design/proximity-service2.png" alt="Card image cap">
 
     <h3 class="card-title">Caching</h3>
     <ul>
@@ -255,6 +250,26 @@
     <ul>
       <li>For example, users from US West should be connected to data centers in US West</li>
       <li>High density regions (Ex. Japan, Korea) should be in separate regions</li>
+      <li>For some regions, employing DNS routing to limit requests only in those regions is needed to respect privacy laws</li>
+    </ul>
+
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/proximity-service2.png" alt="Card image cap">
+
+    <h3 class="card-title">Workflow</h3>
+    <ul>
+      <li>Get nearby business</li>
+      <ul>
+        <li>Client sends latitude, longitude, radius to load balancer, which in turn gets sent to location based service</li>
+        <li>Location based service finds geohash length that matches the search</li>
+        <li>Location based service calculates neighboring geohashes and adds them to list</li>
+        <li>Location based service calls Geohash Redis cache to find business IDs for each geohash</li>
+        <li>Location based service pulls businees info from Business info Redis cache based on the business IDs</li>
+      </ul>
+      <li>View/add/update/delete business</li>
+      <ul>
+        <li>Business service first checks Business info Redis cache</li>
+        <li>If not, Business service fetches data from DB and data is stored in Redis cache</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
