@@ -46,6 +46,7 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#decision-tree-">Decision tree</a></li>
       <li><a href="#decision-tree-">Hyperparameters</a></li>
+      <li><a href="#decision-tree-">Example - heart disease</a></li>
     </ul>
   </div>
 </div>
@@ -174,29 +175,29 @@ def grid_search(params, reg=DecisionTreeRegressor(random_state=2)):
 # Training score: 888.905
 # Test score: 878.538</code></pre></li>
       </ul>
-      <li>max_leaf_nodes</li>
+      <li><code>max_leaf_nodes</code></li>
       <ul>
         <li>Maximum total number of leaves</li>
       </ul>
-      <li>max_features</li>
+      <li><code>max_features</code></li>
       <ul>
         <li>Instead of considering every possible feature for a split, chooese from a set of features each round</li>
         <li><code>auto</code> - no limitation (default option)</li>
         <li><code>sqrt</code> - square root of total number of features</li>
         <li><code>log2</code> - for example, 32 columns resolve to 5 (2^5 = 32)</li>
       </ul>
-      <li>min_samples_split</li>
+      <li><code>min_samples_split</code></li>
       <ul>
         <li>Number of samples need to be present before a split can be made</li>
         <li>2 by default</li>
       </ul>
-      <li>splitter</li>
+      <li><code>splitter</code></li>
       <ul>
         <li>How to select feature to split each branch</li>
         <li><code>best</code> - selects feature that result in greatest gain of information</li>
         <li><code>random</code> - recommended choice for preventing overfitting</li>
       </ul>
-      <li>criterion</li>
+      <li><code>criterion</code></li>
       <ul>
         <li>For each possible split, calculates a number for a possible split and compares it to other options</li>
         <li>Split with the best score wins</li>
@@ -212,7 +213,7 @@ def grid_search(params, reg=DecisionTreeRegressor(random_state=2)):
           <li><code>entropy</code></li>
         </ul>
       </ul>
-      <li>min_impurity_decrease</li>
+      <li><code>min_impurity_decrease</code></li>
       <ul>
         <li>Split is made when impurity is >= min_impurity_decreas</li>
         <li>Tree with 100% accuracy has impurity 0.0. Tree with 80% accuracy has impurity 0.2</li>
@@ -220,14 +221,163 @@ def grid_search(params, reg=DecisionTreeRegressor(random_state=2)):
         <li>Split that results in greatest decrease of impurity is chosen for each node</li>
         <li>0.0 by default</li>
       </ul>
-      <li>min_weight_fraction_leaf</li>
-      <li>ccp_alpha</li>
+      <li><code>min_weight_fraction_leaf</code></li>
+      <li><code>ccp_alpha</code></li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Hands-On Gradient Boosting with XGBoost and scikit-learn, Corey Wade
+  </div>
+</div>
+
+<div class="card mb-4" id="decision-tree-">
+  <div class="card-body">
+    <h2 class="card-title">Example - heart disease</h2>
+
+<pre><code class="python">df_heart = pd.read_csv('heart_disease.csv')
+
+# Split data into X and y
+X = df_heart.iloc[:,:-1]
+y = df_heart.iloc[:,-1]
+
+# Split data into train and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=2)</code></pre>
+
+    <h3 class="card-title">Baseline model</h3>
+
+<pre><code class="python"># Initialize Decision Tree Classifier
+model = DecisionTreeClassifier(random_state=2)
+
+# Obtain scores of cross-validation
+scores = cross_val_score(model, X, y, cv=5)
+
+# Display accuracy
+print('Accuracy:', np.round(scores, 2))
+
+# Display mean accuracy
+print('Accuracy mean: %0.2f' % (scores.mean()))
+
+# Accuracy: [0.74 0.85 0.77 0.73 0.7 ]
+# Accuracy mean: 0.76</code></pre>
+
+    <h3 class="card-title">RandomizedSearchCV</h3>
+    <ul>
+      <li>Instead of trying all hyperparameters (GridSearchCV), try random number of combinations</li>
     </ul>
 
-    <!-- <img class="img-fluid" class="card-img-top" src="/img/machine-learning/attention1.png" style="width: 500px; height: 500px" alt="Card image cap"> -->
+<pre><code class="python">from sklearn.model_selection import RandomizedSearchCV
 
-<pre><code class="python"></code></pre>
+def randomized_search_clf(params, runs=20, clf=DecisionTreeClassifier(random_state=2)):
 
+    # Instantiate GridSearchCV as grid_reg
+    rand_clf = RandomizedSearchCV(clf, params, n_iter=runs,
+                                  cv=5, n_jobs=-1, random_state=2)
+
+    # Fit grid_reg on X_train and y_train
+    rand_clf.fit(X_train, y_train)
+
+    # Extract best estimator
+    best_model = rand_clf.best_estimator_
+
+    # Extract best score
+    best_score = rand_clf.best_score_
+
+    # Print best score
+    print("Training score: {:.3f}".format(best_score))
+
+    # Predict test set labels
+    y_pred = best_model.predict(X_test)
+
+    # Compute accuracy
+    accuracy = accuracy_score(y_test, y_pred)
+
+    # Print accuracy
+    print('Test score: {:.3f}'.format(accuracy))
+
+    # Return best model
+    return best_model</code></pre>
+
+    <h3 class="card-title">Initial search</h3>
+
+<pre><code class="python">randomized_search_clf(params={'criterion':['entropy', 'gini'],
+    'splitter':['random', 'best'],
+    'min_weight_fraction_leaf':[0.0, 0.0025, 0.005, 0.0075, 0.01],
+    'min_samples_split':[2, 3, 4, 5, 6, 8, 10],
+    'min_samples_leaf':[1, 0.01, 0.02, 0.03, 0.04],
+    'min_impurity_decrease':[0.0, 0.0005, 0.005, 0.05, 0.10, 0.15, 0.2],
+    'max_leaf_nodes':[10, 15, 20, 25, 30, 35, 40, 45, 50, None],
+    'max_features':['auto', 0.95, 0.90, 0.85, 0.80, 0.75, 0.70],
+    'max_depth':[None, 2,4,6,8],
+    'min_weight_fraction_leaf':[0.0, 0.0025, 0.005, 0.0075, 0.01, 0.05]
+})
+
+# Training score: 0.798
+# Test score: 0.855
+# DecisionTreeClassifier(criterion='entropy', max_depth=8, max_features=0.8,
+#                        max_leaf_nodes=45, min_samples_leaf=0.04,
+#                        min_samples_split=10, min_weight_fraction_leaf=0.05,
+#                        random_state=2)</code></pre>
+
+    <h3 class="card-title">Narrowed search</h3>
+
+<pre><code class="python">randomized_search_clf(params={'max_depth':[None, 6, 7],
+    'max_features':['auto', 0.78],
+    'max_leaf_nodes':[45, None],
+    'min_samples_leaf':[1, 0.035, 0.04, 0.045, 0.05],
+    'min_samples_split':[2, 9, 10],
+    'min_weight_fraction_leaf': [0.0, 0.05, 0.06, 0.07],
+},
+runs=100)
+
+# Training score: 0.802
+# Test score: 0.868
+# DecisionTreeClassifier(max_depth=7, max_features=0.78, max_leaf_nodes=45,
+#                        min_samples_leaf=0.045, min_samples_split=9,
+#                        min_weight_fraction_leaf=0.06, random_state=2)</code></pre>
+
+    <h3 class="card-title">Check against baseline model</h3>
+
+<pre><code class="python"># Initialize Decision Tree Classifier
+model = DecisionTreeClassifier(class_weight=None, criterion='gini', max_depth=7,
+            max_features=0.78, max_leaf_nodes=45,
+            min_impurity_decrease=0.0, min_impurity_split=None,
+            min_samples_leaf=0.045, min_samples_split=9,
+            min_weight_fraction_leaf=0.06, presort=False, random_state=2,
+            splitter='best')
+
+# Obtain scores of cross-validation
+scores = cross_val_score(model, X, y, cv=5)
+
+# Display accuracy
+print('Accuracy:', np.round(scores, 2))
+
+# Display mean accuracy
+print('Accuracy mean: %0.2f' % (scores.mean()))
+
+# Accuracy: [0.82 0.9  0.8  0.8  0.78]
+# Accuracy mean: 0.82</code></pre>
+
+    <h3 class="card-title">Feature importance</h3>
+
+<pre><code class="python">import operator
+
+best_clf = DecisionTreeClassifier(class_weight=None, criterion='gini', max_depth=7,
+    max_features=0.78, max_leaf_nodes=45,
+    min_impurity_decrease=0.0, min_impurity_split=None,
+    min_samples_leaf=0.045, min_samples_split=9,
+    min_weight_fraction_leaf=0.06, presort=False,
+    random_state=2, splitter='best')
+best_clf.fit(X, y)
+
+# Zip columns and feature_importances_ into dict
+feature_dict = dict(zip(X.columns, best_clf.feature_importances_))
+
+# Sort dict by values (as list of tuples)
+sorted(feature_dict.items(), key=operator.itemgetter(1), reverse=True)[0:3]
+
+# [('cp', 0.4840958610240171),
+# ('thal', 0.20494445570568706),
+# ('ca', 0.18069065321397942)]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: Hands-On Gradient Boosting with XGBoost and scikit-learn, Corey Wade
