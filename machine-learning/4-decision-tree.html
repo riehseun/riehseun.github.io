@@ -77,19 +77,32 @@ import numpy as np
 import warnings
 warnings.filterwarnings('ignore')
 
-df_cencus = pd.read_csv('census_cleaned.csv')
-x = df_cencus.iloc[:,:,-1]
-y = df_cencus.iloc[:,-1]
+# Load dataset 'census_cleaned.csv'
+df_census = pd.read_csv('census_cleaned.csv')
 
+# Split data into X and y
+X = df_census.iloc[:,:-1]
+y = df_census.iloc[:,-1]
+
+# Import train_test_split
 from sklearn.model_selection import train_test_split
-x_train, x_test, y_train, y_test = train_test_split(x, y, random_state=2)</code></pre>
 
-<pre><code class="python">from sklean.tree import DecisionTreeClassifier
+# Split data into train and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=2)</code></pre>
+
+<pre><code class="python">from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
 
+# Initialize classification model
 clf = DecisionTreeClassifier(random_state=2)
-clf.fit(x_train, y_train)
-y_pred = clf.predict(x_test)
+
+# Fit model on training data
+clf.fit(X_train, y_train)
+
+# Make predictions for test data
+y_pred = clf.predict(X_test)
+
+# Calculate accuracy
 accuracy_score(y_pred, y_test)</code></pre>
   </div>
   <div class="card-footer text-muted">
@@ -101,19 +114,53 @@ accuracy_score(y_pred, y_test)</code></pre>
   <div class="card-body">
     <h2 class="card-title">Hyperparameters</h2>
     <ul>
-      <li>max_depth</li>
+      <li><code>max_depth</code></li>
       <ul>
         <li>Depth of tree, determined by the number of splits</li>
         <li><pre><code class="python">from sklearn.model_selection import GridSearchCV
-params = {'max_depth': [None,2,3,4,6,8,10,20]}
-reg = DecisionTreeRegressor(random_state=2)
-grid_reg = GridSearchCV(reg, params, scoring='neg_mean_squared_error', cv=5, n_jobs=-1)
-grid_reg.fit(X_train, Y_train)
-best_params = grid_reg.best_params_</code></pre></li>
+
+def grid_search(params, reg=DecisionTreeRegressor(random_state=2)):
+
+    # Instantiate GridSearchCV as grid_reg
+    grid_reg = GridSearchCV(reg, params, scoring='neg_mean_squared_error', cv=5, n_jobs=-1)
+
+    # Fit grid_reg on X_train and y_train
+    grid_reg.fit(X_train, y_train)
+
+    # Extract best params
+    best_params = grid_reg.best_params_
+
+    # Print best params
+    print("Best params:", best_params)
+
+    # Compute best score
+    best_score = np.sqrt(-grid_reg.best_score_)
+
+    # Print best score
+    print("Training score: {:.3f}".format(best_score))
+
+    # Predict test set labels
+    y_pred = grid_reg.predict(X_test)
+
+    # Compute rmse_test
+    rmse_test = mean_squared_error(y_test, y_pred)**0.5
+
+    # Print rmse_test
+    print('Test score: {:.3f}'.format(rmse_test))</code></pre></li>
+        <li><pre><code class="python">grid_search(params={'max_depth':[None,2,3,4,6,8,10,20]})
+# Best params: {'max_depth': 6}
+# Training score: 951.398
+# Test score: 864.670</code></pre></li>
       </ul>
-      <li>min_samples_leaf</li>
+      <li><code>min_samples_leaf</code></li>
       <ul>
         <li>Minimum number of samples that a leaf must have</li>
+        <li><pre><code class="python">grid_search(params={'min_samples_leaf':[1,2,4,6,8,10,20,30]})
+# Best params: {'min_samples_leaf': 8}
+# Training score: 896.083
+# Test score: 855.620</code></pre></li>
+        <li>Combine <code>max_depth</code> and <code>min_samples_leaf</code></li>
+        <li><pre><code class="python"></code></pre></li>
       </ul>
       <li>max_leaf_nodes</li>
       <ul>
