@@ -57,9 +57,6 @@
       <li><a href="#dynamicprogramming-">Unique binary search trees</a></li>
       <li><a href="#dynamicprogramming-">Interleaving string</a></li>
       <li><a href="#dynamicprogramming-">Distinct subsequences</a></li>
-      <li><a href="#dynamicprogramming-">Pascal's triangle</a></li>
-      <li><a href="#dynamicprogramming-">Pascal's triangle II</a></li>
-      <li><a href="#dynamicprogramming-">Triangle</a></li>
       <li><a href="#dynamicprogramming-">Best time to buy and sell stock III</a></li>
       <li><a href="#dynamicprogramming-">Palindrome partitioning</a></li>
       <li><a href="#dynamicprogramming-">Word break</a></li>
@@ -543,7 +540,34 @@
   <div class="card-body">
     <h2 class="card-title">Unique binary search trees (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def numTrees(self, n: int) -> int:
+
+        # BST with 1 node has 1 possible configuration
+        # BST with 2 nodes has 2 possible configuration
+        # BST with 3 nodes has 5 possible configuration
+        # https://www.cs.cmu.edu/afs/cs/academic/class/15750-s17/ScribeNotes/lecture7.pdf
+
+        # 0 1 2 3 4 5 6 7 8
+        # 0 1 2 5 11
+
+        # Edge case
+        if n == 1 or n == 2:
+            return n
+
+        dp = [1 for _ in range(n+1)]
+        dp[1] = 1
+        dp[2] = 2
+
+        # Time O(n^2)
+        # Space O(n)
+        for i in range(3, n+1):
+            num_config = 0
+            for j in range(i):
+                num_config += (dp[j]*dp[i-j-1])
+            dp[i] = num_config
+
+        return dp[n]></code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/unique-binary-search-trees">96. Unique Binary Search Trees</a>
@@ -554,7 +578,72 @@
   <div class="card-body">
     <h2 class="card-title">Interleaving string (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def isInterleave(self, s1: str, s2: str, s3: str) -> bool:
+
+        # dp[i][j] = True if s3[:i+j] can be formed from s1[:i] and s2[:j]
+
+        # aabcc dbbca  => aa dbbc bc a c
+
+        #   0 1 2 3 4 5
+        # 0 T T T F F F
+        # 1 F F T T F F
+        # 2 F F T T T F
+        # 3 F
+        # 4 F
+        # 5 F
+
+        # Edge case
+        if s1 == "":
+            if s2 == s3:
+                return True
+            else:
+                return False
+        if s2 == "":
+            if s1 == s3:
+                return True
+            else:
+                return False
+        if s3 == "":
+            if s1 == s2 == "":
+                return True
+            else:
+                return False
+
+        n = len(s1)
+        m = len(s2)
+
+        if n + m != len(s3):
+            return False
+
+        dp = [[False]*(m+1) for _ in range(n+1)]
+        dp[0][0] = True
+        for i in range(1, n+1):
+            if s1[i-1] == s3[i-1]:
+                dp[i][0] = True
+            else:
+                break
+        for j in range(1, m+1):
+            if s2[j-1] == s3[j-1]:
+                dp[0][j] = True
+            else:
+                break
+
+        # Time O(nm) n = len(s1), m = len(s2)
+        # Space O(nm)
+        for i in range(1, n+1):
+            for j in range(1, m+1):
+                if s3[i+j-1] == s1[i-1] and dp[i-1][j]:
+                    dp[i][j] = True
+                if s3[i+j-1] == s2[j-1] and dp[i][j-1]:
+                    dp[i][j] = True
+
+        # for j in range(m+1):
+        #     for i in range(n+1):
+        #         print(dp[i][j],end=" ")
+        #     print("\n")
+
+        return dp[n][m]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/interleaving-string">97. Interleaving String</a>
@@ -565,43 +654,37 @@
   <div class="card-body">
     <h2 class="card-title">Distinct subsequences (H)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def numDistinct(self, s: str, t: str) -> int:
+
+        # babgbag bag
+
+        #   0 1 2 3 4 5 6 7
+        # 0 1 1 1 1 1 1 1 1
+        # 1 0
+        # 2 0
+        # 3 0
+
+        n = len(s)
+        m = len(t)
+
+        dp = [[0]*(m+1) for _ in range(n+1)]
+        for i in range(0, n+1):
+            dp[i][0] = 1
+
+        # Time O(nm)
+        # Space O(nm)
+        for i in range(1, n+1):
+            for j in range(1, m+1):
+                if s[i-1] == t[j-1]:
+                    dp[i][j] = dp[i-1][j-1] + dp[i-1][j]
+                else:
+                    dp[i][j] = dp[i-1][j]
+
+        return dp[n][m]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/distinct-subsequences">115. Distinct Subsequences</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="dynamicprogramming-">
-  <div class="card-body">
-    <h2 class="card-title">Pascal's triangle (E)</h2>
-
-<pre><code class="python"></code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/pascals-triangle">118. Pascal's Triangle</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="dynamicprogramming-">
-  <div class="card-body">
-    <h2 class="card-title">Pascal's triangle II (E)</h2>
-
-<pre><code class="python"></code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/pascals-triangle-ii">119. Pascal's Triangle II</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="dynamicprogramming-">
-  <div class="card-body">
-    <h2 class="card-title">Triangle (M)</h2>
-
-<pre><code class="python"></code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/triangle">120. Triangle</a>
   </div>
 </div>
 
