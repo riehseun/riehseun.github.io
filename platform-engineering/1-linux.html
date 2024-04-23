@@ -106,11 +106,16 @@
       <li>Maximum line length is 80 characters</li>
     </ul>
 
-    <h3 class="card-title">Read user inputs</h3>
+    <h3 class="card-title">Shellcheck</h3>
+    <ul>
+      <li>https://www.shellcheck.net</li>
+    </ul>
 
+    <h3 class="card-title">Example</h3>
+    <ul>
+      <li>Read user inputs</li>
 <pre><code class="bash">read USER_INPUT1 ; export USER_INPUT1
-# Makes echoing user input unavailable
-read -s USER_INPUT1 ; export USER_INPUT1
+read -s USER_INPUT1 ; export USER_INPUT1  # Hide user input
 
 read input
 if [[ "${input}" == "y" ]]; then
@@ -124,9 +129,7 @@ if [ -z "${ENV_VAR_SET_BY_USER_ACTION}" ]; then
   echo "Usage: ${0} keyword3"
   exit 1
 fi</code></pre>
-
-    <h3 class="card-title">Suppress outputs</h3>
-
+      <li>Suppress outputs</li>
 <pre><code class="bash"># Supress outputs of pushd and popd commands
 pushd () {
   command pushd "$@" > /dev/null
@@ -143,17 +146,11 @@ cat file.txt > /dev/null # suppress output
 err() {
   echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*" >&2
 }</code></pre>
-
-    <h3 class="card-title">Current and parent directory</h3>
-    <ul>
-      <li>Scripts can be executed from different path, so absolute path is needed</li>
-    </ul>
-
-<pre><code class="bash">CURRENT_DIR=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+      <li>Current and parent directory</li>
+<pre><code class="bash"># Scripts can be executed from different path, so absolute path is needed
+CURRENT_DIR=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 PARENT_DIR="$(dirname "${CURRENT_DIR}")"</code></pre>
-
-    <h3 class="card-title">File</h3>
-
+      <li>File</li>
 <pre><code class="bash"># Check if file exists
 if [ ! -f /path/file ]; then
   echo "File does not exist"
@@ -172,9 +169,7 @@ cat &lt;&lt;EOF&gt;&gt; "${file}"
   "key": "value"
 }
 EOF</code></pre>
-
-    <h3 class="card-title">Uppercase and lowercase</h3>
-
+      <li>Uppercase and lowercase</li>
 <pre><code class="bash"># Convert to uppercase
 tr a-z A-Z < file.txt
 
@@ -191,50 +186,37 @@ echo "${lowercase}" # test
 
 uppercase=${var^^}
 echo "${uppercase}" # TEST</code></pre>
-
-    <h3 class="card-title">envsubst</h3>
-
+      <li>envsubst</li>
 <pre><code class="json">{
   "field1": "${value1}",
   "field2": "${value2}",
   "field3": "${value3}"
-}</code></pre>
+}
 
-<pre><code class="bash"># "envsubst" updated above JSON
-data=$(value1="some_value1" value2="some_value2" value3="some_value3" envsubst '${value1}, ${value2}, ${value3}' < $file_name)</code>
-</pre>
-
-    <h3 class="card-title">Environment variable</h3>
-
+# "envsubst" updated above JSON
+data=$(value1="some_value1" value2="some_value2" value3="some_value3" envsubst '${value1}, ${value2}, ${value3}' < $file_name)</code></pre>
+      <li>Environment variable</li>
 <pre><code class="bash"># Add to an environment variable
-export ENV_VAR=$ENV_VAR:/path/to/add</code></pre>
+export ENV_VAR=$ENV_VAR:/path/to/add
 
-<pre><code class="bash"># Remove from an environment variable
+# Remove from an environment variable
 directory_to_remove=/path/to/remove
 ENV_VAR=:${ENV_VAR}:
 ENV_VAR=${ENV_VAR//:$directory_to_remove:/:}
 ENV_VAR=${ENV_VAR#:}; ENV_VAR=${ENV_VAR%:}</code></pre>
-
-    <h3 class="card-title">Increment a snapshot version</h3>
-
+      <li>Increment a snapshot version</li>
 <pre><code class="bash"># build.gradle
 version=$(grep version\( build.gradle | cut -d- -f1 | cut -d\' -f2)
 [[ -n $grep version\( build.gradle | grep SNAPSHOT) ]] && version=$(echo $version | awk -F\. '{print $1"."$2"."(#3-1)}')
-echo $version</code></pre>
+echo $version
 
-<pre><code class="bash"># maven-metadata.xml (in Nexus)
+# maven-metadata.xml (in Nexus)
 url=&lt;nexus_url&gt;/repository/&lt;repo_name&gt;/&lt;group_id&gt;/&lt;artifact_id&gt;/maven_metadata.xml
 current_version=$(curl -k $url | grep -Po '(?&lt;=&lt;version&gt;)([0-9\.]+(-SNAPSHOT)?)' | sort --version-sort r | head -n 1)
 incremented_version=$(echo $current_version | awk -F. -v OFS=. 'NF==1{pring ++$NF}; NF&gt;1{if(length($NF+1)&gt;length($NF))$(NF-1)++;$NF=sprintf("%0*d", length($NF), ($NF+1)%(10^length($NF))); print}')
 echo $incremented_version</code></pre>
-
-    <h3 class="card-title">Shellcheck</h3>
-
-    <ul>
-      <li>https://www.shellcheck.net</li>
     </ul>
   </div>
-
   <div class="card-footer text-muted">
     Reference: Mastering Linux Shell Scripting, Andrew Mallett
   </div>
