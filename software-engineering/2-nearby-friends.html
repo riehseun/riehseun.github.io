@@ -39,33 +39,34 @@
 <div class="col-md-12">
 <h1 class="my-4">Software Engineering</h1>
 
-<!-- Proximity service BEGIN -->
-<div class="card mb-4" id="proximity-service">
+<!-- Nearby friends BEGIN -->
+<div class="card mb-4" id="nearby-friends">
   <div class="card-body">
-    <h2 class="card-title">Proximity service</h2>
+    <h2 class="card-title">Nearby friends</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#proximity-service-1">Requirement</a></li>
-      <li><a href="#proximity-service-2">Estimation</a></li>
-      <li><a href="#proximity-service-3">High level design</a></li>
-      <li><a href="#proximity-service-4">API</a></li>
-      <li><a href="#proximity-service-5">Storage schema</a></li>
-      <li><a href="#proximity-service-6">Detailed design</a></li>
-      <li><a href="#proximity-service-7">Evaluation</a></li>
+      <li><a href="#nearby-friends-1">Requirement</a></li>
+      <li><a href="#nearby-friends-2">Estimation</a></li>
+      <li><a href="#nearby-friends-3">High level design</a></li>
+      <li><a href="#nearby-friends-4">API</a></li>
+      <li><a href="#nearby-friends-5">Storage schema</a></li>
+      <li><a href="#nearby-friends-6">Detailed design</a></li>
+      <li><a href="#nearby-friends-7">Evaluation</a></li>
     </ul>
   </div>
 </div>
 
-<div class="card mb-4" id="proximity-service-1">
+<div class="card mb-4" id="nearby-friends-1">
   <div class="card-body">
     <h2 class="card-title">Requirement</h2>
 
     <h3 class="card-title">Functional</h3>
     <ul>
-      <li>What is the radius of search? User can specify the radius and We can only care about businesses within that radius</li>
-      <li>What is the maxium radius allowed? 20km</li>
-      <li>Can user change the radius on UI? Yes, we should support these options (0.5km, 1km, 2km, 5km, 20km)</li>
-      <li>How is business information get added or updated? Business owners can add or udpate business info</li>
-      <li>Should the system update or refresh search result as users are moving and the location is being updated? No</li>
+      <li>How close do users need to be in order be considered as nearby? The number should be configurable</li>
+      <li>Is distance between users calculated based on the straight line between them? Yes</li>
+      <li>How many users are there? 1B users and 100M of them use nearby friends feature</li>
+      <li>Should the system store location history? Yes</li>
+      <li>Should the system how inactive users? No</li>
+      <li>Should the system consider privacy laws? No</li>
     </ul>
 
     <h3 class="card-title">Non-functional</h3>
@@ -82,7 +83,7 @@
   </div>
 </div>
 
-<div class="card mb-4" id="proximity-service-2">
+<div class="card mb-4" id="nearby-friends-2">
   <div class="card-body">
     <h2 class="card-title">Estimation</h2>
 
@@ -92,9 +93,9 @@
 
     <h3 class="card-title">Bandwidth</h3>
     <ul>
-      <li>Assume 100M daily active users</li>
-      <li>Assume each user makes 5 queries per day</li>
-      <li>Incoming - (100M * 5 / 86400) queries per second</li>
+      <li>Assume location refresh takes place every 30 seconds</li>
+      <li>Assume 10M out of 100M DAU are concurrent users</li>
+      <li>Incoming - (10M / 30) queries per second</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -102,85 +103,59 @@
   </div>
 </div>
 
-<div class="card mb-4" id="proximity-service-3">
+<div class="card mb-4" id="nearby-friends-3">
   <div class="card-body">
     <h2 class="card-title">High level design</h2>
 
-    <img class="img-fluid" class="card-img-top" src="/img/system-design/proximity-service1.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/nearby-friends1.png" alt="Card image cap">
 
-    <h3 class="card-title">Location based service</h3>
+    <h3 class="card-title">API servers</h3>
     <ul>
-      <li>Read heavy service with no write requests</li>
-      <li>High QPS</li>
-      <li>Stateless, thus can easily scale horizontally</li>
+      <li>Add/remove/update users</li>
     </ul>
 
-    <h3 class="card-title">Business service</h3>
+    <h3 class="card-title">WebSocket servers</h3>
     <ul>
-      <li>Write QPS is not high</li>
-      <li>Viewing businesses (read QPS) can be high during peak hours</li>
+      <li>Real-time update of friends' location</li>
+      <li>Each client maintains one persistent WebSocket connection to one WebSocket server</li>
     </ul>
 
-    <h3 class="card-title">Database cluster</h3>
+    <h3 class="card-title">Cache</h3>
     <ul>
-      <li>Write operation is written to primary and propagated to replicas</li>
-      <li>Consistency is not a concern since businesses don't need to be udpated real time</li>
+      <li>Key-value store is used to cache the most recent location for each active user</li>
+      <li>When TTL expires, location data is deleted from cache</li>
     </ul>
 
-    <h3 class="card-title">Algorithm</h3>
+    <h3 class="card-title">User DB</h3>
     <ul>
-      <li>Two dimensional search</li>
-      <ul>
-        <li>Draw a circle in pre-defined radius</li>
-        <li>Need to scan the whole DB, thus long search time </li>
-        <li>Building indices on latitude and longitude does not help because indexing works on one dimension only</li>
-      </ul>
-      <li>Evenly divided grid</li>
-      <ul>
-        <li>Divided the world into small grids</li>
-        <li>Not efficient because businesses are not evenly distributed</li>
-      </ul>
-      <li>Geohash</li>
-      <ul>
-        <li>Divided the world into small grids</li>
-        <li>Each grid is represented by alternating latitude bit and longitude bit</li>
-        <ul>
-          <li>latitude between -90 and 0 is represented by 0</li>
-          <li>latitude between 0 and 90 is represented by 1</li>
-          <li>longitude between -180 and 0 is represented by 0</li>
-          <li>longitude between 0 and 180 is represented by 1</li>
-        </ul>
-        <li>Example</li>
-        <ul>
-          <li>1001 10110 01001 11011 11010 (binary) = 9q9hvu (base32)</li>
-        </ul>
-        <li>Geohash longer than 6 is too small and less than 4 is too big</li>
-        <li>Boundary issue</li>
-        <ul>
-          <li>Geohashes sharing long common prefix is close location-wise. But two close locations may have completely different geohashes</li>
-        </ul>
-        <li>Not enough businesses</li>
-        <ul>
-          <li>Remove last digit of geohahs and use new geohash to fetch nearby businesses</li>
-        </ul>
-      </ul>
-      <li>Quadtree</li>
-      <ul>
-        <li>The root node represents the world map</li>
-        <li>Each node gets 4 children and this process repeats until no nodes have more than a certain number of businesses</li>
-        <li>Quadtree is stored in memory</li>
-        <li>Quadtree does not require much memory and can fit into a single server (But still multiple servers are needed to serve all read requests)</li>
-        <li>How to get neayby businesses</li>
-        <ul>
-          <li>Build Quadtree in memory</li>
-          <li>Start from the root until finding the node where the search origin is</li>
-          <li>Either return the businesses in that node or add businesses from its neighbors until enough businesses are returned</li>
-        </ul>
-      </ul>
-      <li>Google S2</li>
-      <ul>
-        <li>Maps a sphere into 1D index based on Hilbert curve</li>
-      </ul>
+      <li>Stores user and user friendship data</li>
+      <li>Relational DB or NoSQL can be used</li>
+    </ul>
+
+    <h3 class="card-title">Location history DB</h3>
+    <ul>
+      <li>Stores location history data</li>
+    </ul>
+
+    <h3 class="card-title">Redis Pub/Sub</h3>
+    <ul>
+      <li>Very light message bus</li>
+      <li>Channels are very cheap to create</li>
+      <li>WebSocket server of a user publishes to that user's channel in Redis Pub/Sub</li>
+      <li>Each channel of a user in Redis Pub/Sub is subscribed by WebSocket servers of that user's friends</li>
+    </ul>
+
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/nearby-friends2.png" alt="Card image cap">
+
+    <h3 class="card-title">Workflow</h3>
+    <ul>
+      <li>User sends location update to load balancer</li>
+      <li>Load balancer forwards update to WebSocket server</li>
+      <li>WebSocket server updates new location in location cache. The update refreshes TTL</li>
+      <li>WebSocket server publishes new location to user's channel in Redis Pub/Sub</li>
+      <li>Update is broadcasted to all subscribers who are user's friends</li>
+      <li>WebSocket server of friends compute the distance from the user</li>
+      <li>If distance is within search radius, new location is sent to friends. Otherwise, update is dropped</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -188,15 +163,31 @@
   </div>
 </div>
 
-<div class="card mb-4" id="proximity-service-4">
+<div class="card mb-4" id="nearby-friends-4">
   <div class="card-body">
     <h2 class="card-title">API</h2>
     <ul>
-      <li>GET /v1/search/nearby - return businesses</li>
-      <li>GET /v1/businesses/id - return detailed info about a business</li>
-      <li>POST /v1/businesses - add a business</li>
-      <li>PUT /v1/businesses/id - update a business</li>
-      <li>DELETE /v1/businesses/id - delete a business</li>
+      <li>Periodic location update</li>
+      <ul>
+        <li>Request - latitude, longigude, timestamp</li>
+        <li>Response - none</li>
+      </ul>
+      <li>Client receives location updates</li>
+      <li>WebScoket initialization</li>
+      <ul>
+        <li>Request - latitude, longigude, timestamp</li>
+        <li>Response - friends' location data</li>
+      </ul>
+      <li>Subscribe to a new friend</li>
+      <ul>
+        <li>Request - friend ID</li>
+        <li>Response - friend's latest latitude, longigude, timestamp</li>
+      </ul>
+      <li>Unsubscribe a friend</li>
+      <ul>
+        <li>Request - friend ID</li>
+        <li>Response - none</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -204,30 +195,25 @@
   </div>
 </div>
 
-<div class="card mb-4" id="proximity-service-5">
+<div class="card mb-4" id="nearby-friends-5">
   <div class="card-body">
     <h2 class="card-title">Storage schema</h2>
+
+    <h3 class="card-title">Cache</h3>
     <ul>
-      <li>Read is heavy due to seaching businesses and viewing business information</li>
-      <li>Write is low</li>
-      <li>Choose MySQL</li>
+      <li>Redis is good choice due to fast read and write as well as TTL support</li>
+      <li>Key - user_id</li>
+      <li>Value - {latitude, longigude, timestamp}</li>
     </ul>
 
-    <h3 class="card-title">Business</h3>
+    <h3 class="card-title">Location DB</h3>
     <ul>
-      <li>business_id (int, pk)</li>
-      <li>address</li>
-      <li>city</li>
-      <li>state</li>
-      <li>country</li>
+      <li>Cassandra is good choice due to heavy write workload</li>
+      <li>If using relational DB, sharding based on user ID is needed</li>
+      <li>user_id</li>
       <li>latitude</li>
-      <li>longitude</li>
-    </ul>
-
-    <h3 class="card-title">Geo index</h3>
-    <ul>
-      <li>Geohash</li>
-      <li>business_id</li>
+      <li>longigude</li>
+      <li>timestamp</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -235,7 +221,7 @@
   </div>
 </div>
 
-<div class="card mb-4" id="proximity-service-6">
+<div class="card mb-4" id="nearby-friends-6">
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
 
@@ -264,7 +250,7 @@
       <li>For some regions, employing DNS routing to limit requests only in those regions is needed to respect privacy laws</li>
     </ul>
 
-    <img class="img-fluid" class="card-img-top" src="/img/system-design/proximity-service2.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/nearby-friends2.png" alt="Card image cap">
 
     <h3 class="card-title">Workflow</h3>
     <ul>
@@ -288,7 +274,7 @@
   </div>
 </div>
 
-<div class="card mb-4" id="proximity-service-7">
+<div class="card mb-4" id="nearby-friends-7">
   <div class="card-body">
     <h2 class="card-title">Evaluation</h2>
 
@@ -333,7 +319,7 @@
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
   </div>
 </div>
-<!-- Proximity service END -->
+<!-- Nearby friends END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->
