@@ -54,10 +54,14 @@
           <li><a href="#python-">deque</a></li>
         </ul>
         <li><a href="#python-">Tuple</a></li>
+        <ul>
+          <li><a href="#python-">namedtuple</a></li>
+        </ul>
         <li><a href="#python-">Dictionary</a></li>
         <ul>
           <li><a href="#python-">defaultdict</a></li>
           <li><a href="#python-">OrderedDict</a></li>
+          <li><a href="#python-">ChainMap</a></li>
         </ul>
         <li><a href="#python-">Set</a></li>
         <ul>
@@ -242,6 +246,11 @@ recursive-include *.txt *.py</code></pre>
 <div class="card mb-4" id="python-">
   <div class="card-body">
     <h2 class="card-title">Python built-in types</h2>
+
+    <h3 class="card-title">collections</h3>
+    <ul>
+      <li>Specialized data types to replace list, dict, tuple, set</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: Expert Python Programming, Michał Jaworski & Tarek Ziadé
@@ -419,8 +428,17 @@ my_list.sort(key = lambda x: (x[0], -x[1]))
 <div class="card mb-4" id="python-">
   <div class="card-body">
     <h2 class="card-title">deque</h2>
+    <ul>
+      <li>Used when fast appends or fast pops are needed</li>
+      <li>List is used instead when random access is needed</li>
+    </ul>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">from collections import deque
+
+d = deque()
+d.append("bork")  # Add to the back
+d.appendleft("test")  # Add to the front
+d.rorate(1)  # Shift to right by 1</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: Expert Python Programming, Michał Jaworski & Tarek Ziadé
@@ -439,6 +457,24 @@ my_list.sort(key = lambda x: (x[0], -x[1]))
 
 <pre><code class="python"># Create an empty tuple
 my_tuple = ()</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Expert Python Programming, Michał Jaworski & Tarek Ziadé
+  </div>
+</div>
+
+<div class="card mb-4" id="python-">
+  <div class="card-body">
+    <h2 class="card-title">namedtuple</h2>
+    <ul>
+      <li>No need to keep track of index in tuple</li>
+    </ul>
+
+<pre><code class="python">from collections import namedtuple
+
+Parts = namedtuple("Parts", "id_num desc cost amount")
+auto_parts = Parts(id_num="1234", desc="Ford Engine", cost=1200.00, amount=10)
+print(auto_parts.id_num)  # 1234</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: Expert Python Programming, Michał Jaworski & Tarek Ziadé
@@ -502,12 +538,21 @@ sorted(my_dict, key=my_dict.get, reverse=True)</code></pre>
 <div class="card mb-4" id="python-">
   <div class="card-body">
     <h2 class="card-title">defaultdict</h2>
+    <ul>
+      <li>Assign zero as the value to any key</li>
+    </ul>
 
 <pre><code class="python"># "defaultdict": when a key does not exist, a new entry is created rather than keyError thrown
 from collections import defaultdict
 my_dict = defaultdict(int)
 my_dict = defaultdict(list)
 my_dict = defaultdict(set)</code></pre>
+
+<pre><code class="python">from collections import defaultdict
+
+d1 = defaultdict(int)
+d2 = defaultdict(list)
+d3 = defaultdict(lambda: 1)  # Set default value to 1</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: Expert Python Programming, Michał Jaworski & Tarek Ziadé
@@ -517,8 +562,36 @@ my_dict = defaultdict(set)</code></pre>
 <div class="card mb-4" id="python-">
   <div class="card-body">
     <h2 class="card-title">OrderedDict</h2>
+    <ul>
+      <li>Keep order of keys as they are added</li>
+      <li>In regular dictionary, looping over and printing the items will show different order every time the code is executed</li>
+    </ul>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">from collections import OrderedDict
+
+d = {"banana": 3, "apple": 4, "pear": 1, "orange": 2}
+new_d = OrderedDict(sorted(d.items()))
+print(new_d)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Expert Python Programming, Michał Jaworski & Tarek Ziadé
+  </div>
+</div>
+
+<div class="card mb-4" id="python-">
+  <div class="card-body">
+    <h2 class="card-title">ChainMap</h2>
+    <ul>
+      <li>Merge multiple dictionaries into one</li>
+    </ul>
+
+<pre><code class="python">from collections import ChainMap
+
+car_parts = {"hood": 500, "engine": 5000, "front_door": 750}
+car_options = {"A/C": 1000, "Turbo": 2500, "rollbar": 300}
+car_accessories = {"cover": 100, "hood_ornament": 150, "seat_cover": 99}
+car_pricing = ChainMap(car_accessories, car_options, car_parts)
+print(car_pricing["hood"])</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: Expert Python Programming, Michał Jaworski & Tarek Ziadé
@@ -1390,23 +1463,9 @@ sound.Sound(cat)  # Meow meow</code></pre>
 if __name__ == "__main__":
     get_args()</code></pre>
 
-    <h3 class="card-title"><code>collections</code></h3>
-    <ul>
-      <li>Specialized data types to replace <code>list</code>, <code>dict</code>, <code>tuple</code>, <code>set</code></li>
-    </ul>
 
-    <h4 class="card-title"><code>ChainMap</code></h4>
-    <ul>
-      <li>Merge multiple dictionaries into one</li>
-    </ul>
 
-<pre><code class="python">from collections import ChainMap
 
-car_parts = {"hood": 500, "engine": 5000, "front_door": 750}
-car_options = {"A/C": 1000, "Turbo": 2500, "rollbar": 300}
-car_accessories = {"cover": 100, "hood_ornament": 150, "seat_cover": 99}
-car_pricing = ChainMap(car_accessories, car_options, car_parts)
-print(car_pricing["hood"])</code></pre>
 
     <h4 class="card-title"><code>Counter</code></h4>
 
@@ -1417,52 +1476,13 @@ counter = Counter("superfluous")
 print(counter)  # Counter({'u': 3, 's': 2, 'o': 1, 'p': 1, 'r': 1, 'l': 1, 'f': 1, 'e': 1})
 print(counter.most_common(2))  # [('u', 3), ('s', 2)]</code></pre>
 
-    <h4 class="card-title"><code>defaultdict</code></h4>
-    <ul>
-      <li>Assign zero as the value to any key.</li>
-    </ul>
 
-<pre><code class="python">from collections import defaultdict
 
-d1 = defaultdict(int)
-d2 = defaultdict(list)
-d3 = defaultdict(lambda: 1)  # Set default value to 1</code></pre>
 
-    <h4 class="card-title"><code>deque</code></h4>
-    <ul>
-      <li>Used when fast appends or fast pops are needed</li>
-      <li>List is used instead when random access is needed</li>
-    </ul>
 
-<pre><code class="python">from collections import deque
 
-d = deque()
-d.append("bork")  # Add to the back
-d.appendleft("test")  # Add to the front
-d.rorate(1)  # Shift to right by 1</code></pre>
 
-    <h4 class="card-title"><code>namedtuple</code></h4>
-    <ul>
-      <li>No need to keep track of index in tuple</li>
-    </ul>
 
-<pre><code class="python">from collections import namedtuple
-
-Parts = namedtuple("Parts", "id_num desc cost amount")
-auto_parts = Parts(id_num="1234", desc="Ford Engine", cost=1200.00, amount=10)
-print(auto_parts.id_num)  # 1234</code></pre>
-
-    <h4 class="card-title"><code>OrderedDict</code></h4>
-    <ul>
-      <li>Keep order of keys as they are added</li>
-      <li>In regular dictionary, looping over and printing the items will show different order every time the code is executed</li>
-    </ul>
-
-<pre><code class="python">from collections import OrderedDict
-
-d = {"banana": 3, "apple": 4, "pear": 1, "orange": 2}
-new_d = OrderedDict(sorted(d.items()))
-print(new_d)</code></pre>
 
     <h3 class="card-title">Context manager</h3>
     <ul>
@@ -1786,7 +1806,7 @@ print(str(my_mock))  # 'Mocking'</code></pre>
 
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/module/concurrency-python">Concurrency</a>
+    Reference: Expert Python Programming, Michał Jaworski & Tarek Ziadé | <a href="https://www.educative.io/module/concurrency-python">Concurrency</a>
   </div>
 </div>
 <!-- Python END -->
