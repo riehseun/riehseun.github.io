@@ -47,8 +47,6 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#kubernetes-1">Kubernetes basic</a>
       <li><a href="#kubernetes-2">Kubectl</a></li>
-      <li><a href="#kubernetes-3">Kubernetes security</a></li>
-      <li><a href="#kubernetes-4">Autoscaler</a></li>
       <li><a href="#kubernetes-5">Helm</a></li>
       <li><a href="#kubernetes-6">Skaffold</a></li>
       <li><a href="#kubernetes-7">Datadog and kube state metric</a></li>
@@ -156,12 +154,10 @@
         <li>Registers the node with the cluster</li>
         <li>Watches the API server for new work assignments</li>
       </ul>
-
       <li>kube-proxy</li>
       <ul>
         <li>Local cluster network rules</li>
       </ul>
-
       <li>Container runtime</li>
       <ul>
         <li>Ex. cri-containerd</li>
@@ -192,6 +188,97 @@
       <li>spec</li>
       <ul>
         <li>Define container(s)</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Kubernetes security</h3>
+    <ul>
+      <li>Spoofing</li>
+      <ul>
+        <li>Pretending to be someone</li>
+        <li>Kubernetes components communicate each other using TLS</li>
+        <li>Certificate is issued by the internal Kubernetes CA</li>
+      </ul>
+      <li>Tampering</li>
+      <ul>
+        <li>Changing something in a malicious way</li>
+        <li>Can enforce readonly to certain directory</li>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  securityContext:
+    readOnlyRootFilesystem: true
+    allowedHostPaths:
+      - pathPrefix: /path
+        readOnly: true</code></pre>
+      </ul>
+      <li>Repudiation</li>
+      <ul>
+        <li>Non-repudiation is proving certain actions were carried out by certain individuals</li>
+        <li>API server has audit logs</li>
+      </ul>
+      <li>Information Disclosure</li>
+      <ul>
+        <li>Secrets can be encrypted</li>
+        <li>Encryption key is stored in nodes but storing it outside the cluster is recommended</li>
+      </ul>
+      <li>Denial of Service</li>
+      <ul>
+        <li>Can limit number of pods</li>
+<pre><code class="yaml">apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: my-resourcequota
+spec:
+  hard:
+    pods: 100</code></pre>
+      </ul>
+      <li>Elevation of Privilege</li>
+      <ul>
+        <li>Gaining higher access than what is granted</li>
+        <li>Can use RBAC</li>
+      </ul>
+      <li>User in Pod</li>
+      <ul>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  securityContext:  # Applies to all containers in this Pod
+    runAsUser: 1000 # Non-root user
+  containers:
+  - name: my-container
+    image: my-image
+    securityContext:
+      runAsUser: 2000  # Overrides the Pod setting</code></pre>
+      </ul>
+      <li>Prevent privilege escalation by containers</li>
+      <ul>
+<pre><code class="yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  containers:
+  - name: my-pod
+    image: my-image
+    securityContext:
+      allowPrivilegeEscalation: false</code></pre>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Autoscaler</h3>
+    <ul>
+      <li>Horizontal Pod Autoscaler</li>
+      <ul>
+        <li>Dynamically scales Pods in a Deployment based on demand</li>
+      </ul>
+      <li>Cluster Autoscaler</li>
+      <ul>
+        <li>Dynamically scales nodes based on demand</li>
       </ul>
     </ul>
   </div>
@@ -427,117 +514,6 @@ kubectl get secret -n &lt;namespace&gt; &lt;secret_name&gt; -o go-template='{{in
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://kubernetes.io/docs/reference/kubectl/cheatsheet">kubectl Cheat Sheet</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="kubernetes-3">
-  <div class="card-body">
-    <h2 class="card-title">Kubernetes security</h2>
-
-    <h3 class="card-title">Spoofing</h3>
-    <ul>
-      <li>Pretending to be someone</li>
-      <li>Kubernetes components communicate each other using TLS</li>
-      <li>Certificate is issued by the internal Kubernetes CA</li>
-    </ul>
-
-    <h3 class="card-title">Tampering</h3>
-    <ul>
-      <li>Changing something in a malicious way</li>
-      <li>Can enforce readonly to certain directory</li>
-    </ul>
-
-<pre><code class="yaml">apiVersion: v1
-kind: Pod
-metadata:
-  name: my-pod
-spec:
-  securityContext:
-    readOnlyRootFilesystem: true
-    allowedHostPaths:
-      - pathPrefix: /path
-        readOnly: true</code></pre>
-
-    <h3 class="card-title">Repudiation</h3>
-    <ul>
-      <li>Non-repudiation is proving certain actions were carried out by certain individuals</li>
-      <li>API server has audit logs</li>
-    </ul>
-
-    <h3 class="card-title">Information Disclosure</h3>
-    <ul>
-      <li>Secrets can be encrypted</li>
-      <li>Encryption key is stored in nodes but storing it outside the cluster is recommended</li>
-    </ul>
-
-    <h3 class="card-title">Denial of Service</h3>
-    <ul>
-      <li>Can limit number of pods</li>
-    </ul>
-
-<pre><code class="yaml">apiVersion: v1
-kind: ResourceQuota
-metadata:
-  name: my-resourcequota
-spec:
-  hard:
-    pods: 100</code></pre>
-
-    <h3 class="card-title">Elevation of Privilege</h3>
-    <ul>
-      <li>Gaining higher access than what is granted</li>
-      <li>Can use RBAC</li>
-    </ul>
-
-    <h3 class="card-title">User in Pod</h3>
-
-<pre><code class="yaml">apiVersion: v1
-kind: Pod
-metadata:
-  name: my-pod
-spec:
-  securityContext:  # Applies to all containers in this Pod
-    runAsUser: 1000 # Non-root user
-  containers:
-  - name: my-container
-    image: my-image
-    securityContext:
-      runAsUser: 2000  # Overrides the Pod setting</code></pre>
-
-    <h3 class="card-title">Prevent privilege escalation by containers</h3>
-
-<pre><code class="yaml">apiVersion: v1
-kind: Pod
-metadata:
-  name: my-pod
-spec:
-  containers:
-  - name: my-pod
-    image: my-image
-    securityContext:
-      allowPrivilegeEscalation: false</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/courses/the-kubernetes-course">Learn Kubernetes: A Deep Dive</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="kubernetes-4">
-  <div class="card-body">
-    <h2 class="card-title">Autoscaler</h2>
-
-    <h3 class="card-title">Horizontal Pod Autoscaler</h3>
-    <ul>
-      <li>Dynamically scales Pods in a Deployment based on demand</li>
-    </ul>
-
-    <h3 class="card-title">Cluster Autoscaler</h3>
-    <ul>
-      <li>Dynamically scales nodes based on demand</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/courses/the-kubernetes-course">Learn Kubernetes: A Deep Dive</a>
   </div>
 </div>
 
@@ -1828,10 +1804,12 @@ spec:
 <div class="card mb-4" id="kubernetes-107">
   <div class="card-body">
     <h2 class="card-title">Service Account</h2>
+    <ul>
+      <li>When creating Pod, when service account is not specified, it is automatically assigned <code>default</code> service account in the same namespace</li>
+    </ul>
 
-    <p class="card-text">When creating Pod, when service account is not specified, it is automatically assigned <code>default</code> service account in the same namespace</p>
+    <h3 class="card-text">Opt-out of automatic service account assignment</h3>
 
-    <p class="card-text">Opt-out of automatic service account assignment</p>
 <pre><code class="yaml">apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -1840,7 +1818,8 @@ metadata:
   automountServiceAccountToken: false
 ...</code></pre>
 
-    <p class="card-text">Opt-out of automatic service account assignment for a specific Pod</p>
+    <h3 class="card-text">Opt-out of automatic service account assignment for a specific Pod</h3>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
 metadata:
@@ -1850,13 +1829,24 @@ spec:
   automountServiceAccountToken: false
   ...</code></pre>
 
-    <p class="card-text">Manually create service account API token</p>
+  <h3 class="card-text">Manually create service account</h3>
+
+<pre><code class="yaml">apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: my-service-account
+  namespace: my-namespace
+secrets:
+- name: my-service-account-secret</code></pre>
+
+    <h3 class="card-text">Manually create service account API token</h3>
+
 <pre><code class="yaml">apiVersion: v1
 kind: Secret
 metadata:
-  name: build-robot-secret
+  name: my-service-account-secret
   annotations:
-    kubernetes.io/service-account.name: build-robot
+    kubernetes.io/service-account.name: my-service-account
 type: kubernetes.io/service-account-token</code></pre>
   </div>
   <div class="card-footer text-muted">
