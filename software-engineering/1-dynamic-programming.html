@@ -63,9 +63,10 @@
       <li><a href="#dynamicprogramming-">Best time to buy and sell stock IV</a></li>
       <li><a href="#dynamicprogramming-">House robber</a></li>
       <li><a href="#dynamicprogramming-">Coin change</a></li>
-      <li><a href="#dynamicprogramming-">Partition equal subset su=m</a></li>
+      <li><a href="#dynamicprogramming-">Partition equal subset sum</a></li>
       <li><a href="#dynamicprogramming-">Target sum</a></li>
       <li><a href="#dynamicprogramming-">Race car</a></li>
+      <li><a href="#dynamicprogramming-">Minimum number of refueling stops</a></li>
       <li><a href="#dynamicprogramming-">Nth tribonacci number</a></li>
     </ul>
   </div>
@@ -753,7 +754,34 @@
   <div class="card-body">
     <h2 class="card-title">Dungeon game (H)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def calculateMinimumHP(self, dungeon: List[List[int]]) -> int:
+
+        #   1 2 3     1 2 3
+        # 1 -2 -3 3   i i i
+        # 2 -5 -10 1  i i i
+        # 3 10 30 -5  i i 6
+
+        n = len(dungeon)
+        m = len(dungeon[0])
+
+        dp = [[math.inf]*(m) for _ in range(n)]
+
+        if dungeon[n-1][m-1] > 0:
+            dp[n-1][m-1] = 1
+        else:
+            dp[n-1][m-1] = 1 - dungeon[n-1][m-1]
+
+        # Time O(nm)
+        # Space O(nm)
+        for i in range(n-1, -1, -1):
+            for j in range(m-1, -1, -1):
+                if j < m - 1:
+                    dp[i][j] = max(1, dp[i][j+1]-dungeon[i][j])
+                if i < n - 1:
+                    dp[i][j] = min(dp[i][j], max(1, dp[i+1][j]-dungeon[i][j]))
+
+        return dp[0][0]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/dungeon-game">174. Dungeon Game</a>
@@ -796,15 +824,26 @@
         # b) don't rob the current house
         # max(current + rob(i-2), rob(i-1))
 
-        prev1 = 0
-        prev2 = 0
+        # 1 2 3 1
+        # 1 2 4 4
 
-        for num in nums:
-            temp = prev1
-            prev1 = max(num+prev2, prev1)
-            prev2 = temp
+        n = len(nums)
+        dp = [[0] for _ in range(n)]
 
-        return prev1</code></pre>
+        if n == 1:
+            return nums[0]
+        if n == 2:
+            return max(nums[0], nums[1])
+
+        dp[0] = nums[0]
+        dp[1] = max(nums[0], nums[1])
+
+        # Time O(n)
+        # Space O(n)
+        for i in range(2, n):
+            dp[i] = max(nums[i]+dp[i-2], dp[i-1])
+
+        return dp[n-1]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/house-robber">198. House Robber</a>
@@ -824,28 +863,27 @@
         # 2 0 1 1 2 2 3 3 4 4 5 5  6
         # 5 0 1 1 2 2 1 2 2 3 3 2  3
 
-        max_amount = 10001
-        dp = []
-        for i in range(amount+1):
-            dp.append([])
-            for _ in range(len(coins)+1):
-                dp[i].append(0)
+        n = amount
+        m = len(coins)
+        dp = [[0]*(m+1) for _ in range(n+1)]
 
-        for i in range(1, amount+1):
-            dp[i][0] = max_amount
+        for i in range(1, n+1):
+            dp[i][0] = math.inf
 
-        for i in range(1, amount+1):
-            for j in range(1, len(coins)+1):
+        # Time O(nm)
+        # Space O(nm)
+        for i in range(1, n+1):
+            for j in range(1, m+1):
                 if i >= coins[j-1]:
                     dp[i][j] = min(dp[i][j-1], 1+dp[i-coins[j-1]][j])
-                # Amount if less than face value of coin.
+                # Amount if less than face value of coin
                 else:
                     dp[i][j] = dp[i][j-1]
 
-        if dp[amount][len(coins)] == max_amount:
+        if dp[n][m] == math.inf:
             return -1
 
-        return dp[amount][len(coins)]</code></pre>
+        return dp[n][m]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/coin-change">322. Coin Change</a>
@@ -866,7 +904,7 @@
         m = sum(nums) // 2
 
         # [1,2,5,2]
-        # dp[i][j] = True if we can pick numbers from nums[:i+1] whose sum equals to the value at j.
+        # dp[i][j] = True if we can pick numbers from nums[:i+1] whose sum equals to the value at j
         # dp[i][j] = True means whether dp[i-1][j] is already true or dp[i-1][j-nums[i]] is true
 
         #     1 2 5 2
@@ -877,13 +915,11 @@
         # 4 F
         # 5 F
 
-        dp = []
-        for i in range(n+1):
-            dp.append([])
-            for j in range(m+1):
-                dp[i].append(False)
+        dp = [[False]*(m+1) for _ in range(n+1)]
         dp[0][0] = True
 
+        # Time O(nm)
+        # Space O(nm)
         for i in range(1,n+1):
             for j in range(1,m+1):
                 dp[i][j] = dp[i-1][j] or (j >= nums[i-1] and dp[i-1][j-nums[i-1]])
@@ -899,7 +935,30 @@
   <div class="card-body">
     <h2 class="card-title">Target sum (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def findTargetSumWays(self, nums: List[int], target: int) -> int:
+
+        # Let P = positive subset, N = negative subset
+        # Then, sum(P) + sum(N) = sum(nums) (1)
+        # We want to find subsets such that, sum(P) - sum(N) = target (2)
+        # Add (1) and (2), then sum(P) = (sum(nums) + target) / 2
+        # We notice that (sum(nums) + target) must be even number
+
+        if (sum(nums)+target) % 2 != 0 or (sum(nums)+target) < 0:
+            return 0
+
+        n = (sum(nums)+target) // 2
+        m = len(nums)
+        dp = [0 for _ in range(n+1)]
+        dp[0] = 1
+
+        # Time O(nm)
+        # Space O(n)
+        for num in nums:
+            for i in range(n, num-1, -1):
+                dp[i] += dp[i-num]
+
+        return dp[n]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/target-sum">494. Target Sum</a>
