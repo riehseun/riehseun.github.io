@@ -120,7 +120,7 @@
       <li>Each client maintains one persistent WebSocket connection to one WebSocket server</li>
     </ul>
 
-    <h3 class="card-title">Cache</h3>
+    <h3 class="card-title">Location cache</h3>
     <ul>
       <li>Key-value store is used to cache the most recent location for each active user</li>
       <li>When TTL expires, location data is deleted from cache</li>
@@ -141,7 +141,7 @@
     <ul>
       <li>Very light message bus</li>
       <li>Channels are very cheap to create</li>
-      <li>WebSocket server of a user publishes to that user's channel in Redis Pub/Sub</li>
+      <li>A user's WebSocket server publishes to that user's channel in Redis Pub/Sub</li>
       <li>Each channel of a user in Redis Pub/Sub is subscribed by WebSocket servers of that user's friends</li>
     </ul>
 
@@ -199,7 +199,7 @@
   <div class="card-body">
     <h2 class="card-title">Storage schema</h2>
 
-    <h3 class="card-title">Cache</h3>
+    <h3 class="card-title">Location cache</h3>
     <ul>
       <li>Redis is good choice due to fast read and write as well as TTL support</li>
       <li>Shard based on user_id and replicate each shard to improve availability</li>
@@ -207,7 +207,7 @@
       <li>Value - {latitude, longigude, timestamp}</li>
     </ul>
 
-    <h3 class="card-title">Location DB</h3>
+    <h3 class="card-title">Location history DB</h3>
     <ul>
       <li>Cassandra is good choice due to heavy write workload</li>
       <li>If using relational DB, sharding based on user ID is needed</li>
@@ -255,6 +255,11 @@
 
     <h3 class="card-title">Redis PubSub</h3>
     <ul>
+      <li>Design</li>
+      <ul>
+        <li>Uses a hash table and linked list to track the subscribers</li>
+        <li>A user subscribes to each friend's channel whether the friend is online or not</li>
+      </ul>
       <li>Memory</li>
       <ul>
         <li>Assume a channel is allocated for each user who uses nearby friend</li>
@@ -266,43 +271,15 @@
       </ul>
       <li>CPU</li>
       <ul>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
+        <li>Assume Redis PubSub sends 14 million updates per second to subscribers</li>
+        <li>Assume each server can handle 100k pushes per seconds</li>
+        <li>Then, 14M / 100K = 140 Redis PubSub servers are needed</li>
       </ul>
       <li>Distributed Redis PubSub</li>
       <ul>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-      </ul>
-      <li>Scaling Redis PubSub</li>
-      <ul>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-      </ul>
-    </ul>
-
-    <img class="img-fluid" class="card-img-top" src="/img/system-design/nearby-friends2.png" alt="Card image cap">
-
-    <h3 class="card-title">Workflow</h3>
-    <ul>
-      <li>Get nearby business</li>
-      <ul>
-        <li>Client sends latitude, longitude, radius to load balancer, which in turn gets sent to location based service</li>
-        <li>Location based service finds geohash length that matches the search</li>
-        <li>Location based service calculates neighboring geohashes and adds them to list</li>
-        <li>Location based service calls Geohash Redis cache to find business IDs for each geohash</li>
-        <li>Location based service pulls businees info from Business info Redis cache based on the business IDs</li>
-      </ul>
-      <li>View/add/update/delete business</li>
-      <ul>
-        <li>Business service first checks Business info Redis cache</li>
-        <li>If not, Business service fetches data from DB and data is stored in Redis cache</li>
+        <li>Similar to consistent hashing, place Redis PubSub servers in a hash ring</li>
+        <li>Compute hash of channels to determine which PubSub servers that those channels should go to</li>
+        <li>The hash ring can be stored in service discovery like ZooKeeper and cached in WebSocket servers</li>
       </ul>
     </ul>
   </div>
