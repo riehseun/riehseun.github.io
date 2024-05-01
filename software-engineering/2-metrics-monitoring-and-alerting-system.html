@@ -45,9 +45,9 @@
     <h2 class="card-title">Metrics monitoring and alerting system</h2>
     <ul class="list-unstyled mb-0">
       <li><a href="#metrics-monitoring-and-alerting-system-1">Requirement</a></li>
-      <li><a href="#metrics-monitoring-and-alerting-system-2">Estimation</a></li>
+      <!-- <li><a href="#metrics-monitoring-and-alerting-system-2">Estimation</a></li> -->
       <li><a href="#metrics-monitoring-and-alerting-system-3">High level design</a></li>
-      <li><a href="#metrics-monitoring-and-alerting-system-4">API</a></li>
+      <!-- <li><a href="#metrics-monitoring-and-alerting-system-4">API</a></li> -->
       <li><a href="#metrics-monitoring-and-alerting-system-5">Storage schema</a></li>
       <li><a href="#metrics-monitoring-and-alerting-system-6">Detailed design</a></li>
       <li><a href="#metrics-monitoring-and-alerting-system-7">Evaluation</a></li>
@@ -61,12 +61,12 @@
 
     <h3 class="card-title">Functional</h3>
     <ul>
-      <li>How close do users need to be in order be considered as nearby? The number should be configurable</li>
-      <li>Is distance between users calculated based on the straight line between them? Yes</li>
-      <li>How many users are there? 1B users and 100M of them use nearby friends feature</li>
-      <li>Should the system store location history? Yes</li>
-      <li>Should the system how inactive users? No</li>
-      <li>Should the system consider privacy laws? No</li>
+      <li>What metrics should the system collect? CPU load, memory usage, disk space comsumption, request per second of a service, running server count of web pool</li>
+      <li>How many servers are there? 1000 server pools, 100 machines per pool. Also 100M daily active users</li>
+      <li>How long should the system keep the data? 1 year</li>
+      <li>How should the system alert metrics? Email, webhooks</li>
+      <li>Should the system collect logs? No</li>
+      <li>Should the system support distributed system tracing? No</li>
     </ul>
 
     <h3 class="card-title">Non-functional</h3>
@@ -83,7 +83,7 @@
   </div>
 </div>
 
-<div class="card mb-4" id="metrics-monitoring-and-alerting-system-2">
+<!-- <div class="card mb-4" id="metrics-monitoring-and-alerting-system-2">
   <div class="card-body">
     <h2 class="card-title">Estimation</h2>
 
@@ -92,16 +92,12 @@
     <h3 class="card-title">Storage</h3>
 
     <h3 class="card-title">Bandwidth</h3>
-    <ul>
-      <li>Assume location refresh takes place every 30 seconds</li>
-      <li>Assume 10M out of 100M DAU are concurrent users</li>
-      <li>Incoming - (10M / 30) queries per second</li>
-    </ul>
+
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
   </div>
-</div>
+</div> -->
 
 <div class="card mb-4" id="metrics-monitoring-and-alerting-system-3">
   <div class="card-body">
@@ -109,117 +105,63 @@
 
     <img class="img-fluid" class="card-img-top" src="/img/system-design/metrics-monitoring-and-alerting-system1.png" alt="Card image cap">
 
-    <h3 class="card-title">API servers</h3>
     <ul>
-      <li>Add/remove/update users</li>
+      <li>Metrics source</li>
+      <ul>
+        <li>Ex. application servers, SQL databases, message queues, etc</li>
+      </ul>
+      <li>Metrics collector</li>
+      <ul>
+        <li>Gathers metrics data and write them into time-series DB</li>
+      </ul>
+      <li>Time-series DB</li>
+      <ul>
+        <li>Store metrics data as time series</li>
+        <li>Indexes lables to allow fast lookup based on labels</li>
+      </ul>
+      <li>Alerting system</li>
+      <ul>
+        <li>Send notifications to various destinations</li>
+      </ul>
+      <li>Visualization system</li>
+      <ul>
+        <li>Shows metrics in graphs/charts</li>
+      </ul>
     </ul>
 
-    <h3 class="card-title">WebSocket servers</h3>
+    <h3 class="card-title">Data storage</h3>
     <ul>
-      <li>Real-time update of friends' location</li>
-      <li>Each client maintains one persistent WebSocket connection to one WebSocket server</li>
+      <li>Need time-series DB</li>
+      <ul>
+        <li>Ex. MetricsDB, Timestream, InfluxDB, Prometheus</li>
+      </ul>
     </ul>
 
-    <h3 class="card-title">Location cache</h3>
-    <ul>
-      <li>Key-value store is used to cache the most recent location for each active user</li>
-      <li>When TTL expires, location data is deleted from cache</li>
-    </ul>
 
-    <h3 class="card-title">User DB</h3>
-    <ul>
-      <li>Stores user and user friendship data</li>
-      <li>Relational DB or NoSQL can be used</li>
-    </ul>
-
-    <h3 class="card-title">Location history DB</h3>
-    <ul>
-      <li>Stores location history data</li>
-    </ul>
-
-    <h3 class="card-title">Redis Pub/Sub</h3>
-    <ul>
-      <li>Very light message bus</li>
-      <li>Channels are very cheap to create</li>
-      <li>A user's WebSocket server publishes to that user's channel in Redis Pub/Sub</li>
-      <li>Each channel of a user in Redis Pub/Sub is subscribed by WebSocket servers of that user's friends</li>
-    </ul>
-
-    <img class="img-fluid" class="card-img-top" src="/img/system-design/metrics-monitoring-and-alerting-system2.png" alt="Card image cap">
-
-    <h3 class="card-title">Workflow</h3>
-    <ul>
-      <li>User sends location update to load balancer</li>
-      <li>Load balancer forwards update to WebSocket server</li>
-      <li>WebSocket server updates new location in location cache. The update refreshes TTL</li>
-      <li>WebSocket server publishes new location to user's channel in Redis Pub/Sub</li>
-      <li>Update is broadcasted to all subscribers who are user's friends</li>
-      <li>WebSocket server of friends compute the distance from the user</li>
-      <li>If distance is within search radius, new location is sent to friends. Otherwise, update is dropped</li>
-    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
   </div>
 </div>
 
-<div class="card mb-4" id="metrics-monitoring-and-alerting-system-4">
+<!-- <div class="card mb-4" id="metrics-monitoring-and-alerting-system-4">
   <div class="card-body">
     <h2 class="card-title">API</h2>
-    <ul>
-      <li>Periodic location update</li>
-      <ul>
-        <li>Request - latitude, longigude, timestamp</li>
-        <li>Response - none</li>
-      </ul>
-      <li>Client receives location updates</li>
-      <li>WebScoket initialization</li>
-      <ul>
-        <li>Request - latitude, longigude, timestamp</li>
-        <li>Response - friends' location data</li>
-      </ul>
-      <li>Subscribe to a new friend</li>
-      <ul>
-        <li>Request - friend ID</li>
-        <li>Response - friend's latest latitude, longigude, timestamp</li>
-      </ul>
-      <li>Unsubscribe a friend</li>
-      <ul>
-        <li>Request - friend ID</li>
-        <li>Response - none</li>
-      </ul>
-    </ul>
+
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
   </div>
-</div>
+</div> -->
 
 <div class="card mb-4" id="metrics-monitoring-and-alerting-system-5">
   <div class="card-body">
     <h2 class="card-title">Storage schema</h2>
-
-    <h3 class="card-title">Location cache</h3>
     <ul>
-      <li>Redis is good choice due to fast read and write as well as TTL support</li>
-      <li>Shard based on user_id and replicate each shard to improve availability</li>
-      <li>Key - user_id</li>
-      <li>Value - {latitude, longigude, timestamp}</li>
-    </ul>
-
-    <h3 class="card-title">Location history DB</h3>
-    <ul>
-      <li>Cassandra is good choice due to heavy write workload</li>
-      <li>If using relational DB, sharding based on user ID is needed</li>
-      <li>user_id</li>
-      <li>latitude</li>
-      <li>longigude</li>
-      <li>timestamp</li>
-    </ul>
-
-    <h3 class="card-title">User DB</h3>
-    <ul>
-      <li>Relational DB with sharding based on user_id</li>
+      <li>Constant heavy write load and spiky read load</li>
+      <li>A metric name - string</li>
+      <li>A set of tags/labels - list of &lt;key:value&gt; pairs</li>
+      <li>An array of values and their timestamps - an array of &lt;value:timestamp&gt; pairs</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
