@@ -136,8 +136,6 @@
         <li>Ex. MetricsDB, Timestream, InfluxDB, Prometheus</li>
       </ul>
     </ul>
-
-
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
@@ -173,15 +171,32 @@
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
 
-    <h3 class="card-title">Scaling servers</h3>
+    <h3 class="card-title">Metrics collections</h3>
     <ul>
-      <li>API servers</li>
+      <li>Pull</li>
       <ul>
-        <li>Stateless, thus autoscale based on loads</li>
+        <img class="img-fluid" class="card-img-top" src="/img/system-design/metrics-monitoring-and-alerting-system2.png" alt="Card image cap">
+        <li>Metrics collector fetches configuration metadata of service endpoints (such as pulling interval, IP addresses, timeout, etc) from service discovery</li>
+        <li>Metrics collector pulls metrics data via pre-defined HTTP endpoints</li>
+        <li>Distribute metrics source to a scalable set of metrics collectors via consistent hashing</li>
+        <li>Ex. Prometheus</li>
+        <li>Pros</li>
+        <ul>
+          <li>Easy debugging</li>
+          <li>Health check</li>
+        </ul>
       </ul>
-      <li>WebSocket servers</li>
+      <li>Push</li>
       <ul>
-        <li>Stateful, the load balancers need to gracefully open/close connections when adding/removing servers</li>
+        <img class="img-fluid" class="card-img-top" src="/img/system-design/metrics-monitoring-and-alerting-system3.png" alt="Card image cap">
+        <li>Collection agent is installed on every server being monitored</li>
+        <li>Collection agent periodically pushes metrics to metircs collectors</li>
+        <li>Ex. Amazon CloudWatch, Graphite</li>
+        <li>Pros</li>
+        <ul>
+          <li>Short lived jobs</li>
+          <li>Networking</li>
+        </ul>
       </ul>
     </ul>
 
@@ -227,7 +242,7 @@
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
+  </divr>
 </div>
 
 <div class="card mb-4" id="metrics-monitoring-and-alerting-system-7">
