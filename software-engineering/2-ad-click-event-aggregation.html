@@ -40,33 +40,42 @@
 <h1 class="my-4">Software Engineering</h1>
 
 <!-- Ad click event aggregation BEGIN -->
-<div class="card mb-4" id="add-click-event-aggregation">
+<div class="card mb-4" id="ad-click-event-aggregation">
   <div class="card-body">
     <h2 class="card-title">Ad click event aggregation</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#add-click-event-aggregation-1">Requirement</a></li>
-      <li><a href="#add-click-event-aggregation-2">Estimation</a></li>
-      <li><a href="#add-click-event-aggregation-3">High level design</a></li>
-      <li><a href="#add-click-event-aggregation-4">API</a></li>
-      <li><a href="#add-click-event-aggregation-5">Storage schema</a></li>
-      <li><a href="#add-click-event-aggregation-6">Detailed design</a></li>
-      <li><a href="#add-click-event-aggregation-7">Evaluation</a></li>
+      <li><a href="#ad-click-event-aggregation-1">Requirement</a></li>
+      <li><a href="#ad-click-event-aggregation-2">Estimation</a></li>
+      <li><a href="#ad-click-event-aggregation-3">High level design</a></li>
+      <li><a href="#ad-click-event-aggregation-4">API</a></li>
+      <li><a href="#ad-click-event-aggregation-5">Storage schema</a></li>
+      <li><a href="#ad-click-event-aggregation-6">Detailed design</a></li>
+      <li><a href="#ad-click-event-aggregation-7">Evaluation</a></li>
     </ul>
   </div>
 </div>
 
-<div class="card mb-4" id="add-click-event-aggregation-1">
+<div class="card mb-4" id="ad-click-event-aggregation-1">
   <div class="card-body">
     <h2 class="card-title">Requirement</h2>
 
     <h3 class="card-title">Functional</h3>
     <ul>
-      <li>How close do users need to be in order be considered as nearby? The number should be configurable</li>
-      <li>Is distance between users calculated based on the straight line between them? Yes</li>
-      <li>How many users are there? 1B users and 100M of them use nearby friends feature</li>
-      <li>Should the system store location history? Yes</li>
-      <li>Should the system how inactive users? No</li>
-      <li>Should the system consider privacy laws? No</li>
+      <li>How does input data look like? Log files where latest click events are appended to them</li>
+      <li>How does event look like in terms of data attribute? ad_id, click_timestamp, user_id, ip, country</li>
+      <li>How larget is dataset? 1B clicks per day and 2M Ads where number of Ads grows 30% per year</li>
+      <li>What kind of queries should the system support?</li>
+      <ul>
+        <li>Return the number of clicks for a particular Ad in last M minites</li>
+        <li>Return the top 100 most clicked Ads in past 1 minute</li>
+        <li>Support filtering by user_id, ip, country for above two queries</li>
+      </ul>
+      <li>What kind of edge cases are there?</li>
+      <ul>
+        <li>Events that arrive later than expected</li>
+        <li>Duplicate events</li>
+      </ul>
+      <li>Should the system have low latency? Less than 1s for real-time bidding, few minutes for ad click event aggregation</li>
     </ul>
 
     <h3 class="card-title">Non-functional</h3>
@@ -83,19 +92,22 @@
   </div>
 </div>
 
-<div class="card mb-4" id="add-click-event-aggregation-2">
+<div class="card mb-4" id="ad-click-event-aggregation-2">
   <div class="card-body">
     <h2 class="card-title">Estimation</h2>
 
     <h3 class="card-title">Server</h3>
 
     <h3 class="card-title">Storage</h3>
+    <ul>
+      <li>Assume single click requires 0.1KB storage</li>
+      <li>0.1KB * 1B = 100GB per day = 3TB per month</li>
+    </ul>
 
     <h3 class="card-title">Bandwidth</h3>
     <ul>
-      <li>Assume location refresh takes place every 30 seconds</li>
-      <li>Assume 10M out of 100M DAU are concurrent users</li>
-      <li>Incoming - (10M / 30) queries per second</li>
+      <li>Incoming - (1B / 24 * 86400) clicks per second on average</li>
+      <li>Assuming peak is 5 times the average number, 5 * (1B / 24 * 86400) clicks per second during peak</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -103,59 +115,42 @@
   </div>
 </div>
 
-<div class="card mb-4" id="add-click-event-aggregation-3">
+<div class="card mb-4" id="ad-click-event-aggregation-3">
   <div class="card-body">
     <h2 class="card-title">High level design</h2>
 
-    <img class="img-fluid" class="card-img-top" src="/img/system-design/add-click-event-aggregation1.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/ad-click-event-aggregation1.png" alt="Card image cap">
 
-    <h3 class="card-title">API servers</h3>
+    <h3 class="card-title">Message queues</h3>
     <ul>
-      <li>Add/remove/update users</li>
+      <li>First message queue</li>
+      <ul>
+        <li>ad_id, click_timestamp, user_id, ip, country</li>
+      </ul>
+      <li>Second message queue</li>
+      <ul>
+        <li>ad_id, click_minute, count</li>
+        <li>update_time_minute, most_clicked_ads</li>
+      </ul>
     </ul>
 
-    <h3 class="card-title">WebSocket servers</h3>
+    <h3 class="card-title">Data aggregation service</h3>
     <ul>
-      <li>Real-time update of friends' location</li>
-      <li>Each client maintains one persistent WebSocket connection to one WebSocket server</li>
-    </ul>
-
-    <h3 class="card-title">Location cache</h3>
-    <ul>
-      <li>Key-value store is used to cache the most recent location for each active user</li>
-      <li>When TTL expires, location data is deleted from cache</li>
-    </ul>
-
-    <h3 class="card-title">User DB</h3>
-    <ul>
-      <li>Stores user and user friendship data</li>
-      <li>Relational DB or NoSQL can be used</li>
-    </ul>
-
-    <h3 class="card-title">Location history DB</h3>
-    <ul>
-      <li>Stores location history data</li>
-    </ul>
-
-    <h3 class="card-title">Redis Pub/Sub</h3>
-    <ul>
-      <li>Very light message bus</li>
-      <li>Channels are very cheap to create</li>
-      <li>A user's WebSocket server publishes to that user's channel in Redis Pub/Sub</li>
-      <li>Each channel of a user in Redis Pub/Sub is subscribed by WebSocket servers of that user's friends</li>
-    </ul>
-
-    <img class="img-fluid" class="card-img-top" src="/img/system-design/add-click-event-aggregation2.png" alt="Card image cap">
-
-    <h3 class="card-title">Workflow</h3>
-    <ul>
-      <li>User sends location update to load balancer</li>
-      <li>Load balancer forwards update to WebSocket server</li>
-      <li>WebSocket server updates new location in location cache. The update refreshes TTL</li>
-      <li>WebSocket server publishes new location to user's channel in Redis Pub/Sub</li>
-      <li>Update is broadcasted to all subscribers who are user's friends</li>
-      <li>WebSocket server of friends compute the distance from the user</li>
-      <li>If distance is within search radius, new location is sent to friends. Otherwise, update is dropped</li>
+      <li>MapReduce</li>
+      <ul>
+        <li>Map node</li>
+        <ul>
+          <li>Read data from data source and transform it (clean and normalize data)</li>
+        </ul>
+        <li>Aggregate node</li>
+        <ul>
+          <li>Counts ad click events by ad_id every minute</li>
+        </ul>
+        <li>Reduce node</li>
+        <ul>
+          <li>Combines aggregated results from all Aggregate nodes to produce the final result</li>
+        </ul>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -163,30 +158,38 @@
   </div>
 </div>
 
-<div class="card mb-4" id="add-click-event-aggregation-4">
+<div class="card mb-4" id="ad-click-event-aggregation-4">
   <div class="card-body">
     <h2 class="card-title">API</h2>
     <ul>
-      <li>Periodic location update</li>
+      <li>Return aggregated event count for a given <code>ad_id</code></li>
       <ul>
-        <li>Request - latitude, longigude, timestamp</li>
-        <li>Response - none</li>
+        <li><code>GET /v1/ads/{:ad_id}/aggregated_count</code></li>
+        <li>Request</li>
+        <ul>
+          <li><code>from</code> - start minute</li>
+          <li><code>to</code> - end minute</li>
+          <li><code>filter</code> - identifier for different filtering strategies</li>
+        </ul>
+        <li>Response</li>
+        <ul>
+          <li><code>ad_id</code></li>
+          <li><code>count</code> - aggregated count between start and end minutes</li>
+        </ul>
       </ul>
-      <li>Client receives location updates</li>
-      <li>WebScoket initialization</li>
+      <li>Return top N most clicked ads in last M minutes</li>
       <ul>
-        <li>Request - latitude, longigude, timestamp</li>
-        <li>Response - friends' location data</li>
-      </ul>
-      <li>Subscribe to a new friend</li>
-      <ul>
-        <li>Request - friend ID</li>
-        <li>Response - friend's latest latitude, longigude, timestamp</li>
-      </ul>
-      <li>Unsubscribe a friend</li>
-      <ul>
-        <li>Request - friend ID</li>
-        <li>Response - none</li>
+        <li><code>GET /v1/ads/popular_ads</code></li>
+        <li>Request</li>
+        <ul>
+          <li><code>count</code> - specifies N</li>
+          <li><code>window</code> - specifies M</li>
+          <li><code>filter</code> - identifier for different filtering strategies</li>
+        </ul>
+        <li>Response</li>
+        <ul>
+          <li><code>ad_ids</code></li>
+        </ul>
       </ul>
     </ul>
   </div>
@@ -195,26 +198,55 @@
   </div>
 </div>
 
-<div class="card mb-4" id="add-click-event-aggregation-5">
+<div class="card mb-4" id="ad-click-event-aggregation-5">
   <div class="card-body">
     <h2 class="card-title">Storage schema</h2>
-
-    <h3 class="card-title">Location cache</h3>
     <ul>
-      <li>Redis is good choice due to fast read and write as well as TTL support</li>
-      <li>Shard based on user_id and replicate each shard to improve availability</li>
-      <li>Key - user_id</li>
-      <li>Value - {latitude, longigude, timestamp}</li>
+      <li>Raw data serves as backup data in case aggregated data is corrupted</li>
+      <li>Aggregated data makes queries fast</li>
+      <li>Raw data</li>
+      <ul>
+        <li>Little read and heavy write</li>
+        <li>Use Cassandra or InfluxDB because these are good for writes and time-range queries</li>
+      </ul>
+      <li>Aggregated data</li>
+      <ul>
+        <li>Heavy read and write</li>
+        <li>Use Cassandra or InfluxDB here as well</li>
+      </ul>
     </ul>
 
-    <h3 class="card-title">Location history DB</h3>
+    <h3 class="card-title">Raw data</h3>
     <ul>
-      <li>Cassandra is good choice due to heavy write workload</li>
-      <li>If using relational DB, sharding based on user ID is needed</li>
+      <li>ad_id</li>
+      <li>click_timestamp</li>
       <li>user_id</li>
-      <li>latitude</li>
-      <li>longigude</li>
-      <li>timestamp</li>
+      <li>ip</li>
+      <li>country</li>
+    </ul>
+
+    <h3 class="card-title">Aggregated data</h3>
+    <ul>
+      <li>Aggregated data with filters</li>
+      <ul>
+        <li>ad_id</li>
+        <li>click_minute</li>
+        <li>filter_id</li>
+        <li>count</li>
+      </ul>
+      <li>Filter table</li>
+      <ul>
+        <li>filter_id</li>
+        <li>region</li>
+        <li>ip</li>
+        <li>user_id</li>
+      </ul>
+      <li>Most clicked_ads</li>
+      <ul>
+        <li>window_size - integer</li>
+        <li>update_time_minute - timestamp</li>
+        <li>most_clicked_ads - array</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">User DB</h3>
@@ -227,7 +259,7 @@
   </div>
 </div>
 
-<div class="card mb-4" id="add-click-event-aggregation-6">
+<div class="card mb-4" id="ad-click-event-aggregation-6">
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
 
@@ -288,7 +320,7 @@
   </div>
 </div>
 
-<div class="card mb-4" id="add-click-event-aggregation-7">
+<div class="card mb-4" id="ad-click-event-aggregation-7">
   <div class="card-body">
     <h2 class="card-title">Evaluation</h2>
 
