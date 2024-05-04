@@ -184,6 +184,46 @@
         <li><code>DELETE /v1/hotels/ID</code></li>
       </ul>
     </ul>
+
+    <h3 class="card-title">Room related API</h3>
+    <ul>
+      <li>Get detailed information about a room</li>
+      <ul>
+        <li><code>GET /v1/hotels/ID/rooms/ID</code></li>
+      </ul>
+      <li>Add a new room</li>
+      <ul>
+        <li><code>POST /v1/hotels/ID/rooms</code></li>
+      </ul>
+      <li>Update room information</li>
+      <ul>
+        <li><code>PUT /v1/hotels/ID/rooms/ID</code></li>
+      </ul>
+      <li>Delete a room</li>
+      <ul>
+        <li><code>DELETE /v1/hotels/ID/rooms/ID</code></li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Reservation related API</h3>
+    <ul>
+      <li>Get reservation history of logged-in user</li>
+      <ul>
+        <li><code>GET /v1/reservations</code></li>
+      </ul>
+      <li>Get detailed information about a reservation</li>
+      <ul>
+        <li><code>GET /v1/reservations/ID</code></li>
+      </ul>
+      <li>Make a new reservation</li>
+      <ul>
+        <li><code>POST /v1/reservations</code></li>
+      </ul>
+      <li>Cancel a reservation</li>
+      <ul>
+        <li><code>DELETE /v1/reservations/ID</code></li>
+      </ul>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
@@ -193,28 +233,65 @@
 <div class="card mb-4" id="hotel-reservation-5">
   <div class="card-body">
     <h2 class="card-title">Storage schema</h2>
-
-    <h3 class="card-title">Location cache</h3>
     <ul>
-      <li>Redis is good choice due to fast read and write as well as TTL support</li>
-      <li>Shard based on user_id and replicate each shard to improve availability</li>
-      <li>Key - user_id</li>
-      <li>Value - {latitude, longigude, timestamp}</li>
+      <li>Heavy read and little write</li>
+      <li>Thus, choose relational</li>
+      <li>ACID property prevents double charge, double booking, etc</li>
+      <li>Shard DB by hash(hotel_id) % number_of_servers</li>
     </ul>
 
-    <h3 class="card-title">Location history DB</h3>
+    <h3 class="card-title">Hotel</h3>
     <ul>
-      <li>Cassandra is good choice due to heavy write workload</li>
-      <li>If using relational DB, sharding based on user ID is needed</li>
-      <li>user_id</li>
-      <li>latitude</li>
-      <li>longigude</li>
-      <li>timestamp</li>
+      <li>hotel_id (pk)</li>
+      <li>name</li>
+      <li>address</li>
+      <li>location</li>
     </ul>
 
-    <h3 class="card-title">User DB</h3>
+    <h3 class="card-title">room</h3>
     <ul>
-      <li>Relational DB with sharding based on user_id</li>
+      <li>room_id (pk)</li>
+      <li>room_type_id</li>
+      <li>floor</li>
+      <li>number</li>
+      <li>hotel_id</li>
+      <li>name</li>
+      <li>is_available</li>
+    </ul>
+
+    <h3 class="card-title">room_type_rate</h3>
+    <ul>
+      <li>hotel_id (pk)</li>
+      <li>date (pk)</li>
+      <li>rate</li>
+    </ul>
+
+    <h3 class="card-title">guest</h3>
+    <ul>
+      <li>guest_id (pk)</li>
+      <li>first_name</li>
+      <li>last_name</li>
+      <li>email</li>
+    </ul>
+
+    <h3 class="card-title">room_type_inventory</h3>
+    <ul>
+      <li>hotel_id (pk)</li>
+      <li>room_type_id (pk)</li>
+      <li>date (pk)</li>
+      <li>total_inventory - total number of rooms minus those that are temporarily taken off the inventory</li>
+      <li>total_reserved - total number of rooms booked for specific hotel_id, room_type_id, date</li>
+    </ul>
+
+    <h3 class="card-title">reservation</h3>
+    <ul>
+      <li>reservation_id (pk)</li>
+      <li>hotel_id</li>
+      <li>room_type_id</li>
+      <li>start_date</li>
+      <li>end_date</li>
+      <li>status</li>
+      <li>guest_id</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
