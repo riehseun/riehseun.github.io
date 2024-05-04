@@ -61,12 +61,10 @@
 
     <h3 class="card-title">Functional</h3>
     <ul>
-      <li>How close do users need to be in order be considered as nearby? The number should be configurable</li>
-      <li>Is distance between users calculated based on the straight line between them? Yes</li>
-      <li>How many users are there? 1B users and 100M of them use nearby friends feature</li>
-      <li>Should the system store location history? Yes</li>
-      <li>Should the system how inactive users? No</li>
-      <li>Should the system consider privacy laws? No</li>
+      <li>How many users are there? 1B</li>
+      <li>What kind of features should the system support? Send email, search emails, spam filtering</li>
+      <li>Should the system suport email attachment? Yes</li>
+      <li>How do users connect with mail servers? HTTP</li>
     </ul>
 
     <h3 class="card-title">Non-functional</h3>
@@ -93,9 +91,9 @@
 
     <h3 class="card-title">Bandwidth</h3>
     <ul>
-      <li>Assume location refresh takes place every 30 seconds</li>
-      <li>Assume 10M out of 100M DAU are concurrent users</li>
-      <li>Incoming - (10M / 30) queries per second</li>
+      <li>Assume each user sends 10 emails per day</li>
+      <li>Assume each user received 50 emails per day, size of email is 10KB on average, size of attachment is 1MB on average, 20% of emails have attachment</li>
+      <li>Incoming - (1B * 50 * (10KB + 1MB * 0.2)) per day</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -108,54 +106,57 @@
     <h2 class="card-title">High level design</h2>
 
     <img class="img-fluid" class="card-img-top" src="/img/system-design/distributed-email-service1.png" alt="Card image cap">
-
-    <h3 class="card-title">API servers</h3>
     <ul>
-      <li>Add/remove/update users</li>
+      <li>Webmail</li>
+      <ul>
+        <li>Users use web browsers to send and receive emails</li>
+      </ul>
+      <li>Real-time servers</li>
+      <ul>
+        <li>Push new email updates to clients in real-time</li>
+        <li>Stateful servers that maintain persistent connections</li>
+        <li>Use WebSocket whenever possible and fall back to long-polling in case WebSocket has browser compatibility issue</li>
+      </ul>
+      <li>Metadata DB</li>
+      <ul>
+        <li>Stores email metadata</li>
+      </ul>
+      <li>Attachment store</li>
+      <ul>
+        <li>Use object storage like S3</li>
+      </ul>
+      <li>Distributed cache</li>
+      <ul>
+        <li>Cache recent emails since they are loaded frequently</li>
+        <li>Use Redis</li>
+      </ul>
+      <li>Search store</li>
+      <ul>
+        <li>Distributed document store that uses inverted index</li>
+      </ul>
     </ul>
 
-    <h3 class="card-title">WebSocket servers</h3>
+    <h3 class="card-title">Email sending flow</h3>
     <ul>
-      <li>Real-time update of friends' location</li>
-      <li>Each client maintains one persistent WebSocket connection to one WebSocket server</li>
+      <img class="img-fluid" class="card-img-top" src="/img/system-design/distributed-email-service2.png" alt="Card image cap">
+      <li>User sneds an email. Request is sent to load balancer</li>
+      <li>Load balancer performs rate limiting and routes request to web servers</li>
+      <li>Web servers performs email validation</li>
+      <li>If validation succeeds, email is sent to outgoing queue</li>
+      <li>If validation fails, email is sent to error queue</li>
+      <li>SMPT outgoing workers pull messages and check for spam and virus</li>
+      <li>Outgoing email is stored in "Sent" folder in storage</li>
+      <li>SMPT outgoing workers sends email to recipient mail server</li>
     </ul>
 
-    <h3 class="card-title">Location cache</h3>
+    <h3 class="card-title">Email receiving flow</h3>
     <ul>
-      <li>Key-value store is used to cache the most recent location for each active user</li>
-      <li>When TTL expires, location data is deleted from cache</li>
-    </ul>
-
-    <h3 class="card-title">User DB</h3>
-    <ul>
-      <li>Stores user and user friendship data</li>
-      <li>Relational DB or NoSQL can be used</li>
-    </ul>
-
-    <h3 class="card-title">Location history DB</h3>
-    <ul>
-      <li>Stores location history data</li>
-    </ul>
-
-    <h3 class="card-title">Redis Pub/Sub</h3>
-    <ul>
-      <li>Very light message bus</li>
-      <li>Channels are very cheap to create</li>
-      <li>A user's WebSocket server publishes to that user's channel in Redis Pub/Sub</li>
-      <li>Each channel of a user in Redis Pub/Sub is subscribed by WebSocket servers of that user's friends</li>
-    </ul>
-
-    <img class="img-fluid" class="card-img-top" src="/img/system-design/distributed-email-service2.png" alt="Card image cap">
-
-    <h3 class="card-title">Workflow</h3>
-    <ul>
-      <li>User sends location update to load balancer</li>
-      <li>Load balancer forwards update to WebSocket server</li>
-      <li>WebSocket server updates new location in location cache. The update refreshes TTL</li>
-      <li>WebSocket server publishes new location to user's channel in Redis Pub/Sub</li>
-      <li>Update is broadcasted to all subscribers who are user's friends</li>
-      <li>WebSocket server of friends compute the distance from the user</li>
-      <li>If distance is within search radius, new location is sent to friends. Otherwise, update is dropped</li>
+      <img class="img-fluid" class="card-img-top" src="/img/system-design/distributed-email-service3.png" alt="Card image cap">
+      <li>Load balancer distributes emails across SMTP servers</li>
+      <li>Mail processing workers checks spam and virus</li>
+      <li>Email is stored in email storage, cache, and object storage</li>
+      <li>If receiver is currently online, email is pushed to real-time servers</li>
+      <li>If receiver is offline, webmail client calls web servers and web servers pull new emails from storage layer</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -166,27 +167,24 @@
 <div class="card mb-4" id="distributed-email-service-4">
   <div class="card-body">
     <h2 class="card-title">API</h2>
+
+    <h3 class="card-title">Hotel related API</h3>
     <ul>
-      <li>Periodic location update</li>
+      <li>Send a message to receipients</li>
       <ul>
-        <li>Request - latitude, longigude, timestamp</li>
-        <li>Response - none</li>
+        <li><code>POST /v1/messages</code></li>
       </ul>
-      <li>Client receives location updates</li>
-      <li>WebScoket initialization</li>
+      <li>Returns all folders of an email accont</li>
       <ul>
-        <li>Request - latitude, longigude, timestamp</li>
-        <li>Response - friends' location data</li>
+        <li><code>GET /v1/folders</code></li>
       </ul>
-      <li>Subscribe to a new friend</li>
+      <li>Returns all messages under a folder</li>
       <ul>
-        <li>Request - friend ID</li>
-        <li>Response - friend's latest latitude, longigude, timestamp</li>
+        <li><code>GET /v1/folders/{:folder_id}/messages</code></li>
       </ul>
-      <li>Unsubscribe a friend</li>
+      <li>Get all information about a specific message</li>
       <ul>
-        <li>Request - friend ID</li>
-        <li>Response - none</li>
+        <li><code>GET /v1/message/{:message_id}</code></li>
       </ul>
     </ul>
   </div>
