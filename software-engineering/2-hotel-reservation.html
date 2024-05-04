@@ -264,10 +264,65 @@
     <h2 class="card-title">Detailed design</h2>
 
     <h3 class="card-title">Concurrecny</h3>
+    <ul>
+      <li>Same user clicks submit button multiple times</li>
+      <ul>
+        <li>Option 1. Gray out submit button once request is sent. Not reliable because users can disable JavaScript</li>
+        <li>Option 2. Idempotent API produces the same result no mater how many times it is called. Uses globally unique ID generator</li>
+      </ul>
+      <li>Mutiple users try the book the same room at the same time</li>
+      <ul>
+        <li>Option 1. persistent locking</li>
+        <ul>
+          <li>Place a lock on record as soon as one user starts to update it</li>
+          <li>Pros</li>
+          <ul>
+            <li>Useful when data contention is heavy</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Deadlock may occur</li>
+            <li>Not scalable because then a transaction is locked for too long, other transactions cannot access the resouce</li>
+          </ul>
+        </ul>
+        <li>Option 2. optimistic locking</li>
+        <ul>
+          <li>Use either version number or timestamp to allow multiple users to update the same resource</li>
+          <li>Pros</li>
+          <ul>
+            <li>No need to lock the resouce</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Poor performance when data contention is heavy</li>
+          </ul>
+        </ul>
+      </ul>
+    </ul>
 
     <h3 class="card-title">Scaling</h3>
+    <ul>
+      <img class="img-fluid" class="card-img-top" src="/img/system-design/hotel-reservation2.png" alt="Card image cap">
+      <li>Reservation cache</li>
+      <ul>
+        <li>Query the number of available rooms for a given hotel, room type, date range</li>
+        <li>Reserve a room by executing total_reserved+1</li>
+        <li>Update inventory when a user cancels a reservation</li>
+      </ul>
+      <li>Inventory cache</li>
+      <ul>
+        <li>Most read operations are served by cache</li>
+      </ul>
+      <li>Inventory DB</li>
+      <ul>
+        <li>Stores inventory data as source of truth</li>
+      </ul>
+    </ul>
 
     <h3 class="card-title">Consistency</h3>
+    <ul>
+      <li>Microservice architecture (where each service has their own DB) brings great challenge in data consistency</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
