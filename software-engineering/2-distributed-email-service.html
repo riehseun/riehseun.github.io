@@ -196,28 +196,68 @@
 <div class="card mb-4" id="distributed-email-service-5">
   <div class="card-body">
     <h2 class="card-title">Storage schema</h2>
-
-    <h3 class="card-title">Location cache</h3>
     <ul>
-      <li>Redis is good choice due to fast read and write as well as TTL support</li>
-      <li>Shard based on user_id and replicate each shard to improve availability</li>
-      <li>Key - user_id</li>
-      <li>Value - {latitude, longigude, timestamp}</li>
+      <li>A sinlge column can be MBs</li>
+      <li>Strong consistency needed</li>
+      <li>Disk I/O should be small</li>
+      <li>Highly available and fault tolerant</li>
+      <li>Should be easy to create incremental backup</li>
     </ul>
 
-    <h3 class="card-title">Location history DB</h3>
+    <h3 class="card-title">folders_by_user</h3>
     <ul>
-      <li>Cassandra is good choice due to heavy write workload</li>
-      <li>If using relational DB, sharding based on user ID is needed</li>
-      <li>user_id</li>
-      <li>latitude</li>
-      <li>longigude</li>
-      <li>timestamp</li>
+      <li>user_id - uuid, partition key</li>
+      <li>folder_id - uuid</li>
+      <li>folder_name - text</li>
     </ul>
 
-    <h3 class="card-title">User DB</h3>
+    <h3 class="card-title">emails_by_folder</h3>
     <ul>
-      <li>Relational DB with sharding based on user_id</li>
+      <li>user_id - uuid, partition key</li>
+      <li>folder_id - uuid, partition key</li>
+      <li>email_id - timeuuid, clustering key</li>
+      <li>from - text</li>
+      <li>subject - text</li>
+      <li>preview - text</li>
+      <li>is_read - boolean</li>
+    </ul>
+
+    <h3 class="card-title">emails_by_user</h3>
+    <ul>
+      <li>user_id - uuid, partition key</li>
+      <li>email_id - timeuuid, clustering key</li>
+      <li>from - text</li>
+      <li>to - list&lt;text&gt;</li>
+      <li>subject - text</li>
+      <li>body - text</li>
+      <li>attachments - list&lt;filename|size&gt;</li>
+    </ul>
+
+    <h3 class="card-title">attachments</h3>
+    <ul>
+      <li>email_id - timeuuid, clustering key</li>
+      <li>filename - uuid, partition key</li>
+      <li>url - text</li>
+    </ul>
+
+    <h3 class="card-title">read_emails</h3>
+    <ul>
+      <li>user_id - uuid, partition key</li>
+      <li>folder_id - uuid, partition key</li>
+      <li>email_id - timeuuid, clustering key</li>
+      <li>from - text</li>
+      <li>subject - text</li>
+      <li>preview - text</li>
+    </ul>
+
+    <h3 class="card-title">unread_emails</h3>
+    <ul>
+      <li>user_id - uuid, partition key</li>
+      <li>folder_id - uuid, partition key</li>
+      <li>email_id - timeuuid, clustering key</li>
+      <li>from - text</li>
+      <li>subject - text</li>
+      <li>preview - text</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -229,55 +269,40 @@
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
 
-    <h3 class="card-title">Scaling servers</h3>
+    <h3 class="card-title">Email deliverability</h3>
     <ul>
-      <li>API servers</li>
-      <ul>
-        <li>Stateless, thus autoscale based on loads</li>
-      </ul>
-      <li>WebSocket servers</li>
-      <ul>
-        <li>Stateful, the load balancers need to gracefully open/close connections when adding/removing servers</li>
-      </ul>
+      <li>Use dedicated IP addresses for sending emails</li>
+      <li>Send different categoties of emails from different IP addresses</li>
+      <li>Warm up new email server IP addresses slowly to build reputation</li>
+      <li>Ban spammers quickly</li>
     </ul>
 
-    <h3 class="card-title">Client initialization</h3>
+    <h3 class="card-title">Search</h3>
     <ul>
-      <li>User sends it's initial location</li>
-      <li>Server loads all user's friends from user DB</li>
-      <li>Server makes batched requests to cache to fetch locations of all friends</li>
-      <li>Server computes distance between user and all friends</li>
-      <li>For each friend within the search radius, server subscribes to friend's channel in Redis PubSub</li>
-      <li>Server sends user's current location to user's channel in Redis PubSub</li>
-    </ul>
-
-    <h3 class="card-title">Redis PubSub</h3>
-    <ul>
-      <li>Design</li>
+      <li>Option 1. Elasticsearch</li>
       <ul>
-        <li>Uses a hash table and linked list to track the subscribers</li>
-        <li>A user subscribes to each friend's channel whether the friend is online or not</li>
+        <li>Pros</li>
+        <ul>
+          <li>Scalable to some extent</li>
+          <li>Easy to integrate</li>
+        </ul>
+        <li>Cons</li>
+        <ul>
+          <li>Need to maintain two different systems</li>
+          <li>Data consistency is hard to maintain</li>
+        </ul>
       </ul>
-      <li>Memory</li>
+      <li>Option 2. custom search solution</li>
       <ul>
-        <li>Assume a channel is allocated for each user who uses nearby friend</li>
-        <li>Then, we need 100M channels</li>
-        <li>Assume each user have 100 active friends</li>
-        <li>Assume 20 bytes is need to track each subscriber</li>
-        <li>100M * 20 bytes * 100 = 200GB</li>
-        <li>For a server with 100GB memory, 2 PubSub servers can hold all channels</li>
-      </ul>
-      <li>CPU</li>
-      <ul>
-        <li>Assume Redis PubSub sends 14 million updates per second to subscribers</li>
-        <li>Assume each server can handle 100k pushes per seconds</li>
-        <li>Then, 14M / 100K = 140 Redis PubSub servers are needed</li>
-      </ul>
-      <li>Distributed Redis PubSub</li>
-      <ul>
-        <li>Similar to consistent hashing, place Redis PubSub servers in a hash ring</li>
-        <li>Compute hash of channels to determine which PubSub servers that those channels should go to</li>
-        <li>The hash ring can be stored in service discovery like ZooKeeper and cached in WebSocket servers</li>
+        <li>Pros</li>
+        <ul>
+          <li>Easy to scale</li>
+          <li>There is only one system and no need to worry about data consistency</li>
+        </ul>
+        <li>Cons</li>
+        <ul>
+          <li>Significant engineering needed</li>
+        </ul>
       </ul>
     </ul>
   </div>
