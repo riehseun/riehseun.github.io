@@ -61,12 +61,11 @@
 
     <h3 class="card-title">Functional</h3>
     <ul>
-      <li>How close do users need to be in order be considered as nearby? The number should be configurable</li>
-      <li>Is distance between users calculated based on the straight line between them? Yes</li>
-      <li>How many users are there? 1B users and 100M of them use nearby friends feature</li>
-      <li>Should the system store location history? Yes</li>
-      <li>Should the system how inactive users? No</li>
-      <li>Should the system consider privacy laws? No</li>
+      <li>How is score calculated? Users get points when they win matches</li>
+      <li>Are everyone included in the leaderboard? Yes</li>
+      <li>Is there a time segment associated with leaderboard? A new tornament kicks off each month</li>
+      <li>How many users are there? 5M daily active users and 25M monthly active users</li>
+      <li>How many matches are played on average? Each user plays 10 matches per day on averages</li>
     </ul>
 
     <h3 class="card-title">Non-functional</h3>
@@ -93,9 +92,9 @@
 
     <h3 class="card-title">Bandwidth</h3>
     <ul>
-      <li>Assume location refresh takes place every 30 seconds</li>
-      <li>Assume 10M out of 100M DAU are concurrent users</li>
-      <li>Incoming - (10M / 30) queries per second</li>
+      <li>(5M / 86400) users per second</li>
+      <li>Assume peak load is 5 times the above number</li>
+      <li>Multiple above number by 10 to get query per second</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -166,27 +165,34 @@
 <div class="card mb-4" id="real-time-gaming-leaderboard-4">
   <div class="card-body">
     <h2 class="card-title">API</h2>
+
+    <h3 class="card-title">Hotel related API</h3>
     <ul>
-      <li>Periodic location update</li>
+      <li>Update user's position on leaderboard when a user wins a game</li>
       <ul>
-        <li>Request - latitude, longigude, timestamp</li>
-        <li>Response - none</li>
+        <li><code>POST /v1/scores</code></li>
+        <li>Request</li>
+        <ul>
+          <li><code>user_id</code> - user who wins the game</li>
+          <li><code>points</code> - points that user gained by winning a game</li>
+        </ul>
+        <li>Response</li>
+        <ul>
+          <li><code>200 OK</code></li>
+          <li><code>400 Bad Request</code></li>
+        </ul>
       </ul>
-      <li>Client receives location updates</li>
-      <li>WebScoket initialization</li>
+      <li>Add a new hotel</li>
       <ul>
-        <li>Request - latitude, longigude, timestamp</li>
-        <li>Response - friends' location data</li>
+        <li><code>POST /v1/hotels</code></li>
       </ul>
-      <li>Subscribe to a new friend</li>
+      <li>Update hotel information</li>
       <ul>
-        <li>Request - friend ID</li>
-        <li>Response - friend's latest latitude, longigude, timestamp</li>
+        <li><code>PUT /v1/hotels/ID</code></li>
       </ul>
-      <li>Unsubscribe a friend</li>
+      <li>Delete a hotel</li>
       <ul>
-        <li>Request - friend ID</li>
-        <li>Response - none</li>
+        <li><code>DELETE /v1/hotels/ID</code></li>
       </ul>
     </ul>
   </div>
