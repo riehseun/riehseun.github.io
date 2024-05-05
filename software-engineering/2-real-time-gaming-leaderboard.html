@@ -158,28 +158,22 @@
 <div class="card mb-4" id="real-time-gaming-leaderboard-5">
   <div class="card-body">
     <h2 class="card-title">Storage schema</h2>
-
-    <h3 class="card-title">Location cache</h3>
     <ul>
-      <li>Redis is good choice due to fast read and write as well as TTL support</li>
-      <li>Shard based on user_id and replicate each shard to improve availability</li>
-      <li>Key - user_id</li>
-      <li>Value - {latitude, longigude, timestamp}</li>
-    </ul>
-
-    <h3 class="card-title">Location history DB</h3>
-    <ul>
-      <li>Cassandra is good choice due to heavy write workload</li>
-      <li>If using relational DB, sharding based on user ID is needed</li>
-      <li>user_id</li>
-      <li>latitude</li>
-      <li>longigude</li>
-      <li>timestamp</li>
-    </ul>
-
-    <h3 class="card-title">User DB</h3>
-    <ul>
-      <li>Relational DB with sharding based on user_id</li>
+      <li>Relational DB</li>
+      <ul>
+        <li>Not performant when processing larget amount of continuouly changing information</li>
+        <li>Not suitable very high load of read queries</li>
+      </ul>
+      <li>Redis</li>
+      <ul>
+        <li>Sorted sets data type works well with leaderboard problem</li>
+        <li>Redis supports persistence</li>
+        <li>When main replica fails, read replica is promoted and a new read replica is attached</li>
+        <li>ZADD - insert user if not exist O(logn)</li>
+        <li>ZINCBY - increase the score of a user by specified amount O(logn)</li>
+        <li>ZRANGE/ZREVRANGE - fetch a range of users sorted by the score O(logn+m)</li>
+        <li>ZRANK/ZREVRANK - fetch the position of any user</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
