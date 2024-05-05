@@ -185,55 +185,26 @@
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
 
-    <h3 class="card-title">Scaling servers</h3>
+    <h3 class="card-title">Serverless</h3>
     <ul>
-      <li>API servers</li>
-      <ul>
-        <li>Stateless, thus autoscale based on loads</li>
-      </ul>
-      <li>WebSocket servers</li>
-      <ul>
-        <li>Stateful, the load balancers need to gracefully open/close connections when adding/removing servers</li>
-      </ul>
+      <li>Allows auto-scaling as needed with DAU growth</li>
     </ul>
 
-    <h3 class="card-title">Client initialization</h3>
-    <ul>
-      <li>User sends it's initial location</li>
-      <li>Server loads all user's friends from user DB</li>
-      <li>Server makes batched requests to cache to fetch locations of all friends</li>
-      <li>Server computes distance between user and all friends</li>
-      <li>For each friend within the search radius, server subscribes to friend's channel in Redis PubSub</li>
-      <li>Server sends user's current location to user's channel in Redis PubSub</li>
-    </ul>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/real-time-gaming-leaderboard2.png" alt="Card image cap">
 
-    <h3 class="card-title">Redis PubSub</h3>
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/real-time-gaming-leaderboard3.png" alt="Card image cap">
+
+    <h3 class="card-title">Data sharding</h3>
     <ul>
-      <li>Design</li>
+      <li>Fixed partition</li>
       <ul>
-        <li>Uses a hash table and linked list to track the subscribers</li>
-        <li>A user subscribes to each friend's channel whether the friend is online or not</li>
+        <li>Looks at overall range of scores and distribute data into different shards based on the score</li>
+        <li>Adjust the score range in each shard to make sure that data is relatively evenly distributed between shards</li>
+        <li>Return top 10 users from the shard with the highest scores</li>
       </ul>
-      <li>Memory</li>
+      <li>Hash partition</li>
       <ul>
-        <li>Assume a channel is allocated for each user who uses nearby friend</li>
-        <li>Then, we need 100M channels</li>
-        <li>Assume each user have 100 active friends</li>
-        <li>Assume 20 bytes is need to track each subscriber</li>
-        <li>100M * 20 bytes * 100 = 200GB</li>
-        <li>For a server with 100GB memory, 2 PubSub servers can hold all channels</li>
-      </ul>
-      <li>CPU</li>
-      <ul>
-        <li>Assume Redis PubSub sends 14 million updates per second to subscribers</li>
-        <li>Assume each server can handle 100k pushes per seconds</li>
-        <li>Then, 14M / 100K = 140 Redis PubSub servers are needed</li>
-      </ul>
-      <li>Distributed Redis PubSub</li>
-      <ul>
-        <li>Similar to consistent hashing, place Redis PubSub servers in a hash ring</li>
-        <li>Compute hash of channels to determine which PubSub servers that those channels should go to</li>
-        <li>The hash ring can be stored in service discovery like ZooKeeper and cached in WebSocket servers</li>
+        <li>Returning top 10 users requires gathering data from different shards, which will be slow</li>
       </ul>
     </ul>
   </div>
