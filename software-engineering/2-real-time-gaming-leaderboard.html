@@ -108,53 +108,11 @@
 
     <img class="img-fluid" class="card-img-top" src="/img/system-design/real-time-gaming-leaderboard1.png" alt="Card image cap">
 
-    <h3 class="card-title">API servers</h3>
     <ul>
-      <li>Add/remove/update users</li>
-    </ul>
-
-    <h3 class="card-title">WebSocket servers</h3>
-    <ul>
-      <li>Real-time update of friends' location</li>
-      <li>Each client maintains one persistent WebSocket connection to one WebSocket server</li>
-    </ul>
-
-    <h3 class="card-title">Location cache</h3>
-    <ul>
-      <li>Key-value store is used to cache the most recent location for each active user</li>
-      <li>When TTL expires, location data is deleted from cache</li>
-    </ul>
-
-    <h3 class="card-title">User DB</h3>
-    <ul>
-      <li>Stores user and user friendship data</li>
-      <li>Relational DB or NoSQL can be used</li>
-    </ul>
-
-    <h3 class="card-title">Location history DB</h3>
-    <ul>
-      <li>Stores location history data</li>
-    </ul>
-
-    <h3 class="card-title">Redis Pub/Sub</h3>
-    <ul>
-      <li>Very light message bus</li>
-      <li>Channels are very cheap to create</li>
-      <li>A user's WebSocket server publishes to that user's channel in Redis Pub/Sub</li>
-      <li>Each channel of a user in Redis Pub/Sub is subscribed by WebSocket servers of that user's friends</li>
-    </ul>
-
-    <img class="img-fluid" class="card-img-top" src="/img/system-design/real-time-gaming-leaderboard2.png" alt="Card image cap">
-
-    <h3 class="card-title">Workflow</h3>
-    <ul>
-      <li>User sends location update to load balancer</li>
-      <li>Load balancer forwards update to WebSocket server</li>
-      <li>WebSocket server updates new location in location cache. The update refreshes TTL</li>
-      <li>WebSocket server publishes new location to user's channel in Redis Pub/Sub</li>
-      <li>Update is broadcasted to all subscribers who are user's friends</li>
-      <li>WebSocket server of friends compute the distance from the user</li>
-      <li>If distance is within search radius, new location is sent to friends. Otherwise, update is dropped</li>
+      <li>When a player wins a game, user sends a request to game service</li>
+      <li>Game service ensures the win is valid and calls leaderboard service to update the score</li>
+      <li>Leaderboard service updates user's score in leaderboard store</li>
+      <li>User calls leaderboard service directly to fetch leaderboard data</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -182,17 +140,13 @@
           <li><code>400 Bad Request</code></li>
         </ul>
       </ul>
-      <li>Add a new hotel</li>
+      <li>Get top 10 plays from leaderboard</li>
       <ul>
-        <li><code>POST /v1/hotels</code></li>
+        <li><code>GET /v1/scores</code></li>
       </ul>
-      <li>Update hotel information</li>
+      <li>Find the rank of a specific user</li>
       <ul>
-        <li><code>PUT /v1/hotels/ID</code></li>
-      </ul>
-      <li>Delete a hotel</li>
-      <ul>
-        <li><code>DELETE /v1/hotels/ID</code></li>
+        <li><code>GET /v1/scores/{:user_id}</code></li>
       </ul>
     </ul>
   </div>
