@@ -121,7 +121,7 @@
       </ul>
       <li>Payment service provider</li>
       <ul>
-        <li>Ex. Stripe</li>
+        <li>Ex. Stripe, Square</li>
       </ul>
       <li>Card schemes</li>
       <ul>
@@ -129,7 +129,7 @@
       </ul>
       <li>Ledger</li>
       <ul>
-        <li>Keeps transaction information for accouting purpose</li>
+        <li>Keeps transaction information for accouting and post-payment analysis</li>
       </ul>
       <li>Wallet</li>
       <ul>
@@ -170,8 +170,14 @@
           <ul>
             <li><code>seller_account</code> - which seller will receive the monry (string)</li>
             <li><code>amount</code> - transaction amount of the order (string)</li>
+            <ul>
+              <li>Double is not a good choice because the number could be extremely big or small</li>
+            </ul>
             <li><code>currency</code> - currency of the order (string)</li>
             <li><code>payment_order_id</code> - globally unique ID of this payment (string)</li>
+            <ul>
+              <li>This ID is used by PSP as idempotency key, thus must be globally unique</li>
+            </ul>
           </ul>
         </ul>
       </ul>
@@ -191,7 +197,7 @@
     <h2 class="card-title">Storage schema</h2>
     <ul>
       <li>Performance is not the most important factor for payment service</li>
-      <li>Relational DB for ACID transaction</li>
+      <li>Choose relational DB for ACID property</li>
     </ul>
 
     <h3 class="card-title">Payment event</h3>
@@ -207,7 +213,7 @@
     <ul>
       <li>payment_order_id (string, pk)</li>
       <li>buyer_account (string)</li>
-      <li>amount (string</li>
+      <li>amount (string)</li>
       <li>currency (string)</li>
       <li>checkout_id (string, FK)</li>
       <li>payment_order_status (string)</li>
@@ -256,7 +262,7 @@
 
     <h3 class="card-title">Handling failed payments</h3>
     <ul>
-      <li>Retry queue - transient erros are routed here</li>
+      <li>Retry queue - transient errors are routed here</li>
       <li>Dead letter queue - when messages fail repeatedly, they end up here</li>
     </ul>
 
