@@ -225,16 +225,46 @@
     <h2 class="card-title">Detailed design</h2>
 
     <h3 class="card-title">PSP integration</h3>
+    <ul>
+      <li>Choose not to store sensitive payment information due to complex regulations</li>
+      <img class="img-fluid" class="card-img-top" src="/img/system-design/payment-system2.png" alt="Card image cap">
+      <ul>
+        <li>User clicks checkout button and client calls payment service with payment order information</li>
+        <li>Payment service calls PSP with amount, currency, expiration date, redirect URL</li>
+        <li>PSP returns a token (UUID) to payment service</li>
+        <li>Payment service stores token in DB</li>
+        <li>Client displays PSP-hosted payment page</li>
+        <li>User fills PSP-hosted payment page and PSP starts payment processing</li>
+        <li>PSP returns payment status</li>
+        <li>Web page is directed to the redirect URL</li>
+        <li>PSP calls payment service with payment status</li>
+      </ul>
+    </ul>
 
     <h3 class="card-title">Reconciliation</h3>
+    <ul>
+      <li>Every night, PSP or bank sends a settlement file to clients</li>
+      <li>Reconciliation system compares settlement file with ledger</li>
+    </ul>
 
     <h3 class="card-title">Handling payments processing delays</h3>
 
     <h3 class="card-title">Communication among internal services</h3>
+    <ul>
+      <li>Payment events are published to Kafka and consumed by payment system</li>
+    </ul>
 
     <h3 class="card-title">Handling failed payments</h3>
+    <ul>
+      <li>Retry queue - transient erros are routed here</li>
+      <li>Dead letter queue - when messages fail repeatedly, they end up here</li>
+    </ul>
 
     <h3 class="card-title">Exactly-once delivery</h3>
+    <ul>
+      <li>At-least-once - retry</li>
+      <li>At-most-once - idempotency</li>
+    </ul>
 
     <h3 class="card-title">Consistency</h3>
 
