@@ -61,11 +61,13 @@
 
     <h3 class="card-title">Functional</h3>
     <ul>
-      <li>How many hotels? 5000 hotels and 1M rooms</li>
-      <li>When do customers pay? They pay full when they make reservation</li>
-      <li>Where do users book hotel? Hotel website or app</li>
-      <li>Can users cancel reservations? Yes</li>
-      <li>Should the system support overbooking? Yes, 10%</li>
+      <li>What kind of payment system? E-commerce</li>
+      <li>What payment options should the system support? Credit card, debit card, PayPal</li>
+      <li>Should the system handle credit card processing? No, the system can use Stripe, Square, etc</li>
+      <li>Should the system store credit card data in DB? No, the system should rely on third party</li>
+      <li>Should the system support multiple currencies? No</li>
+      <li>How many transactions per day? 1M</li>
+      <li>Should the system pay the sellers based on some cadence? Yes</li>
     </ul>
 
     <h3 class="card-title">Non-functional</h3>
@@ -92,8 +94,7 @@
 
     <h3 class="card-title">Bandwidth</h3>
     <ul>
-      <li>Assume 70% of rooms are booked and stay duration is 3 days on average</li>
-      <li>(1M * 0.7) / (3 * 86400) = ? reservations per second</li>
+      <li>1M transactions per day = 10 transactions per second</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -108,12 +109,45 @@
     <img class="img-fluid" class="card-img-top" src="/img/system-design/payment-system1.png" alt="Card image cap">
 
     <ul>
-      <li>Public API gateway - rate limiting, authentication</li>
-      <li>Internal API - available to staff and protected via VPN</li>
-      <li>Hotel service - hotel and room information</li>
-      <li>Rate service - provides room state for different future dates</li>
-      <li>Reservation service - makes reservations and tracks room inventory</li>
-      <li>Payment service - manages transactions</li>
+      <li>Payment service</li>
+      <ul>
+        <li>Accepts payment events from users</li>
+        <li>Performs risk checks using third party provider</li>
+      </ul>
+      <li>Payment executor</li>
+      <ul>
+        <li>Execute a single payment order using payment service provider (PSP)</li>
+        <li>A payment may contain several payment orders</li>
+      </ul>
+      <li>Payment service provider</li>
+      <ul>
+        <li>Ex. Stripe</li>
+      </ul>
+      <li>Card schemes</li>
+      <ul>
+        <li>Ex. Visa, MasterCard</li>
+      </ul>
+      <li>Ledger</li>
+      <ul>
+        <li>Keeps transaction information for accouting purpose</li>
+      </ul>
+      <li>Wallet</li>
+      <ul>
+        <li>Keeps account balance of the merchants</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Workflow</h3>
+    <ul>
+      <li>When user clicks order button, payment event is generated and sent to payment service</li>
+      <li>Payment service stores payment event in DB</li>
+      <li>Payment service calls payment executor for each payment order</li>
+      <li>Payment executor stores payment order in DB</li>
+      <li>Payment executor calls PSP to process credit card payment</li>
+      <li>Payment service updates wallet</li>
+      <li>Wallet stores updated balance in DB</li>
+      <li>Payment service updates ledger</li>
+      <li>Ledgers stores new transaction information in DB</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -124,64 +158,26 @@
 <div class="card mb-4" id="payment-system-4">
   <div class="card-body">
     <h2 class="card-title">API</h2>
-
-    <h3 class="card-title">Hotel related API</h3>
     <ul>
-      <li>Get detailed information about a hotel</li>
+      <li>Executes a payment event</li>
       <ul>
-        <li><code>GET /v1/hotels/ID</code></li>
+        <li><code>POST /v1/payments</code></li>
+        <ul>
+          <li><code>buyer_info</code> - information of buyer (JSON)</li>
+          <li><code>checkout_id</code> - globally unique ID of this checkout (string)</li>
+          <li><code>credit_card_info</code> - encrypted credit card information, which is PSP specific (JSON)</li>
+          <li><code>payment_orders</code> - list of payment orders (list)</li>
+          <ul>
+            <li><code>seller_account</code> - which seller will receive the monry (string)</li>
+            <li><code>amount</code> - transaction amount of the order (string)</li>
+            <li><code>currency</code> - currency of the order (string)</li>
+            <li><code>payment_order_id</code> - globally unique ID of this payment (string)</li>
+          </ul>
+        </ul>
       </ul>
-      <li>Add a new hotel</li>
+      <li>Returns the execution status of a single payment order</li>
       <ul>
-        <li><code>POST /v1/hotels</code></li>
-      </ul>
-      <li>Update hotel information</li>
-      <ul>
-        <li><code>PUT /v1/hotels/ID</code></li>
-      </ul>
-      <li>Delete a hotel</li>
-      <ul>
-        <li><code>DELETE /v1/hotels/ID</code></li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Room related API</h3>
-    <ul>
-      <li>Get detailed information about a room</li>
-      <ul>
-        <li><code>GET /v1/hotels/ID/rooms/ID</code></li>
-      </ul>
-      <li>Add a new room</li>
-      <ul>
-        <li><code>POST /v1/hotels/ID/rooms</code></li>
-      </ul>
-      <li>Update room information</li>
-      <ul>
-        <li><code>PUT /v1/hotels/ID/rooms/ID</code></li>
-      </ul>
-      <li>Delete a room</li>
-      <ul>
-        <li><code>DELETE /v1/hotels/ID/rooms/ID</code></li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Reservation related API</h3>
-    <ul>
-      <li>Get reservation history of logged-in user</li>
-      <ul>
-        <li><code>GET /v1/reservations</code></li>
-      </ul>
-      <li>Get detailed information about a reservation</li>
-      <ul>
-        <li><code>GET /v1/reservations/ID</code></li>
-      </ul>
-      <li>Make a new reservation</li>
-      <ul>
-        <li><code>POST /v1/reservations</code></li>
-      </ul>
-      <li>Cancel a reservation</li>
-      <ul>
-        <li><code>DELETE /v1/reservations/ID</code></li>
+        <li><code>GET /v1/payments/{:id}</code></li>
       </ul>
     </ul>
   </div>
@@ -194,64 +190,29 @@
   <div class="card-body">
     <h2 class="card-title">Storage schema</h2>
     <ul>
-      <li>Heavy read and little write</li>
-      <li>Thus, choose relational</li>
-      <li>ACID property prevents double charge, double booking, etc</li>
-      <li>Shard DB by hash(hotel_id) % number_of_servers</li>
+      <li>Performance is not the most important factor for payment service</li>
+      <li>Relational DB for ACID transaction</li>
     </ul>
 
-    <h3 class="card-title">Hotel</h3>
+    <h3 class="card-title">Payment event</h3>
     <ul>
-      <li>hotel_id (pk)</li>
-      <li>name</li>
-      <li>address</li>
-      <li>location</li>
+      <li>checkout_id (string, pk)</li>
+      <li>buyer_info (string)</li>
+      <li>seller_info (string)</li>
+      <li>credit_card_info (depends on PSP)</li>
+      <li>is_payment_done (bool)</li>
     </ul>
 
-    <h3 class="card-title">room</h3>
+    <h3 class="card-title">Payment order</h3>
     <ul>
-      <li>room_id (pk)</li>
-      <li>room_type_id</li>
-      <li>floor</li>
-      <li>number</li>
-      <li>hotel_id</li>
-      <li>name</li>
-      <li>is_available</li>
-    </ul>
-
-    <h3 class="card-title">room_type_rate</h3>
-    <ul>
-      <li>hotel_id (pk)</li>
-      <li>date (pk)</li>
-      <li>rate</li>
-    </ul>
-
-    <h3 class="card-title">guest</h3>
-    <ul>
-      <li>guest_id (pk)</li>
-      <li>first_name</li>
-      <li>last_name</li>
-      <li>email</li>
-    </ul>
-
-    <h3 class="card-title">room_type_inventory</h3>
-    <ul>
-      <li>hotel_id (pk)</li>
-      <li>room_type_id (pk)</li>
-      <li>date (pk)</li>
-      <li>total_inventory - total number of rooms minus those that are temporarily taken off the inventory</li>
-      <li>total_reserved - total number of rooms booked for specific hotel_id, room_type_id, date</li>
-    </ul>
-
-    <h3 class="card-title">reservation</h3>
-    <ul>
-      <li>reservation_id (pk)</li>
-      <li>hotel_id</li>
-      <li>room_type_id</li>
-      <li>start_date</li>
-      <li>end_date</li>
-      <li>status</li>
-      <li>guest_id</li>
+      <li>payment_order_id (string, pk)</li>
+      <li>buyer_account (string)</li>
+      <li>amount (string</li>
+      <li>currency (string)</li>
+      <li>checkout_id (string, FK)</li>
+      <li>payment_order_status (string)</li>
+      <li>ledger_updated (bool)</li>
+      <li>wallet_updated (bool)</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -263,66 +224,21 @@
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
 
-    <h3 class="card-title">Concurrecny</h3>
-    <ul>
-      <li>Same user clicks submit button multiple times</li>
-      <ul>
-        <li>Option 1. Gray out submit button once request is sent. Not reliable because users can disable JavaScript</li>
-        <li>Option 2. Idempotent API produces the same result no mater how many times it is called. Uses globally unique ID generator</li>
-      </ul>
-      <li>Mutiple users try the book the same room at the same time</li>
-      <ul>
-        <li>Option 1. persistent locking</li>
-        <ul>
-          <li>Place a lock on record as soon as one user starts to update it</li>
-          <li>Pros</li>
-          <ul>
-            <li>Useful when data contention is heavy</li>
-          </ul>
-          <li>Cons</li>
-          <ul>
-            <li>Deadlock may occur</li>
-            <li>Not scalable because when a transaction is locked for too long, other transactions cannot access the resouce</li>
-          </ul>
-        </ul>
-        <li>Option 2. optimistic locking</li>
-        <ul>
-          <li>Use either version number or timestamp to allow multiple users to update the same resource</li>
-          <li>Pros</li>
-          <ul>
-            <li>No need to lock the resouce</li>
-          </ul>
-          <li>Cons</li>
-          <ul>
-            <li>Poor performance when data contention is heavy</li>
-          </ul>
-        </ul>
-      </ul>
-    </ul>
+    <h3 class="card-title">PSP integration</h3>
 
-    <h3 class="card-title">Scaling</h3>
-    <ul>
-      <img class="img-fluid" class="card-img-top" src="/img/system-design/payment-system2.png" alt="Card image cap">
-      <li>Reservation cache</li>
-      <ul>
-        <li>Query the number of available rooms for a given hotel, room type, date range</li>
-        <li>Reserve a room by executing total_reserved+1</li>
-        <li>Update inventory when a user cancels a reservation</li>
-      </ul>
-      <li>Inventory cache</li>
-      <ul>
-        <li>Most read operations are served by cache</li>
-      </ul>
-      <li>Inventory DB</li>
-      <ul>
-        <li>Stores inventory data as source of truth</li>
-      </ul>
-    </ul>
+    <h3 class="card-title">Reconciliation</h3>
+
+    <h3 class="card-title">Handling payments processing delays</h3>
+
+    <h3 class="card-title">Communication among internal services</h3>
+
+    <h3 class="card-title">Handling failed payments</h3>
+
+    <h3 class="card-title">Exactly-once delivery</h3>
 
     <h3 class="card-title">Consistency</h3>
-    <ul>
-      <li>Microservice architecture (where each service has their own DB) brings great challenge in data consistency</li>
-    </ul>
+
+    <h3 class="card-title">Security</h3>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
