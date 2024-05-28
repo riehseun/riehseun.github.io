@@ -39,29 +39,29 @@
 <div class="col-md-12">
 <h1 class="my-4">Software Engineering</h1>
 
-<!-- Payment system BEGIN -->
-<div class="card mb-4" id="payment-system">
+<!-- Stock exchange BEGIN -->
+<div class="card mb-4" id="stock-exchange">
   <div class="card-body">
-    <h2 class="card-title">Payment system</h2>
+    <h2 class="card-title">Stock exchange</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#payment-system-1">Requirement</a></li>
-      <li><a href="#payment-system-2">Estimation</a></li>
-      <li><a href="#payment-system-3">High level design</a></li>
-      <li><a href="#payment-system-4">API</a></li>
-      <li><a href="#payment-system-5">Storage schema</a></li>
-      <li><a href="#payment-system-6">Detailed design</a></li>
-      <li><a href="#payment-system-7">Evaluation</a></li>
+      <li><a href="#stock-exchange-1">Requirement</a></li>
+      <li><a href="#stock-exchange-2">Estimation</a></li>
+      <li><a href="#stock-exchange-3">High level design</a></li>
+      <li><a href="#stock-exchange-4">API</a></li>
+      <li><a href="#stock-exchange-5">Storage schema</a></li>
+      <li><a href="#stock-exchange-6">Detailed design</a></li>
+      <li><a href="#stock-exchange-7">Evaluation</a></li>
     </ul>
   </div>
 </div>
 
-<div class="card mb-4" id="payment-system-1">
+<div class="card mb-4" id="stock-exchange-1">
   <div class="card-body">
     <h2 class="card-title">Requirement</h2>
 
     <h3 class="card-title">Functional</h3>
     <ul>
-      <li>What kind of payment system? E-commerce</li>
+      <li>What kind of Stock exchange? E-commerce</li>
       <li>What payment options should the system support? Credit card, debit card, PayPal</li>
       <li>Should the system handle credit card processing? No, the system can use Stripe, Square, etc</li>
       <li>Should the system store credit card data in DB? No, the system should rely on third party</li>
@@ -84,7 +84,7 @@
   </div>
 </div>
 
-<div class="card mb-4" id="payment-system-2">
+<div class="card mb-4" id="stock-exchange-2">
   <div class="card-body">
     <h2 class="card-title">Estimation</h2>
 
@@ -102,11 +102,11 @@
   </div>
 </div>
 
-<div class="card mb-4" id="payment-system-3">
+<div class="card mb-4" id="stock-exchange-3">
   <div class="card-body">
     <h2 class="card-title">High level design</h2>
 
-    <img class="img-fluid" class="card-img-top" src="/img/system-design/payment-system1.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/img/system-design/stock-exchange1.png" alt="Card image cap">
 
     <ul>
       <li>Payment service</li>
@@ -155,7 +155,7 @@
   </div>
 </div>
 
-<div class="card mb-4" id="payment-system-4">
+<div class="card mb-4" id="stock-exchange-4">
   <div class="card-body">
     <h2 class="card-title">API</h2>
     <ul>
@@ -192,7 +192,7 @@
   </div>
 </div>
 
-<div class="card mb-4" id="payment-system-5">
+<div class="card mb-4" id="stock-exchange-5">
   <div class="card-body">
     <h2 class="card-title">Storage schema</h2>
     <ul>
@@ -226,14 +226,14 @@
   </div>
 </div>
 
-<div class="card mb-4" id="payment-system-6">
+<div class="card mb-4" id="stock-exchange-6">
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
 
     <h3 class="card-title">PSP integration</h3>
     <ul>
       <li>Choose not to store sensitive payment information due to complex regulations</li>
-      <img class="img-fluid" class="card-img-top" src="/img/system-design/payment-system2.png" alt="Card image cap">
+      <img class="img-fluid" class="card-img-top" src="/img/system-design/stock-exchange2.png" alt="Card image cap">
       <ul>
         <li>User clicks checkout button and client calls payment service with payment order information</li>
         <li>Payment service calls PSP with amount, currency, expiration date, redirect URL</li>
@@ -256,9 +256,7 @@
 
     <h3 class="card-title">Communication among internal services</h3>
     <ul>
-      <li>Message queue - a message can only be consumed by one subscriber</li>
-      <li>Kafka - a message can be consumed by multiple subscribers</li>
-      <li>Payment events are published to Kafka and consumed by payment system, analytics, billing</li>
+      <li>Payment events are published to Kafka and consumed by Stock exchange</li>
     </ul>
 
     <h3 class="card-title">Handling failed payments</h3>
@@ -269,30 +267,20 @@
 
     <h3 class="card-title">Exactly-once delivery</h3>
     <ul>
-      <li>Use both at-least-once and at-most-once</li>
-      <li>At-least-once - retrying failed payment guarantees this</li>
-      <li>At-most-once - idempotency check using UUID</li>
-      <ul>
-        <li>Subsequent requests with the UUID that is already seen will result in 429 too many request</li>
-      </ul>
+      <li>At-least-once - retry</li>
+      <li>At-most-once - idempotency</li>
     </ul>
 
+    <h3 class="card-title">Consistency</h3>
+
     <h3 class="card-title">Security</h3>
-    <ul>
-      <li>Request/response eavesdropping - use HTTPS</li>
-      <li>Data tampering - use encryption</li>
-      <li>Man-in-the-middle-attack - use SSL</li>
-      <li>Data loss - DB replication across multiple zones/regions</li>
-      <li>DDoS - rate limiting and firewall</li>
-      <li>Card theft - tokenization of credit card number</li>
-    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
   </div>
 </div>
 
-<div class="card mb-4" id="payment-system-7">
+<div class="card mb-4" id="stock-exchange-7">
   <div class="card-body">
     <h2 class="card-title">Evaluation</h2>
 
@@ -337,7 +325,7 @@
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
   </div>
 </div>
-<!-- Payment system END -->
+<!-- Stock exchange END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->
