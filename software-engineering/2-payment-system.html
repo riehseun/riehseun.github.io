@@ -251,13 +251,14 @@
     <ul>
       <li>Every night, PSP or bank sends a settlement file to clients</li>
       <li>Reconciliation system compares settlement file with ledger</li>
+      <li>Finance team can manually adjust mismatches</li>
     </ul>
-
-    <h3 class="card-title">Handling payments processing delays</h3>
 
     <h3 class="card-title">Communication among internal services</h3>
     <ul>
-      <li>Payment events are published to Kafka and consumed by payment system</li>
+      <li>Message queue - a message can only be consumed by one subscriber</li>
+      <li>Kafka - a message can be consumed by multiple subscribers</li>
+      <li>Payment events are published to Kafka and consumed by payment system, analytics, billing</li>
     </ul>
 
     <h3 class="card-title">Handling failed payments</h3>
@@ -268,13 +269,23 @@
 
     <h3 class="card-title">Exactly-once delivery</h3>
     <ul>
-      <li>At-least-once - retry</li>
-      <li>At-most-once - idempotency</li>
+      <li>Use both at-least-once and at-most-once</li>
+      <li>At-least-once - retrying failed payment guarantees this</li>
+      <li>At-most-once - idempotency check using UUID</li>
+      <ul>
+        <li>Subsequent requests with the UUID that is already seen will result in 429 too many request</li>
+      </ul>
     </ul>
 
-    <h3 class="card-title">Consistency</h3>
-
     <h3 class="card-title">Security</h3>
+    <ul>
+      <li>Request/response eavesdropping - use HTTPS</li>
+      <li>Data tampering - use encryption</li>
+      <li>Man-in-the-middle-attack - use SSL</li>
+      <li>Data loss - DB replication across multiple zones/regions</li>
+      <li>DDoS - rate limiting and firewall</li>
+      <li>Card theft - tokenization of credit card number</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
