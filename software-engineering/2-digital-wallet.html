@@ -61,13 +61,9 @@
 
     <h3 class="card-title">Functional</h3>
     <ul>
-      <li>What kind of Digital wallet? E-commerce</li>
-      <li>What payment options should the system support? Credit card, debit card, PayPal</li>
-      <li>Should the system handle credit card processing? No, the system can use Stripe, Square, etc</li>
-      <li>Should the system store credit card data in DB? No, the system should rely on third party</li>
-      <li>Should the system support multiple currencies? No</li>
-      <li>How many transactions per day? 1M</li>
-      <li>Should the system pay the sellers based on some cadence? Yes</li>
+      <li>What is the purpose of the system? Balance transfer between two digital wallets</li>
+      <li>How many transactions should the system support? 1M per second</li>
+      <li>Should the system handle foreign currency exchange rate? No</li>
     </ul>
 
     <h3 class="card-title">Non-functional</h3>
@@ -93,9 +89,6 @@
     <h3 class="card-title">Storage</h3>
 
     <h3 class="card-title">Bandwidth</h3>
-    <ul>
-      <li>1M transactions per day = 10 transactions per second</li>
-    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
@@ -108,47 +101,37 @@
 
     <img class="img-fluid" class="card-img-top" src="/img/system-design/digital-wallet1.png" alt="Card image cap">
 
+    <h3 class="card-title">In-memory sharding</h3>
     <ul>
-      <li>Payment service</li>
+      <li>A cluster of Redis nodes to support 1M transactions per second</li>
+      <li>Distribute user accounts across the cluster</li>
+      <li>Store &lt;user,balance&gt; relationship in a map</li>
+      <li>Use ZooKeeper to store the number of partitions and addresses of all Redis nodes</li>
+      <li>Problem - when wallet service updates two Redis nodes for each transaction, there is no guarantee that both update would succeed</li>
+    </ul>
+
+    <h3 class="card-title">Two-phase commit</h3>
+    <ul>
+      <li>In the first phase, wallet service asks both databases to be locked</li>
+      <li>In the second phase, wallet service collects replies from databases</li>
       <ul>
-        <li>Accepts payment events from users</li>
-        <li>Performs risk checks using third party provider</li>
+        <li>If reply is yes, wallet service asks databases to commit transaction</li>
+        <li>If reply is no, wallet service asks databases to abort transaction</li>
       </ul>
-      <li>Payment executor</li>
+      <li>Problem - not performant because locks can be held for long time waiting for replies from other nodes</li>
+    </ul>
+
+    <h3 class="card-title">Try-Confirm/Cancel</h3>
+    <ul>
+      <li>In the first phase, wallet service asks both databases to reserve resources for transaction</li>
+      <li>In the second phase, wallet service collects replies from databases</li>
       <ul>
-        <li>Execute a single payment order using payment service provider (PSP)</li>
-        <li>A payment may contain several payment orders</li>
-      </ul>
-      <li>Payment service provider</li>
-      <ul>
-        <li>Ex. Stripe, Square</li>
-      </ul>
-      <li>Card schemes</li>
-      <ul>
-        <li>Ex. Visa, MasterCard</li>
-      </ul>
-      <li>Ledger</li>
-      <ul>
-        <li>Keeps transaction information for accouting and post-payment analysis</li>
-      </ul>
-      <li>Wallet</li>
-      <ul>
-        <li>Keeps account balance of the merchants</li>
+        <li>If reply is yes, wallet service asks databases to confirm operation (Try-Confirm)</li>
+        <li>If reply is no, wallet service asks databases to cancel operation (Try-Cancel)</li>
       </ul>
     </ul>
 
-    <h3 class="card-title">Workflow</h3>
-    <ul>
-      <li>When user clicks order button, payment event is generated and sent to payment service</li>
-      <li>Payment service stores payment event in DB</li>
-      <li>Payment service calls payment executor for each payment order</li>
-      <li>Payment executor stores payment order in DB</li>
-      <li>Payment executor calls PSP to process credit card payment</li>
-      <li>Payment service updates wallet</li>
-      <li>Wallet stores updated balance in DB</li>
-      <li>Payment service updates ledger</li>
-      <li>Ledgers stores new transaction information in DB</li>
-    </ul>
+    <h3 class="card-title">Saga</h3>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
@@ -159,31 +142,16 @@
   <div class="card-body">
     <h2 class="card-title">API</h2>
     <ul>
-      <li>Executes a payment event</li>
+      <li>Transfer balance from one wallet to another</li>
       <ul>
-        <li><code>POST /v1/payments</code></li>
+        <li><code>POST /v1/wallet/balance_transfer</code></li>
         <ul>
-          <li><code>buyer_info</code> - information of buyer (JSON)</li>
-          <li><code>checkout_id</code> - globally unique ID of this checkout (string)</li>
-          <li><code>credit_card_info</code> - encrypted credit card information, which is PSP specific (JSON)</li>
-          <li><code>payment_orders</code> - list of payment orders (list)</li>
-          <ul>
-            <li><code>seller_account</code> - which seller will receive the monry (string)</li>
-            <li><code>amount</code> - transaction amount of the order (string)</li>
-            <ul>
-              <li>Double is not a good choice because the number could be extremely big or small</li>
-            </ul>
-            <li><code>currency</code> - currency of the order (string)</li>
-            <li><code>payment_order_id</code> - globally unique ID of this payment (string)</li>
-            <ul>
-              <li>This ID is used by PSP as idempotency key, thus must be globally unique</li>
-            </ul>
-          </ul>
+          <li><code>from_account</code> - debit account (string)</li>
+          <li><code>to_account</code> - credit account (string)</li>
+          <li><code>amount</code> - money (string)</li>
+          <li><code>currency</code> - currency type (string)</li>
+          <li><code>transaction_id</code> - ID used for deduplication (UUID)</li>
         </ul>
-      </ul>
-      <li>Returns the execution status of a single payment order</li>
-      <ul>
-        <li><code>GET /v1/payments/{:id}</code></li>
       </ul>
     </ul>
   </div>
@@ -195,31 +163,6 @@
 <div class="card mb-4" id="digital-wallet-5">
   <div class="card-body">
     <h2 class="card-title">Storage schema</h2>
-    <ul>
-      <li>Performance is not the most important factor for payment service</li>
-      <li>Choose relational DB for ACID property</li>
-    </ul>
-
-    <h3 class="card-title">Payment event</h3>
-    <ul>
-      <li>checkout_id (string, pk)</li>
-      <li>buyer_info (string)</li>
-      <li>seller_info (string)</li>
-      <li>credit_card_info (depends on PSP)</li>
-      <li>is_payment_done (bool)</li>
-    </ul>
-
-    <h3 class="card-title">Payment order</h3>
-    <ul>
-      <li>payment_order_id (string, pk)</li>
-      <li>buyer_account (string)</li>
-      <li>amount (string)</li>
-      <li>currency (string)</li>
-      <li>checkout_id (string, FK)</li>
-      <li>payment_order_status (string)</li>
-      <li>ledger_updated (bool)</li>
-      <li>wallet_updated (bool)</li>
-    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
@@ -229,51 +172,6 @@
 <div class="card mb-4" id="digital-wallet-6">
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
-
-    <h3 class="card-title">PSP integration</h3>
-    <ul>
-      <li>Choose not to store sensitive payment information due to complex regulations</li>
-      <img class="img-fluid" class="card-img-top" src="/img/system-design/digital-wallet2.png" alt="Card image cap">
-      <ul>
-        <li>User clicks checkout button and client calls payment service with payment order information</li>
-        <li>Payment service calls PSP with amount, currency, expiration date, redirect URL</li>
-        <li>PSP returns a token (UUID) to payment service</li>
-        <li>Payment service stores token in DB</li>
-        <li>Client displays PSP-hosted payment page</li>
-        <li>User fills PSP-hosted payment page and PSP starts payment processing</li>
-        <li>PSP returns payment status</li>
-        <li>Web page is directed to the redirect URL</li>
-        <li>PSP calls payment service with payment status</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Reconciliation</h3>
-    <ul>
-      <li>Every night, PSP or bank sends a settlement file to clients</li>
-      <li>Reconciliation system compares settlement file with ledger</li>
-      <li>Finance team can manually adjust mismatches</li>
-    </ul>
-
-    <h3 class="card-title">Communication among internal services</h3>
-    <ul>
-      <li>Payment events are published to Kafka and consumed by Digital wallet</li>
-    </ul>
-
-    <h3 class="card-title">Handling failed payments</h3>
-    <ul>
-      <li>Retry queue - transient errors are routed here</li>
-      <li>Dead letter queue - when messages fail repeatedly, they end up here</li>
-    </ul>
-
-    <h3 class="card-title">Exactly-once delivery</h3>
-    <ul>
-      <li>At-least-once - retry</li>
-      <li>At-most-once - idempotency</li>
-    </ul>
-
-    <h3 class="card-title">Consistency</h3>
-
-    <h3 class="card-title">Security</h3>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
