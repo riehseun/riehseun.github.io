@@ -249,24 +249,28 @@
       </ul>
     </ul>
 
-    <!-- <h3 class="card-title">Workflow (distributed event sourcing)</h3>
+    <h3 class="card-title">Workflow (distributed event sourcing)</h3>
     <ul>
       <li>User A sends a transaction to Saga coordinator (two operations, "-1 to A" and "+1 to B")</li>
       <li>Saga coordinator creates a record in phase status table</li>
-      <li>Saga coordinator examines the order of operations and sends "-1 to A" as a command to partition 1</li>
+      <li>Saga coordinator sends "-1 to A" as a command to partition 1</li>
       <li>Partition 1's Raft leader recevies "-1 to A" command and stores it in command list</li>
       <li>Partition 1's Raft leader validates the command, then converts it to an event</li>
       <li>Raft algorithm synchronizes data across different nodes, then the event is executed</li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-    </ul> -->
+      <li>Event sourcing framework of partition 1 synchronizes the data to the read path using CORS</li>
+      <li>The read path of partition 1 pushes status back to Saga coordinator</li>
+      <li>Saga coordinator receives the success status from partition 1</li>
+      <li>Saga coordinator creates a record in phase status table</li>
+      <li>Saga coordinator sends "+1 to B" as a command to partition 2</li>
+      <li>Partition 2's Raft leader recevies "+1 to B" command and stores it in command list</li>
+      <li>Partition 2's Raft leader validates the command, then converts it to an event</li>
+      <li>Raft algorithm synchronizes data across different nodes, then the event is executed</li>
+      <li>Event sourcing framework of partition 2 synchronizes the data to the read path using CORS</li>
+      <li>The read path of partition 2 pushes status back to Saga coordinator</li>
+      <li>Saga coordinator receives the success status from partition 2</li>
+      <li>Saga coordinator creates a record in phase status table</li>
+      <li>Sage coordinator responds to its caller with the result</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
