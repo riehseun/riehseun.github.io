@@ -99,8 +99,6 @@
   <div class="card-body">
     <h2 class="card-title">High level design</h2>
 
-    <img class="img-fluid" class="card-img-top" src="/img/system-design/digital-wallet1.png" alt="Card image cap">
-
     <h3 class="card-title">In-memory sharding</h3>
     <ul>
       <li>A cluster of Redis nodes to support 1M transactions per second</li>
@@ -123,15 +121,35 @@
 
     <h3 class="card-title">Try-Confirm/Cancel</h3>
     <ul>
-      <li>In the first phase, wallet service asks both databases to reserve resources for transaction</li>
-      <li>In the second phase, wallet service collects replies from databases</li>
+      <li>Ex. in the first phase, -1 for account A and do nothing for account B (Try)</li>
+      <li>Ex. in the second phase</li>
       <ul>
-        <li>If reply is yes, wallet service asks databases to confirm operation (Try-Confirm)</li>
-        <li>If reply is no, wallet service asks databases to cancel operation (Try-Cancel)</li>
+        <li>If reply is yes, do nothing for account A and +1 for account B (Confirm)</li>
+        <li>If reply is no, +1 for account A and do nothing for account B (Cancel)</li>
       </ul>
+      <li>Transactional DB can store status in case wallet service gets interrupted during transaction</li>
+      <ul>
+        <li>ID and content of distributed transaction</li>
+        <li>Status of Try phase for each DB (not sent yet, has been sent, response received)</li>
+        <li>Name of second phase</li>
+        <li>Status of second phase</li>
+        <li>Out-of-order flag</li>
+        <ul>
+          <li>Seen a Cancel but not a Try yet</li>
+          <li>Try returns failure if there is out-of-order flag</li>
+        </ul>
+      </ul>
+      <li>Problem - business logics need to be managed at application layer</li>
     </ul>
 
     <h3 class="card-title">Saga</h3>
+    <ul>
+      <li>All operations are ordered in a sequence</li>
+      <li>Each operation is independent transaction in its own DB</li>
+      <li>Operations are executed from first to last</li>
+      <li>When an operation fails, the entire process rolls back</li>
+      <li>Problem - not suitable for latency-sensitive system</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
@@ -172,6 +190,54 @@
 <div class="card mb-4" id="digital-wallet-6">
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
+
+    <h3 class="card-title">Event sourcing</h3>
+    <ul>
+      <li>Command</li>
+      <ul>
+        <li>Ex. transfer 1 from account A to B</li>
+        <li>Commands are put into a queue (Ex. Kafka)</li>
+      </ul>
+      <li>Event</li>
+      <ul>
+        <li>One command may generate any number of events</li>
+        <li>Events are put into a queue</li>
+      </ul>
+      <li>State</li>
+      <ul>
+        <li>Ex. balance of accounts</li>
+      </ul>
+      <li>State machine</li>
+      <ul>
+        <li>Ex. if command is "transfer 1 from A to B", the events are "-1 to A" and "+1 to B"</li>
+        <li>Read commands from the command queue</li>
+        <li>Read balance state from DB</li>
+        <li>Validate the command. If valid, generate two events</li>
+        <li>Read the next event</li>
+        <li>Apply the event by updating the balance in DB</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Questions</h3>
+    <ul>
+      <li>Do we know account balance at any given time? We can reply events from the start up to a point</li>
+      <li>How do we know the historical and current account balance are correct? We can recalculate from event list</li>
+      <li>How do we prove the system logic is correct after a code change? We can run different versions of code against the events and check that results are the same</li>
+    </ul>
+
+    <h3 class="card-title">Optimization</h3>
+    <ul>
+      <li>Save commands and events to a local disk rather than Kafka</li>
+      <li>Cache recent commands and events in memory</li>
+      <li>Use RocksDB to store the state (balance information) and cache recent data</li>
+      <li>Periodically stop the state machine and save the current state into a snapshot for faster reproducibility. Store snapshots into HDFS</li>
+    </ul>
+
+    <h3 class="card-title">Reliability</h3>
+    <ul>
+      <li>State and snapshot can be reproduced from events</li>
+      <li>Commands may generate different events, but events are immutable. Thus, we need reliability for events</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
