@@ -92,7 +92,11 @@
 
     <h3 class="card-title">Bandwidth</h3>
     <ul>
-      <li>1M transactions per day = 10 transactions per second</li>
+      <li>1B orders per day</li>
+      <li>Assume stock exchange opens 8 hours per day</li>
+      <li>Assume peak is 10 times the average</li>
+      <li>Incoming - 1B / (8 * 3600) = 35K</li>
+      <li>Peak incoming - 350K</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -107,45 +111,59 @@
     <img class="img-fluid" class="card-img-top" src="/img/system-design/stock-exchange1.png" alt="Card image cap">
 
     <ul>
-      <li>Payment service</li>
+      <li>Matching engine</li>
       <ul>
-        <li>Accepts payment events from users</li>
-        <li>Performs risk checks using third party provider</li>
+        <li></li>
+        <li></li>
+        <li></li>
       </ul>
-      <li>Payment executor</li>
+      <li>Sequencer</li>
       <ul>
-        <li>Execute a single payment order using payment service provider (PSP)</li>
-        <li>A payment may contain several payment orders</li>
+        <li></li>
+        <li></li>
+        <li></li>
       </ul>
-      <li>Payment service provider</li>
+      <li>Order manager</li>
       <ul>
-        <li>Ex. Stripe, Square</li>
+        <li></li>
+        <li></li>
+        <li></li>
       </ul>
-      <li>Card schemes</li>
+      <li>Client gateway</li>
       <ul>
-        <li>Ex. Visa, MasterCard</li>
+        <li></li>
+        <li></li>
+        <li></li>
       </ul>
-      <li>Ledger</li>
+      <li></li>
       <ul>
-        <li>Keeps transaction information for accouting and post-payment analysis</li>
-      </ul>
-      <li>Wallet</li>
-      <ul>
-        <li>Keeps account balance of the merchants</li>
+        <li></li>
+        <li></li>
+        <li></li>
       </ul>
     </ul>
 
     <h3 class="card-title">Workflow</h3>
     <ul>
-      <li>When user clicks order button, payment event is generated and sent to payment service</li>
-      <li>Payment service stores payment event in DB</li>
-      <li>Payment service calls payment executor for each payment order</li>
-      <li>Payment executor stores payment order in DB</li>
-      <li>Payment executor calls PSP to process credit card payment</li>
-      <li>Payment service updates wallet</li>
-      <li>Wallet stores updated balance in DB</li>
-      <li>Payment service updates ledger</li>
-      <li>Ledgers stores new transaction information in DB</li>
+      <li>Trading flow</li>
+      <ul>
+        <li>Client places a new order</li>
+        <li>Broker sends the order to the exchange</li>
+        <li>Client gateway performs input validation, rate limiting, authentication, etc</li>
+        <li>Order manager performs risk checks and verifies that there are sufficient funds in the wallet</li>
+        <li>Matching engine executes two transactions (buy and sell)</li>
+      </ul>
+      <li>Market data flow</li>
+      <ul>
+        <li>Matching engine generates a stream of executions as matches are made</li>
+        <li>Market data publisher constructs candlestick charts and order books</li>
+        <li>Market data is saved to specialized storage for real-time analysis</li>
+        <li>Brokers connect to data service to obtain timely market data</li>
+      </ul>
+      <li>Reporting flow</li>
+      <ul>
+        <li>Report collects information from orders and executions, then write them to DB</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
