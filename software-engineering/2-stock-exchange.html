@@ -113,34 +113,25 @@
     <ul>
       <li>Matching engine</li>
       <ul>
-        <li></li>
-        <li></li>
-        <li></li>
+        <li>Maintain order book for each symbol</li>
+        <li>Match buy and sell orders</li>
+        <li>Distribute the execution stream as market data</li>
       </ul>
       <li>Sequencer</li>
       <ul>
-        <li></li>
-        <li></li>
-        <li></li>
+        <li>Stamps every incoming order and pair of executions completed by matching engine with a sequence ID</li>
+        <li>Stamping is for fast recovery, exactly-once guarantee</li>
+        <li>Serves as a message queue as well</li>
       </ul>
       <li>Order manager</li>
       <ul>
-        <li></li>
-        <li></li>
-        <li></li>
+        <li>Performs risk checks</li>
+        <li>Verifies that wallet has enough funds</li>
+        <li>Sends the order to sequencer</li>
       </ul>
       <li>Client gateway</li>
       <ul>
-        <li></li>
-        <li></li>
-        <li></li>
-      </ul>
-      <li></li>
-      <ul>
-        <li></li>
-        <li></li>
-        <li></li>
-      </ul>
+        <li>Should be lightweight and complicated functions should be done by risk check adn matching engine</li>
     </ul>
 
     <h3 class="card-title">Workflow</h3>
@@ -175,31 +166,46 @@
   <div class="card-body">
     <h2 class="card-title">API</h2>
     <ul>
-      <li>Executes a payment event</li>
+      <li>Place an order</li>
       <ul>
-        <li><code>POST /v1/payments</code></li>
+        <li><code>POST /v1/order</code></li>
         <ul>
-          <li><code>buyer_info</code> - information of buyer (JSON)</li>
-          <li><code>checkout_id</code> - globally unique ID of this checkout (string)</li>
-          <li><code>credit_card_info</code> - encrypted credit card information, which is PSP specific (JSON)</li>
-          <li><code>payment_orders</code> - list of payment orders (list)</li>
-          <ul>
-            <li><code>seller_account</code> - which seller will receive the monry (string)</li>
-            <li><code>amount</code> - transaction amount of the order (string)</li>
-            <ul>
-              <li>Double is not a good choice because the number could be extremely big or small</li>
-            </ul>
-            <li><code>currency</code> - currency of the order (string)</li>
-            <li><code>payment_order_id</code> - globally unique ID of this payment (string)</li>
-            <ul>
-              <li>This ID is used by PSP as idempotency key, thus must be globally unique</li>
-            </ul>
-          </ul>
+          <li><code>symbol</code> - stock symbol (string)</li>
+          <li><code>side</code> - buy or sell (string)</li>
+          <li><code>price</code> - price of limit order (long)</li>
+          <li><code>orderType</code> - limit or market (string)</li>
+          <li><code>quantity</code> - quanitiy of order (long)</li>
         </ul>
       </ul>
-      <li>Returns the execution status of a single payment order</li>
+      <li>Get execution info</li>
       <ul>
-        <li><code>GET /v1/payments/{:id}</code></li>
+        <li><code>GET /v1/execution?symbol={:symbol}&orderId={:orderId}&startTime={:startTime}&endTime/{:endTime}</code></li>
+        <ul>
+          <li><code>symbol</code> - stock symbol (string)</li>
+          <li><code>orderId</code> - ID of order (string)</li>
+          <li><code>startTime</code> - query start time in epoch (long)</li>
+          <li><code>endTime</code> - query end time in epoch (long)</li>
+        </ul>
+      </ul>
+      <li>Get order book info</li>
+      <ul>
+        <li><code>GET /v1/marketdata/orderBook/L2?symbol={:symbol}&depth={:depth}</code></li>
+        <ul>
+          <li><code>symbol</code> - stock symbol (string)</li>
+          <li><code>depth</code> - order book depth per side (int)</li>
+          <li><code>startTime</code> - query start time in epoch (long)</li>
+          <li><code>endTime</code> - query end time in epoch (long)</li>
+        </ul>
+      </ul>
+      <li>Get candlestick chart data</li>
+      <ul>
+        <li><code>GET /v1/marketdata/candles?symbol={:symbol}&resolution={:resolution}&startTime={:startTime}&endTime/{:endTime}</code></li>
+        <ul>
+          <li><code>symbol</code> - stock symbol (string)</li>
+          <li><code>resolution</code> - window length of candlestick chart in seconds (long)</li>
+          <li><code>startTime</code> - query start time in epoch (long)</li>
+          <li><code>endTime</code> - query end time in epoch (long)</li>
+        </ul>
       </ul>
     </ul>
   </div>
@@ -211,30 +217,34 @@
 <div class="card mb-4" id="stock-exchange-5">
   <div class="card-body">
     <h2 class="card-title">Storage schema</h2>
+
+    <h3 class="card-title">Order</h3>
     <ul>
-      <li>Performance is not the most important factor for payment service</li>
-      <li>Choose relational DB for ACID property</li>
+      <li>order_id (uuid)</li>
+      <li>product_id (int)</li>
+      <li>price (long)</li>
+      <li>quantity (long)</li>
+      <li>side (Side)</li>
+      <li>order_status (OrderStatus)</li>
+      <li>order_type (OrderType)</li>
     </ul>
 
-    <h3 class="card-title">Payment event</h3>
+    <h3 class="card-title">Execution</h3>
     <ul>
-      <li>checkout_id (string, pk)</li>
-      <li>buyer_info (string)</li>
-      <li>seller_info (string)</li>
-      <li>credit_card_info (depends on PSP)</li>
-      <li>is_payment_done (bool)</li>
+      <li>execution_id (uuid)</li>
+      <li>order_id (uuid)</li>
+      <li>price (long)</li>
+      <li>quantity (long)</li>
+      <li>side (Side)</li>
+      <li>order_status (OrderStatus)</li>
+      <li>order_type (OrderType)</li>
     </ul>
 
-    <h3 class="card-title">Payment order</h3>
+    <h3 class="card-title">Product</h3>
     <ul>
-      <li>payment_order_id (string, pk)</li>
-      <li>buyer_account (string)</li>
-      <li>amount (string)</li>
-      <li>currency (string)</li>
-      <li>checkout_id (string, FK)</li>
-      <li>payment_order_status (string)</li>
-      <li>ledger_updated (bool)</li>
-      <li>wallet_updated (bool)</li>
+      <li>product_id (int)</li>
+      <li>symbol (long)</li>
+      <li>description (string)</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -246,50 +256,6 @@
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
 
-    <h3 class="card-title">PSP integration</h3>
-    <ul>
-      <li>Choose not to store sensitive payment information due to complex regulations</li>
-      <img class="img-fluid" class="card-img-top" src="/img/system-design/stock-exchange2.png" alt="Card image cap">
-      <ul>
-        <li>User clicks checkout button and client calls payment service with payment order information</li>
-        <li>Payment service calls PSP with amount, currency, expiration date, redirect URL</li>
-        <li>PSP returns a token (UUID) to payment service</li>
-        <li>Payment service stores token in DB</li>
-        <li>Client displays PSP-hosted payment page</li>
-        <li>User fills PSP-hosted payment page and PSP starts payment processing</li>
-        <li>PSP returns payment status</li>
-        <li>Web page is directed to the redirect URL</li>
-        <li>PSP calls payment service with payment status</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Reconciliation</h3>
-    <ul>
-      <li>Every night, PSP or bank sends a settlement file to clients</li>
-      <li>Reconciliation system compares settlement file with ledger</li>
-      <li>Finance team can manually adjust mismatches</li>
-    </ul>
-
-    <h3 class="card-title">Communication among internal services</h3>
-    <ul>
-      <li>Payment events are published to Kafka and consumed by Stock exchange</li>
-    </ul>
-
-    <h3 class="card-title">Handling failed payments</h3>
-    <ul>
-      <li>Retry queue - transient errors are routed here</li>
-      <li>Dead letter queue - when messages fail repeatedly, they end up here</li>
-    </ul>
-
-    <h3 class="card-title">Exactly-once delivery</h3>
-    <ul>
-      <li>At-least-once - retry</li>
-      <li>At-most-once - idempotency</li>
-    </ul>
-
-    <h3 class="card-title">Consistency</h3>
-
-    <h3 class="card-title">Security</h3>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
