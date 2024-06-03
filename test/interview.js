@@ -29,8 +29,17 @@ else if (page == "machine-learning.html") {
 else if (page == "machine-learning-system-design.html") {
     var question_file = './machine-learning-system-design.json'
 }
-else if (page == "platform-engineering.html") {
-    var question_file = './platform-engineering.json'
+else if (page == "python.html") {
+    var question_file = './python.json'
+}
+else if (page == "bash.html") {
+    var question_file = './bash.json'
+}
+else if (page == "git.html") {
+    var question_file = './git.json'
+}
+else if (page == "kubernetes.html") {
+    var question_file = './kubernetes.json'
 }
 
 fetch(question_file)
@@ -47,7 +56,10 @@ fetch(question_file)
 
 startGame = () => {
     questionCounter = 0;
-    availableQuestions = shuffle(questions);
+    // Questions in random order
+    // availableQuestions = shuffle(questions);
+    // Questions in fixed order
+    availableQuestions = questions;
 
     getNewQuestion();
     game.classList.remove("hidden");
