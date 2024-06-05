@@ -297,17 +297,26 @@
       </ul>
       <li>Feature engineering</li>
       <ul>
-        <li>Handle missing values</li>
+        <li>Missing values</li>
         <ul>
-          <li>Delete - data quantity is reduced</li>
+          <li>Types</li>
           <ul>
-            <li>Delete row to remove a data point</li>
-            <li>Delete column to remove a feature</li>
+            <li>Missing not at random</li>
+            <li>Missing at random</li>
+            <li>Missing completely at random</li>
           </ul>
-          <li>Imputation - dataset gets noisy</li>
+          <li>Handle missing values</li>
           <ul>
-            <li>Fill with default value</li>
-            <li>Fill with mean, media, mode</li>
+            <li>Delete - data quantity is reduced</li>
+            <ul>
+              <li>Delete row to remove a data point</li>
+              <li>Delete column to remove a feature</li>
+            </ul>
+            <li>Imputation - dataset gets noisy</li>
+            <ul>
+              <li>Fill with default value</li>
+              <li>Fill with mean, media, mode</li>
+            </ul>
           </ul>
         </ul>
         <li>Feature scaling</li>
@@ -458,14 +467,50 @@
           <ul>
             <li>Hand labeling - expensive, slow, data privary issue, introduce bias, require domain knowledge</li>
             <li>Natural labeling - ground truth labels are inferred</li>
+            <li>Handling insufficient lables</li>
+            <ul>
+              <li>Weak supervision</li>
+              <li>Semi-supervision</li>
+              <li>Transfer learning</li>
+              <li>Active learning</li>
+            </ul>
           </ul>
           <li>Select sampling strategy</li>
           <ul>
             <li>Convenience sampling</li>
+            <ul>
+              <li>Samples are selected based on their availability</li>
+            </ul>
             <li>Snowball sampling</li>
+            <ul>
+              <li>Samples are selected based on existing samples</li>
+            </ul>
             <li>Stratified sampling</li>
+            <ul>
+              <li>Divide population into groups and sample from each group separately</li>
+              <li>Each group is called stratum</li>
+              <li>Problem is when one sample belongs to multiple groups (Ex. multilabel tasks)</li>
+            </ul>
+            <li>Weighted sampling</li>
+            <ul>
+              <li>If there are three samples and want them to be selected with probabilties 50%, 30%, 20%, give them weights \( 0.5, 0.3, 0.2 \)</li>
+            </ul>
             <li>Reservior sampling</li>
+            <ul>
+              <li>Useful for streaming data</li>
+              <li>Put the first k elements into the reservior</li>
+              <li>For each incoming \( n^{\text{th}} \) element, generate a random number \( i \) such that \( 1 \le i \le n \)</li>
+              <ul>
+                <li>If \( 1 \le i \le k \), replace \( i^{\text{th}} \) element in the reservoir with \( n^{\text{th}} \) element</li>
+                <li>Else, do nothing</li>
+              </ul>
+              <li>Then, each incoming \( n^{\text{th}} \) element has \( \frac{k}{n} \) probability of being in the reservoir</li>
+            </ul>
             <li>Importance sampling</li>
+            <ul>
+              <li>Assume we want to sample from \( P(x) \) but \( P(x) \) is really expensive to sample from</li>
+              <li>The, sample from \( Q(x) \) instead and weigh this sample by \( \frac{P(x)}{Q(x)} \)</li>
+            </ul>
           </ul>
           <li>Split data</li>
           <li>Address imbalance</li>
@@ -476,6 +521,15 @@
               <li>Class-balanced loss</li>
               <li>Focal loss</li>
             </ul>
+          </ul>
+          <li>Data leakage</li>
+          <ul>
+            <li>Splitting time-correlated data randomly instead of by time</li>
+            <li>Scaling before splitting</li>
+            <li>Filling in missing data with statistics from the test split</li>
+            <li>Poor handling of data duplication before splitting</li>
+            <li>Group leakage</li>
+            <li>Leakage from data generation process</li>
           </ul>
         </ul>
         <li>Choose loss function</li>
@@ -541,11 +595,48 @@
     <ul>
       <li>Offline - during development</li>
       <ul>
-        <li>Classification - precision, recall, F1 score, accuracy, ROC-AUC, PR-AUC, confusion matrix</li>
-        <li>Regression - MSE, MAE, RMSE</li>
-        <li>Ranking - precision@k, recall@k, MRR, mAP, nDCG</li>
-        <li>Image generation - FID, inception score</li>
-        <li>Natural language processing - BLUE, METEOR, ROUGE, CIDEr, SPICE</li>
+        <li>Classification</li>
+        <ul>
+          <li>Precision</li>
+          <li>Recall</li>
+          <li>F1 score</li>
+          <li>Accuracy</li>
+          <li>ROC-AUC</li>
+          <li>PR-AUC</li>
+          <li>Confusion matrix</li>
+        </ul>
+        <li>Regression</li>
+        <ul>
+          <li>MSE</li>
+          <li>MAE</li>
+          <li>RMSE</li>
+        </ul>
+        <li>Ranking</li>
+        <ul>
+          <li>Precision@k</li>
+          <li>Recall@k</li>
+          <li>MRR</li>
+          <li>mAP</li>
+          <li>nDCG</li>
+        </ul>
+        <li>Image generation</li>
+        <ul>
+          <li>FID</li>
+          <li>Inception score</li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+          <li></li>
+        </ul>
+        <li>Natural language processing</li>
+        <ul>
+          <li>BLUE</li>
+          <li>METEOR</li>
+          <li>ROUGE</li>
+          <li>CIDEr</li>
+          <li>SPICE</li>
+        </ul>
       </ul>
       <li>Online - in production</li>
       <ul>
@@ -594,14 +685,17 @@
       <ul>
         <li>Batch prediction</li>
         <ul>
+          <li>Only uses batch features</li>
           <li>Less responsive to change in user preference</li>
           <li>Need to know beforehand what needs to be pre-computed</li>
         </ul>
         <li>Online prediction</li>
         <ul>
+          <li>May use batch features only or the combination of batch and streaming features</li>
           <li>Model may take long to generate prediction</li>
         </ul>
       </ul>
+      <li>Continual learning</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -615,9 +709,19 @@
     <ul>
       <li>Data distribution shift</li>
       <ul>
-        <li>Train on large dataset</li>
-        <li>Retrain regularly</li>
+        <li>Types</li>
+        <ul>
+          <li>Covariance shift</li>
+          <li>Label shift</li>
+          <li>Concept drift</li>
+        </ul>
+        <li>Solution</li>
+        <ul>
+          <li>Train on large dataset</li>
+          <li>Retrain regularly</li>
+        </ul>
       </ul>
+      <li>Feature store</li>
     </ul>
 
     <!-- <h3 class="card-title">High level design</h3>
