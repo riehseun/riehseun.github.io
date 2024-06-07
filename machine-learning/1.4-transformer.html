@@ -52,6 +52,13 @@
 <div class="card mb-4" id="transformer-1">
   <div class="card-body">
     <h2 class="card-title">Transformer</h2>
+    <ul>
+      <li>Original transformer was used for machine translation</li>
+      <li>Training data consisted of 4.5M English-German sentence pairs and 3.6M English-French sentence pairs</li>
+      <li>Training base model took 12 hours for 100k steps on a machine with 8 NVIDIA P100 GPUs</li>
+      <li>Training big model took 3.5 days for 300k steps</li>
+      <li>Adam optimizer was used with varying learning rates (linear during start, then decresing going forward)</li>
+    </ul>
 
     <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning/transformer1.png" style="width: 500px; height: 700px" alt="Card image cap">
 
@@ -76,8 +83,8 @@
         </ul>
       </ul>
       <li>Positional encoding</li>
-      <li>Add positional encoding to input embedding to produce final encoding</li>
-        <ul>
+      <ul>
+        <li>Add positional encoding to input embedding to produce final encoding</li>
 <pre><code class="python">def encoding(pos, pe)
     for i in range(0, 512,2):
         # Positional encoding
@@ -88,9 +95,93 @@
         # Final encoding
         fe[0][i] = (y[0][i]*math.sqrt(d_model)) + pe[0][i]
         fe[0][i+1] = (y[0][i+1]*math.sqrt(d_model)) + pe[0][i+1]</code></pre>
-        </ul>
+      </ul>
       <li>Multi-head attention</li>
+      <ul>
+        <li>Represent the input</li>
+        <ul>
+          <li>\( d_{\text{model}} = 512 \)</</li>
+          <li>Assume \( 3 \) input tokens</li>
+          <li>For simplicity,  assume \( d_{\text{model}} = 4 \)</li>
+<pre><code class="python">X = np.array([[1.0, 0.0, 1.0, 0.0],   # Input 1
+              [0.0, 2.0, 0.0, 2.0],   # Input 2
+              [1.0, 1.0, 1.0, 1.0]])  # Input 3</code></pre>
+        </ul>
+        <li>Initialize the weight matrices</li>
+        <ul>
+          <li>Each input token has three weight matrices</li>
+          <ul>
+            <li>\( Q_{w} \) - train the queries</li>
+            <li>\( K_{w} \) - train the keys</li>
+            <li>\( V_{w} \) - train the values</li>
+          </ul>
+          <li>\( d_{k} = 64 \)</li>
+          <li>For simplicity, assume \( d_{k} = 3 \)</li>
+<pre><code class="python">W_query = np.array([[1, 0, 1],
+                    [1, 0, 0],
+                    [0, 0, 1],
+                    [0, 1, 1]])
+W_key = np.array([[0, 0, 1],
+                  [1, 1, 0],
+                  [0, 1, 0],
+                  [1, 1, 0]])
+W_value = np.array([[0, 2, 0],
+                    [0, 3, 0],
+                    [1, 0, 3],
+                    [1, 1, 0]])</code></pre>
+        </ul>
+        <li>Compute \( Q, K, V \)</li>
+        <ul>
+          <li>Assume there is one set of \( W_{\text{query}}, W_{\text{key}}, W_{\text{value}} \) for all inputs</li>
+<pre><code class="python">Q = np.matmul(X, W_query)
+K = np.matmul(X, W_key)
+V = np.matmul(X, W_value)</code></pre>
+        </ul>
+        <li>Compute attention score</li>
+        <ul>
+          <li>\( \text{Attention}(Q,K,V) = \text{softmax} \left( \dfrac{QK^{T}}{\sqrt{d_{k}}} \right) V) \)</li>
+<pre><code class="python">d_k = 1   # Square root of k_d simplified to 1 for this example
+attention_scores = (Q @ K.transpose()) / d_k</code></pre>
+          <li>Softmax score for each input token</li>
+<pre><code class="python">attention_scores[0] = softmax(attention_scores[0])
+attention_scores[1] = softmax(attention_scores[1])
+attention_scores[2] = softmax(attention_scores[2])</code></pre>
+          <li>Attention for each input token</li>
+<pre><code class="python">attention1 = attention_scores[0].reshape(-1,1)
+attention1 = attention_scores[0][0] * V[0]
+attention2 = attention_scores[0][1] * V[1]
+attention3 = attention_scores[0][2] * V[2]</code></pre>
+          <li>Sum up the result</li>
+<pre><code class="python">attention_input1 = attention1 + attention2 + attention3</code></pre>
+        </ul>
+      </ul>
+      <li>Post-layer normalization</li>
+      <ul>
+        <li>Add</li>
+        <ul>
+          <li>Processes residual connections</li>
+        </ul>
+        <li>Normalization</li>
+        <ul>
+          <li>\( \text{Normalization}(v) = \gamma \dfrac{v-\mu}{\sigma} \beta \)</li>
+          <li>\( \mu \) is the mean of \( v \) of dimension \( d \)</li>
+          <ul>
+            <li>\( \mu = \dfrac{1}{d} \displaystyle\sum_{k=1}^{d} v_{k} \)</li>
+          </ul>
+          <li>\( \sigma \) is the standard deviation of \( v \) dimension \( d \)</li>
+          <ul>
+            <li>\( \sigma^{2} = \dfrac{1}{d} \displaystyle\sum_{k=1}^{d} (v_{k}-\mu) \)</li>
+          </ul>
+          <li>\( \gamma \) is a scaling vector</li>
+          <li>\( \beta \) is a bias vector</li>
+        </ul>
+      </ul>
       <li>Feedforward network</li>
+      <ul>
+        <li>Contains two layers and applies ReLU</li>
+        <li>Input and output has \( d_{\text{model}} = 512 \) but inner layer has \( d_{\text{ff}} = 2048 \)</li>
+        <li>\( \text{FFN}(x) = max(0, xW_{1} + b_{1})W_{2} + b_{2} \)</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Decoder stack</h3>
@@ -98,7 +189,7 @@
     <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning/transformer3.png" style="width: 300px; height: 700px" alt="Card image cap">
 
     <ul>
-      <li></li>
+      <li>Masked multi-head attention</li>
       <li></li>
       <li></li>
       <li></li>
