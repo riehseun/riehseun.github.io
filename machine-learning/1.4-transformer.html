@@ -65,8 +65,8 @@
     <ul>
       <li>Output of layer \( l \) is becomes the input of layer \( l+1 \) until prediction is reached</li>
       <li>There is no RNN or LSTM</li>
-      <li>There are 6 sets of encoder and decoder layers</li>
-      <li></li>
+      <li>There are 6 layers of encoder stack and 6 layers of decoder stack</li>
+      <li>Multi-head attention runs \( 8 \) attentions in parallel</li>
     </ul>
 
     <h3 class="card-title">Encoder stack</h3>
@@ -84,17 +84,15 @@
       </ul>
       <li>Positional encoding</li>
       <ul>
+        <li>Considers position of a word in a sentence</li>
         <li>Add positional encoding to input embedding to produce final encoding</li>
-<pre><code class="python">def encoding(pos, pe)
+<pre><code class="python">def encoding(pos, positional_vector)
     for i in range(0, 512,2):
-        # Positional encoding
         val =  pos / (10000**((2*i)/d_model))
-        pe[0][i] = math.sin(val)
-        pe[0][i+1] = math.cos(val)
-
-        # Final encoding
-        fe[0][i] = (y[0][i]*math.sqrt(d_model)) + pe[0][i]
-        fe[0][i+1] = (y[0][i+1]*math.sqrt(d_model)) + pe[0][i+1]</code></pre>
+        positional_vector[0][i] = math.sin(val)
+        positional_vector[0][i+1] = math.cos(val)
+        positional_encoding[0][i] = (embedding_vector[0][i]*math.sqrt(d_model)) + positional_vector[0][i]
+        positional_encoding[0][i+1] = (embedding_vector[0][i+1]*math.sqrt(d_model)) + positional_vector[0][i+1]</code></pre>
       </ul>
       <li>Multi-head attention</li>
       <ul>
@@ -141,7 +139,7 @@ V = np.matmul(X, W_value)</code></pre>
         <ul>
           <li>\( \text{Attention}(Q,K,V) = \text{softmax} \left( \dfrac{QK^{T}}{\sqrt{d_{k}}} \right) V) \)</li>
 <pre><code class="python">d_k = 1   # Square root of k_d simplified to 1 for this example
-attention_scores = (Q @ K.transpose()) / d_k</code></pre>
+attention_scores = (Q@K.transpose()) / d_k</code></pre>
           <li>Softmax score for each input token</li>
 <pre><code class="python">attention_scores[0] = softmax(attention_scores[0])
 attention_scores[1] = softmax(attention_scores[1])
@@ -159,7 +157,8 @@ attention3 = attention_scores[0][2] * V[2]</code></pre>
       <ul>
         <li>Add</li>
         <ul>
-          <li>Processes residual connections</li>
+          <li>Processes residual connections, which transports unprocessed input \( X \) to normalization</li>
+          <li>This prevents key information, such as positional encoding, from being lost on the way</li>
         </ul>
         <li>Normalization</li>
         <ul>
