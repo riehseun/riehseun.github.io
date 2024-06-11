@@ -57,7 +57,7 @@
 
       <li><a href="#kubernetes-21">Namespace</a> - virtual clusters supported by the same physical cluster</li>
       <li><a href="#kubernetes-22">Deployment</a> - declarative updates for Pod and ReplicaSet including rollouts and rollbacks</li>
-      <li><a href="#kubernetes-23">ReplicaSet</a> - creates Pods (should not be manipulated, Deployment should be used instead)</li>
+      <li><a href="#kubernetes-23">ReplicaSet</a> - creates Pods (Should not be manipulated, Deployment should be used instead)</li>
       <li><a href="#kubernetes-24">StatefulSet</a> - similar to Deployment, but provides uniqueness and ordering of Pods</li>
       <li><a href="#kubernetes-25">DaemonSet</a> - exactly one Pod per Node. Deleting it clean up Pods</li>
       <li><a href="#kubernetes-26">Job</a> - create short living Pods. Deleting it clean up Pods</li>
@@ -81,7 +81,7 @@
       <li><a href="#kubernetes-31">Ingress Controller</a> - specification of Ingress</li>
       <li><a href="#kubernetes-32">Ingress</a> - provides external access to Service (Need ingress controller)</li>
       <li><a href="#kubernetes-33">Service</a> - manages traffic to Pods</li>
-      <li><a href="#kubernetes-34">Network Policy</a> - denie/allows traffic to/from Pods</li>
+      <li><a href="#kubernetes-34">Network Policy</a> - denies/allows traffic to/from Pods</li>
       <li><a href="#kubernetes-35">CoreDNS</a></li>
       <br>
 
@@ -620,7 +620,7 @@ data:
   food: {{ .food | upper | quote }}
   {{- end }}
 
-# Use "$" to access objects from parent scope.
+# Use "$" to access objects from parent scope
 {{- with .Values.favorite }}
 drink: {{ .drink | default "tea" | quote }}
 food: {{ .food | upper | quote }}
@@ -673,21 +673,21 @@ data:
 
 <pre><code class="bash">Release.Name
 Release.Namespace
-Release.Service # Always "Helm"
+Release.Service  # Always "Helm"
 Chart</code></pre>
 
     <h3 class="card-text">Common issues</h3>
 
 <pre><code class="bash"># Error: rendered manifests contain a resource that already exists
-# Reason #1: deployment was initially done by helm, but deleted by kubectl
-# Solution:
+# Reason #1 - deployment was initially done by helm, but deleted by kubectl
+# Solution
 kubectl get crd
 kubectl get delete &lt;crd1&gt; &lt;crd2&gt; &lt;crd3&gt; ...
 
-# Reason #2: resources created manually but getting upgraded by helm
-# Solution:
+# Reason #2 - resources created manually but getting upgraded by helm
+# Solution
 kubectl patch namespace &lt;namespace&gt; --patch-file &lt;updated_yaml_to_use&gt;
-kubectl annotate &lt;kind&gt; &lt;name&gt; meta.helm.sh/release-namespace=&lt;helm_will_tell_you_what_to_put_here&gt; # For example, kind can be "namespace", name can be "namespace name".
+kubectl annotate &lt;kind&gt; &lt;name&gt; meta.helm.sh/release-namespace=&lt;helm_will_tell_you_what_to_put_here&gt;  # For example, kind can be "namespace", name can be "namespace name"
 kubectl annotate &lt;kind&gt; &lt;name&gt; meta.helm.sh/release-name=&lt;helm_will_tell_you_what_to_put_here&gt;</code></pre>
 
 <pre><code class="bash"># "updated_yaml_to_use" should look like
@@ -702,8 +702,8 @@ metadata:
     helm.sh/chart: {{ .Chart.Name }}-{{ .Chart.Version }}</code></pre>
 
 <pre><code class="bash"># Error: UPGRADE FAILED: another operation (kill/upgrade/rollback) is in progress
-# Reason: "helm status &lt;release_name&gt;" or "helm history &lt;release_name&gt;" will show that the last helm install is still pending
-# Solution:
+# Reason - "helm status &lt;release_name&gt;" or "helm history &lt;release_name&gt;" will show that the last helm install is still pending
+# Solution
 helm uninstall &lt;release_name&gt;
 </code></pre>
   </div>
@@ -1042,7 +1042,7 @@ spec:
     matchLabels:
       app: my-statefulset  # Has to match .spec.template.metadata.labels
   serviceName: my-headless-service  # Has to be the name of headless service
-  replicas: 3  # by default is 1.
+  replicas: 3  # By default is 1
   template:
     metadata:
       labels:
@@ -1108,8 +1108,8 @@ spec:
         name: my-daemonset
     spec:
       tolerations:
-      # this toleration is to have the daemonset runnable on master nodes
-      # remove it if your masters can't run pods
+      # This toleration is to have the daemonset runnable on master nodes
+      # Remove it if your masters can't run pods
       - key: node-role.kubernetes.io/master
         operator: Exists
         effect: NoSchedule
@@ -1194,7 +1194,7 @@ run pods=$(kubectl get pods --selector=job-name=pi --output=jsonpath='{.items[*]
 
     <h3 class="card-title">Job termination and clean up</h3>
 
-<pre><code class="bash"># Delete the Job, all the Pods created by that Job are deleted too.
+<pre><code class="bash"># Delete the Job, all the Pods created by that Job are deleted too
 kubectl get jobs
 kubectl delete jobs/&lt;job_name&gt;</code></pre>
 
@@ -1767,13 +1767,13 @@ spec:
     - /bin/sh
     - -c
     - touch /tmp/healthy; sleep 30; rm -rf /tmp/healthy; sleep 600
-    livenessProbe: # kubelet executes command "cat /tmp/healthy" in the target container. If 0 is returned, then container is healthy. Otherwise, kubelet kills the container and restarts it
+    livenessProbe:  # Kubelet executes command "cat /tmp/healthy" in the target container. If 0 is returned, then container is healthy. Otherwise, kubelet kills the container and restarts it
       exec:
         command:
         - cat
         - /tmp/healthy
-      initialDelaySeconds: 5 # kubelet should wait 5 seconds before performing the first probe
-      periodSeconds: 5 # kubelet should perform liveness probe every 5 seconds</code></pre>
+      initialDelaySeconds: 5  # Kubelet should wait 5 seconds before performing the first probe
+      periodSeconds: 5  # Kubelet should perform liveness probe every 5 seconds</code></pre>
 
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
@@ -1787,15 +1787,15 @@ spec:
     image: k8s.gcr.io/liveness
     args:
     - /server
-    livenessProbe: # kubelet sends HTTP GET request to the server running in the container and listening on port 8080. If status code between 200 and 400 is returned, then container is healthy. Otherwise, kubelet kills the container and restarts it
+    livenessProbe:  # Kubelet sends HTTP GET request to the server running in the container and listening on port 8080. If status code between 200 and 400 is returned, then container is healthy. Otherwise, kubelet kills the container and restarts it
       httpGet:
         path: /healthz
         port: 8080
         httpHeaders:
         - name: Custom-Header
           value: Awesome
-      initialDelaySeconds: 3 # kubelet should wait 3 seconds before performing the first probe
-      periodSeconds: 3 # kubelet should perform liveness probe every 3 seconds</code></pre>
+      initialDelaySeconds: 3  # Kubelet should wait 3 seconds before performing the first probe
+      periodSeconds: 3  # Kubelet should perform liveness probe every 3 seconds</code></pre>
 
 <pre><code class="yaml">apiVersion: v1
 kind: Pod
@@ -2219,11 +2219,11 @@ status:
 
     <h3 class="card-title">Connecting Applications with Services</h3>
     <ul>
-      <li>Docker: containers can talk to other containers only if they are on the same machine</li>
+      <li>Docker - containers can talk to other containers only if they are on the same machine</li>
       <ul>
         <li>Containers must be allowed ports on machine's own IP address</li>
       </ul>
-      <li>Kubernetes: Pods can talk to other Pods regardless of Nodes</li>
+      <li>Kubernetes - Pods can talk to other Pods regardless of Nodes</li>
       <ul>
         <li>Every Pod gets cluster-private IP address and all Pods in a cluster can see each other</li>
       </ul>
@@ -2657,11 +2657,11 @@ spec:
 
     <h3 class="card-title">PV</h3>
     <ul>
-      <li><code>ReadWriteOnce</code>: PV can only be bound as R/W by a single PVC</li>
-      <li><code>ReadWriteMany</code>: PV can be bound as R/W by multiple PVCs</li>
-      <li><code>ReadOnlyMany</code>: PV can be bound as R/O by multiple PVCs</li>
-      <li><code>Delete</code>: deletes PV and data stored on the associated external storage</li>
-      <li><code>Retain</code>: keep PV and data stored on the associated external storage</li>
+      <li><code>ReadWriteOnce</code> - PV can only be bound as R/W by a single PVC</li>
+      <li><code>ReadWriteMany</code> - PV can be bound as R/W by multiple PVCs</li>
+      <li><code>ReadOnlyMany</code> - PV can be bound as R/O by multiple PVCs</li>
+      <li><code>Delete</code> - deletes PV and data stored on the associated external storage</li>
+      <li><code>Retain</code> - keep PV and data stored on the associated external storage</li>
     </ul>
 
 <pre><code class="yaml">apiVersion: v1
@@ -2757,7 +2757,7 @@ metadata:
 spec:
   volumeSnapshotClassName: csi-hostpath-snapclass
   source:
-    persistentVolumeClaimName: pvc-test # name of PVC data source for the snapshot</code></pre>
+    persistentVolumeClaimName: pvc-test  # Name of PVC data source for the snapshot</code></pre>
 
     <h3 class="card-title">VSC</h3>
 
