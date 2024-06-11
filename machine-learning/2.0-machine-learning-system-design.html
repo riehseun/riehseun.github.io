@@ -635,6 +635,35 @@
           <li>Model parallelism</li>
         </ul>
         <li>How to overcome underfitting and overfitting (bias and variance)</li>
+        <li>Checkpoints</li>
+        <ul>
+          <li>Save the model state at the end of every epoc</li>
+          <ul>
+            <li>If tree model, save the final rules for each intermediate node and the predicted value for each of the leaf nodes</li>
+            <li>If linear model, save the final values of the weights and biases</li>
+            <li>If neural network, save the final values of the weights and biases plus activation functions and the weights of the hidden connections</li>
+          </ul>
+          <li>Model state changes after every batch, but checkpointing at every batch is too expensive</li>
+          <li>Fine-tuning - when retraining the model on fresh data, train from a checkpoint</li>
+          <li>Instead of this</li>
+<pre><code class="python">model.fit(X_train, y_train,
+          batch_size=100,
+          epochs=15)</code></pre>
+          <li>Do this</li>
+<pre><code class="python">NUM_TRAINING_EXAMPLES = 1000 * 1000
+STOP_POINT = 14.3
+TOTAL_TRAINING_EXAMPLES = int(STOP_POINT*NUM_TRAINING_EXAMPLES)
+BATCH_SIZE = 100
+NUM_CHECKPOINTS = 15
+steps_per_epoch = TOTAL_TRAINING_EXAMPLES // (BATCH_SIZE*NUM_CHECKPOINTS)
+cp_callback = tf.keras.callbacks.ModelCheckpoint(...)
+history = model.fit(trainds,
+                    validation_data=evalds,
+                    epochs=NUM_CHECKPOINTS,
+                    steps_per_epoch =steps_per_epoch,
+                    batch_size=BATCH_SIZE,
+                    callbacks=[cp_callback])</code></pre>
+        </ul>
       </ul>
     </ul>
   </div>
