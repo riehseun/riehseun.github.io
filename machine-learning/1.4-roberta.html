@@ -79,6 +79,111 @@ tokenizer.train(files=path, vocab_size=52_000, min_frequency=2, special_token=[
     "&lt;unk&gt;",
     "&lt;mask&gt;"
 ])</code></pre>
+
+    <h3 class="card-title">Save file to disk</h3>
+    <ul>
+      <li>The tokenizer generates two files when trained</li>
+      <ul>
+        <li><code>merges.txt</code> - contains merged tokenized substrings</li>
+        <li><code>vocab.json</code> - contains indices of tokenized substrings</li>
+      </ul>
+    </ul>
+
+<pre><code class="python">import os
+token_dir = '/content/KantaiBERT'
+if not os.path.exists(token_dir):
+    os.makedirs(token_dir)
+tokenizer.save_model('KantaiBERT')</code></pre>
+
+    <h3 class="card-title">Load the trained tokenizer files</h3>
+
+<pre><code class="python">from tokenizers.implementations import ByteLevelBPETokenizer
+from tokenizers.processors import BertProcessing
+
+tokenizer = ByteLevelBPETokenizer(
+    "./KantaiBERT/vocab.json",
+    "./KantaiBERT/merges.txt",
+)</code></pre>
+
+    <h3 class="card-title">Define configuration of the model</h3>
+
+<pre><code class="python">from transformers import RobertaConfig
+
+config = RobertaConfig(
+    vocab_size=52_000,
+    max_position_embeddings=514,
+    num_attention_heads=12,
+    num_hidden_layers=6,
+    type_vocab_size=1,
+)</code></pre>
+
+    <h3 class="card-title">Reload the tokenizer in transformers</h3>
+
+<pre><code class="python">from transformers import RobertaTokenizer
+tokenizer = RobertaTokenizer.from_pretrained("./KantaiBERT", max_length=512)</code></pre>
+
+    <h3 class="card-title">Initialize a model from scratch</h3>
+
+<pre><code class="python">from transformers import RobertaForMaskedLM
+model = RobertaForMaskedLM(config=config)</code></pre>
+
+    <h3 class="card-title">Build the dataset</h3>
+
+<pre><code class="python">from transformers import LineByLineTextDataset
+
+dataset = LineByLineTextDataset(
+    tokenizer=tokenizer,
+    file_path="./kant.txt",
+    block_size=128,
+)</code></pre>
+
+    <h3 class="card-title">Define a data collator</h3>
+
+<pre><code class="python">from transformers import DataCollatorForLanguageModeling
+
+data_collator = DataCollatorForLanguageModeling(
+    tokenizer=tokenizer, mlm=True, mlm_probability=0.15
+)</code></pre>
+
+    <h3 class="card-title">Initialize the trainer</h3>
+
+<pre><code class="python">from transformers import Trainer, TrainingArguments
+
+training_args = TrainingArguments(
+    output_dir="./KantaiBERT",
+    overwrite_output_dir=True,
+    num_train_epochs=1, #can be increased
+    per_device_train_batch_size=64,
+    save_steps=10_000,
+    save_total_limit=2,
+)
+
+trainer = Trainer(
+    model=model,
+    args=training_args,
+    data_collator=data_collator,
+    train_dataset=dataset,
+)</code></pre>
+
+    <h3 class="card-title">Pretrain the model</h3>
+
+<pre><code class="python">trainer.train()</code></pre>
+
+    <h3 class="card-title">Save the final model to disk</h3>
+
+<pre><code class="python">trainer.save_model("./KantaiBERT")</code></pre>
+
+    <h3 class="card-title">Language modeling with FillMaskPipeline</h3>
+
+<pre><code class="python">from transformers import pipeline
+
+fill_mask = pipeline(
+    "fill-mask",
+    model="./KantaiBERT",
+    tokenizer="./KantaiBERT"
+)</code></pre>
+
+<pre><code class="python">fill_mask("Human thinking involves human &lt;mask&gt;.")</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: Transformers for Natural Language Processing, Denis Rothman
