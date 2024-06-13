@@ -57,23 +57,28 @@
       <li>Does not use WordPiece tokenization but uses byte-level Byte-Pair Encoding (BPE)</li>
     </ul>
 
-    <h3 class="card-title">Import modules</h3>
+    <h3 class="card-title">Train a tokenizer</h3>
+    <ul>
+      <li>Train a tokenizer instead of using pre-trained tokenizer</li>
+      <li>BPE tokenizer breaks a string or word down into substrings or subwords</li>
+    </ul>
 
-<pre><code class="python">import transformers
-import torch
-import torch.nn as nn
-from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
-from keras.utils import pad_sequences
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import matthews_corrcoef
-from transformers import BertTokenizer, BertModel, BertConfig
-from transformers import AdamW, BertForSequenceClassification, get_linear_schedule_with_warmup
-from tqdm import tqdm, trange  # For progress bars
-import pandas as pd
-import io
-import numpy as np
-import matplotlib.pyplot as plt
-from IPython.display import Image  # For image rendering</code></pre>
+<pre><code class="python">from pathlib import Path
+from tokenizers import ByteLevelBPETokenizer
+
+paths = [str(x) for x in Path(".").glob("**/*.txt")]
+
+# Initialize a tokenizer
+tokenizer = ByteLevelBPETokenizer()
+
+# Customize training
+tokenizer.train(files=path, vocab_size=52_000, min_frequency=2, special_token=[
+    "&lt;s&gt;",
+    "&lt;pad&gt;",
+    "&lt;/s&gt;",
+    "&lt;unk&gt;",
+    "&lt;mask&gt;"
+])</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: Transformers for Natural Language Processing, Denis Rothman
