@@ -1390,6 +1390,179 @@ for k=1 to n
 <div class="card mb-4" id="data-structure-and-algorithm-">
   <div class="card-body">
     <h2 class="card-title">Dynamic programming</h2>
+    <ul>
+      <li>Identify a small number of sub-problems</li>
+      <li>Can quickly + correctly solve "larger" sub-problems given the solutions to "smaller sub-problems"</li>
+      <li>Solving all sub-problems computes final solution</li>
+    </ul>
+
+    <h3 class="card-title">Weighted independent sets</h3>
+    <ul>
+      <li>Input - a path graph $G = (V,E)$ with non-negative weights on vertices</li>
+      <li>Desired output - subset of nonadjacent vertices (an independent set of maximum total weight)</li>
+      <li>Brute force - exponential time</li>
+      <li>Optimal structure</li>
+      <ul>
+        <li>Reason about structure of an optimal solution</li>
+        <li>Let $S \le V$ be a max-weight independent set (IS)</li>
+        <li>Let $v_{n}$ = last vertex of path</li>
+      </ul>
+      <li>A case analysis</li>
+      <ul>
+        <li>Case #1: suppose $v_{n} \in S$. let $G^{'} = G$ with $v_{n}$ deleted</li>
+        <ul>
+          <li>Note: $S$ also an IS of $G^{'}$</li>
+          <li>Note: $S$ must be a max-weight IS of $G^{'}$ - if $S^{*}$ was better, it would also be better than $S$ in $G$ (contradiction)</li>
+        </ul>
+        <li>Case #2: suppose $v_{n} \in S$</li>
+        <ul>
+          <li>Note: previous vertex $v_{n-1} \notin S$ (by definition of IS). let $G^{''} = G$ with $v_{n-1}, v_{n}$ deleted</li>
+          <li>Note: $S-\{v_{n}\}$ is an IS of $G^{''}$</li>
+          <li>Note: must in fact be a max-weight IS of $G^{''}$ - if $S{*}$ is better than $S$ in $G^{''}$, then $S^{*}\cup\{v_{n}\}$ is better than $S$ in $G$ (contradiction)</li>
+        </ul>
+      </ul>
+      <li>Optimal solution</li>
+      <ul>
+        <li>Reformulate as a bottom-up iterative algorithm. let $G_{i}$ = 1st vertices of $G$</li>
+        <li>Populate array $A$ left to right with $A[i]$ = value of max-weight IS of $G_{i}$</li>
+        <li>Initialize $A[0] = 0, A[1] = w_{1}$</li>
+        <li>For $i = 2,3 \dots n$</li>
+        <ul>
+          <li>$A[i] = max{A[i-1], A[i-2]+w_{i}}$</li>
+        </ul>
+        <li>Runs in $O(n)$</li>
+        <li>Trace back through filled-in array to reconstruct optimal solution</li>
+        <li>Key point: we know that a vertex $v_{i}$ belongs to a max-weight IS of $G_{i}$ <=> $w_{i}$ + max-weight IS of $G_{i-2} \ge$ max-weight IS of $G_{i-1}$</li>
+      </ul>
+      <li>A reconstruction algorithm - trace back through filled-in array to reconstruct optimal solution</li>
+      <ul>
+        <li>Let $A$ = filled-in array</li>
+        <li>Let $S$ = empty set</li>
+        <li>While $i \ge 1$</li>
+        <ul>
+          <li>If $A[i-1] \ge A[i-2] + w_{i}$ (case 1 wins)</li>
+          <ul>
+            <li>Decrease i by 1</li>
+          </ul>
+          <li>Else (case 2 wins)</li>
+          <ul>
+            <li>Add $v_{i}$ to $S$</li>
+            <li>Decrease $i$ by 2</li>
+          </ul>
+        </ul>
+        <li>Return $S$</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Knapsack problem</h3>
+    <ul>
+      <li>Input - \( n \) items</li>
+      <ul>
+        <li>Value \( v_{i} \) (non-negative)</li>
+        <li>Size \( w_{i} \) (non-negative and integral)</li>
+        <li>Capacity \( W \) (non-negative integer)</li>
+      </ul>
+      <li>Output - subset \( S \in \{1 \dots n\} \) that maximizes \( \displaystyle\sum_{i}v_{i} \) subject to \( \displaystyle\sum_{i}w_{i} \le W \)</li>
+      <li>Step #1</li>
+      <ul>
+        <li>Let \( S \) = a max-value solution</li>
+        <li>Suppose item \( n \notin S \). \( S \) must be optimal with first \( n-1 \) items with capacity \( W \)</li>
+        <ul>
+          <li>If \( S^{*} \) were better than \( S \) with respect to 1st \( n-1 \) items, then this equally true with respect to all \( n \) items -> contradiction</li>
+        </ul>
+        <li>Suppose item \( n \in S \). \( S-\{n\} \) must be optimal with first \( n-1 \) items with capacity \( W-w_{n} \)</li>
+        <ul>
+          <li>If \( S^{*} \) has higher value than \( S-\{n\} \) + totla size \( \le W-w_{n} \), then \( S\cup\{n\} \) has size \( \le W \) and value more than \( S \) -> contradiction</li>
+        </ul>
+      </ul>
+      <li>Step #2</li>
+      <ul>
+        <li>Let \( v_{i,x} \) = value of the best solution that</li>
+        <ul>
+          <li>Uses only the first \( i \) items</li>
+          <li>Has total size \( \le x \)</li>
+        </ul>
+        <li>For i = 1 to n and any x</li>
+        <ul>
+          <li>\( v_{i,x} = \text{max}\{v_{i-1,x}\} \) (case when item \( i \) in excluded), \( v_{i} + v_{i-1,x-w_{i}} \) (case when item \( i \) in included)}</li>
+        </ul>
+        <li>If \( w_{i} > x \), then \( v_{i,x} = v_{i-1,x} \)</li>
+      </ul>
+      <li>Step #3</li>
+      <ul>
+        <li>Let \( A \) = 2D array</li>
+        <li>Init \( A[0,x] = 0 \) for \( x = 0 \dots W \)</li>
+        <li>For \( i = 1 \dots n \)</li>
+        <ul>
+          <li>For \( x = 0 \dots W \)</li>
+          <ul>
+            <li>\( A[i,x] = \text{max}\{A[i-1, x], A[i-1, x-w_{i}] + v_{i}\} \) (ignore second term if \( w_{i} \gt x \))</li>
+          </ul>
+        </ul>
+        <li>Return \( A[n,W] \)</li>
+        <li>Runs in \( \theta(nW) \)</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Sequence alignment</h3>
+    <ul>
+      <li>Input - strings \( X = x_{1} \dots x_{m}, Y = y_{1} \dots y_{m} \) over some alphabet (like \( \{A,C,G,T\} \))</li>
+      <ul>
+        <li>Penalty \( \alpha_{gap} \ge 0 \) for inserting a gap, \( \alpha_{ab} \) for matching \( a \) and \( b \)</li>
+      </ul>
+      <li>Alignment - insert gaps to equalize length of string</li>
+      <li>Goal - alignment with minimum possible total penalty</li>
+      <li>Final position of string can be one of</li>
+      <ul>
+        <li>Case1 - \( x_{m} \) and \( y_{n} \) matched</li>
+        <li>Case2 - \( x_{m} \) is matched with a gap</li>
+        <li>Case3 - \( y_{n} \) is matched with a gap</li>
+      </ul>
+      <li>Let \( X^{'} = X - x_{m} \) and \( Y^{'} = Y - y_{m} \)</li>
+      <ul>
+        <li>Case1 - alignment of \( X^{'} \) and \( Y^{'} \) is optimal</li>
+        <li>Case2 - alignment of \( X^{'} \) and \( Y \) is optimal</li>
+        <li>Case3 - alignment of \( X \) and \( Y^{'} \) is optimal</li>
+      </ul>
+      <li>Subproblem \( (X_{i}m Y_{j}) \)</li>
+      <ul>
+        <li>\( X_{i} \) = 1st \( i \) letters of \( X \)</li>
+        <li>\( Y_{j} \) = 1st \( j \) letters of \( Y \)</li>
+      </ul>
+      <li>Recurrence</li>
+      <ul>
+        <li>Let \( P_{ij} \) = penalty of optimal alignment of \( X_{i} \) and \( Y_{j} \)</li>
+        <li>For all i = 1 to n and j = 1 to n, \( P_{ij} \) is the <strong>minimun</strong> of the following three cases</li>
+        <li>Case1 - \( \alpha_{x_{i}y_{j}} + P_{i-1,j-1} \)</li>
+        <li>Case2 - \( \alpha_{gap} + P_{i-1,j} \)</li>
+        <li>Case3 - \( \alpha_{gap} + P_{i,j-1} \)</li>
+      </ul>
+      <li>Algorithm</li>
+      <ul>
+        <li>Let \( A \) = 2D array</li>
+        <li>\( A[i,0] = A[0,j] = i * \alpha_{gap} \forall i \ge 0 \)</li>
+        <li>For \( i = 1 \dots m \)</li>
+        <ul>
+          <li>For \( j = 1 \dots n \)</li>
+          <ul>
+            <li>\( A[i,j] = min\{A[i-1,j-1]+\alpha_{x_{i}y_{j}}, A[i-1,j]+\alpha_{gap}, A[i,j-1]+\alpha_{gap}\} \)</li>
+          </ul>
+        </ul>
+        <li>Runs in \( O(mn) \)</li>
+      </ul>
+      <li>Reconstructing a solution</li>
+      <ul>
+        <li>Trace back through filled-in table \( A_{i} \) starting at \( A[m,n] \)</li>
+        <li>When reaching subproblem \( A[i,j] \)</li>
+        <ul>
+          <li>If \( A[i,j] \) filled using case1, match \( x_{i} \) and \( y_{j} \), and go to \( A[i-1, j-1] \)</li>
+          <li>If \( A[i,j] \) filled using case2, match \( x_{i} \) and a gap, and go to \( A[i-1, j] \)</li>
+          <li>If \( A[i,j] \) filled using case3, match \( y_{j} \) and a gap, and go to \( A[i, j-1] \)</li>
+        </ul>
+        <li>If \( i=0 \) or \( j=0 \), match remaining substring with gaps</li>
+        <li>Runs in \( O(m+n) \)</li>
+      </ul>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.coursera.org/specializations/algorithms">Algorithms</a>
