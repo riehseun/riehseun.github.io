@@ -386,6 +386,74 @@ my_dict = {}
 
 # Set implementation of hash table
 my_set = set()</code></pre>
+
+    <h3 class="card-title">High level idea</h3>
+    <ul>
+      <li>Setup - universe \( U \)</li>
+      <li>Goal - want to maintain evolving set \( S \subseteq U \)</li>
+      <li>Pick \( n \) = number of "buckets"</li>
+      <li>Choose a hash function \( h: U -> \{0,1,2 \dots n-1\} \)</li>
+      <li>Use array \( A \) of length \( n \), store \( x \) in \( A[h(x)] \)</li>
+    </ul>
+
+    <h3 class="card-title">Resolving collisions</h3>
+    <ul>
+      <li>Collision - distinct \( x,y \in U \) such that \( h(x) = h(y) \)</li>
+      <li>Solution #1 - (separate) chaining</li>
+      <ul>
+        <li>Keep linked list in each bucket</li>
+        <li>Given a key/object \( x \), perform insert/delete/lookup in the list in \( A[h(x)] \) where \( A \) = linked list for \( x \) and \( h(x) \) = bucket for \( x \)</li>
+      </ul>
+      <li>Solution #2 - open addressing (only one object per bucket)</li>
+      <ul>
+        <li>Hash function now specifies probe sequence \( h_{1}(x), h_{2}(x) \dots \) (keep trying till finding an open slot)</li>
+        <li>Ex. linear probing (look consecutively), double hashing</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Good hash function</h3>
+    <ul>
+      <li>Spread data out</li>
+      <li>Easy to store</li>
+      <li>Fast to evaluate</li>
+    </ul>
+
+    <h3 class="card-title">Universal hash function</h3>
+    <ul>
+      <li>The load of a hash table \( \alpha \) = (number of objects in hash table) / (number of buckets of hash table)</li>
+      <ul>
+        <li>\( \alpha = O(1) \) is necessary condition for operations to run in constant time</li>
+        <li>With open addressing, need \( \alpha << 1 \)</li>
+      </ul>
+      <li>Good hash table performance</li>
+      <ul>
+        <li>Need to control load</li>
+        <li>Need a good hash function</li>
+      </ul>
+      <li>Ideally we want hash function that guarantees to spread every data set out evenly, however for every hash function, there is a pathological data set</li>
+      <ul>
+        <li>Use a cryptographic hash function (Ex. SHA-2)</li>
+        <ul>
+          <li>Infeasible to reverse engineer a pathological data set</li>
+        </ul>
+      </ul>
+      <ul>
+        <li>Use randomization</li>
+        <ul>
+          <li>Design a family \( H \) of hash functions such that for all data sets \( S \), "almost all" functions \( h \in H \) spread \( S \) out "pretty evenly"</li>
+        </ul>
+      </ul>
+      <li>Definition</li>
+      <ul>
+        <li>Let \( H \) be a set of hash functions from \( U \) to \( \{0,1,2 \dots n-1\} \)</li>
+        <li>\( H \) is universal iff for all \( x,y \) in \( U \) (with \( x != y \))</li>
+        <li>\( Pr_{h \in H}[h(x) = h(y)] \le \dfrac{1}{n} \)</li>
+        <ul>
+          <li>\( n \) = number of buckets</li>
+          <li>\( h \) is chosen uniformly at random from \( H \)</li>
+        </ul>
+      </ul>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href=""></a>
