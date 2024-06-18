@@ -225,6 +225,16 @@ echo $incremented_version</code></pre> -->
 <div class="card mb-4" id="linux-">
   <div class="card-body">
     <h2 class="card-title">Function</h2>
+    <ul>
+      <li>Use <code>echo</code> for the return statement</li>
+      <li>Arguments</li>
+      <ul>
+        <li><code>$*</code> - treats each quoted arguments as separate arguments</li>
+        <li><code>$@</code> - treats entire set of positional parameters as a single string</li>
+        <li>When calling a function, wrapping a variable inside quotes will make sure that the entire content is passed</li>
+<pre><code class="bash">my_function ${arg1} ${arg2} "${arg_large_string_with_spaces}"</code></pre>
+      </ul>
+    </ul>
 
 <pre><code class="bash">########################
 # Function description
@@ -246,11 +256,7 @@ function &lt;function_name&gt;() {
 
   # This exits the script execution
   exit 1
-}
-
-# When calling a function, wrapping a variable inside quotes will make sure that
-# the entire content is passed. For example,
-my_function ${arg1} ${arg2} "${arg_large_string_with_spaces}"</code></pre>
+}</code></pre>
   </div>
 
   <div class="card-footer text-muted">
@@ -557,7 +563,10 @@ find / -type f -name *.tar.gz -size +100M -exec rm -f {} \;
 # Loop through results from "find"
 find / type -f -name ${filename} 2> /dev/null | while read line; do
   # Do something with ${line}
-done</code></pre>
+done
+
+# Remove a file except 'file_to_remove'
+find . ! -name 'file_to_remove' -type f -exec rm -r {} +</code></pre>
 
     <h3 class="card-title">Utility <code>grep</code></h3>
     <ul>
@@ -587,11 +596,18 @@ fi</code></pre>
 <pre><code class="bash"># For example, "chmod 640" gives read and write permission to the owner, read permission to the group, no permission to all others
 chmod 640 $file</code></pre>
 
-    <h3 class="card-title">Softlink</h3>
+    <h3 class="card-title">Soft links</h3>
+    <ul>
+      <li>Soft links - link to file name (Can be on different file system)</li>
+      <li>Hard links - link to inode of the file (Must be on the same file system)</li>
+      <li>Deleting original file breaks soft links but does not impact hard link</li>
+      <ul>
+        <li>Hard link still can access the copy of the file</li>
+      </ul>
+    </ul>
 
 <pre><code class="bash"># To have "link1 -> file1"
-ln -s file1 link1
-ls -l file1 link1</code></pre>
+ln -s file1 link1</code></pre>
 
     <h3 class="card-title">Remove a file starting with dash</h3>
 
@@ -604,9 +620,6 @@ split -b 1000000000 file.tar.gz
 
 # Merge splitted files
 cat x* > file.tar.gz</code></pre>
-
-    <h3 class="card-title">Remove a file except 'file_to_remove'</h3>
-<pre><code class="bash">find . ! -name 'file_to_remove' -type f -exec rm -r {} +</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.educative.io/path/bash-programming">Bash Programming</a>
