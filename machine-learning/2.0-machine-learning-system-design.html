@@ -108,12 +108,14 @@
         </ul>
         <li>Multi-labeling</li>
         <ul>
-          <li>Give more than one label to training example</li>
           <li>Ex. image consists of multiple animals rather than just one animal like cat, dog, rabbit</li>
+          <li>Give more than one label to training example</li>
+          <li>Encode the label using a multi-hot array</li>
           <li>Final output layer will have a sigmoid activation function where each value in the array is in range between \( 0 \) and \( 1 \)</li>
         </ul>
         <li>Ensembles</li>
         <ul>
+          <li>Suitable for bia-variance trade-off on small to medium scale problems</li>
           <li>Bagging</li>
           <ul>
             <li>Ex. Random Forest</li>
@@ -132,15 +134,15 @@
           <li>Break a problem into many sub-problems</li>
           <li>Ex. predict the likelihood of a customer returning an item</li>
           <ul>
-            <li>Predict where a specific transaction is by a reseller or retail buyer</li>
-            <li>Train one model on sales to retail buyers</li>
-            <li>Train another model on sales to resellers</li>
+            <li>Predict whether a specific transaction is by a reseller or retail buyer</li>
+            <li>Train a model on sales to retail buyers</li>
+            <li>Train a model on sales to resellers</li>
             <li>Combine the outputs of three seperate models to predict return likelihood</li>
           </ul>
         </ul>
         <li>Neutral class</li>
         <ul>
-          <li>Instead of binary classifier, three-class classifier that outputs disjoint probabilities for Yes, No, Maybe</li>
+          <li>Ex. three-class classifier that outputs disjoint probabilities for Yes, No, Maybe</li>
         </ul>
       </ul>
       <li>Define ML objective</li>
@@ -412,20 +414,21 @@
         <ul>
           <li>Convert numerical feature to categorical feature</li>
         </ul>
-        <li>Encoding - convert categorical features to numerical</li>
+        <li>Encoding</li>
         <ul>
-          <li>Integer encoding</li>
+          <li>Convert categorical features to numerical feature</li>
+          <li>Ex. integer encoding</li>
           <ul>
             <li>Integer value is assigned to each category</li>
             <li>Cannot be used for nominal features</li>
           </ul>
-          <li>One-hot encoding</li>
+          <li>Ex. one-hot encoding</li>
           <ul>
             <li>Binary value is assigned to each category</li>
             <li>Not suitable for features with high cardinality</li>
             <li>Not suitable when features values are not independent</li>
           </ul>
-          <li>Embedding</li>
+          <li>Ex. embedding</li>
           <ul>
             <li>Learn N-D vector for each categorial value</li>
             <li>Just another hidden layer in neural network</li>
@@ -444,23 +447,22 @@
             <li>Categorical variable has high cardinality</li>
             <li>Cold start problem</li>
           </ul>
-          <li>Ex. airport_id in USA (there rae 347)</li>
+          <li>Ex. airport_id in USA where there are 347 of them</li>
           <ul>
             <li>Training data may not contain all airport_id</li>
             <li>347 results in high cardinality</li>
             <li>New airport will get built</li>
           </ul>
-          <li>Convert categorical input to unique stringm then apply hashing on the string</li>
+          <li>Convert categorical input to unique string, then apply hashing on the string</li>
           <li>The number of buckets can be treated as a hyperparameter</li>
           <li>Cons</li>
           <ul>
             <li>Model accuracy will suffer (especially when the distribution of categorical input is highly skewed)</li>
-            <li></li>
-            <li></li>
           </ul>
         </ul>
         <li>Feature cross</li>
         <ul>
+          <li>Used when model complexity is insufficient to learn feature relationships</li>
           <li>Concatenate categorical features to create combinations of feature values</li>
           <li>Should never be used for numerical feature as it will result in infinite sparcity</li>
           <ul>
@@ -581,6 +583,10 @@
           <li>Split data</li>
           <ul>
             <li>Split must be repeatable</li>
+            <ul>
+              <li>Use fixed seed number</li>
+              <li>If distributed training environment, store the splitted data</li>
+            </ul>
           </ul>
           <li>Address imbalance</li>
           <ul>
@@ -886,6 +892,10 @@ history = model.fit(trainds,
             <li>May use batch features only or the combination of batch and streaming features</li>
             <li>Model may take long to generate prediction</li>
             <li>Stateless serving function</li>
+            <ul>
+              <li>Should support millions of requests per second</li>
+              <li>Model should be packaged and deployed as stateless function</li>
+            </ul>
           </ul>
         </ul>
         <li>Continual learning</li>
@@ -905,6 +915,11 @@ history = model.fit(trainds,
             <li>Automated, stateful training</li>
             <li>Continual learning</li>
           </ul>
+        </ul>
+        <li>Two-phase prediction</li>
+        <ul>
+          <li>Split large use case into two phases</li>
+          <li>Only the simpler phase should be carried out on the edge</li>
         </ul>
         <li>Feature store</li>
         <ul>
