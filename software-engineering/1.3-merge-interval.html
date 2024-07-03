@@ -139,43 +139,37 @@ merge([])</code></pre>
   <div class="card-body">
     <h2 class="card-title">Meeting rooms II (M/G1/F1/100)</h2>
 
-<pre><code class="python">from heapq import heappush, heappop
+<pre><code class="python">class Solution:
+    def minMeetingRooms(self, intervals: List[List[int]]) -> int:
 
-def find_sets(intervals):
+        # Sort all the meetings by start time
+        # Insert the end time of the first meeting into min heap
+        #
+        # Loop through intervals
+        #   If earliest end time in heap <= start time of current meeting
+        #     No additional room is required
+        #     Pop from heap because the meeting at the root of heap is now
+        #     scheduled back to back with the current meeting
+        #   Else
+        #     Increment room count
+        #   Insert the current meeting into heap to update the earlist end time
 
-    # Sort all the meetings by start time
-    # Initialize a min heap
-    # Insert the end time of the first meeting into heap
-    # If the minimum end time of all meetings (root of heap) is less than current meeting, update the heap by removing the root
-    # Return the height of heap
-    # Time: O(nlogn) where n length of input arrays.
-    # Space: O(n)
+        heap = []
+        intervals.sort(key = lambda x: (x[0]))
+        heappush(heap, intervals[0][1])
+        num_rooms = 1
 
-    # num_rooms = 0
-
-    heap = []
-
-    intervals.sort(key = lambda x: (x[0]))
-
-    for interval in intervals:
-
-        if not heap:
-            heappush(heap, interval[1])  # O(logn)
-            # num_rooms += 1
-        else:
-            # If the earliest end time amongst all meetings is less than or equal
-            # to the start time of current meeting, then the current meeting
-            # can go in after that end time.
-            # Update the earliest end time by removing the root from the min heap.
+        # Time O(nlogn) n = number of intervals, heap operation is logn
+        # Space O(n) worst case every interval need separate room
+        for interval in intervals[1:]:
             if heap[0] <= interval[0]:
-                heappop(heap)  # O(logn)
-            # else:
-            #     num_rooms += 1
+                heappop(heap)
+            else:
+                num_rooms += 1
 
-            heappush(heap, interval[1])  # O(logn)
+            heappush(heap, interval[1])
 
-    return len(heap)
-    # return num_rooms</code></pre>
+        return num_rooms</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/meeting-rooms-ii">253. Meeting Rooms II</a>
