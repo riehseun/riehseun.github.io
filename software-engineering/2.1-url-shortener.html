@@ -307,63 +307,67 @@
   <div class="card-body">
     <h2 class="card-title">Evaluation</h2>
 
-    <h3 class="card-title">Availability</h3>
+    <h3 class="card-title">Functional</h3>
     <ul>
-      <li>Replication</li>
+      <li>Business objective</li>
       <ul>
-        <li>Replicate each server and DB</li>
-        <li>Replicate entire components to different zone or geographical region</li>
-      </ul>
-      <li>Fail over</li>
-      <ul>
-        <li></li>
-        <li></li>
+        <li>Covered short URL generation, URL redirection</li>
+        <li>Shortened URL is only 7 characters</li>
+        <li>We are only using 0-9, A-Z, a-z</li>
+        <li>Supported update/delete URLs</li>
       </ul>
     </ul>
 
-    <h4 class="card-title">Reliability</h4>
+    <h3 class="card-title">Non-functional</h3>
     <ul>
-      <li>Data loss</li>
+      <li>Availability</li>
+      <ul>
+        <li>Replication</li>
+        <ul>
+          <li>Replicate each web server, cache, DB</li>
+          <ul>
+            <li>DB - since the system is read-heavy, go for single-master replication</li>
+          </ul>
+          <li>Replicate entire system to different zone or geographical region</li>
+        </ul>
+        <li>Fail over</li>
+        <ul>
+          <li>Active-active</li>
+          <ul>
+            <li>Both actives manage traffic, spreading load between them</li>
+          </ul>
+          <li>Active-passive</li>
+          <ul>
+            <li>Active web servers, cache send heartbearts to passives</li>
+            <li>If heartbeats stop, passives take over actives' IP and resume service</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>Reliability</li>
+      <ul>
+        <li>Data loss - periodically take snapshot of data and store snapshots in multi zone or region</li>
+      </ul>
+      <li>Scalability</li>
+      <ul>
+        <li>Horizontal scaling - can add more web servers, cache</li>
+        <li>Data partitioning</li>
+        <ul>
+          <li>Horizontal partitioning or sharding since the system is less concerned about atomic operation</li>
+          <li>Use consistent hashing to spread data evenly to different data nodes</li>
+        </ul>
+      </ul>
+      <li>Performance</li>
+      <ul>
+        <li>Cache improves the performance of redirection</li>
+        <li>MongoDB has low latency and high throughput</li>
+      </ul>
+      <li>Consistency</li>
+      <ul>
+        <li>Inconsistency can happen when user updates short_url but update is not syncs to all data nodes</li>
+        <li>Impact is that users are redirected to wrong original URLs</li>
+        <li>The impact is not too catastrophic, thus eventual consistency suffice</li>
+      </ul>
     </ul>
-
-    <h3 class="card-title">Scalability</h3>
-    <ul>
-      <li>Horizontal scaling</li>
-      <li>Data partitioning</li>
-    </ul>
-
-    <h4 class="card-title">Performance</h4>
-    <ul>
-      <li></li>
-    </ul>
-
-    <h3 class="card-title">Consistency</h3>
-    <ul>
-      <li></li>
-    </ul>
-
-    <!-- <h4 class="card-title">Availability</h4>
-    <ul>
-      <li>App servers and DBs can be replicated.</li>
-      <li>Rate limiter limits resource allocation for each user.</li>
-      <li>Global load balancer to route traffic to app servers in closest regions.</li>
-    </ul>
-
-    <h4 class="card-title">Reliability</h4>
-
-    <h4 class="card-title">Scalability</h4>
-    <ul>
-      <li>Consistent hashing to distribute data shards.</li>
-      <li>Separate read and write server.</li>
-      <li>NoSQL DB like MongoDB.</li>
-    </ul>
-
-    <h4 class="card-title">Performance</h4>
-    <ul>
-      <li>MongoDB has low latency and high throughput.</li>
-      <li>Distributed cache like Memcached</li>
-      <li>NoSQL DB like MongoDB.</li>
-    </ul> -->
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu
