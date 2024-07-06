@@ -60,33 +60,35 @@
 <pre><code class="python">class Solution:
     def merge(self, intervals: List[List[int]]) -> List[List[int]]:
 
-        # Save the first interval into the result array.
-        # While iterating the rest of intervals.
-        #   If the end of the last interval is greater than the current, then there is an overlap.
-        #   Then, merge these two intervals.
-        #   Else, just append the current interval to the result array.
+        # Save the first interval into the result
+        # While iterating the rest of intervals
+        #   If the end of the last interval is greater than the current,
+        #   then there is an overlap
+        #   Then, merge these two intervals
+        #   Else, just append the current interval to the result array
 
         if len(intervals) <= 1:
             return intervals
 
         intervals.sort(key = lambda x: x[0])
-
         result = []
-        # Keep the first interval.
         result.append(intervals[0])
 
+        # Time O(n) n = len(intervals)
+        # Space O(1) ignoring space for output
         for interval in intervals[1:]:
-            # If overlap is found.
+            # If overlap is found
             if result[-1][1] >= interval[0] and result[-1][0] <= interval[1]:
-                old = result.pop()
-                new = [min(old[0], interval[0]), max(old[1], interval[1])]
-                result.append(new)
+                last_interval = result.pop()
+                merged_interval = [
+                    min(last_interval[0], interval[0]),
+                    max(last_interval[1], interval[1])
+                ]
+                result.append(merged_interval)
             else:
                 result.append(interval)
 
-        return result
-
-merge([])</code></pre>
+        return result</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/merge-intervals">56. Merge Intervals</a>
