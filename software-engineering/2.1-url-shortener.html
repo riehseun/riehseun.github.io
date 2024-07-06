@@ -51,6 +51,7 @@
       <li><a href="#url-shortener-5">Storage schema</a></li>
       <li><a href="#url-shortener-6">Detailed design</a></li>
       <li><a href="#url-shortener-7">Evaluation</a></li>
+      <li><a href="#url-shortener-8">Follow up</a></li>
     </ul>
   </div>
 </div>
@@ -66,7 +67,7 @@
         <li>How does url-shortener work? Given a URL, generate a short version. When users click short link, redirect them to original link</li>
         <li>How long should the shortened URL be? As short as possible</li>
         <li>What chars are allowed in short URL? 0-9, A-Z, a-z</li>
-        <li>Can users delete or update short URLs? No</li>
+        <li>Can users delete or update short URLs? Yes</li>
       </ul>
       <li>Estimation</li>
       <ul>
@@ -97,7 +98,7 @@
 
     <h3 class="card-title">Storage</h3>
     <ul>
-      <li>100M URLs per day * 100 bytes = 10GB per day = 10GB * 365 = 3.65B per year</li>
+      <li>100M URLs per day * 100 bytes = 10GB per day = 10GB * 365 = 3.65TB per year</li>
     </ul>
 
     <h3 class="card-title">Bandwidth</h3>
@@ -107,7 +108,11 @@
         <li>Generate short link - 100M URLs per day = 100M / (24 * 3600) = 1157 URLs per second</li>
         <li>Redirection - 11570 per second</li>
       </ul>
-      <li>Outgoing - 100 * 0.926 Mbps = 92.6 Mbps</li>
+      <li>Outgoing</li>
+      <ul>
+        <li>Generate short link - 1157 URLs per second</li>
+        <li>Redirection - 11570 per second</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -119,9 +124,19 @@
   <div class="card-body">
     <h2 class="card-title">High level design</h2>
 
-    <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/url-shortener1.png" alt="Card image cap">
+    <h3 class="card-title">URL shortening</h3>
+    <ul>
+      <li>Need a hash function that converts long URL to hash value</li>
+      <ul>
+        <li>There has to be one-to-one mapping between long URL and hash value</li>
+        <li>Each hash value shoud be mapped back to long URL</li>
+      </ul>
+    </ul>
 
     <h3 class="card-title">URL redirecting</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/url-shortener1.png" alt="Card image cap">
+
     <ul>
       <li>301 redirect</li>
       <ul>
@@ -135,16 +150,7 @@
         <li>Subsequent requests for the same URL is sent to url-shortener server first</li>
         <li>Helps with data analytics</li>
       </ul>
-      <li>Use hash table to map short URL and long URL</li>
-    </ul>
-
-    <h3 class="card-title">URL shortening</h3>
-    <ul>
-      <li>Need hash function that maps long URL to hash value</li>
-      <ul>
-        <li>There has to be one-to-one mapping between long URL and hash value</li>
-        <li>Each hash value shoud be mapped back to long URL</li>
-      </ul>
+      <li>Use a hash table to map short URL and long URL</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -159,12 +165,24 @@
       <li><code>short_url(original_url)</code></li>
       <ul>
         <li>POST api/v1/data/shorten</li>
+        <li>Returns shortened URL</li>
         <li><code>original_url</code> - original long URL</li>
       </ul>
       <li><code>redirect_url(short_url)</code></li>
       <ul>
         <li>GET api/v1/shortUrl</li>
         <li>Returns long URL for HTTP redirection</li>
+        <li><code>shorten_url</code> - shortened URL</li>
+      </ul>
+      <li><code>update_url(short_url)</code></li>
+      <ul>
+        <li>PUT api/v1/updateUrl</li>
+        <li>Returns updated shortened URL for the given short URL</li>
+      </ul>
+      <li><code>delete_url(short_url)</code></li>
+      <ul>
+        <li>DELETE api/v1/shortUrl</li>
+        <li>Deletes the shortened URL</li>
       </ul>
     </ul>
   </div>
@@ -176,12 +194,10 @@
 <div class="card mb-4" id="url-shortener-5">
   <div class="card-body">
     <h2 class="card-title">Storage schema</h2>
-
-    <h3 class="card-title">MongoDB</h3>
     <ul>
       <li>Need to store users</li>
       <li>Need to store mapping between original URL and short URL</li>
-      <li>Since there is no relationship between records and ready heavy, No SQL should be chosen</li>
+      <li>Since there is no relationship between tables and ready heavy, No SQL should be chosen (Ex. MongoDB)</li>
     </ul>
 
     <h4 class="card-title">URL</h4>
@@ -209,24 +225,26 @@
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
 
-    <h3 class="card-title">Hashing</h3>
+    <h3 class="card-title">Length of short URL</h3>
     <ul>
-      <li>100M URLs generated per day (from Estimation)</li>
-      <li>Assume we want to run service for 10 yeears</li>
+      <li>100M URLs generated per day</li>
+      <li>Assume we want to run service for 10 years</li>
       <li>Then, 100M * 10 * 365 = 365B URLs are needed</li>
-      <li>0-9, A-Z, a-z have 10+26+26 = 62 chars</li>
+      <li>0-9, A-Z, a-z have 10 + 26 + 26 = 62 chars</li>
       <li>62^n >= 365B, n = 7 should be the length of short URL</li>
     </ul>
 
-    <h3 class="card-title">Hash function</h3>
+    <h3 class="card-title">Generate short URL</h3>
     <ul>
-      <li>Ex. CRC32, MD5, SHA-1</li>
-      <li>These functions generate hash values that are too long for our purpose</li>
-    </ul>
-
-    <h3 class="card-title">Base 62 conversion</h3>
-    <ul>
-      <li>Requires unique ID generator</li>
+      <li>Hash function</li>
+      <ul>
+        <li>Ex. CRC32, MD5, SHA-1</li>
+        <li>These functions generate hash values that are too long for our purpose</li>
+      </ul>
+      <li>Base 62 conversion</li>
+      <ul>
+        <li>Requires unique ID generator</li>
+      </ul>
     </ul>
 
     <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/url-shortener2.png" alt="Card image cap">
@@ -346,6 +364,29 @@
       <li>Distributed cache like Memcached</li>
       <li>NoSQL DB like MongoDB.</li>
     </ul> -->
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="url-shortener-8">
+  <div class="card-body">
+    <h2 class="card-title">Follow up</h2>
+    <ul>
+      <li>Explain how to prevent malicious users send large amount of requests</li>
+      <ul>
+        <li>Use rate limiter in front of load balancer</li>
+      </ul>
+      <li>Explain how to integrate analytics solution URL shortening service</li>
+      <ul>
+        <li>Creating a table of &lt;short_url, interaction_type (click, etc), timestamp&gt; will allow tracking</li>
+        <ul>
+          <li>How many people click a particular link</li>
+          <li>At what time people click a particular link</li>
+        </ul>
+      </ul>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu
