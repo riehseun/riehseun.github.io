@@ -217,7 +217,73 @@
   <div class="card-body">
     <h2 class="card-title">Alien dictionary (H/Ga/F1)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def alienOrder(self, words: List[str]) -> str:
+
+        # Compare two adjacent words at a time
+        # Only the first difference in char tells the ordering
+        #   If there is bidirectional, return ""
+        #   If second word is prefix of first word, return ""
+        # Construct a graph based on the ordering
+        #   Letters than don't appear in the graph are not subject to
+        #   ordering, thus can go anywhere in the output
+        # Then, apply topological order
+        #   Do DFS starting at each node and track finishing time
+        #   Idea is that longer finishing time means earlier in the order
+
+        # Track all chars in words
+        all_chars = set()
+        for word in words:
+            for char in word:
+                all_chars.add(char)
+        print(all_chars)
+
+        graph = defaultdict(set)
+
+        for i in range(len(words)-1):
+            # If second word is prefix of first word, it is not valid ordering
+            if words[i+1] in words[i]
+            for c1, c2 in zip(words[i], words[i+1]):
+                if c1 != c2:
+                    # Check bidirectional
+                    if c1 in graph[c2]:
+                        return ""
+                    graph[c1].add(c2)
+                    break
+
+        print(graph)
+
+        def dfs(graph, start, finishing_time):
+
+            explored = set()
+            explored.add(start)
+
+            stack = []
+            stack.append(start)
+            finishing_time = 0
+
+            while stack:
+                node = stack.pop()
+                for next_node in graph[node]:
+                    if next_node not in explored:
+                        explored.add(next_node)
+                        stack.append(next_node)
+                        finishing_time += 1
+
+            return finishing_time
+
+        ordering = []
+        for char in all_chars:
+            finishing_time = dfs(graph, char, 0)
+            ordering.append([char, finishing_time])
+
+        ordering.sort(key = lambda x: (-x[1]))
+        print(ordering)
+
+        result = ""
+        for item in ordering:
+            result += item[0]
+        return result</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/alien-dictionary">269. Alien Dictionary</a>
