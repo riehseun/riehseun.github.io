@@ -103,9 +103,6 @@
       <li>Define ML objective</li>
       <ul>
         <li>Retrieve images that are similar to the image that user provided</li>
-      </ul>
-      <li>Specify input and output</li>
-      <ul>
         <li>Input</li>
         <ul>
           <li>Image provided by user</li>
@@ -310,7 +307,7 @@
           <li>Example</li>
           <ul>
             <li>Assume visual search system return images \( I1, I2, I3, I4 \) in the order of relevance</li>
-            <li>Assume human rates the images on scale of 0-3 such that \( I1=3, I2=2, I3=3, I4=0 \) (3 is highly relevant, 0 is merely relevant)</li>
+            <li>Assume human rates the images on scale of \( 0 \) to \( 3 \) such that \( I1=3, I2=2, I3=3, I4=0 \) (\( 3 \) is highly relevant, \( 0 \) is merely relevant)</li>
             <li>\( DCG_{p} = \frac{3}{log(1+1)} + \frac{2}{log(2+1)} + \frac{3}{log(3+1)} + \frac{0}{log(4+1)} = 3 + 1.262 + 1.5 + 0 = 5.762 \)</li>
           </ul>
           <li>Cons - nDCG does not penalize irrelevant search result</li>
@@ -321,6 +318,7 @@
         <li>Click-through rate (CTR)</li>
         <ul>
           <li>\( \dfrac{\text{number of clicked images}}{\text{total number of suggested images}} \)</li>
+        </ul>
         <li>Average daily/weekly/monthly time spent on suggested images</li>
       </ul>
     </ul>
@@ -334,6 +332,8 @@
   <div class="card-body">
     <h2 class="card-title">Deployment and serving</h2>
 
+    <h3 class="card-title">Components</h3>
+
     <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/visual-search-system1.png" alt="Card image cap">
     <ul>
       <li>Indexing service</li>
@@ -344,27 +344,29 @@
       <ul>
         <li>Preprocess the input images and use trained model to determine its embedding</li>
       </ul>
-      <li>Re-ranking service</li>
-      <ul>
-        <li>Filters inappropriate results, removes duplicates, etc</li>
-      </ul>
       <li>Nearest neighbor service</li>
       <ul>
         <li>Retrieve similar images from embedding space</li>
         <li>Exact NN</li>
         <ul>
-          <li>Time O(ND) where N is total number of points and D is dimension</li>
-          <li>N could be billions</li>
+          <li>Time \( \text{O}(ND) \) where \( N \) is total number of points and \( D \) is dimension</li>
+          <li>\( N \) could be billions</li>
         </ul>
         <li>Approximate NN</li>
         <ul>
-          <li>Time O(log(N)D)</li>
+          <li>Time \( \text{O}(\text{log}(N)D) \)</li>
           <li>Tree-based</li>
           <li>Locality sensitive hashing (LSH)</li>
           <li>Clustering-based</li>
         </ul>
       </ul>
+      <li>Re-ranking service</li>
+      <ul>
+        <li>Filters inappropriate results, removes duplicates, etc</li>
+      </ul>
     </ul>
+
+    <h3 class="card-title">Workflow</h3>
   </div>
   <div class="card-footer text-muted">
     Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
