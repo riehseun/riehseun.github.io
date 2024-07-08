@@ -82,6 +82,9 @@
         <li>Can the model compute similar images offline or should the system service model online? Online</li>
       </ul>
       <li>Scale</li>
+      <ul>
+        <li>How many users are using the system? 1M</li>
+      </ul>
       <li>Performance</li>
       <ul>
         <li>How fast should the search be? Reasonably fast</li>
@@ -103,13 +106,19 @@
       </ul>
       <li>Specify input and output</li>
       <ul>
-        <li>Input - image provided by user</li>
-        <li>Output - images that are similar to input image. Output images are ranked by similarity score</li>
+        <li>Input</li>
+        <ul>
+          <li>Image provided by user</li>
+        </ul>
+        <li>Output</li>
+        <ul>
+          <li>Images that are similar to input image</li>
+          <li>Output images are ranked by similarity score</li>
+        </ul>
       </ul>
       <li>Choose right ML category</li>
       <ul>
-        <li>Supervised, ranking problem</li>
-        <li>Representation learning</li>
+        <li>Supervised, ranking problem, representation learning</li>
         <ul>
           <li>Learn embeddings of images such that</li>
           <ul>
@@ -209,17 +218,17 @@
       <ul>
         <li>Construct dataset</li>
         <ul>
-          <li>Human label</li>
+          <li>Option 1. human label</li>
           <ul>
             <li>Expensive</li>
             <li>Time consuming</li>
           </ul>
-          <li>User interaction</li>
+          <li>Option 2. user interaction</li>
           <ul>
             <li>Data can be noisy due to user misclicks</li>
             <li>Data can be sparce since lots of images may not have click data</li>
           </ul>
-          <li>Self-supervision</li>
+          <li>Option 3. self-supervision</li>
           <ul>
             <li>Constructed images differ from real data</li>
             <li>We choose this since this is least expensive and fast</li>
@@ -252,27 +261,33 @@
     <ul>
       <li>Offline</li>
       <ul>
-        <li>MRR (Mean Reciprobal Rank)</li>
+        <li>Option 1. mean reciprobal rank (MRR)</li>
         <ul>
-          <li>\( MRR = \dfrac{1}{m} \displaystyle\sum_{i=1}^{m} \dfrac{1}{rank_{i}} \) where \( {rank_{i}} \) is the position on which the first relevant item appears in the output list</li>
+          <li>\( MRR = \dfrac{1}{m} \displaystyle\sum_{i=1}^{m} \dfrac{1}{\text{rank}_{i}} \)</li>
+          <ul>
+            <li>\( {\text{rank}_{i}} \) is position on which the first relevant item appears in the output list</li>
+          </ul>
           <li>Consider only the first relevant item in each output list, then average the reciprocal rank</li>
           <li>Cons - ignores other relevant items in the list other than the first one</li>
         </ul>
-        <li>Recall@k</li>
+        <li>Option 2. recall@k</li>
         <ul>
-          <li>Number of relevant items in the output list (contaning top k items) / total relevant items in the dataset</li>
-          <li>Cons - denominator (total relevant items in the dataset) can be very big. This negatively impacts recall value</li>
+          <li>\( \dfrac{\text{Number of relevant items in the output list (contaning top k items)}}{\text{total relevant items in the dataset}} \)</li>
+          <li>Cons - denominator can be very big, which negatively impacts recall value</li>
         </ul>
-        <li>Precision@k</li>
+        <li>Option 3. precision@k</li>
         <ul>
-          <li>Number of relevant items in the output list (contaning top k items) / k</li>
+          <li>\( \dfrac{\text{Number of relevant items in the output list (contaning top k items)}}{\text{k}} \)</li>
           <li>Cons - does not consider ranking quality</li>
         </ul>
-        <li>mAP (Mean Average Precision)</li>
+        <li>Option 4. mean average precision (mAP)</li>
         <ul>
           <li>AP</li>
           <ul>
-            <li>\( AP = \dfrac{\displaystyle\sum_{i=1}^{k} precision@i}{n} \) where \( n = \) total relevant items</li>
+            <li>\( AP = \dfrac{\displaystyle\sum_{i=1}^{k} \text{precision}@i}{n} \)</li>
+            <ul>
+              <li>\( n = \) total relevant items</li>
+            </ul>
             <li>Averages precision@k at different values of k</li>
             <li>AP is high if more relevant items are located at the top of list</li>
           </ul>
@@ -280,12 +295,18 @@
           <ul>
             <li>Compute AP for each output list, then average them</li>
           </ul>
-          <li>Cons - works well when each item is either relevant or irrelevant. Does not work well for relevance scores</li>
+          <li>Cons - works well when each item is either relevant or irrelevant, but does not work well for relevance scores</li>
         </ul>
-        <li>nDCG (Normalized Discounted Cumulative Gain)</li>
+        <li>Option 5. normalized discounted cumulative gain (nDCG)</li>
         <ul>
-          <li>\( DCG_{p} = \displaystyle\sum_{i=1}^{p} \dfrac{rel_{i}}{log_{2}(i+1)} \) where \( rel_{i} \) is ground truth relevance score of image ranked at \( i \)</li>
-          <li>\( nDCG_{p} = \dfrac{DCG_{p}}{IDCG_{p}} \) where \( {IDCG_{p}} \) is \( {DCG_{p}} \) of ideal ranking</li>
+          <li>\( DCG_{p} = \displaystyle\sum_{i=1}^{p} \dfrac{\text{rel}_{i}}{log_{2}(i+1)} \)</li>
+          <ul>
+            <li>\( \text{rel}_{i} \) is ground truth relevance score of image ranked at \( i \)</li>
+          </ul>
+          <li>\( nDCG_{p} = \dfrac{DCG_{p}}{IDCG_{p}} \)</li>
+          <ul>
+            <li>where \( {IDCG_{p}} \) is \( {DCG_{p}} \) of ideal ranking</li>
+          </ul>
           <li>Example</li>
           <ul>
             <li>Assume visual search system return images \( I1, I2, I3, I4 \) in the order of relevance</li>
@@ -297,7 +318,9 @@
       </ul>
       <li>Online</li>
       <ul>
-        <li>Click-through rate (CTR) = number of clicked images / total number of suggested images</li>
+        <li>Click-through rate (CTR)</li>
+        <ul>
+          <li>\( \dfrac{\text{number of clicked images}}{\text{total number of suggested images}} \)</li>
         <li>Average daily/weekly/monthly time spent on suggested images</li>
       </ul>
     </ul>

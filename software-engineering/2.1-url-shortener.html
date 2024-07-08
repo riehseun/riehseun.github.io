@@ -124,33 +124,43 @@
   <div class="card-body">
     <h2 class="card-title">High level design</h2>
 
-    <h3 class="card-title">URL shortening</h3>
+    <h3 class="card-title">Components</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/url-shortener2.png" alt="Card image cap">
+
     <ul>
-      <li>Need a hash function that converts long URL to hash value</li>
-      <ul>
-        <li>There has to be one-to-one mapping between long URL and hash value</li>
-        <li>Each hash value shoud be mapped back to long URL</li>
-      </ul>
+      <li>Load balancer -</li>
+      <li>Web server- </li>
+      <li>Cache -</li>
+      <li>DB -</li>
     </ul>
 
-    <h3 class="card-title">URL redirecting</h3>
-
-    <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/url-shortener1.png" alt="Card image cap">
-
+    <h3 class="card-title">Workflow</h3>
     <ul>
-      <li>301 redirect</li>
+      <li>URL shortening</li>
       <ul>
-        <li>Permanently moved</li>
-        <li>Browser caches the response and subsequent requests for the same URL is redirected to website directly</li>
-        <li>Helps with server load</li>
+        <li>Long URL is entered</li>
+        <li>Web server checks to see if long URL is in DB</li>
+        <ul>
+          <li>If yes, return short URL</li>
+          <li>If no, generate new ID, then convert ID to short URL</li>
+          <ul>
+            <li>Need a way to convert long URL to hash value</li>
+            <li>There should be one-to-one mapping between long URL and hash value</li>
+          </ul>
+        </ul>
+        <li>Save short URL to DB and return short URL</li>
       </ul>
-      <li>302 redirect</li>
+      <li>URL redirecting</li>
       <ul>
-        <li>Temporarily moved</li>
-        <li>Subsequent requests for the same URL is sent to url-shortener server first</li>
-        <li>Helps with data analytics</li>
+        <li>User clicks short URL</li>
+        <li>Web server checks the cache to see if long URL exist</li>
+        <li>If not, long URL is fetched from DB</li>
+        <li>Long URL is delivered to user</li>
+        <ul>
+          <li>Need to determine the http status code to return</li>
+        </ul>
       </ul>
-      <li>Use a hash table to map short URL and long URL</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -225,78 +235,73 @@
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
 
-    <h3 class="card-title">Length of short URL</h3>
-    <ul>
-      <li>100M URLs generated per day</li>
-      <li>Assume we want to run service for 10 years</li>
-      <li>Then, 100M * 10 * 365 = 365B URLs are needed</li>
-      <li>0-9, A-Z, a-z have 10 + 26 + 26 = 62 chars</li>
-      <li>62^n >= 365B, n = 7 should be the length of short URL</li>
-    </ul>
-
     <h3 class="card-title">Generate short URL</h3>
     <ul>
-      <li>Hash function</li>
+      <li>Length of short URL</li>
+      <ul>
+        <li>100M URLs generated per day</li>
+        <li>Assume we want to run service for 10 years</li>
+        <li>Then, 100M * 10 * 365 = 365B URLs are needed</li>
+        <li>0-9, A-Z, a-z have 10 + 26 + 26 = 62 chars</li>
+        <li>62^n >= 365B, n = 7 should be the length of short URL</li>
+      </ul>
+      <li>Option 1. hash function</li>
       <ul>
         <li>Ex. CRC32, MD5, SHA-1</li>
+        <li>URL length is fixed</li>
         <li>These functions generate hash values that are too long for our purpose</li>
       </ul>
-      <li>Base 62 conversion</li>
+      <li>Option 2. base 62 conversion</li>
       <ul>
+        <li>URL length goes up with ID</li>
         <li>Requires unique ID generator</li>
       </ul>
     </ul>
 
-    <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/url-shortener2.png" alt="Card image cap">
+    <h3 class="card-title">Http status code</h3>
 
-    <h3 class="card-title">Short URL</h3>
-    <ul>
-      <li>Long URL is entered</li>
-      <li>Web server checks to see if long URL is in DB. If yes, return short URL</li>
-      <li>If not, generate new ID. Then, convert ID to short URL</li>
-      <li>Save short URL to DB and return short URL</li>
-    </ul>
+    <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/url-shortener1.png" alt="Card image cap">
 
-    <h3 class="card-title">Redirect URL</h3>
     <ul>
-      <li>User clicks short URL</li>
-      <li>Web server checks the cache to see if long URL exist</li>
-      <li>If not, long URL is fetched from DB</li>
-    </ul>
-
-    <!-- <h4 class="card-title">Encoding</h4>
-    <ul>
-      <li>From base64 encoding (A-Z, a-z, 0-9,+,/) omit 0, O, I, l, +, / to make it base58 encoding.</li>
-      <li>First user sequencer to generate unique ID. (Must have at least 10 digits)</li>
-      <li>Continuouly mode the unique ID by 58 till the ID becomes 1.</li>
-      <li>Gather all the remainders from moding by most recent to least recent in order to generate encoded string.</li>
-    </ul> -->
-
-    <!-- <h4 class="card-title">Encode the URL</h4>
-    <ul>
-      <li>Want to generate characters at the end of the URL.</li>
-      <li>Assume base64 encoding</li>
+      <li>Option 1. 301 redirect</li>
       <ul>
-        <li>6 letters 64^6 = 68.7 billion possible strings.</li>
-        <li>8 letters 64^8 = 281 trillion possible strings.</li>
+        <li>Permanently moved</li>
+        <li>Browser caches the response and subsequent requests for the same URL is redirected to website directly</li>
+        <li>Helps with server load</li>
       </ul>
-      <li>Duplication: if multiple users enter the same URL, they can get the same shortened URL, which is not good.</li>
+      <li>Option 2. 302 redirect</li>
+      <ul>
+        <li>Temporarily moved</li>
+        <li>Subsequent requests for the same URL is sent to url-shortener server first</li>
+        <li>Helps with data analytics</li>
+      </ul>
     </ul>
 
-    <h4 class="card-title">Key generating service</h4>
+    <h3 class="card-title">User experience during failure</h3>
     <ul>
-      <li>Generates random 6 letter strings and store them in key DB.</li>
-      <li>What is two or more servers are trying the use the same key?</li>
+      <li>If load balancer fails, servers are marked offline</li>
+      <li>If server fails, API return 503 service unavailable</li>
+      <li>If cache fails</li>
       <ul>
-        <li>One table for keys not in used, one table for keys in use.</li>
-        <li>Load some keys in memory to give to the servers and at the same time move them to "Used" table.</li>
-        <ul>
-          <li>If servers die, we lose keys. But that is okay given we've got enough keys to cover shortening requests.</li>
-        </ul>
+        <li>For URL shortening, users are not impacted</li>
+        <li>For URL redirection, users can get slower response</li>
       </ul>
-      <li>DB size: 6 (characters per key) * 68.7 billion (unique keys) = 412GB</li>
-      <li>Single point of failure? Use replicas.</li>
-    </ul> -->
+      <li>If DB fails, API return appropriate error message</li>
+    </ul>
+
+    <h3 class="card-title">Potential bottlenecks</h3>
+    <ul>
+      <li>Assuming each component is scaled appropriately, there should be no SPOF</li>
+    </ul>
+
+    <h3 class="card-title">10x scale</h3>
+    <ul>
+      <li>The length of short URL should be increased</li>
+      <li>Base 62 conversion becomes better approach than hash function</li>
+      <li>Web servers - horizontal scaling Vs. vertical scaling, then horizonal scaling</li>
+      <li>Cache/DB - assess the cost of chosen infrastructure type given the new size of data</li>
+    </ul>
+
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu
@@ -332,11 +337,11 @@
         </ul>
         <li>Fail over</li>
         <ul>
-          <li>Active-active</li>
+          <li>Option 1. active-active</li>
           <ul>
             <li>Both actives manage traffic, spreading load between them</li>
           </ul>
-          <li>Active-passive</li>
+          <li>Option 2. active-passive</li>
           <ul>
             <li>Active web servers, cache send heartbearts to passives</li>
             <li>If heartbeats stop, passives take over actives' IP and resume service</li>
@@ -358,6 +363,11 @@
       </ul>
       <li>Performance</li>
       <ul>
+        <li>Peak load</li>
+        <ul>
+          <li>Load balancer should distribute load amongst horizontally scaled servers and cache</li>
+          <li>DB is paritioned to scale to handle the load</li>
+        </ul>
         <li>Cache improves the performance of redirection</li>
         <li>MongoDB has low latency and high throughput</li>
       </ul>
