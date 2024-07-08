@@ -222,32 +222,31 @@
 
         # Compare two adjacent words at a time
         # Only the first difference in char tells the ordering
-        #   If there is bidirectional, return ""
         #   If second word is prefix of first word, return ""
         # Construct a graph based on the ordering
         #   Letters than don't appear in the graph are not subject to
         #   ordering, thus can go anywhere in the output
+        #   If there is cycle, return ""
         # Then, apply topological order
         #   Do DFS starting at each node and track finishing time
         #   Idea is that longer finishing time means earlier in the order
 
         # Track all chars in words
+        # Space O(c) c = all character in words
         all_chars = set()
         for word in words:
             for char in word:
                 all_chars.add(char)
-        print(all_chars)
 
         graph = defaultdict(set)
 
+        # Time O(c)
         for i in range(len(words)-1):
             # If second word is prefix of first word, it is not valid ordering
-            if words[i+1] in words[i]
+            if words[i].startswith(words[i+1]) and len(words[i]) > len(words[i+1]):
+                return ""
             for c1, c2 in zip(words[i], words[i+1]):
                 if c1 != c2:
-                    # Check bidirectional
-                    if c1 in graph[c2]:
-                        return ""
                     graph[c1].add(c2)
                     break
 
@@ -269,12 +268,18 @@
                         explored.add(next_node)
                         stack.append(next_node)
                         finishing_time += 1
+                    if next_node == start:
+                        return -1
 
             return finishing_time
 
         ordering = []
+
+        # Time O(n*(n+m)) n = number of nodes, m = number of edges
         for char in all_chars:
             finishing_time = dfs(graph, char, 0)
+            if finishing_time == -1:
+                return ""
             ordering.append([char, finishing_time])
 
         ordering.sort(key = lambda x: (-x[1]))
