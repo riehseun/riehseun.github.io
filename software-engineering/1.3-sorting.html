@@ -142,7 +142,53 @@
   <div class="card-body">
     <h2 class="card-title">Best meeting point (H/Ga/F1)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def minTotalDistance(self, grid: List[List[int]]) -> int:
+
+        # Break the problem into two problems
+        #   Find the best position in horizontal
+        #   Find the best position in vertical
+
+        # Consider just one dimensional case
+        #   The best position should be the middle element (median)
+        #   First store all the coordinates where 1 shows up
+        #   Then, sort the coordinates
+        #   Distance from median to all other 1s can be calculated
+        #   using two pointers
+        #     Init start and end pointers at two ends
+        #     Distance between start and end = distance from median to those two points
+        #     Increment start and decrement end to compute the next distance
+        #     Repeat until start == end
+
+        horizontal_indexes = []
+        vertical_indexes = []
+
+        # Time O(nm) n = number of rows, m = number of columns
+        for j in range(len(grid)):
+            for i in range(len(grid[0])):
+                if grid[j][i] == 1:
+                    horizontal_indexes.append(i)
+                    vertical_indexes.append(j)
+
+        # O(nlogn)
+        horizontal_indexes.sort()
+        # O(mlogm)
+        vertical_indexes.sort()
+
+        def compute_distance(indexes):
+
+            start = 0
+            end = len(indexes) - 1
+            distance = 0
+
+            while start < end:
+                distance += (indexes[end]-indexes[start])
+                start += 1
+                end -= 1
+
+            return distance
+
+        return compute_distance(horizontal_indexes) + compute_distance(vertical_indexes)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/best-meeting-point">296. Best Meeting Point</a>
