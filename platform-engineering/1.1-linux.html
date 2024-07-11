@@ -64,16 +64,17 @@
       <li><a href="#linux-">yq</a></li>
 
       <br>
+      <li><a href="#linux-">SSH and SCP</a></li>
+      <li><a href="#linux-">System</a></li>
+      <li><a href="#linux-">Cron</a></li>
       <li><a href="#linux-">CD Command</a></li>
       <li><a href="#linux-">Date</a></li>
-      <li><a href="#linux-">SSH and SCP</a></li>
       <li><a href="#linux-">PS</a></li>
       <li><a href="#linux-">Archive</a></li>
       <li><a href="#linux-">Administration</a></li>
-      <li><a href="#linux-">System</a></li>
       <li><a href="#linux-">Color</a></li>
       <li><a href="#linux-">Python Integration</a></li>
-      <li><a href="#linux-">Cron</a></li>
+
     </ul>
   </div>
 </div>
@@ -111,7 +112,7 @@
       <li>https://www.shellcheck.net</li>
     </ul>
 
-    <h3 class="card-title">Examples</h3>
+    <!-- <h3 class="card-title">Examples</h3>
     <ul>
       <li>Read user inputs</li>
 <pre><code class="bash">read USER_INPUT1 ; export USER_INPUT1
@@ -203,7 +204,8 @@ export ENV_VAR=$ENV_VAR:/path/to/add
 directory_to_remove=/path/to/remove
 ENV_VAR=:${ENV_VAR}:
 ENV_VAR=${ENV_VAR//:$directory_to_remove:/:}
-ENV_VAR=${ENV_VAR#:}; ENV_VAR=${ENV_VAR%:}</code></pre>
+ENV_VAR=${ENV_VAR#:}; ENV_VAR=${ENV_VAR%:}</code></pre> -->
+
       <!-- <li>Increment a snapshot version</li>
 <pre><code class="bash"># build.gradle
 version=$(grep version\( build.gradle | cut -d- -f1 | cut -d\' -f2)
@@ -226,7 +228,6 @@ echo $incremented_version</code></pre> -->
   <div class="card-body">
     <h2 class="card-title">Function</h2>
     <ul>
-      <li>Use <code>echo</code> for the return statement</li>
       <li>Arguments</li>
       <ul>
         <li><code>$*</code> - treats each quoted arguments as separate arguments</li>
@@ -234,6 +235,7 @@ echo $incremented_version</code></pre> -->
         <li>When calling a function, wrapping a variable inside quotes will make sure that the entire content is passed</li>
 <pre><code class="bash">my_function ${arg1} ${arg2} "${arg_large_string_with_spaces}"</code></pre>
       </ul>
+      <li>Use <code>echo</code> for the return statement</li>
     </ul>
 
 <pre><code class="bash">########################
@@ -870,6 +872,189 @@ yq w -i ${yaml_file_name} a.b[1].d.e[+] ${something_to_add}</code></pre>
 
 <div class="card mb-4" id="linux-">
   <div class="card-body">
+    <h2 class="card-title">SSH and SCP</h2>
+
+    <h3 class="card-title">Check ssh version</h3>
+
+<pre><code class="bash">ssh -V</code></pre>
+
+    <h3 class="card-title">Login to remote</h3>
+
+<pre><code class="bash">ssh -l &lt;username&gt; &lt;ip&gt;</code></pre>
+
+    <h3 class="card-title">Debug ssh client session</h3>
+
+<pre><code class="bash">ssh -v l &lt;username&gt; &lt;ip&gt;</code></pre>
+
+    <h3 class="card-title">Creating public and private key pair. First, have <strong>Git</strong> installed in your machine</h3>
+
+<pre><code class="bash">ssh-keygen</code></pre>
+
+    <img class="img-fluid" class="card-img-top" src="/platform-engineering/platform-engineering/linux1.png" alt="Card image cap" style="max-width:500px">
+
+    <ul>
+      <li>You can choose to have passphrase as well (That you need to remember when sshing into a remote machine)</li>
+      <li>Make sure to give</li>
+      <ul>
+        <li>600 to <code>id_rsa</code></li>
+        <li>644 to <code>id_rsa.pub</code> and <code>known_hosts</code></li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Refresh known_hosts</h3>
+
+<pre><code class="bash">ssh-keyscan -H &lt;ip&gt; ~/.ssh/known_hosts</code></pre>
+
+    <h3 class="card-title">Change SSH password</h3>
+
+<pre><code class="bash">Login via SSH first. Type "passwd" and enter the existing and new passwords</code></pre>
+
+    <h3 class="card-title">SCP</h3>
+
+<pre><code class="bash"># Local to remote
+scp -r &lt;folder&gt; &lt;username&gt;@&lt;IP-or-hostname&gt;:&lt;directory&gt;
+
+# Remote to local
+scp &lt;username&gt;@&lt;IP-or-hostname&gt;:&lt;file&gt; &lt;directory&gt;</code></pre>
+
+    <h3 class="card-title">SSH tunnel via port-forwarding</h3>
+
+<pre><code class="bash">ssh -i &lt;host-private-key&gt; -L &lt;host-port&gt;:&lt;vm-ip&gt;:&lt;vm-port&gt; &lt;vm-username&gt;@&lt;vm-ip&gt; -N</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="linux-">
+  <div class="card-body">
+    <h2 class="card-title">System</h2>
+
+    <ul>
+      <li><code>Crtl+Z</code> - SIGSTOP (cannot be intercepted)</li>
+      <li><code>Crtl+C</code> - SIGINT (can be intercepted)</li>
+      <li>Latency - speed</li>
+      <li>Throughput - volume</li>
+    </ul>
+
+    <h3 class="card-text">free</h3>
+    <ul>
+      <li><code>m</code> - displays values in MB</li>
+      <li><code>t</code> - displays sum of physical and swap memory</li>
+      <li><code>o</code> - hide buffers/cache line</li>
+    </ul>
+
+<pre><code class="bash">free &lt;options&gt;</code></pre>
+
+    <h3 class="card-text">top</h3>
+    <ul>
+      <li><code>us</code> - cpu time spent in user mode</li>
+      <li><code>sy</code> - cpu time spent in kernel mode</li>
+      <li><code>ni</code> - cpu tmie spent in niced executing processes</li>
+      <li><code>id</code> - cpu time spent idle</li>
+      <li><code>wa</code> - cpu time spent waiting for I/O</li>
+      <li><code>hi</code> - cpu time spent on hardware inputs</li>
+      <li><code>si</code> - cpu time spent on software inputs</li>
+      <li><code>VIRT</code> - virtual memory (budget)</li>
+      <li><code>RES</code> - physical memory (money)</li>
+    </ul>
+
+<pre><code class="bash">top</code></pre>
+
+    <h3 class="card-text">Memory</h3>
+
+<pre><code class="bash">grep MemTotal /proc/meminfo</code></pre>
+
+    <h3 class="card-text">ps &lt;options&gt;</h3>
+
+<pre><code class="bash">ps aux | more  # Display all processes running in system
+ps -ef | grep defunct  # Find parent process of a defunct process.</code></pre>
+
+    <h3 class="card-text">df &lt;options&gt; &lt;name&gt;</h3>
+
+<pre><code class="bash">df –h  # Human readable format</code></pre>
+
+    <h3 class="card-text">kill &lt;options&gt; &lt;pids|commands&gt;</h3>
+
+    <h3 class="card-text">Disk usage</h3>
+
+<pre><code class="bash">du -sh ~
+
+# Find size of folders
+du --max-depth=1 &lt;directory&gt; | sort -n -r
+
+# If there is a discrepancy from du to reality
+lsof | grep &lt;directory&gt; | grep deleted</code></pre>
+
+    <h3 class="card-text">lsof</h3>
+
+<pre><code class="bash">lsof | more  # View all open files in system
+lsof -i -P -n | grep LISTEN  # Find pid and kill them
+kill -9 &lt;pid&gt;</code></pre>
+
+    <h3 class="card-text">sar</h3>
+
+<pre><code class="bash">sar –u  # Display CPU statistics
+sar –d  # Display disk IO statistics</code></pre>
+
+    <h3 class="card-text">stat</h3>
+
+<pre><code class="bash">netstat -tulnp | grep 8443  # Find processes running on port 8443
+stat -c "%a &n" *  # Display stats of files</code></pre>
+
+    <h3 class="card-text">Diff</h3>
+
+<pre><code class="bash">diff -w file_old.txt file_new.txt</code></pre>
+
+    <h3 class="card-text">Reboot the machine</h3>
+
+<pre><code class="bash">sudo reboot</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Linux 101 Hacks, Remesh Natarajan, www.thegeekstuff.com
+  </div>
+</div>
+
+<div class="card mb-4" id="linux-">
+  <div class="card-body">
+    <h2 class="card-title">Cron</h2>
+
+    <ul>
+      <li>Minute (0 - 59)</li>
+      <li>Hour (0 - 23)</li>
+      <li>Day of the month (1 - 31)</li>
+      <li>Month (1 - 12)</li>
+      <li>Day of the week (0 - 6) # Sunday to Saturday</li>
+    </ul>
+
+<pre><code class="bash"># Find cron jobs for a root user
+sudo crontab -u root -l
+
+# Find cron jobs for all users
+for use in $(cut -f1 -d: /etc/passwd); do sudo crontab -u $user -l; done</code></pre>
+
+    <h3 class="card-title">Example</h3>
+
+<pre><code class="bash">22 5 * * 6 # 5:22AM every Saturday
+*/5 * * * * # Every 5 minutes
+0 0 1 1 * # Yearly
+0 0 1 * * # Monthly
+0 0 * * 0 # Weekly
+0 0 * * * # Daily
+0 * * * * # Hourly</code></pre>
+
+<pre><code class="bash">ls -la /etc/cron.hourly
+ls -la /etc/cron.daily
+ls -la /etc/cron.weekly
+ls -la /etc/cron.monthly</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+
+  </div>
+</div>
+
+<div class="card mb-4" id="linux-">
+  <div class="card-body">
     <h2 class="card-title">CD Command</h2>
 
     <h3 class="card-title">CDPATH</h3>
@@ -955,62 +1140,6 @@ date --date="tomorrow"</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: Linux 101 Hacks, Remesh Natarajan, www.thegeekstuff.com
-  </div>
-</div>
-
-<div class="card mb-4" id="linux-">
-  <div class="card-body">
-    <h2 class="card-title">SSH and SCP</h2>
-
-    <h3 class="card-title">Check ssh version</h3>
-
-<pre><code class="bash">ssh -V</code></pre>
-
-    <h3 class="card-title">Login to remote</h3>
-
-<pre><code class="bash">ssh -l &lt;username&gt; &lt;ip&gt;</code></pre>
-
-    <h3 class="card-title">Debug ssh client session</h3>
-
-<pre><code class="bash">ssh -v l &lt;username&gt; &lt;ip&gt;</code></pre>
-
-    <h3 class="card-title">Creating public and private key pair. First, have <strong>Git</strong> installed in your machine</h3>
-
-<pre><code class="bash">ssh-keygen</code></pre>
-
-    <img class="img-fluid" class="card-img-top" src="/platform-engineering/platform-engineering/linux1.png" alt="Card image cap" style="max-width:500px">
-
-    <ul>
-      <li>You can choose to have passphrase as well (That you need to remember when sshing into a remote machine)</li>
-      <li>Make sure to give</li>
-      <ul>
-        <li>600 to <code>id_rsa</code></li>
-        <li>644 to <code>id_rsa.pub</code> and <code>known_hosts</code></li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Refresh known_hosts</h3>
-
-<pre><code class="bash">ssh-keyscan -H &lt;ip&gt; ~/.ssh/known_hosts</code></pre>
-
-    <h3 class="card-title">Change SSH password</h3>
-
-<pre><code class="bash">Login via SSH first. Type "passwd" and enter the existing and new passwords</code></pre>
-
-    <h3 class="card-title">SCP</h3>
-
-<pre><code class="bash"># Local to remote
-scp -r &lt;folder&gt; &lt;username&gt;@&lt;IP-or-hostname&gt;:&lt;directory&gt;
-
-# Remote to local
-scp &lt;username&gt;@&lt;IP-or-hostname&gt;:&lt;file&gt; &lt;directory&gt;</code></pre>
-
-    <h3 class="card-title">SSH tunnel via port-forwarding</h3>
-
-<pre><code class="bash">ssh -i &lt;host-private-key&gt; -L &lt;host-port&gt;:&lt;vm-ip&gt;:&lt;vm-port&gt; &lt;vm-username&gt;@&lt;vm-ip&gt; -N</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-
   </div>
 </div>
 
@@ -1121,95 +1250,6 @@ chown -fR &lt;user/group&gt;:&lt;user/group&gt; &lt;directory/file&gt;  # Change
 
 <div class="card mb-4" id="linux-">
   <div class="card-body">
-    <h2 class="card-title">System</h2>
-
-    <ul>
-      <li><code>Crtl+Z</code> - SIGSTOP (cannot be intercepted)</li>
-      <li><code>Crtl+C</code> - SIGINT (can be intercepted)</li>
-      <li>Latency - speed</li>
-      <li>Throughput - volume</li>
-    </ul>
-
-    <h3 class="card-text">free</h3>
-    <ul>
-      <li><code>m</code> - displays values in MB</li>
-      <li><code>t</code> - displays sum of physical and swap memory</li>
-      <li><code>o</code> - hide buffers/cache line</li>
-    </ul>
-
-<pre><code class="bash">free &lt;options&gt;</code></pre>
-
-    <h3 class="card-text">top</h3>
-    <ul>
-      <li><code>us</code> - cpu time spent in user mode</li>
-      <li><code>sy</code> - cpu time spent in kernel mode</li>
-      <li><code>ni</code> - cpu tmie spent in niced executing processes</li>
-      <li><code>id</code> - cpu time spent idle</li>
-      <li><code>wa</code> - cpu time spent waiting for I/O</li>
-      <li><code>hi</code> - cpu time spent on hardware inputs</li>
-      <li><code>si</code> - cpu time spent on software inputs</li>
-      <li><code>VIRT</code> - virtual memory (budget)</li>
-      <li><code>RES</code> - physical memory (money)</li>
-    </ul>
-
-<pre><code class="bash">top</code></pre>
-
-    <h3 class="card-text">Memory</h3>
-
-<pre><code class="bash">grep MemTotal /proc/meminfo</code></pre>
-
-    <h3 class="card-text">ps &lt;options&gt;</h3>
-
-<pre><code class="bash">ps aux | more  # Display all processes running in system
-ps -ef | grep defunct  # Find parent process of a defunct process.</code></pre>
-
-    <h3 class="card-text">df &lt;options&gt; &lt;name&gt;</h3>
-
-<pre><code class="bash">df –h  # Human readable format</code></pre>
-
-    <h3 class="card-text">kill &lt;options&gt; &lt;pids|commands&gt;</h3>
-
-    <h3 class="card-text">Disk usage</h3>
-
-<pre><code class="bash">du -sh ~
-
-# Find size of folders
-du --max-depth=1 &lt;directory&gt; | sort -n -r
-
-# If there is a discrepancy from du to reality
-lsof | grep &lt;directory&gt; | grep deleted</code></pre>
-
-    <h3 class="card-text">lsof</h3>
-
-<pre><code class="bash">lsof | more  # View all open files in system
-lsof -i -P -n | grep LISTEN  # Find pid and kill them
-kill -9 &lt;pid&gt;</code></pre>
-
-    <h3 class="card-text">sar</h3>
-
-<pre><code class="bash">sar –u  # Display CPU statistics
-sar –d  # Display disk IO statistics</code></pre>
-
-    <h3 class="card-text">stat</h3>
-
-<pre><code class="bash">netstat -tulnp | grep 8443  # Find processes running on port 8443
-stat -c "%a &n" *  # Display stats of files</code></pre>
-
-    <h3 class="card-text">Diff</h3>
-
-<pre><code class="bash">diff -w file_old.txt file_new.txt</code></pre>
-
-    <h3 class="card-text">Reboot the machine</h3>
-
-<pre><code class="bash">sudo reboot</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: Linux 101 Hacks, Remesh Natarajan, www.thegeekstuff.com
-  </div>
-</div>
-
-<div class="card mb-4" id="linux-">
-  <div class="card-body">
     <h2 class="card-title">Color</h2>
 
 <pre><code class="bash">printf "Foreground Regular\n"
@@ -1269,44 +1309,6 @@ pip3 install -r requirements.txt </code></pre>
 
 <pre><code class="bash"># Execute python
 python &lt;your_script.py&gt; &lt;options&gt; &lt;arguments&gt;</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-
-  </div>
-</div>
-
-<div class="card mb-4" id="linux-">
-  <div class="card-body">
-    <h2 class="card-title">Cron</h2>
-
-    <ul>
-      <li>Minute (0 - 59)</li>
-      <li>Hour (0 - 23)</li>
-      <li>Day of the month (1 - 31)</li>
-      <li>Month (1 - 12)</li>
-      <li>Day of the week (0 - 6) # Sunday to Saturday</li>
-    </ul>
-
-<pre><code class="bash"># Find cron jobs for a root user
-sudo crontab -u root -l
-
-# Find cron jobs for all users
-for use in $(cut -f1 -d: /etc/passwd); do sudo crontab -u $user -l; done</code></pre>
-
-    <h3 class="card-title">Example</h3>
-
-<pre><code class="bash">22 5 * * 6 # 5:22AM every Saturday
-*/5 * * * * # Every 5 minutes
-0 0 1 1 * # Yearly
-0 0 1 * * # Monthly
-0 0 * * 0 # Weekly
-0 0 * * * # Daily
-0 * * * * # Hourly</code></pre>
-
-<pre><code class="bash">ls -la /etc/cron.hourly
-ls -la /etc/cron.daily
-ls -la /etc/cron.weekly
-ls -la /etc/cron.monthly</code></pre>
   </div>
   <div class="card-footer text-muted">
 
