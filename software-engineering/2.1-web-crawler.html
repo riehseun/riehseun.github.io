@@ -51,6 +51,7 @@
       <!-- <li><a href="#web-crawler-5">Storage schema</a></li> -->
       <li><a href="#web-crawler-6">Detailed design</a></li>
       <li><a href="#web-crawler-7">Evaluation</a></li>
+      <li><a href="#web-crawler-8">Follow up</a></li>
     </ul>
   </div>
 </div>
@@ -59,13 +60,18 @@
   <div class="card-body">
     <h2 class="card-title">Requirement</h2>
 
-    <h3 class="card-title">Functional</h3>
     <ul>
-      <li>What does web crawler need to do? Search engine indexing</li>
-      <li>How many web pages to crawl? 1B pages per month</li>
-      <li>What content types are in scpe? HTML only</li>
-      <li>Do we need to store HTML page? Yes for 5 yearss</li>
-      <li>What about duplicate content? Duplicate content should be ignored</li>
+      <li>Business objective</li>
+      <ul>
+        <li>What does web crawler need to do? Search engine indexing</li>
+        <li>What content types are in scpe? HTML only</li>
+        <li>What about duplicate content? Duplicate content should be ignored</li>
+      </ul>
+      <li>Estimation</li>
+      <ul>
+        <li>How many web pages to crawl? 1B pages per month</li>
+        <li>Do we need to store HTML page? Yes for 5 years</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Non-functional</h3>
@@ -104,7 +110,10 @@
 
     <h3 class="card-title">Bandwidth</h3>
     <ul>
-      <li>Incoming - 100TB * 8 / (86400 * 30) = 3Gbps</li>
+      <li>Incoming</li>
+      <ul>
+        <li>100TB * 8 / (86400 * 30) = 3Gbps</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -116,7 +125,56 @@
   <div class="card-body">
     <h2 class="card-title">High level design</h2>
 
+    <h3 class="card-title">Components</h3>
+
     <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/web-crawler1.png" alt="Card image cap">
+
+    <ul>
+      <li>Seed URLs</li>
+      <ul>
+        <li>Base URLs</li>
+      </ul>
+      <li>URL frontier (priority queue)</li>
+      <ul>
+        <li>Contains all the remaining URLs to download</li>
+      </ul>
+      <li>Service host</li>
+      <ul>
+        <li>Each worker dequeues URL from the URL frontier</li>
+        <li>Each worker uses DNS resolver to acquire web page's IP address</li>
+      </ul>
+      <li>DNS resolver</li>
+      <ul>
+        <li>Custom DNS resolver is needed because DNS lookup is time consuming process</li>
+        <li>Cache frequently used IP addresses within their TTL</li>
+      </ul>
+      <li>Content parser</li>
+      <ul>
+        <li>HTML is parsed and validated</li>
+      </ul>
+      <li>Duplicate HTML eliminator</li>
+      <ul>
+        <li>Checks if document is duplicate by checking the hash values of two web pages</li>
+      </ul>
+      <li>URL extractor</li>
+      <ul>
+        <li>Extracts links from HTML pages</li>
+      </ul>
+      <li>URL filter</li>
+      <ul>
+        <li>Exclude certain content types, file extensions, and blacklisted sites</li>
+      </ul>
+      <li>Duplicate URL eliminator</li>
+      <ul>
+        <li>Bloom filter or hash table is used</li>
+      </ul>
+      <li>URL storage</li>
+      <ul>
+        <li>Stores already visited URLs</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Workflow</h3>
     <ul>
       <li>Add seed URLs to URL frontier</li>
       <li>Service host fetches URLs from URL frontier</li>
@@ -127,58 +185,6 @@
       <ul>
         <li>If URL is not duplicate, it is added to URL frontier</li>
       </ul>
-    </ul>
-
-    <h3 class="card-title">Seed URLs</h3>
-    <ul>
-      <li>Base URLs</li>
-    </ul>
-
-    <h3 class="card-title">URL frontier (priority queue)</h3>
-    <ul>
-      <li>Contains all the remaining URLs to download</li>
-    </ul>
-
-    <h3 class="card-title">Service host</h3>
-    <ul>
-      <li>Each worker dequeues URL from the URL frontier</li>
-      <li>Each worker uses DNS resolver to acquire web page's IP address</li>
-    </ul>
-
-    <h3 class="card-title">DNS resolver</h3>
-    <ul>
-      <li>Custom DNS resolver is needed because DNS lookup is time consuming process</li>
-      <li>Cache frequently used IP addresses within their TTL</li>
-    </ul>
-
-    <h3 class="card-title">Content parser</h3>
-    <ul>
-      <li>HTML is parsed and validated</li>
-    </ul>
-
-    <h3 class="card-title">Duplicate HTML eliminator</h3>
-    <ul>
-      <li>Checks if document is duplicate by checking the hash values of two web pages</li>
-    </ul>
-
-    <h3 class="card-title">URL extractor</h3>
-    <ul>
-      <li>Extracts links from HTML pages</li>
-    </ul>
-
-    <h3 class="card-title">URL filter</h3>
-    <ul>
-      <li>Exclude certain content types, file extensions, and blacklisted sites</li>
-    </ul>
-
-    <h3 class="card-title">Duplicate URL eliminator</h3>
-    <ul>
-      <li>Bloom filter or hash table is used</li>
-    </ul>
-
-    <h4 class="card-title">URL storage</h4>
-    <ul>
-      <li>Stores already visited URLs</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -249,6 +255,12 @@
       <li>Use consistent hashing to distribute load among crawl jobs</li>
       <li>Save crawl states into disk (When failure happens, can resume from the saved state)</li>
     </ul>
+
+    <h3 class="card-title">User experience during failure</h3>
+
+    <h3 class="card-title">Potential bottlenecks</h3>
+
+    <h3 class="card-title">10x scale</h3>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
@@ -296,6 +308,20 @@
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="web-crawler-8">
+  <div class="card-body">
+    <h2 class="card-title">Follow up</h2>
+    <ul>
+      <li>Explain how to handle dynamically generated links</li>
+      <li>Explain how to filter out unwanted pages</li>
+      <li>Explain how to perform data analytics</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
   </div>
 </div>
 <!-- Web crawler END -->

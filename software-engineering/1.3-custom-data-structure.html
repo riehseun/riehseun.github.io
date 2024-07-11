@@ -51,6 +51,7 @@
       <li><a href="#custom-data-structure-">Move zeroes</a></li>
       <li><a href="#custom-data-structure-">Moving average from data stream</a></li>
       <li><a href="#custom-data-structure-">Insert Delete GetRandom</a></li>
+      <li><a href="#custom-data-structure-">Random pick with weightm</a></li>
       <li><a href="#custom-data-structure-">Time based key-value store</a></li>
       <li><a href="#custom-data-structure-">Snapshot array</a></li>
     </ul>
@@ -304,6 +305,51 @@ class RandomizedSet:
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/insert-delete-getrandom-o1">380. Insert Delete GetRandom O(1)</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="custom-data-structure-">
+  <div class="card-body">
+    <h2 class="card-title">Random pick with weight (M/Ga/F1/100)</h2>
+
+<pre><code class="python">class Solution:
+
+    # Indexes with higher weight have higher probability of being picked
+    # Consider cumulative sum
+    #   Ex. [1,2,3,4] => [1,3,6,10]
+    #   If generate a random number between 0 and 10, then
+    #     0 comes before 1 => 10% probability
+    #     1,2 comes before 3 => 20% probability
+    #     3,4,5 comes before 6 => 30% probability
+    #     6,7,8,9, comes before 10 => 40% probability
+
+    def __init__(self, w: List[int]):
+
+        # Time O(n) n = len(w)
+        # Space O(n) n = len(w)
+        self.cumulative_sums = []
+        cumulative_sum = 0
+        for num in w:
+            cumulative_sum += num
+            self.cumulative_sums.append(cumulative_sum)
+        self.total_sum = cumulative_sum
+
+    def pickIndex(self) -> int:
+
+        # Time O(n) n = len(w)
+        # Space O(1)
+        random_number = self.total_sum * random.random()
+        for i, num in enumerate(self.cumulative_sums):
+            if random_number < num:
+                return i
+
+
+# Your Solution object will be instantiated and called as such:
+# obj = Solution(w)
+# param_1 = obj.pickIndex()</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/random-pick-with-weight">528. Random Pick with Weight</a>
   </div>
 </div>
 
