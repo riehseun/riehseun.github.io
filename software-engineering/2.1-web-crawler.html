@@ -70,6 +70,8 @@
       <li>Estimation</li>
       <ul>
         <li>How many web pages to crawl? 1B pages per month</li>
+        <li>What is the size if each HTML page? 100KB including metadata</li>
+        <li>How long does it take to traverse one page? 100ms</li>
         <li>Do we need to store HTML page? Yes for 5 years</li>
       </ul>
     </ul>
@@ -84,7 +86,7 @@
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: System Design Interview, Alex Xu | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+    Reference: System Design Interview, Alex Xu
   </div>
 </div>
 
@@ -92,19 +94,9 @@
   <div class="card-body">
     <h2 class="card-title">Estimation</h2>
 
-    <h3 class="card-title">Server</h3>
-    <ul>
-      <li>Assume 100ms to traverse one page</li>
-      <li>Assume 1B HTML pages per month</li>
-      <li>100ms * 1B = 100Ms = 1157 days</li>
-      <li>To crawl the web (one month of data) in one day, we need 1157 servers</li>
-    </ul>
-
     <h3 class="card-title">Storage</h3>
     <ul>
-      <li>Assume 1B HTML pages per month</li>
-      <li>Assume page size including metadata is 100KB on average</li>
-      <li>1B * 100KB = 100TB</li>
+      <li>1B per month * 100KB = 100TB per month</li>
       <li>100TB per month = 6PB for 5 years</li>
     </ul>
 
@@ -115,9 +107,15 @@
         <li>100TB * 8 / (86400 * 30) = 3Gbps</li>
       </ul>
     </ul>
+
+    <h3 class="card-title">Server</h3>
+    <ul>
+      <li>100ms * 1B per month = 100Ms = 1157 days</li>
+      <li>To crawl the web (one month of data) in one day, we need 1157 servers</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: System Design Interview, Alex Xu | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+    Reference: System Design Interview, Alex Xu
   </div>
 </div>
 
@@ -188,7 +186,7 @@
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: System Design Interview, Alex Xu | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+    Reference: System Design Interview, Alex Xu
   </div>
 </div>
 
@@ -197,63 +195,63 @@
     <h2 class="card-title">Detailed design</h2>
 
     <h3 class="card-title">URL frontier (priority queue)</h3>
-    <ul>
-      <li>Use BFS (DFS is not a good choice because depth can be very deep)</li>
-    </ul>
 
     <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/web-crawler2.png" alt="Card image cap">
 
-    <h4 class="card-title">Priority</h4>
     <ul>
-      <li>Prioritizer computes priority of each URL</li>
-      <li>Each queue is assigned a priority</li>
-      <li>Queue selector has higher probability of picking queues with higher priority</li>
-    </ul>
-
-    <h4 class="card-title">Politeness</h4>
-    <ul>
-      <li>Download one page at a time from the same host</li>
-      <li>Each thread in service host has a queue and download URLs from that queue</li>
-      <li>Queue router ensures that each queue only contains URLs from the same host</li>
-      <li>Mapping table maps host (ex. wikipedia.com) to queue</li>
-      <li>Queue selector rotates worker threads that downloads webpages</li>
-    </ul>
-
-    <h4 class="card-title">Freshness</h4>
-    <ul>
-      <li>Recrawl is needed because webpages are constantly updated</li>
-      <li>Recrawl URLs with higher priority first</li>
-    </ul>
-
-    <h4 class="card-title">Storage</h4>
-    <ul>
-      <li>Due to huge size of URLs, need to store URLs into a disk</li>
-      <li>But, disk is slow, thus introduce buffers in memory</li>
+      <li>Algorithm</li>
       <ul>
-        <li>Enqueue buffer - once filled, written to disk</li>
-        <li>Dequeue buffer - keeps cache of URLs to be visited. It periodically reads from disk to fill the buffer</li>
+        <li>Use BFS</li>
+        <li>DFS is not a good choice because depth can be very deep</li>
+      </ul>
+      <li>Priority</li>
+      <ul>
+        <li>Prioritizer computes priority of each URL</li>
+        <li>Each queue is assigned a priority</li>
+        <li>Queue selector has higher probability of picking queues with higher priority</li>
+      </ul>
+      <li>Politeness</li>
+      <ul>
+        <li>Download one page at a time from the same host</li>
+        <li>Each thread in service host has a queue and download URLs from that queue</li>
+        <li>Queue router ensures that each queue only contains URLs from the same host</li>
+        <li>Mapping table maps host (ex. wikipedia.com) to queue</li>
+        <li>Queue selector rotates worker threads that downloads webpages</li>
+      </ul>
+      <li>Freshness</li>
+      <ul>
+        <li>Recrawl is needed because webpages are constantly updated</li>
+        <li>Recrawl URLs with higher priority first</li>
+      </ul>
+      <li>Storage</li>
+      <ul>
+        <li>Due to huge size of URLs, need to store URLs into a disk</li>
+        <li>But, disk is slow, thus introduce buffers in memory</li>
+        <ul>
+          <li>Enqueue buffer - once filled, written to disk</li>
+          <li>Dequeue buffer - keeps cache of URLs to be visited. It periodically reads from disk to fill the buffer</li>
+        </ul>
       </ul>
     </ul>
 
     <h3 class="card-title">Service host</h3>
-
-    <h4 class="card-title">Robots.txt</h4>
     <ul>
-      <li>Specifies pages that are not allowed to be downloaded</li>
-    </ul>
-
-    <h4 class="card-title">Performance optimization</h4>
-    <ul>
-      <li>Crawl jobs are distributed into multiple servers, and each server runs multiple threads</li>
-      <li>Response from DNS resolver is cached in Service host</li>
-      <li>Place crawl servers close to website hosts in terms of geographical region</li>
-      <li>Enforce maximum wait time from the host</li>
-    </ul>
-
-    <h4 class="card-title">Robustness</h4>
-    <ul>
-      <li>Use consistent hashing to distribute load among crawl jobs</li>
-      <li>Save crawl states into disk (When failure happens, can resume from the saved state)</li>
+      <li>Robots.txt</li>
+      <ul>
+        <li>Specifies pages that are not allowed to be downloaded</li>
+      </ul>
+      <li>Performance optimization</li>
+      <ul>
+        <li>Crawl jobs are distributed into multiple servers, and each server runs multiple threads</li>
+        <li>Response from DNS resolver is cached in Service host</li>
+        <li>Place crawl servers close to website hosts in terms of geographical region</li>
+        <li>Enforce maximum wait time from the host</li>
+      </ul>
+      <li>Robustness</li>
+      <ul>
+        <li>Use consistent hashing to distribute load among crawl jobs</li>
+        <li>Save crawl states into disk (When failure happens, can resume from the saved state)</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">User experience during failure</h3>
@@ -263,7 +261,7 @@
     <h3 class="card-title">10x scale</h3>
   </div>
   <div class="card-footer text-muted">
-    Reference: System Design Interview, Alex Xu | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+    Reference: System Design Interview, Alex Xu
   </div>
 </div>
 
@@ -271,43 +269,75 @@
   <div class="card-body">
     <h2 class="card-title">Evaluation</h2>
 
-    <h3 class="card-title">Availability</h3>
+    <h3 class="card-title">Functional</h3>
     <ul>
-      <li>Replication</li>
+      <li>Business objective</li>
       <ul>
-        <li>Replicate each server and DB</li>
-        <li>Replicate entire components to different zone or geographical region</li>
-      </ul>
-      <li>Fail over</li>
-      <ul>
-        <li></li>
-        <li></li>
+        <li>Covered short URL generation, URL redirection</li>
+        <li>Shortened URL is only 7 characters</li>
+        <li>We are only using 0-9, A-Z, a-z</li>
+        <li>Supported update/delete URLs</li>
       </ul>
     </ul>
 
-    <h4 class="card-title">Reliability</h4>
+    <h3 class="card-title">Non-functional</h3>
     <ul>
-      <li>Data loss</li>
-    </ul>
-
-    <h3 class="card-title">Scalability</h3>
-    <ul>
-      <li>Horizontal scaling</li>
-      <li>Data partitioning - distribute based on hostname which contains URLs to visit, URL checksum, document checksum</li>
-    </ul>
-
-    <h4 class="card-title">Performance</h4>
-    <ul>
-      <li></li>
-    </ul>
-
-    <h3 class="card-title">Consistency</h3>
-    <ul>
-      <li></li>
+      <li>Availability</li>
+      <ul>
+        <li>Replication</li>
+        <ul>
+          <li>Replicate each web server, cache, DB</li>
+          <ul>
+            <li>DB - since the system is read-heavy, go for single-master replication</li>
+          </ul>
+          <li>Replicate entire system to different zone or geographical region</li>
+        </ul>
+        <li>Fail over</li>
+        <ul>
+          <li>Option 1. active-active</li>
+          <ul>
+            <li>Both actives manage traffic, spreading load between them</li>
+          </ul>
+          <li>Option 2. active-passive</li>
+          <ul>
+            <li>Active web servers, cache send heartbearts to passives</li>
+            <li>If heartbeats stop, passives take over actives' IP and resume service</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>Reliability</li>
+      <ul>
+        <li>Data loss - periodically take snapshot of data and store snapshots in multi zone or region</li>
+      </ul>
+      <li>Scalability</li>
+      <ul>
+        <li>Horizontal scaling - can add more web servers, cache</li>
+        <li>Data partitioning</li>
+        <ul>
+          <li>Horizontal partitioning or sharding since the system is less concerned about atomic operation</li>
+          <li>Use consistent hashing to spread data evenly to different data nodes</li>
+        </ul>
+      </ul>
+      <li>Performance</li>
+      <ul>
+        <li>Peak load</li>
+        <ul>
+          <li>Load balancer should distribute load amongst horizontally scaled servers and cache</li>
+          <li>DB is paritioned to scale to handle the load</li>
+        </ul>
+        <li>Cache improves the performance of redirection</li>
+        <li>MongoDB has low latency and high throughput</li>
+      </ul>
+      <li>Consistency</li>
+      <ul>
+        <li>Inconsistency can happen when user updates short_url but update is not syncs to all data nodes</li>
+        <li>Impact is that users are redirected to wrong original URLs</li>
+        <li>The impact is not too catastrophic, thus eventual consistency suffice</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: System Design Interview, Alex Xu | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+    Reference: System Design Interview, Alex Xu
   </div>
 </div>
 
