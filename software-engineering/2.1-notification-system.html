@@ -42,15 +42,16 @@
 <!-- Notification system BEGIN -->
 <div class="card mb-4" id="instagram">
   <div class="card-body">
-    <h2 class="card-title">Instagram</h2>
+    <h2 class="card-title">Notification system</h2>
     <ul class="list-unstyled mb-0">
       <li><a href="#notification-system-1">Requirement</a></li>
       <li><a href="#notification-system-2">Estimation</a></li>
       <li><a href="#notification-system-3">High level design</a></li>
       <li><a href="#notification-system-4">API</a></li>
-      <li><a href="#notification-system-5">Storage schema</a></li>
+      <li><a href="#notification-system-5">Database</a></li>
       <li><a href="#notification-system-6">Detailed design</a></li>
       <li><a href="#notification-system-7">Evaluation</a></li>
+      <li><a href="#notification-system-8">Follow up</a></li>
     </ul>
   </div>
 </div>
@@ -61,10 +62,18 @@
 
     <h3 class="card-title">Functional</h3>
     <ul>
-      <li>What type of notifications are in scope? Push notification, SMS, email</li>
-      <li>How many notifications per day? 10M push nofitication, 1M SMS, 5M email</li>
-      <li>What triggers notification? Either by client application or by scheduling on server side</li>
-      <li>Should notification be sent in real-time? Yes, but little delay is acceptable</li>
+      <li>Business objective</li>
+      <ul>
+        <li>What type of notifications are in scope? Push notification, SMS, email</li>
+        <li>What triggers notification? Either by client application or by scheduling on server side</li>
+        <li>Should notification be sent in real-time? Yes, but little delay is acceptable</li>
+        <li>Can users opt-out from notification? Yes</li>
+      </ul>
+      <li>Estimation</li>
+      <ul>
+        <li>How many notifications per day? 10M push nofitication, 1M SMS, 5M email</li>
+        <li>What is the size of each type of notification? 100KB on average for all of them</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Non-functional</h3>
@@ -85,11 +94,18 @@
   <div class="card-body">
     <h2 class="card-title">Estimation</h2>
 
-    <h3 class="card-title">Server</h3>
-
     <h3 class="card-title">Storage</h3>
+    <ul>
+      <li>Notification data will be minor</li>
+    </ul>
 
     <h3 class="card-title">Bandwidth</h3>
+    <ul>
+      <li>Outgoing</li>
+      <ul>
+        <li>(10M + 1M + 5M) * 100KB = ? per day</li>
+      </ul>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu
@@ -100,23 +116,60 @@
   <div class="card-body">
     <h2 class="card-title">High level design</h2>
 
+    <h3 class="card-title">Components</h3>
+
     <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/notification-system1.png" alt="Card image cap">
     <ul>
-      <li>APNs - Apple push notification service</li>
-      <li>FCM - fire-base cloud messaging</li>
-      <li>SMS service - Twilio, Nexmo, etc</li>
-      <li>Email service - Sendgrid, Mailchimp, etc</li>
+      <li>Services</li>
+      <ul>
+        <li>Triggeres notification sending events</li>
+        <li>Can be micro-service, cron job, etc</li>
+      </ul>
       <li>Notification servers</li>
       <ul>
         <li>Validates email, phone number, etc</li>
         <li>Queries cache or DB to fetch data to render a notification</li>
-        <li>Serves as rate limiter</li>
+      </ul>
+      <li>Cache</li>
+      <ul>
+        <li>Caches user info, device info, notification templates</li>
       </ul>
       <li>Message queues</li>
       <ul>
         <li>Remove dependency between notification servers and third party services</li>
         <li>Serves as buffer when high volumn of notifications are sent out</li>
       </ul>
+      <li>Workers</li>
+      <ul>
+        <li>Pull notification events from message queues and send them to corresponding third party services</li>
+      </ul>
+      <li>APNs</li>
+      <ul>
+        <li>Apple push notification service</li>
+      </ul>
+      <li>FCM</li>
+      <ul>
+        <li>Fire-base cloud messaging</li>
+        <li>Used for Android device</li>
+      </ul>
+      <li>SMS service</li>
+      <ul>
+        <li>Ex. Twilio, Nexmo</li>
+      </ul>
+      <li>Email service</li>
+      <ul>
+        <li>Ex. Sendgrid, Mailchimp</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Workflow</h3>
+    <ul>
+      <li>Service calls APIs to notification servers</li>
+      <li>Notification servers fetch metadata from cache or DB</li>
+      <li>A notification event is sent to corresponding queue</li>
+      <li>Workers pull nofitication events from message queues</li>
+      <li>Workers send notifications to third party services</li>
+      <li>Third party services send notifications to user devices</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -130,6 +183,7 @@
     <ul>
       <li><code>send_email_notification(user_id, email, subject, content)</code></li>
       <ul>
+        <li>POST api/v1/sendNotification</li>
         <li><code>user_id</code> - recepient of the email notification</li>
         <li><code>email</code> - "from" email address of the email notification</li>
       </ul>
@@ -142,7 +196,7 @@
 
 <div class="card mb-4" id="notification-system-5">
   <div class="card-body">
-    <h2 class="card-title">Storage schema</h2>
+    <h2 class="card-title">Database</h2>
     <ul>
       <li>Use relational database</li>
     </ul>
@@ -168,8 +222,14 @@
     <ul>
       <li>notification_id (int, pk)</li>
       <li>user_id (int)</li>
-      <li>channel (string) - push notification, SMS, email</li>
-      <li>opt-in (boolean) - whether user agreed to receive notification using the corresponding channel</li>
+      <li>channel (string)</li>
+      <ul>
+        <li>Push notification, SMS, email</li>
+      </ul>
+      <li>opt-in (boolean)</li>
+      <ul>
+        <li>Whether user agreed to receive notification using the corresponding channel</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -181,16 +241,39 @@
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
 
-    <h3 class="card-title">Retry</h3>
+    <h3 class="card-title">Workers</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/notification-system2.png" alt="Card image cap">
+
     <ul>
-      <li>Workers store notification data in notification log DB</li>
-      <li>When third party fails to send notification, the notification is added to message queue for retrying</li>
+      <li>Retry</li>
+      <ul>
+        <li>Workers store notification data in notification log DB</li>
+        <li>When third party fails to send notification, the notification is added to message queue for retrying</li>
+      </ul>
     </ul>
 
-    <h3 class="card-title">De-duplication</h3>
+    <h3 class="card-title">Notification servers</h3>
     <ul>
-      <li>When notification arrives, check event ID. If event ID is seen before, discard it</li>
+      <li>De-duplication</li>
+      <ul>
+        <li>Distributed nature of the design cannot guarantee exactly-once delivery</li>
+        <li>When notification arrives, check event ID. If event ID is seen before, discard it</li>
+      </ul>
+      <li>Performs authentication</li>
+      <li>Serves as rate limiter</li>
     </ul>
+
+    <h3 class="card-title">Analytics service</h3>
+    <ul>
+      <li>Implemented in any stage to capture statistics</li>
+    </ul>
+
+    <h3 class="card-title">Potential bottlenecks</h3>
+
+    <h3 class="card-title">User experience during failure</h3>
+
+    <h3 class="card-title">10x scale</h3>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu
@@ -201,40 +284,83 @@
   <div class="card-body">
     <h2 class="card-title">Evaluation</h2>
 
-    <h3 class="card-title">Availability</h3>
+    <h3 class="card-title">Functional</h3>
     <ul>
-      <li>Replication</li>
+      <li>Business objective</li>
       <ul>
-        <li>Replicate each server and DB</li>
-        <li>Replicate entire components to different zone or geographical region</li>
-      </ul>
-      <li>Fail over</li>
-      <ul>
-        <li></li>
-        <li></li>
+        <li>Design supports push notification, SMS, email via different third party service providers</li>
+        <li>Notification table stores whether user opt-out from notification or not</li>
       </ul>
     </ul>
 
-    <h4 class="card-title">Reliability</h4>
+    <h3 class="card-title">Non-functional</h3>
     <ul>
-      <li>Data loss</li>
+      <li>Availability</li>
+      <ul>
+        <li>Replication</li>
+        <ul>
+          <li>Replicate each</li>
+          <ul>
+            <li></li>
+          </ul>
+          <li>Replicate entire system to different zone or geographical region</li>
+        </ul>
+        <li>Fail over</li>
+        <ul>
+          <li>Option 1. active-active</li>
+          <ul>
+            <li>Both actives manage traffic, spreading load between them</li>
+          </ul>
+          <li>Option 2. active-passive</li>
+          <ul>
+            <li>Active web servers, cache send heartbearts to passives</li>
+            <li>If heartbeats stop, passives take over actives' IP and resume service</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>Reliability</li>
+      <ul>
+        <li>Data loss - periodically take snapshot of data and store snapshots in multi zone or region to prevent data loss</li>
+        <li>Handling failure - implement retry mechanism</li>
+      </ul>
+      <li>Scalability</li>
+      <ul>
+        <li>Horizontal scaling</li>
+        <li>Data partitioning</li>
+        <ul>
+          <li></li>
+          <li></li>
+        </ul>
+      </ul>
+      <li>Performance</li>
+      <ul>
+        <li>Peak load</li>
+        <ul>
+          <li>Scale notification servers to handle increased requests from clients</li>
+          <li>Scale workers to deque messages fast from message queues</li>
+        </ul>
+        <li>Message queues allow async processing where producers do not need to wait for consumers to finish</li>
+        <li></li>
+      </ul>
+      <li>Consistency</li>
+      <ul>
+        <li>If device info is out of sync, then message is likely sent to device that no longer exists</li>
+        <li>If notification info is out of sync, then message could get delivered to users who opted-out</li>
+        <li>Both cases are not detrimental (although it is degrading) thus eventual consistency should suffice</li>
+      </ul>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
 
-    <h3 class="card-title">Scalability</h3>
-    <ul>
-      <li>Horizontal scaling</li>
-      <li>Data partitioning</li>
-    </ul>
-
-    <h4 class="card-title">Performance</h4>
+<div class="card mb-4" id="notification-system-8">
+  <div class="card-body">
+    <h2 class="card-title">Follow up</h2>
     <ul>
       <li></li>
       <li></li>
-    </ul>
-    </ul>
-
-    <h3 class="card-title">Consistency</h3>
-    <ul>
       <li></li>
     </ul>
   </div>
