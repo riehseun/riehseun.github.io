@@ -48,9 +48,10 @@
       <li><a href="#newsfeed-system-2">Estimation</a></li>
       <li><a href="#newsfeed-system-3">High level design</a></li>
       <li><a href="#newsfeed-system-4">API</a></li>
-      <li><a href="#newsfeed-system-5">Storage schema</a></li>
+      <li><a href="#newsfeed-system-5">Database</a></li>
       <li><a href="#newsfeed-system-6">Detailed design</a></li>
       <li><a href="#newsfeed-system-7">Evaluation</a></li>
+      <li><a href="#newsfeed-system-8">Follow up</a></li>
     </ul>
   </div>
 </div>
@@ -61,10 +62,22 @@
 
     <h3 class="card-title">Functional</h3>
     <ul>
-      <li>What can a feed contain? Text, image, video</li>
-      <li>How many daily active users? 100M</li>
-      <li>How is the ordering of feed determined? For simplicity, assume reverse chronogical order</li>
-      <li>How many friends a can user have? 1000</li>
+      <li>Business objective</li>
+      <ul>
+        <li>What can a feed contain? Text, image, video</li>
+        <li>How is the ordering of feed determined? For simplicity, assume reverse chronogical order</li>
+        <li>How many friends a can user have? 1000</li>
+        <li>How many posts does each user see? 1000</li>
+      </ul>
+      <li>Estimation</li>
+      <ul>
+        <li>How many daily active users? 100M</li>
+        <li>How many total number of users? 1B</li>
+        <li>What is the size of user metadata? 100KB</li>
+        <li>What is the size of each post? 1MB on average (text, image, video combined)</li>
+        <li>How many posts does each user create per day? 1</li>
+        <li>How many feeds does each user view per day? 10</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Non-functional</h3>
@@ -85,29 +98,22 @@
   <div class="card-body">
     <h2 class="card-title">Estimation</h2>
 
-    <h3 class="card-title">Server</h3>
-    <ul>
-      <li>Assume 100M daily active users</li>
-      <li>Assume a single server can handle 10K connections</li>
-      <li>100M / 10K = 10,000 servers are needed</li>
-    </ul>
-
     <h3 class="card-title">Storage</h3>
     <ul>
-      <li>Assume daily acive users is 100M and total users is 1B</li>
-      <li>Assume each user metadata is 100KB</li>
-      <li>Assume each user has 1000 posts</li>
-      <li>Assume each post 1MB (text, image, video combined) on average</li>
-      <li>100KB * 1B = 100TB for all user metadata</li>
-      <li>1000 * 100M * 1MB = 100PB for all posts</li>
+      <li>User metadata - 100KB * 1B = 100TB</li>
+      <li>Posts - 1000 * 100M * 1MB = 100PB</li>
     </ul>
 
     <h3 class="card-title">Bandwidth</h3>
     <ul>
-      <li>Assume each user creates 1 posts per day</li>
-      <li>Assume each user views feeds 10 times a day</li>
-      <li>Incoming - 100M * 1 per day * 1MB = 100TB * 8 / 86400 = 9.26Gbps</li>
-      <li>Outgoing - 100M * 10 per day * 1MB = 1PB * 8 / 86400 = 92.6Gbps</li>
+      <li>Incoming</li>
+      <ul>
+        <li>100M * 1 per day * 1MB = 100TB * 8 / 86400 = 9.26Gbps</li>
+      </ul>
+      <li>Outgoing</li>
+      <ul>
+        <li>100M * 10 per day * 1MB = 1PB * 8 / 86400 = 92.6Gbps</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -119,13 +125,38 @@
   <div class="card-body">
     <h2 class="card-title">High level design</h2>
 
+    <h3 class="card-title">Components</h3>
+
     <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/newsfeed-system1.png" alt="Card image cap">
     <ul>
-      <li>Web server - authentication and rate limiting</li>
-      <li>Post service - stores posts in cache and DB</li>
-      <li>Fanout service - push new content to users' friends' newsfeed. Feed is stored in cache for fast retrieval</li>
-      <li>Notification service - informs friends about the new feeds via push notification</li>
-      <li>Newsfeed service - fetches newsfeed from cache</li>
+      <li>Web server</li>
+      <ul>
+        <li>Authentication and rate limiting</li>
+      </ul>
+      <li>Post service</li>
+      <ul>
+        <li>Stores posts in cache and DB</li>
+      </ul>
+      <li>Fanout service</li>
+      <ul>
+        <li>Push new content to users' friends' newsfeed</li>
+        <li>Feed is stored in cache for fast retrieval</li>
+      </ul>
+      <li>Newsfeed service</li>
+      <ul>
+        <li>Fetches newsfeed from cache</li>
+      </ul>
+      <li>Notification service</li>
+      <ul>
+        <li>Informs friends about the new feeds via push notification</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Workflow</h3>
+    <ul>
+      <li></li>
+      <li></li>
+      <li></li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -137,14 +168,15 @@
   <div class="card-body">
     <h2 class="card-title">API</h2>
     <ul>
-      <li><code>post_feed(user_id, content)</code></li>
+      <li><code>post_feed(user_id, content, auth_token)</code></li>
       <ul>
-        <li><code>content</code> - feed content</li>
+        <li>POST api/v1/me/feed</li>
+        <li><code>content</code> - text content of the feed</li>
+        <li><code>auth_token</code> - authenticate API requests</li>
       </ul>
-      <li><code>get_feed(user_id)</code></li>
+      <li><code>get_feed(user_id, auth_token)</code></li>
       <ul>
-        <li></li>
-        <li></li>
+        <li>GET api/v1/me/feed</li>
       </ul>
     </ul>
   </div>
@@ -155,7 +187,7 @@
 
 <div class="card mb-4" id="newsfeed-system-5">
   <div class="card-body">
-    <h2 class="card-title">Storage schema</h2>
+    <h2 class="card-title">Database</h2>
     <ul>
       <li>Use relational database</li>
       <li>Use a graph database only for the relationships between users</li>
@@ -215,6 +247,7 @@
     <ul>
       <li>Push model</li>
       <ul>
+        <li>Newsfeed is pre-computed during write time</li>
         <li>Pros</li>
         <ul>
           <li>Newsfeed is generated and pushed to friends immediately</li>
@@ -228,6 +261,7 @@
       </ul>
       <li>Pull model</li>
       <ul>
+        <li>Newsfeed is generated during read time</li>
         <li>Pros</li>
         <ul>
           <li>More efficient for handling inactive user scenario</li>
@@ -240,7 +274,13 @@
       <li>Hybrid model</li>
       <ul>
         <li>For celebrities, use pull model</li>
+        <ul>
+          <li>Let followers pull new contents on-demand to avoid system overload</li>
+        </ul>
         <li>For all other users, use push model</li>
+        <ul>
+          <li>Generating feed fast is critical</li>
+        </ul>
       </ul>
     </ul>
 
@@ -267,6 +307,12 @@
       <li>Action (tier 4) - store info on whether user liked a post, replied to post, etc</li>
       <li>Counters (tier 5) - number of likes, replies, followers, etc</li>
     </ul>
+
+    <h3 class="card-title">Potential bottlenecks</h3>
+
+    <h3 class="card-title">User experience during failure</h3>
+
+    <h3 class="card-title">10x scale</h3>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu
@@ -277,40 +323,83 @@
   <div class="card-body">
     <h2 class="card-title">Evaluation</h2>
 
-    <h3 class="card-title">Availability</h3>
+    <h3 class="card-title">Functional</h3>
     <ul>
-      <li>Replication</li>
-      <ul>
-        <li>Replicate each server and DB</li>
-        <li>Replicate entire components to different zone or geographical region</li>
-      </ul>
-      <li>Fail over</li>
+      <li>Business objective</li>
       <ul>
         <li></li>
         <li></li>
       </ul>
     </ul>
 
-    <h4 class="card-title">Reliability</h4>
+    <h3 class="card-title">Non-functional</h3>
     <ul>
-      <li>Data loss</li>
+      <li>Availability</li>
+      <ul>
+        <li>Replication</li>
+        <ul>
+          <li>Replicate each</li>
+          <ul>
+            <li></li>
+          </ul>
+          <li>Replicate entire system to different zone or geographical region</li>
+        </ul>
+        <li>Fail over</li>
+        <ul>
+          <li>Option 1. active-active</li>
+          <ul>
+            <li>Both actives manage traffic, spreading load between them</li>
+          </ul>
+          <li>Option 2. active-passive</li>
+          <ul>
+            <li>Active web servers, cache send heartbearts to passives</li>
+            <li>If heartbeats stop, passives take over actives' IP and resume service</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>Reliability</li>
+      <ul>
+        <li>Data loss</li>
+        <li>Handling failure</li>
+      </ul>
+      <li>Scalability</li>
+      <ul>
+        <li>Horizontal scaling</li>
+        <li>Data partitioning</li>
+        <ul>
+          <li></li>
+          <li></li>
+        </ul>
+      </ul>
+      <li>Performance</li>
+      <ul>
+        <li>Peak load</li>
+        <ul>
+          <li></li>
+          <li></li>
+        </ul>
+        <li></li>
+        <li></li>
+      </ul>
+      <li>Consistency</li>
+      <ul>
+        <li></li>
+        <li></li>
+        <li></li>
+      </ul>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
 
-    <h3 class="card-title">Scalability</h3>
-    <ul>
-      <li>Horizontal scaling</li>
-      <li>Data partitioning</li>
-    </ul>
-
-    <h4 class="card-title">Performance</h4>
+<div class="card mb-4" id="newsfeed-system-8">
+  <div class="card-body">
+    <h2 class="card-title">Follow up</h2>
     <ul>
       <li></li>
       <li></li>
-    </ul>
-    </ul>
-
-    <h3 class="card-title">Consistency</h3>
-    <ul>
       <li></li>
     </ul>
   </div>

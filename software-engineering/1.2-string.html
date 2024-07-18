@@ -48,6 +48,7 @@
       <!-- <li><a href="#string-">Length of last word</a></li> -->
       <li><a href="#string-">Count and say</a></li>
       <li><a href="#string-">Valid number</a></li>
+      <li><a href="#string-">Simplify path</a></li>
       <li><a href="#string-">Palindrome permutation</a></li>
       <li><a href="#string-">Encode and decode strings</a></li>
       <li><a href="#string-">Integer to english words</a></li>
@@ -150,10 +151,111 @@
   <div class="card-body">
     <h2 class="card-title">Valid number (H/F1)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def isNumber(self, s: str) -> bool:
+
+        # Each char must be digit, sign, exponent, dot
+        # Input cannot end with a sign or an exponent
+        # There must be at least one digit in the input
+        # If there is a sign, it must be either
+        #   First character in the input
+        #   First character after an exponent
+        # There cannot be more than one exponent in the input
+        # If an exponent exists, a digit must have existed beforehand
+        # There cannot be more than one dot in the input
+        # If a dot exists, there should be no exponent beforehand
+
+        digit_exist = False
+        exponent_exist = False
+        dot_exist = False
+
+        # Time O(n) n = len(s)
+        # Space O(1)
+        for i, c in enumerate(s):
+            if c.isdigit():
+                digit_exist = True
+            elif c == "-" or c == "+":
+                if i > 0 \
+                    and (s[i-1] != "e" and s[i-1] != "E"):
+                    return False
+                if i == len(s) - 1:
+                    return False
+            elif c == "e" or c == "E":
+                if exponent_exist:
+                    return False
+                if not digit_exist:
+                    return False
+                if i == len(s) - 1:
+                    return False
+                exponent_exist = True
+            elif c == ".":
+                if dot_exist:
+                    return False
+                if exponent_exist:
+                    return False
+                dot_exist = True
+            else:
+                return False
+
+        if not digit_exist:
+            return False
+
+        return True</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/valid-number">65. Valid Number</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="string-">
+  <div class="card-body">
+    <h2 class="card-title">Simplify path (M/F1/100)</h2>
+
+<pre><code class="python">class Solution:
+    def simplifyPath(self, path: str) -> str:
+
+        # Split the input by delimiter "/"
+        # Read the tokens from right to left
+        #   If empty string or ".", skip
+        #   If "..", skip the current and next token
+
+        # Ex. "/.../a/../b/c/../d/./"
+        #  => "...", "a", "..", "b", "c", "..", "d", "."
+
+        result = ""
+        tokens = path.split("/")
+        i = len(tokens) - 1
+        to_skip = 0
+
+        # Time O(n) n = len(path)
+        # Space O(n)
+        while i > 0:
+
+            if tokens[i] == "" or tokens[i] == ".":
+                i -= 1
+                continue
+
+            elif tokens[i] == "..":
+                to_skip += 1
+                i -= 1
+                continue
+
+            if to_skip > 0:
+                to_skip -= 1
+                i -= 1
+                continue
+
+            else:
+                result = "/" + tokens[i] + result
+                i -= 1
+
+        if not result:
+            return "/"
+
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/simplify-path">71. Simplify Path</a>
   </div>
 </div>
 
