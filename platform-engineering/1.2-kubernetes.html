@@ -137,10 +137,22 @@
       </ul>
       <li>kube-controller-manager</li>
       <ul>
-        <li>Node controller - notice and respond when Nodes are down</li>
-        <li>Replication controller - ensures correct number of Pods are running</li>
-        <li>Endpoint controller - populates Endpoint object</li>
-        <li>Service account & token controller - creates accounts and API tokens for new namespaces</li>
+        <li>Node controller</li>
+        <ul>
+          <li>Notice and respond when Nodes are down</li>
+        </ul>
+        <li>Replication controller</li>
+        <ul>
+          <li>Ensures correct number of Pods are running</li>
+        </ul>
+        <li>Endpoint controller</li>
+        <ul>
+          <li>Populates Endpoint object</li>
+        </ul>
+        <li>Service account & token controller</li>
+        <ul>
+          <li>Creates accounts and API tokens for new namespaces</li>
+        </ul>
       </ul>
       <li>cluster-controller-manager</li>
       <ul>
@@ -1174,22 +1186,42 @@ run pods=$(kubectl get pods --selector=job-name=pi --output=jsonpath='{.items[*]
 
     <h3 class="card-title">Three types of tasks suitable to run as a Job</h3>
     <ul>
-      <li>Non-parallel Jobs - normally only one Pod is started. Job is complete as soon as its Pod terminates successfully. Can leave both <code>.spec.completions</code> and <code>.spec.parallelism</code> unset (they will default to 1)</li>
-      <li>Parallel Jobs with a fixed completion count - Job is complete when there is one successful Pod for each value in the range 1 to <code>.spec.completions</code></li>
-      <li>Parallel Jobs with a work queue - when any Pod from the Job terminates with success, no new Pods are created. Once at least one Pod is terminated with success and all Pods are terminated, Job succeeds. Must leave <code>.spec.completions</code> unset and set <code>.spec.parallelism</code> to a non-negative integer</li>
+      <li>Non-parallel Jobs</li>
+      <ul>
+        <li>Normally only one Pod is started</li>
+        <li>Job is complete as soon as its Pod terminates successfully</li>
+        <li>Can leave both <code>.spec.completions</code> and <code>.spec.parallelism</code> unset (they will default to 1)</li>
+      </ul>
+      <li>Parallel Jobs with a fixed completion count</li>
+      <ul>
+        <li>Job is complete when there is one successful Pod for each value in the range 1 to <code>.spec.completions</code></li>
+      </ul>
+      <li>Parallel Jobs with a work queue</li>
+      <ul>
+        <li>When any Pod from the Job terminates with success, no new Pods are created</li>
+        <li>Once at least one Pod is terminated with success and all Pods are terminated, Job succeeds</li>
+        <li>Must leave <code>.spec.completions</code> unset and set <code>.spec.parallelism</code> to a non-negative integer</li>
+      </ul>
     </ul>
 
     <p class="card-text">Requested parallelism <code>.spec.parallelism</code> is set to 1 if not specified. Setting it to 0 makes Job effective paused</p>
     <ul>
-      <li>Fixed completion count Jobs - actual number of Pods running in parallel will not exceed the number of remaining completions. Higher value of <code>.spec.parallelism</code> is ignored</li>
-      <li>Work queue Jobs - no new Pods are started after any Pod has succeeded</li>
+      <li>Fixed completion count Jobs</li>
+      <ul>
+        <li>Actual number of Pods running in parallel will not exceed the number of remaining completions</li>
+        <li>Higher value of <code>.spec.parallelism</code> is ignored</li>
+      </ul>
+      <li>Work queue Jobs</li>
+      <ul>
+        <li>No new Pods are started after any Pod has succeeded</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Pod and container failure</h3>
     <ul>
-      <li>If container fails and <code>.spec.template.spec.restartPolicy = "OnFailure"</code>, Pod stays on the node but container re-runs. You can avoid this by <code>.spec.template.spec.restartPolicy = "Never"</code></li>
+      <li>If container fails and <code>.spec.template.spec.restartPolicy = "OnFailure"</code>, Pod stays on the node but container re-runs (You can avoid this by <code>.spec.template.spec.restartPolicy = "Never"</code>)</li>
       <li>If Pod fails, then Job Controller starts a new Pod</li>
-      <li><code>.spec.backoffLimit</code> is specifiy number fo retries before marking Job as failure (Default is 6)</li>
+      <li><code>.spec.backoffLimit</code> is specifiy number of retries before marking Job as failure (Default is 6)</li>
     </ul>
 
     <h3 class="card-title">Job termination and clean up</h3>
@@ -1287,7 +1319,8 @@ spec:
 
     <h3 class="card-title">Container restart policy</h3>
     <ul>
-      <li><code>spec</code> of Pod has <code>restartPolicy</code>, which has <code>Always</code>, <code>OnFailure</code>, <code>Never</code>. Default is <code>Always</code>.</li>
+      <li><code>spec</code> of Pod has <code>restartPolicy</code>, which has <code>Always</code>, <code>OnFailure</code>, <code>Never</code></li>
+      <li>Default is <code>Always</code></li>
     </ul>
 
     <h3 class="card-title">Pod condition</h3>
@@ -1306,8 +1339,7 @@ spec:
       <li>When the grace period expires, kubelet triggeres forcible shutdown (Contrainer runtime sends SIGKILL to any running processes in containers)</li>
       <li>API server deletes Pod's object</li>
     </ul>
-
-    <ul>
+<!--     <ul>
       <li>Init containers</li>
       <li>Pod Topology Spread Constraints</li>
       <li>Multi-container pod design</li>
@@ -1319,7 +1351,7 @@ spec:
       <li>Labels, selectors, and annotations</li>
       <li>Node affinity</li>
       <li>Pod affinity</li>
-    </ul>
+    </ul> -->
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://kubernetes.io/docs/concepts/workloads/pods">Pods | <a href="https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle">Pod Lifecycle</a> | <a href="https://www.educative.io/path/become-a-kubernetes-professional">Become a Kubernetes Professional</a>
@@ -1507,10 +1539,15 @@ profiles:
       <li>Communication between containers is faster and securer, and containers can share volumns and file systems</li>
     </ul>
 
-    <h4 class="card-title">Sidecar</strong></h4>
+    <h3 class="card-title">Sidecar</strong></h3>
     <ul>
       <li>Enhance/extend existing functionality of container</li>
       <li>For example, an app container can stream logs to a particular location while the sidecar container mounts the logs to some other directory</li>
+    </ul>
+
+    <h4 class="card-title">Example</strong></h4>
+    <ul>
+      <li>"app-container" streams logs to /var/log/app.log while "log-exporter-sidecar" mounts those logs into /usr/share/nginx/html</li>
     </ul>
 
 <pre><code class="yaml">apiVersion: v1
@@ -1536,12 +1573,19 @@ spec:
     volumeMounts:
     - name: logs
       mountPath: /usr/share/nginx/html</code></pre>
-    <p class="card-text">"app-container" streams logs to /var/log/app.log while "log-exporter-sidecar" mounts those logs into /usr/share/nginx/html</p>
 
-    <h4 class="card-title">Ambassador</h4>
+    <h3 class="card-title">Ambassador</h3>
     <ul>
       <li>Serves as a proxy to external worlds (This for for legacy apps, ConfigMap should be used for new apps)</li>
       <li>For example, when connecting to a DB server and that server config changes across different environments, the ambassador container can act as a TCP proxy to the database, which can be connected via localhost. The sysadmin can use config maps and secrets with the proxy container to inject the correct connection and auth information</li>
+    </ul>
+
+    <h4 class="card-title">Example</strong></h4>
+    <ul>
+      <li>"app-container-poller" call on port 81 and send stuff to /usr/share/nginx/html/index.html</li>
+      <li>"app-container-server" listens on  port 80</li>
+      <li>These two containers share the same mount point</li>
+      <li>Lastly, "ambassador-container" listens on port 81, so that when users curl on 80 they get response from html page</li>
     </ul>
 
 <pre><code class="yaml">apiVersion: v1
@@ -1574,9 +1618,7 @@ spec:
     ports:
       - containerPort: 81</code></pre>
 
-    <p class="card-text">"app-container-poller" call on port 81 and send stuff to /usr/share/nginx/html/index.html. "app-container-server" listens on  port 80. These two containers share the same mount point. Lastly, "ambassador-container" listens on port 81, so that when users curl on 80 they get response from html page</p>
-
-    <h4 class="card-title">Adaptor</h4>
+    <h3 class="card-title">Adaptor</h3>
     <ul>
       <li>Help standarized heterogeneous system</li>
       <li>For example, when there are multiple applications running on separate containers that are outputing logs in different formats, the adaptor container can standardize logs</li>
@@ -1586,6 +1628,11 @@ spec:
     <ul>
       <li>A proxy container is inserted into every application Pod</li>
       <li>Proxy container handles all network traffic entering and leaving the Pod</li>
+    </ul>
+
+    <h4 class="card-title">Example</strong></h4>
+    <ul>
+      <li>"app-container" outputs stream of dates in log file while "log-adapter" appends a word to those stream of dates</li>
     </ul>
 
 <pre><code class="yaml">apiVersion: v1
@@ -1613,7 +1660,6 @@ spec:
     volumeMounts:
     - name: logs
       mountPath: /var/log</code></pre>
-    <p class="card-text">"app-container" outputs stream of dates in log file while "log-adapter" appends a word to those stream of dates</p>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://betterprogramming.pub/understanding-kubernetes-multi-container-pod-patterns-577f74690aee">Understanding Kubernetes Multi-Container Pod Patterns</a>
@@ -1623,7 +1669,8 @@ spec:
 <div class="card mb-4" id="kubernetes-104">
   <div class="card-body">
     <h2 class="card-title">Disruptions</h2>
-    <p class="card-text">There are involuntary disruptions</p>
+
+    <h3 class="card-title">Involuntary disruptions</h3>
     <ul>
       <li>Hardware failure</li>
       <li>Kernal panic</li>
@@ -1632,25 +1679,29 @@ spec:
       <li>Pod eviction due to Node having out of resource</li>
     </ul>
 
-    <p class="card-text">There are voluntary disruptions. Application owners can</p>
+    <h3 class="card-title">Voluntary disruptions</h3>
     <ul>
       <li>Delete the Deployment</li>
       <li>Update the Deployment, causing a restart</li>
       <li>Directly delete Pods by accident</li>
     </ul>
 
-    <p class="card-text">Cluster admins can</p>
+    <h3 class="card-title">Cluster admins can</h3>
     <ul>
       <li>Drain a Node for repair or scale down</li>
       <li>Remove a Pod from a Node to fit in something else</li>
     </ul>
 
-    <p class="card-text">Pod disruption budgets (PDB)</p>
+    <h3 class="card-title">Pod disruption budgets (PDB)</h3>
     <ul>
       <li>Limits the number of Pods down simultaneously from voluntary disruptions</li>
     </ul>
 
-    <p class="card-text">Consider the following scenario where Pod-a, Pod-b, Pod-c are subject to PDB (whose requirement is that at least 2 out of 3 Pods must be available) while Pod-x is not</p>
+    <h3 class="card-title">Example</h3>
+    <ul>
+      <li>Consider the following scenario where Pod-a, Pod-b, Pod-c are subject to PDB while Pod-x is not</li>
+      <li>Requirement is that at least 2 out of 3 Pods must be available</li>
+    </ul>
 
     <img class="img-fluid" class="card-img-top" src="/platform-engineering/platform-engineering/kubernetes6.png" style="width: 700px; height: 300px" alt="Card image cap">
 
