@@ -340,10 +340,10 @@ class Solution:
 <pre><code class="python">class Solution:
     def removeInvalidParentheses(self, s: str) -> List[str]:
 
-        # Treat "s" as root.
+        # Treat "s" as root
         # If node is a valid paranthesis expression, add to result
         # Else, construcut child nodes by removing one parenthesis at a time
-        # Keep track of distances from root to child nodes
+        # Keep distance from root to child nodes
 
         explored = set()
         explored.add(s)
@@ -354,12 +354,30 @@ class Solution:
         result = []
         min_dist = len(s)
 
-        # Time O(n+m) n = len(s) ^ 2, m = len(s) ^ 2
+        def is_valid_bracket_expression(string):
+
+            bracket_counts = defaultdict(int)
+            count = 0
+
+            for char in string:
+                bracket_counts[char] += 1
+                # Early exit because if the count of ')' > '(', s can't be valid
+                if bracket_counts[")"] > bracket_counts["("]:
+                    return False
+
+            return bracket_counts[")"] == bracket_counts["("]
+
+        # Time O(n+m)
+        #   n = number of nodes
+        #   Number of nodes are all possible substring that can be
+        #   formed by removing one char at a time
+        #   Then, it should be that n = k^2, k = len(s)
+        #   Also, m = k^2
         # Space O(n)
         while queue:
             node, dist = queue.popleft()
 
-            if self.is_valid(node):
+            if is_valid_bracket_expression(node):
                 # If not the shortest distance
                 if dist > min_dist:
                     return result
@@ -374,17 +392,7 @@ class Solution:
                             explored.add(next_node)
                             queue.append((next_node,dist+1))
 
-        return result
-
-    def is_valid(self, string):
-
-        dic = {'(': 1, ')': -1}
-        count = 0
-        for char in string:
-            count += dic.get(char, 0)
-            if count < 0:
-                return False # early exit coz once count of ')' > '(', s can't be valid
-        return count == 0</code></pre>
+        return result</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/remove-invalid-parentheses">301. Remove Invalid Parentheses</a>
