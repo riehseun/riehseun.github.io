@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+=<!DOCTYPE html>
 
 <html lang="en">
 
@@ -255,7 +255,24 @@
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
 
+    <h3 class="card-title">Workflow revisited</h3>
+
     <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/newsfeed-system2.png" alt="Card image cap">
+
+    <h4 class="card-title">Newsfeed generation</h4>
+    <ul>
+      <li>Fanout service fetches friend IDs from graph DB</li>
+      <li>Fanout service gets friends metadata from user cache</li>
+      <li>Fanout service sends the list of friends IDs and post ID to message queue</li>
+      <li>Fanout workers fetch data from message queue, generates newsfeed, and store &lt;post_id, user_id&gt; mapping in newsfeed cache</li>
+    </ul>
+
+    <h4 class="card-title">Newsfeed retrieval</h4>
+    <ul>
+      <li>Images and videos are fetched from CDN</li>
+      <li>Newsfeed service gets a list of post IDs from newsfeed cache</li>
+      <li>Newsfeed service retrieves post content from user cache/DB and post cache/DB</li>
+    </ul>
 
     <h3 class="card-title">Fanout service</h3>
     <ul>
@@ -296,21 +313,6 @@
           <li>Generating feed fast is critical</li>
         </ul>
       </ul>
-    </ul>
-
-    <h3 class="card-title">Newsfeed generation</h3>
-    <ul>
-      <li>Fanout service fetches friend IDs from graph DB</li>
-      <li>Fanout service gets friends metadata from user cache</li>
-      <li>Fanout service sends the list of friends IDs and post ID to message queue</li>
-      <li>Fanout workers fetch data from message queue, generates newsfeed, and store &lt;post_id, user_id&gt; mapping in newsfeed cache</li>
-    </ul>
-
-    <h3 class="card-title">Newsfeed retrieval</h3>
-    <ul>
-      <li>Images and videos are fetched from CDN</li>
-      <li>Newsfeed service gets a list of post IDs from newsfeed cache</li>
-      <li>Newsfeed service retrieves post content from user cache/DB and post cache/DB</li>
     </ul>
 
     <h3 class="card-title">Newsfeed cache</h3>
