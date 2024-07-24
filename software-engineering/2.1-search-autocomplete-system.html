@@ -48,9 +48,10 @@
       <li><a href="#search-autocomplete-system-2">Estimation</a></li>
       <li><a href="#search-autocomplete-system-3">High level design</a></li>
       <li><a href="#search-autocomplete-system-4">API</a></li>
-      <!-- <li><a href="#search-autocomplete-system-5">Storage schema</a></li> -->
+      <!-- <li><a href="#search-autocomplete-system-5">Database</a></li> -->
       <li><a href="#search-autocomplete-system-6">Detailed design</a></li>
       <li><a href="#search-autocomplete-system-7">Evaluation</a></li>
+      <li><a href="#search-autocomplete-system-8">Follow up</a></li>
     </ul>
   </div>
 </div>
@@ -61,14 +62,22 @@
 
     <h3 class="card-title">Functional</h3>
     <ul>
-      <li>How many total users in the system? 1B</li>
-      <li>How many daily users in the system? 100M</li>
-      <li>How many suggestions should the system return> 10</li>
-      <li>What criteria is used to determine top 10 terms? popularity and historical query frequency</li>
-      <li>Should the system support spell check? No</li>
-      <li>Should the system support multi-language? No, english only</li>
-      <li>Should the system support capital letters and special characters? No, lower case only</li>
-      <li>How many queries each user makes? 10</li>
+      <li>Business objective</li>
+      <ul>
+        <li>How many suggestions should the system return? 10</li>
+        <li>What criteria is used to determine top 10 terms? popularity and historical query frequency</li>
+        <li>Should the system support spell check? No</li>
+        <li>Should the system support multi-language? No, english only</li>
+        <li>Should the system support capital letters and special characters? No, lower case only</li>
+      </ul>
+      <li>Estimation</li>
+      <ul>
+        <li>How many total users in the system? 1B</li>
+        <li>How many daily users in the system? 100M</li>
+        <li>How many queries each user makes? 10 per day</li>
+        <li>How many characters does each query have? 10</li>
+        <li>What is the size of each character? 2 bytes</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Non-functional</h3>
@@ -81,7 +90,7 @@
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: System Design Interview, Alex Xu | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+    Reference: System Design Interview, Alex Xu
   </div>
 </div>
 
@@ -89,32 +98,29 @@
   <div class="card-body">
     <h2 class="card-title">Estimation</h2>
 
-    <h3 class="card-title">Server</h3>
-    <ul>
-      <li>Assume 100M * 10 = 1B queries per day = 11574 queries per second</li>
-      <li>Assume each server can handle 10K connections</li>
-      <li>11574 / 10k = 2 servers are needed</li>
-    </ul>
-
     <h3 class="card-title">Storage</h3>
     <ul>
-      <li>Assume there are 1B queries per day</li>
-      <li>Assume there are 100M unique queries out of 10B per day</li>
-      <li>Assume each query has 10 characters on average</li>
-      <li>Assume each character requires 2 bytes to store</li>
+      <li>100M daily active users * 10 queries per day = 1B queries per day</li>
+      <li>Assume there are 100M unique queries out of 1B per day</li>
       <li>100M per day * 10 * 2 = 2GB per day</li>
     </ul>
 
     <h3 class="card-title">Bandwidth</h3>
     <ul>
-      <li>Assume suggestions have the same length, which is 10 chracters</li>
-      <li>Assume top 10 suggestions are shown to users</li>
-      <li>Incoming: 1B * 10 * 2 * 8 / 86400 = 1.85Mbps</li>
-      <li>Outgoing: 10 * 10 * 1.85Mbps = 0.185Gbps</li>
+      <li>Incoming</li>
+      <ul>
+        <li>1B queries per day * 10 * 2 * 8 / 86400 = 1.85Mbps</li>
+      </ul>
+      <li>Outgoing</li>
+      <ul>
+        <li>Assume suggestions have the same length, which is 10 chracters</li>
+        <li>Assume top 10 suggestions are shown to users</li>
+        <li>10 * 10 * 1.85Mbps = 0.185Gbps</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: System Design Interview, Alex Xu | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+    Reference: System Design Interview, Alex Xu
   </div>
 </div>
 
@@ -122,38 +128,51 @@
   <div class="card-body">
     <h2 class="card-title">High level design</h2>
 
+    <h3 class="card-title">Components</h3>
+
     <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/search-autocomplete-system1.png" alt="Card image cap">
+
     <ul>
-      <li>Data gathering service stores frequency of each word</li>
-      <li>Query service gets the top 10 frequent words starting with the string that the user types</li>
+      <li>Data gathering service</li>
+      <ul>
+        <li>Stores frequency of each word</li>
+      </ul>
+      <li>Query service</li>
+      <ul>
+        <li>Gets the top 10 frequent words starting with the string that the user types</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Workflow</h3>
+    <ul>
+      <li>User types in a character</li>
+      <li>Data gathering service updates word frequency in DB</li>
+      <li>Query service searches DB and returns top 10 search result to user</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: System Design Interview, Alex Xu | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+    Reference: System Design Interview, Alex Xu
   </div>
 </div>
 
-<div class="card mb-4" id="google-maps-4">
+<div class="card mb-4" id="search-autocomplete-system-4">
   <div class="card-body">
     <h2 class="card-title">API</h2>
     <ul>
       <li><code>get_suggestions(prefix)</code></li>
       <ul>
-        <li>Retrieves suggestions from the servers</li>
-        <li><code>prefix</code></li>
-        <ul>
-          <li>Whatever the user has typed</li>
-        </ul>
+        <li>GET api/v1/suggestion</li>
+        <li><code>prefix</code> - the character that user has typed</li>
       </ul>
       <li><code>add_to_database(query)</code></li>
       <ul>
-        <li>Adds what the user has searched to database</li>
-        <li><code>query</code></li>
+        <li>POST api/v1/query</li>
+        <li><code>query</code> - the query that user has typed</li>
       </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: System Design Interview, Alex Xu | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+    Reference: System Design Interview, Alex Xu
   </div>
 </div>
 
@@ -161,9 +180,10 @@
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
 
+    <h3 class="card-title">Trie data structure</h3>
+
     <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/search-autocomplete-system2.png" alt="Card image cap">
 
-    <h3 class="card-title">Trie data structure</h3>
     <ul>
       <li>Root represents an empty string</li>
       <li>Each node stores characters (which represent a prefix) and has 26 children</li>
@@ -172,9 +192,10 @@
       <li>The length of prefix is limited to 50 because users rarely type long query</li>
     </ul>
 
+    <h3 class="card-title">Data gathering service</h3>
+
     <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/search-autocomplete-system3.png" alt="Card image cap">
 
-    <h3 class="card-title">Data gathering service</h3>
     <ul>
       <li>Analytics log</li>
       <ul>
@@ -195,12 +216,12 @@
       </ul>
       <li>Trie DB</li>
       <ul>
-        <li>Option 1 - document store</li>
+        <li>Option 1. document store</li>
         <ul>
           <li>Take a snapshot of weekly built trie, serialize it, and store serialized data in DB</li>
           <li>MongoDB can be used</li>
         </ul>
-        <li>Option 2 - key-value store</li>
+        <li>Option 2. key-value store</li>
         <ul>
           <li>Trie can be mapped to hash table</li>
           <li>Prefix can be key and cache data can be value</li>
@@ -212,9 +233,10 @@
       </ul>
     </ul>
 
+    <h3 class="card-title">Query service</h3>
+
     <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/search-autocomplete-system4.png" alt="Card image cap">
 
-    <h3 class="card-title">Query service</h3>
     <ul>
       <li>AJAX request</li>
       <ul>
@@ -238,8 +260,11 @@
       </ul>
       <li>Update</li>
       <ul>
-        <li>Option 1 - create new trie every week</li>
-        <li>Option 2 - update individual node directly. This is expensive because when a node is updated, all ancestors must also be updated</li>
+        <li>Option 1. create new trie every week</li>
+        <li>Option 2. update individual node directly</li>
+        <ul>
+          <li>This is expensive because when a node is updated, all ancestors must also be updated</li>
+        </ul>
       </ul>
       <li>Delete</li>
       <ul>
@@ -321,7 +346,7 @@
     </ul> -->
   </div>
   <div class="card-footer text-muted">
-    Reference: System Design Interview, Alex Xu | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+    Reference: System Design Interview, Alex Xu
   </div>
 </div>
 
@@ -329,45 +354,88 @@
   <div class="card-body">
     <h2 class="card-title">Evaluation</h2>
 
-    <h3 class="card-title">Availability</h3>
+    <h3 class="card-title">Functional</h3>
     <ul>
-      <li>Replication</li>
-      <ul>
-        <li>Replicate each server and DB</li>
-        <li>Replicate entire components to different zone or geographical region</li>
-      </ul>
-      <li>Fail over</li>
+      <li>Business objective</li>
       <ul>
         <li></li>
         <li></li>
       </ul>
     </ul>
 
-    <h4 class="card-title">Reliability</h4>
+    <h3 class="card-title">Non-functional</h3>
     <ul>
-      <li>Data loss</li>
-    </ul>
-
-    <h3 class="card-title">Scalability</h3>
-    <ul>
-      <li>Horizontal scaling</li>
-      <li>Data partitioning</li>
-    </ul>
-
-    <h4 class="card-title">Performance</h4>
-    <ul>
-      <li>AJAX request</li>
-      <li>Browser caching</li>
-      <li>Data sampling</li>
-    </ul>
-
-    <h3 class="card-title">Consistency</h3>
-    <ul>
-      <li>Eventual consistency - users seeing different orders of suggestions do not matter much</li>
+      <li>Availability</li>
+      <ul>
+        <li>Replication</li>
+        <ul>
+          <li>Replicate each</li>
+          <ul>
+            <li></li>
+          </ul>
+          <li>Replicate entire system to different zone or geographical region</li>
+        </ul>
+        <li>Fail over</li>
+        <ul>
+          <li>Option 1. active-active</li>
+          <ul>
+            <li>Both actives manage traffic, spreading load between them</li>
+          </ul>
+          <li>Option 2. active-passive</li>
+          <ul>
+            <li>Active web servers, cache send heartbearts to passives</li>
+            <li>If heartbeats stop, passives take over actives' IP and resume service</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>Reliability</li>
+      <ul>
+        <li>Data loss</li>
+        <li>Handling failure</li>
+      </ul>
+      <li>Scalability</li>
+      <ul>
+        <li>Horizontal scaling</li>
+        <li>Data partitioning</li>
+        <ul>
+          <li></li>
+          <li></li>
+        </ul>
+      </ul>
+      <li>Performance</li>
+      <ul>
+        <li>Peak load</li>
+        <ul>
+          <li></li>
+          <li></li>
+        </ul>
+        <li></li>
+        <li></li>
+      </ul>
+      <li>Consistency</li>
+      <ul>
+        <li></li>
+        <li></li>
+        <li></li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: System Design Interview, Alex Xu | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="search-autocomplete-system-8">
+  <div class="card-body">
+    <h2 class="card-title">Follow up</h2>
+    <ul>
+      <li>Explain how to expand the design to support multiple languages</li>
+      <li>Explain how to handle situation where the top search queries in one country are different from others</li>
+      <li>Explain how to support real-time queries</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
   </div>
 </div>
 <!-- Search autocomplte system END -->
