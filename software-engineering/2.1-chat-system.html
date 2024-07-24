@@ -48,9 +48,10 @@
       <li><a href="#whatsapp-2">Estimation</a></li>
       <li><a href="#whatsapp-3">High level design</a></li>
       <li><a href="#whatsapp-4">API</a></li>
-      <li><a href="#whatsapp-5">Storage schema</a></li>
+      <li><a href="#whatsapp-5">Database</a></li>
       <li><a href="#whatsapp-6">Detailed design</a></li>
       <li><a href="#whatsapp-7">Evaluation</a></li>
+      <li><a href="#whatsapp-8">Follow up</a></li>
     </ul>
   </div>
 </div>
@@ -61,15 +62,23 @@
 
     <h3 class="card-title">Functional</h3>
     <ul>
-      <li>Should the system support group chat? Yes</li>
-      <li>Should the system support voice chat? No</li>
-      <li>How many daily active users? 100M</li>
-      <li>Is there a limit on group members? Yes, 100</li>
-      <li>Is there a limit on chat size? Yes, 100k chars</li>
-      <li>How long shoud we store chat history? Indefinitely</li>
-      <li>What devices should we support? Web, mobile</li>
-      <li>Should we support sending images and videos? No, text only</li>
+      <li>Business objective</li>
+      <ul>
+        <li>Should the system support group chat? Yes</li>
+        <li>Should the system support voice chat? No</li>
+        <li>Is there a limit on group members? Yes, 100</li>
+        <li>Is there a limit on chat size? Yes, 100k chars</li>
+        <li>How long shoud we store chat history? Indefinitely</li>
+        <li>What devices should we support? Web, mobile</li>
+        <li>Should we support sending images and videos? No, text only</li>
       <li>Should we support push notification? Yes</li>
+      </ul>
+      <li>Estimation</li>
+      <ul>
+        <li>How many daily active users? 100M</li>
+        <li>How many messages are exchanged in total? 10B per day</li>
+        <li>What is the size of each message? 100 bytes on average</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Non-functional</h3>
@@ -90,24 +99,21 @@
   <div class="card-body">
     <h2 class="card-title">Estimation</h2>
 
-    <h3 class="card-title">Server</h3>
-    <ul>
-      <li>Assume 100M daily active users</li>
-      <li>Assume a single server can handle 10K connections</li>
-      <li>100M / 10K = 10,000 servers are needed</li>
-    </ul>
-
     <h3 class="card-title">Storage</h3>
     <ul>
-      <li>Assume 10B messages per day</li>
-      <li>Assume Each message is 100 bytes</li>
       <li>10B per day * 100 bytes = 1TB per day</li>
     </ul>
 
     <h3 class="card-title">Bandwidth</h3>
     <ul>
-      <li>Incoming: 1TB per day * 8 bits / 86400 seconds per day = 92.6Mbps</li>
-      <li>Outgoing: same as incoming</li>
+      <li>Incoming</li>
+      <ul>
+        <li>1TB per day * 8 bits / 86400 seconds per day = 92.6Mbps</li>
+      </ul>
+      <li>Outgoing</li>
+      <ul>
+        <li>Same as incoming</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -118,6 +124,8 @@
 <div class="card mb-4" id="whatsapp-3">
   <div class="card-body">
     <h2 class="card-title">High level design</h2>
+
+
 
     <h3 class="card-title">Polling</h3>
 
@@ -137,6 +145,8 @@
         <li>Because connection is persistent, efficient connection management is needed</li>
       </ul>
     </ul>
+
+    <h3 class="card-title">Components</h3>
 
     <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/chat-system2.png" alt="Card image cap">
 
@@ -161,18 +171,36 @@
       <ul>
         <li>Store user profile</li>
       </ul>
+      <li>Service discovery</li>
+      <ul>
+        <li>Recommend the best chat server for the user</li>
+      </ul>
     </ul>
 
-    <!-- <img class="img-fluid" class="card-img-top" src="/img/system-design/whatsapp1.png" alt="Card image cap">
+    <h3 class="card-title">Workflow</h3>
+
+    <h4 class="card-title">1-on-1 chat</h4>
+
+    <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/chat-system3.png" alt="Card image cap">
+
     <ul>
-      <li>When user A sends a message to user B</li>
-      <ul>
-        <li>Server receives the message and send ack back to A.</li>
-        <li>Server stores the message into DB and sends message to B.</li>
-        <li>B receives the message and sends ack back to the server.</li>
-        <li>Server notifies A that the message has been delivered.</li>
-      </ul>
-    </ul> -->
+      <li>User A sends message to chat server 1</li>
+      <li>Chat server 1 obtains message ID from ID generator</li>
+      <li>Chat server 1 sends message to message queue</li>
+      <li>Message is stored in key-value store</li>
+      <li>If user B is online, message is forwarded to chat server 2 where user B is connected</li>
+      <li>If user B is offline, push notification is send to user B from push notification server</li>
+      <li>Chat server 2 forwards messsage to user B</li>
+    </ul>
+
+    <h4 class="card-title">Group chat</h4>
+
+    <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/chat-system4.png" alt="Card image cap">
+
+    <ul>
+      <li>Message from user A is copied to messaage queues for user B and user C</li>
+      <li>Message queues server as an inbox for each user</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu
@@ -185,12 +213,12 @@
     <ul>
       <li><code>send_msessage(sender_id, reciever_id, text)</code></li>
       <ul>
+        <li>POST api/v1/message</li>
         <li></li>
-        <li><code></code></li>
       </ul>
       <li><code>get_message(user_Id)</code></li>
       <ul>
-        <li></li>
+        <li>GET api/v1/message</li>
         <li></li>
       </ul>
     </ul>
@@ -202,7 +230,7 @@
 
 <div class="card mb-4" id="whatsapp-5">
   <div class="card-body">
-    <h2 class="card-title">Storage schema</h2>
+    <h2 class="card-title">Database</h2>
 
     <h3 class="card-title">Chat history</h3>
     <ul>
@@ -223,23 +251,23 @@
 
     <h3 class="card-title">Message</h3>
     <ul>
-      <li>message_id - int</li>
-      <li>message_from - int</li>
-      <li>message_to - int</li>
-      <li>content - string</li>
-      <li>created_at - timestamp</li>
+      <li>message_id (int)</li>
+      <li>message_from (int)</li>
+      <li>message_to (int)</li>
+      <li>content (string)</li>
+      <li>created_at (timestamp)</li>
     </ul>
 
     <h3 class="card-title">Group message</h3>
     <ul>
-      <li>channel_id - int</li>
-      <li>message_id - int</li>
+      <li>channel_id (int)</li>
+      <li>message_id (int)</li>
       <ul>
         <li>Use local sequence number generator because IDs only need to be unique within a group</li>
       </ul>
-      <li>used_id - int</li>
-      <li>content - string</li>
-      <li>created_at - timestamp</li>
+      <li>used_id (int)</li>
+      <li>content (string)</li>
+      <li>created_at (timestamp)</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -251,24 +279,6 @@
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
 
-    <h3 class="card-title">Service discovery</h3>
-    <ul>
-      <li>Recommend the best chat server for the user</li>
-    </ul>
-
-    <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/chat-system3.png" alt="Card image cap">
-
-    <h3 class="card-title">1-on-1 chat</h3>
-    <ul>
-      <li>User A sends message to chat server 1</li>
-      <li>Chat server 1 obtains message ID from ID generator</li>
-      <li>Chat server 1 sends message to message queue</li>
-      <li>Message is stored in key-value store</li>
-      <li>If user B is online, message is forwarded to chat server 2 where user B is connected</li>
-      <li>If user B is offline, push notification is send to user B from push notification server</li>
-      <li>Chat server 2 forwards messsage to user B</li>
-    </ul>
-
     <h3 class="card-title">Message synchronization</h3>
     <ul>
       <li>Different devices owned by the same user are connected to the same chat server</li>
@@ -278,14 +288,6 @@
         <li>The recipient ID equals the current user ID</li>
         <li>Latest message ID is less than message IDs in key-value store</li>
       </ul>
-    </ul>
-
-    <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/chat-system4.png" alt="Card image cap">
-
-    <h3 class="card-title">Group chat</h3>
-    <ul>
-      <li>Message from user A is copied to messaage queues for user B and user C</li>
-      <li>Message queues server as an inbox for each user</li>
     </ul>
 
     <h3 class="card-title">User status</h3>
@@ -303,37 +305,11 @@
       </ul>
     </ul>
 
-    <!-- <h4 class="card-title">Message service</h4>
-    <ul>
-      <li>Interface to Mnesia DB.</li>
-      <li>Stores and retrieves messages from Mnesia DB.</li>
-    </ul>
+    <h3 class="card-title">Potential bottlenecks</h3>
 
-    <h4 class="card-title">Asset service</h4>
-    <ul>
-      <li>Stores compressed and encrypted media to blob storage.</li>
-      <li>Maintains hash for each file to avoid duplication.</li>
-      <li>Send ID of media to receiver and receiver downloads media using the ID.</li>
-    </ul>
+    <h3 class="card-title">User experience during failure</h3>
 
-    <h4 class="card-title">Group service</h4>
-    <ul>
-      <li>Keep all information about users in each group.</li>
-      <li>Stores and retrieves messages from MySQL.</li>
-      <li>Redis is used as a cache for MySQL data.</li>
-    </ul>
-
-    <h4 class="card-title">Group message handler</h4>
-    <ul>
-      <li>Communicates with group service to retrieve data of users in the group.</li>
-      <li>Delivers messages to each user.</li>
-    </ul>
-
-    <h4 class="card-title">Kafka</h4>
-    <ul>
-      <li>Message service sends messages to Kafka, to be saved for further processing.</li>
-      <li>Group is topic, sender is producer, and receiver is consumer.</li>
-    </ul> -->
+    <h3 class="card-title">10x scale</h3>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu
@@ -344,41 +320,85 @@
   <div class="card-body">
     <h2 class="card-title">Evaluation</h2>
 
-    <h3 class="card-title">Availability</h3>
+    <h3 class="card-title">Functional</h3>
     <ul>
-      <li>Replication</li>
-      <ul>
-        <li>Replicate each server and DB</li>
-        <li>Replicate entire components to different zone or geographical region</li>
-      </ul>
-      <li>Fail over</li>
+      <li>Business objective</li>
       <ul>
         <li></li>
         <li></li>
       </ul>
     </ul>
 
-    <h4 class="card-title">Reliability</h4>
+    <h3 class="card-title">Non-functional</h3>
     <ul>
-      <li>Data loss</li>
+      <li>Availability</li>
+      <ul>
+        <li>Replication</li>
+        <ul>
+          <li>Replicate each</li>
+          <ul>
+            <li></li>
+          </ul>
+          <li>Replicate entire system to different zone or geographical region</li>
+        </ul>
+        <li>Fail over</li>
+        <ul>
+          <li>Option 1. active-active</li>
+          <ul>
+            <li>Both actives manage traffic, spreading load between them</li>
+          </ul>
+          <li>Option 2. active-passive</li>
+          <ul>
+            <li>Active web servers, cache send heartbearts to passives</li>
+            <li>If heartbeats stop, passives take over actives' IP and resume service</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>Reliability</li>
+      <ul>
+        <li>Data loss</li>
+        <li>Handling failure</li>
+      </ul>
+      <li>Scalability</li>
+      <ul>
+        <li>Horizontal scaling</li>
+        <li>Data partitioning</li>
+        <ul>
+          <li></li>
+          <li></li>
+        </ul>
+      </ul>
+      <li>Performance</li>
+      <ul>
+        <li>Peak load</li>
+        <ul>
+          <li></li>
+          <li></li>
+        </ul>
+        <li></li>
+        <li></li>
+      </ul>
+      <li>Consistency</li>
+      <ul>
+        <li></li>
+        <li></li>
+        <li></li>
+      </ul>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
 
-    <h3 class="card-title">Scalability</h3>
+<div class="card mb-4" id="chat-system-8">
+  <div class="card-body">
+    <h2 class="card-title">Follow up</h2>
     <ul>
-      <li>Horizontal scaling</li>
-      <li>Data partitioning</li>
-    </ul>
-
-    <h4 class="card-title">Performance</h4>
-    <ul>
-      <!-- <li>Low latency via web socket servers and cache</li> -->
-      <!-- <li>Low latency via CDN</li> -->
-    </ul>
-    </ul>
-
-    <h3 class="card-title">Consistency</h3>
-    <ul>
-      <li></li>
+      <li>Explain how to allow media files?</li>
+      <li>Explain how to enable end-to-end encryption</li>
+      <li>Explain if caching messages on client-side can help</li>
+      <li>Explain how to optimize the load time of messages</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
