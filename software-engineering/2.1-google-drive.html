@@ -48,9 +48,10 @@
       <li><a href="#google-drive-2">Estimation</a></li>
       <li><a href="#google-drive-3">High level design</a></li>
       <li><a href="#google-drive-4">API</a></li>
-      <li><a href="#google-drive-5">Storage schema</a></li>
+      <li><a href="#google-drive-5">Database</a></li>
       <li><a href="#google-drive-6">Detailed design</a></li>
       <li><a href="#google-drive-7">Evaluation</a></li>
+      <li><a href="#google-drive-8">Follow up</a></li>
     </ul>
   </div>
 </div>
@@ -61,13 +62,22 @@
 
     <h3 class="card-title">Functional</h3>
     <ul>
-      <li>How many total users in the system? 1B</li>
-      <li>How many daily users in the system? 100M</li>
-      <li>What are the most important features? Upload/download files, sync files, send notification</li>
-      <li>Is this mobile app or web app? Both</li>
-      <li>What are supported file formats? Any file type</li>
-      <li>Do files need to be encrypted? Yes</li>
-      <li>Is there a file size limit? Yes, 10GB</li>
+      <li>Business objective</li>
+      <ul>
+        <li>What are the most important features? Upload/download files, sync files, send notification</li>
+        <li>Is this mobile app or web app? Both</li>
+        <li>What are supported file formats? Any file type</li>
+        <li>Do files need to be encrypted? Yes</li>
+        <li>Is there a file size limit? Yes, 10GB</li>
+      </ul>
+      <li>Estimation</li>
+      <ul>
+        <li>How many total users in the system? 1B</li>
+        <li>How many daily users in the system? 100M</li>
+        <li>How many files does each user upload? 2 files per day</li>
+        <li>What is the size of each file? 1MB on average</li>
+        <li>What is the read-write raion? 1:1</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Non-functional</h3>
@@ -88,24 +98,21 @@
   <div class="card-body">
     <h2 class="card-title">Estimation</h2>
 
-    <h3 class="card-title">Server</h3>
-    <ul>
-      <li>Assume each server can handle 10k connections</li>
-      <li>100M / 10k = 10,000 servers are needed</li>
-    </ul>
-
     <h3 class="card-title">Storage</h3>
     <ul>
-      <li>Assume each user uploads 2 files per day</li>
-      <li>Assume each file is 1MB</li>
-      <li>2 files per day * 100M * 2 * 1MB = 200TB per day</li>
+      <li>2 files per day * 100M * 1MB = 200TB per day</li>
     </ul>
 
     <h3 class="card-title">Bandwidth</h3>
     <ul>
-      <li>Assume read/write ratio is 1:1</li>
-      <li>Incoming - 200TB per day * 8 bits / 86400 seconds per day = 18.51Gbps</li>
-      <li>Outgoing - 18.51Gbps</li>
+      <li>Incoming</li>
+      <ul>
+        <li>200TB per day * 8 bits / 86400 seconds per day = 18.51Gbps</li>
+      </ul>
+      <li>Outgoing</li>
+      <ul>
+        <li>18.51Gbps</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -117,58 +124,56 @@
   <div class="card-body">
     <h2 class="card-title">High level design</h2>
 
+    <h3 class="card-title">Components</h3>
+
     <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/google-drive1.png" alt="Card image cap">
 
-    <h3 class="card-title">User</h3>
     <ul>
-      <li>Can either be browser or mobile app</li>
+      <li>User</li>
+      <ul>
+        <li>Can either be browser or mobile app</li>
+      </ul>
+      <li>Block servers</li>
+      <ul>
+        <li>Upload blocks to cloud storage</li>
+        <li>Each file is split into blocks, that gets a unique hash value</li>
+        <li>The hash values are stored in metadata DB</li>
+        <li>To reconstruct a file, blocked are joined in a particular order</li>
+        <li>Block size is typically 4MB</li>
+      </ul>
+      <li>Cloud storage</li>
+      <ul>
+        <li>Amazon S3 is chosen</li>
+      </ul>
+      <li>Cold storage</li>
+      <ul>
+        <li>Storage used for inactive data</li>
+      </ul>
+      <li>API servers</li>
+      <ul>
+        <li>Authenticates users</li>
+        <li>Updates metadata</li>
+      </ul>
+      <li>Metadata DB</li>
+      <ul>
+        <li>Stores metadata of user, file, block, file version</li>
+      </ul>
+      <li>Metadata cache</li>
+      <ul>
+        <li>Some metadata is cached for fast retrieval</li>
+      </ul>
+      <li>Notification service</li>
+      <ul>
+        <li>Pub-sub like Kafka</li>
+        <li>Notifies clients when files are added/updated/removed so they can pull the latest change</li>
+      </ul>
+      <li>Offline backup queue</li>
+      <ul>
+        <li>When clients are offline, information is stored so that it can be synced when clients come back online</li>
+      </ul>
     </ul>
 
-    <h3 class="card-title">Block servers</h3>
-    <ul>
-      <li>Upload blocks to cloud storage</li>
-      <li>Each file is split into blocks, that gets a unique hash value</li>
-      <li>The hash values are stored in metadata DB</li>
-      <li>To reconstruct a file, blocked are joined in a particular order</li>
-      <li>Block size is typically 4MB</li>
-    </ul>
-
-    <h3 class="card-title">Cloud storage</h3>
-    <ul>
-      <li>Amazon S3 is chosen</li>
-    </ul>
-
-    <h3 class="card-title">Cold storage</h3>
-    <ul>
-      <li>Storage used for inactive data</li>
-    </ul>
-
-    <h3 class="card-title">API servers</h3>
-    <ul>
-      <li>Authenticates users</li>
-      <li>Updates metadata</li>
-    </ul>
-
-    <h3 class="card-title">Metadata DB</h3>
-    <ul>
-      <li>Stores metadata of user, file, block, file version</li>
-    </ul>
-
-    <h3 class="card-title">Metadata cache</h3>
-    <ul>
-      <li>Some metadata is cached for fast retrieval</li>
-    </ul>
-
-    <h3 class="card-title">Notification service</h3>
-    <ul>
-      <li>Pub-sub like Kafka</li>
-      <li>Notifies clients when files are added/updated/removed so they can pull the latest change</li>
-    </ul>
-
-    <h3 class="card-title">Offline backup queue</h3>
-    <ul>
-      <li>When clients are offline, information is stored so that it can be synced when clients come back online</li>
-    </ul>
+    <h3 class="card-title">Workflow</h3>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu
@@ -181,6 +186,7 @@
     <ul>
       <li><code>upload_file(data, upload_type)</code></li>
       <ul>
+        <li>POST api/v1/file/upload</li>
         <li><code>data</code></li>
         <ul>
           <li>Local file to be uploaded</li>
@@ -192,8 +198,12 @@
         </ul>
       </ul>
       <li><code>download_file(path)</code></li>
+      <ul>
+        <li>GET api/v1/file/download</li>
+      </ul>
       <li><code>get_file_revision(path, limit)</code></li>
       <ul>
+        <li>GET api/v1/file/revision</li>
         <li><code>limit</code></li>
         <ul>
           <li>Max number of revisions to retrieve</li>
@@ -208,9 +218,9 @@
 
 <div class="card mb-4" id="google-drive-5">
   <div class="card-body">
-    <h2 class="card-title">Storage schema</h2>
+    <h2 class="card-title">Database</h2>
 
-    <h3 class="card-title">Relational DB</h3>-
+    <h3 class="card-title">Relational DB</h3>
     <ul>
       <li>User</li>
       <ul>
@@ -265,9 +275,10 @@
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
 
+    <h3 class="card-title">Block servers</h3>
+
     <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/google-drive2.png" alt="Card image cap">
 
-    <h3 class="card-title">Block servers</h3>
     <ul>
       <li>A file is split into smaller blocks</li>
       <li>Each block is compressed to reduce size</li>
@@ -278,7 +289,9 @@
       </ul>
     </ul>
 
-    <h3 class="card-title">Client uploads a file</h3>
+    <h3 class="card-title">Workflow revisited</h3>
+
+    <h4 class="card-title">Client uploads a file</h4>
     <ul>
       <li>File metadata</li>
       <ul>
@@ -296,7 +309,7 @@
       </ul>
     </ul>
 
-    <h3 class="card-title">File is added or edited elsewhere</h3>
+    <h4 class="card-title">File is added or edited elsewhere</h4>
     <ul>
       <li>Client 2 sends requests to API servers to fetch metadata</li>
       <li>Client 2 sends requests to block servers to download blocks</li>
@@ -342,53 +355,100 @@
   <div class="card-body">
     <h2 class="card-title">Evaluation</h2>
 
-    <h3 class="card-title">Availability</h3>
+    <h3 class="card-title">Functional</h3>
     <ul>
-      <li>Replication</li>
+      <li>Business objective</li>
       <ul>
-        <li>Replicate each server and DB</li>
-        <li>Replicate entire components to different zone or geographical region</li>
+        <li></li>
+        <li></li>
       </ul>
-      <li>Fail over</li>
+    </ul>
+
+    <h3 class="card-title">Non-functional</h3>
+    <ul>
+      <li>Availability</li>
       <ul>
-        <li>Load balancer - active-passive, when heartbeat fails, the secondary takes the IP</li>
-        <li>Block servers - other block servers pick up the job</li>
-        <li>Cloud storage - S3 is replicated is multiple regions. Blocks can be fetched from different region if one region fails</li>
-        <li>API servers - traffic is redirected to other API servers via load balancer</li>
-        <li>Metadata cache - other cache servers serve the cache</li>
-        <li>Metadata DB</li>
+        <li>Replication</li>
         <ul>
-          <li>Master - promote one slave to master</li>
-          <li>Slave - use anotehr slave for read operation</li>
+          <li>Replicate each</li>
+          <ul>
+            <li></li>
+          </ul>
+          <li>Replicate entire system to different zone or geographical region</li>
         </ul>
-        <li>Notification service - all clients reconnect to different server (This can be slow)</li>
-        <li>Offline backup queue - other queue can be subscribed by consumers</li>
+        <li>Fail over</li>
+        <ul>
+          <li>Option 1. active-active</li>
+          <ul>
+            <li>Both actives manage traffic, spreading load between them</li>
+          </ul>
+          <li>Option 2. active-passive</li>
+          <ul>
+            <li>Active web servers, cache send heartbearts to passives</li>
+            <li>If heartbeats stop, passives take over actives' IP and resume service</li>
+          </ul>
+        </ul>
       </ul>
-    </ul>
-
-    <h4 class="card-title">Reliability</h4>
-    <ul>
-      <li>Data loss</li>
+      <li>Reliability</li>
       <ul>
-        <li>Regional backup of database using S3</li>
-        <li>Replicate entire components to different zone or geographical region</li>
+        <li>Data loss</li>
+        <ul>
+          <li>Regional backup of database using S3</li>
+          <li>Replicate entire components to different zone or geographical region</li>
+        </ul>
+        <li>Handling failure</li>
+        <ul>
+          <li>Load balancer - active-passive, when heartbeat fails, the secondary takes the IP</li>
+          <li>Block servers - other block servers pick up the job</li>
+          <li>Cloud storage - S3 is replicated is multiple regions. Blocks can be fetched from different region if one region fails</li>
+          <li>API servers - traffic is redirected to other API servers via load balancer</li>
+          <li>Metadata cache - other cache servers serve the cache</li>
+          <li>Metadata DB</li>
+          <ul>
+            <li>Master - promote one slave to master</li>
+            <li>Slave - use anotehr slave for read operation</li>
+          </ul>
+          <li>Notification service - all clients reconnect to different server (This can be slow)</li>
+          <li>Offline backup queue - other queue can be subscribed by consumers</li>
+        </ul>
+      </ul>
+      <li>Scalability</li>
+      <ul>
+        <li>Horizontal scaling</li>
+        <li>Data partitioning</li>
+        <ul>
+          <li></li>
+          <li></li>
+        </ul>
+      </ul>
+      <li>Performance</li>
+      <ul>
+        <li>Peak load</li>
+        <ul>
+          <li></li>
+          <li></li>
+        </ul>
+        <li>Use of metadata cache</li>
+        <li>Spliting files into blocks and delta update</li>
+      </ul>
+      <li>Consistency</li>
+      <ul>
+        <li></li>
+        <li></li>
+        <li></li>
       </ul>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
 
-    <h3 class="card-title">Scalability</h3>
+<div class="card mb-4" id="google-drive-8">
+  <div class="card-body">
+    <h2 class="card-title">Follow up</h2>
     <ul>
-      <li>Horizontal scaling</li>
-      <li>Data partitioning</li>
-    </ul>
-
-    <h4 class="card-title">Performance</h4>
-    <ul>
-      <li>Use of metadata cache</li>
-      <li>Spliting files into blocks and delta update</li>
-    </ul>
-
-    <h3 class="card-title">Consistency</h3>
-    <ul>
+      <li></li>
       <li></li>
       <li></li>
     </ul>
