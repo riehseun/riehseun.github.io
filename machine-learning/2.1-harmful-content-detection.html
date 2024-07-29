@@ -44,12 +44,13 @@
   <div class="card-body">
     <h2 class="card-title">Harmful content detection</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#harmful-content-detection-1">Clarify requirements</a></li>
-      <li><a href="#harmful-content-detection-2">Frame problem as ML task</a></li>
+      <li><a href="#harmful-content-detection-1">Requirements</a></li>
+      <li><a href="#harmful-content-detection-2">Problem</a></li>
       <li><a href="#harmful-content-detection-3">Data preparation</a></li>
       <li><a href="#harmful-content-detection-4">Model development</a></li>
       <li><a href="#harmful-content-detection-5">Evaluation</a></li>
-      <li><a href="#harmful-content-detection-6">Deployment and serving</a></li>
+      <li><a href="#harmful-content-detection-6">Serving</a></li>
+      <li><a href="#harmful-content-detection-7">Follow up</a></li>
     </ul>
   </div>
 </div>
@@ -87,61 +88,64 @@
 
 <div class="card mb-4" id="harmful-content-detection-2">
   <div class="card-body">
-    <h2 class="card-title">Frame problem as ML task</h2>
+    <h2 class="card-title">Problem</h2>
+
+    <h3 class="card-title">ML problem</h3>
     <ul>
-      <li>Define ML objective</li>
+      <li>Accurately predict harmful posts</li>
+      <li>Input</li>
       <ul>
-        <li>Accurately predict harmful posts</li>
+        <li>A post</li>
       </ul>
-      <li>Specify input and output</li>
+      <li>Output</li>
       <ul>
-        <li>Input - a post</li>
-        <li>Output - probability that the post is harmful</li>
-        <li>Late fusion</li>
-        <ul>
-          <li>Train, evaluate, improve each model independently</li>
-          <li>Separate training data is needed for each model</li>
-          <li>Combination of modalities might be harmful even though each is benign</li>
-        </ul>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection1.png" alt="Card image cap">
-        <li>Early fusion</li>
-        <ul>
-          <li>Single model to train, so there is no need to separate training dataset</li>
-          <li>Model considers all modalities together (If each modality is benign but the combination is harmful, model can capture this in unified feature vector)</li>
-          <li>Model needs to learn complex relationship between modalities, requiring large set of data</li>
-        </ul>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection2.png" alt="Card image cap">
+        <li>Probability that the post is harmful</li>
       </ul>
-      <li>Choose right ML category</li>
+    </ul>
+
+    <h3 class="card-title">ML category</h3>
+    <ul>
+      <li>Late fusion</li>
       <ul>
-        <li>Single binary classifier</li>
-        <ul>
-          <li>Difficult to tell users why the post is considered harmful</li>
-          <li>Difficult to determine what kind of harmful content the post contains</li>
-        </ul>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection3.png" alt="Card image cap">
-        <li>One binary classifier per harmful class</li>
-        <ul>
-          <li>Multiple models must be trained separately</li>
-        </ul>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection4.png" alt="Card image cap">
-        <li>A multi-label classifier</li>
-        <ul>
-          <li>Each input feature may need to be transformed differently</li>
-        </ul>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection5.png" alt="Card image cap">
-        <li>Multi-task classifier</li>
-        <ul>
-          <li>Shared layers - transform input features into new ones</li>
-          <li>Task specific layers - each classification head transforms features in optiaml way to predict a specific harm probability</li>
-          <li>Single model is used, thus training is less expensive</li>
-          <li>Shared layers transform features so that they are beneficial for each task. This prevents redundant computations</li>
-          <li>Training data for each task contributes to learning other tasks</li>
-        </ul>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection6.png" alt="Card image cap">
-        <li>Final design</li>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection7.png" alt="Card image cap">
+        <li>Train, evaluate, improve each model independently</li>
+        <li>Separate training data is needed for each model</li>
+        <li>Combination of modalities might be harmful even though each is benign</li>
       </ul>
+      <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection1.png" alt="Card image cap">
+      <li>Early fusion</li>
+      <ul>
+        <li>Single model to train, so there is no need to separate training dataset</li>
+        <li>Model considers all modalities together (If each modality is benign but the combination is harmful, model can capture this in unified feature vector)</li>
+        <li>Model needs to learn complex relationship between modalities, requiring large set of data</li>
+      </ul>
+      <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection2.png" alt="Card image cap">
+      <li>Single binary classifier</li>
+      <ul>
+        <li>Difficult to tell users why the post is considered harmful</li>
+        <li>Difficult to determine what kind of harmful content the post contains</li>
+      </ul>
+      <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection3.png" alt="Card image cap">
+      <li>One binary classifier per harmful class</li>
+      <ul>
+        <li>Multiple models must be trained separately</li>
+      </ul>
+      <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection4.png" alt="Card image cap">
+      <li>A multi-label classifier</li>
+      <ul>
+        <li>Each input feature may need to be transformed differently</li>
+      </ul>
+      <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection5.png" alt="Card image cap">
+      <li>Multi-task classifier</li>
+      <ul>
+        <li>Shared layers - transform input features into new ones</li>
+        <li>Task specific layers - each classification head transforms features in optiaml way to predict a specific harm probability</li>
+        <li>Single model is used, thus training is less expensive</li>
+        <li>Shared layers transform features so that they are beneficial for each task. This prevents redundant computations</li>
+        <li>Training data for each task contributes to learning other tasks</li>
+      </ul>
+      <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection6.png" alt="Card image cap">
+      <li>Final design</li>
+      <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection7.png" alt="Card image cap">
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -152,8 +156,23 @@
 <div class="card mb-4" id="harmful-content-detection-3">
   <div class="card-body">
     <h2 class="card-title">Data preparation</h2>
+
+    <h3 class="card-title">Data engineering</h3>
     <ul>
-      <li>Data engineering</li>
+      <li>Training data</li>
+      <ul>
+        <li>Option 1. human annotators</li>
+        <ul>
+          <li>Accurate but expensive</li>
+          <li>Used for evaluation dataset</li>
+        </ul>
+        <li>Option 2. user reports</li>
+        <ul>
+          <li>Noisy but produced more quickly</li>
+          <li>Used for training dataset</li>
+        </ul>
+      </ul>
+      <li>Database</li>
       <ul>
         <li>Users</li>
         <ul>
@@ -176,59 +195,60 @@
           <li>interaction_type (impression / like / comment / share / report)</li>
         </ul>
       </ul>
-      <li>Feature engineering</li>
+    </ul>
+
+    <h3 class="card-title">Feature engineering</h3>
+    <ul>
+      <li>Textual content</li>
       <ul>
-        <li>Textual content</li>
+        <li>Text preprocessing</li>
+        <li>Vectorization</li>
         <ul>
-          <li>Text preprocessing</li>
-          <li>Vectorization</li>
-          <ul>
-            <li>Statistical methods like BoW and TF-IDF cannot capture semantics</li>
-            <li>BERT takes long time to produce text embeddings and is for english only</li>
-            <li>DistlimBERT can be used here</li>
-          </ul>
+          <li>Statistical methods like BoW and TF-IDF cannot capture semantics</li>
+          <li>BERT takes long time to produce text embeddings and is for english only</li>
+          <li>DistlimBERT can be used here</li>
         </ul>
-        <li>Image or video</li>
-        <ul>
-          <li>Preprocessing - decode, resize, normalize</li>
-          <li>Feature extraction - convert unstructured data into feature vector</li>
-          <ul>
-            <li>Image - CLIP's visual encoder, SimCLR</li>
-            <li>Video - VideoMoCo</li>
-          </ul>
-        </ul>
-        <li>User interation to the post</li>
-        <ul>
-          <li>Number of likes, shares, comments, reports - scale these values to speed up convergence during training</li>
-          <li>Comments</li>
-        </ul>
-        <li>Author features</li>
-        <ul>
-          <li>Author's violation history</li>
-          <ul>
-            <li>Number of violations</li>
-            <li>Total user reports</li>
-            <li>Profane word rate</li>
-          </ul>
-          <li>Author's demographics</li>
-          <ul>
-            <li>Age</li>
-            <li>Gender - use one-hot encoding</li>
-            <li>City and country - use embedding layer to represent these as feature vectors</li>
-          </ul>
-          <li>Account information</li>
-          <ul>
-            <li>Number of followers and followings</li>
-            <li>Account age</li>
-          </ul>
-        </ul>
-        <li>Contexual information</li>
-        <ul>
-          <li>Time of day - use one-hot encoding</li>
-          <li>Device - use one-hot encoding</li>
-        </ul>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection8.png" alt="Card image cap">
       </ul>
+      <li>Image or video</li>
+      <ul>
+        <li>Preprocessing - decode, resize, normalize</li>
+        <li>Feature extraction - convert unstructured data into feature vector</li>
+        <ul>
+          <li>Image - CLIP's visual encoder, SimCLR</li>
+          <li>Video - VideoMoCo</li>
+        </ul>
+      </ul>
+      <li>User interation to the post</li>
+      <ul>
+        <li>Number of likes, shares, comments, reports - scale these values to speed up convergence during training</li>
+        <li>Comments</li>
+      </ul>
+      <li>Author features</li>
+      <ul>
+        <li>Author's violation history</li>
+        <ul>
+          <li>Number of violations</li>
+          <li>Total user reports</li>
+          <li>Profane word rate</li>
+        </ul>
+        <li>Author's demographics</li>
+        <ul>
+          <li>Age</li>
+          <li>Gender - use one-hot encoding</li>
+          <li>City and country - use embedding layer to represent these as feature vectors</li>
+        </ul>
+        <li>Account information</li>
+        <ul>
+          <li>Number of followers and followings</li>
+          <li>Account age</li>
+        </ul>
+      </ul>
+      <li>Contexual information</li>
+      <ul>
+        <li>Time of day - use one-hot encoding</li>
+        <li>Device - use one-hot encoding</li>
+      </ul>
+      <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection8.png" alt="Card image cap">
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -239,25 +259,23 @@
 <div class="card mb-4" id="harmful-content-detection-4">
   <div class="card-body">
     <h2 class="card-title">Model development</h2>
+
+    <h3 class="card-title">Model selection</h3>
     <ul>
-      <li>Model selection</li>
+      <li>Neural network</li>
+    </ul>
+
+    <h3 class="card-title">Model training</h3>
+    <ul>
+      <li>Choose loss function</li>
       <ul>
-        <li>Neural network</li>
-        <li>Hyperparameter tuning with grid search</li>
+        <li>In multi-task training, each task is assigned a loss function based on its ML category</li>
+        <li>Since each task is binary classification, cross-entropy is used for each task</li>
       </ul>
-      <li>Model training</li>
+      <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection9.png" alt="Card image cap">
+      <li>Hyperparameters</li>
       <ul>
-        <li>Constructing dataset</li>
-        <ul>
-          <li>Human annotators - accurate but expensive. Used for evaluation dataset</li>
-          <li>User reports - noisy but produced more quickly. Used for training dataset</li>
-        </ul>
-        <li>Choosing loss function</li>
-        <ul>
-          <li>In multi-task training, each task is assigned a loss function based on its ML category</li>
-          <li>Since each task is binary classification, cross-entropy is used for each task</li>
-        </ul>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection9.png" alt="Card image cap">
+        <li>Grid search</li>
       </ul>
     </ul>
   </div>
@@ -269,44 +287,44 @@
 <div class="card mb-4" id="harmful-content-detection-5">
   <div class="card-body">
     <h2 class="card-title">Evaluation</h2>
+
+    <h3 class="card-title">Offline</h3>
     <ul>
-      <li>Offline</li>
+      <li>PR curve</li>
       <ul>
-        <li>PR curve</li>
-        <ul>
-          <li>Trade-off between precision and recall</li>
-          <li>PR-AUC calculates area beneath PR curve</li>
-          <li>High PR-AUC indicates more accurate model</li>
-        </ul>
-        <li>ROC curve</li>
-        <ul>
-          <li>Trade-off between true positive (recall) and false positive</li>
-          <li>ROC-AUC calculates area beneath POC curve</li>
-          <li>High ROC-AUC indicates more accurate model</li>
-        </ul>
+        <li>Trade-off between precision and recall</li>
+        <li>PR-AUC calculates area beneath PR curve</li>
+        <li>High PR-AUC indicates more accurate model</li>
       </ul>
-      <li>Online</li>
+      <li>ROC curve</li>
       <ul>
-        <li>Prevalence</li>
-        <ul>
-          <li>Number of harmful posts / Total number of posts</li>
-          <li>Treats all harmful posts equally</li>
-          <li>Does not capture number of people affected by harmful posts</li>
-        </ul>
-        <li>Harmful impressions</li>
-        <ul>
-          <li>Better metric than prevalence</li>
-        </ul>
-        <li>Valid appeals</li>
-        <ul>
-          <li>Number of reversed appeals / Number of harmful posts detected by system</li>
-        </ul>
-        <li>Proactive rate</li>
-        <ul>
-          <li>Number of harmful posts detected by system / Number of harmful posts detected by system + reported by users</li>
-        </ul>
-        <li>User reports per harmful class</li>
+        <li>Trade-off between true positive (recall) and false positive</li>
+        <li>ROC-AUC calculates area beneath POC curve</li>
+        <li>High ROC-AUC indicates more accurate model</li>
       </ul>
+    </ul>
+
+    <h3 class="card-title">Online</h3>
+    <ul>
+      <li>Prevalence</li>
+      <ul>
+        <li>Number of harmful posts / Total number of posts</li>
+        <li>Treats all harmful posts equally</li>
+        <li>Does not capture number of people affected by harmful posts</li>
+      </ul>
+      <li>Harmful impressions</li>
+      <ul>
+        <li>Better metric than prevalence</li>
+      </ul>
+      <li>Valid appeals</li>
+      <ul>
+        <li>Number of reversed appeals / Number of harmful posts detected by system</li>
+      </ul>
+      <li>Proactive rate</li>
+      <ul>
+        <li>Number of harmful posts detected by system / Number of harmful posts detected by system + reported by users</li>
+      </ul>
+      <li>User reports per harmful class</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -316,24 +334,47 @@
 
 <div class="card mb-4" id="harmful-content-detection-6">
   <div class="card-body">
-    <h2 class="card-title">Deployment and serving</h2>
+    <h2 class="card-title">Serving</h2>
+
+    <h3 class="card-title">Components</h3>
 
     <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection10.png" alt="Card image cap">
 
-    <h3 class="card-title">Harmful content detection service</h3>
     <ul>
-      <li>Computes probability of posts being harmful</li>
-    </ul>
-
-    <h3 class="card-title">Violation enforcement service</h3>
-    <ul>
-      <li>Immediately takes down posts</li>
+      <li>Harmful content detection service</li>
+      <ul>
+        <li>Computes probability of posts being harmful</li>
+      </ul>
+      <li>Violation enforcement service</li>
+      <ul>
+        <li>Immediately takes down posts</li>
       <li>Notifies users why the post is taken down</li>
+      </ul>
+      <li>Demotion service</li>
+      <ul>
+        <li>Temporarily demotes posts to be reviewd by human</li>
+      </ul>
     </ul>
 
-    <h3 class="card-title">Demotion service</h3>
+    <h3 class="card-title">Workflow</h3>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="harmful-content-detection-7">
+  <div class="card-body">
+    <h2 class="card-title">Follow up</h2>
     <ul>
-      <li>Temporarily demotes posts to be reviewd by human</li>
+      <li>Explain how to handle bias introduced by human labeling</li>
+      <li>Explain how to handle trending harmful classes (Ex. covid-19, elections)</li>
+      <li>Explain how to leverage temporal information (Ex. user's sequence of actions)</li>
+      <li>Explain how to select post samples for human review</li>
+      <li>Explain how to detect authentic and fake accounts</li>
+      <li>Explain how to deal with borderline contents</li>
+      <li>Explain how to make the system efficient to deploy on devices</li>
+      <li>Explain how to use transformer based architectures with linear transformers</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
