@@ -44,19 +44,20 @@
   <div class="card-body">
     <h2 class="card-title">Youtube video search</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#youtube-video-search-1">Clarify requirements</a></li>
-      <li><a href="#youtube-video-search-2">Frame problem as ML task</a></li>
+      <li><a href="#youtube-video-search-1">Requirements</a></li>
+      <li><a href="#youtube-video-search-2">Problem</a></li>
       <li><a href="#youtube-video-search-3">Data preparation</a></li>
       <li><a href="#youtube-video-search-4">Model development</a></li>
       <li><a href="#youtube-video-search-5">Evaluation</a></li>
-      <li><a href="#youtube-video-search-6">Deployment and serving</a></li>
+      <li><a href="#youtube-video-search-6">Serving</a></li>
+      <li><a href="#youtube-video-search-7">Follow up</a></li>
     </ul>
   </div>
 </div>
 
 <div class="card mb-4" id="youtube-video-search-1">
   <div class="card-body">
-    <h2 class="card-title">Clarify requirements</h2>
+    <h2 class="card-title">Requirements</h2>
     <ul>
       <li>Business objective</li>
       <ul>
@@ -65,7 +66,7 @@
         <li>How many languages are supported? English only</li>
         <li>Do videos need to be personalized? No</li>
       </ul>
-      <li>Features that the system supports</li>
+      <li>System features</li>
       <ul>
         <li>Is the video determined by only the visual and textual (title and descritpion) content? Yes</li>
       </ul>
@@ -86,32 +87,35 @@
 
 <div class="card mb-4" id="youtube-video-search-2">
   <div class="card-body">
-    <h2 class="card-title">Frame problem as ML task</h2>
+    <h2 class="card-title">Problem</h2>
+
+    <h3 class="card-title">ML problem</h3>
     <ul>
-      <li>Define ML objective</li>
+      <li>Rank videos based on the relevance to the text query</li>
+      <li>Input</li>
       <ul>
-        <li>Rank videos based on the relevance to the text query</li>
+        <li>Text query</li>
       </ul>
-      <li>Specify input and output</li>
+      <li>Output</li>
       <ul>
-        <li>Input - text query</li>
-        <li>Output - ranked list of videos</li>
+        <li>Ranked list of videos</li>
       </ul>
-      <li>Choose right ML category</li>
+    </ul>
+
+    <h3 class="card-title">ML category</h3>
+    <ul>
+      <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/youtube-video-search1.png" alt="Card image cap">
+      <li>Visual search</li>
       <ul>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/youtube-video-search1.png" alt="Card image cap">
-        <li>Visual search</li>
-        <ul>
-          <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/youtube-video-search2.png" alt="Card image cap">
-          <li>Text query and video are encoded separately using two encoders</li>
-          <li>Compute dot product between text query embedding and each video embedding, and rank videos based on the score</li>
-        </ul>
-        <li>Text search</li>
-        <ul>
-          <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/youtube-video-search3.png" alt="Card image cap">
-          <li>Inverted index is used (This is not based on ML, thus there is no training cost)</li>
-          <li>Elasticsearch is popular choice for inverted index</li>
-        </ul>
+        <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/youtube-video-search2.png" alt="Card image cap">
+        <li>Text query and video are encoded separately using two encoders</li>
+        <li>Compute dot product between text query embedding and each video embedding, and rank videos based on the score</li>
+      </ul>
+      <li>Text search</li>
+      <ul>
+        <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/youtube-video-search3.png" alt="Card image cap">
+        <li>Inverted index is used (This is not based on ML, thus there is no training cost)</li>
+        <li>Elasticsearch is popular choice for inverted index</li>
       </ul>
     </ul>
   </div>
@@ -123,8 +127,14 @@
 <div class="card mb-4" id="youtube-video-search-3">
   <div class="card-body">
     <h2 class="card-title">Data preparation</h2>
+
+    <h3 class="card-title">Data engineering</h3>
     <ul>
-      <li>Data engineering</li>
+      <li>Training data</li>
+      <ul>
+        <li>We are given annotated dataset</li>
+      </ul>
+      <li>Database</li>
       <ul>
         <li>Annotated dataset</li>
         <ul>
@@ -132,50 +142,53 @@
           <li>Text query</li>
           <li>Split type - train, validation, test</li>
         </ul>
-        <li>No need to do data engineering since annotated dataset is given</li>
       </ul>
-      <li>Feature engineering</li>
+      <li>No need to do data engineering since annotated dataset is given</li>
+    </ul>
+
+    <h3 class="card-title">Feature engineering</h3>
+    <ul>
+      <li>Prepare text data</li>
       <ul>
-        <li>Prepare text data</li>
+        <li>Text normalization (text cleanup)</li>
         <ul>
-          <li>Text normalization (text cleanup)</li>
-          <ul>
-            <li>Lowercasing</li>
-            <li>Punctuation removal</li>
-            <li>Trim whitespaces</li>
-            <li>Normalization Form KD (NFKD)</li>
-            <li>Strip accents</li>
-            <li>Lemmatization and stemming</li>
-            <li>Ex. "A person  is walking in Montreal!" -> "a person walk in montreal"</li>
-          </ul>
-          <li>Tokenization</li>
-          <ul>
-            <li>Ex. "a person walk in montreal" -> "["a", "person", "walk", "in", "montreal"]"</li>
-          </ul>
-          <li>Tokens to IDs</li>
-          <ul>
-            <li>Lookup table</li>
-            <ul>
-              <li>Each token is mapped to unique ID</li>
-              <li>Need to keep large table in memory</li>
-              <li>New words cannot be handled</li>
-            </ul>
-            <li>Hashing</li>
-            <ul>
-              <li>Hash function is used to compute ID for each token</li>
-              <li>Potential collision</li>
-              <li>Cannot convert IDs to tokens</li>
-            </ul>
-            <li>Ex. "["a", "person", "walk", "in", "montreal"]" -> [33,28,4,16,99]</li>
-          </ul>
+          <li>Lowercasing</li>
+          <li>Punctuation removal</li>
+          <li>Trim whitespaces</li>
+          <li>Normalization Form KD (NFKD)</li>
+          <li>Strip accents</li>
+          <li>Lemmatization and stemming</li>
+          <li>Ex. "A person  is walking in Montreal!" -> "a person walk in montreal"</li>
         </ul>
-        <li>Prepare video data</li>
+        <li>Tokenization</li>
         <ul>
-          <li>Decode frames</li>
-          <li>Sample frames</li>
-          <li>Resizing</li>
-          <li>Scaling, normalizing, correcting color mode</li>
+          <li>Ex. "a person walk in montreal" -> "["a", "person", "walk", "in", "montreal"]"</li>
         </ul>
+        <li>Tokens to IDs</li>
+        <ul>
+          <li>Lookup table</li>
+          <ul>
+            <li>Each token is mapped to unique ID</li>
+            <li>Need to keep large table in memory</li>
+            <li>New words cannot be handled</li>
+          </ul>
+          <li>Hashing</li>
+          <ul>
+            <li>Hash function is used to compute ID for each token</li>
+            <li>Potential collision</li>
+            <li>Cannot convert IDs to tokens</li>
+          </ul>
+          <li>Ex. "["a", "person", "walk", "in", "montreal"]" -> [33,28,4,16,99]</li>
+        </ul>
+      </ul>
+      <li>Prepare video data</li>
+      <ul>
+        <li>Decode frames</li>
+        <li>Sample frames</li>
+        <li>Resize</li>
+        <li>Scale</li>
+        <li>Normalize</li>
+        <li>Pick color mode</li>
       </ul>
     </ul>
   </div>
@@ -187,66 +200,68 @@
 <div class="card mb-4" id="youtube-video-search-4">
   <div class="card-body">
     <h2 class="card-title">Model development</h2>
+
+    <h3 class="card-title">Model selection</h3>
     <ul>
-      <li>Model selection</li>
+      <li>Text encoder</li>
       <ul>
-        <li>Text encoder</li>
+        <li>Statistical method</li>
         <ul>
-          <li>Statistical method</li>
+          <li>Does not consider the order of words in sentences</li>
+          <li>Does not capture semantic and contextual meaning</li>
+          <li>The representation vector is sparse</li>
+          <li>Ex. Bag of words</li>
           <ul>
-            <li>Does not consider the order of words in sentences</li>
-            <li>Does not capture semantic and contextual meaning</li>
-            <li>The representation vector is sparse</li>
-            <li>Ex. Bag of words</li>
-            <ul>
-              <li>Models sentence-word occurences in matrix</li>
-            </ul>
-            <li>Ex. Term frequency inverse document frequency (TF-IDF)</li>
-            <ul>
-              <li>Same sentence-word matrix as BoW but normalizes based on the frequency of words</li>
-            </ul>
+            <li>Models sentence-word occurences in matrix</li>
           </ul>
-          <li>ML based method</li>
+          <li>Ex. Term frequency inverse document frequency (TF-IDF)</li>
           <ul>
-            <li>Embedding layer</li>
-            <ul>
-              <li>Map each token ID to embedding vector</li>
-            </ul>
-            <li>Word2vec</li>
-            <ul>
-              <li>Learns to predict a center word from its surrounding words during training</li>
-              <li>Ex. skip-gram, continuous bag of words (CBOW)</li>
-            </ul>
-            <li>Transformer-based models</li>
-            <ul>
-              <li>As opposed to word2vec, produces different embeddings for the same word depending on the context</li>
-              <li>Ex. BERT, GPT3, BLOOM</li>
-            </ul>
+            <li>Same sentence-word matrix as BoW but normalizes based on the frequency of words</li>
           </ul>
         </ul>
-        <li>Video encoder</li>
+        <li>ML based method</li>
         <ul>
-          <li>Video-level models</li>
+          <li>Embedding layer</li>
           <ul>
-            <li>Processes a whole video to produce an embedding</li>
-            <li>Based on 3D convolutions or transformers</li>
-            <li>Computationally expensive</li>
+            <li>Map each token ID to embedding vector</li>
           </ul>
-          <li>Frame-level models</li>
+          <li>Word2vec</li>
           <ul>
-            <li>Processes a video and sample frames</li>
-            <li>Produces frame embeddings</li>
-            <li>Aggregate (for example, avergae) frame embeddings to generate video embeddings</li>
-            <li>Computationally less expensive, but does not understand temporal aspects of videos such as actions and motions</li>
-            <li>Ex. ViT</li>
+            <li>Learns to predict a center word from its surrounding words during training</li>
+            <li>Ex. skip-gram, continuous bag of words (CBOW)</li>
+          </ul>
+          <li>Transformer-based models</li>
+          <ul>
+            <li>As opposed to word2vec, produces different embeddings for the same word depending on the context</li>
+            <li>Ex. BERT, GPT3, BLOOM</li>
           </ul>
         </ul>
       </ul>
-      <li>Model training</li>
+      <li>Video encoder</li>
       <ul>
-        <li>Constrative learning</li>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/youtube-video-search4.png" alt="Card image cap">
+        <li>Video-level models</li>
+        <ul>
+          <li>Processes a whole video to produce an embedding</li>
+          <li>Based on 3D convolutions or transformers</li>
+          <li>Computationally expensive</li>
+        </ul>
+        <li>Frame-level models</li>
+        <ul>
+          <li>Processes a video and sample frames</li>
+          <li>Produces frame embeddings</li>
+          <li>Aggregate (for example, avergae) frame embeddings to generate video embeddings</li>
+          <li>Computationally less expensive, but does not understand temporal aspects of videos such as actions and motions</li>
+          <li>Ex. ViT</li>
+        </ul>
       </ul>
+      <li>Constrative learning</li>
+      <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/youtube-video-search4.png" alt="Card image cap">
+    </ul>
+
+    <h3 class="card-title">Model training</h3>
+    <ul>
+      <li>Choose loss function</li>
+      <li>Hyperparameters</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -257,36 +272,36 @@
 <div class="card mb-4" id="youtube-video-search-5">
   <div class="card-body">
     <h2 class="card-title">Evaluation</h2>
+
+    <h3 class="card-title">Offline</h3>
     <ul>
-      <li>Offline</li>
+      <li>Option 1. precision@k</li>
       <ul>
-        <li>Precision@k</li>
+        <li>\( \dfrac{\text{number of relevant items among the top k items in the ranked list}}{k} \)</li>
+        <li>In annotated dataset, text query is associated to just one video. That means the numerator is either 1 or 0</li>
+        <li>Thus, this metric is not useful</li>
+      </ul>
+      <li>Option 2. recall@k</li>
+      <ul>
+        <li>\( \dfrac{\text{number of relevant items among the top k items in the ranked list}}{\text{total number of relevant videos}} \)</li>
+        <li>Total number of relevant videos is always 1</li>
+        <li>Then, recall@k = 1 if relevant video is in the top k items, 0 otherwise</li>
         <ul>
-          <li>Precision@k = number of relevant items among the top k items in the ranked list / k</li>
-          <li>In annotated dataset, text query is associated to just one video. That means the numerator is either 1 or 0</li>
-          <li>Thus, this metric is not useful</li>
-        </ul>
-        <li>Recall@k</li>
-        <ul>
-          <li>Recall@k = number of relevant items among the top k items in the ranked list / total number of relevant videos</li>
-          <li>Total number of relevant videos is always 1</li>
-          <li>Then, recall@k = 1 if relevant video is in the top k items, 0 otherwise</li>
-          <ul>
-            <li>Picking k can be challenging</li>
-          </ul>
-        </ul>
-        <li>MRR (Mean Reciprobal Rank)</li>
-        <ul>
-          <li>\( MRR = \dfrac{1}{m} \displaystyle\sum_{i=1}^{m} \dfrac{1}{rank_{i}} \) where \( {rank_{i}} \) is the position on which the first relevant item appears in the output list</li>
-          <li>Consider only the first relevant item in each output list, then average the reciprocal rank</li>
+          <li>Picking k can be challenging</li>
         </ul>
       </ul>
-      <li>Online</li>
+      <li>Option 3.  mean reciprobal rank (MRR)</li>
       <ul>
-        <li>Click-through rate</li>
-        <li>Video completion rate</li>
-        <li>Total watch time</li>
+        <li>\( MRR = \dfrac{1}{m} \displaystyle\sum_{i=1}^{m} \dfrac{1}{\text{rank}_{i}} \) where \( {\text{rank}_{i}} \) is the position on which the first relevant item appears in the output list</li>
+        <li>Consider only the first relevant item in each output list, then average the reciprocal rank</li>
       </ul>
+    </ul>
+
+    <h3 class="card-title">Online</h3>
+    <ul>
+      <li>Click-through rate</li>
+      <li>Video completion rate</li>
+      <li>Total watch time</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -296,9 +311,12 @@
 
 <div class="card mb-4" id="youtube-video-search-6">
   <div class="card-body">
-    <h2 class="card-title">Deployment and serving</h2>
+    <h2 class="card-title">Serving</h2>
+
+    <h3 class="card-title">Components</h3>
 
     <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/youtube-video-search5.png" alt="Card image cap">
+
     <ul>
       <li>Prediction pipeline</li>
       <ul>
@@ -331,6 +349,30 @@
         <li>Uses Elasticsearch to index titles, manual and automated tags</li>
         <li>Standalone model to generate tag (When users don't provide tags for their videos)</li>
       </ul>
+    </ul>
+
+    <h3 class="card-title">Workflow</h3>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="youtube-video-search-7">
+  <div class="card-body">
+    <h2 class="card-title">Follow up</h2>
+    <ul>
+      <li>Explain how multi-stage design (candidate generation + ranking) can improve the system</li>
+      <li>Explain how to use more video features (video length, video popularity) to improve the model</li>
+      <li>Explain how to use interactions (clicks, likes) to label data instead of relying on annotated dataset</li>
+      <li>Explain how to use ML model to find titles and tags that are similar to text query</li>
+      <li>Explain how to build query understanding</li>
+      <li>Explain how to build multi-modal system that processes speech and audio to improve search result</li>
+      <li>Explain how to support other languages</li>
+      <li>Explain how to detect near-duplicate videos and remove them from search result</li>
+      <li>Explain how to divide text queries into head, torso, tail</li>
+      <li>Explain how to consider popularity and freshness when producing output list</li>
+      <li>Explain how real-world search system work</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
