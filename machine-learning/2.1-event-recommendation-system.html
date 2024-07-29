@@ -42,21 +42,22 @@
 <!-- Event recommendation systemn BEGIN -->
 <div class="card mb-4" id="event-recommendation-system">
   <div class="card-body">
-    <h2 class="card-title">Machine learning system design</h2>
+    <h2 class="card-title">Event recommendation system</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#event-recommendation-system-1">Clarify requirements</a></li>
-      <li><a href="#event-recommendation-system-2">Frame problem as ML task</a></li>
+      <li><a href="#event-recommendation-system-1">Requirements</a></li>
+      <li><a href="#event-recommendation-system-2">Problem</a></li>
       <li><a href="#event-recommendation-system-3">Data preparation</a></li>
       <li><a href="#event-recommendation-system-4">Model development</a></li>
       <li><a href="#event-recommendation-system-5">Evaluation</a></li>
-      <li><a href="#event-recommendation-system-6">Deployment and serving</a></li>
+      <li><a href="#event-recommendation-system-6">serving</a></li>
+      <li><a href="#event-recommendation-system-7">Follow up</a></li>
     </ul>
   </div>
 </div>
 
 <div class="card mb-4" id="event-recommendation-system-1">
   <div class="card-body">
-    <h2 class="card-title">Clarify requirements</h2>
+    <h2 class="card-title">Requirements</h2>
     <ul>
       <li>Business objective</li>
       <ul>
@@ -66,7 +67,7 @@
         <li>Can users RSVP to events? RSVP is out of scope</li>
         <li>Is event free or paid? Both</li>
       </ul>
-      <li>Features that the system supports</li>
+      <li>System features</li>
       <ul>
         <li>How can the distance and ETA between two location be calculated? Assume we have access to Google API to do that</li>
         <li>Can we access user's current location? Yes</li>
@@ -95,42 +96,45 @@
 
 <div class="card mb-4" id="event-recommendation-system-2">
   <div class="card-body">
-    <h2 class="card-title">Frame problem as ML task</h2>
+    <h2 class="card-title">Problem</h2>
+
+    <h3 class="card-title">ML problem</h3>
     <ul>
-      <li>Define ML objective</li>
+      <li>Maximize the number of event registrations</li>
+      <li>Input</li>
       <ul>
-        <li>Maximize the number of event registrations</li>
+        <li>A user</li>
       </ul>
-      <li>Specify input and output</li>
+      <li>Output</li>
       <ul>
-        <li>Input - user</li>
-        <li>Output - a list of events sorted by relevance score</li>
+        <li>A list of events sorted by relevance score</li>
       </ul>
-      <li>Choose right ML category</li>
+    </ul>
+
+    <h3 class="card-title">ML category</h3>
+    <ul>
+      <li>Learning to Rank (LTR)</li>
       <ul>
-        <li>Learning to Rank (LTR)</li>
+        <li>Option 1. pointwise LTR</li>
         <ul>
-          <li>Pointwise LTR</li>
-          <ul>
-            <li>Predict relevance between query and each item</li>
-          </ul>
-          <li>Pairwise LTR</li>
-          <ul>
-            <li>Take two items, and predict which item is more relevant to the query</li>
-            <li>Ex. RankNet, LambdaRank, LambdaMART</li>
-          </ul>
-          <li>Listwise LTR</li>
-          <ul>
-            <li>Predict the optimal ordering of entire items given the query</li>
-            <li>Ex. SoftRank, ListNet, AdaRank</li>
-          </ul>
-          <li>Pairwise and listwise produce more accurate results but they are more expensive to train</li>
-          <li>Use pointwise with binary classification predicting whether user will register the event or not</li>
+          <li>Predict relevance between query and each item</li>
         </ul>
-        <li>Events are short-lived, thus not many historical interaction are available</li>
-        <li>Intrinsically have cold-start and new-item problem</li>
-        <li>Focus on extracting as many features as possible</li>
+        <li>Option 2. pairwise LTR</li>
+        <ul>
+          <li>Take two items, and predict which item is more relevant to the query</li>
+          <li>Ex. RankNet, LambdaRank, LambdaMART</li>
+        </ul>
+        <li>Option 3. listwise LTR</li>
+        <ul>
+          <li>Predict the optimal ordering of entire items given the query</li>
+          <li>Ex. SoftRank, ListNet, AdaRank</li>
+        </ul>
+        <li>Pairwise and listwise produce more accurate results but they are more expensive to train</li>
+        <li>Use pointwise with binary classification predicting whether user will register the event or not</li>
       </ul>
+      <li>Events are short-lived, thus not many historical interaction are available</li>
+      <li>Intrinsically have cold-start and new-item problem</li>
+      <li>Focus on extracting as many features as possible</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -141,8 +145,15 @@
 <div class="card mb-4" id="event-recommendation-system-3">
   <div class="card-body">
     <h2 class="card-title">Data preparation</h2>
+
+    <h3 class="card-title">Data engineering</h3>
     <ul>
-      <li>Data engineering</li>
+      <li>Training data</li>
+      <ul>
+        <li>&lt;user, event&gt; pair from interaction data where 1 if user registered for the event and 0 otherwise</li>
+        <li>Data will highly be imbalanced, thus use undersampling</li>
+      </ul>
+      <li>Database</li>
       <ul>
         <li>Event</li>
         <ul>
@@ -177,94 +188,95 @@
           <li>interaction_type - impression/register/invite</li>
         </ul>
       </ul>
-      <li>Feature engineering</li>
+    </ul>
+
+    <h3 class="card-title">Feature engineering</h3>
+    <ul>
+      <li>Location</li>
       <ul>
-        <li>Location</li>
+        <li>Walk score</li>
         <ul>
-          <li>Walk score</li>
-          <ul>
-            <li>90 to 100 - No car needed</li>
-            <li>70 to 89 - Very walkable</li>
-            <li>50 to 69 - Somewhat walkable</li>
-            <li>25 to 49 - Car-dependent</li>
-            <li>0 to 24 - Requires a car</li>
-          </ul>
-          <li>Walk score similarity - difference between event's walk score and user's average walk score of previous events that user registered</li>
-          <li>Transit score</li>
-          <li>Tannsit score similarity</li>
-          <li>Bike score</li>
-          <li>Bike score similarity</li>
-          <li>Same country - 1 if user and events are in the same country, 0 otherwise</li>
-          <li>Same city - 1 if user and events are in the same city, 0 otherwise</li>
-          <li>Distance - distance between user and event location</li>
-          <ul>
-            <li>0 - less than a mile</li>
-            <li>1 - 1 to 5 miles</li>
-            <li>2 - 5 to 20 miles</li>
-            <li>3 - 20 to 50 miles</li>
-            <li>4 - 50 to 100 miles</li>
-            <li>5 - more than 100 miles</li>
-          </ul>
-          <li>Distance similarity - difference between distance to event and average distance to previous events that user registered</li>
+          <li>90 to 100 - No car needed</li>
+          <li>70 to 89 - Very walkable</li>
+          <li>50 to 69 - Somewhat walkable</li>
+          <li>25 to 49 - Car-dependent</li>
+          <li>0 to 24 - Requires a car</li>
         </ul>
-        <li>Time</li>
+        <li>Walk score similarity - difference between event's walk score and user's average walk score of previous events that user registered</li>
+        <li>Transit score</li>
+        <li>Tannsit score similarity</li>
+        <li>Bike score</li>
+        <li>Bike score similarity</li>
+        <li>Same country - 1 if user and events are in the same country, 0 otherwise</li>
+        <li>Same city - 1 if user and events are in the same city, 0 otherwise</li>
+        <li>Distance - distance between user and event location</li>
         <ul>
-          <li>Remaining time - time remaining until the event happens</li>
-          <ul>
-            <li>0 - less than 1 hour left</li>
-            <li>1 - 1 to 2 hours</li>
-            <li>2 - 2 to 4 hours</li>
-            <li>3 - 4 to 6 hours</li>
-            <li>4 - 6 to 12 hours</li>
-            <li>5 - 12 to 24 hours</li>
-            <li>6 - 1 to 3 days</li>
-            <li>7 - 3 to 7 days</li>
-            <li>8 - more than 7 days</li>
-          </ul>
-          <li>Remaining time similarity - difference between remaining time and average remaining time of previous events that user registered</li>
-          <li>ETA - ETA between user and event location</li>
-          <li>ETA similarity - difference between ETA and average ETA of previous events that user registered</li>
-          <li>Day similarity - difference between event day (Mon to Sun) and days of previous events that user registered</li>
-          <li>Hour similarity - difference between event hour (bucketized) and hours of previous events that user registered</li>
+          <li>0 - less than a mile</li>
+          <li>1 - 1 to 5 miles</li>
+          <li>2 - 5 to 20 miles</li>
+          <li>3 - 20 to 50 miles</li>
+          <li>4 - 50 to 100 miles</li>
+          <li>5 - more than 100 miles</li>
         </ul>
-        <li>Social</li>
+        <li>Distance similarity - difference between distance to event and average distance to previous events that user registered</li>
+      </ul>
+      <li>Time</li>
+      <ul>
+        <li>Remaining time - time remaining until the event happens</li>
         <ul>
-          <li>Number of users registered for the event</li>
-          <li>Ratio of total number of registered users and number of impressions</li>
-          <li>Registered user similarity - difference between number of registered users and average number of registration for all previous events</li>
-          <li>Number of friends who invited the user to the event</li>
-          <li>Number of users (who are not friend) who invited the user to the event</li>
-          <li>Is the event hosted by a friend (1 if yes, 0 otherwise)</li>
-          <li>How often the user registered for the event created by the host</li>
+          <li>0 - less than 1 hour left</li>
+          <li>1 - 1 to 2 hours</li>
+          <li>2 - 2 to 4 hours</li>
+          <li>3 - 4 to 6 hours</li>
+          <li>4 - 6 to 12 hours</li>
+          <li>5 - 12 to 24 hours</li>
+          <li>6 - 1 to 3 days</li>
+          <li>7 - 3 to 7 days</li>
+          <li>8 - more than 7 days</li>
         </ul>
-        <li>User</li>
+        <li>Remaining time similarity - difference between remaining time and average remaining time of previous events that user registered</li>
+        <li>ETA - ETA between user and event location</li>
+        <li>ETA similarity - difference between ETA and average ETA of previous events that user registered</li>
+        <li>Day similarity - difference between event day (Mon to Sun) and days of previous events that user registered</li>
+        <li>Hour similarity - difference between event hour (bucketized) and hours of previous events that user registered</li>
+      </ul>
+      <li>Social</li>
+      <ul>
+        <li>Number of users registered for the event</li>
+        <li>Ratio of total number of registered users and number of impressions</li>
+        <li>Registered user similarity - difference between number of registered users and average number of registration for all previous events</li>
+        <li>Number of friends who invited the user to the event</li>
+        <li>Number of users (who are not friend) who invited the user to the event</li>
+        <li>Is the event hosted by a friend (1 if yes, 0 otherwise)</li>
+        <li>How often the user registered for the event created by the host</li>
+      </ul>
+      <li>User</li>
+      <ul>
+        <li>Gender</li>
+        <li>Age</li>
+      </ul>
+      <li>Event</li>
+      <ul>
+        <li>Price</li>
         <ul>
-          <li>Gender</li>
-          <li>Age</li>
+          <li>0 - free</li>
+          <li>1 - 1 to 99</li>
+          <li>2 - 100 to 499</li>
+          <li>3 - 500 to 1999</li>
+          <li>4 - more than 2000</li>
         </ul>
-        <li>Event</li>
+        <li>Price similarity - difference between event price and average price of previous events that user registered</li>
+        <li>Similarity between event description and description of previous events that user registered</li>
         <ul>
-          <li>Price</li>
-          <ul>
-            <li>0 - free</li>
-            <li>1 - 1 to 99</li>
-            <li>2 - 100 to 499</li>
-            <li>3 - 500 to 1999</li>
-            <li>4 - more than 2000</li>
-          </ul>
-          <li>Price similarity - difference between event price and average price of previous events that user registered</li>
-          <li>Similarity between event description and description of previous events that user registered</li>
-          <ul>
-            <li>Convert event description to numerical vector using TF-ID and compute similarity using cosine distance</li>
-          </ul>
+          <li>Convert event description to numerical vector using TF-ID and compute similarity using cosine distance</li>
         </ul>
-        <li>Other points</li>
-        <ul>
-          <li>Batch features (those that don't change often like age, gender, event description) can be computed via batch processing and stored in feature store</li>
-          <li>Dynamic features (like number of users registered for an event) is expensive to compute in real-time</li>
-          <li>Use decay factor to give more weights on user's recent interactions</li>
-          <li>Convert each event and user into embedding vector</li>
-        </ul>
+      </ul>
+      <li>Other points</li>
+      <ul>
+        <li>Batch features (those that don't change often like age, gender, event description) can be computed via batch processing and stored in feature store</li>
+        <li>Dynamic features (like number of users registered for an event) is expensive to compute in real-time</li>
+        <li>Use decay factor to give more weights on user's recent interactions</li>
+        <li>Convert each event and user into embedding vector</li>
       </ul>
     </ul>
   </div>
@@ -276,109 +288,105 @@
 <div class="card mb-4" id="event-recommendation-system-4">
   <div class="card-body">
     <h2 class="card-title">Model development</h2>
+
+    <h3 class="card-title">Model selection</h3>
     <ul>
-      <li>Model selection</li>
+      <li>Option 1. logistic regression</li>
       <ul>
-        <li>Logistic regression</li>
+        <li>Pros</li>
         <ul>
-          <li>Pros</li>
-          <ul>
-            <li>Fast inference</li>
-            <li>Fast training</li>
-            <li>Interpretable</li>
-          </ul>
-          <li>Cons</li>
-          <ul>
-            <li>Non-linear problems can't be solved</li>
-            <li>Cannot handle dependency between features</li>
-          </ul>
+          <li>Fast inference</li>
+          <li>Fast training</li>
+          <li>Interpretable</li>
         </ul>
-        <li>Decision tree</li>
+        <li>Cons</li>
         <ul>
-          <li>Pros</li>
-          <ul>
-            <li>Fast inference</li>
-            <li>Fast training</li>
-            <li>Interpretable</li>
-            <li>Little dataprep required</li>
-          </ul>
-          <li>Cons</li>
-          <ul>
-            <li>Non-optimal decision boundry</li>
-            <li>Overfitting due to model being sensitive to small variations in input data</li>
-          </ul>
-        </ul>
-        <li>Bagging</li>
-        <ul>
-          <li>Train models in parallel on subsets of training data, then combine predictions to make final prediction</li>
-          <li>Pros</li>
-          <ul>
-            <li>Reduce model sensitivity to change in data</li>
-            <li>Train in parallel, thus fast training</li>
-            <li>Inputs are processed in parallel, thus fast inference</li>
-          </ul>
-          <li>Cons</li>
-          <ul>
-            <li>Does not solve underfitting</li>
-          </ul>
-          <li>Ex. random forest</li>
-        </ul>
-        <li>Boosting</li>
-        <ul>
-          <li>Train weak classifiers in sequence, that perform slightly better than random guess</li>
-          <li>Pros</li>
-          <ul>
-            <li>Reduce both bias and variance</li>
-          </ul>
-          <li>Cons</li>
-          <ul>
-            <li>Slower traning and infernce</li>
-          </ul>
-          <li>Ex. Adaboost, XGBoost</li>
-        </ul>
-        <li>GBDT</li>
-        <ul>
-          <li>Use GradientBoost to improve decision trees</li>
-          <li>Pros</li>
-          <ul>
-            <li>Reduce both bias and variance</li>
-            <li>Little dataprep required</li>
-          </ul>
-          <li>Cons</li>
-          <ul>
-            <li>Lots of hyperparameters to tune</li>
-            <li>Not suitable for continual learning from streaming data</li>
-          </ul>
-          <li>Ex. XGBoost</li>
-        </ul>
-        <li>Neural network</li>
-        <ul>
-          <li>Pros</li>
-          <ul>
-            <li>Continual learning</li>
-            <li>Can handle unstructured data</li>
-          </ul>
-          <li>Cons</li>
-          <ul>
-            <li>Computationally expensive</li>
-            <li>Lots of dataprep</li>
-            <li>Large training data is needed</li>
-            <li>Not interpretable</li>
-          </ul>
+          <li>Non-linear problems can't be solved</li>
+          <li>Cannot handle dependency between features</li>
         </ul>
       </ul>
-      <li>Model training</li>
+      <li>Option 2. decision tree</li>
       <ul>
-        <li>Construct dataset</li>
+        <li>Pros</li>
         <ul>
-          <li>&lt;user, event&gt; pair from interaction data where 1 if user registered for the event and 0 otherwise</li>
-          <li>Data will highly be imbalanced, thus use undersampling</li>
+          <li>Fast inference</li>
+          <li>Fast training</li>
+          <li>Interpretable</li>
+          <li>Little dataprep required</li>
         </ul>
-        <li>Choose loss function</li>
+        <li>Cons</li>
         <ul>
-          <li>Binary classification, thus use cross-entropy</li>
+          <li>Non-optimal decision boundry</li>
+          <li>Overfitting due to model being sensitive to small variations in input data</li>
         </ul>
       </ul>
+      <li>Option 3. bagging</li>
+      <ul>
+        <li>Train models in parallel on subsets of training data, then combine predictions to make final prediction</li>
+        <li>Pros</li>
+        <ul>
+          <li>Reduce model sensitivity to change in data</li>
+          <li>Train in parallel, thus fast training</li>
+          <li>Inputs are processed in parallel, thus fast inference</li>
+        </ul>
+        <li>Cons</li>
+        <ul>
+          <li>Does not solve underfitting</li>
+        </ul>
+        <li>Ex. random forest</li>
+      </ul>
+      <li>Option 4. boosting</li>
+      <ul>
+        <li>Train weak classifiers in sequence, that perform slightly better than random guess</li>
+        <li>Pros</li>
+        <ul>
+          <li>Reduce both bias and variance</li>
+        </ul>
+        <li>Cons</li>
+        <ul>
+          <li>Slower traning and infernce</li>
+        </ul>
+        <li>Ex. Adaboost, XGBoost</li>
+      </ul>
+      <li>Option 5. GBDT</li>
+      <ul>
+        <li>Use GradientBoost to improve decision trees</li>
+        <li>Pros</li>
+        <ul>
+          <li>Reduce both bias and variance</li>
+          <li>Little dataprep required</li>
+        </ul>
+        <li>Cons</li>
+        <ul>
+          <li>Lots of hyperparameters to tune</li>
+          <li>Not suitable for continual learning from streaming data</li>
+        </ul>
+        <li>Ex. XGBoost</li>
+      </ul>
+      <li>Option 6. neural network</li>
+      <ul>
+        <li>Pros</li>
+        <ul>
+          <li>Continual learning</li>
+          <li>Can handle unstructured data</li>
+        </ul>
+        <li>Cons</li>
+        <ul>
+          <li>Computationally expensive</li>
+          <li>Lots of dataprep</li>
+          <li>Large training data is needed</li>
+          <li>Not interpretable</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Model training</h3>
+    <ul>
+      <li>Choose loss function</li>
+      <ul>
+        <li>Binary classification, thus use cross-entropy</li>
+      </ul>
+      <li>Hyperparameters</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -389,33 +397,33 @@
 <div class="card mb-4" id="event-recommendation-system-5">
   <div class="card-body">
     <h2 class="card-title">Evaluation</h2>
+
+    <h3 class="card-title">Offline</h3>
     <ul>
-      <li>Offline</li>
+      <li>Option 1. precision@k or recall@k</li>
       <ul>
-        <li>Precision@k or recall@k</li>
-        <ul>
-          <li>Not good because these don't consider ranking quality</li>
-        </ul>
-        <li>MRR</li>
-        <ul>
-          <li>Considers only the first item, thus not good</li>
-        </ul>
-        <li>nDCG</li>
-        <ul>
-          <li>Works well when the score is non-binary, thus not good</li>
-        </ul>
-        <li>mAP</li>
-        <ul>
-          <li>Works well when the score is binary, thus the best choice</li>
-        </ul>
+        <li>Not good because these don't consider ranking quality</li>
       </ul>
-      <li>Online</li>
+      <li>Option 2. MRR</li>
       <ul>
-        <li>Click-through rate = total number of clicked events / total number of impressions</li>
-        <li>Conversion rate = total number of event registration / total number of impressions</li>
-        <li>Bookmark rate</li>
-        <li>Revenue life</li>
+        <li>Considers only the first item, thus not good</li>
       </ul>
+      <li>Option 3. nDCG</li>
+      <ul>
+        <li>Works well when the score is non-binary, thus not good</li>
+      </ul>
+      <li>Option 4. mAP</li>
+      <ul>
+        <li>Works well when the score is binary, thus the best choice</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Online</h3>
+    <ul>
+      <li>Click-through rate = \( \dfrac{\text{total number of clicked events}}{\text{total number of impressions}} \)</li>
+      <li>Conversion rate = \( \dfrac{\text{total number of event registration}}{\text{total number of impressions}} \)</li>
+      <li>Bookmark rate</li>
+      <li>Revenue life</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -425,9 +433,10 @@
 
 <div class="card mb-4" id="event-recommendation-system-6">
   <div class="card-body">
-    <h2 class="card-title">Deployment and serving</h2>
+    <h2 class="card-title">Serving</h2>
 
     <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/event-recommendation-system1.png" alt="Card image cap">
+
     <ul>
       <li>Online learning pipeline</li>
       <ul>
@@ -447,6 +456,25 @@
           <li>Ouputs top k most relevent events</li>
         </ul>
       </ul>
+    </ul>
+
+    <h3 class="card-title">Workflow</h3>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="event-recommendation-system-7">
+  <div class="card-body">
+    <h2 class="card-title">Follow up</h2>
+    <ul>
+      <li>Explain how to utilize feature crossing to achieve more expressiveness</li>
+      <li>Explain how to ensure output list is diverse and fresh</li>
+      <li>Explain privacy issue regarding leveraging user's live location</li>
+      <li>Explain how to keep the platform fair for both hosts and users</li>
+      <li>Explain how to avoid data leakage when constructing dataset</li>
+      <li>Explain how to determine right frequency to update the model</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
