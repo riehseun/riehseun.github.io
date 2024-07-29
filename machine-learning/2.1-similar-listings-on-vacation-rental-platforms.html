@@ -44,19 +44,20 @@
   <div class="card-body">
     <h2 class="card-title">Similar listings on vacation rental platform</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#similar-listings-on-vacation-rental-platform-1">Clarify requirements</a></li>
-      <li><a href="#similar-listings-on-vacation-rental-platform-2">Frame problem as ML task</a></li>
+      <li><a href="#similar-listings-on-vacation-rental-platform-1">Requirements</a></li>
+      <li><a href="#similar-listings-on-vacation-rental-platform-2">Problem</a></li>
       <li><a href="#similar-listings-on-vacation-rental-platform-3">Data preparation</a></li>
       <li><a href="#similar-listings-on-vacation-rental-platform-4">Model development</a></li>
       <li><a href="#similar-listings-on-vacation-rental-platform-5">Evaluation</a></li>
       <li><a href="#similar-listings-on-vacation-rental-platform-6">Deployment and serving</a></li>
+      <li><a href="#similar-listings-on-vacation-rental-platform-7">Follow up</a></li>
     </ul>
   </div>
 </div>
 
 <div class="card mb-4" id="similar-listings-on-vacation-rental-platform-1">
   <div class="card-body">
-    <h2 class="card-title">Clarify requirements</h2>
+    <h2 class="card-title">Requirements</h2>
     <ul>
       <li>Business objective</li>
       <ul>
@@ -94,29 +95,32 @@
 
 <div class="card mb-4" id="similar-listings-on-vacation-rental-platform-2">
   <div class="card-body">
-    <h2 class="card-title">Frame problem as ML task</h2>
+    <h2 class="card-title">Problem</h2>
+
+    <h3 class="card-title">ML problem</h3>
     <ul>
-      <li>Define ML objective</li>
+      <li>Given currently viewed listing, predict which listing will be clicked next</li>
+      <li>Input</li>
       <ul>
-        <li>Given currently viewed listing, predict which listing will be clicked next</li>
+        <li>Listing that user is currently viewing</li>
       </ul>
-      <li>Specify input and output</li>
+      <li>Output</li>
       <ul>
-        <li>Input - listing that user is currently viewing</li>
-        <li>Output - a list of listings ranked by probability of being clicked</li>
+        <li>A list of listings ranked by probability of being clicked</li>
       </ul>
-      <li>Choose right ML category</li>
+    </ul>
+
+    <h3 class="card-title">ML category</h3>
+    <ul>
+      <li>Option 1. recommendation system</li>
       <ul>
-        <li>Recommendation system</li>
-        <ul>
-          <li>Relies on user's historical interaction</li>
-          <li>For this problem, recently viewed listings are more informative than those in the past</li>
-        </ul>
-        <li>Session-based recommendation system</li>
-        <ul>
-          <li>Map each listing into embedding vector</li>
-          <li>Embeddings are close when the two listings frequently co-occur in user's browsing history</li>
-        </ul>
+        <li>Relies on user's historical interaction</li>
+        <li>For this problem, recently viewed listings are more informative than those in the past</li>
+      </ul>
+      <li>Option 2. session-based recommendation system</li>
+      <ul>
+        <li>Map each listing into embedding vector</li>
+        <li>Embeddings are close when the two listings frequently co-occur in user's browsing history</li>
       </ul>
     </ul>
   </div>
@@ -128,8 +132,20 @@
 <div class="card mb-4" id="similar-listings-on-vacation-rental-platform-3">
   <div class="card-body">
     <h2 class="card-title">Data preparation</h2>
+
+    <h3 class="card-title">Data engineering</h3>
     <ul>
-      <li>Data engineering</li>
+      <li>Training data</li>
+      <ul>
+        <li>Negative sampling</li>
+        <ul>
+          <li>Move a sliding window through search sessions</li>
+          <li>As the sliding window moves, use central listing and its nearby listings as positive pairs</li>
+          <li>As the sliding window moves, use central listing and randomly sampled listings as negative pairs</li>
+          <li>Positive pairs have ground truth label 1 and negative pairs have ground truth label 0</li>
+        </ul>
+      </ul>
+      <li>Database</li>
       <ul>
         <li>Listing</li>
         <ul>
@@ -160,15 +176,16 @@
           <li>position_of_the_listing_in_the_displayed_list</li>
         </ul>
       </ul>
-      <li>Feature engineering</li>
+    </ul>
+
+    <h3 class="card-title">Feature engineering</h3>
+    <ul>
+      <li>Model only utilizes browsing history</li>
+      <li>Search session</li>
       <ul>
-        <li>Model only utilizes browsing history</li>
-        <li>Search session</li>
-        <ul>
-          <li>session_id</li>
-          <li>clicked_listing_ids</li>
-          <li>booked_listing_id</li>
-        </ul>
+        <li>session_id</li>
+        <li>clicked_listing_ids</li>
+        <li>booked_listing_id</li>
       </ul>
     </ul>
   </div>
@@ -180,39 +197,30 @@
 <div class="card mb-4" id="similar-listings-on-vacation-rental-platform-4">
   <div class="card-body">
     <h2 class="card-title">Model development</h2>
+
+    <h3 class="card-title">Model selection</h3>
     <ul>
-      <li>Model selection</li>
+      <li>Neural network to learn embeddings</li>
+      <li>Initialize embeddings to random vectors</li>
+      <li>As sliding window moves, embeddings of central listing become close to embedding of nearby listings and far from embeddings of listings outside the window</li>
+    </ul>
+
+    <h3 class="card-title">Model training</h3>
+    <ul>
+      <li>Choose loss function</li>
       <ul>
-        <li>Neural network to learn embeddings</li>
-        <li>Initialize embeddings to random vectors</li>
-        <li>As sliding window moves, embeddings of central listing become close to embedding of nearby listings and far from embeddings of listings outside the window</li>
+        <li>\( \displaystyle\sum_{(c,p) \in D_{p}} \text{log} \dfrac{1}{1+e^{-E_{c}E_{p}}} + \displaystyle\sum_{(c,n) \in D_{n}} \text{log} \dfrac{1}{1+e^{E_{c}E_{n}}} + \displaystyle\sum_{(c,b) \in D_{booked}} \text{log} \dfrac{1}{1+e^{-E_{c}E_{b}}} + \displaystyle\sum_{(c,n) \in D_{hard}} \text{log} \dfrac{1}{1+e^{E_{c}E_{n}}} \)</li>
+        <li>First term computes loss over positive pairs</li>
+        <li>Second term computes loss over negative pairs</li>
+        <li>Third term helps push embeddings of central listing closer to embeddings of eventually booked listings</li>
+        <li>Third term helps push embeddings of central listing away from embeddings of random listings</li>
+        <li>\( c \) - central listing</li>
+        <li>\( p \) - positive listing (co-occured with \( c \))</li>
+        <li>\( n \) - negative listing (did not co-occur with \( c \))</li>
+        <li>\( b \) - eventually booked listing</li>
+        <li>\( D_{\text{hard}} \) - pair of contral and negative listng (that are from the same region as the central listing)</li>
       </ul>
-      <li>Model training</li>
-      <ul>
-        <li>Construct dataset</li>
-        <ul>
-          <li>Negative sampling</li>
-          <ul>
-            <li>Move a sliding window through search sessions</li>
-            <li>As the sliding window moves, use central listing and its nearby listings as positive pairs</li>
-            <li>As the sliding window moves, use central listing and randomly sampled listings as negative pairs</li>
-            <li>Positive pairs have ground truth label 1 and negative pairs have ground truth label 0</li>
-          </ul>
-        </ul>
-        <li>Choose loss function</li>
-        <ul>
-          <li>\( \displaystyle\sum_{(c,p) \in D_{p}} \text{log} \dfrac{1}{1+e^{-E_{c}E_{p}}} + \displaystyle\sum_{(c,n) \in D_{n}} \text{log} \dfrac{1}{1+e^{E_{c}E_{n}}} + \displaystyle\sum_{(c,b) \in D_{booked}} \text{log} \dfrac{1}{1+e^{-E_{c}E_{b}}} + \displaystyle\sum_{(c,n) \in D_{hard}} \text{log} \dfrac{1}{1+e^{E_{c}E_{n}}} \)</li>
-          <li>First term computes loss over positive pairs</li>
-          <li>Second term computes loss over negative pairs</li>
-          <li>Third term helps push embeddings of central listing closer to embeddings of eventually booked listings</li>
-          <li>Third term helps push embeddings of central listing away from embeddings of random listings</li>
-          <li>\( c \) - central listing</li>
-          <li>\( p \) - positive listing (co-occured with \( c \))</li>
-          <li>\( n \) - negative listing (did not co-occur with \( c \))</li>
-          <li>\( b \) - eventually booked listing</li>
-          <li>\( D_{\text{hard}} \) - pair of contral and negative listng (that are from the same region as the central listing)</li>
-        </ul>
-      </ul>
+      <li>Hyperparameters</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -223,23 +231,23 @@
 <div class="card mb-4" id="similar-listings-on-vacation-rental-platform-5">
   <div class="card-body">
     <h2 class="card-title">Evaluation</h2>
+
+    <h3 class="card-title">Offline</h3>
     <ul>
-      <li>Offline</li>
+      <li>Average rank of eventually booked listing</li>
       <ul>
-        <li>Average rank of eventually booked listing</li>
-        <ul>
-          <li>Model computes similarities between the first clicked listing and other listings in the embedding space</li>
-          <li>Once similarities are computed, listings are ranked</li>
-          <li>Average the rank of eventually booked listings across all sessions</li>
-        </ul>
+        <li>Model computes similarities between the first clicked listing and other listings in the embedding space</li>
+        <li>Once similarities are computed, listings are ranked</li>
+        <li>Average the rank of eventually booked listings across all sessions</li>
       </ul>
-      <li>Online</li>
-      <ul>
-        <li>Click-through rate = total number of clicked Ads / total number of shown Ads</li>
-        <li>Conversion rate = total number of conversions / total number of impressions</li>
-        <li>Hide rate</li>
-        <li>Revenue life</li>
-      </ul>
+    </ul>
+
+    <h3 class="card-title">Online</h3>
+    <ul>
+      <li>Click-through rate = total number of clicked Ads / total number of shown Ads</li>
+      <li>Conversion rate = total number of conversions / total number of impressions</li>
+      <li>Hide rate</li>
+      <li>Revenue life</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -249,9 +257,12 @@
 
 <div class="card mb-4" id="similar-listings-on-vacation-rental-platform-6">
   <div class="card-body">
-    <h2 class="card-title">Deployment and serving</h2>
+    <h2 class="card-title">Serving</h2>
+
+    <h3 class="card-title">Components</h3>
 
     <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/similar-listings-on-vacation-rental-platform1.png" alt="Card image cap">
+
     <ul>
       <li>Training pipeline</li>
       <ul>
@@ -279,6 +290,24 @@
           <li>Listings in cities other than currently viewed listing can also be removed</li>
         </ul>
       </ul>
+    </ul>
+
+    <h3 class="card-title">Workflow</h3>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="similar-listings-on-vacation-rental-platform-7">
+  <div class="card-body">
+    <h2 class="card-title">Follow up</h2>
+    <ul>
+      <li>Explain positional bias and how to avoid it</li>
+      <li>Explain difference between session-based approach and random walk</li>
+      <li>Explain how to use random walk with restart (RWR) to recommend similar listings</li>
+      <li>Explain how to personalize outputs considering user's longer-term interest (in-session personalization)</li>
+      <li>Explain how to incorporate seasonality</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
