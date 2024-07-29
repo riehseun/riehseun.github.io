@@ -44,12 +44,13 @@
   <div class="card-body">
     <h2 class="card-title">Google street view blurring system</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#google-street-view-blurring-system-1">Clarify requirements</a></li>
-      <li><a href="#google-street-view-blurring-system-2">Frame problem as ML task</a></li>
+      <li><a href="#google-street-view-blurring-system-1">Requirement</a></li>
+      <li><a href="#google-street-view-blurring-system-2">Problem</a></li>
       <li><a href="#google-street-view-blurring-system-3">Data preparation</a></li>
       <li><a href="#google-street-view-blurring-system-4">Model development</a></li>
       <li><a href="#google-street-view-blurring-system-5">Evaluation</a></li>
-      <li><a href="#google-street-view-blurring-system-6">Deployment and serving</a></li>
+      <li><a href="#google-street-view-blurring-system-6">Serving</a></li>
+      <li><a href="#google-street-view-blurring-system-7">Follow up</a></li>
     </ul>
   </div>
 </div>
@@ -64,7 +65,7 @@
         <li>Should the detect human faces and license plates? Yes</li>
         <li>Should the system handle bias w.r.t. race, gender, age, etc? No</li>
       </ul>
-      <li>Features that the system supports</li>
+      <li>System features</li>
       <ul>
         <li>Can users report images that are not correctly blurred? Yes</li>
       </ul>
@@ -87,40 +88,43 @@
 
 <div class="card mb-4" id="google-street-view-blurring-system-2">
   <div class="card-body">
-    <h2 class="card-title">Frame problem as ML task</h2>
+    <h2 class="card-title">Problem</h2>
+
+    <h3 class="card-title">ML problem</h3>
     <ul>
-      <li>Define ML objective</li>
+      <li>Accurately detect objects in images</li>
+      <li>Accurately identify objects of interest</li>
+      <li>Input</li>
       <ul>
-        <li>Accurately detect objects in images</li>
-        <li>Accurately identify objects of interest</li>
+        <li>Images with zero or more objects in it</li>
       </ul>
-      <li>Specify input and output</li>
+      <li>Output</li>
       <ul>
-        <li>Input - images with zero or more objects in it</li>
-        <li>Output - location of objects of interest</li>
+        <li>Location of objects of interest</li>
       </ul>
-      <li>Choose right ML category</li>
+    </ul>
+
+    <h3 class="card-title">ML category</h3>
+    <ul>
+      <li>Object detection is regression problem</li>
+      <li>Object classification is classification problem</li>
+      <li>Two stage networks</li>
       <ul>
-        <li>Object detection is regression problem</li>
-        <li>Object classification is classification problem</li>
-        <li>Two stage networks</li>
-        <ul>
-          <li>Region proposal network (RPN) - proposes candidate regions that are likely objects</li>
-          <li>Classifier - classifies each proposed region into an object class</li>
-          <li>Usually slower but accurate</li>
-          <li>Ex. R-CNN, Fast R-CNN, Faster R-CNN</li>
-        </ul>
-        <li>One stage network</li>
-        <ul>
-          <li>Bounding boxes and object classes are generated simultaneously</li>
-          <li>Ex. YOLO, SDD</li>
-        </ul>
-        <li>Transformer based network</li>
-        <ul>
-          <li>Ex. DETR</li>
-        </ul>
-        <li>Since 1M images are not too big, we go with two stage network</li>
+        <li>Region proposal network (RPN) - proposes candidate regions that are likely objects</li>
+        <li>Classifier - classifies each proposed region into an object class</li>
+        <li>Usually slower but accurate</li>
+        <li>Ex. R-CNN, Fast R-CNN, Faster R-CNN</li>
       </ul>
+      <li>One stage network</li>
+      <ul>
+        <li>Bounding boxes and object classes are generated simultaneously</li>
+        <li>Ex. YOLO, SDD</li>
+      </ul>
+      <li>Transformer based network</li>
+      <ul>
+        <li>Ex. DETR</li>
+      </ul>
+      <li>Since 1M images are not too big, we go with two stage network</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -131,8 +135,14 @@
 <div class="card mb-4" id="google-street-view-blurring-system-3">
   <div class="card-body">
     <h2 class="card-title">Data preparation</h2>
+
+    <h3 class="card-title">Data engineering</h3>
     <ul>
-      <li>Data engineering</li>
+      <li>Training data</li>
+      <ul>
+        <li>We are given annotated dataset</li>
+      </ul>
+      <li>Database</li>
       <ul>
         <li>Annotated dataset</li>
         <ul>
@@ -143,25 +153,31 @@
         <li>Street view images</li>
         <ul>
           <li>Image path</li>
+          <li>Location - latitude, longitude</li>
+          <li>Pitch, yaw, roll</li>
+          <li>Timestamp</li>
         </ul>
       </ul>
-      <li>Feature engineering</li>
+    </ul>
+
+    <h3 class="card-title">Feature engineering</h3>
+    <ul>
+      <li>Resize</li>
+      <li>Scale</li>
+      <li>Normalize</li>
+      <li>Data augmentation</li>
       <ul>
-        <li>Resize, scale, normalize</li>
-        <li>Data augmentation</li>
+        <li>Ex. random crop, random saturation, vertical/horizontal flip, rotation/translation, affline transformations, changing brightness/saturation/contrast</li>
+        <li>When rotating/flipping images, the ground truth bounding boxes must also be transformed</li>
+        <li>Option 1. offline</li>
         <ul>
-          <li>Ex. random crop, random saturation, vertical/horizontal flip, rotation/translation, affline transformations, changing brightness/saturation/contrast</li>
-          <li>When rotating/flipping images, the ground truth bounding boxes must also be transformed</li>
-          <li>Offline</li>
-          <ul>
-            <li>Augment image before training</li>
-            <li>Training is faster but requires additional storage</li>
-          </ul>
-          <li>Online</li>
-          <ul>
-            <li>Augment image on the fly during training</li>
-            <li>Training is slower but requires no additional storage</li>
-          </ul>
+          <li>Augment image before training</li>
+          <li>Training is faster but requires additional storage</li>
+        </ul>
+        <li>Option 2. online</li>
+        <ul>
+          <li>Augment image on the fly during training</li>
+          <li>Training is slower but requires no additional storage</li>
         </ul>
       </ul>
     </ul>
@@ -174,28 +190,31 @@
 <div class="card mb-4" id="google-street-view-blurring-system-4">
   <div class="card-body">
     <h2 class="card-title">Model development</h2>
+
+    <h3 class="card-title">Model selection</h3>
     <ul>
-      <li>Model selection</li>
+      <li>Two stages network</li>
       <ul>
-        <li>Two stages network</li>
+        <li>Convolutional layers</li>
         <ul>
-          <li>Convolutional layers</li>
-          <ul>
-            <li>Takes input image and produces feature map</li>
-          </ul>
-          <li>Region proposal network (RPN)</li>
-          <ul>
-            <li>Based on neural network</li>
-            <li>Takes feature map and produces candidate regions in the image</li>
-          </ul>
-          <li>Classifier</li>
-          <ul>
-            <li>Based on neural network</li>
-            <li>Takes feature map and candidate regions, and assigns an object class to each region</li>
-          </ul>
+          <li>Takes input image and produces feature map</li>
+        </ul>
+        <li>Region proposal network (RPN)</li>
+        <ul>
+          <li>Based on neural network</li>
+          <li>Takes feature map and produces candidate regions in the image</li>
+        </ul>
+        <li>Classifier</li>
+        <ul>
+          <li>Based on neural network</li>
+          <li>Takes feature map and candidate regions, and assigns an object class to each region</li>
         </ul>
       </ul>
-      <li>Model training</li>
+    </ul>
+
+    <h3 class="card-title">Model training</h3>
+    <ul>
+      <li>Choose loss function</li>
       <ul>
         <li>Regression loss</li>
         <ul>
@@ -232,6 +251,7 @@
           <li>\( \lambda \) - balancing parameter</li>
         </ul>
       </ul>
+      <li>Hyperparameters</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -247,27 +267,29 @@
       <ul>
         <li>Measures overlap between detected and ground truth bounding boxes</li>
       </ul>
-      <li>Offline</li>
+    </ul>
+
+    <h3 class="card-title">Offline</h3>
+    <ul>
+      <li>Precision</li>
       <ul>
-        <li>Precision</li>
-        <ul>
-          <li>Correct detections / total detections</li>
-          <li>Need to pick an IoU threshold</li>
-        </ul>
-        <li>Average precision (AP)</li>
-        <ul>
-          <li>Calculate precision at different IoU threshold and compute the average</li>
-        </ul>
-        <li>Mean average precision (mAP)</li>
-        <ul>
-          <li>Average of average precision across all object classes</li>
-        </ul>
+        <li>\( \dfrac{\text{Correct detections}}{\text{total detections}} \)</li>
+        <li>Need to pick an IoU threshold</li>
       </ul>
-      <li>Online</li>
+      <li>Average precision (AP)</li>
       <ul>
-        <li>Number of user reports</li>
-        <li>Human annotators to check the blurred images</li>
+        <li>Calculate precision at different IoU threshold and compute the average</li>
       </ul>
+      <li>Mean average precision (mAP)</li>
+      <ul>
+        <li>Average of average precision across all object classes</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Online</h3>
+    <ul>
+      <li>Number of user reports</li>
+      <li>Human annotators to check the blurred images</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -277,9 +299,12 @@
 
 <div class="card mb-4" id="google-street-view-blurring-system-6">
   <div class="card-body">
-    <h2 class="card-title">Deployment and serving</h2>
+    <h2 class="card-title">Serving</h2>
+
+    <h3 class="card-title">Components</h3>
 
     <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/google-street-view-blurring-system1.png" alt="Card image cap">
+
     <ul>
       <li>Batch inference pipeline</li>
       <ul>
@@ -312,6 +337,25 @@
           <li>Resize, scale, normalize</li>
         </ul>
       </ul>
+    </ul>
+
+    <h3 class="card-title">Workflow</h3>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="google-street-view-blurring-system-7">
+  <div class="card-body">
+    <h2 class="card-title">Follow up</h2>
+    <ul>
+      <li>Explain how transformer based object detection differs from one-stage or two-stage models</li>
+      <li>Explain distributed training techniques to improve object detection at larger dataset</li>
+      <li>Explain the impact of generate data protection regulation (GDPR) on the design</li>
+      <li>Explain how to handle bias in face detection system</li>
+      <li>Explain how to continuously fine-tune the model</li>
+      <li>Explain how to use active learning or human-in-the-loop ML to select data points for training</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
