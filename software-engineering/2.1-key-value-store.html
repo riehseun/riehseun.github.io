@@ -51,6 +51,7 @@
       <!-- <li><a href="#key-value-store-5">Storage schema</a></li> -->
       <li><a href="#key-value-store-6">Detailed design</a></li>
       <li><a href="#key-value-store-7">Evaluation</a></li>
+      <li><a href="#key-value-store-8">Follow up</a></li>
     </ul>
   </div>
 </div>
@@ -61,9 +62,16 @@
 
     <h3 class="card-title">Functional</h3>
     <ul>
-      <li>Is low latency needed? Yes</li>
-      <li>What level of consistency do we need? It needs to be tunable</li>
-      <li>What is the size of key-value pair? About 10KB</li>
+      <li>Business objective</li>
+      <ul>
+        <li>Is low latency needed? Yes</li>
+        <li>What level of consistency do we need? It needs to be tunable</li>
+        <li>What is the size of key-value pair? About 10KB</li>
+      </ul>
+      <li>Estimation</li>
+      <ul>
+
+      </ul>
     </ul>
 
     <h3 class="card-title">Non-functional</h3>
@@ -84,8 +92,6 @@
   <div class="card-body">
     <h2 class="card-title">Estimation</h2>
 
-    <h3 class="card-title">Server</h3>
-
     <h3 class="card-title">Storage</h3>
 
     <h3 class="card-title">Bandwidth</h3>
@@ -99,17 +105,21 @@
   <div class="card-body">
     <h2 class="card-title">High level design</h2>
 
-    <h3 class="card-title">Sigle server</h3>
+    <h3 class="card-title">Components</h3>
     <ul>
-      <li>Use a hash table, which saves frequently accessd data in memory and the rest on disk</li>
-      <li>Will reach its capacity quickly</li>
+      <li>Single server</li>
+      <ul>
+        <li>Use a hash table, which saves frequently accessd data in memory and the rest on disk</li>
+        <li>Will reach its capacity quickly</li>
+      </ul>
+      <li>Distributed</li>
+      <ul>
+        <li>Consistency - when network partition occurs, block writes and return error to user until inconsistency is resolved</li>
+        <li>Availability - when network partition occurs, return stale data. Data is synced when network partition is resolved</li>
+      </ul>
     </ul>
 
-    <h3 class="card-title">Distributed</h3>
-    <ul>
-      <li>Consistency - when network partition occurs, block writes and return error to user until inconsistency is resolved</li>
-      <li>Availability - when network partition occurs, return stale data. Data is synced when network partition is resolved</li>
-    </ul>
+    <h3 class="card-title">Workflow</h3>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu
@@ -121,7 +131,13 @@
     <h2 class="card-title">API</h2>
     <ul>
       <li><code>put(key, value)</code></li>
+      <ul>
+        <li>POST api/v1</li>
+      </ul>
       <li><code>get(key)</code></li>
+      <ul>
+        <li>GET api/v1</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -131,7 +147,7 @@
 
 <!-- <div class="card mb-4" id="key-value-store-5">
   <div class="card-body">
-    <h2 class="card-title">Storage schema</h2>
+    <h2 class="card-title">Database</h2>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu
@@ -155,7 +171,6 @@
       <ul>
         <li>Not the first N nodes or servers within the same data center</li>
       </ul>
-
     </ul>
 
     <h3 class="card-title">Consistency</h3>
@@ -247,7 +262,9 @@
     </ul>
 
     <h3 class="card-title">Write path</h3>
+
     <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/key-value-store1.png" alt="Card image cap">
+
     <ul>
       <li>Write request is saved on commit log file</li>
       <li>Data is saved in memory cache</li>
@@ -255,12 +272,20 @@
     </ul>
 
     <h3 class="card-title">Read path</h3>
+
     <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/key-value-store2.png" alt="Card image cap">
+
     <ul>
       <li>Check if data is in memory cache</li>
       <li>If not, check bloom filter to find SSTable that contains the key</li>
       <li>SSTable returns the data</li>
     </ul>
+
+    <h3 class="card-title">Potential bottlenecks</h3>
+
+    <h3 class="card-title">User experience during failure</h3>
+
+    <h3 class="card-title">10x scale</h3>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu
@@ -271,40 +296,83 @@
   <div class="card-body">
     <h2 class="card-title">Evaluation</h2>
 
-    <h3 class="card-title">Availability</h3>
+    <h3 class="card-title">Functional</h3>
     <ul>
-      <li>Replication</li>
-      <ul>
-        <li>Replicate each server and DB</li>
-        <li>Replicate entire components to different zone or geographical region</li>
-      </ul>
-      <li>Fail over</li>
+      <li>Business objective</li>
       <ul>
         <li></li>
         <li></li>
       </ul>
     </ul>
 
-    <h4 class="card-title">Reliability</h4>
+    <h3 class="card-title">Non-functional</h3>
     <ul>
-      <li>Data loss</li>
+      <li>Availability</li>
+      <ul>
+        <li>Replication</li>
+        <ul>
+          <li>Replicate each</li>
+          <ul>
+            <li></li>
+          </ul>
+          <li>Replicate entire system to different zone or geographical region</li>
+        </ul>
+        <li>Fail over</li>
+        <ul>
+          <li>Option 1. active-active</li>
+          <ul>
+            <li>Both actives manage traffic, spreading load between them</li>
+          </ul>
+          <li>Option 2. active-passive</li>
+          <ul>
+            <li>Active web servers, cache send heartbearts to passives</li>
+            <li>If heartbeats stop, passives take over actives' IP and resume service</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>Reliability</li>
+      <ul>
+        <li>Data loss</li>
+        <li>Handling failure</li>
+      </ul>
+      <li>Scalability</li>
+      <ul>
+        <li>Horizontal scaling</li>
+        <li>Data partitioning</li>
+        <ul>
+          <li></li>
+          <li></li>
+        </ul>
+      </ul>
+      <li>Performance</li>
+      <ul>
+        <li>Peak load</li>
+        <ul>
+          <li></li>
+          <li></li>
+        </ul>
+        <li></li>
+        <li></li>
+      </ul>
+      <li>Consistency</li>
+      <ul>
+        <li></li>
+        <li></li>
+        <li></li>
+      </ul>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
 
-    <h3 class="card-title">Scalability</h3>
-    <ul>
-      <li>Horizontal scaling</li>
-      <li>Data partitioning</li>
-    </ul>
-
-    <h4 class="card-title">Performance</h4>
+<div class="card mb-4" id="key-value-store-8">
+  <div class="card-body">
+    <h2 class="card-title">Follow up</h2>
     <ul>
       <li></li>
       <li></li>
-    </ul>
-    </ul>
-
-    <h3 class="card-title">Consistency</h3>
-    <ul>
       <li></li>
     </ul>
   </div>
