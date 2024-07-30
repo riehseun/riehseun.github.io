@@ -48,9 +48,10 @@
       <!-- <li><a href="#uuid-generator-2">Estimation</a></li> -->
       <li><a href="#uuid-generator-3">High level design</a></li>
       <!-- <li><a href="#uuid-generator-4">API</a></li> -->
-      <!-- <li><a href="#uuid-generator-5">Storage schema</a></li> -->
+      <!-- <li><a href="#uuid-generator-5">Database</a></li> -->
       <li><a href="#uuid-generator-6">Detailed design</a></li>
       <li><a href="#uuid-generator-7">Evaluation</a></li>
+      <li><a href="#uuid-generator-8">Follow up</a></li>
     </ul>
   </div>
 </div>
@@ -61,11 +62,18 @@
 
     <h3 class="card-title">Functional</h3>
     <ul>
-      <li>How does Id look like? Must be unique and sortable</li>
-      <li>Does Id contain only numbers? Yes</li>
-      <li>Does Id need to increment by 1? Not necessarily</li>
-      <li>How long can Id be? Should fit into 64 bits</li>
-      <li>How many Ids does the system need? 10k per second</li>
+      <li>Business objective</li>
+      <ul>
+        <li>How does Id look like? Must be unique and sortable</li>
+        <li>Does Id contain only numbers? Yes</li>
+        <li>Does Id need to increment by 1? Not necessarily</li>
+        <li>How long can Id be? Should fit into 64 bits</li>
+        <li>How many Ids does the system need? 10k per second</li>
+      </ul>
+      <li>Estimation</li>
+      <ul>
+
+      </ul>
     </ul>
 
     <h3 class="card-title">Non-functional</h3>
@@ -86,8 +94,6 @@
   <div class="card-body">
     <h2 class="card-title">Estimation</h2>
 
-    <h3 class="card-title">Server</h3>
-
     <h3 class="card-title">Storage</h3>
 
     <h3 class="card-title">Bandwidth</h3>
@@ -101,29 +107,32 @@
   <div class="card-body">
     <h2 class="card-title">High level design</h2>
 
-    <h3 class="card-title">Multi-master replication</h3>
+    <h3 class="card-title">Components</h3>
     <ul>
-      <li>Use DB's auto-increment feature</li>
-      <li>Instead of increment by 1, increment by k, where k is number of DB servers in use</li>
+      <li>Multi-master replication</li>
       <ul>
-        <li>Server 1 increment like 1, 3, 5, etc</li>
-        <li>Server 2 increment like 2, 4, 6, etc</li>
+        <li>Use DB's auto-increment feature</li>
+        <li>Instead of increment by 1, increment by k, where k is number of DB servers in use</li>
+        <ul>
+          <li>Server 1 increment like 1, 3, 5, etc</li>
+          <li>Server 2 increment like 2, 4, 6, etc</li>
+        </ul>
+        <li>Does not scale well when servers are added or removed</li>
       </ul>
-      <li>Does not scale well when servers are added or removed</li>
+      <li>UUID</li>
+      <ul>
+        <li>No coordication between servers needed, thus no synchronization issue</li>
+        <li>UUID is 128 bits number, which is greater than 64 bits requirement</li>
+        <li>UUID contains non-numeric characters</li>
+      </ul>
+      <li>Ticket server</li>
+      <ul>
+        <li>Single DB (ticket server) generates primary keys</li>
+        <li>Ticket server is SPOF</li>
+      </ul>
     </ul>
 
-    <h3 class="card-title">UUID</h3>
-    <ul>
-      <li>No coordication between servers needed, thus no synchronization issue</li>
-      <li>UUID is 128 bits number, which is greater than 64 bits requirement</li>
-      <li>UUID contains non-numeric characters</li>
-    </ul>
-
-    <h3 class="card-title">Ticket server</h3>
-    <ul>
-      <li>Single DB (ticket server) generates primary keys</li>
-      <li>Ticket server is SPOF</li>
-    </ul>
+    <h3 class="card-title">Workflow</h3>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu
@@ -142,7 +151,7 @@
 
 <!-- <div class="card mb-4" id="uuid-generator-5">
   <div class="card-body">
-    <h2 class="card-title">Storage schema</h2>
+    <h2 class="card-title">Database</h2>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu
@@ -179,6 +188,12 @@
         </ul>
       </ul>
     </ul>
+
+    <h3 class="card-title">Potential bottlenecks</h3>
+
+    <h3 class="card-title">User experience during failure</h3>
+
+    <h3 class="card-title">10x scale</h3>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu
@@ -189,41 +204,82 @@
   <div class="card-body">
     <h2 class="card-title">Evaluation</h2>
 
-    <h3 class="card-title">Availability</h3>
+    <h3 class="card-title">Functional</h3>
     <ul>
-      <li>Replication</li>
-      <ul>
-        <li>Replicate each server and DB</li>
-        <li>Replicate entire components to different zone or geographical region</li>
-      </ul>
-      <li>Fail over</li>
+      <li>Business objective</li>
       <ul>
         <li></li>
         <li></li>
       </ul>
     </ul>
 
-    <h4 class="card-title">Reliability</h4>
+    <h3 class="card-title">Non-functional</h3>
     <ul>
-      <li>Data loss</li>
+      <li>Availability</li>
+      <ul>
+        <li>Replication</li>
+        <ul>
+          <li>Replicate each</li>
+          <ul>
+            <li></li>
+          </ul>
+          <li>Replicate entire system to different zone or geographical region</li>
+        </ul>
+        <li>Fail over</li>
+        <ul>
+          <li>Option 1. active-active</li>
+          <ul>
+            <li>Both actives manage traffic, spreading load between them</li>
+          </ul>
+          <li>Option 2. active-passive</li>
+          <ul>
+            <li>Active web servers, cache send heartbearts to passives</li>
+            <li>If heartbeats stop, passives take over actives' IP and resume service</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>Reliability</li>
+      <ul>
+        <li>Data loss</li>
+        <li>Handling failure</li>
+      </ul>
+      <li>Scalability</li>
+      <ul>
+        <li>Horizontal scaling</li>
+        <li>Data partitioning</li>
+        <ul>
+          <li></li>
+          <li></li>
+        </ul>
+      </ul>
+      <li>Performance</li>
+      <ul>
+        <li>Peak load</li>
+        <ul>
+          <li></li>
+          <li></li>
+        </ul>
+        <li></li>
+        <li></li>
+      </ul>
+      <li>Consistency</li>
+      <ul>
+        <li></li>
+        <li></li>
+        <li></li>
+      </ul>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
 
-    <h3 class="card-title">Scalability</h3>
+<div class="card mb-4" id="uuid-generator-8">
+  <div class="card-body">
+    <h2 class="card-title">Follow up</h2>
     <ul>
-      <li>Horizontal scaling</li>
-      <li>Data partitioning</li>
-    </ul>
-
-    <h4 class="card-title">Performance</h4>
-    <ul>
-      <li></li>
-      <li></li>
-    </ul>
-    </ul>
-
-    <h3 class="card-title">Consistency</h3>
-    <ul>
-      <li></li>
+      <li>Explain how to handle clock synchronization</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
