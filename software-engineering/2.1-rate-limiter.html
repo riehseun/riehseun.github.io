@@ -43,19 +43,15 @@
 <div class="card mb-4" id="rate-limiter">
   <div class="card-body">
     <h2 class="card-title">Rate limiter</h2>
-    <ul>
-      <li>Prevent resource starvation (Ex. DDOS attack)</li>
-      <li>Manage policies and quotas</li>
-      <li>Avoid excess costs</li>
-    </ul>
     <ul class="list-unstyled mb-0">
       <li><a href="#rate-limiter-1">Requirement</a></li>
       <li><a href="#rate-limiter-2">Estimation</a></li>
       <li><a href="#rate-limiter-3">High level design</a></li>
       <!-- <li><a href="#rate-limiter-4">API</a></li> -->
-      <!-- <li><a href="#rate-limiter-5">Storage schema</a></li> -->
+      <!-- <li><a href="#rate-limiter-5">Database</a></li> -->
       <li><a href="#rate-limiter-6">Detailed design</a></li>
       <li><a href="#rate-limiter-7">Evaluation</a></li>
+      <li><a href="#rate-limiter-8">Follow up</a></li>
     </ul>
   </div>
 </div>
@@ -66,10 +62,18 @@
 
     <h3 class="card-title">Functional</h3>
     <ul>
-      <li>Is rate limiter placed on client side or server side? server side</li>
-      <li>Based on what (like user_id, IP, etc) does the system trottle the requests? It should be flexible</li>
-      <li>Do we need to inform users when their requests are throttled? Yes</li>
-      <li>Who configures the rate limit? The owner of application or server</li>
+      <li>Business objective</li>
+      <ul>
+        <li>What is the purpose of the application? Prevent resource starvation (Ex. DDOS attack), manage policies and quotas, avoid excess costs</li>
+        <li>Is rate limiter placed on client side or server side? server side</li>
+        <li>Based on what (like user_id, IP, etc) does the system trottle the requests? It should be flexible</li>
+        <li>Do we need to inform users when their requests are throttled? Yes</li>
+        <li>Who configures the rate limit? The owner of application or server</li>
+      </ul>
+      <li>Estimation</li>
+      <ul>
+
+      </ul>
     </ul>
 
     <h3 class="card-title">Non-functional</h3>
@@ -90,8 +94,6 @@
   <div class="card-body">
     <h2 class="card-title">Estimation</h2>
 
-    <h3 class="card-title">Server</h3>
-
     <h3 class="card-title">Storage</h3>
 
     <h3 class="card-title">Bandwidth</h3>
@@ -105,31 +107,35 @@
   <div class="card-body">
     <h2 class="card-title">High level design</h2>
 
-    <h3 class="card-title">Throttling</h3>
-    <ul>
-      <li>Hard - when exceed 500 (for example) the request is discarded</li>
-      <li>Soft - allow 5% beyong the limit (for example) such as 525</li>
-      <li>Dynamic - allow additional requests as long as there is free resource</li>
-    </ul>
-
-    <h3 class="card-title">Where to place rate limiter</h3>
-    <ul>
-      <li>Client - not safe and configuration can be difficult</li>
-      <li>Server - a viable option.</li>
-      <li>Middleware - between client and server</li>
-      <ul>
-        <li>For example, API gateway performs rate limiting, SSL termination, authentication, IP whitelisting, service static content, etc</li>
-      </ul>
-    </ul>
+    <h3 class="card-title">Components</h3>
 
     <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/rate-limiter1.png" alt="Card image cap">
 
-    <h3 class="card-title">Redis</h3>
     <ul>
-      <li>Cache is chosen because DB is too slow</li>
-      <li>INCR - increments stored counter by 1</li>
-      <li>EXPIRE - sets a timeout for the counter. If timeout expires, counter is deleted</li>
+      <li>Where to place rate limiter</li>
+      <ul>
+        <li>Client - not safe and configuration can be difficult</li>
+        <li>Server - a viable option.</li>
+        <li>Middleware - between client and server</li>
+        <ul>
+          <li>For example, API gateway performs rate limiting, SSL termination, authentication, IP whitelisting, service static content, etc</li>
+        </ul>
+      </ul>
+      <li>Redis</li>
+      <ul>
+        <li>Cache is chosen because DB is too slow</li>
+        <li>INCR - increments stored counter by 1</li>
+        <li>EXPIRE - sets a timeout for the counter. If timeout expires, counter is deleted</li>
+      </ul>
+      <li>Throttling</li>
+      <ul>
+        <li>Hard - when exceed 500 (for example) the request is discarded</li>
+        <li>Soft - allow 5% beyong the limit (for example) such as 525</li>
+        <li>Dynamic - allow additional requests as long as there is free resource</li>
+      </ul>
     </ul>
+
+    <h3 class="card-title">Workflow</h3>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu
@@ -147,7 +153,7 @@
 
 <!-- <div class="card mb-4" id="rate-limiter-5">
   <div class="card-body">
-    <h2 class="card-title">Storage schema</h2>
+    <h2 class="card-title">Database</h2>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu
@@ -158,88 +164,89 @@
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
 
-    <h3 class="card-title">Token bucket algorithm</h3>
+    <h3 class="card-title">Algorithm</h3>
     <ul>
-      <li>Tokens are added to bucket periodically at pre-defined rate</li>
-      <li>If bucket is full, extra tokens will overflow</li>
-      <li>Each request consumes one token</li>
-      <li>If not enough tokens, request is dropped</li>
-      <li>Different buckets for differet API endpoints are needed</li>
-      <li>If throttle based on IP addresses, each IP needs a bucket</li>
-      <li>Global bucket may be needed, which is shared by all requests, if system allows only certain number of requests per second</li>
-      <li>Pros</li>
+      <li>Option 1. token bucket algorithm</li>
       <ul>
-        <li>Memory efficient</li>
-        <li>Can handle burst of traffic</li>
+        <li>Tokens are added to bucket periodically at pre-defined rate</li>
+        <li>If bucket is full, extra tokens will overflow</li>
+        <li>Each request consumes one token</li>
+        <li>If not enough tokens, request is dropped</li>
+        <li>Different buckets for differet API endpoints are needed</li>
+        <li>If throttle based on IP addresses, each IP needs a bucket</li>
+        <li>Global bucket may be needed, which is shared by all requests, if system allows only certain number of requests per second</li>
+        <li>Pros</li>
+        <ul>
+          <li>Memory efficient</li>
+          <li>Can handle burst of traffic</li>
+        </ul>
+        <li>Cons</li>
+        <ul>
+          <li>Two parameters (bucket size and token refill rate) are hard to tune</li>
+        </ul>
+        <li>Ex. Amazon, Stripe</li>
       </ul>
-      <li>Cons</li>
+      <li>Option 2. leaking bucket algorithm</li>
       <ul>
-        <li>Two parameters (bucket size and token refill rate) are hard to tune</li>
+        <li>Similar to token bucket algorithm, but uses queues instead</li>
+        <li>Pre-defined rate of how many request can be processed at a time</li>
+        <li>Pros</li>
+        <ul>
+          <li>Memory efficient</li>
+          <li>Stable outflow</li>
+        </ul>
+        <li>Cons</li>
+        <ul>
+          <li>Burst of traffic will cause later requests to be rate limited</li>
+          <li>Two parameters (queue size and outflow rate) are hard to tune</li>
+        </ul>
+        <li>Ex. Shopify</li>
       </ul>
-      <li>Ex. Amazon, Stripe</li>
+      <li>Option 3. fixed window counter algorithm</li>
+      <ul>
+        <li>Each time window get a counter</li>
+        <li>Each requests increments counter by one</li>
+        <li>When reaching threshold, new requests are dropped until new time window starts</li>
+        <li>Pros</li>
+        <ul>
+          <li>Memory efficient</li>
+        </ul>
+        <li>Cons</li>
+        <ul>
+          <li>Burst of traffic at the edge of window can cause more requests than allowed to go through</li>
+        </ul>
+      </ul>
+      <li>Option 4. sliding window log algorithm</li>
+      <ul>
+        <li>Request timestamps are kept in a cache like Redis and added to a log</li>
+        <li>When a request comes in, remove all timestamps older than the start of current time window</li>
+        <li>If log size is equal or smaller than allowed acount, request is accpeted. Otherwise, it is dropped</li>
+        <li>Pros</li>
+        <ul>
+          <li>Accurate</li>
+        </ul>
+        <li>Cons</li>
+        <ul>
+          <li>Memory inefficient because timestamps of rejected request may still be in memory</li>
+        </ul>
+      </ul>
+      <li>Option 5. sliding window counter algorithm</li>
+      <ul>
+        <li>Mixes previous two approches</li>
+        <li>Request in current window + requests in previous window * overlap percentage of rolling window and previous window</li>
+        <li>Pros</li>
+        <ul>
+          <li>Memory efficient</li>
+          <li>Smooths out spikes in traffic because rate is based on the average rate of previous window</li>
+        </ul>
+        <li>Cons</li>
+        <ul>
+          <li>Assumes that requests in previous window are evenly distributed</li>
+        </ul>
+      </ul>
     </ul>
 
-    <h3 class="card-title">Leaking bucket algorithm</h3>
-    <ul>
-      <li>Similar to token bucket algorithm, but uses queues instead</li>
-      <li>Pre-defined rate of how many request can be processed at a time</li>
-      <li>Pros</li>
-      <ul>
-        <li>Memory efficient</li>
-        <li>Stable outflow</li>
-      </ul>
-      <li>Cons</li>
-      <ul>
-        <li>Burst of traffic will cause later requests to be rate limited</li>
-        <li>Two parameters (queue size and outflow rate) are hard to tune</li>
-      </ul>
-      <li>Ex. Shopify</li>
-    </ul>
-
-    <h3 class="card-title">Fixed window counter algorithm</h3>
-    <ul>
-      <li>Each time window get a counter</li>
-      <li>Each requests increments counter by one</li>
-      <li>When reaching threshold, new requests are dropped until new time window starts</li>
-      <li>Pros</li>
-      <ul>
-        <li>Memory efficient</li>
-      </ul>
-      <li>Cons</li>
-      <ul>
-        <li>Burst of traffic at the edge of window can cause more requests than allowed to go through</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Sliding window log algorithm</h3>
-    <ul>
-      <li>Request timestamps are kept in a cache like Redis and added to a log</li>
-      <li>When a request comes in, remove all timestamps older than the start of current time window</li>
-      <li>If log size is equal or smaller than allowed acount, request is accpeted. Otherwise, it is dropped</li>
-      <li>Pros</li>
-      <ul>
-        <li>Accurate</li>
-      </ul>
-      <li>Cons</li>
-      <ul>
-        <li>Memory inefficient because timestamps of rejected request may still be in memory</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Sliding window counter algorithm</h3>
-    <ul>
-      <li>Mixes previous two approches</li>
-      <li>Request in current window + requests in previous window * overlap percentage of rolling window and previous window</li>
-      <li>Pros</li>
-      <ul>
-        <li>Memory efficient</li>
-        <li>Smooths out spikes in traffic because rate is based on the average rate of previous window</li>
-      </ul>
-      <li>Cons</li>
-      <ul>
-        <li>Assumes that requests in previous window are evenly distributed</li>
-      </ul>
-    </ul>
+    <h3 class="card-title">Workflow revisited</h3>
 
     <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/rate-limiter2.png" alt="Card image cap">
     <ul>
@@ -247,6 +254,12 @@
       <li>Rate limiter fetches counter and last request timestamp from Redis</li>
       <li>Multiple rate limiters are connnected to the same Redis for the synchronization purpose</li>
     </ul>
+
+    <h3 class="card-title">Potential bottlenecks</h3>
+
+    <h3 class="card-title">User experience during failure</h3>
+
+    <h3 class="card-title">10x scale</h3>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu
@@ -257,41 +270,84 @@
   <div class="card-body">
     <h2 class="card-title">Evaluation</h2>
 
-    <h3 class="card-title">Availability</h3>
+    <h3 class="card-title">Functional</h3>
     <ul>
-      <li>Replication</li>
-      <ul>
-        <li>Replicate each server and DB</li>
-        <li>Replicate entire components to different zone or geographical region</li>
-      </ul>
-      <li>Fail over</li>
+      <li>Business objective</li>
       <ul>
         <li></li>
         <li></li>
       </ul>
     </ul>
 
-    <h4 class="card-title">Reliability</h4>
+    <h3 class="card-title">Non-functional</h3>
     <ul>
-      <li>Data loss</li>
+      <li>Availability</li>
+      <ul>
+        <li>Replication</li>
+        <ul>
+          <li>Replicate each</li>
+          <ul>
+            <li></li>
+          </ul>
+          <li>Replicate entire system to different zone or geographical region</li>
+        </ul>
+        <li>Fail over</li>
+        <ul>
+          <li>Option 1. active-active</li>
+          <ul>
+            <li>Both actives manage traffic, spreading load between them</li>
+          </ul>
+          <li>Option 2. active-passive</li>
+          <ul>
+            <li>Active web servers, cache send heartbearts to passives</li>
+            <li>If heartbeats stop, passives take over actives' IP and resume service</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>Reliability</li>
+      <ul>
+        <li>Data loss</li>
+        <li>Handling failure</li>
+      </ul>
+      <li>Scalability</li>
+      <ul>
+        <li>Horizontal scaling</li>
+        <li>Data partitioning</li>
+        <ul>
+          <li></li>
+          <li></li>
+        </ul>
+      </ul>
+      <li>Performance</li>
+      <ul>
+        <li>Peak load</li>
+        <ul>
+          <li></li>
+          <li></li>
+        </ul>
+        <li></li>
+        <li></li>
+      </ul>
+      <li>Consistency</li>
+      <ul>
+        <li></li>
+        <li></li>
+        <li></li>
+      </ul>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
 
-    <h3 class="card-title">Scalability</h3>
+<div class="card mb-4" id="rate-limiter-8">
+  <div class="card-body">
+    <h2 class="card-title">Follow up</h2>
     <ul>
-      <li>Horizontal scaling</li>
-      <li>Data partitioning</li>
-    </ul>
-
-    <h4 class="card-title">Performance</h4>
-    <ul>
-      <li></li>
-      <li></li>
-    </ul>
-    </ul>
-
-    <h3 class="card-title">Consistency</h3>
-    <ul>
-      <li></li>
+      <li>Explain hard and soft rate limiting</li>
+      <li>Explain rate limiting at layers other than the application layer </li>
+      <li>Explain how to help client do best practices to avoid being rate limited</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
