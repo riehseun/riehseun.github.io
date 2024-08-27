@@ -49,6 +49,7 @@
       <li><a href="#graph-bfs-">Clone graph</a></li>
       <li><a href="#graph-bfs-">Number of islands</a></li>
       <li><a href="#graph-bfs-">Remove invalid parentheses</a></li>
+      <li><a href="#graph-bfs-">Water and jug problem</a></li>
       <!-- <li><a href="#graph-bfs-">Number of provinces</a></li> -->
     </ul>
   </div>
@@ -396,6 +397,57 @@ class Solution:
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/remove-invalid-parentheses">301. Remove Invalid Parentheses</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-bfs">
+  <div class="card-body">
+    <h2 class="card-title">Water and jug problem (M/G1)</h2>
+
+<pre><code class="python">class Solution:
+    def canMeasureWater(self, x: int, y: int, target: int) -> bool:
+
+        # BFS
+        # Consider start node is (x,y)
+        # For a given node (a,b) the next node can be
+        #   (0,b) empty first jug
+        #   (a,0) empty second jug
+        #   (x,b) fill up first jug
+        #   (a,y) flll up second jug
+        #   (min(x,a+b), max(b-(x-a),0)) pour second jug into first jug
+        #   (max(a-(x-b),0), min(y,b+a)) pour first jug unto second jug
+
+        explored = set()
+        explored.add((x,y))
+
+        queue = deque()
+        queue.append((x,y))
+
+        # Time O(n+m) n = number of nodes, m = number of edges
+        # Space O(n)
+        while queue:
+            a, b = queue.popleft()
+            print(f"a: {a}, b: {b}")
+
+            next_nodes = []
+            next_nodes.append((0,b))
+            next_nodes.append((a,0))
+            next_nodes.append((x,b))
+            next_nodes.append((a,y))
+            next_nodes.append((min(x,a+b), max(b-(x-a),0)))
+            next_nodes.append((max(a-(y-b),0), min(y,b+a)))
+
+            for new_a, new_b in next_nodes:
+                if new_a + new_b == target:
+                    return True
+                if (new_a, new_b) not in explored:
+                    explored.add((new_a, new_b))
+                    queue.append((new_a, new_b))
+
+        return False</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/water-and-jug-problem">365. Water and Jug Problem</a>
   </div>
 </div>
 
