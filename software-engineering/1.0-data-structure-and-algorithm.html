@@ -709,9 +709,21 @@ G2973 ❌
 
     <h3 class="card-title">Runtime</h3>
     <ul>
-      <li>Search - \( O(1) \) on average, \( O(n) \) worst case</li>
-      <li>Insert - \( O(1) \) on average, \( O(n) \) worst case</li>
-      <li>Delete - \( O(1) \) on average, \( O(n) \) worst case</li>
+      <li>Search</li>
+      <ul>
+        <li>On average - \( O(1) \)</li>
+        <li>Worst case - \( O(n) \)</li>
+      </ul>
+      <li>Insert</li>
+      <ul>
+        <li>On average - \( O(1) \)</li>
+        <li>Worst case - \( O(n) \)</li>
+      </ul>
+      <li>Delete</li>
+      <ul>
+        <li>On average - \( O(1) \)</li>
+        <li>Worst case - \( O(n) \)</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Representation</h3>
@@ -1081,7 +1093,7 @@ for edge in edges:
 
     <h4 class="card-title">Detect cycle</h4>
 
-<pre><code class="python">def is_cycle(graph, start):
+<pre><code class="python">def dfs(graph, start):
 
     explored = set()
     explored.add(start)
@@ -1112,11 +1124,33 @@ for edge in edges:
 
 <pre><code class="python">def topological_order(graph, num_nodes):
 
+    def dfs(graph, start):
+
+      explored = set()
+      explored.add(start)
+
+      stack = []
+      stack.append(start)
+      count = 1
+
+      while stack:
+          node = stack.pop()
+          for next_node in graph[node]:
+              if next_node not in explored:
+                  explored.add(next_node)
+                  stack.append(next_node)
+                  count += 1
+              else:
+                  if next_node == start_node:
+                      return -1
+
+      return count
+
     ordering = []
 
     for i in range(num_nodes):
-        count = self.dfs(i, graph)
-        # If cycle.
+        count = dfs(i, graph)
+        # If cycle
         if count == -1:
             return []
         ordering.append([count, i])
@@ -1125,34 +1159,14 @@ for edge in edges:
 
     return [item[1] for item in ordering]
 
-def dfs(self, start_node, graph):
-
-    explored = set()
-    explored.add(start_node)
-
-    stack = []
-    stack.append(start_node)
-    count = 1
-
-    while stack:
-        node = stack.pop()
-        for next_node in graph[node]:
-            if next_node not in explored:
-                explored.add(next_node)
-                stack.append(next_node)
-                count += 1
-            else:
-                if next_node == start_node:
-                    return -1
-
-    return count</code></pre>
+</code></pre>
 
     <h4 class="card-title">Strongly connected components</h4>
     <ul>
       <li>There exist path u to v and v to u in graph G</li>
       <li>Kosaraju's two pass algorithm</li>
       <ul>
-        <li>Compute SCC in O(m+n)</li>
+        <li>Compute SCC in \( O(m+n) \)</li>
         <li>Let G' = G with all arcs reversed</li>
         <li>Run DFS_loop on G' (compute magical ordering of nodes)</li>
         <li>Run DFS_loop on G (compute strongly connected component one by one)</li>
@@ -1184,13 +1198,13 @@ def dfs(self, start_node, graph):
 
     <h3 class="card-title">BFS</h3>
     <ul>
-      <li>Explore nodes in "layers"</li>
+      <li>Explore nodes in layers</li>
       <li>\( O(n+m) \) using queue</li>
     </ul>
 
 <pre><code class="python">from collections import deque
 
-def bfs(graph, starth):
+def bfs(graph, start):
 
     explored = set()
     explored.add(start)
@@ -1223,16 +1237,15 @@ def bfs(graph, start, end):
     queue.append((start, 0))
 
     while queue:
-        item = queue.popleft()
-        node = item[0]
-        layer = item[1]
-        for child_node in graph[node]:
-            if child_node == end_node:
-                return layer+1
+        node, layer = queue.popleft()
 
-            if child_node not in explored:
-                queue.append((child_node, layer+1))
-                explored.add(child_node)
+        for next_node in graph[node]:
+            if next_node == end_node:
+                return layer + 1
+
+            if next_node not in explored:
+                queue.append((next_node, layer+1))
+                explored.add(next_node)
 
     return -1</code></pre>
 
@@ -1386,6 +1399,8 @@ def union(group, node, new_leader):
         self.left = left
         self.right = right</code></pre>
 
+    <h3 class="card-title">DFS</h3>
+
     <h4 class="card-title">Pre-order traversal</h4>
 
 <pre><code class="python">def pre_order_traversal(node):
@@ -1410,26 +1425,30 @@ def union(group, node, new_leader):
         print(node.val)
         in_order_traversal(node.right)</code></pre>
 
+    <h3 class="card-title">BFS</h3>
+
+<pre><code class="python"></code></pre>
+
     <h3 class="card-title">Heap (priority queue)</h3>
     <ul>
       <li>Perfectly balanced tree</li>
       <li>Root element must have the minimum key</li>
       <li>Runtime</li>
       <ul>
-        <li>Insert (add to heap) - \( O(nlogn) \)</li>
-        <ul>
-          <li>Create a new node at the end of the heap</li>
-          <li>Place the new key at that node</li>
-          <li>Perculate (swap values if needed) up until reaching the root and the heap property is satisfied</li>
-        </ul>
-        <li>Extract (remove an element with minimum key) - \( O(nlogn) \)</li>
+        <li>Heapify (n batched inserts) - \( O(n) \)</li>
+        <li>Extract (remove an element with minimum key) - \( O(?) \)</li>
         <ul>
           <li>Delete root</li>
           <li>Move last node to new root</li>
           <li>Bubble-down k until k's parent <= k</li>
         </ul>
-        <li>Heapify (n batched inserts) - \( O(n) \)</li>
-        <li>Delete - \( O(nlogn) \)</li>
+        <li>Insert (add to heap) - \( O(?) \)</li>
+        <ul>
+          <li>Create a new node at the end of the heap</li>
+          <li>Place the new key at that node</li>
+          <li>Perculate (swap values if needed) up until reaching the root and the heap property is satisfied</li>
+        </ul>
+        <li>Delete - \( O(?) \)</li>
         <ul>
           <li>Delete the root</li>
           <li>Move the key of the last child node to root</li>
@@ -1442,12 +1461,12 @@ def union(group, node, new_leader):
     <ul>
       <li>Sorted array with fast insert & delete</li>
       <li>Search - \( O(\text{log}n) \)</li>
+      <li>Insert/Delete - \( O(\text{log}n) \)</li>
       <li>Select - \( O(\text{log}n) \)</li>
       <li>Min/Max - \( O(\text{log}n) \)</li>
       <li>Pred/Succ - \( O(\text{log}n) \)</li>
       <li>Rank - \( O(\text{log}n) \)</li>
       <li>Output in sorted order - \( O(n) \)</li>
-      <li>Insert/Delete - \( O(\text{log}n) \)</li>
     </ul>
 
     <h4 class="card-title">Red-Black tree</h4>
@@ -1503,6 +1522,22 @@ def union(group, node, new_leader):
         self.right = right
         self.parent = parent</code></pre>
 
+    <h4 class="card-title">Search</h4>
+
+<pre><code class="python">def search(self, val):
+    current = self
+
+    while current is not None:
+
+        if val < current.val:
+            current = current.left
+        elif val > current.val:
+            current = current.right
+        else:
+            return True
+
+    return False</code></pre>
+
     <h4 class="card-title">Insert</h4>
 
 <pre><code class="python">def insert(self, val):
@@ -1520,22 +1555,6 @@ def union(group, node, new_leader):
         parent.left = Node(val)
     else:
         parent.right = Node(val)</code></pre>
-
-    <h4 class="card-title">Search</h4>
-
-<pre><code class="python">def search(self, val):
-    current = self
-
-    while current is not None:
-
-        if val < current.val:
-            current = current.left
-        elif val > current.val:
-            current = current.right
-        else:
-            return True
-
-    return False</code></pre>
 
     <h4 class="card-title">Delete</h4>
 
