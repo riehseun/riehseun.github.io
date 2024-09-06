@@ -62,20 +62,10 @@
 
     <h3 class="card-title">Functional</h3>
     <ul>
-      <li>Business objective</li>
-      <ul>
-        <li>How does url-shortener work? Given a URL, generate a short version. When users click short link, redirect them to original link</li>
-        <li>How long should the shortened URL be? As short as possible</li>
-        <li>What chars are allowed in short URL? 0-9, A-Z, a-z</li>
-        <li>Can users delete or update short URLs? Yes</li>
-      </ul>
-      <li>Estimation</li>
-      <ul>
-        <li>How many users are there? 100M daily active users</li>
-        <li>How many total request per day? 100M URLs are generated per day</li>
-        <li>What is the read:write ration? 10:1</li>
-        <li>What is the average size of short URL? 100 bytes</li>
-      </ul>
+      <li>What is the purpose of the application? Given a URL, generate a short version. When users click short link, redirect them to original link</li>
+      <li>What should be the length of short URL? As short as possible</li>
+      <li>What chars can go in short URL? 0-9, A-Z, a-z</li>
+      <li>Can users delete or update short URLs? Yes</li>
     </ul>
 
     <h3 class="card-title">Non-functional</h3>
@@ -95,23 +85,29 @@
 <div class="card mb-4" id="url-shortener-2">
   <div class="card-body">
     <h2 class="card-title">Estimation</h2>
+    <ul>
+      <li>How many users are there? 100M daily active users</li>
+      <li>How many request does each user make for URL shortening? 1 URL shortening per day</li>
+      <li>How many request does each user make for URL redirection? 10 URL redirection per day</li>
+      <li>What is the average size of short URL? 100 bytes</li>
+    </ul>
 
     <h3 class="card-title">Storage</h3>
     <ul>
-      <li>100M URLs per day * 100 bytes = 10GB per day = 10GB * 365 = 3.65TB per year</li>
+      <li>100M URLs per day * 100 bytes = 10GB per day</li>
     </ul>
 
     <h3 class="card-title">Bandwidth</h3>
     <ul>
       <li>Incoming</li>
       <ul>
-        <li>Generate short link - 100M URLs per day = 100M / (24 * 3600) = 1157 URLs per second</li>
-        <li>Redirection - 11570 per second</li>
+        <li>Shortening - 100M URLs per day = 100M / (24 * 3600) = 1157 URLs per second</li>
+        <li>Redirection - 1B URLs per day = 1B / (24 * 3600) = 11570 URLs per second</li>
       </ul>
       <li>Outgoing</li>
       <ul>
-        <li>Generate short link - 1157 URLs per second</li>
-        <li>Redirection - 11570 per second</li>
+        <li>Shortening - 1157 URLs per second (serving response back to user)</li>
+        <li>Redirection - 11570 URLs per second (serving response back to user)</li>
       </ul>
     </ul>
   </div>
@@ -129,6 +125,7 @@
     <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/url-shortener2.png" alt="Card image cap">
 
     <ul>
+      <li>User</li>
       <li>Load balancer</li>
       <li>Web server</li>
       <li>Cache</li>
@@ -143,22 +140,31 @@
         <li>Web server checks to see if long URL is in DB</li>
         <ul>
           <li>If yes, return short URL</li>
-          <li>If no, generate new ID, then convert ID to short URL</li>
+          <li>If no, generate short URL</li>
           <ul>
             <li>Need a way to convert long URL to hash value</li>
-            <li>There should be one-to-one mapping between long URL and hash value</li>
+            <li>Need one-to-one mapping between long URL and hash value</li>
+            <li>Save short URL to DB and return short URL</li>
           </ul>
         </ul>
-        <li>Save short URL to DB and return short URL</li>
       </ul>
       <li>URL redirecting</li>
       <ul>
         <li>User clicks short URL</li>
         <li>Web server checks the cache to see if long URL exist</li>
-        <li>If not, long URL is fetched from DB</li>
-        <li>Long URL is delivered to user</li>
         <ul>
+          <li>If yes, long URL is fetched and returned from cache</li>
+          <li>If no, long URL is fetched and returned from DB</li>
           <li>Need to determine the http status code to return</li>
+        </ul>
+      </ul>
+      <li>URL update/delete</li>
+      <ul>
+        <li>Short URL is entered</li>
+        <li>Web server checks to see if short URL is in DB</li>
+        <ul>
+          <li>If yes, update/delete short URL in DB and return updated/deleted short URL to user</li>
+          <li>If no, return error to user</li>
         </ul>
       </ul>
     </ul>
@@ -175,24 +181,24 @@
       <li><code>short_url(original_url)</code></li>
       <ul>
         <li>POST api/v1/data/shorten</li>
-        <li>Returns shortened URL</li>
+        <li>Returns short URL</li>
         <li><code>original_url</code> - original long URL</li>
       </ul>
       <li><code>redirect_url(short_url)</code></li>
       <ul>
         <li>GET api/v1/shortUrl</li>
         <li>Returns long URL for HTTP redirection</li>
-        <li><code>shorten_url</code> - shortened URL</li>
+        <li><code>shorten_url</code> - short URL</li>
       </ul>
       <li><code>update_url(short_url)</code></li>
       <ul>
         <li>PUT api/v1/updateUrl</li>
-        <li>Returns updated shortened URL for the given short URL</li>
+        <li>Returns updated short URL for the given short URL</li>
       </ul>
       <li><code>delete_url(short_url)</code></li>
       <ul>
         <li>DELETE api/v1/deleteUrl</li>
-        <li>Deletes the shortened URL</li>
+        <li>Deletes the short URL</li>
       </ul>
     </ul>
   </div>
@@ -207,11 +213,11 @@
     <ul>
       <li>Need to store users</li>
       <li>Need to store mapping between original URL and short URL</li>
-      <li>Since there is no relationship between tables and ready heavy, NoSQL should be chosen (Ex. MongoDB)</li>
-    </ul>
-
-    <h3 class="card-title">NoSQL</h3>
-    <ul>
+      <li>NoSQL (Ex. MongoDB)</li>
+      <ul>
+        <li>No relationship between tables</li>
+        <li>System is read heavy</li>
+      </ul>
       <li>URL</li>
       <ul>
         <li>shortened_url_hash (varchar, PK)</li>
@@ -274,34 +280,51 @@
       <li>Option 2. 302 redirect</li>
       <ul>
         <li>Temporarily moved</li>
-        <li>Subsequent requests for the same URL is sent to url-shortener server first</li>
+        <li>Subsequent requests for the same URL is sent to web server first</li>
         <li>Helps with data analytics</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">User experience during failure</h3>
+    <ul>
+      <li>Load balancer</li>
+      <ul>
+        <li>Servers are marked offline</li>
+      </ul>
+      <li>Server</li>
+      <ul>
+        <li>API returns 503 service unavailable</li>
+      </ul>
+      <li>Cache</li>
+      <ul>
+        <li>For URL shortening, users are not impacted</li>
+        <li>For URL redirection, users can get slower response</li>
+      </ul>
+      <li>DB</li>
+      <ul>
+        <li>API returns error message</li>
       </ul>
     </ul>
 
     <h3 class="card-title">Potential bottlenecks</h3>
     <ul>
-      <li>Assuming each component is scaled appropriately, there should be no SPOF</li>
-    </ul>
-
-    <h3 class="card-title">User experience during failure</h3>
-    <ul>
-      <li>If load balancer fails, servers are marked offline</li>
-      <li>If server fails, API return 503 service unavailable</li>
-      <li>If cache fails</li>
-      <ul>
-        <li>For URL shortening, users are not impacted</li>
-        <li>For URL redirection, users can get slower response</li>
-      </ul>
-      <li>If DB fails, API return appropriate error message</li>
+      <li>If each component is replicated and scaled properly, there should be no SPOF</li>
     </ul>
 
     <h3 class="card-title">10x scale</h3>
     <ul>
       <li>The length of short URL should be increased</li>
       <li>Base 62 conversion becomes better approach than hash function</li>
-      <li>Web servers - horizontal scaling Vs. vertical scaling, then horizonal scaling</li>
-      <li>Cache/DB - assess the cost of chosen infrastructure type given the new size of data</li>
+      <li>Web servers</li>
+      <ul>
+        <li>Assess the cost of horizontal scaling and vertical scaling</li>
+        <li>Getting bigger machines, and then doing horizontal scaling could make sense in terms of cost</li>
+      </ul>
+      <li>Cache/DB</li>
+      <ul>
+        <li>Assess the cost of current infrastructure type given the new size of data</li>
+        <li>Replacing current NoSQL to different NoSQL could make sense in terms of cost</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
