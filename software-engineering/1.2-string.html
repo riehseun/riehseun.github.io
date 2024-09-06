@@ -52,6 +52,7 @@
       <li><a href="#string-">Palindrome permutation</a></li>
       <li><a href="#string-">Encode and decode strings</a></li>
       <li><a href="#string-">Integer to english words</a></li>
+      <li><a href="#string-">Valid Word Abbreviation</a></li>
     </ul>
   </div>
 </div>
@@ -310,6 +311,63 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/integer-to-english-words">273. Integer to English Words</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="string-">
+  <div class="card-body">
+    <h2 class="card-title">Valid Word Abbreviation (E/F1/100)</h2>
+
+<pre><code class="python">class Solution:
+    def validWordAbbreviation(self, word: str, abbr: str) -> bool:
+
+        # Tokenize "abbr" by letters and numbers
+        # If any token is 0, return False
+        # Go through "word" by tokens
+
+        # Ex. word = "hi", abbr = "hi1"
+        if len(abbr) > len(word):
+            return False
+
+        # Ex. word = "a", abbr = "2"
+        if abbr.isdigit() and not abbr.startswith("0"):
+            return int(abbr) == len(word)
+
+        tokens = re.findall(r'\D+|\d+', abbr)
+        print(tokens)
+
+        i = 0
+        seen_digit = False
+
+        # Time O(n) where n = max(len(word), len(abbr))
+        # Space O(1)
+        for token in tokens:
+
+            if token.isdigit():
+                # Leading zeros are not allowed
+                if token.startswith("0") and not seen_digit:
+                    return False
+                seen_digit = True
+                i += int(token)
+            else:
+                for char in token:
+                    # Ex. word = "hi", abbr = "2i"
+                    if i < len(word):
+                        if word[i] != char:
+                            return False
+                        i += 1
+                    else:
+                        return False
+
+        # Ex. word = "hi", abbr = "h2"
+        # Ex. word = "word", abbr = "2r0"
+        if i != len(word):
+            return False
+
+        return True</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/valid-word-abbreviation">408. Valid Word Abbreviation</a>
   </div>
 </div>
 <!-- String END -->
