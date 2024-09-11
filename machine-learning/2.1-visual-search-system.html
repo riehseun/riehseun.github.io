@@ -254,17 +254,17 @@
           <li>Can make accurate predictions with very limited training examples</li>
           <li>Better accuracy than convolutional neural network</li>
         </ul>
-      </ul>
-      <li>Contrastive learning</li>
-      <ul>
-        <li>An input image</li>
-        <li>One similar image to the input image (Positive or ground truth)</li>
+        <li>Option 3. contrastive learning</li>
         <ul>
-          <li>Image must be constructed</li>
-        </ul>
-        <li>Few dissimilar images from the input image (Negative)</li>
-        <ul>
-          <li>Images can be randomly selected</li>
+          <li>An input image</li>
+          <li>One similar image to the input image (Positive or ground truth)</li>
+          <ul>
+            <li>Image must be constructed</li>
+          </ul>
+          <li>Few dissimilar images from the input image (Negative)</li>
+          <ul>
+            <li>Images can be randomly selected</li>
+          </ul>
         </ul>
       </ul>
     </ul>
@@ -400,51 +400,81 @@
     <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/visual-search-system1.png" alt="Card image cap">
 
     <ul>
-      <li>Indexing service</li>
+      <li>Indexing pipeline</li>
       <ul>
-        <li>Indexes the embeddings of new images so that NN search can easily find it</li>
-      </ul>
-      <li>Embedding generation service</li>
-      <ul>
-        <li>Preprocess the input images and use trained model to determine its embedding</li>
-      </ul>
-      <li>Nearest neighbor service</li>
-      <ul>
-        <li>Retrieve similar images from embedding space</li>
-        <li>Exact NN</li>
+        <li>Object storage</li>
         <ul>
-          <li>Time \( \text{O}(ND) \) where \( N \) is total number of points and \( D \) is dimension</li>
-          <li>\( N \) could be billions</li>
+          <li>Stores new images</li>
         </ul>
-        <li>Approximate NN</li>
+        <li>Indexing service</li>
         <ul>
-          <li>Time \( \text{O}(\text{log}(N)D) \)</li>
-          <li>Option 1. tree-based</li>
-          <ul>
-            <li>Similar to gradient boosted tree</li>
-            <li>Ex. R-trees, Kd-trees, Annoy (Approximate Nearest Neighbor Oh Yeah)</li>
-          </ul>
-          <li>Option 2. locality sensitive hashing (LSH)</li>
-          <ul>
-            <li>Use hash function to reduce the dimensions of points and group them into buckets</li>
-            <li>Maps points in close proximity to same bucket</li>
-            <li>LSH searches only those points in the same bucket</li>
-          </ul>
-          <li>Option 3. clustering-based</li>
-          <ul>
-            <li>Group points based on simiarities</li>
-            <li>Algorithm only searches the subset of points in the cluster</li>
-          </ul>
+          <li>Indexes the embeddings of new images so that NN search can easily find it</li>
         </ul>
-        <li>Due to algorithm runtime, we choose ANN</li>
+        <li>Index table</li>
+        <ul>
+          <li>Stores images embeddings in sorted order</li>
+        </ul>
       </ul>
-      <li>Re-ranking service</li>
+      <li>Prediction pipeline</li>
       <ul>
-        <li>Filters inappropriate results, removes duplicates, etc</li>
+        <li>Embedding generation service</li>
+        <ul>
+          <li>Preprocess the input images and use trained model to determine its embedding</li>
+        </ul>
+        <li>Nearest neighbor service</li>
+        <ul>
+          <li>Retrieve similar images from embedding space</li>
+          <li>Option 1. exact NN</li>
+          <ul>
+            <li>Time \( \text{O}(ND) \) where \( N \) is total number of points and \( D \) is dimension</li>
+            <li>\( N \) could be billions</li>
+          </ul>
+          <li>Option 2. approximate NN</li>
+          <ul>
+            <li>Time \( \text{O}(\text{log}(N)D) \)</li>
+            <li>Option 1. tree-based</li>
+            <ul>
+              <li>Similar to gradient boosted tree</li>
+              <li>Ex. R-trees, Kd-trees, Annoy (Approximate Nearest Neighbor Oh Yeah)</li>
+            </ul>
+            <li>Option 2. locality sensitive hashing (LSH)</li>
+            <ul>
+              <li>Use hash function to reduce the dimensions of points and group them into buckets</li>
+              <li>Maps points in close proximity to same bucket</li>
+              <li>LSH searches only those points in the same bucket</li>
+            </ul>
+            <li>Option 3. clustering-based</li>
+            <ul>
+              <li>Group points based on simiarities</li>
+              <li>Algorithm only searches the subset of points in the cluster</li>
+            </ul>
+          </ul>
+          <li>Due to algorithm runtime, we choose ANN</li>
+        </ul>
+        <li>Re-ranking service</li>
+        <ul>
+          <li>Filters inappropriate results, removes duplicates, etc</li>
+        </ul>
       </ul>
     </ul>
 
     <h3 class="card-title">Workflow</h3>
+    <ul>
+      <li>New image</li>
+      <ul>
+        <li>Images are first stored in object storage</li>
+        <li>Indexing service contacts embedding generation service to get embeddings of images stored in object storage</li>
+        <li>Embeddings are stored in index table for fast search</li>
+      </ul>
+      <li>Query image</li>
+      <ul>
+        <li>Images are first preprocessed</li>
+        <li>Embedding generation service computes embedding of query image via trained model</li>
+        <li>NN finds similar images between query image and images stored in index table based on their embedding distance</li>
+        <li>Candidate similar images go through re-ranking process</li>
+        <li>Final list of similar images are showned in the order based on similarity score</li>
+      </ul>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
