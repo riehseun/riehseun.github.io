@@ -44,7 +44,7 @@
   <div class="card-body">
     <h2 class="card-title">Google street view blurring system</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#google-street-view-blurring-system-1">Requirements</a></li>
+      <li><a href="#google-street-view-blurring-system-1">Requirement</a></li>
       <li><a href="#google-street-view-blurring-system-2">Problem</a></li>
       <li><a href="#google-street-view-blurring-system-3">Data preparation</a></li>
       <li><a href="#google-street-view-blurring-system-4">Model development</a></li>
@@ -61,6 +61,7 @@
     <ul>
       <li>Business objective</li>
       <ul>
+        <li>What is the the purpose of the system? Blurring parts of images that are inappropriate</li>
         <li>Should the system protect user privacy? Yes</li>
         <li>Should the detect human faces and license plates? Yes</li>
         <li>Should the system handle bias w.r.t. race, gender, age, etc? No</li>
@@ -71,14 +72,17 @@
       </ul>
       <li>Data</li>
       <ul>
-        <li>Do we have annotated dataset? There are 1 million images with human faces and license plates manually annotated</li>
+        <li>Do we have training data available? There are 1M images with human faces and license plates manually annotated</li>
       </ul>
       <li>Constraints</li>
-      <li>Scale</li>
-      <li>Performance</li>
       <ul>
-        <li>Should the system have low latency? No, images can be processed offline</li>
+        <li>Can the inference be batch or does it need to be online? Images can be processed offline</li>
       </ul>
+      <li>Scale</li>
+      <ul>
+        <li>How many users are using the system? 1B</li>
+      </ul>
+      <li>Performance</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -108,23 +112,23 @@
     <ul>
       <li>Object detection is regression problem</li>
       <li>Object classification is classification problem</li>
-      <li>Two stage networks</li>
+      <li>Option 1. one stage network</li>
+      <ul>
+        <li>Bounding boxes and object classes are generated simultaneously</li>
+        <li>Ex. YOLO, SDD</li>
+      </ul>
+      <li>Option 2. two stages networks</li>
       <ul>
         <li>Region proposal network (RPN) - proposes candidate regions that are likely objects</li>
         <li>Classifier - classifies each proposed region into an object class</li>
         <li>Usually slower but accurate</li>
         <li>Ex. R-CNN, Fast R-CNN, Faster R-CNN</li>
       </ul>
-      <li>One stage network</li>
-      <ul>
-        <li>Bounding boxes and object classes are generated simultaneously</li>
-        <li>Ex. YOLO, SDD</li>
-      </ul>
-      <li>Transformer based network</li>
+      <li>Option 3. transformer based network</li>
       <ul>
         <li>Ex. DETR</li>
       </ul>
-      <li>Since 1M images are not too big, we go with two stage network</li>
+      <li>Since 1M images are not too big, we go with two stages network</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -146,16 +150,16 @@
       <ul>
         <li>Annotated dataset</li>
         <ul>
-          <li>Image path</li>
-          <li>Objects - human face, license plate</li>
-          <li>Bounding boxes - x coordinate, y coordinate, width, height</li>
+          <li>image_path</li>
+          <li>objects - human face, license plate</li>
+          <li>bounding_boxes - x coordinate, y coordinate, width, height</li>
         </ul>
         <li>Street view images</li>
         <ul>
-          <li>Image path</li>
-          <li>Location - latitude, longitude</li>
-          <li>Pitch, yaw, roll</li>
-          <li>Timestamp</li>
+          <li>image_path</li>
+          <li>location - latitude, longitude</li>
+          <li>pitch_yaw_roll</li>
+          <li>timestamp</li>
         </ul>
       </ul>
     </ul>
@@ -291,6 +295,8 @@
       <li>Number of user reports</li>
       <li>Human annotators to check the blurred images</li>
     </ul>
+
+    <h3 class="card-title">Business</h3>
   </div>
   <div class="card-footer text-muted">
     Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
