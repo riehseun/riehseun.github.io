@@ -553,26 +553,18 @@
 <pre><code class="python">class Solution:
     def validPalindrome(self, s: str) -> bool:
 
-        # When mismatch is found, remove mismatched char and check if palindrome
+        # Time: O(n)
+        # Space: O(1)
 
-        def helper(s):
-
-            start = 0
-            end = len(s) - 1
-
-            while start < end:
-                if s[start] != s[end]:
-                    return False
-                start += 1
-                end -= 1
-            return True
+        # Allow 1 mismatch to happen. If more than 1 mismatch, return False
+        # When mismatch happens, either increment start pointer
+        # or decrement end pointer such that two chars at the end matches
+        # If cannot find match, return False
 
         start = 0
         end = len(s) - 1
         num_mismatch = 0
 
-        # Time O(n^2) where n = len(s)
-        # Space O(1)
         while start < end:
             if s[start] == s[end]:
                 start += 1
@@ -580,7 +572,11 @@
             else:
                 s_excluding_start_pointer = s[:start] + s[start+1:]
                 s_excluding_end_pointer = s[:end] + s[end+1:]
-                return helper(s_excluding_start_pointer) or helper(s_excluding_end_pointer)
+                if s_excluding_start_pointer == s_excluding_start_pointer[::-1] \
+                    or s_excluding_end_pointer == s_excluding_end_pointer[::-1]:
+                    return True
+                else:
+                    return False
 
         return True</code></pre>
   </div>
