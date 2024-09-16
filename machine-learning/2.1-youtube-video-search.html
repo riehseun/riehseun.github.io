@@ -44,7 +44,7 @@
   <div class="card-body">
     <h2 class="card-title">Youtube video search</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#youtube-video-search-1">Requirements</a></li>
+      <li><a href="#youtube-video-search-1">Requirement</a></li>
       <li><a href="#youtube-video-search-2">Problem</a></li>
       <li><a href="#youtube-video-search-3">Data preparation</a></li>
       <li><a href="#youtube-video-search-4">Model development</a></li>
@@ -61,23 +61,33 @@
     <ul>
       <li>Business objective</li>
       <ul>
+        <li>What is the the purpose of the system? Return relevant videos based on keyword search</li>
         <li>Can users search with text, image, video? Text search only</li>
-        <li>Does the system support videos, images, audios? Video only</li>
-        <li>How many languages are supported? English only</li>
-        <li>Do videos need to be personalized? No</li>
+        <li>Should the system support videos, images, audios? Video only</li>
+        <li>Should the system support multiple languages? No, English only</li>
+        <li>Should the system personalize videos? No</li>
       </ul>
       <li>System features</li>
       <ul>
-        <li>Is the video determined by only the visual and textual (title and descritpion) content? Yes</li>
+        <li>Should features come from videos, including visual and textual (title and descritpion) content? Yes</li>
       </ul>
       <li>Data</li>
       <ul>
-        <li>Do we have annotated dataset? There are 10 million pairs of &lt;video, text query&gt;</li>
-        <li>How many videos are available on the platform? 1B videos</li>
+        <li>Do we have training data available? There are 10M pairs of &lt;video, text query&gt;</li>
       </ul>
       <li>Constraints</li>
+      <ul>
+        <li>Can the inference be batch or does it need to be online? Online</li>
+      </ul>
       <li>Scale</li>
+      <ul>
+        <li>How many videos are there on the platform? 1B videos</li>
+      </ul>
       <li>Performance</li>
+      <ul>
+        <li>How fast should the search be? Reasonably fast</li>
+        <li>Is accuracy or latency more important? Both</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -104,7 +114,16 @@
 
     <h3 class="card-title">ML category</h3>
     <ul>
-      <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/youtube-video-search1.png" alt="Card image cap">
+      <li>Supervised, ranking problem, representation learning</li>
+      <ul>
+        <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/youtube-video-search1.png" alt="Card image cap">
+        <li>Learn embeddings of images and text such that</li>
+        <ul>
+          <li>Dot product between a video and its relevant text is small</li>
+          <li>Dot product between a video and random text is large</li>
+        </ul>
+      </ul>
+
       <li>Visual search</li>
       <ul>
         <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/youtube-video-search2.png" alt="Card image cap">
@@ -138,12 +157,11 @@
       <ul>
         <li>Annotated dataset</li>
         <ul>
-          <li>Video name</li>
-          <li>Text query</li>
-          <li>Split type - train, validation, test</li>
+          <li>video_name</li>
+          <li>text_query</li>
+          <li>split_type - train, validation, test</li>
         </ul>
       </ul>
-      <li>No need to do data engineering since annotated dataset is given</li>
     </ul>
 
     <h3 class="card-title">Feature engineering</h3>
@@ -166,13 +184,13 @@
         </ul>
         <li>Tokens to IDs</li>
         <ul>
-          <li>Lookup table</li>
+          <li>Option 1. lookup table</li>
           <ul>
             <li>Each token is mapped to unique ID</li>
             <li>Need to keep large table in memory</li>
             <li>New words cannot be handled</li>
           </ul>
-          <li>Hashing</li>
+          <li>Option 2. hashing</li>
           <ul>
             <li>Hash function is used to compute ID for each token</li>
             <li>Potential collision</li>
@@ -205,32 +223,32 @@
     <ul>
       <li>Text encoder</li>
       <ul>
-        <li>Statistical method</li>
+        <li>Option 1. statistical method</li>
         <ul>
           <li>Does not consider the order of words in sentences</li>
           <li>Does not capture semantic and contextual meaning</li>
           <li>The representation vector is sparse</li>
-          <li>Ex. Bag of words</li>
+          <li>Option 1a. Bag of words</li>
           <ul>
             <li>Models sentence-word occurences in matrix</li>
           </ul>
-          <li>Ex. Term frequency inverse document frequency (TF-IDF)</li>
+          <li>Option 1b. Term frequency inverse document frequency (TF-IDF)</li>
           <ul>
             <li>Same sentence-word matrix as BoW but normalizes based on the frequency of words</li>
           </ul>
         </ul>
-        <li>ML based method</li>
+        <li>Option 2. ML based method</li>
         <ul>
-          <li>Embedding layer</li>
+          <li>Option 2a. Embeddingr</li>
           <ul>
             <li>Map each token ID to embedding vector</li>
           </ul>
-          <li>Word2vec</li>
+          <li>Option 2b. Word2vec</li>
           <ul>
             <li>Learns to predict a center word from its surrounding words during training</li>
             <li>Ex. skip-gram, continuous bag of words (CBOW)</li>
           </ul>
-          <li>Transformer-based models</li>
+          <li>Option 2c. Transformer-based models</li>
           <ul>
             <li>As opposed to word2vec, produces different embeddings for the same word depending on the context</li>
             <li>Ex. BERT, GPT3, BLOOM</li>
@@ -239,17 +257,17 @@
       </ul>
       <li>Video encoder</li>
       <ul>
-        <li>Video-level models</li>
+        <li>Option 1. video-level models</li>
         <ul>
           <li>Processes a whole video to produce an embedding</li>
           <li>Based on 3D convolutions or transformers</li>
           <li>Computationally expensive</li>
         </ul>
-        <li>Frame-level models</li>
+        <li>Option 2. frame-level models</li>
         <ul>
           <li>Processes a video and sample frames</li>
           <li>Produces frame embeddings</li>
-          <li>Aggregate (for example, avergae) frame embeddings to generate video embeddings</li>
+          <li>Aggregate (for example, averge) frame embeddings to generate video embeddings</li>
           <li>Computationally less expensive, but does not understand temporal aspects of videos such as actions and motions</li>
           <li>Ex. ViT</li>
         </ul>
@@ -303,6 +321,8 @@
       <li>Video completion rate</li>
       <li>Total watch time</li>
     </ul>
+
+    <h3 class="card-title">Business</h3>
   </div>
   <div class="card-footer text-muted">
     Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
