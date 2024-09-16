@@ -49,6 +49,7 @@
       <!-- <li><a href="#graph-dfs-">Course schedule II</a></li> -->
       <li><a href="#graph-dfs-">Alien dictionary</a></li>
       <!-- <li><a href="#graph-dfs-">Find eventual safe states</a></li> -->
+      <li><a href="#graph-dfs-">Employee Importance</a></li>
     </ul>
   </div>
 </div>
@@ -299,6 +300,67 @@
     Reference: <a href="https://leetcode.com/problems/alien-dictionary">269. Alien Dictionary</a>
   </div>
 </div>
+
+<div class="card mb-4" id="graph-dfs-">
+  <div class="card-body">
+    <h2 class="card-title">Employee Importance (M/G1)</h2>
+
+<pre><code class="python">"""
+# Definition for Employee.
+class Employee:
+    def __init__(self, id: int, importance: int, subordinates: List[int]):
+        self.id = id
+        self.importance = importance
+        self.subordinates = subordinates
+"""
+
+class Solution:
+    def getImportance(self, employees: List['Employee'], id: int) -> int:
+
+        # Construct a graph
+        # DFS
+
+        graph = defaultdict(list)
+        importance = defaultdict(int)
+
+        for employee in employees:
+            graph[employee.id] = employee.subordinates
+            importance[employee.id] = employee.importance
+
+        print(graph)
+        print(importance)
+        self.total_importance = 0
+
+        # Time O(n+m) n = len(employees) m = number of edges
+        # Space O(n)
+        def dfs(graph, importance, start):
+
+            explored = set()
+            explored.add(start)
+
+            stack = []
+            stack.append(start)
+
+            self.total_importance += importance[start]
+
+            while stack:
+                node = stack.pop()
+
+                for next_node in graph[node]:
+                    if next_node not in explored:
+                        explored.add(next_node)
+                        stack.append(next_node)
+                        self.total_importance += importance[next_node]
+
+        dfs(graph, importance, id)
+
+        return self.total_importance</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/employee-importance">690. Employee Importance</a>
+  </div>
+</div>
+
 
 <!-- <div class="card mb-4" id="graph-dfs-">
   <div class="card-body">
