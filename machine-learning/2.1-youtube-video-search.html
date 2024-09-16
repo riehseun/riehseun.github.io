@@ -279,7 +279,16 @@
     <h3 class="card-title">Model training</h3>
     <ul>
       <li>Loss function</li>
+      <ul>
+        <li>Constrastive loss function</li>
+        <ul>
+          <li>Cross-entropy</li>
+        </ul>
+      </ul>
       <li>Hyperparameters</li>
+      <ul>
+        <li>Size of embedding vector</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -296,22 +305,29 @@
       <li>Option 1. precision@k</li>
       <ul>
         <li>\( \dfrac{\text{number of relevant items among the top k items in the ranked list}}{k} \)</li>
-        <li>In annotated dataset, text query is associated to just one video. That means the numerator is either 1 or 0</li>
-        <li>Thus, this metric is not useful</li>
+        <li>Cons</li>
+        <ul>
+          <li>In annotated dataset, text query is associated to just one video. That means the numerator is either 1 or 0. Thus, this metric is not useful</li>
+        </ul>
       </ul>
       <li>Option 2. recall@k</li>
       <ul>
         <li>\( \dfrac{\text{number of relevant items among the top k items in the ranked list}}{\text{total number of relevant videos}} \)</li>
-        <li>Total number of relevant videos is always 1</li>
-        <li>Then, recall@k = 1 if relevant video is in the top k items, 0 otherwise</li>
+        <li>Cons</li>
         <ul>
-          <li>Picking k can be challenging</li>
+          <li>Total number of relevant videos is always 1</li>
+          <ul>
+            <li>Then, recall@k = 1 if relevant video is in the top k items, 0 otherwise</li>
+            <li>Picking k can be challenging</li>
+          </ul>
+          <li>Does not consider ranking quality</li>
         </ul>
       </ul>
       <li>Option 3.  mean reciprobal rank (MRR)</li>
       <ul>
         <li>\( MRR = \dfrac{1}{m} \displaystyle\sum_{i=1}^{m} \dfrac{1}{\text{rank}_{i}} \) where \( {\text{rank}_{i}} \) is the position on which the first relevant item appears in the output list</li>
         <li>Consider only the first relevant item in each output list, then average the reciprocal rank</li>
+        <li>Since there is one-to-one mapping between video and text is training data, this is the best choice</li>
       </ul>
     </ul>
 
@@ -323,6 +339,9 @@
     </ul>
 
     <h3 class="card-title">Business</h3>
+    <ul>
+      <li>Revenue lift from users on the platform</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
@@ -338,18 +357,23 @@
     <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/youtube-video-search5.png" alt="Card image cap">
 
     <ul>
+      <li>Video indexing pipeline</li>
+      <ul>
+        <li>Video encoder computes video embeddings</li>
+        <li>Video index table stores video embeddings</li>
+      </ul>
       <li>Prediction pipeline</li>
       <ul>
         <li>Visual search</li>
         <ul>
-          <li>Encodes text query</li>
-          <li>Uses ANN to find the most similar video embeddings to the text embedding</li>
+          <li>Text encoder computes embeddings of text query</li>
+          <li>ANN finds the most similar video embeddings to the text embedding</li>
         </ul>
         <li>Text search</li>
         <ul>
-          <li>Finds videos whose titles and tags overlap with text query</li>
+          <li>Elasticsearch finds videos whose titles and tags overlap with text query</li>
         </ul>
-        <li>Fusing layer</li>
+        <li>Fusing</li>
         <ul>
           <li>Re-rank videos based on the weighted sum of their predicted relevance scores</li>
           <li>Using additional model to re-rank the videos will be computationally expensive</li>
@@ -359,19 +383,27 @@
           <li>Uses business logics to again re-rank the videos</li>
         </ul>
       </ul>
-      <li>Video indexing pipeline</li>
-      <ul>
-        <li>A trained video encoder is used to compute video embeddings</li>
-        <li>Video embeddings are indexed and used by ANN</li>
-      </ul>
       <li>Text indexing pipeline</li>
       <ul>
-        <li>Uses Elasticsearch to index titles, manual and automated tags</li>
-        <li>Standalone model to generate tag (When users don't provide tags for their videos)</li>
+        <li>Elasticsearch indexes titles, manual tags, and automated tags</li>
+        <li>Standalone model generates automated tag for when users don't provide tags for the videos</li>
       </ul>
     </ul>
 
     <h3 class="card-title">Workflow</h3>
+    <ul>
+      <li>Video</li>
+      <ul>
+        <li>Video embeddings are computed by video encoder and stored in video index table</li>
+        <li>Video components (titles, tags) are indexed and stored in Elasticsearch</li>
+      </ul>
+      <li>Text search</li>
+      <ul>
+        <li>Text embeddings are computed by text encoder</li>
+        <li>ANN uses text embeddings to find relevant videos based on video embeddings</li>
+        <li>Elasticsearch also uses text to find relevant videos based on Elasticsearch index</li>
+      </ul>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
