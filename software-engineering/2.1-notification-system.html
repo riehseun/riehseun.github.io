@@ -59,21 +59,12 @@
 <div class="card mb-4" id="notification-system-1">
   <div class="card-body">
     <h2 class="card-title">Requirement</h2>
-
-    <h3 class="card-title">Functional</h3>
     <ul>
-      <li>Business objective</li>
-      <ul>
-        <li>What type of notifications are in scope? Push notification, SMS, email</li>
-        <li>What triggers notification? Either by client application or by scheduling on server side</li>
-        <li>Should notification be sent in real-time? Yes, but little delay is acceptable</li>
-        <li>Can users opt-out from notification? Yes</li>
-      </ul>
-      <li>Estimation</li>
-      <ul>
-        <li>How many notifications per day? 10M push nofitication, 1M SMS, 5M email</li>
-        <li>What is the size of each type of notification? 100KB on average for all of them</li>
-      </ul>
+      <li>What is the purpose of the application? Send notifications to users</li>
+      <li>What type of notifications are in scope? Push notification, SMS, email</li>
+      <li>What triggers notification? Either by client application or by scheduling from server side</li>
+      <li>Should notification be sent in real-time? Yes, but little delay is acceptable</li>
+      <li>Can users opt-out from notification? Yes</li>
     </ul>
 
     <h3 class="card-title">Non-functional</h3>
@@ -93,6 +84,10 @@
 <div class="card mb-4" id="notification-system-2">
   <div class="card-body">
     <h2 class="card-title">Estimation</h2>
+    <ul>
+      <li>How many notifications per day? 10M push nofitication, 1M SMS, 5M email</li>
+      <li>What is the size of each type of notification? 100KB on average for all of them</li>
+    </ul>
 
     <h3 class="card-title">Storage</h3>
     <ul>
@@ -103,7 +98,7 @@
     <ul>
       <li>Outgoing</li>
       <ul>
-        <li>(10M + 1M + 5M) * 100KB = ? per day</li>
+        <li>(10M + 1M + 5M) * 100KB = 1.6MB per day</li>
       </ul>
     </ul>
   </div>
@@ -122,8 +117,8 @@
     <ul>
       <li>Services</li>
       <ul>
-        <li>Triggeres notification sending events</li>
-        <li>Can be micro-service, cron job, etc</li>
+        <li>Triggers notification sending events</li>
+        <li>Ex. micro-service, cron job, etc</li>
       </ul>
       <li>Notification servers</li>
       <ul>
@@ -199,10 +194,6 @@
     <h2 class="card-title">Database</h2>
     <ul>
       <li>Use relational database</li>
-    </ul>
-
-    <h3 class="card-title">Relational DB</h3>
-    <ul>
       <li>User</li>
       <ul>
         <li>user_id (int, pk)</li>
@@ -247,7 +238,7 @@
     <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/notification-system2.png" alt="Card image cap">
 
     <ul>
-      <li>Retry</li>
+      <li>Retry on error</li>
       <ul>
         <li>Workers store notification data in notification log DB</li>
         <li>When third party fails to send notification, the notification is added to message queue for retrying</li>
@@ -259,7 +250,10 @@
       <li>De-duplication</li>
       <ul>
         <li>Distributed nature of the design cannot guarantee exactly-once delivery</li>
-        <li>When notification arrives, check event ID. If event ID is seen before, discard it</li>
+        <li>When notification arrives, check event ID</li>
+        <ul>
+          <li>If event ID is seen before, discard it</li>
+        </ul>
       </ul>
       <li>Performs authentication</li>
       <li>Serves as rate limiter</li>
@@ -267,14 +261,23 @@
 
     <h3 class="card-title">Analytics service</h3>
     <ul>
-      <li>Implemented in any stage to capture statistics</li>
+      <li>Implemented in various stages to capture statistics</li>
+    </ul>
+
+    <h3 class="card-title">User experience during failure</h3>
+    <ul>
+      <li>Users will not receive notification</li>
     </ul>
 
     <h3 class="card-title">Potential bottlenecks</h3>
-
-    <h3 class="card-title">User experience during failure</h3>
+    <ul>
+      <li>Notification servers could be under high load</li>
+    </ul>
 
     <h3 class="card-title">10x scale</h3>
+    <ul>
+      <li>Pay attention to increased cost of using third party services</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu
@@ -287,11 +290,8 @@
 
     <h3 class="card-title">Functional</h3>
     <ul>
-      <li>Business objective</li>
-      <ul>
-        <li>Design supports push notification, SMS, email via different third party service providers</li>
-        <li>Notification table stores whether user opt-out from notification or not</li>
-      </ul>
+      <li>Design supports push notification, SMS, email via different third party service providers</li>
+      <li>Notification table stores whether user opt-out from notification or not</li>
     </ul>
 
     <h3 class="card-title">Non-functional</h3>
@@ -300,9 +300,10 @@
       <ul>
         <li>Replication</li>
         <ul>
-          <li>Replicate each</li>
+          <li>Replicate each component</li>
           <ul>
-            <li></li>
+            <li>DB - read-heavy, use single master replication</li>
+            <li>Notification log DB - write-heavy, use leaderless replication</li>
           </ul>
           <li>Replicate entire system to different zone or geographical region</li>
         </ul>
@@ -327,10 +328,13 @@
       <li>Scalability</li>
       <ul>
         <li>Horizontal scaling</li>
+        <ul>
+          <li>All compute components</li>
+        </ul>
         <li>Data partitioning</li>
         <ul>
-          <li></li>
-          <li></li>
+          <li>Using UUID generator, create ID for each notification</li>
+          <li>Using that ID, use consistent hashing to spread notification different data nodes</li>
         </ul>
       </ul>
       <li>Performance</li>
@@ -341,7 +345,6 @@
           <li>Scale workers to deque messages fast from message queues</li>
         </ul>
         <li>Message queues allow async processing where producers do not need to wait for consumers to finish</li>
-        <li></li>
       </ul>
       <li>Consistency</li>
       <ul>
