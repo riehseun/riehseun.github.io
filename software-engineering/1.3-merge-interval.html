@@ -46,8 +46,8 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#merge-interval-">Merge interval</a></li>
       <!-- <li><a href="#merge-interval-">Insert interval</a></li> -->
-      <li><a href="#merge-interval-">Meeting room</a></li>
-      <li><a href="#merge-interval-">Free time</a></li>
+      <li><a href="#merge-interval-">Meeting rooms II</a></li>
+      <li><a href="#merge-interval-">Employee Free Time</a></li>
       <li><a href="#merge-interval-">Interval intersection</a></li>
     </ul>
   </div>
@@ -182,37 +182,47 @@
   <div class="card-body">
     <h2 class="card-title">Employee free time (H/G1)</h2>
 
-<pre><code class="python">def employee_free_time(schedule):
+<pre><code class="python">"""
+# Definition for an Interval.
+class Interval:
+    def __init__(self, start: int = None, end: int = None):
+        self.start = start
+        self.end = end
+"""
 
-    # Sort the interval by the start, and then end by reverse
-    # If any start is after the latest end seen, then there is non-intersection
-    # Time: O(nlogn) where n length of combined input arrays.
-    # Space: O(n)
+class Solution:
+    def employeeFreeTime(self, schedule: '[[Interval]]') -> '[Interval]':
 
-    result = []
+        # Sort the interval by the start, and then end by reverse
+        # If any start is after the latest end seen,
+        # then there is non-intersection
 
-    array = convert_input_to_list(schedule)
+        result = []
 
-    latest_end = 0
-    for interval in array:
+        # Time O(nlogn) n = length of combined input arrays
+        # Space O(n)
+        def convert_input_to_list(schedules):
 
-        if interval[0] > latest_end and latest_end != 0:
-                result.append(Interval(latest_end, interval[0]))
-        latest_end = max(latest_end, interval[1])
+            flat_array = []
 
-    return result
+            for schedule in schedules:
+                for array in schedule:
+                    flat_array.append([array.start, array.end])
 
-def convert_input_to_list(schedules):
+            flat_array.sort(key = lambda x: (x[0], -x[1]))
 
-    flat_array = []
+            return flat_array
 
-    for schedule in schedules:
-        for array in schedule:
-            flat_array.append([array.start, array.end])
+        array = convert_input_to_list(schedule)
 
-    flat_array.sort(key = lambda x: (x[0], -x[1]))
+        latest_end = 0
+        for interval in array:
 
-    return flat_array</code></pre>
+            if interval[0] > latest_end and latest_end != 0:
+                    result.append(Interval(latest_end, interval[0]))
+            latest_end = max(latest_end, interval[1])
+
+        return result</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/employee-free-time">759. Employee Free Time</a>
