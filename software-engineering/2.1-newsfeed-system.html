@@ -1,4 +1,4 @@
-=<!DOCTYPE html>
+<!DOCTYPE html>
 
 <html lang="en">
 
@@ -62,22 +62,11 @@
 
     <h3 class="card-title">Functional</h3>
     <ul>
-      <li>Business objective</li>
-      <ul>
-        <li>What can a feed contain? Text, image, video</li>
-        <li>How is the ordering of feed determined? For simplicity, assume reverse chronogical order</li>
-        <li>How many friends a can user have? 1000</li>
-        <li>How many posts does each user see? 1000</li>
-      </ul>
-      <li>Estimation</li>
-      <ul>
-        <li>How many daily active users? 100M</li>
-        <li>How many total number of users? 1B</li>
-        <li>What is the size of user metadata? 100KB</li>
-        <li>What is the size of each post? 1MB on average (text, image, video combined)</li>
-        <li>How many posts does each user create per day? 1</li>
-        <li>How many feeds does each user view per day? 10</li>
-      </ul>
+      <li>What is the purpose of the application? Generate newsfeed for the users</li>
+      <li>What can a feed contain? Text, image, video</li>
+      <li>How is the ordering of feed determined? For simplicity, assume reverse chronogical order</li>
+      <li>How many friends a can user have? 1000</li>
+      <li>How many posts does each user see? 1000</li>
     </ul>
 
     <h3 class="card-title">Non-functional</h3>
@@ -97,11 +86,19 @@
 <div class="card mb-4" id="newsfeed-system-2">
   <div class="card-body">
     <h2 class="card-title">Estimation</h2>
+    <ul>
+      <li>How many daily active users? 100M</li>
+      <li>How many total number of users? 1B</li>
+      <li>What is the size of user metadata? 100KB</li>
+      <li>What is the size of each post? 1MB on average (text, image, video combined)</li>
+      <li>How many posts does each user create per day? 1</li>
+      <li>How many feeds does each user view per day? 10</li>
+    </ul>
 
     <h3 class="card-title">Storage</h3>
     <ul>
       <li>User metadata - 100KB * 1B = 100TB</li>
-      <li>Posts - 1000 * 100M * 1MB = 100PB</li>
+      <li>Posts - 1000 * 100M * 1MB = 100PB per day</li>
     </ul>
 
     <h3 class="card-title">Bandwidth</h3>
@@ -153,24 +150,23 @@
     </ul>
 
     <h3 class="card-title">Workflow</h3>
-
-    <h4 class="card-title">User creates a post</h4>
     <ul>
-      <li>Post service stores posts in cache and DB</li>
-    </ul>
-
-    <h4 class="card-title">Feed is generated</h4>
-    <ul>
-      <li>Feed is generated from posts store in post cache and post DB</li>
-      <li>Generated feed is stored in newsfeed cache</li>
+      <li>User creates a post</li>
       <ul>
-        <li>How to determine which feed is for which user?</li>
+        <li>Post service stores posts in cache and DB</li>
       </ul>
-    </ul>
-
-    <h4 class="card-title">User views posts</h4>
-    <ul>
-      <li>Feed is returned to user from newsfeed cache</li>
+      <li>Feed is generated</li>
+      <ul>
+        <li>Feed is generated from posts stored in post cache and post DB</li>
+        <li>Generated feed is stored in newsfeed cache</li>
+        <ul>
+          <li>How to determine which feed is for which user?</li>
+        </ul>
+      </ul>
+      <li>User views posts</li>
+      <ul>
+        <li>Feed is returned to user from newsfeed cache</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -205,10 +201,6 @@
     <ul>
       <li>Use relational database</li>
       <li>Use a graph database only for the relationships between users</li>
-    </ul>
-
-    <h3 class="card-title">Relational DB</h3>
-    <ul>
       <li>User</li>
       <ul>
         <li>user_id (int, pk)</li>
@@ -231,10 +223,6 @@
         <li>path (string)</li>
         <li>created_at (timestamp)</li>
       </ul>
-    </ul>
-
-    <h3 class="card-title">Graph DB</h3>
-    <ul>
       <li>User (Vertex)</li>
       <ul>
         <li>user_id (int, pk)</li>
@@ -279,7 +267,7 @@
 
     <h3 class="card-title">Fanout service</h3>
     <ul>
-      <li>Push model</li>
+      <li>Option 1. push model</li>
       <ul>
         <li>Newsfeed is pre-computed during write time</li>
         <li>Pros</li>
@@ -293,7 +281,7 @@
           <li>Generating newsfeed for friends who are inactive is wasting computing resource</li>
         </ul>
       </ul>
-      <li>Pull model</li>
+      <li>Option 2. pull model</li>
       <ul>
         <li>Newsfeed is generated during read time</li>
         <li>Pros</li>
@@ -305,7 +293,7 @@
           <li>Fetching newsfeed is slow</li>
         </ul>
       </ul>
-      <li>Hybrid model</li>
+      <li>Option 3. hybrid model</li>
       <ul>
         <li>For celebrities, use pull model</li>
         <ul>
@@ -327,11 +315,25 @@
       <li>Counters (tier 5) - number of likes, replies, followers, etc</li>
     </ul>
 
-    <h3 class="card-title">Potential bottlenecks</h3>
-
     <h3 class="card-title">User experience during failure</h3>
+    <ul>
+      <li>Post service - users cannot upload posts</li>
+      <li>Fanout service - newsfeed cannot be generated (Users will not see updated newsfeeds)</li>
+      <li>Newsfeed service - newsfeed cannot be fetched (Users will not see updated newsfeeds)</li>
+      <li>Notification service - users will not be notififed when new posts arrives in their newsfeed</li>
+    </ul>
+
+    <h3 class="card-title">Potential bottlenecks</h3>
+    <ul>
+      <li>As system scales, reach/write speed from/to Graph DB, Post DB, user DB may suffer</li>
+      <li>Newsfeed cache can get easily overloads with constant read/write</li>
+    </ul>
 
     <h3 class="card-title">10x scale</h3>
+    <ul>
+      <li>Pay attention to the cost of graph DB, Post DB, User DB</li>
+      <li>May need to upgrade the cache type of newsfeed cache to serve increased demand</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu
@@ -344,11 +346,7 @@
 
     <h3 class="card-title">Functional</h3>
     <ul>
-      <li>Business objective</li>
-      <ul>
-        <li></li>
-        <li></li>
-      </ul>
+      <li>The design delivers newsfeed for users and their friends</li>
     </ul>
 
     <h3 class="card-title">Non-functional</h3>
@@ -357,9 +355,10 @@
       <ul>
         <li>Replication</li>
         <ul>
-          <li>Replicate each</li>
+          <li>Replicate each compute components</li>
           <ul>
-            <li></li>
+            <li>Post DB - both read and write heavy, thus leaderless replication</li>
+            <li>Graph DB, user DB - read-heavy, thus single-master replication</li>
           </ul>
           <li>Replicate entire system to different zone or geographical region</li>
         </ul>
@@ -379,6 +378,9 @@
       <li>Reliability</li>
       <ul>
         <li>Data loss</li>
+        <ul>
+          <li>Periodically take snapshot of data and store snapshots in multi zone or region to prevent data loss</li>
+        </ul>
         <li>Handling failure</li>
       </ul>
       <li>Scalability</li>
@@ -386,25 +388,26 @@
         <li>Horizontal scaling</li>
         <li>Data partitioning</li>
         <ul>
-          <li></li>
-          <li></li>
+          <li>Horizontal partitioning or sharding since the system is less concerned about atomic operation</li>
+          <li>Use consistent hashing to spread data evenly to different data nodes</li>
         </ul>
       </ul>
       <li>Performance</li>
       <ul>
         <li>Peak load</li>
         <ul>
-          <li></li>
-          <li></li>
+          <li>Load balancer should distribute load amongst horizontally scaled servers and caches</li>
+          <li>DB is paritioned to scale to handle the load</li>
         </ul>
-        <li></li>
-        <li></li>
+        <li>Newsfeed cache allows fast retrieval of newsfeed for each user</li>
+        <li>Use of post cache and user cache</li>
       </ul>
       <li>Consistency</li>
       <ul>
-        <li></li>
-        <li></li>
-        <li></li>
+        <li>Inconsistency can happen when newly created/updated posts are not propagated to all data nodes</li>
+        <li>Inconsistency can also happen when updated friend information are not propagated to all data nodes</li>
+        <li>Impact is that friends not getting the post</li>
+        <li>This impact is not too catastrophic, thus eventual consistency suffice</li>
       </ul>
     </ul>
   </div>
