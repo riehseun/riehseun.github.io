@@ -44,7 +44,7 @@
   <div class="card-body">
     <h2 class="card-title">Event recommendation system</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#event-recommendation-system-1">Requirements</a></li>
+      <li><a href="#event-recommendation-system-1">Requirement</a></li>
       <li><a href="#event-recommendation-system-2">Problem</a></li>
       <li><a href="#event-recommendation-system-3">Data preparation</a></li>
       <li><a href="#event-recommendation-system-4">Model development</a></li>
@@ -57,11 +57,11 @@
 
 <div class="card mb-4" id="event-recommendation-system-1">
   <div class="card-body">
-    <h2 class="card-title">Requirements</h2>
+    <h2 class="card-title">Requirement</h2>
     <ul>
       <li>Business objective</li>
       <ul>
-        <li>What is the business objective? Increase event ticket sales</li>
+        <li>What is the the purpose of the system? Increase event ticket sales</li>
         <li>Can users become friends with one another? Yes</li>
         <li>Can users invite other users to events? Yes</li>
         <li>Can users RSVP to events? RSVP is out of scope</li>
@@ -69,15 +69,18 @@
       </ul>
       <li>System features</li>
       <ul>
-        <li>How can the distance and ETA between two location be calculated? Assume we have access to Google API to do that</li>
-        <li>Can we access user's current location? Yes</li>
-        <li>What kinds of features are available for an event? description, price, location, date and time, etc</li>
+        <li>How should the system calculate ETA between two locations? Assume we have access to Google API to do that</li>
+        <li>Can the system access user's current location? Yes</li>
+        <li>What features are available for an event? description, price, location, date and time, etc</li>
       </ul>
       <li>Data</li>
       <ul>
-        <li>Do we have annotated dataset? No, but user-event interaction data is available</li>
+        <li>Do we have training data available? No, but user-event interaction data is available</li>
       </ul>
       <li>Constraints</li>
+      <ul>
+        <li>Can the inference be batch or does it need to be online? Events are short-lived, thus batch inference is not feasible</li>
+      </ul>
       <li>Scale</li>
       <ul>
         <li>How many active users are there on platform? 1M per day</li>
@@ -113,7 +116,7 @@
 
     <h3 class="card-title">ML category</h3>
     <ul>
-      <li>Learning to Rank (LTR)</li>
+      <li>Supervised, learning to rank (LTR)</li>
       <ul>
         <li>Option 1. pointwise LTR</li>
         <ul>
@@ -150,7 +153,11 @@
     <ul>
       <li>Training data</li>
       <ul>
-        <li>&lt;user, event&gt; pair from interaction data where 1 if user registered for the event and 0 otherwise</li>
+        <li>&lt;user, event&gt; pair from interaction data</li>
+        <ul>
+          <li>1 - if user registered for the event</li>
+          <li>0 - otherwise</li>
+        </ul>
         <li>Data will highly be imbalanced, thus use undersampling</li>
       </ul>
       <li>Database</li>
@@ -185,7 +192,7 @@
         <ul>
           <li>user_id</li>
           <li>event_id</li>
-          <li>interaction_type - impression/register/invite</li>
+          <li>interaction_type - impression, register, invite</li>
         </ul>
       </ul>
     </ul>
@@ -420,10 +427,20 @@
 
     <h3 class="card-title">Online</h3>
     <ul>
-      <li>Click-through rate = total number of clicked events / total number of impressions</li>
-      <li>Conversion rate = total number of event registration / total number of impressions</li>
+      <li>Click-through rate</li>
+      <ul>
+        <li>\( \dfrac{\text{total number of clicked events}}{\text{total number of impressions}} \)</li>
+      </ul>
+      <li>Conversion rate</li>
+      <ul>
+        <li>\( \dfrac{\text{total number of event registration}}{\text{total number of impressions}} \)</li>
+      </ul>
       <li>Bookmark rate</li>
-      <li>Revenue life</li>
+    </ul>
+
+    <h3 class="card-title">Business</h3>
+    <ul>
+      <li>Revenue lift from event registration</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
