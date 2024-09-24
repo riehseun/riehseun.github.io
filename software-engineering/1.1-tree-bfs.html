@@ -51,6 +51,7 @@
       <!-- <li><a href="#tree-bfs">Populating next right pointers in each node II</a></li> -->
       <li><a href="#tree-bfs">Binary tree right side view</a></li>
       <li><a href="#tree-bfs">Binary tree vertical order traversal</a></li>
+      <li><a href="#tree-bfs">Vertical Order Traversal of a Binary Tree</a></li>
     </ul>
   </div>
 </div>
@@ -430,10 +431,65 @@ class Solution:
 
         bfs(root)
 
-        return self.right_side_view.values() </code></pre>
+        return self.right_side_view.values()</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/binary-tree-vertical-order-traversal">314. Binary Tree Vertical Order Traversal</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="tree-bfs">
+  <div class="card-body">
+    <h2 class="card-title">Vertical Order Traversal of a Binary Tree (H/F1)</h2>
+
+<pre><code class="python"># Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def verticalTraversal(self, root: Optional[TreeNode]) -> List[List[int]]:
+
+        # Use BFS
+        # Use hash table to store nodes
+        #   Storing nodes as traversing guarantees vertical order
+        #   Use key in hash table to remember horizontal order
+
+        # Time O(nlogn) n = number of nodes
+        # Space O(n)
+
+        nodes = []
+
+        queue = deque()
+        queue.append((root, 0, 0))
+
+        while queue:
+            node, row, column = queue.popleft()
+
+            if node:
+                nodes.append((node.val, row, column))
+
+                queue.append((node.left, row+1, column-1))
+                queue.append((node.right, row+1, column+1))
+
+        nodes.sort(key = lambda x: (x[2], x[1], x[0]))
+
+        result = []
+        last_column = -math.inf
+        group = []
+        for node in nodes:
+            if node[2] != last_column:
+                group = [node[0]]
+                last_column = node[2]
+                result.append(group)
+            else:
+                group.append(node[0])
+
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/vertical-order-traversal-of-a-binary-tree">987. Vertical Order Traversal of a Binary Tree</a>
   </div>
 </div>
 <!-- Tree BFS END -->
