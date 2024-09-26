@@ -52,6 +52,7 @@
       <li><a href="#tree-bfs">Binary tree right side view</a></li>
       <li><a href="#tree-bfs">Binary tree vertical order traversal</a></li>
       <li><a href="#tree-bfs">Vertical Order Traversal of a Binary Tree</a></li>
+      <li><a href="#tree-bfs">Delete Nodes And Return Forest</a></li>
     </ul>
   </div>
 </div>
@@ -490,6 +491,71 @@ class Solution:
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/vertical-order-traversal-of-a-binary-tree">987. Vertical Order Traversal of a Binary Tree</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="tree-bfs">
+  <div class="card-body">
+    <h2 class="card-title">Delete Nodes And Return Forest (M/G1)</h2>
+
+<pre><code class="python"># Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def delNodes(self, root: Optional[TreeNode], to_delete: List[int]) -> List[TreeNode]:
+
+        # BFS
+
+        if not root:
+            return []
+
+        result = []
+
+        # Time O(n) n = number of nodes
+        # Space O(n)
+        def bfs(root):
+
+            explored = set()
+            explored.add(root)
+
+            queue = deque()
+            queue.append(root)
+
+            while queue:
+                node = queue.popleft()
+
+                if node.left and node.left not in explored:
+                    explored.add(node.left)
+                    queue.append(node.left)
+                    # Disconnect left sub tree
+                    if node.left.val in to_delete:
+                        node.left = None
+                if node.right and node.right not in explored:
+                    explored.add(node.right)
+                    queue.append(node.right)
+                    # Disconnect right sub tree
+                    if node.right.val in to_delete:
+                        node.right = None
+
+                # If current node is deleted, add its children to result
+                if node.val in to_delete:
+                    if node.left:
+                        result.append(node.left)
+                    if node.right:
+                        result.append(node.right)
+
+        bfs(root)
+
+        if root.val not in to_delete:
+            result.append(root)
+
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/delete-nodes-and-return-forest">1110. Delete Nodes And Return Forest</a>
   </div>
 </div>
 <!-- Tree BFS END -->
