@@ -143,74 +143,72 @@ class Solution:
 #         self.next = next
 class Solution:
     def reverseKGroup(self, head: Optional[ListNode], k: int) -> Optional[ListNode]:
+        # Reverse linked list and reconnect various nodes
+        #   Helper function to check the length of remaining linked list
+        #   Reversed nodes themselves need to be reconnected to each other
+        #   Reversed nodes and the remaining nodes need to be reconnected
 
-        # Reverse linked list and reconnect various nodes.
-        #   Helper function to check the length of remaining linked list.
-        #   Reversed nodes themselves need to be reconnected to each other.
-        #   Reversed nodes and the remaining nodes need to be reconnected.
+        def get_linked_list_length(head):
 
-        # Time: O(n)
-        # Space: O(1)
+            i = 0
 
-        # This tracks the node that should be in the beginning.
+            # Check if there are at least k nodes in the linked list
+            while head:
+                head = head.next
+                i += 1
+
+            return i
+
+        def reverse(head, k):
+
+            first_head = head
+
+            pre = None
+            cur = head
+            nex = head.next
+
+            i = 0
+
+            while i < k:
+                cur.next = pre
+                pre = cur
+                cur = nex
+                if nex:
+                    nex = nex.next
+                i += 1
+
+            # Key idea is to return the current node
+            return pre, cur, first_head
+
+        # This tracks the node that should be in the beginning
         head_in_the_beginning = None
 
         prev_first_head = None
 
+        # Time O(n)
+        # Space O(1)
         while True:
-            length = self.get_linked_list_length(head)
+            length = get_linked_list_length(head)
             if length < k:
-                # This connects reversed nodes to the node on the right.
+                # This connects reversed nodes to the node on the right
                 first_head.next = head
                 break
             else:
-                pre, head, first_head = self.reverse(head, k)
+                pre, head, first_head = reverse(head, k)
 
-                # This connects between the reversed nodes.
+                # This connects between the reversed nodes
                 if prev_first_head:
                     prev_first_head.next = pre
 
-                # In this case, this is the first time the reverse takes place.
-                # Thus, pre will be the first node in the final linked list.
+                # In this case, this is the first time the reverse takes place
+                # Thus, pre will be the first node in the final linked list
                 else:
                     head_in_the_beginning = pre
 
-                # This connects between the reversed nodes.
+                # This connects between the reversed nodes
                 prev_first_head = first_head
 
-        return head_in_the_beginning
-
-    def get_linked_list_length(self, head):
-
-        i = 0
-
-        # Check if there are at least k nodes in the linked list.
-        while head:
-            head = head.next
-            i += 1
-
-        return i
-
-    def reverse(self, head, k):
-
-        first_head = head
-
-        pre = None
-        cur = head
-        nex = head.next
-
-        i = 0
-
-        while i < k:
-            cur.next = pre
-            pre = cur
-            cur = nex
-            if nex:
-                nex = nex.next
-            i += 1
-
-        # Key idea is to return the current node.
-        return pre, cur, first_head</code></pre>
+        return head_in_the_beginning</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/reverse-nodes-in-k-group">25. Reverse Nodes in k-Group</a>
