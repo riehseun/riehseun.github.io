@@ -66,32 +66,33 @@
 <pre><code class="python">class Solution:
     def lengthOfLongestSubstring(self, s: str) -> int:
 
-        # Move the end pointer until repeat char is found
-        # Move the start point until there is no repeat char
-        # Keep max diff between start and end
-        # Use hash table to keep last index of each char
-
-        # How to tell when char is repeated
-        #   If char has index greater than start but less than end
+        # Move the end pointer until seeing repeating chars
+        # Move the start pointer until substring has no repeating chars
+        # Keep the max diff between end and start pointer
+        # Scan finished when both start and end pointers reach the end of string
 
         start = 0
-        char = {}
-        max_diff = 0
+        max_length = 0
+        char_map = {}  # Store chracter and its index
 
-        # Time O(n) n = len(s)
+        # Time O(n) = len(s)
         # Space O(n)
         for i,c in enumerate(s):
 
-            # If repeat char is found
-            if c in char and char[c] >= start:
-                max_diff = max(max_diff, i-start)
-                start = char[c] + 1
+            # If duplicate is found, compute the length
+            # using start and the i pointer
+            # The second condition ensures that we are only looking
+            # at the substring after the start index
+            if c in char_map and char_map[c] >= start:
+                max_length = max(max_length, i-start)
+                # Move the start pointer to plus 1
+                # of the index where the duplicate is
+                start = char_map[c] + 1
+            char_map[c] = i
 
-            char[c] = i
+        max_length = max(max_length, len(s)-start)
 
-        max_diff = max(max_diff, len(s)-start)
-
-        return max_diff</code></pre>
+        return max_length</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/longest-substring-without-repeating-characters">3. Longest Substring Without Repeating Characters</a>
