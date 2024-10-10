@@ -375,8 +375,13 @@
   <div class="card-body">
     <h2 class="card-title">Climbing stairs (E/G/F/A)</h2>
 
-<pre><code class="python">class Solution:
-    def climbStairs(self, n: int) -> int:
+<pre><code class="python">class Solution(object):
+    def climbStairs(self, n):
+
+        # Dictionary to store the answer for each
+        memory = defaultdict(int)
+        memory[1] = 1
+        memory[2] = 2
 
         # Example: n=1
         # 1+1
@@ -399,27 +404,20 @@
         # 1+1+1+1+1
         # 8
 
-        #  1 2 3 4 5
-        #  1 2 3 5 8
-        #
-        # f(n) = f(n-1) + f(n-2)
-
-        # Edge cases
-        if n == 1:
-            return 1
-        if n == 2:
-            return 2
-
-        dp = [0] * n
-        dp[0] = 1
-        dp[1] = 2
+        # Take 1 step and compute (n-1)
+        # Take 2 steps and compute (n-2)
 
         # Time O(n)
-        # Space O(n)
-        for i in range(2, n):
-            dp[i] = dp[i-1] + dp[i-2]
+        # Sapce O(n)
+        def helper(n, memory):
 
-        return dp[n-1]</code></pre>
+            if n in memory:
+                return memory[n]
+
+            memory[n] = helper(n-1, memory) + helper(n-2, memory)
+            return memory[n]
+
+        return helper(n, memory)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/climbing-stairs">70. Climbing Stairs</a>
