@@ -76,7 +76,7 @@
         n = len(words)
 
         # Construct a set that contains all words that differ by one char
-        # Space O(n * s) where s is length of word
+        # Space O(n*s) s = length of word
         all_words_differ_by_one_char = defaultdict(set)
         for word in words:
             for i in range(len(word)):
@@ -91,74 +91,74 @@
                     graph[words[i]].append(words[j])
                     graph[words[j]].append(words[i])
 
+        def bfs(graph, start, end, explored_by_level):
+
+            explored = set()
+            explored.add(start)
+
+            explored_by_level = defaultdict(set)
+            explored_by_level[0].add(start)
+
+            queue = deque()
+            queue.append((start,0,[]))
+
+            result = []
+            min_dist = 500
+
+            while queue:
+                node, dist, previous_nodes = queue.popleft()
+
+                for next_node in graph[node]:
+                    if next_node == end:
+                        min_dist = min(min_dist, dist)
+                        path = previous_nodes+[node]+[end]
+                        if dist <= min_dist and path not in result:
+                            result.append(path)
+
+                    if next_node not in explored:
+                        all_parent_nodes_dequeued = True
+                        parent_nodes = explored_by_level[dist]
+                        for parent_node in parent_nodes:
+                            if parent_node in queue:
+                                all_parent_nodes_dequeued = False
+                        if all_parent_nodes_dequeued:
+                            explored.add(node)
+                        queue.append((next_node,dist+1,previous_nodes+[node]))
+
+            return result
+
+        def bfs_helper(graph, start, end):
+
+            explored = set()
+            explored.add(start)
+
+            explored_by_level = defaultdict(set)
+            explored_by_level[0].add(start)
+
+            queue = deque()
+            queue.append((start,0))
+
+            result = []
+
+            while queue:
+                node, dist = queue.popleft()
+
+                for next_node in graph[node]:
+                    if next_node not in explored:
+                        explored.add(node)
+                        explored_by_level[dist+1].add(next_node)
+                        queue.append((next_node,dist+1))
+
+            return explored_by_level
+
         # Time O(n+m)
         # Space O(n*m) if all nodes is connected to all other nodes,
         # there are m possible distances from one node to reach another
-        explored_by_level = self.bfs_helper(graph, beginWord, endWord)
+        explored_by_level = bfs_helper(graph, beginWord, endWord)
 
         # Time O(n+m)
         # Space O(n)
-        return self.bfs(graph, beginWord, endWord, explored_by_level)
-
-    def bfs(self, graph, start, end, explored_by_level):
-
-        explored = set()
-        explored.add(start)
-
-        explored_by_level = defaultdict(set)
-        explored_by_level[0].add(start)
-
-        queue = deque()
-        queue.append((start,0,[]))
-
-        result = []
-        min_dist = 500
-
-        while queue:
-            node, dist, previous_nodes = queue.popleft()
-
-            for next_node in graph[node]:
-                if next_node == end:
-                    min_dist = min(min_dist, dist)
-                    path = previous_nodes+[node]+[end]
-                    if dist <= min_dist and path not in result:
-                        result.append(path)
-
-                if next_node not in explored:
-                    all_parent_nodes_dequeued = True
-                    parent_nodes = explored_by_level[dist]
-                    for parent_node in parent_nodes:
-                        if parent_node in queue:
-                            all_parent_nodes_dequeued = False
-                    if all_parent_nodes_dequeued:
-                        explored.add(node)
-                    queue.append((next_node,dist+1,previous_nodes+[node]))
-
-        return result
-
-    def bfs_helper(self, graph, start, end):
-
-        explored = set()
-        explored.add(start)
-
-        explored_by_level = defaultdict(set)
-        explored_by_level[0].add(start)
-
-        queue = deque()
-        queue.append((start,0))
-
-        result = []
-
-        while queue:
-            node, dist = queue.popleft()
-
-            for next_node in graph[node]:
-                if next_node not in explored:
-                    explored.add(node)
-                    explored_by_level[dist+1].add(next_node)
-                    queue.append((next_node,dist+1))
-
-        return explored_by_level</code></pre>
+        return bfs(graph, beginWord, endWord, explored_by_level)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/word-ladder-ii">126. Word Ladder II</a>
@@ -196,26 +196,26 @@
                     graph[words[j]].append(words[i])
 
         # Time O(n+m)
-        return self.bfs(graph, beginWord, endWord)
+        def bfs(graph, start, end):
 
-    def bfs(self, graph, start, end):
+            explored = set()
+            explored.add(start)
 
-        explored = set()
-        explored.add(start)
+            queue = deque()
+            queue.append((start,0))
 
-        queue = deque()
-        queue.append((start,0))
+            while queue:
+                node, dist = queue.popleft()
+                for next_node in graph[node]:
+                    if next_node == end:
+                        return dist+2
+                    if next_node not in explored:
+                        explored.add(next_node)
+                        queue.append((next_node,dist+1))
 
-        while queue:
-            node, dist = queue.popleft()
-            for next_node in graph[node]:
-                if next_node == end:
-                    return dist+2
-                if next_node not in explored:
-                    explored.add(next_node)
-                    queue.append((next_node,dist+1))
+            return 0
 
-        return 0</code></pre>
+        return bfs(graph, beginWord, endWord)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/word-ladder">127. Word Ladder</a>
