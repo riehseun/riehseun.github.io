@@ -200,36 +200,48 @@
 <pre><code class="python">class Solution:
     def calculate(self, s: str) -> int:
 
+        # If token is a digit
+        #   Put it in stack
+        #   If two consecutive tokens are digits, multiply first digit by 10
+        #   If three consecutive tokens are digits, multiply first digit by 100
+        #   and so on
+        # If token is "+" or "-", the expression should be evaludate later
+        #   Put it in stack
+        # If token is "*" or "/", the expression can be evaludated immediately
+        #   Pop a number from stack
+        #   Multiply or divide with the next number
+        #   Put the result back into the stack
+
         s = s.replace(" ", "")
         stack = []
         num = 0
         operator = "+"
 
+        def helper(stack, operator, num):
+
+            if operator == "+":
+                stack.append(num)
+            if operator == "-":
+                stack.append(-num)
+            if operator == "*":
+                stack.append(stack.pop()*num)
+            if operator == "/":
+                stack.append(int(stack.pop()/num))
+
+        # Time O(n) n = len(s)
+        # Space O(n)
         for i, token in enumerate(s):
 
             if token.isdigit():
                 num = num*10 + int(token)
 
             elif token in "+-*/":
-                self.helper(stack, operator, num)
+                helper(stack, operator, num)
                 num = 0
                 operator = token
 
-        self.helper(stack, operator, num)
-        print(stack)
-        return sum(stack)
-
-
-    def helper(self, stack, operator, num):
-
-        if operator == "+":
-            stack.append(num)
-        if operator == "-":
-            stack.append(-num)
-        if operator == "*":
-            stack.append(stack.pop()*num)
-        if operator == "/":
-            stack.append(int(stack.pop()/num))</code></pre>
+        helper(stack, operator, num)
+        return sum(stack)</code></pre>
   </div>
   <div class="card-footer text-muted">
     <a href="https://leetcode.com/problems/basic-calculator-ii">227. Basic Calculator II</a>
