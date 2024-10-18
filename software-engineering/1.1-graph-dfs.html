@@ -58,33 +58,19 @@
   <div class="card-body">
     <h2 class="card-title">Word break (M/A)</h2>
 
-<pre><code class="python">class Solution:
-    def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+<pre><code class="python">class Solution(object):
+    def wordBreak(self, s, wordDict):
+        """
+        :type s: str
+        :type wordDict: List[str]
+        :rtype: bool
+        """
 
         # Consider indices in string as nodes in graph
         # For example, because "leet" is in "leetcode", 0->4
 
-        def dfs(graph, start_node, end_node):
-            explored = set()
-            explored.add(start_node)
-
-            stack = []
-            stack.append(start_node)
-
-            while stack:
-                node = stack.pop()
-                for next_node in graph[node]:
-                    if next_node == end_node:
-                        return True
-
-                    if next_node not in explored:
-                        stack.append(next_node)
-                        explored.add(next_node)
-
         occurences = defaultdict(list)
 
-        # Time O(mn) where m = len(wordDict), n = len(s)
-        # Space O(mn)
         for word in wordDict:
             start = 0
             end = len(s)
@@ -96,7 +82,29 @@
                     occurences[index].append(index+len(word))
                     start = index + 1
 
-        return dfs(occurences, 0, len(s)) </code></pre>
+        # Time O(mn) where m = len(wordDict), n = len(s)
+        # Space O(mn)
+        def dfs(graph, start, end):
+
+            explored = set()
+            explored.add(start)
+
+            stack = []
+            stack.append(start)
+
+            while stack:
+                node = stack.pop()
+                for next_node in graph[node]:
+                    if next_node == end:
+                        return True
+
+                    if next_node not in explored:
+                        stack.append(next_node)
+                        explored.add(next_node)
+
+            return False
+
+        return dfs(occurences, 0, len(s))</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/word-break">139. Word Break</a>
@@ -162,9 +170,10 @@
   <div class="card-body">
     <h2 class="card-title">Course schedule II (M/A)</h2>
 
-<pre><code class="python">class Solution:
-    def findOrder(self, numCourses: int, prerequisites: List[List[int]]) -> List[int]:
+<pre><code class="python">from collections import defaultdict
 
+class Solution:
+    def findOrder(self, numCourses: int, prerequisites: List[List[int]]) -> List[int]:
         # Loop through n. Do DFS for each node
         # 1. If a node is pre-requisite for a lot of courses, it will take long to
         # finsh DFS
@@ -177,11 +186,35 @@
         for edge in prerequisites:
             graph[edge[1]].add(edge[0])
 
-        # Time O(n^2)
+        # Time O(n+m)
+        #   n = number of nodes = numCourses
+        #   m = number of edges = len(prerequisites)
         # Space O(n)
+        def dfs(graph, start):
+
+            explored = set()
+            explored.add(start)
+
+            stack = []
+            stack.append(start)
+            count = 1
+
+            while stack:
+                node = stack.pop()
+                for next_node in graph[node]:
+                    if next_node not in explored:
+                        explored.add(next_node)
+                        stack.append(next_node)
+                        count += 1
+                    else:
+                        if next_node == start:
+                            return -1
+
+            return count
+
         ordering = []
         for i in range(numCourses):
-            count = self.dfs(i, graph)
+            count = dfs(graph, i)
             # If cycle
             if count == -1:
                 return []
@@ -189,30 +222,7 @@
 
         ordering.sort(key=lambda x:(-x[0]))
 
-        return [item[1] for item in ordering]
-
-    def dfs(self, start, graph):
-
-        explored = set()
-        explored.add(start)
-
-        stack = []
-        stack.append(start)
-
-        count = 1
-
-        while stack:
-            node = stack.pop()
-            for next_node in graph[node]:
-                if next_node not in explored:
-                    explored.add(next_node)
-                    stack.append(next_node)
-                    count += 1
-                else:
-                    if next_node == start:
-                        return -1
-
-        return count</code></pre>
+        return [item[1] for item in ordering]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/course-schedule-ii">210. Course Schedule II</a>
