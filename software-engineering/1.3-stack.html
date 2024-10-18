@@ -356,7 +356,43 @@ class NestedIterator:
   <div class="card-body">
     <h2 class="card-title">Decode string (M/G)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def decodeString(self, s: str) -> str:
+
+        # Append each char into a stack
+        #   When seeing closing bracket, pop out until seeing
+        #   opening bracket and the number
+        #   Evaluate the expression and put back into stack
+
+        stack = []
+
+        # Time O(n) n = len(s)
+        # Space O(n)
+        i = 0
+        while i < len(s):
+            if s[i] != "]":
+                if s[i].isdigit():
+                    j = i
+                    while s[j].isdigit():
+                        j += 1
+                    stack.append(s[i:j])
+                    i = j-1
+                # s[i] must be opening bracket
+                else:
+                    stack.append(s[i])
+            else:
+                string_inside_bracket = ""
+                while stack[-1] != "[":
+                    # Must add the result of stack.pop() to the front
+                    string_inside_bracket = stack.pop() + string_inside_bracket
+                # Pop out "["
+                stack.pop()
+                # Pop out number, compute the result,
+                # and put the result back to stack
+                stack.append(int(stack.pop()) * string_inside_bracket)
+            i += 1
+
+        return ''.join(stack)</code></pre>
   </div>
   <div class="card-footer text-muted">
     <a href="https://leetcode.com/problems/decode-string">394. Decode String</a>

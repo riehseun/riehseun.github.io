@@ -199,38 +199,38 @@
             nodes.add(equation[0])
             nodes.add(equation[1])
 
+        # Time O(n+m)
+        #   n = size of input array (equations)
+        #   m = size of input array (equations)
+        # Space O(n)
+        def dfs(graph, start, end):
+
+            explored = set()
+            explored.add(start)
+
+            stack = []
+            stack.append((start, 1))
+
+            while stack:
+                node, ret_val = stack.pop()
+                for next_node, value in graph[node]:
+                    if next_node not in explored:
+                        explored.add(next_node)
+                        stack.append((next_node, ret_val*value))
+
+                        if next_node == end:
+                            return ret_val*value
+
+            return -1
+
         result = []
         for query in queries:
             if query[0] == query[1] and query[0] in nodes:
                 result.append(1)
             else:
-                result.append(self.dfs(graph, query[0], query[1]))
+                result.append(dfs(graph, query[0], query[1]))
 
-        return result
-
-    # Number of nodes n = size of input array (equations)
-    # Number of edges m = size of input array (equations)
-    # Time O(nm)
-    # Space O(n)
-    def dfs(self, graph, start, end):
-
-        explored = set()
-        explored.add(start)
-
-        stack = []
-        stack.append((start, 1))
-
-        while stack:
-            node, ret_val = stack.pop()
-            for next_node, value in graph[node]:
-                if next_node not in explored:
-                    explored.add(next_node)
-                    stack.append((next_node, ret_val*value))
-
-                    if next_node == end:
-                        return ret_val*value
-
-        return -1</code></pre>
+        return result</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/evaluate-division">399. Evaluate Division</a>
