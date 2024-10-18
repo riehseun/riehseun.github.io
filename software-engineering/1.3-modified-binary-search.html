@@ -388,10 +388,25 @@
 <pre><code class="python">class Solution:
     def findClosestElements(self, nums: List[int], k: int, num: int) -> List[int]:
 
-        # Time: O(logn+k)
-        # Space: O(1)
+        # Time O(logn+k)
+        # Space O(1)
 
-        index = self.binary_search(nums, 0, len(nums)-1, num)
+        def binary_search(nums, low, high, target):
+
+            if low > high:
+                return low
+
+            mid = low + (high - low) / 2
+            mid = int(mid)
+
+            if target > nums[mid]:
+                return binary_search(nums, mid+1, high, target)
+            elif target < nums[mid]:
+                return binary_search(nums, low, mid-1, target)
+            else:
+                return mid
+
+        index = binary_search(nums, 0, len(nums)-1, num)
 
         left = index - 1
         right = index
@@ -408,22 +423,7 @@
             else:
                 right += 1
 
-        return nums[left+1:right]
-
-    def binary_search(self, nums, low, high, target):
-
-        if low > high:
-            return low
-
-        mid = low + (high - low) / 2
-        mid = int(mid)
-
-        if target > nums[mid]:
-            return self.binary_search(nums, mid+1, high, target)
-        elif target < nums[mid]:
-            return self.binary_search(nums, low, mid-1, target)
-        else:
-            return mid</code></pre>
+        return nums[left+1:right]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/find-k-closest-elements">658. Find K Closest Elements</a>
