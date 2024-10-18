@@ -52,6 +52,8 @@
       <!-- <li><a href="#stack-">Flatten nested list iterator</a></li> -->
       <li><a href="#stack-">Decode string</a></li>
       <li><a href="#stack-">Next greater element I</a></li>
+      <li><a href="#stack-">Next Greater Element II</a></li>
+      <li><a href="#stack-">Asteroid Collision</a></li>
       <li><a href="#stack-">Minimum Add to Make Parentheses Valid</a></li>
       <li><a href="#stack-">Remove all adjacent duplicates in string</a></li>
     </ul>
@@ -459,6 +461,114 @@ class NestedIterator:
   </div>
   <div class="card-footer text-muted">
     <a href="https://leetcode.com/problems/next-greater-element-i">496. Next Greater Element I</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="stack-">
+  <div class="card-body">
+    <h2 class="card-title">Next Greater Element II (M/A)</h2>
+
+<pre><code class="python">class Solution:
+    def nextGreaterElements(self, nums: List[int]) -> List[int]:
+
+        # 1. Use dictionary to store the indexes of current and its
+        # next greater element
+        # 3. Start appending numbers into a stack
+        #    If current number is less than or equal to stack.top, append
+        #    If current number is greater than stack.top, keep poppping
+        #    until current number of less than stack.top
+        #    When poppping, record that the current number is the next greater
+        #    of numbers being popped. Append current number into a stack
+        # 4. Most left item in the stack must be the greatest number
+
+        # [1,2,3,7,4,5,2]
+        # [7,5,2] [1,2,3,7,4,5,2]
+
+        # [1,2,1]
+        # [2,1] [1,2,1]
+
+        nums = nums + nums
+        stack = []
+        next_greater = {}
+
+        for i in range(len(nums)):
+            # Only the first item in nums will hit this condition
+            if not stack:
+                stack.append((i, nums[i]))
+                continue
+
+            if nums[i] <= stack[-1][1]:
+                stack.append((i, nums[i]))
+            else:
+                while stack and nums[i] > stack[-1][1]:
+                    item = stack.pop()
+                    if i >= len(nums):
+                        index = i - len(nums)
+                    else:
+                        index = i
+                    next_greater[item[0]] = index
+                stack.append((i, nums[i]))
+
+        result = []
+        for i in range(int(len(nums)/2)):
+            if i in next_greater:
+                result.append(nums[next_greater[i]])
+            else:
+                result.append(-1)
+
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://leetcode.com/problems/next-greater-element-ii">503. Next Greater Element II</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="stack-">
+  <div class="card-body">
+    <h2 class="card-title">Asteroid Collision (M/A)</h2>
+
+<pre><code class="python">class Solution:
+    def asteroidCollision(self, asteroids: List[int]) -> List[int]:
+
+        # Go through the array, and start appending numbers into a stack
+        # While current number is negative and stack.top is positive, keep the greater
+        # of the absolute values in the stack. Remove both if absolute values
+        # are the same
+        # Otherwise just append the number
+
+        stack = []
+
+        for num in asteroids:
+            # If stack is empty, just append.
+            if not stack:
+                stack.append(num)
+                continue
+
+            if (num > 0 and stack[-1] > 0
+                or num < 0 and stack[-1] < 0
+                or num > 0 and stack[-1] < 0):
+                stack.append(num)
+                continue
+
+            append_current_number = True
+            while stack and (num < 0 and stack[-1] > 0):
+                if abs(num) > abs(stack[-1]):
+                    stack.pop()
+                elif abs(num) == abs(stack[-1]):
+                    stack.pop()
+                    append_current_number = False
+                    break
+                else:
+                    append_current_number = False
+                    break
+
+            if append_current_number:
+                stack.append(num)
+
+        return stack</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://leetcode.com/problems/asteroid-collision">735. Asteroid Collision</a>
   </div>
 </div>
 

@@ -208,32 +208,30 @@ class Solution:
   <div class="card-body">
     <h2 class="card-title">Kth largest element in a stream (E/A)</h2>
 
-<pre><code class="python">from heapq import heapify, heappush, heappop
+<pre><code class="python">class KthLargest:
 
-class KthLargest:
+    # Initialize min_heap with just K elements from input array
+    # As items are added, maintain K elements in min_heap
 
-    # Time O(nlogn)
-    # Space O(n)
-
-    # Initialize min_heap with just K elements from input array.
-    # As items are added, maintain K elements in min_heap.
-
-    # Constructor to initialize heap and add values in it.
     def __init__(self, k: int, nums: List[int]):
         self.k = k
         self.min_heap = nums
         heapify(self.min_heap)
         while len(self.min_heap) > k:
             heappop(self.min_heap)
-        print(self.min_heap)
 
-    # Adds element in the heap.
-    # Time O(logk).
+    # Time O(nlogn)
+    # Space O(n)
     def add(self, val: int) -> int:
         heappush(self.min_heap, val)
         if len(self.min_heap) > self.k:
             heappop(self.min_heap)
-        return self.min_heap[0]</code></pre>
+        return self.min_heap[0]
+
+
+# Your KthLargest object will be instantiated and called as such:
+# obj = KthLargest(k, nums)
+# param_1 = obj.add(val)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/kth-largest-element-in-a-stream">703. Kth Largest Element in a Stream</a>
@@ -244,23 +242,20 @@ class KthLargest:
   <div class="card-body">
     <h2 class="card-title">Reorganize string (M/A)</h2>
 
-<pre><code class="python">from collections import defaultdict
-from heapq import heapify, heappush, heappop
-
-class Solution:
+<pre><code class="python">class Solution:
     def reorganizeString(self, s: str) -> str:
 
-        # Time: O(n)
-        # Space: O(1)
-
-        # Store frequency of each char in a dictionary.
-        # Store each char into max_heap by the frequency.
-        # Pop out char from max_heap, decrement the frequency, and add the char to the resulting string.
-        # Do not push back the char into the max_heap in the same iteration. Push back in the next interation if the frequency is greater than 0. This is to ensure not to repeat the same char in the resulting string.
+        # Store frequency of each char in a dictionary
+        # Store each char into max_heap by the frequency
+        # Pop out char from max_heap, decrement the frequency, and add the char to the resulting string
+        # Do not push back the char into the max_heap in the same iteration. Push back in the next interation if the frequency is greater than 0. This is to ensure not to repeat the same char in the resulting string
 
         frequency = defaultdict(str)
         max_heap = []
         result_string = ""
+
+        # Time O(n)
+        # Space O(1)
 
         for char in s:
             if char in frequency:
@@ -272,7 +267,7 @@ class Solution:
             heappush(max_heap, [-v,k])
 
         previous = None
-        # If previous still exists after max_heap is emptied out, then return empty string.
+        # If previous still exists after max_heap is emptied out, then return empty string
         while max_heap or previous:
 
             if previous and len(max_heap) == 0:
@@ -281,17 +276,17 @@ class Solution:
             v, k = heappop(max_heap)
             v = -v
 
-            # Decrement the frequency.
+            # Decrement the frequency
             v -= 1
             result_string += k
 
             # Idea is that char popped out in this interation must not be pushed back
-            # to max_heap in this interation, but the next iteration.
+            # to max_heap in this interation, but the next iteration
             if previous:
                 heappush(max_heap, previous)
                 previous = None
 
-            # "previous" should be set to most recently used char.
+            # "previous" should be set to most recently used char
             if v > 0:
                 previous = [-v,k]
 
