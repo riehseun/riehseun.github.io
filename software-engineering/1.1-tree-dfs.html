@@ -58,6 +58,7 @@
       <li><a href="#tree-dfs">Alien dictionary</a></li>
       <li><a href="#tree-dfs">Diameter of binary tree</a></li>
       <!-- <li><a href="#tree-dfs">Longest univalue path</a></li> -->
+      <li><a href="#tree-dfs">Lowest Common Ancestor of a Binary Tree III</a></li>
     </ul>
   </div>
 </div>
@@ -437,7 +438,7 @@ class Solution:
             return None</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/sum-root-to-leaf-numbers">236. Lowest Common Ancestor of a Binary Tree</a>
+    Reference: <a href="https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree">236. Lowest Common Ancestor of a Binary Tree</a>
   </div>
 </div>
 
@@ -596,7 +597,7 @@ class Solution:
 
         get_max_diameter(root)
 
-        return self.max_diameter </code></pre>
+        return self.max_diameter</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/diameter-of-binary-tree">543. Diameter of Binary Tree</a>
@@ -655,6 +656,67 @@ class Solution:
     Reference: <a href="https://leetcode.com/problems/longest-univalue-path">687. Longest univalue path</a>
   </div>
 </div> -->
+
+<div class="card mb-4" id="tree-dfs">
+  <div class="card-body">
+    <h2 class="card-title">Lowest Common Ancestor of a Binary Tree III (M/F)</h2>
+
+<pre><code class="python">"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val):
+        self.val = val
+        self.left = None
+        self.right = None
+        self.parent = None
+"""
+
+class Solution:
+    def lowestCommonAncestor(self, p: 'Node', q: 'Node') -> 'Node':
+
+        # If subtrees return one p and one q, the current root is LCA
+        # If only one of subtrees return one of p and q, then the other one of
+        # p and q must be contained under that subtree
+
+        def get_root(p):
+
+            if not p.parent:
+                return p
+
+            return get_root(p.parent)
+
+        root = get_root(p)
+
+        def lowest_common_ancestor(root, p, q):
+
+            if root == p or root == q:
+                return root
+
+            left = None
+            right = None
+
+            # Time O(h) h = height of tree
+            # Space O(1)
+            if root.left:
+                left = lowest_common_ancestor(root.left, p, q)
+            if root.right:
+                right = lowest_common_ancestor(root.right, p, q)
+
+            if left and right:
+                return root
+            elif left and not right:
+                return left
+            elif not left and right:
+                return right
+            else:
+                return None
+
+        return lowest_common_ancestor(root, p, q)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree-iii">1650. Lowest Common Ancestor of a Binary Tree III</a>
+  </div>
+</div>
 <!-- Tree DFS END -->
 
 </div> <!-- /.col-md-12 -->
