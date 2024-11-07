@@ -45,6 +45,7 @@
     <h2 class="card-title">Heap</h2>
     <ul class="list-unstyled mb-0">
       <!-- <li><a href="#heap-">The skyline problem</a></li> -->
+      <li><a href="#heap-">Minimum Cost to Hire K Workers</a></li>
     </ul>
   </div>
 </div>
@@ -92,6 +93,59 @@ class Solution:
     Reference: <a href="https://leetcode.com/problems/the-skyline-problem">218. The Skyline Problem</a>
   </div>
 </div> -->
+
+<div class="card mb-4" id="heap-">
+  <div class="card-body">
+    <h2 class="card-title">Minimum Cost to Hire K Workers (H)</h2>
+
+<pre><code class="python">class Solution:
+    def mincostToHireWorkers(self, quality: List[int], wage: List[int], k: int) -> float:
+
+        # Compute wage-to-quality ratio
+        # Cost = max ratio amongst k worker * total_quality of k workers
+        # Sort workers by ratio first
+        # Use heap
+        #   When heap size exceeds k, pop the highest quality worker (which causes
+        #   minimum wage to be maximized) first
+        # Ex. quality = [10,20,5], wage = [70,50,30], k = 2
+        # wage-to-quality ratio = [7, 2.5, 6]
+
+        # Time O(nlogn) n = len(quality)
+        # Space O(n)
+        workers = []
+        for q,w in zip(quality, wage):
+            workers.append([q,w,w/q])
+        workers.sort(key=lambda x: x[2])
+
+        heap = []
+        cost = math.inf
+        total_quality = 0
+        r_out = 0
+        for q, w, r in workers:
+            heappush(heap, [-q, w, r])
+            total_quality += q
+            if len(heap) > k:
+                q_out, w_out, r_out = heappop(heap)
+                total_quality += q_out
+            if len(heap) == k:
+                # If current worker got popped out from heap
+                if r_out == r:
+                    max_r = 0
+                    for q, w, r in heap:
+                        max_r = max(max_r, r)
+                    cost = min(cost, max_r*total_quality)
+                # If current worker is in the heap, the ratio of current worker
+                # is the maximum ratio in the heap because workers are sorted
+                # by ratio
+                else:
+                    cost = min(cost, r*total_quality)
+
+        return cost</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/minimum-cost-to-hire-k-workers">857. Minimum Cost to Hire K Workers</a>
+  </div>
+</div>
 <!-- Heap END -->
 
 </div> <!-- /.col-md-12 -->
