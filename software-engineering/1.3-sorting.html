@@ -47,6 +47,7 @@
       <!-- <li><a href="#sorting-">Maximum gap</a></li> -->
       <li><a href="#sorting-">Largest number</a></li>
       <!-- <li><a href="#sorting-">Best meeting point</a></li> -->
+      <li><a href="#sorting-">Minimum Time Difference</a></li>
       <li><a href="#sorting-">Sort an array</a></li>
     </ul>
   </div>
@@ -182,6 +183,52 @@
     Reference: <a href="https://leetcode.com/problems/best-meeting-point">296. Best Meeting Point</a>
   </div>
 </div> -->
+
+<div class="card mb-4" id="sorting-">
+  <div class="card-body">
+    <h2 class="card-title">Minimum Time Difference (M)</h2>
+
+<pre><code class="python">class Solution:
+    def findMinDifference(self, timePoints: List[str]) -> int:
+
+        # Convert time format to integer representing number of minutes
+        # Sort (bucket sort since range of values is knwon)
+        times = []
+
+        for timepoint in timePoints:
+            hour = timepoint[0:2]
+            minute = timepoint[3:5]
+            times.append(int(hour)*60+int(minute))
+
+        # Time O(n) n = len(timePoints)
+        # Space O(1) size is limited to 24 * 60
+        buckets = defaultdict(int)
+        for time in times:
+            if time in buckets:
+                return 0
+            buckets[time] = True
+
+        result = math.inf
+        prev = math.inf
+        first = math.inf
+        last = math.inf
+
+        # Time O(1)
+        for i in range(24*60):
+            if buckets[i]:
+                if prev != math.inf:
+                    result = min(result, i-prev)
+                prev = i
+                if first == math.inf:
+                    first = i
+                last = i
+
+        return min(result, 24*60-last+first)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/minimum-time-difference">539. Minimum Time Difference</a>
+  </div>
+</div>
 
 <div class="card mb-4" id="sorting-">
   <div class="card-body">
