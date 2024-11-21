@@ -271,14 +271,13 @@
       </ul>
       <li>Neural network</li>
       <ul>
-        <li>Single NN</li>
+        <li>Independent DNNs</li>
         <ul>
-          <li>All features are used as inputs and NN outputs click probability</li>
+          <li>Expensive to train</li>
         </ul>
-        <li>Two tower NN</li>
+        <li>A multi-task DNN</li>
         <ul>
-          <li>Separate encoder for user and AD features</li>
-          <li>Similarity of user embeddings and AD embeddings is computed</li>
+          <li>A shared layer and each classification head for dwell time, like, share, comment, hide, report</li>
         </ul>
       </ul>
     </ul>
@@ -287,20 +286,16 @@
     <ul>
       <li>Loss function</li>
       <ul>
-        <li>Constrastive loss function</li>
+        <li>Dwell time</li>
         <ul>
-          <li>Dot product or cosine similarity is used to compute distances in embedding space</li>
-          <ul>
-            <li>Euclidean distance is not used due to curse of dimensionality</li>
-          </ul>
-          <li>Softmax is applied to distances to make them sum to 1</li>
-          <li>Cross-entropy is used to measure how close the probabilities are to the ground truth</li>
+          <li>MSE/MAE</li>
+        </ul>
+        <li>Like, share, comment, hide, report</li>
+        <ul>
+          <li>Cross entropy</li>
         </ul>
       </ul>
       <li>Hyperparameters</li>
-      <ul>
-        <li>Size of embedding vector</li>
-      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -316,12 +311,12 @@
     <ul>
       <li>Precision@k</li>
       <ul>
-        <li>\( \dfrac{\text{Number of relevant ADs in top k items}}{\text{k}} \)</li>
+        <li>\( \dfrac{\text{Number of relevant posts in top k items}}{\text{k}} \)</li>
         <li>Does not consider ranking quality</li>
       </ul>
       <li>Recall@k</li>
       <ul>
-        <li>\( \dfrac{\text{Number of relevant ADs in top k items}}{\text{total number of relevant ADs}} \)</li>
+        <li>\( \dfrac{\text{Number of relevant posts in top k items}}{\text{total number of relevant posts}} \)</li>
         <li>Does not consider ranking quality</li>
       </ul>
       <li>Mean reciprobal rank (MRR)</li>
@@ -330,8 +325,8 @@
         <ul>
           <li>\( {\text{rank}_{i}} \) is position on which the first relevant item appears in the output list</li>
         </ul>
-        <li>Consider only the first relevant AD in each output list, then average the reciprocal rank</li>
-        <li>Ignores other relevant ADs in the list other than the first one</li>
+        <li>Consider only the first relevant post in each output list, then average the reciprocal rank</li>
+        <li>Ignores other relevant posts in the list other than the first one</li>
       </ul>
       <li>Mormalized discounted cumulative gain (nDCG)</li>
       <ul>
@@ -342,12 +337,7 @@
         <li>\( nDCG_{p} = \dfrac{DCG_{p}}{IDCG_{p}} \)</li>
         <ul>
           <li>where \( {IDCG_{p}} \) is \( {DCG_{p}} \) of ideal ranking</li>
-        </ul>
-        <li>We only have training data that consist of 0 or 1 representing user click on AD, not the ordering of ADs for each user</li>
-      </ul>
-      <li>Cross-entropy</li>
-      <ul>
-        <li>Multiply ground truth label (0 or 1) with the probability of AD being clicked for each AD, them sum it to assess the model performance</li>
+        </ul></li>
       </ul>
     </ul>
 
@@ -355,7 +345,7 @@
     <ul>
       <li>Click-through rate (CTR)</li>
       <ul>
-        <li>\( \dfrac{\text{number of clicked ADs}}{\text{total number of shown ADs}} \)</li>
+        <li>\( \dfrac{\text{number of clicked posts}}{\text{total number of shown posts}} \)</li>
       </ul>
     </ul>
 
@@ -380,10 +370,6 @@
     <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/image/feed-ranking-system3.png" alt="Card image cap">
 
     <h3 class="card-title">Workflow</h3>
-    <ul>
-      <li>Batch features (Ex. AD's text, image, video) don't change much, so they can be processed offline</li>
-      <li>Dynamic features (Ex. number of clicks for an AD) should be computed in real-time</li>
-    </ul>
 
   </div>
   <div class="card-footer text-muted">
@@ -395,9 +381,9 @@
   <div class="card-body">
     <h2 class="card-title">Follow up</h2>
     <ul>
-      <li>Explain how to calibrate the model</li>
-      <li>Explain how to avoid data leakage</li>
-      <li>Explain catastrophic forgetting and the solutions</li>
+      <li>Explain how to handle viral posts</li>
+      <li>Explain how to handle new users</li>
+      <li>Explain how to handle potential bias</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
