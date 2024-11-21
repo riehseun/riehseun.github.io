@@ -39,35 +39,37 @@
 <div class="col-md-12">
 <h1 class="my-4">Machine Learning</h1>
 
-<!-- Visual search system BEGIN -->
-<div class="card mb-4" id="recommender-system">
+<!-- Feed ranking system BEGIN -->
+<div class="card mb-4" id="feed-ranking-system">
   <div class="card-body">
-    <h2 class="card-title">Recommender system</h2>
+    <h2 class="card-title">Feed ranking system</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#recommender-system-1">Requirement</a></li>
-      <li><a href="#recommender-system-2">Problem</a></li>
-      <li><a href="#recommender-system-3">Data preparation</a></li>
-      <li><a href="#recommender-system-4">Model development</a></li>
-      <li><a href="#recommender-system-5">Evaluation</a></li>
-      <li><a href="#recommender-system-6">Serving</a></li>
-      <li><a href="#recommender-system-7">Follow up</a></li>
+      <li><a href="#feed-ranking-system-1">Requirement</a></li>
+      <li><a href="#feed-ranking-system-2">Problem</a></li>
+      <li><a href="#feed-ranking-system-3">Data preparation</a></li>
+      <li><a href="#feed-ranking-system-4">Model development</a></li>
+      <li><a href="#feed-ranking-system-5">Evaluation</a></li>
+      <li><a href="#feed-ranking-system-6">Serving</a></li>
+      <li><a href="#feed-ranking-system-7">Follow up</a></li>
     </ul>
   </div>
 </div>
 
-<div class="card mb-4" id="recommender-system-1">
+<div class="card mb-4" id="feed-ranking-system-1">
   <div class="card-body">
     <h2 class="card-title">Requirement</h2>
     <ul>
       <li>Business objective</li>
       <ul>
-        <li>What should the system recommend? ADs on social website like Instagram</li>
-        <li>What does an AD consist of? Text, iamge, video</li>
-        <li>Should ADs be personalized for each user? Yes</li>
+        <li>What kinds of feed system are we designing? Instagram feed</li>
+        <li>What does a post consist of? Text, iamge, video</li>
+        <li>Should the feed be personalized for each user? Yes</li>
       </ul>
       <li>System features</li>
       <ul>
-        <li>Does the system keep track of user clicks on ADs? Yes</li>
+        <li>Does the system keep track of how much time each user spends on each post? Yes</li>
+        <li>What kinds of user actions are available on each post? Like, share, comment, hide, report</li>
+        <li>Can users follow each other? Yes</li>
       </ul>
       <li>Data</li>
       <ul>
@@ -83,7 +85,7 @@
       <li>Scale</li>
       <ul>
         <li>How many users are using the system? 1M per month</li>
-        <li>How many ADs are in the system? 1B per month</li>
+        <li>How many feeds are in the system? 1B per month</li>
       </ul>
       <li>Performance</li>
       <ul>
@@ -97,20 +99,20 @@
   </div>
 </div>
 
-<div class="card mb-4" id="recommender-system-2">
+<div class="card mb-4" id="feed-ranking-system-2">
   <div class="card-body">
     <h2 class="card-title">Problem</h2>
 
     <h3 class="card-title">ML problem</h3>
     <ul>
-      <li>Given an AD, compute probability of user click</li>
+      <li>Given a post, compute probability of user interaction such as view, like, etc</li>
       <li>Input</li>
       <ul>
         <li>A user</li>
       </ul>
       <li>Output</li>
       <ul>
-        <li>List of ADs ranked by probability of being clicked</li>
+        <li>List of posts ranked by score that represents some combination of user interactions</li>
       </ul>
     </ul>
 
@@ -120,29 +122,29 @@
       <ul>
         <li>Content-based filtering</li>
         <ul>
-          <li>Needs to know user interests to match them with the ADs</li>
+          <li>Needs to know user interests to match them with the post</li>
           <li>Since no data is available about user interest, this can't be an option</li>
         </ul>
         <li>Collaborative filtering</li>
         <ul>
-          <li>Needs to know user historical interaction with the ADs</li>
+          <li>Needs to know user historical interaction with the posts</li>
           <li>Since no data is available about user historical interaction, this can't be an option</li>
         </ul>
         <li>Learning to rank</li>
         <ul>
           <li>Pointwise</li>
           <ul>
-            <li>Given a user and an AD, compute probability of click</li>
+            <li>Given a user and a post, compute probability of each type of user interaction</li>
             <li>Best option</li>
           </ul>
           <li>Pariwise</li>
           <ul>
-            <li>Given two ADs, compute which AD is more probable to be clicked</li>
+            <li>Given two ADs, compute which post is more probable for each type of user interaction</li>
             <li>Compute expensive</li>
           </ul>
           <li>Listwise</li>
           <ul>
-            <li>Given a list of ADs, compute the optimal ordering</li>
+            <li>Given a list of posts, compute the optimal ordering</li>
             <li>Compute expensive</li>
           </ul>
         </ul>
@@ -154,7 +156,7 @@
   </div>
 </div>
 
-<div class="card mb-4" id="recommender-system-3">
+<div class="card mb-4" id="feed-ranking-system-3">
   <div class="card-body">
     <h2 class="card-title">Data preparation</h2>
 
@@ -162,8 +164,16 @@
     <ul>
       <li>Training data</li>
       <ul>
-        <li>Positive if user clicks the AD within t seconds after the AD is shown</li>
-        <li>Negative otherwise</li>
+        <li>View</li>
+        <ul>
+          <li>Positive if user spends t seconds on each post</li>
+          <li>Negative otherwise</li>
+        </ul>
+        <li>Like, share, comment, hide, report</li>
+        <ul>
+          <li>Positive if user perform an action</li>
+          <li>Negative otherwise</li>
+        </ul>
       </ul>
       <li>Database</li>
       <ul>
@@ -178,19 +188,25 @@
           <li>age</li>
           <li>gender</li>
         </ul>
-        <li>AD</li>
+        <li>Post</li>
         <ul>
-          <li>ad_id</li>
+          <li>post_id</li>
           <li>text_description</li>
           <li>image_path</li>
           <li>video_path</li>
           <li>manual_tags</li>
         </ul>
-        <li>User-AD interaction</li>
+        <li>User-post interaction</li>
         <ul>
           <li>user_id</li>
-          <li>ad_id</li>
-          <li>interaction - impression, click</li>
+          <li>post_id</li>
+          <li>interaction - view, like, share, comment, hide, report</li>
+          <li>timestamp</li>
+        </ul>
+        <li>Following</li>
+        <ul>
+          <li>user_id_1</li>
+          <li>user_id_2</li>
         </ul>
       </ul>
     </ul>
@@ -206,17 +222,29 @@
         <li>Country - embedding</li>
         <li>Age - can't be used due to bias and fairness concern</li>
         <li>Gender - can't be used due to bias and fairness concern</li>
-        <li>Clicked ADs - embedding</li>
         <li>Time of day - bucketize + one-hot since the dimension is not sparse</li>
         <li>Device - bucketize + one-hot</li>
       </ul>
-      <li>AD</li>
+      <li>Post</li>
       <ul>
-        <li>AD ID - embedding since the dimension is sparse</li>
+        <li>Post ID - embedding since the dimension is sparse</li>
         <li>Description - BERT since we need to know the context of each word</li>
         <li>Image - </li>
         <li>Video - </li>
         <li>Tag - CBOW since we don't need to know the context of each word</li>
+      </ul>
+      <li>User-post interaction</li>
+      <ul>
+        <li>Like - scale</li>
+        <li>Comment - BERT</li>
+        <li>Share - scale</li>
+        <li>Hide - scale</li>
+        <li>Report - scale</li>
+      </ul>
+      <li>User-author interaction</li>
+      <ul>
+        <li>Duration at which user followed the author - scale</li>
+        <li>Duration at which author followed the user - scale</li>
       </ul>
     </ul>
   </div>
@@ -225,7 +253,7 @@
   </div>
 </div>
 
-<div class="card mb-4" id="recommender-system-4">
+<div class="card mb-4" id="feed-ranking-system-4">
   <div class="card-body">
     <h2 class="card-title">Model development</h2>
 
@@ -280,7 +308,7 @@
   </div>
 </div>
 
-<div class="card mb-4" id="recommender-system-5">
+<div class="card mb-4" id="feed-ranking-system-5">
   <div class="card-body">
     <h2 class="card-title">Evaluation</h2>
 
@@ -341,15 +369,15 @@
   </div>
 </div>
 
-<div class="card mb-4" id="recommender-system-6">
+<div class="card mb-4" id="feed-ranking-system-6">
   <div class="card-body">
     <h2 class="card-title">Serving</h2>
 
     <h3 class="card-title">Components</h3>
 
-    <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/image/recommender-system1.png" alt="Card image cap">
-    <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/image/recommender-system2.png" alt="Card image cap">
-    <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/image/recommender-system3.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/image/feed-ranking-system1.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/image/feed-ranking-system2.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/image/feed-ranking-system3.png" alt="Card image cap">
 
     <h3 class="card-title">Workflow</h3>
     <ul>
@@ -363,7 +391,7 @@
   </div>
 </div>
 
-<div class="card mb-4" id="recommender-system-7">
+<div class="card mb-4" id="feed-ranking-system-7">
   <div class="card-body">
     <h2 class="card-title">Follow up</h2>
     <ul>
@@ -376,7 +404,7 @@
     Reference:
   </div>
 </div>
-<!-- Recommender system END -->
+<!-- Feed ranking system END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->
