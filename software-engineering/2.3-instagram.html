@@ -171,31 +171,51 @@
   <div class="card-body">
     <h2 class="card-title">Database</h2>
     <ul>
-      <li>Need to store users</li>
-      <li>Need to store mapping between original URL and short URL</li>
-      <li>NoSQL (Ex. MongoDB)</li>
-      <ul>
-        <li>No relationship between tables</li>
-        <li>System is read heavy</li>
-      </ul>
-      <li>URL</li>
-      <ul>
-        <li>shortened_url_hash (varchar, PK)</li>
-        <li>original_url (varchar)</li>
-        <li>user_id (int)</li>
-        <li>creation_date (datetime)</li>
-      </ul>
+      <li>Relational DB suffice for user and post metadata</li>
+      <li>For storing texts, key-value store can be used</li>
       <li>User</li>
       <ul>
         <li>user_id (int, pk)</li>
-        <li>name (varchar)</li>
         <li>email (varchar)</li>
+        <li>first_name (varchar)</li>
+        <li>first_name (varchar)</li>
         <li>creation_date (datetime)</li>
+      </ul>
+      <li>Post</li>
+      <ul>
+        <li>post_id (int, pk)</li>
+        <li>image_path (varchar)</li>
+        <li>video_path (varchar)</li>
+        <li>creation_date (datetime)</li>
+      </ul>
+      <li>Post_text</li>
+      <ul>
+        <li>post_id (int, pk)</li>
+        <li>text (varchar)</li>
+      </ul>
+      <li>User_post</li>
+      <ul>
+        <li>user_id (int)</li>
+        <li>post_id (int)</li>
+        <li>interaction_type (varchar) - like, share, comment, hide, report</li>
+        <li>creation_date (datetime)</li>
+      </ul>
+      <li>Comment</li>
+      <ul>
+        <li>user_id (int)</li>
+        <li>post_id (int)</li>
+        <li>comment (varchar)</li>
+        <li>creation_date (datetime)</li>
+      </ul>
+      <li>Following</li>
+      <ul>
+        <li>user_id_1 (int)</li>
+        <li>user_id_2 (int)</li>
       </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: System Design Interview, Alex Xu
+    Reference:
   </div>
 </div>
 
@@ -203,92 +223,19 @@
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
 
-    <h3 class="card-title">Generate short URL</h3>
-    <ul>
-      <li>Length of short URL</li>
-      <ul>
-        <li>100M URLs generated per day</li>
-        <li>Assume we want to run service for 10 years</li>
-        <li>Then, 100M * 10 * 365 = 365B URLs are needed</li>
-        <li>0-9, A-Z, a-z have 10 + 26 + 26 = 62 chars</li>
-        <li>62^n >= 365B, n = 7 should be the length of short URL</li>
-      </ul>
-      <li>Option 1. hash function</li>
-      <ul>
-        <li>Ex. CRC32, MD5, SHA-1</li>
-        <li>URL length is fixed</li>
-        <li>These functions generate hash values that are too long for our purpose</li>
-      </ul>
-      <li>Option 2. base 62 conversion</li>
-      <ul>
-        <li>URL length goes up with ID</li>
-        <li>Requires unique ID generator</li>
-      </ul>
-    </ul>
+    <h3 class="card-title">API gateway</h3>
 
-    <h3 class="card-title">Http status code</h3>
-
-    <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/instagram1.png" alt="Card image cap">
-
-    <ul>
-      <li>Option 1. 301 redirect</li>
-      <ul>
-        <li>Permanently moved</li>
-        <li>Browser caches the response and subsequent requests for the same URL is redirected to website directly</li>
-        <li>Helps with server load</li>
-      </ul>
-      <li>Option 2. 302 redirect</li>
-      <ul>
-        <li>Temporarily moved</li>
-        <li>Subsequent requests for the same URL is sent to web server first</li>
-        <li>Helps with data analytics</li>
-      </ul>
-    </ul>
+    <h3 class="card-title">Cache</h3>
 
     <h3 class="card-title">User experience during failure</h3>
-    <ul>
-      <li>Load balancer</li>
-      <ul>
-        <li>Servers are marked offline</li>
-      </ul>
-      <li>Server</li>
-      <ul>
-        <li>API returns 503 service unavailable</li>
-      </ul>
-      <li>Cache</li>
-      <ul>
-        <li>For URL shortening, users are not impacted</li>
-        <li>For URL redirection, users can get slower response</li>
-      </ul>
-      <li>DB</li>
-      <ul>
-        <li>API returns error message</li>
-      </ul>
-    </ul>
 
     <h3 class="card-title">Potential bottlenecks</h3>
-    <ul>
-      <li>Web server could be under high load</li>
-    </ul>
 
     <h3 class="card-title">10x scale</h3>
-    <ul>
-      <li>The length of short URL should be increased</li>
-      <li>Base 62 conversion becomes better approach than hash function</li>
-      <li>Web servers</li>
-      <ul>
-        <li>Assess the cost of horizontal scaling and vertical scaling</li>
-        <li>Getting bigger machines, and then doing horizontal scaling could make sense in terms of cost</li>
-      </ul>
-      <li>Cache/DB</li>
-      <ul>
-        <li>Assess the cost of current infrastructure type given the new size of data</li>
-        <li>Replacing current NoSQL to different NoSQL could make sense in terms of cost</li>
-      </ul>
-    </ul>
+
   </div>
   <div class="card-footer text-muted">
-    Reference: System Design Interview, Alex Xu
+    Reference:
   </div>
 </div>
 
@@ -298,10 +245,7 @@
 
     <h3 class="card-title">Functional</h3>
     <ul>
-      <li>Covered short URL generation, URL redirection</li>
-      <li>Shortened URL is only 7 characters</li>
-      <li>We are only using 0-9, A-Z, a-z</li>
-      <li>Supported update/delete URLs</li>
+      <li></li>
     </ul>
 
     <h3 class="card-title">Non-functional</h3>
@@ -372,7 +316,7 @@
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: System Design Interview, Alex Xu
+    Reference:
   </div>
 </div>
 
@@ -380,22 +324,11 @@
   <div class="card-body">
     <h2 class="card-title">Follow up</h2>
     <ul>
-      <li>Explain how to prevent malicious users send large amount of requests</li>
-      <ul>
-        <li>Use rate limiter in front of load balancer</li>
-      </ul>
-      <li>Explain how to integrate analytics solution URL shortening service</li>
-      <ul>
-        <li>Creating a table of &lt;short_url, interaction_type (click, etc), timestamp&gt; will allow tracking</li>
-        <ul>
-          <li>How many people click a particular link</li>
-          <li>At what time people click a particular link</li>
-        </ul>
-      </ul>
+      <li></li>
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: System Design Interview, Alex Xu
+    Reference:
   </div>
 </div>
 <!-- Instagram END -->
