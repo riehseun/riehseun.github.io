@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="/img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/monokai-sublime.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="/js/jquery.min.js" type="text/javascript"></script>
+<script src="/js/bootstrap.bundle.min.js" type="text/javascript"></script>
+<script src="/js/highlight.pack.js" type="text/javascript"></script>
+<script src="/js/include_html.js" type="text/javascript"></script>
+<script src="/js/mathjax/tex-chtml.js" type="text/javascript"></script>
+<script src="/js/site.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<include src="/header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Software Engineering</h1>
+
+<!-- Instagram BEGIN -->
+<div class="card mb-4" id="instagram">
+  <div class="card-body">
+    <h2 class="card-title">Instagram</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#instagram-1">Requirement</a></li>
+      <li><a href="#instagram-2">Estimation</a></li>
+      <li><a href="#instagram-3">High level design</a></li>
+      <li><a href="#instagram-4">API</a></li>
+      <li><a href="#instagram-5">Database</a></li>
+      <li><a href="#instagram-6">Detailed design</a></li>
+      <li><a href="#instagram-7">Evaluation</a></li>
+      <li><a href="#instagram-8">Follow up</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="instagram-1">
+  <div class="card-body">
+    <h2 class="card-title">Requirement</h2>
+
+    <h3 class="card-title">Functional</h3>
+    <ul>
+      <li>What is the purpose of the application? Design social platform like Instagram</li>
+      <li>Should the system generate feeds? Yes</li>
+      <li>What does a feed consist of? Posts with text, image, video</li>
+      <li>What user actions are supported on posts? Like, share, comment, hide, report</li>
+      <li>How should posts be ranked? Assume chronological order</li>
+      <li>Should feeds be personalized for each user? No</li>
+      <li>Should feeds contains ADs? No</li>
+      <li>Can users follow each other? Yes</li>
+    </ul>
+
+    <h3 class="card-title">Non-functional</h3>
+    <ul>
+      <li>Availability</li>
+      <li>Reliability</li>
+      <li>Scalability</li>
+      <li>Performance</li>
+      <li>Consistency</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference:
+  </div>
+</div>
+
+<div class="card mb-4" id="instagram-2">
+  <div class="card-body">
+    <h2 class="card-title">Estimation</h2>
+    <ul>
+      <li>How many users are there? 100M daily active users</li>
+      <li>How many posts does each user create each day? 1 per day on average</li>
+      <li>How many posts does each user view per day? 100 on average</li>
+      <li>What is the size of each post? 1MB</li>
+    </ul>
+
+    <h3 class="card-title">Storage</h3>
+    <ul>
+      <li>Posts - 1 * 100M * 1MB = 100TB per day</li>
+      <li>Image and video can be compressed before they are sent to server for storage</li>
+      <li>Assuming each post whose size is 1MB can be compressed into 100KB, incoming data is 10TB per day</li>
+      <li>User metadata - negligible</li>
+    </ul>
+
+    <h3 class="card-title">Bandwidth</h3>
+    <ul>
+      <li>Incoming</li>
+      <ul>
+        <li>100TB per day = 9.26Gbps</li>
+      </ul>
+      <li>Outgoing</li>
+      <ul>
+        <li>100 * 100 * 1MB = 10PB per day = 926Gbps</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference:
+  </div>
+</div>
+
+<div class="card mb-4" id="instagram-3">
+  <div class="card-body">
+    <h2 class="card-title">High level design</h2>
+
+    <h3 class="card-title">Components</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/image/instagram1.png" alt="Card image cap">
+
+    <h3 class="card-title">Workflow</h3>
+    <ul>
+      <li>User sign-up</li>
+      <li>User uploads posts</li>
+      <li>User views feeds of posts</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference:
+  </div>
+</div>
+
+<div class="card mb-4" id="instagram-4">
+  <div class="card-body">
+    <h2 class="card-title">API</h2>
+    <ul>
+      <li><code>short_url(original_url)</code></li>
+      <ul>
+        <li>POST api/v1/data/shorten</li>
+        <li>Returns short URL</li>
+        <li><code>original_url</code> - original long URL</li>
+      </ul>
+      <li><code>redirect_url(short_url)</code></li>
+      <ul>
+        <li>GET api/v1/shortUrl</li>
+        <li>Returns long URL for HTTP redirection</li>
+        <li><code>shorten_url</code> - short URL</li>
+      </ul>
+      <li><code>update_url(short_url)</code></li>
+      <ul>
+        <li>PUT api/v1/updateUrl</li>
+        <li>Returns updated short URL for the given short URL</li>
+      </ul>
+      <li><code>delete_url(short_url)</code></li>
+      <ul>
+        <li>DELETE api/v1/deleteUrl</li>
+        <li>Deletes the short URL</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="instagram-5">
+  <div class="card-body">
+    <h2 class="card-title">Database</h2>
+    <ul>
+      <li>Need to store users</li>
+      <li>Need to store mapping between original URL and short URL</li>
+      <li>NoSQL (Ex. MongoDB)</li>
+      <ul>
+        <li>No relationship between tables</li>
+        <li>System is read heavy</li>
+      </ul>
+      <li>URL</li>
+      <ul>
+        <li>shortened_url_hash (varchar, PK)</li>
+        <li>original_url (varchar)</li>
+        <li>user_id (int)</li>
+        <li>creation_date (datetime)</li>
+      </ul>
+      <li>User</li>
+      <ul>
+        <li>user_id (int, pk)</li>
+        <li>name (varchar)</li>
+        <li>email (varchar)</li>
+        <li>creation_date (datetime)</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="instagram-6">
+  <div class="card-body">
+    <h2 class="card-title">Detailed design</h2>
+
+    <h3 class="card-title">Generate short URL</h3>
+    <ul>
+      <li>Length of short URL</li>
+      <ul>
+        <li>100M URLs generated per day</li>
+        <li>Assume we want to run service for 10 years</li>
+        <li>Then, 100M * 10 * 365 = 365B URLs are needed</li>
+        <li>0-9, A-Z, a-z have 10 + 26 + 26 = 62 chars</li>
+        <li>62^n >= 365B, n = 7 should be the length of short URL</li>
+      </ul>
+      <li>Option 1. hash function</li>
+      <ul>
+        <li>Ex. CRC32, MD5, SHA-1</li>
+        <li>URL length is fixed</li>
+        <li>These functions generate hash values that are too long for our purpose</li>
+      </ul>
+      <li>Option 2. base 62 conversion</li>
+      <ul>
+        <li>URL length goes up with ID</li>
+        <li>Requires unique ID generator</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Http status code</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/software-engineering/system-design/instagram1.png" alt="Card image cap">
+
+    <ul>
+      <li>Option 1. 301 redirect</li>
+      <ul>
+        <li>Permanently moved</li>
+        <li>Browser caches the response and subsequent requests for the same URL is redirected to website directly</li>
+        <li>Helps with server load</li>
+      </ul>
+      <li>Option 2. 302 redirect</li>
+      <ul>
+        <li>Temporarily moved</li>
+        <li>Subsequent requests for the same URL is sent to web server first</li>
+        <li>Helps with data analytics</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">User experience during failure</h3>
+    <ul>
+      <li>Load balancer</li>
+      <ul>
+        <li>Servers are marked offline</li>
+      </ul>
+      <li>Server</li>
+      <ul>
+        <li>API returns 503 service unavailable</li>
+      </ul>
+      <li>Cache</li>
+      <ul>
+        <li>For URL shortening, users are not impacted</li>
+        <li>For URL redirection, users can get slower response</li>
+      </ul>
+      <li>DB</li>
+      <ul>
+        <li>API returns error message</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Potential bottlenecks</h3>
+    <ul>
+      <li>Web server could be under high load</li>
+    </ul>
+
+    <h3 class="card-title">10x scale</h3>
+    <ul>
+      <li>The length of short URL should be increased</li>
+      <li>Base 62 conversion becomes better approach than hash function</li>
+      <li>Web servers</li>
+      <ul>
+        <li>Assess the cost of horizontal scaling and vertical scaling</li>
+        <li>Getting bigger machines, and then doing horizontal scaling could make sense in terms of cost</li>
+      </ul>
+      <li>Cache/DB</li>
+      <ul>
+        <li>Assess the cost of current infrastructure type given the new size of data</li>
+        <li>Replacing current NoSQL to different NoSQL could make sense in terms of cost</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="instagram-7">
+  <div class="card-body">
+    <h2 class="card-title">Evaluation</h2>
+
+    <h3 class="card-title">Functional</h3>
+    <ul>
+      <li>Covered short URL generation, URL redirection</li>
+      <li>Shortened URL is only 7 characters</li>
+      <li>We are only using 0-9, A-Z, a-z</li>
+      <li>Supported update/delete URLs</li>
+    </ul>
+
+    <h3 class="card-title">Non-functional</h3>
+    <ul>
+      <li>Availability</li>
+      <ul>
+        <li>Replication</li>
+        <ul>
+          <li>Replicate each web server, cache, DB</li>
+          <ul>
+            <li>DB - since the system is read-heavy, go for single-master replication</li>
+          </ul>
+          <li>Replicate entire system to different zone or geographical region</li>
+          <ul>
+            <li>Consider the cost of replicating compute components</li>
+            <li>Data replication could be cheaper than compute</li>
+          </ul>
+        </ul>
+        <li>Fail over</li>
+        <ul>
+          <li>Option 1. active-active</li>
+          <ul>
+            <li>Both actives manage traffic, spreading load between them</li>
+          </ul>
+          <li>Option 2. active-passive</li>
+          <ul>
+            <li>Active web servers, cache send heartbearts to passives</li>
+            <li>If heartbeats stop, passives take over actives' IP and resume service</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>Reliability</li>
+      <ul>
+        <li>Data loss</li>
+        <ul>
+          <li>Periodically take snapshot of data and store snapshots in multi zone or region to prevent data loss</li>
+        </ul>
+        <li>Handling failure</li>
+      </ul>
+      <li>Scalability</li>
+      <ul>
+        <li>Horizontal scaling</li>
+        <ul>
+          <li>Web servers, cache</li>
+        </ul>
+        <li>Data partitioning</li>
+        <ul>
+          <li>Horizontal partitioning or sharding since the system is less concerned about atomic operation</li>
+          <li>Use consistent hashing to spread data evenly to different data nodes</li>
+        </ul>
+      </ul>
+      <li>Performance</li>
+      <ul>
+        <li>Peak load</li>
+        <ul>
+          <li>Load balancer should distribute load amongst horizontally scaled servers and caches</li>
+          <li>DB is paritioned to scale to handle the load</li>
+        </ul>
+        <li>Cache improves the performance of redirection</li>
+        <li>MongoDB has low latency and high throughput</li>
+      </ul>
+      <li>Consistency</li>
+      <ul>
+        <li>Inconsistency can happen when user updates short url but update is not synced to all data nodes</li>
+        <li>Impact is that users are redirected to wrong original URLs</li>
+        <li>The impact is not too catastrophic, thus eventual consistency suffice</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="instagram-8">
+  <div class="card-body">
+    <h2 class="card-title">Follow up</h2>
+    <ul>
+      <li>Explain how to prevent malicious users send large amount of requests</li>
+      <ul>
+        <li>Use rate limiter in front of load balancer</li>
+      </ul>
+      <li>Explain how to integrate analytics solution URL shortening service</li>
+      <ul>
+        <li>Creating a table of &lt;short_url, interaction_type (click, etc), timestamp&gt; will allow tracking</li>
+        <ul>
+          <li>How many people click a particular link</li>
+          <li>At what time people click a particular link</li>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+<!-- Instagram END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+</html>
