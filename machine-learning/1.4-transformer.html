@@ -68,6 +68,7 @@
     <h3 class="card-title">Multi-head attention</h3>
     <ul>
       <li>Run attentions in parallel, instead of single attention with \( d_{model} \) dimensional queries, key, values</li>
+      <li>Divide \( d_{model} = 512 \) dimensions, into \( 8 \) of \( d_{model} = 64 \) dimensions for all input workds/tokens</li>
       <li>\( \text{Multi-head attention}(Q,K,V) = \text{Concat}(\text{Attention}_{1} \dots \text{Attention}_{h}) \)</li>
     </ul>
   </div>
@@ -125,23 +126,21 @@
       <ul>
         <li>Represent the input</li>
         <ul>
-          <li>\( d_{\text{model}} = 512 \)</</li>
           <li>Assume \( 3 \) input tokens</li>
-          <li>For simplicity,  assume \( d_{\text{model}} = 4 \)</li>
-<pre><code class="python">X = np.array([[1.0, 0.0, 1.0, 0.0],   # Input 1
-              [0.0, 2.0, 0.0, 2.0],   # Input 2
-              [1.0, 1.0, 1.0, 1.0]])  # Input 3</code></pre>
+          <li>\( d_{\text{model}} = 512 \), but for simplicity, assume \( d_{\text{model}} = 4 \)</li>
+<pre><code class="python">X = np.array([[1.0, 0.0, 1.0, 0.0],   # Input token 1
+              [0.0, 2.0, 0.0, 2.0],   # Input token 2
+              [1.0, 1.0, 1.0, 1.0]])  # Input token 3</code></pre>
         </ul>
         <li>Initialize the weight matrices</li>
         <ul>
           <li>Each input token has three weight matrices</li>
           <ul>
-            <li>\( Q_{w} \) - train the queries</li>
-            <li>\( K_{w} \) - train the keys</li>
-            <li>\( V_{w} \) - train the values</li>
+            <li>\( W_{Q} \) - train the queries</li>
+            <li>\( W_{K} \) - train the keys</li>
+            <li>\( W_{V} \) - train the values</li>
           </ul>
-          <li>\( d_{k} = 64 \)</li>
-          <li>For simplicity, assume \( d_{k} = 3 \)</li>
+          <li>\( d_{k} = 64 \), but for simplicity, assume \( d_{k} = 3 \)</li>
 <pre><code class="python">W_query = np.array([[1, 0, 1],
                     [1, 0, 0],
                     [0, 0, 1],
@@ -157,7 +156,7 @@ W_value = np.array([[0, 2, 0],
         </ul>
         <li>Compute \( Q, K, V \)</li>
         <ul>
-          <li>Assume there is one set of \( W_{\text{query}}, W_{\text{key}}, W_{\text{value}} \) for all inputs</li>
+          <li>Assume there is one set of \( W_{Q}, W_{K}, W_{V} \) for all inputs</li>
 <pre><code class="python">Q = np.matmul(X, W_query)
 K = np.matmul(X, W_key)
 V = np.matmul(X, W_value)</code></pre>
