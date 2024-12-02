@@ -129,37 +129,37 @@
         for pair in prerequisites:
             graph[pair[1]].add(pair[0])
 
+        # Time O(n+m)
+        #   n = number of nodes, which is k
+        #   m = number of edges, which is k^2
+        # Space O(n)
+        def dfs(graph, start):
+
+            explored = set()
+            explored.add(start)
+
+            stack = []
+            stack.append(start)
+
+            while stack:
+                node = stack.pop()
+                if node in graph:
+                    for next_node in graph[node]:
+                        if next_node not in explored:
+                            explored.add(next_node)
+                            stack.append(next_node)
+                        else:
+                            if next_node == start:
+                                return True
+
+            return False
+
         # Time O(k^2)
         for node in graph:
-            if self.dfs(node, graph):
+            if dfs(graph, node):
                 return False
 
-        return True
-
-    # Time O(n+m)
-    #   n = number of nodes, which is k
-    #   m = number of edges, which is k^2
-    # Space O(n)
-    def dfs(self, start, graph):
-
-        explored = set()
-        explored.add(start)
-
-        stack = []
-        stack.append(start)
-
-        while stack:
-            node = stack.pop()
-            if node in graph:
-                for next_node in graph[node]:
-                    if next_node not in explored:
-                        explored.add(next_node)
-                        stack.append(next_node)
-                    else:
-                        if next_node == start:
-                            return True
-
-        return False</code></pre>
+        return True</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/course-schedule">207. Course Schedule</a>
@@ -170,10 +170,9 @@
   <div class="card-body">
     <h2 class="card-title">Course schedule II (M/A)</h2>
 
-<pre><code class="python">from collections import defaultdict
-
-class Solution:
+<pre><code class="python">class Solution:
     def findOrder(self, numCourses: int, prerequisites: List[List[int]]) -> List[int]:
+
         # Loop through n. Do DFS for each node
         # 1. If a node is pre-requisite for a lot of courses, it will take long to
         # finsh DFS
@@ -266,9 +265,7 @@ class Solution:
                     graph[c1].add(c2)
                     break
 
-        print(graph)
-
-        def dfs(graph, start, finishing_time):
+        def dfs(graph, start):
 
             explored = set()
             explored.add(start)
@@ -293,13 +290,12 @@ class Solution:
 
         # Time O(n*(n+m)) n = number of nodes, m = number of edges
         for char in all_chars:
-            finishing_time = dfs(graph, char, 0)
+            finishing_time = dfs(graph, char)
             if finishing_time == -1:
                 return ""
             ordering.append([char, finishing_time])
 
         ordering.sort(key = lambda x: (-x[1]))
-        print(ordering)
 
         result = ""
         for item in ordering:
