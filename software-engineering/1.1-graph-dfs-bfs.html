@@ -51,7 +51,7 @@
       <li><a href="#graph-">All Nodes Distance K in Binary Tree</a></li>
       <!-- <li><a href="#graph-">Is graph bipartite?</a></li> -->
       <!-- <li><a href="#graph-">All paths from source to target</a></li> -->
-      <li><a href="#graph-">Sum of distances in tree</a></li>
+      <!-- <li><a href="#graph-">Sum of distances in tree</a></li> -->
       <!-- <li><a href="#graph-">Keys and rooms</a></li> -->
       <!-- <li><a href="#graph-">Possible bipartition</a></li> -->
       <li><a href="#graph-">Regions cut by slashes</a></li>
@@ -190,12 +190,12 @@
         # Construct a graph such that
         #   If a / b = 2.0, a->b has weight 2.0 and b->a has weight 0.5
 
-        graph = defaultdict(list)
+        graph = defaultdict(set)
         nodes = set()
 
         for equation, value in zip(equations, values):
-            graph[equation[0]].append((equation[1],value))
-            graph[equation[1]].append((equation[0],1/value))
+            graph[equation[0]].add((equation[1],value))
+            graph[equation[1]].add((equation[0],1/value))
             nodes.add(equation[0])
             nodes.add(equation[1])
 
@@ -249,7 +249,7 @@
         #   Edge between nodes (emails) is when they belong to the same person
         # Compute connected components
 
-        graph = defaultdict(list)
+        graph = defaultdict(set)
         email_to_person = defaultdict(str)
 
         for account in accounts:
@@ -260,7 +260,7 @@
             for i in range(1, len(account)):
                 for j in range(1, len(account)):
                     if i != j:
-                        graph[account[i]].append(account[j])
+                        graph[account[i]].add(account[j])
                         email_to_person[account[i]] = account[0]
 
         # Time O(n+m)
@@ -320,22 +320,20 @@ class Solution:
         # Convert tree to graph
         # DFS
 
-        graph = defaultdict(list)
+        graph = defaultdict(set)
 
         # Time O(n) n = number of nodes in tree
         # Space O(n)
         def build_graph(graph, node, parent):
             if node and parent:
-                graph[node.val].append(parent.val)
-                graph[parent.val].append(node.val)
+                graph[node.val].add(parent.val)
+                graph[parent.val].add(node.val)
             if node.left:
                 build_graph(graph, node.left, node)
             if node.right:
                 build_graph(graph, node.right, node)
 
         build_graph(graph, root, None)
-
-        print(graph)
 
         distances = defaultdict(list)
 
@@ -478,7 +476,7 @@ class Solution:
   </div>
 </div> -->
 
-<div class="card mb-4" id="graph-">
+<!-- <div class="card mb-4" id="graph-">
   <div class="card-body">
     <h2 class="card-title">Sum of distances in tree (H)</h2>
 
@@ -525,7 +523,7 @@ class Solution:
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/sum-of-distances-in-tree">834. Sum of Distances in Tree</a>
   </div>
-</div>
+</div> -->
 
 <!-- <div class="card mb-4" id="graph-">
   <div class="card-body">
@@ -672,7 +670,7 @@ class Solution:
                     new_grid[3*i+2][3*j+1] = 0
                     new_grid[3*i+2][3*j+2] = 1
 
-        graph = defaultdict(list)
+        graph = defaultdict(set)
         nodes = set()
 
         # Time O(nm)
@@ -686,20 +684,20 @@ class Solution:
                         nodes.add((i,j))
                     # Check right
                     if j < m-1 and new_grid[i][j+1] == 0:
-                        graph[(i,j)].append((i, j+1))
-                        graph[(i,j+1)].append((i,j))
+                        graph[(i,j)].add((i, j+1))
+                        graph[(i,j+1)].add((i,j))
                     # Check left
                     if j > 0 and new_grid[i][j-1] == 0:
-                        graph[(i,j)].append((i, j-1))
-                        graph[(i,j-1)].append((i,j))
+                        graph[(i,j)].add((i, j-1))
+                        graph[(i,j-1)].add((i,j))
                     # Check up
                     if i > 0 and new_grid[i-1][j] == 0:
-                        graph[(i,j)].append((i-1, j))
-                        graph[(i-1,j)].append((i,j))
+                        graph[(i,j)].add((i-1, j))
+                        graph[(i-1,j)].add((i,j))
                     # Check down
                     if i < n-1 and new_grid[i+1][j] == 0:
-                        graph[(i,j)].append((i+1, j))
-                        graph[(i+1,j)].append((i,j))
+                        graph[(i,j)].add((i+1, j))
+                        graph[(i+1,j)].add((i,j))
 
         explored = set()
         count = 0
@@ -722,6 +720,7 @@ class Solution:
             if (i,j) not in explored:
                 bfs(graph, explored, (i,j))
                 count += 1
+
         return count</code></pre>
   </div>
   <div class="card-footer text-muted">
