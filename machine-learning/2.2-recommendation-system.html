@@ -39,39 +39,40 @@
 <div class="col-md-12">
 <h1 class="my-4">Machine Learning</h1>
 
-<!-- Recognition system BEGIN -->
-<div class="card mb-4" id="recognition-system">
+<!-- Recommendation system BEGIN -->
+<div class="card mb-4" id="recommendation-system">
   <div class="card-body">
-    <h2 class="card-title">Recognition system</h2>
+    <h2 class="card-title">Recommendation system</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#recognition-system-1">Requirement</a></li>
-      <li><a href="#recognition-system-2">Problem</a></li>
-      <li><a href="#recognition-system-3">Data preparation</a></li>
-      <li><a href="#recognition-system-4">Model development</a></li>
-      <li><a href="#recognition-system-5">Evaluation</a></li>
-      <li><a href="#recognition-system-6">Serving</a></li>
-      <li><a href="#recognition-system-7">Follow up</a></li>
+      <li><a href="#recommendation-system-1">Requirement</a></li>
+      <li><a href="#recommendation-system-2">Problem</a></li>
+      <li><a href="#recommendation-system-3">Data preparation</a></li>
+      <li><a href="#recommendation-system-4">Model development</a></li>
+      <li><a href="#recommendation-system-5">Evaluation</a></li>
+      <li><a href="#recommendation-system-6">Serving</a></li>
+      <li><a href="#recommendation-system-7">Follow up</a></li>
     </ul>
   </div>
 </div>
 
-<div class="card mb-4" id="recognition-system-1">
+<div class="card mb-4" id="recommendation-system-1">
   <div class="card-body">
     <h2 class="card-title">Requirement</h2>
     <ul>
       <li>Business objective</li>
       <ul>
-        <li>What kinds of recognition system are we designing? harmful posts in Instagram</li>
-        <li>What does a post consist of? Text, iamge, video</li>
-        <li>What kinds of posts are considered harmful? Violence, nudity, etc</li>
+        <li>What should the system recommend? ADs on social website like Instagram</li>
+        <li>What does an AD consist of? Text, iamge, video</li>
+        <li>Should ADs be personalized for each user? Yes</li>
       </ul>
       <li>System features</li>
       <ul>
-        <li>Can users report harmful content? Yes</li>
+        <li>Does the system keep track of user clicks on ADs? Yes</li>
       </ul>
       <li>Data</li>
       <ul>
-        <li>Do we have training data available? Yes</li>
+        <li>Do we have training data available? No</li>
+        <li>Should we label the data based on user interaction? Yes</li>
       </ul>
       <li>Constraints</li>
       <ul>
@@ -82,6 +83,7 @@
       <li>Scale</li>
       <ul>
         <li>How many users are using the system? 1M per month</li>
+        <li>How many ADs are in the system? 1B per month</li>
       </ul>
       <li>Performance</li>
       <ul>
@@ -95,32 +97,55 @@
   </div>
 </div>
 
-<div class="card mb-4" id="recognition-system-2">
+<div class="card mb-4" id="recommendation-system-2">
   <div class="card-body">
     <h2 class="card-title">Problem</h2>
 
     <h3 class="card-title">ML problem</h3>
     <ul>
-      <li>Given a post, determine whether the post is harmful or not</li>
+      <li>Given an AD, compute probability of user click</li>
       <li>Input</li>
       <ul>
-        <li>A post</li>
+        <li>A user</li>
       </ul>
       <li>Output</li>
       <ul>
-        <li>0 or 1 depending on whether post is harmful or not</li>
+        <li>List of ADs ranked by probability of being clicked</li>
       </ul>
     </ul>
 
     <h3 class="card-title">ML category</h3>
     <ul>
-      <li>Supervised, binary classification</li>
+      <li>Supervised, ranking problem</li>
       <ul>
-        <li>Predict harmful on each category (violence, nudity)</li>
+        <li>Content-based filtering</li>
         <ul>
-          <li>Use a single model but different classification heads for violence, nudity, etc</li>
+          <li>Needs to know user interests to match them with the ADs</li>
+          <li>Since no data is available about user interest, this can't be an option</li>
         </ul>
-        <li>Consider harmful based on the combination of text, image, video</li>
+        <li>Collaborative filtering</li>
+        <ul>
+          <li>Needs to know user historical interaction with the ADs</li>
+          <li>Since no data is available about user historical interaction, this can't be an option</li>
+        </ul>
+        <li>Learning to rank</li>
+        <ul>
+          <li>Pointwise</li>
+          <ul>
+            <li>Given a user and an AD, compute probability of click</li>
+            <li>Best option</li>
+          </ul>
+          <li>Pariwise</li>
+          <ul>
+            <li>Given two ADs, compute which AD is more probable to be clicked</li>
+            <li>Compute expensive</li>
+          </ul>
+          <li>Listwise</li>
+          <ul>
+            <li>Given a list of ADs, compute the optimal ordering</li>
+            <li>Compute expensive</li>
+          </ul>
+        </ul>
       </ul>
     </ul>
   </div>
@@ -129,7 +154,7 @@
   </div>
 </div>
 
-<div class="card mb-4" id="recognition-system-3">
+<div class="card mb-4" id="recommendation-system-3">
   <div class="card-body">
     <h2 class="card-title">Data preparation</h2>
 
@@ -137,10 +162,12 @@
     <ul>
       <li>Training data</li>
       <ul>
-        <li></li>
+        <li>Positive if user clicks the AD within t seconds after the AD is shown</li>
+        <li>Negative otherwise</li>
       </ul>
       <li>Database</li>
       <ul>
+        <li>We use the following tables to keep user interaction data</li>
         <li>User</li>
         <ul>
           <li>user_id</li>
@@ -151,20 +178,19 @@
           <li>age</li>
           <li>gender</li>
         </ul>
-        <li>Post</li>
+        <li>AD</li>
         <ul>
-          <li>post_id</li>
+          <li>ad_id</li>
           <li>text_description</li>
           <li>image_path</li>
           <li>video_path</li>
           <li>manual_tags</li>
         </ul>
-        <li>User-post interaction</li>
+        <li>User-AD interaction</li>
         <ul>
           <li>user_id</li>
-          <li>post_id</li>
-          <li>interaction - view, like, share, comment, hide, report</li>
-          <li>timestamp</li>
+          <li>ad_id</li>
+          <li>interaction - impression, click</li>
         </ul>
       </ul>
     </ul>
@@ -180,29 +206,17 @@
         <li>Country - embedding</li>
         <li>Age - can't be used due to bias and fairness concern</li>
         <li>Gender - can't be used due to bias and fairness concern</li>
+        <li>Clicked ADs - embedding</li>
         <li>Time of day - bucketize + one-hot since the dimension is not sparse</li>
         <li>Device - bucketize + one-hot</li>
       </ul>
-      <li>Post</li>
+      <li>AD</li>
       <ul>
-        <li>Post ID - embedding since the dimension is sparse</li>
+        <li>AD ID - embedding since the dimension is sparse</li>
         <li>Description - BERT since we need to know the context of each word</li>
         <li>Image - </li>
         <li>Video - </li>
         <li>Tag - CBOW since we don't need to know the context of each word</li>
-      </ul>
-      <li>User-post interaction</li>
-      <ul>
-        <li>Like - scale</li>
-        <li>Comment - BERT</li>
-        <li>Share - scale</li>
-        <li>Hide - scale</li>
-        <li>Report - scale</li>
-      </ul>
-      <li>User-author interaction</li>
-      <ul>
-        <li>Duration at which user followed the author - scale</li>
-        <li>Duration at which author followed the user - scale</li>
       </ul>
     </ul>
   </div>
@@ -211,7 +225,7 @@
   </div>
 </div>
 
-<div class="card mb-4" id="recognition-system-4">
+<div class="card mb-4" id="recommendation-system-4">
   <div class="card-body">
     <h2 class="card-title">Model development</h2>
 
@@ -229,13 +243,14 @@
       </ul>
       <li>Neural network</li>
       <ul>
-        <li>Independent DNNs</li>
+        <li>Single NN</li>
         <ul>
-          <li>Expensive to train</li>
+          <li>All features are used as inputs and NN outputs click probability</li>
         </ul>
-        <li>A multi-task DNN</li>
+        <li>Two tower NN</li>
         <ul>
-          <li>A shared layer and each classification head for dwell time, like, share, comment, hide, report</li>
+          <li>Separate encoder for user and AD features</li>
+          <li>Similarity of user embeddings and AD embeddings is computed</li>
         </ul>
       </ul>
     </ul>
@@ -244,16 +259,20 @@
     <ul>
       <li>Loss function</li>
       <ul>
-        <li>Dwell time</li>
+        <li>Constrastive loss function</li>
         <ul>
-          <li>MSE/MAE</li>
-        </ul>
-        <li>Like, share, comment, hide, report</li>
-        <ul>
-          <li>Cross entropy</li>
+          <li>Dot product or cosine similarity is used to compute distances in embedding space</li>
+          <ul>
+            <li>Euclidean distance is not used due to curse of dimensionality</li>
+          </ul>
+          <li>Softmax is applied to distances to make them sum to 1</li>
+          <li>Cross-entropy is used to measure how close the probabilities are to the ground truth</li>
         </ul>
       </ul>
       <li>Hyperparameters</li>
+      <ul>
+        <li>Size of embedding vector</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -261,7 +280,7 @@
   </div>
 </div>
 
-<div class="card mb-4" id="recognition-system-5">
+<div class="card mb-4" id="recommendation-system-5">
   <div class="card-body">
     <h2 class="card-title">Evaluation</h2>
 
@@ -269,12 +288,12 @@
     <ul>
       <li>Precision@k</li>
       <ul>
-        <li>\( \dfrac{\text{Number of relevant posts in top k items}}{\text{k}} \)</li>
+        <li>\( \dfrac{\text{Number of relevant ADs in top k items}}{\text{k}} \)</li>
         <li>Does not consider ranking quality</li>
       </ul>
       <li>Recall@k</li>
       <ul>
-        <li>\( \dfrac{\text{Number of relevant posts in top k items}}{\text{total number of relevant posts}} \)</li>
+        <li>\( \dfrac{\text{Number of relevant ADs in top k items}}{\text{total number of relevant ADs}} \)</li>
         <li>Does not consider ranking quality</li>
       </ul>
       <li>Mean reciprobal rank (MRR)</li>
@@ -283,8 +302,8 @@
         <ul>
           <li>\( {\text{rank}_{i}} \) is position on which the first relevant item appears in the output list</li>
         </ul>
-        <li>Consider only the first relevant post in each output list, then average the reciprocal rank</li>
-        <li>Ignores other relevant posts in the list other than the first one</li>
+        <li>Consider only the first relevant AD in each output list, then average the reciprocal rank</li>
+        <li>Ignores other relevant ADs in the list other than the first one</li>
       </ul>
       <li>Mormalized discounted cumulative gain (nDCG)</li>
       <ul>
@@ -295,7 +314,12 @@
         <li>\( nDCG_{p} = \dfrac{DCG_{p}}{IDCG_{p}} \)</li>
         <ul>
           <li>where \( {IDCG_{p}} \) is \( {DCG_{p}} \) of ideal ranking</li>
-        </ul></li>
+        </ul>
+        <li>We only have training data that consist of 0 or 1 representing user click on AD, not the ordering of ADs for each user</li>
+      </ul>
+      <li>Cross-entropy</li>
+      <ul>
+        <li>Multiply ground truth label (0 or 1) with the probability of AD being clicked for each AD, them sum it to assess the model performance</li>
       </ul>
     </ul>
 
@@ -303,7 +327,7 @@
     <ul>
       <li>Click-through rate (CTR)</li>
       <ul>
-        <li>\( \dfrac{\text{number of clicked posts}}{\text{total number of shown posts}} \)</li>
+        <li>\( \dfrac{\text{number of clicked ADs}}{\text{total number of shown ADs}} \)</li>
       </ul>
     </ul>
 
@@ -317,38 +341,38 @@
   </div>
 </div>
 
-<div class="card mb-4" id="recognition-system-6">
+<div class="card mb-4" id="recommendation-system-6">
   <div class="card-body">
     <h2 class="card-title">Serving</h2>
 
-    <h3 class="card-title">Components</h3>
+    <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/image/recommendation-system1.png" alt="Card image cap">
+    <ul>
+      <li>Batch features (Ex. AD's text, image, video) don't change much, so they can be processed offline</li>
+      <li>Dynamic features (Ex. number of clicks for an AD) should be computed in real-time</li>
+    </ul>
 
-    <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/image/recognition-system1.png" alt="Card image cap">
-    <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/image/recognition-system2.png" alt="Card image cap">
-    <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/image/recognition-system3.png" alt="Card image cap">
-
-    <h3 class="card-title">Workflow</h3>
-
+    <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/image/recommendation-system2.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/image/recommendation-system3.png" alt="Card image cap">
   </div>
   <div class="card-footer text-muted">
     Reference:
   </div>
 </div>
 
-<div class="card mb-4" id="recognition-system-7">
+<div class="card mb-4" id="recommendation-system-7">
   <div class="card-body">
     <h2 class="card-title">Follow up</h2>
     <ul>
-      <li>Explain how to handle viral posts</li>
-      <li>Explain how to handle new users</li>
-      <li>Explain how to handle potential bias</li>
+      <li>Explain how to calibrate the model</li>
+      <li>Explain how to avoid data leakage</li>
+      <li>Explain catastrophic forgetting and the solutions</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
     Reference:
   </div>
 </div>
-<!-- Recognition system END -->
+<!-- Recommendation system END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->
