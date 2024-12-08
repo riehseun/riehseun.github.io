@@ -190,7 +190,7 @@
 
     <h3 class="card-title">Feature engineering</h3>
     <ul>
-      <li>User</li>
+      <li>User (Author)</li>
       <ul>
         <li>User ID - embedding since the dimension is sparse</li>
         <li>Username - can't use due to dependecy with user ID</li>
@@ -201,19 +201,54 @@
         <li>Gender - can't use due to bias and fairness concern</li>
         <li>Time of day - bucketize + one-hot since the dimension is not sparse</li>
         <li>Device - bucketize + one-hot</li>
+        <li>Number of violation - scale</li>
+        <li>Number of user report - scale</li>
       </ul>
       <li>Post</li>
       <ul>
         <li>Post ID - embedding since the dimension is sparse</li>
-        <li>Description - BERT since we need to know the context of each word</li>
-        <li>Image - </li>
-        <li>Video - </li>
-        <li>Tag - CBOW since we don't need to know the context of each word</li>
+        <li>Description</li>
+        <ul>
+          <li>Preprocessing</li>
+          <ul>
+            <li>Text normalization (Text clean up)</li>
+            <li>Tokenization</li>
+            <li>Tokens to IDs</li>
+          </ul>
+          <li>Vectorization</li>
+          <ul>
+            <li>Statistical methods like BoW and TF-IDF cannot capture semantics</li>
+            <li>BERT takes long time to produce text embeddings and is for english only</li>
+            <li>DistlimBERT can be used here</li>
+          </ul>
+        </ul>
+        <li>Image</li>
+        <ul>
+          <li>Preprocessing</li>
+          <ul>
+            <li>Resize - models require fixed-sized images</li>
+            <li>Scale - pixel values should be between 0 and 1</li>
+            <li>Standardization - pixel values should have mean 0 and variance 1</li>
+            <li>Color mode - pick either RGB or CMYK</li>
+          </ul>
+          <li>Feature extraction</li>
+          <ul>
+            <li>CLIP's visual encoder, SimCLR</li>
+          </ul>
+        </ul>
+        <li>Video</li>
+        <li>Tag</li>
+        <ul>
+          <li>Use Viterbi to tokenzie hashtags into different words</li>
+          <li>Use feature hashing to convert words to Ids</li>
+          <li>Use TF-IDF or word2vec to vectorize tags</li>
+        </ul>
       </ul>
       <li>User-post interaction</li>
       <ul>
+        <li>View - scale</li>
         <li>Like - scale</li>
-        <li>Comment - BERT</li>
+        <li>Comment - DistlimBERT</li>
         <li>Share - scale</li>
         <li>Hide - scale</li>
         <li>Report - scale</li>
