@@ -391,7 +391,7 @@ class Solution:
 
 <div class="card mb-4" id="tree-bfs">
   <div class="card-body">
-    <h2 class="card-title">Binary tree vertical order traversal (M) (F)</h2>
+    <h2 class="card-title">Binary tree vertical order traversal (M) (F) !</h2>
 
 <pre><code class="python"># Definition for a binary tree node.
 # class TreeNode:
@@ -400,39 +400,37 @@ class Solution:
 #         self.left = left
 #         self.right = right
 class Solution:
-    def rightSideView(self, root: Optional[TreeNode]) -> List[int]:
+    def verticalOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
 
-        # Do BFS
-        # Pick only the right most
+        # Use BFS
+        # Use hash table to store nodes
+        #   Storing nodes as traversing guarantees vertical order
+        #   Use key in hash table to remember horizontal order
 
-        self.right_side_view = {}
-
-        # Time O(n) n = number of nodes
+        # Time O(nlogn) n = number of nodes
         # Space O(n)
-        def bfs(root):
 
-            explored = set()
-            explored.add(root)
+        ordering = defaultdict(list)
 
-            queue = deque()
-            queue.append((root,0))
+        queue = deque()
+        queue.append((root, 0))
 
-            while queue:
-                root, depth = queue.popleft()
-                self.right_side_view[depth] = root.val
-                if root.left and root.left not in explored:
-                    explored.add(root.left)
-                    queue.append((root.left,depth+1))
-                if root.right and root.right not in explored:
-                    explored.add(root.right)
-                    queue.append((root.right,depth+1))
+        while queue:
+            node, position = queue.popleft()
 
-        if not root:
-            return []
+            if node:
+                ordering[position].append(node.val)
 
-        bfs(root)
+                queue.append((node.left, position-1))
+                queue.append((node.right, position+1))
 
-        return self.right_side_view.values()</code></pre>
+        ordering_sorted_by_key = dict(sorted(ordering.items()))
+        result = []
+
+        for k,v in ordering_sorted_by_key.items():
+            result.append(v)
+
+        return result</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/binary-tree-vertical-order-traversal">314. Binary Tree Vertical Order Traversal</a>
