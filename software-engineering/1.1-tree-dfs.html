@@ -47,6 +47,8 @@
       <!-- <li><a href="#tree-dfs">Binary tree inorder traversal</a></li> -->
       <!-- <li><a href="#tree-dfs">Validate Binary Search Tree</a></li> -->
       <!-- <li><a href="#tree-dfs">Recover Binary Search Tree</a></li> -->
+      <!-- <li><a href="#tree-dfs">Same tree</a></li> -->
+      <!-- <li><a href="#tree-dfs">Symmetric tree</a></li> -->
       <!-- <li><a href="#tree-dfs">Maximum depth of binary tree</a></li> -->
       <!-- <li><a href="#tree-dfs">Construct binary tree from preorder and inorder traversal</a></li> -->
       <!-- <li><a href="#tree-dfs">Construct binary tree from inorder and postorder traversal</a></li> -->
@@ -56,17 +58,21 @@
       <!-- <li><a href="#tree-dfs">Path sum</a></li> -->
       <!-- <li><a href="#tree-dfs">Path sum II</a></li> -->
       <!-- <li><a href="#tree-dfs">Flatten binary tree to linked list</a></li> -->
+      <!-- <li><a href="#tree-dfs">Populating next right pointers in each node</a></li> -->
       <li><a href="#tree-dfs">Binary tree maximum path sum</a></li>
       <li><a href="#tree-dfs">Sum root to leaf numbers</a></li>
       <!-- <li><a href="#tree-dfs">Binary tree preorder traversal</a></li> -->
       <!-- <li><a href="#tree-dfs">Binary tree postorder traversal</a></li> -->
+      <!-- <li><a href="#tree-dfs">Invert binary tree</a></li> -->
       <li><a href="#tree-dfs">Lowest common ancestor of a binary tree</a></li>
       <li><a href="#tree-dfs">Closest binary search tree value</a></li>
+      <li><a href="#tree-dfs">Serialize and deserialize binary tree</a></li>
       <!-- <li><a href="#tree-dfs">Find leaves of binary tree</a></li> -->
       <li><a href="#tree-dfs">Convert Binary Search Tree to Sorted Doubly Linked List</a></li>
       <li><a href="#tree-dfs">Alien dictionary</a></li>
       <li><a href="#tree-dfs">Diameter of binary tree</a></li>
       <!-- <li><a href="#tree-dfs">Longest univalue path</a></li> -->
+      <li><a href="#tree-dfs">Range Sum of BST</a></li>
       <li><a href="#tree-dfs">Lowest Common Ancestor of a Binary Tree III</a></li>
     </ul>
   </div>
@@ -192,6 +198,90 @@ class Solution:
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/recover-binary-search-tree">99. Recover Binary Search Tree</a>
+  </div>
+</div> -->
+
+<!-- <div class="card mb-4" id="tree-dfs">
+  <div class="card-body">
+    <h2 class="card-title">Same tree (E)</h2>
+
+<pre><code class="python"># Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def isSameTree(self, p: Optional[TreeNode], q: Optional[TreeNode]) -> bool:
+
+        # If both root are None, return True
+        # If one root is not None but the other is None, return False
+        # If at any point, the root val is different, return False
+
+        # Time O(n) where n is number of nodes
+        # Space O(h) where h = n if worst case, h = log(n) if best case
+        def helper(p, q):
+
+            if not p and not q:
+                return True
+
+            if (not p and q) or (p and not q):
+                return False
+
+            if p.val != q.val:
+                return False
+
+            left = helper(p.left, q.left)
+            right = helper(p.right, q.right)
+
+            return left and right
+
+        return helper(p, q)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/same-tree">100. Same Tree</a>
+  </div>
+</div> -->
+
+<!-- <div class="card mb-4" id="tree-dfs">
+  <div class="card-body">
+    <h2 class="card-title">Symmetric tree (E)</h2>
+
+<pre><code class="python"># Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def isSymmetric(self, root: Optional[TreeNode]) -> bool:
+
+        # If both root are None, return True
+        # If one root is not None but the other is None, return False
+        # If values are different at any point, return False
+
+        # Time O(n) where n is number of nodes
+        # Space O(h) where h = n if worst case, h = log(n) if best case
+        def helper(node1, node2):
+
+            if not node1 and not node2:
+                return True
+
+            if (node1 and not node2) or (node2 and not node1):
+                return False
+
+            if node1.val != node2.val:
+                return False
+
+            left = helper(node1.left, node2.right)
+            right = helper(node1.right, node2.left)
+
+            return left and right
+
+        return helper(root.left, root.right)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/symmetric-tree">101. Symmetric Tree</a>
   </div>
 </div> -->
 
@@ -549,6 +639,45 @@ class Solution:
   </div>
 </div> -->
 
+<!-- <div class="card mb-4" id="tree-dfs">
+  <div class="card-body">
+    <h2 class="card-title">Populating next right pointers in each node (M)</h2>
+
+<pre><code class="python">"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val: int = 0, left: 'Node' = None, right: 'Node' = None, next: 'Node' = None):
+        self.val = val
+        self.left = left
+        self.right = right
+        self.next = next
+"""
+
+class Solution:
+    def connect(self, root: 'Optional[Node]') -> 'Optional[Node]':
+
+        # Time O(n) where n is number of nodes
+        # Space O(h) where h = log(n)
+        def helper(root):
+
+            if root:
+                if root.left:
+                    root.left.next = root.right
+                    if root.next:
+                        root.right.next = root.next.left
+
+                helper(root.left)
+                helper(root.right)
+
+        helper(root)
+
+        return root</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/populating-next-right-pointers-in-each-node">116. Populating Next Right Pointers in Each Node</a>
+  </div>
+</div> -->
+
 <div class="card mb-4" id="tree-dfs">
   <div class="card-body">
     <h2 class="card-title">Binary tree maximum path sum (H) (F)</h2>
@@ -711,6 +840,40 @@ class Solution:
   </div>
 </div> -->
 
+<!-- <div class="card mb-4" id="tree-dfs">
+  <div class="card-body">
+    <h2 class="card-title">Invert binary tree (E)</h2>
+
+<pre><code class="python"># Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+
+        # Time O(n) where n is number of nodes
+        # Space O(h) where h = n if worst case, h = log(n) if best case
+
+        def helper(root):
+
+            if root:
+
+                root.left, root.right = root.right, root.left
+
+                helper(root.left)
+                helper(root.right)
+
+        helper(root)
+
+        return root</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/invert-binary-tree">226. Invert Binary Tree</a>
+  </div>
+</div> -->
+
 <div class="card mb-4" id="tree-dfs">
   <div class="card-body">
     <h2 class="card-title">Lowest common ancestor of a binary tree (M) (F/A)</h2>
@@ -796,6 +959,74 @@ class Solution:
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/closest-binary-search-tree-value">270. Closest Binary Search Tree Value</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="tree-dfs">
+  <div class="card-body">
+    <h2 class="card-title">Serialize and deserialize binary tree (H) (A)</h2>
+
+<pre><code class="python"># Definition for a binary tree node.
+# class TreeNode(object):
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Codec:
+
+    # Time O(n) where n is number of nodes
+    # Space O(h) where h = n if worst case, h = log(n) if best case
+
+    def serialize(self, root):
+        """Encodes a tree to a single string.
+
+        :type root: TreeNode
+        :rtype: str
+        """
+
+        self.data = ""
+
+        def helper(root):
+
+            if root:
+                self.data += str(root.val)
+                self.data += ","
+                helper(root.left)
+                helper(root.right)
+            else:
+                self.data += "#"
+                self.data += ","
+
+        helper(root)
+        return self.data[:len(self.data)-1]
+
+    def deserialize(self, data):
+        """Decodes your encoded data to tree.
+
+        :type data: str
+        :rtype: TreeNode
+        """
+
+        data_array = data.split(",")
+
+        def helper(data_array):
+            val = next(data_array)
+            if val != "#":
+                root = TreeNode(int(val))
+                root.left = helper(data_array)
+                root.right = helper(data_array)
+                return root
+
+        return helper(iter(data_array))
+
+# Your Codec object will be instantiated and called as such:
+# ser = Codec()
+# deser = Codec()
+# ans = deser.deserialize(ser.serialize(root))</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/serialize-and-deserialize-binary-tree">297. Serialize and Deserialize Binary Tree</a>
   </div>
 </div>
 
@@ -1013,6 +1244,47 @@ class Solution:
     Reference: <a href="https://leetcode.com/problems/longest-univalue-path">687. Longest univalue path</a>
   </div>
 </div> -->
+
+<div class="card mb-4" id="tree-dfs">
+  <div class="card-body">
+    <h2 class="card-title">Range sum of bst (E) (F)</h2>
+
+<pre><code class="python"># Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def rangeSumBST(self, root: Optional[TreeNode], low: int, high: int) -> int:
+
+        # Get all nodes first
+        # Then, find numbers within the range
+
+        self.nodes = []
+
+        # Time O(n) where n is number of nodes
+        # Space O(h) where h = n if worst case, h = log(n) if best case
+        def pre_order(root):
+
+            if root:
+                self.nodes.append(root.val)
+                pre_order(root.left)
+                pre_order(root.right)
+
+        pre_order(root)
+
+        range_sum = 0
+        for node in self.nodes:
+            if node >= low and node <= high:
+                range_sum +=  node
+
+        return range_sum</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/range-sum-of-bst">938. Range Sum of BST</a>
+  </div>
+</div>
 
 <div class="card mb-4" id="tree-dfs">
   <div class="card-body">
