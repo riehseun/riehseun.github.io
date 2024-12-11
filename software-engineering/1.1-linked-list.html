@@ -48,6 +48,7 @@
       <li><a href="#linkedlist-">Remove Nth node from end of list</a></li>
       <li><a href="#linkedlist-">Merge two sorted lists</a></li>
       <li><a href="#linkedlist-">Copy list with random pointer</a></li>
+      <li><a href="#linkedlist-">LRU Cache</a></li>
       <!-- <li><a href="#linkedlist-">Insertion sort list</a></li> -->
       <!-- <li><a href="#linkedlist-">Sort list</a></li> -->
       <!-- <li><a href="#linkedlist-">Delete node in a linked list</a></li> -->
@@ -210,7 +211,7 @@ class Solution:
 
 <div class="card mb-4" id="linkedlist-">
   <div class="card-body">
-    <h2 class="card-title">Copy list with random pointer (M) (F/A)</h2>
+    <h2 class="card-title">Copy list with random pointer (M) (F/A) !</h2>
 
 <pre><code class="python">"""
 # Definition for a Node.
@@ -271,6 +272,100 @@ class Solution:
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/copy-list-with-random-pointer">138. Copy List with Random Pointer</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="linkedlist-">
+  <div class="card-body">
+    <h2 class="card-title">LRU cache (M) (F/A) !</h2>
+
+<pre><code class="python">class ListNode:
+
+    def __init__(self, key, val):
+        self.prev = None
+        self.next = None
+        self.key = key
+        self.val = val
+
+
+class LRUCache:
+
+    # Use a dictionary to keep key-value pair
+    #   Get is O(1), Add is O(1), Remove is O(1)
+    #   Getting the size of dictionary is O(1)
+    #   How to keep track of LRU?
+    #
+    # Use linked list
+    #   Keep least recently used at the tail
+    #     When the capacity exceeds, remove from tail - O(1)
+    #   Keep most recently used at the head
+    #     New element goes to head - O(1)
+    #     Existing element also goes to head - O(1)
+    #       Dictionary must store the node
+
+    def __init__(self, capacity: int):
+        self.dictionary = defaultdict(int)
+        self.capacity = capacity
+        # Initialize linked list
+        self.head = ListNode(-1, -1)
+        self.tail = ListNode(-1, -1)
+        self.head.next = self.tail
+        self.tail.prev = self.head
+
+    def get(self, key: int) -> int:
+        if key in self.dictionary:
+            node = self.dictionary[key]
+            # Move the existing node to head
+            node.next.prev = node.prev
+            node.prev.next = node.next
+            node.prev = self.head
+            node.next = self.head.next
+            self.head.next.prev = node
+            self.head.next = node
+            return node.val
+        return -1
+
+    def put(self, key: int, value: int) -> None:
+        if key in self.dictionary:
+            node = self.dictionary[key]
+            # Update the existing node's key and val
+            node.key = key
+            node.val = value
+            # Move the existing node to head
+            node.next.prev = node.prev
+            node.prev.next = node.next
+            node.prev = self.head
+            node.next = self.head.next
+            self.head.next.prev = node
+            self.head.next = node
+        else:
+            # Create a new node
+            node = ListNode(key, value)
+            # Move the new node to head
+            node.next = self.head.next
+            node.prev = self.head
+            self.head.next.prev = node
+            self.head.next = node
+            # Create a new item in dictionary
+            self.dictionary[key] = node
+
+            if len(self.dictionary) > self.capacity:
+                del self.dictionary[self.tail.prev.key]
+                # Remove a node from tail
+                temp = self.tail.prev.prev
+                self.tail.prev.prev = None
+                self.tail.prev.next = None
+                self.tail.prev = temp
+                temp.next = self.tail
+
+
+# Your LRUCache object will be instantiated and called as such:
+# obj = LRUCache(capacity)
+# param_1 = obj.get(key)
+# obj.put(key,value)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/lru-cache">146. LRU Cache</a>
   </div>
 </div>
 
