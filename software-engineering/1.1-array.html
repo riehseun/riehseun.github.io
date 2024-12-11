@@ -44,6 +44,7 @@
     <h2 class="card-title">Array</h2>
     <ul class="list-unstyled mb-0">
       <li><a href="#array-">Two sum</a></li>
+      <li><a href="#array-">Next permutation</a></li>
       <li><a href="#array-">First missing positive</a></li>
       <li><a href="#array-">Longest consecutive sequence</a></li>
       <li><a href="#array-">Maximum product subarray</a></li>
@@ -59,7 +60,6 @@
       <li><a href="#array-">Minimum Number of Increments on Subarrays to Form a Target Array</a></li>
       <li><a href="#array-">Three Consecutive Odds</a></li>
       <li><a href="#array-">Crawler Log Folder</a></li>
-      <li><a href="#array-">Buildings With an Ocean View</a></li>
     </ul>
   </div>
 </div>
@@ -89,6 +89,61 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/two-sum">1. Two Sum</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="array-">
+  <div class="card-body">
+    <h2 class="card-title">Next permutation (M) (G/F/A) !</h2>
+
+<pre><code class="python">class Solution:
+    def nextPermutation(self, nums: List[int]) -> None:
+        """
+        Do not return anything, modify nums in-place instead.
+        """
+
+        # Find a first decreasing number from the right
+        # (Find the largest i-1 such that nums[i-1] < nums[i])
+        #   Find a first number from the right, that is greater than the first
+        #   decreasing number
+        #   (Find the largest index j > i-1 such that nums[i-1] < nums[j])
+        #   Swap those two numbers
+        #   (Swap nums[j], nums[i-1])
+        #   Then reverse the right side of the array, which is nums[i:]
+        # When such numbers do not exist
+        #   Reverse the entire array
+
+        is_swapped = False
+
+        # Time O(n) n = len(nums)
+        # Space O(1)
+        for i in range(len(nums)-1, 0, -1):
+
+            # First decreasing number
+            if nums[i-1] < nums[i]:
+
+                # Find number that is greater than first decreasing number
+                for j in range(len(nums)-1, i-1, -1):
+                    if nums[i-1] < nums[j]:
+                        nums[i-1], nums[j] = nums[j], nums[i-1]
+                        break
+
+                # Reverse right side of array
+                start = 0
+                end = len(nums[i:]) - 1
+                while start < end:
+                    nums[i+start], nums[i+end] = nums[i+end], nums[i+start]
+                    start += 1
+                    end -= 1
+
+                is_swapped = True
+                break
+
+        if not is_swapped:
+            nums.sort()</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/next-permutation">31. Next Permutation</a>
   </div>
 </div>
 
@@ -580,34 +635,6 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/crawler-log-folder">1598. Crawler Log Folder</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="array-">
-  <div class="card-body">
-    <h2 class="card-title">Buildings With an Ocean View (M) (F)</h2>
-
-<pre><code class="python">class Solution:
-    def findBuildings(self, heights: List[int]) -> List[int]:
-
-        # Find numbers that has decreasing sequence only
-        # Compute running maximum from the right and compare
-
-        max_num = -1
-        result = []
-
-        # Time O(n) n = len(heights)
-        # Space O(n)
-        for i in range(len(heights)-1, -1, -1):
-            if heights[i] > max_num:
-                result.append(i)
-            max_num = max(max_num, heights[i])
-
-        result.reverse()
-        return result</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/buildings-with-an-ocean-view">1762. Buildings With an Ocean View</a>
   </div>
 </div>
 <!-- Array END -->
