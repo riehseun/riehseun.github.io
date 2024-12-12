@@ -727,7 +727,7 @@ class Solution:
 
 <div class="card mb-4" id="tree-dfs">
   <div class="card-body">
-    <h2 class="card-title">Sum root to leaf numbers (M) (F)</h2>
+    <h2 class="card-title">Sum root to leaf numbers (M) (F) !</h2>
 
 <pre><code class="python"># Definition for a binary tree node.
 # class TreeNode:
@@ -738,34 +738,28 @@ class Solution:
 class Solution:
     def sumNumbers(self, root: Optional[TreeNode]) -> int:
 
-        # Find all path from root to all leaf nodes
+        # Do pre-order to find all path from root to all leaf nodes
 
-        self.paths = []
+        self.total_num = 0
 
         # Time O(n) where n is number of nodes
-        # Space O(n) for each node, we are constructing its path
-        def helper(root, path):
+        # Space O(h) to keep recursion stack
+        def pre_order(root, num):
 
             if root:
 
+                num = num * 10 + root.val
+
                 # If leaf node
                 if not root.left and not root.right:
-                    self.paths.append(path+[root.val])
+                    self.total_num += num
 
-                helper(root.left, path+[root.val])
-                helper(root.right, path+[root.val])
+                pre_order(root.left, num)
+                pre_order(root.right, num)
 
-            return self.paths
+        pre_order(root, 0)
 
-        final_sum = 0
-        result = helper(root, [])
-        for path in result:
-            string = ""
-            for node in path:
-                string += str(node)
-            final_sum += int(string)
-
-        return final_sum</code></pre>
+        return self.total_num</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/sum-root-to-leaf-numbers">129. Sum Root to Leaf Numbers</a>
