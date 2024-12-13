@@ -45,6 +45,7 @@
     <h2 class="card-title">Graph</h2>
     <ul class="list-unstyled mb-0">
       <!-- <li><a href="#graph-">Surrounded regions</a></li> -->
+      <li><a href="#graph-">Clone graph</a></li>
       <!-- <li><a href="#graph-">Minimum height trees</a></li> -->
       <!-- <li><a href="#graph-">Longest increasing path in a matrix</a></li> -->
       <li><a href="#graph-">Evaluate division</a></li>
@@ -52,6 +53,7 @@
       <!-- <li><a href="#graph-">Network delay time</a></li> -->
       <!-- <li><a href="#graph-">Is graph bipartite?</a></li> -->
       <!-- <li><a href="#graph-">All paths from source to target</a></li> -->
+      <li><a href="#graph-">Making A Large Island</a></li>
       <!-- <li><a href="#graph-">Sum of distances in tree</a></li> -->
       <!-- <li><a href="#graph-">Keys and rooms</a></li> -->
       <li><a href="#graph-">All Nodes Distance K in Binary Tree</a></li>
@@ -138,6 +140,53 @@
     Reference: <a href="https://leetcode.com/problems/surrounded-regions">130. Surrounded Regions</a>
   </div>
 </div> -->
+
+<div class="card mb-4" id="graph-bfs-">
+  <div class="card-body">
+    <h2 class="card-title">Clone graph (M) (F) !</h2>
+
+<pre><code class="python">"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val = 0, neighbors = None):
+        self.val = val
+        self.neighbors = neighbors if neighbors is not None else []
+"""
+
+from typing import Optional
+class Solution:
+    def cloneGraph(self, node: Optional['Node']) -> Optional['Node']:
+
+        # Do standard BFS
+
+        if not node:
+            return node
+
+        explored = {}
+        explored[node] = Node(node.val)
+
+        queue = deque()
+        queue.append(node)
+
+        # Time O(n+m) n = number of nodes, m = number of edges
+        # Space O(n)
+        while queue:
+
+            n = queue.popleft()
+
+            for next_node in n.neighbors:
+                if next_node not in explored:
+                    explored[next_node] = Node(next_node.val)
+                    queue.append(next_node)
+
+                explored[n].neighbors.append(explored[next_node])
+
+        return explored[node]</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/clone-graph">133. Clone Graph</a>
+  </div>
+</div>
 
 <!-- <div class="card mb-4" id="graph-">
   <div class="card-body">
@@ -540,6 +589,83 @@
   </div>
 </div> -->
 
+<div class="card mb-4" id="graph-">
+  <div class="card-body">
+    <h2 class="card-title">Making A Large Island (H) (F) !</h2>
+
+<pre><code class="python">class Solution:
+    def largestIsland(self, grid: List[List[int]]) -> int:
+
+        # For each 0, pretend that it is 1, then do DFS
+
+        graph = defaultdict(list)
+
+        for i in range(len(grid)):
+            for j in range(len(grid[0])):
+                if grid[i][j] == 1:
+                    if i > 0 and grid[i-1][j] == 1:
+                        graph[(i,j)].append((i-1,j))
+                    if i < len(grid)-1 and grid[i+1][j] == 1:
+                        graph[(i,j)].append((i+1,j))
+                    if j > 0 and grid[i][j-1] == 1:
+                        graph[(i,j)].append((i,j-1))
+                    if j < len(grid[0])-1 and grid[i][j+1] == 1:
+                        graph[(i,j)].append((i,j+1))
+
+        def dfs(graph, start):
+
+            explored = set()
+            explored.add(start)
+
+            stack = []
+            stack.append(start)
+
+            size = 0
+
+            while stack:
+                node = stack.pop()
+                size += 1
+                for next_node in graph[node]:
+                    if next_node not in explored:
+                        explored.add(next_node)
+                        stack.append(next_node)
+
+            return size
+
+        max_size = 0
+
+        for i in range(len(grid)):
+            for j in range(len(grid[0])):
+                if grid[i][j] == 0:
+                    if i > 0 and grid[i-1][j] == 1:
+                        graph[(i,j)].append((i-1,j))
+                    if i < len(grid)-1 and grid[i+1][j] == 1:
+                        graph[(i,j)].append((i+1,j))
+                    if j > 0 and grid[i][j-1] == 1:
+                        graph[(i,j)].append((i,j-1))
+                    if j < len(grid[0])-1 and grid[i][j+1] == 1:
+                        graph[(i,j)].append((i,j+1))
+
+                    max_size = max(max_size, dfs(graph, (i,j)))
+                    if (i-1,j) in graph[(i,j)]:
+                        graph[(i,j)].remove((i-1,j))
+                    if (i+1,j) in graph[(i,j)]:
+                        graph[(i,j)].remove((i+1,j))
+                    if (i,j-1) in graph[(i,j)]:
+                        graph[(i,j)].remove((i,j-1))
+                    if (i,j+1) in graph[(i,j)]:
+                        graph[(i,j)].remove((i,j+1))
+
+                else:
+                    max_size = max(max_size, dfs(graph, (i,j)))
+
+        return max_size</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/making-a-large-island">827. Making A Large Island</a>
+  </div>
+</div>
+
 <!-- <div class="card mb-4" id="graph-">
   <div class="card-body">
     <h2 class="card-title">Sum of distances in tree (H)</h2>
@@ -922,12 +1048,6 @@ class Solution:
     Reference: <a href="https://leetcode.com/problems/satisfiability-of-equality-equations">990. Satisfiability of Equality Equations</a>
   </div>
 </div> -->
-
-
-
-
-
-
 <!-- Graph END -->
 
 </div> <!-- /.col-md-12 -->
