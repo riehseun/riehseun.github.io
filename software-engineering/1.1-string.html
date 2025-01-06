@@ -616,48 +616,32 @@
 
 <div class="card mb-4" id="string-">
   <div class="card-body">
-    <h2 class="card-title">Valid Word Abbreviation (E) (F/100) !!</h2>
+    <h2 class="card-title">Valid Word Abbreviation (E) (F/100) #!</h2>
 
-<pre><code class="python">class Solution:
+<pre><code class="python">cclass Solution:
     def validWordAbbreviation(self, word: str, abbr: str) -> bool:
 
         # Tokenize "abbr" by letters and numbers
         # If any token is 0, return False
         # Go through "word" by tokens
 
-        # Ex. word = "hi", abbr = "hi1"
-        if len(abbr) > len(word):
-            return False
-
-        # Ex. word = "a", abbr = "2"
-        if abbr.isdigit() and not abbr.startswith("0"):
-            return int(abbr) == len(word)
-
+        # Time O(n) where n = len(abbr)
+        # Space O(1)
         tokens = re.findall(r'\D+|\d+', abbr)
         i = 0
-        seen_digit = False
-
-        # Time O(n) where n = max(len(word), len(abbr))
-        # Space O(1)
+        
         for token in tokens:
             if token.isdigit():
                 # Leading zeros are not allowed
-                if token.startswith("0") and not seen_digit:
+                if token.startswith("0"):
                     return False
-                seen_digit = True
                 i += int(token)
             else:
-                for char in token:
-                    # Ex. word = "hi", abbr = "2i"
-                    if i < len(word):
-                        if word[i] != char:
-                            return False
-                        i += 1
-                    else:
-                        return False
+                if word[i:i+len(token)] == token:
+                    i += len(token)
+                else:
+                    return False     
 
-        # Ex. word = "hi", abbr = "h2"
-        # Ex. word = "word", abbr = "2r0"
         if i != len(word):
             return False
 
