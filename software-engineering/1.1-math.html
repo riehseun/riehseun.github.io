@@ -46,7 +46,7 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#math-">Reverse integer</a></li>
       <li><a href="#math-">Pow(x, n)</a></li>
-      <li><a href="#math-">Dot Product of Two Sparse Vectors</a></li>
+      <li><a href="#math-">Basic calculator II</a></li>
       <li><a href="#math-">Integer to English Words</a></li>
       <li><a href="#math-">Random Pick Index</a></li>
       <li><a href="#math-">Add Strings</a></li>
@@ -55,6 +55,7 @@
       <li><a href="#math-">Fraction Addition and Subtraction</a></li>
       <li><a href="#math-">2 Keys Keyboard</a></li>
       <li><a href="#math-">Water Bottles</a></li>
+      <li><a href="#math-">Dot Product of Two Sparse Vectors</a></li>
       <li><a href="#math-">Find the Winner of the Circular Game</a></li>
       <li><a href="#math-">Add Two Integers</a></li>
       <li><a href="#math-">Longest Subarray With Maximum Bitwise AND</a></li>
@@ -144,39 +145,61 @@
 
 <div class="card mb-4" id="math-">
   <div class="card-body">
-    <h2 class="card-title">Dot Product of Two Sparse Vectors (M) (F/100) !!</h2>
+    <h2 class="card-title">Basic calculator II (M) (F/A/100) #!!</h2>
 
-<pre><code class="python">class SparseVector:
+<pre><code class="python">cclass Solution:
+    def calculate(self, s: str) -> int:
 
-    # Don't store 0 to deal with sparsity
-    # Hash table
+        # If token is a digit
+        #   Set current number to the digit
+        #   If two consecutive tokens are digits, 
+        #   multiply first digit by 10
+        #   If three consecutive tokens are digits,
+        #   multiply first digit by 100
+        #   And so on
+        # Check if last operation is "+" or "-", 
+        #   The expression should be evaludated later
+        #   Add/subtract the expression to/from result
+        #   Set last_num to curr_num
+        # Check if last operation is "*" or "/"
+        #   The expression should be evaludated immediately
+        #   Multiply/divide last_num by curr_num
+        
+        # Remove all whitespaces from the input string
+        s = s.replace(" ", "")
+        # This allow last operator to be evaluated
+        s = s + "+"
+        # Assume operator of first digit is positive
+        last_op = "+"
 
-    # Time O(n) n = len(nums)
-    # Space O(n)
-    def __init__(self, nums: List[int]):
-        self.nums = defaultdict(int)
-        for i, num in enumerate(nums):
-            self.nums[i] = num
+        curr_num, last_num, result = 0, 0, 0
+    
+        # Time O(n) 
+        #   n = len(s)
+        # Space O(1)
+        for token in s:
 
-    # Return the dotProduct of two sparse vectors
-    def dotProduct(self, vec: 'SparseVector') -> int:
-
-        result = 0
-
-        for key, val in vec.nums.items():
-            if key in self.nums:
-                result += (self.nums[key]*val)
-
-        return result
-
-
-# Your SparseVector object will be instantiated and called as such:
-# v1 = SparseVector(nums1)
-# v2 = SparseVector(nums2)
-# ans = v1.dotProduct(v2)</code></pre>
+            if token.isdigit():
+                curr_num = curr_num * 10 + int(token)
+                continue    
+            
+            if last_op == "+":
+                result += last_num
+                last_num = curr_num
+            elif last_op == "-":
+                result += last_num
+                last_num = -curr_num
+            elif last_op == "*":
+                last_num *= curr_num
+            elif last_op == "/":
+                last_num = int(last_num/curr_num)
+            curr_num = 0
+            last_op = token
+                
+        return result + last_num</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/dot-product-of-two-sparse-vectors">1570. Dot Product of Two Sparse Vectors</a>
+    <a href="https://leetcode.com/problems/basic-calculator-ii">227. Basic Calculator II</a>
   </div>
 </div>
 
@@ -448,6 +471,45 @@
     Reference: <a href="https://leetcode.com/problems/water-bottles">1518. Water Bottles</a>
   </div>
 </div>
+
+<div class="card mb-4" id="math-">
+  <div class="card-body">
+    <h2 class="card-title">Dot Product of Two Sparse Vectors (M) (F/100) !!</h2>
+
+<pre><code class="python">class SparseVector:
+
+    # Don't store 0 to deal with sparsity
+    # Hash table
+
+    # Time O(n) n = len(nums)
+    # Space O(n)
+    def __init__(self, nums: List[int]):
+        self.nums = defaultdict(int)
+        for i, num in enumerate(nums):
+            self.nums[i] = num
+
+    # Return the dotProduct of two sparse vectors
+    def dotProduct(self, vec: 'SparseVector') -> int:
+
+        result = 0
+
+        for key, val in vec.nums.items():
+            if key in self.nums:
+                result += (self.nums[key]*val)
+
+        return result
+
+
+# Your SparseVector object will be instantiated and called as such:
+# v1 = SparseVector(nums1)
+# v2 = SparseVector(nums2)
+# ans = v1.dotProduct(v2)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/dot-product-of-two-sparse-vectors">1570. Dot Product of Two Sparse Vectors</a>
+  </div>
+</div>
+
 
 <div class="card mb-4" id="math-">
   <div class="card-body">
