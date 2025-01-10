@@ -69,7 +69,7 @@
       </ul>
       <li>System features</li>
       <ul>
-        <li>Should features come from videos, including visual and textual (title and descritpion) content? Yes</li>
+        <li>Should features come from video only, such as visual and textual (title and descritpion) content? Yes</li>
       </ul>
       <li>Data</li>
       <ul>
@@ -84,10 +84,6 @@
         <li>How many videos are there on the platform? 1B videos</li>
       </ul>
       <li>Performance</li>
-      <ul>
-        <li>How fast should the search be? Reasonably fast</li>
-        <li>Is accuracy or latency more important? Both</li>
-      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -116,7 +112,7 @@
     <ul>
       <li>Supervised, ranking problem, representation learning</li>
       <ul>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/youtube-video-search1.png" alt="Card image cap">
+        <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-1/youtube-video-search1.png" alt="Card image cap">
         <li>Learn embeddings of images and text such that</li>
         <ul>
           <li>Dot product between a video and its relevant text is small</li>
@@ -126,13 +122,13 @@
 
       <li>Visual search</li>
       <ul>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/youtube-video-search2.png" alt="Card image cap">
+        <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-1/youtube-video-search2.png" alt="Card image cap">
         <li>Text query and video are encoded separately using two encoders</li>
         <li>Compute dot product between text query embedding and each video embedding, and rank videos based on the score</li>
       </ul>
       <li>Text search</li>
       <ul>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/youtube-video-search3.png" alt="Card image cap">
+        <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-1/youtube-video-search3.png" alt="Card image cap">
         <li>Inverted index is used (This is not based on ML, thus there is no training cost)</li>
         <li>Elasticsearch is popular choice for inverted index</li>
       </ul>
@@ -239,7 +235,7 @@
         </ul>
         <li>Option 2. ML based method</li>
         <ul>
-          <li>Option 2a. Embeddingr</li>
+          <li>Option 2a. Embedding layer</li>
           <ul>
             <li>Map each token ID to embedding vector</li>
           </ul>
@@ -273,22 +269,13 @@
         </ul>
       </ul>
       <li>Constrative learning</li>
-      <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/youtube-video-search4.png" alt="Card image cap">
+      <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-1/youtube-video-search4.png" alt="Card image cap">
     </ul>
 
     <h3 class="card-title">Model training</h3>
     <ul>
       <li>Loss function</li>
-      <ul>
-        <li>Constrastive loss function</li>
-        <ul>
-          <li>Cross-entropy</li>
-        </ul>
-      </ul>
       <li>Hyperparameters</li>
-      <ul>
-        <li>Size of embedding vector</li>
-      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -307,7 +294,11 @@
         <li>\( \dfrac{\text{number of relevant items among the top k items in the ranked list}}{k} \)</li>
         <li>Cons</li>
         <ul>
-          <li>In annotated dataset, text query is associated to just one video. That means the numerator is either 1 or 0. Thus, this metric is not useful</li>
+          <li>In annotated dataset, text query is associated to just one video</li>
+          <ul>
+            <li>That means the numerator is either 1 or 0</li>
+            <li>Thus, this metric is not useful</li>
+          </ul>
         </ul>
       </ul>
       <li>Option 2. recall@k</li>
@@ -334,13 +325,18 @@
     <h3 class="card-title">Online</h3>
     <ul>
       <li>Click-through rate</li>
+      <ul>
+        <li>How often users click on recommended videos</li>
+      </ul>
       <li>Video completion rate</li>
+      <ul>
+        <li>How many videos are watched till the end</li>
+        <li>Users may see the video as relevant but not watch it till the end, thus not a good metric</li>
+      </ul>
       <li>Total watch time</li>
-    </ul>
-
-    <h3 class="card-title">Business</h3>
-    <ul>
-      <li>Revenue lift from users on the platform</li>
+      <ul>
+        <li>Sum of watch times of all videos recommended to users</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -352,15 +348,18 @@
   <div class="card-body">
     <h2 class="card-title">Serving</h2>
 
-    <h3 class="card-title">Components</h3>
-
-    <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/youtube-video-search5.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-1/youtube-video-search5.png" alt="Card image cap">
 
     <ul>
       <li>Video indexing pipeline</li>
       <ul>
         <li>Video encoder computes video embeddings</li>
         <li>Video index table stores video embeddings</li>
+      </ul>
+      <li>Text indexing pipeline</li>
+      <ul>
+        <li>Elasticsearch indexes titles, manual tags, and automated tags</li>
+        <li>Standalone model generates automated tag for when users don't provide tags for the videos</li>
       </ul>
       <li>Prediction pipeline</li>
       <ul>
@@ -382,26 +381,6 @@
         <ul>
           <li>Uses business logics to again re-rank the videos</li>
         </ul>
-      </ul>
-      <li>Text indexing pipeline</li>
-      <ul>
-        <li>Elasticsearch indexes titles, manual tags, and automated tags</li>
-        <li>Standalone model generates automated tag for when users don't provide tags for the videos</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Workflow</h3>
-    <ul>
-      <li>Video</li>
-      <ul>
-        <li>Video embeddings are computed by video encoder and stored in video index table</li>
-        <li>Video components (titles, tags) are indexed and stored in Elasticsearch</li>
-      </ul>
-      <li>Text search</li>
-      <ul>
-        <li>Text embeddings are computed by text encoder</li>
-        <li>ANN uses text embeddings to find relevant videos based on video embeddings</li>
-        <li>Elasticsearch also uses text to find relevant videos based on Elasticsearch index</li>
       </ul>
     </ul>
   </div>
