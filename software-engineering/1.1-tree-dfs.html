@@ -922,7 +922,7 @@ class Solution:
 
 <div class="card mb-4" id="tree-dfs">
   <div class="card-body">
-    <h2 class="card-title">Lowest common ancestor of a binary tree (M) (F/A) !!</h2>
+    <h2 class="card-title">Lowest common ancestor of a binary tree (M) (F/A) #!</h2>
 
 <pre><code class="python"># Definition for a binary tree node.
 # class TreeNode:
@@ -934,31 +934,38 @@ class Solution:
 class Solution:
     def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
 
-        # If subtrees return one p and one q, the current root is LCA
-        # If only one of subtrees return one of p and q, then the other one of
-        # p and q must be contained under that subtree
+        # Traverse tree recursively
+        # At each node, if node itself is p or q, mark mid as True
+        # If left subtree return True, p or q is in left subtree
+        # If right subtree return True, p or q is in left subtree
+        # When two of mid, left, right returns True, LCA is mid
 
-        if root == p or root == q:
-            return root
+        self.lca = None
 
-        left = None
-        right = None
+        # Time O(n) 
+        #   Height can be n if tree is not balanced     
+        #   n = number of nodes in tree
+        # Space O(n)
+        #   Number of recursion stack can be n  
+        def lowest_common_ancestor(root, p, q):
 
-        # Time O(h) h = height of tree
-        # Space O(1)
-        if root.left:
-            left = self.lowestCommonAncestor(root.left, p, q)
-        if root.right:
-            right = self.lowestCommonAncestor(root.right, p, q)
+            if not root:
+                return False
 
-        if left and right:
-            return root
-        elif left and not right:
-            return left
-        elif not left and right:
-            return right
-        else:
-            return None</code></pre>
+            left = lowest_common_ancestor(root.left, p, q)
+            right = lowest_common_ancestor(root.right, p, q)
+
+            mid = False
+            if root == p or root == q:
+                mid = True
+
+            if mid + left + right == 2:
+                self.lca = root
+
+            return mid or left or right
+                
+        lowest_common_ancestor(root, p, q)
+        return self.lca</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree">236. Lowest Common Ancestor of a Binary Tree</a>
@@ -1339,9 +1346,13 @@ class Node:
 class Solution:
     def lowestCommonAncestor(self, p: 'Node', q: 'Node') -> 'Node':
 
-        # If subtrees return one p and one q, the current root is LCA
-        # If only one of subtrees return one of p and q, then the other one of
-        # p and q must be contained under that subtree
+        # Traverse tree recursively
+        # At each node, if node itself is p or q, mark mid as True
+        # If left subtree return True, p or q is in left subtree
+        # If right subtree return True, p or q is in left subtree
+        # When two of mid, left, right returns True, LCA is mid
+
+        self.lca = None
 
         def get_root(p):
 
@@ -1352,31 +1363,30 @@ class Solution:
 
         root = get_root(p)
 
+        # Time O(n) 
+        #   Height can be n if tree is not balanced     
+        #   n = number of nodes in tree
+        # Space O(n)
+        #   Number of recursion stack can be n  
         def lowest_common_ancestor(root, p, q):
 
+            if not root:
+                return False
+
+            left = lowest_common_ancestor(root.left, p, q)
+            right = lowest_common_ancestor(root.right, p, q)
+
+            mid = False
             if root == p or root == q:
-                return root
+                mid = True
 
-            left = None
-            right = None
+            if mid + left + right == 2:
+                self.lca = root
 
-            # Time O(h) h = height of tree
-            # Space O(1)
-            if root.left:
-                left = lowest_common_ancestor(root.left, p, q)
-            if root.right:
-                right = lowest_common_ancestor(root.right, p, q)
-
-            if left and right:
-                return root
-            elif left and not right:
-                return left
-            elif not left and right:
-                return right
-            else:
-                return None
-
-        return lowest_common_ancestor(root, p, q)</code></pre>
+            return mid or left or right
+                
+        lowest_common_ancestor(root, p, q)
+        return self.lca</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree-iii">1650. Lowest Common Ancestor of a Binary Tree III</a>
