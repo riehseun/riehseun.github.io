@@ -106,18 +106,47 @@
     <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-1/transformer2.png" style="width: 300px; height: 500px" alt="Card image cap">
 
     <ul>
+      <li>Structure</li>
+      <ul>
+        <li>Two sublayers</li>
+        <ul>
+          <li>Multi-head attention</li>
+          <li>Fully connected position-wise feed forward</li>
+        </ul>
+        <li>Each sublayer has residual connection</li>
+        <ul>
+          <li>Transmit unprocessed input X of sublayer to layer normalization function</li>
+          <li>Ensure key information like positional encoding is not lost on the way</li>
+          <li>\( \text{LayerNormalization}(x+\text{sublayer}(x)) \)</li>
+        </ul>
+        <li>Output of every sublayer \( d_{model} \) remain constant</li>
+        <ul>
+          <li>All key operations in transformer is dot product</li>
+          <li>Reduces computation</li>
+        </ul>
+      </ul>
       <li>Input embedding</li>
       <ul>
         <li>Converts input tokens to vector of \( d_{\text{model}} = 512 \) dimension using learned embeddings</li>
         <ul>
           <li>Tokenizer transforms a sentence into tokens</li>
-          <li>An embedding method is used to convert each word to a vector of \( 512 \) numbers</li>
+          <ul>
+            <li>Ex. text = "The cat slept on the couch.It was too tired to get up."</li>
+            <li>Ex. tokenized_text = [1996, 4937, 7771, 2006, 1996, 6411, 1012, 2009, 2001, 2205, 5458, 2000, 2131, 2039, 1012]</li>
+          </ul>
+          <li>An embedding method (Ex. skip gram) is used to convert each word to a vector of \( 512 \) numbers</li>
+          <ul>
+            <li>Ex. black = [[-0.01206071 ... -0.04273562]]</li>
+            <li>Ex. brown = [[0.00135794589 ... -0.0490022525]]</li>
+          </ul>
         </ul>
       </ul>
       <li>Positional encoding</li>
       <ul>
         <li>Considers position of a word in a sentence</li>
         <li>Add positional encoding to input embedding to produce final encoding</li>
+        <li>\( PE_{pos 2i} = \sin\left(\dfrac{pos}{10000^{\frac{2i}{d_{model}}}}\right) \)</li>
+        <li>\( PE_{pos 2i+1} = \cos\left(\dfrac{pos}{10000^{\frac{2i}{d_{model}}}}\right) \)</li>
 <pre><code class="python">def encoding(pos, positional_vector)
     for i in range(0, 512,2):
         val =  pos / (10000**((2*i)/d_model))
