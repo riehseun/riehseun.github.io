@@ -81,13 +81,9 @@
         <li>Should the system remove harmful contents immediately or can it do batch inference offline? Violent posts should be removed in real time while others can be removed after some time</li>
       </ul>
       <li>Scale</li>
-      <ul>
-        <li>How many users are using the system? 10M</li>
-      </ul>
       <li>Performance</li>
       <ul>
-        <li>How fast should the search be? Reasonably fast</li>
-        <li>Is accuracy or latency more important? Both</li>
+        <li>How fast should the inference be? Violent contents should be removed immediately while others can be removed later</li>
       </ul>
     </ul>
   </div>
@@ -124,7 +120,7 @@
           <li>Separate training data is needed for each model</li>
           <li>Combination of modalities might be harmful even though each is benign</li>
         </ul>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection1.png" alt="Card image cap">
+        <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-1/harmful-content-detection1.png" alt="Card image cap">
         <li>Option 2. early fusion</li>
         <ul>
           <li>Single model to train, so there is no need to separate training dataset</li>
@@ -134,7 +130,7 @@
           </ul>
           <li>Model needs to learn complex relationship between modalities, requiring large set of data</li>
         </ul>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection2.png" alt="Card image cap">
+        <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-1/harmful-content-detection2.png" alt="Card image cap">
       </ul>
       <li>Classifier</li>
       <ul>
@@ -143,17 +139,17 @@
           <li>Difficult to tell users why the post is considered harmful</li>
           <li>Difficult to determine what kind of harmful content the post contains</li>
         </ul>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection3.png" alt="Card image cap">
+        <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-1/harmful-content-detection3.png" alt="Card image cap">
         <li>Option 2. one binary classifier per harmful class</li>
         <ul>
           <li>Multiple models must be trained separately</li>
         </ul>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection4.png" alt="Card image cap">
+        <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-1/harmful-content-detection4.png" alt="Card image cap">
         <li>Option 3. multi-label classifier</li>
         <ul>
           <li>Each input feature may need to be transformed differently</li>
         </ul>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection5.png" alt="Card image cap">
+        <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-1/harmful-content-detection5.png" alt="Card image cap">
         <li>Option 4. multi-task classifier</li>
         <ul>
           <li>Shared layers - transform input features into new ones</li>
@@ -162,9 +158,9 @@
           <li>Shared layers transform features so that they are beneficial for each task. This prevents redundant computations</li>
           <li>Training data for each task contributes to learning other tasks</li>
         </ul>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection6.png" alt="Card image cap">
+        <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-1/harmful-content-detection6.png" alt="Card image cap">
         <li>Final design (early fusion + multi-task classifier)</li>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection7.png" alt="Card image cap">
+        <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-1/harmful-content-detection7.png" alt="Card image cap">
       </ul>
     </ul>
   </div>
@@ -199,6 +195,10 @@
           <li>id</li>
           <li>username</li>
           <li>email</li>
+          <li>age</li>
+          <li>gender</li>
+          <li>city</li>
+          <li>country</li>
         </ul>
         <li>Posts</li>
         <ul>
@@ -207,12 +207,14 @@
           <li>textual_content</li>
           <li>image_path</li>
           <li>video_path</li>
+          <li>timestamp</li>
         </ul>
         <li>User-post interations</li>
         <ul>
           <li>user_id</li>
           <li>post_id</li>
           <li>interaction_type - impression, like, comment, share, report</li>
+          <li>timestamp</li>
         </ul>
       </ul>
     </ul>
@@ -247,7 +249,7 @@
       <li>User interation to the post</li>
       <ul>
         <li>Number of likes, shares, comments, reports - scale these values to speed up convergence during training</li>
-        <li>Comments</li>
+        <li>Comments - use pre-trained model to find embedding of each comment, then aggregate</li>
       </ul>
       <li>Author features</li>
       <ul>
@@ -271,10 +273,10 @@
       </ul>
       <li>Contextual information</li>
       <ul>
-        <li>Time of day - use one-hot encoding</li>
+        <li>Time of day - bucketize + one-hot encoding</li>
         <li>Device - use one-hot encoding</li>
       </ul>
-      <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection8.png" alt="Card image cap">
+      <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-1/harmful-content-detection8.png" alt="Card image cap">
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -297,11 +299,21 @@
       <ul>
         <li>In multi-task training, each task is assigned a loss function based on its ML category</li>
         <li>Since each task is binary classification, cross-entropy is used for each task</li>
+        <li>Overall loss is computed by combining task-specific losses</li>
+        <ul>
+          <li>\( \text{Loss} = L_{1} + L_{2} + \dots L_{n} \)</li>
+        </ul>
+        <li>In multimodal systems, overfitting is likely</li>
+        <ul>
+          <li>Gradient blending or focal loss is used to deal with overfitting</li>
+        </ul>
       </ul>
-      <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection9.png" alt="Card image cap">
+      <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-1/harmful-content-detection9.png" alt="Card image cap">
       <li>Hyperparameters</li>
       <ul>
-        <li>Grid search</li>
+        <li>Number of hidden layers</li>
+        <li>Activation function</li>
+        <li>Learning rate</li>
       </ul>
     </ul>
   </div>
@@ -367,9 +379,7 @@
   <div class="card-body">
     <h2 class="card-title">Serving</h2>
 
-    <h3 class="card-title">Components</h3>
-
-    <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/harmful-content-detection10.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-1/harmful-content-detection10.png" alt="Card image cap">
 
     <ul>
       <li>Harmful content detection service</li>
@@ -379,19 +389,12 @@
       <li>Violation enforcement service</li>
       <ul>
         <li>Immediately takes down posts</li>
-      <li>Notifies users why the post is taken down</li>
+        <li>Notifies users why the post is taken down</li>
       </ul>
       <li>Demotion service</li>
       <ul>
         <li>Temporarily demotes posts to be reviewd by human</li>
       </ul>
-    </ul>
-
-    <h3 class="card-title">Workflow</h3>
-    <ul>
-      <li>User creates a post in the application</li>
-      <li>Post enters harmful content detection service</li>
-      <li>If post is determined as harmful, it is either taken down or gets demoted for manual review</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
