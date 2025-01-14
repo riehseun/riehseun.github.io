@@ -158,23 +158,29 @@
       </ul>
       <li>Multi-head attention</li>
       <ul>
-        <li>Represent the input</li>
+        <li>Each word is represented by vector of \( 512 \) dimension</li>
+        <li>Ex. The cat sat on the rug and it was dry-cleaned</li>
+        <li>Model is trained to find if "it" is related to "cat" or "rug"</li>
+        <li>There are \( 8 \) heads whose dimension is \( 64 \)</li>
+        <li>In each head, weight matrices whose dimension is \( 512 \times 64 \) must be trained</li>
         <ul>
-          <li>Assume \( 3 \) input tokens</li>
-          <li>\( d_{\text{model}} = 512 \), but for simplicity, assume \( d_{\text{model}} = 4 \)</li>
+          <li>\( W_{Q} \) - train the queries</li>
+          <li>\( W_{K} \) - train the keys</li>
+          <li>\( W_{V} \) - train the values</li>
+        </ul>
+        <li>Example</li>
+        <ul>
+          <li>Represent the input</li>
+          <ul>
+            <li>Assume \( 3 \) input tokens (or words)</li>
+            <li>Assume \( d_{\text{model}} = 4 \)</li>
 <pre><code class="python">X = np.array([[1.0, 0.0, 1.0, 0.0],   # Input token 1
               [0.0, 2.0, 0.0, 2.0],   # Input token 2
               [1.0, 1.0, 1.0, 1.0]])  # Input token 3</code></pre>
-        </ul>
-        <li>Initialize the weight matrices</li>
-        <ul>
-          <li>Each input token has three weight matrices</li>
-          <ul>
-            <li>\( W_{Q} \) - train the queries</li>
-            <li>\( W_{K} \) - train the keys</li>
-            <li>\( W_{V} \) - train the values</li>
           </ul>
-          <li>\( d_{k} = 64 \), but for simplicity, assume \( d_{k} = 3 \)</li>
+          <li>Initialize the weight matrices</li>
+          <ul>
+            <li>Assume \( d_{k} = 3 \)</li>
 <pre><code class="python">W_query = np.array([[1, 0, 1],
                     [1, 0, 0],
                     [0, 0, 1],
@@ -187,30 +193,31 @@ W_value = np.array([[0, 2, 0],
                     [0, 3, 0],
                     [1, 0, 3],
                     [1, 1, 0]])</code></pre>
-        </ul>
-        <li>Compute \( Q, K, V \)</li>
-        <ul>
-          <li>Assume there is one set of \( W_{Q}, W_{K}, W_{V} \) for all inputs</li>
+          </ul>
+          <li>Compute \( Q, K, V \)</li>
+          <ul>
+            <li>Assume there is one set of \( W_{Q}, W_{K}, W_{V} \) for all inputs</li>
 <pre><code class="python">Q = np.matmul(X, W_query)
 K = np.matmul(X, W_key)
 V = np.matmul(X, W_value)</code></pre>
-        </ul>
-        <li>Compute attention score</li>
-        <ul>
-          <li>\( \text{Attention}(Q,K,V) = \text{softmax} \left( \dfrac{QK^{T}}{\sqrt{d_{k}}} \right) V \)</li>
+          </ul>
+          <li>Compute attention score</li>
+          <ul>
+            <li>\( \text{Attention}(Q,K,V) = \text{softmax} \left( \dfrac{QK^{T}}{\sqrt{d_{k}}} \right) V \)</li>
 <pre><code class="python">d_k = 1   # Square root of k_d simplified to 1 for this example
 attention_scores = (Q@K.transpose()) / d_k</code></pre>
-          <li>Softmax score for each input token</li>
+            <li>Softmax score for each input token</li>
 <pre><code class="python">attention_scores[0] = softmax(attention_scores[0])
 attention_scores[1] = softmax(attention_scores[1])
 attention_scores[2] = softmax(attention_scores[2])</code></pre>
-          <li>Attention for each input token</li>
+            <li>Attention for each input token</li>
 <pre><code class="python">attention1 = attention_scores[0].reshape(-1,1)
 attention1 = attention_scores[0][0] * V[0]
 attention2 = attention_scores[0][1] * V[1]
 attention3 = attention_scores[0][2] * V[2]</code></pre>
-          <li>Sum up the result</li>
+            <li>Sum up the result</li>
 <pre><code class="python">attention_input1 = attention1 + attention2 + attention3</code></pre>
+          </ul>
         </ul>
       </ul>
       <li>Post-layer normalization</li>
@@ -222,7 +229,7 @@ attention3 = attention_scores[0][2] * V[2]</code></pre>
         </ul>
         <li>Normalization</li>
         <ul>
-          <li>\( \text{Normalization}(v) = \gamma \dfrac{v-\mu}{\sigma} \beta \)</li>
+          <li>\( \text{LayerNormalization}(v) = \gamma \dfrac{v-\mu}{\sigma} + \beta \)</li>
           <li>\( \mu \) is the mean of \( v \) of dimension \( d \)</li>
           <ul>
             <li>\( \mu = \dfrac{1}{d} \displaystyle\sum_{k=1}^{d} v_{k} \)</li>
