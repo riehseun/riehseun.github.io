@@ -303,7 +303,8 @@
         <ul>
           <li>Replicate each web server, cache, DB</li>
           <ul>
-            <li>DB - since the system is read-heavy, go for single-master replication</li>
+            <li>DB - if the system is read-heavy, go for single-master replication</li>
+            <li>DB - if the system is write-heavy, go for leaderless replication</li>
           </ul>
           <li>Replicate entire system to different zone or geographical region</li>
           <ul>
@@ -336,11 +337,12 @@
       <ul>
         <li>Horizontal scaling</li>
         <ul>
-          <li>Web servers, cache</li>
+          <li>All compute components like web servers, cache</li>
         </ul>
         <li>Data partitioning</li>
         <ul>
           <li>Horizontal partitioning or sharding since the system is less concerned about atomic operation</li>
+          <li>Create unique ID Using UUID generator</li>
           <li>Use consistent hashing to spread data evenly to different data nodes</li>
         </ul>
       </ul>
@@ -350,15 +352,14 @@
         <ul>
           <li>Load balancer should distribute load amongst horizontally scaled servers and caches</li>
           <li>DB is paritioned to scale to handle the load</li>
+          <li>Horizontal scaling of compute conponents</li>
         </ul>
         <li>Cache improves the performance of redirection</li>
-        <li>MongoDB has low latency and high throughput</li>
       </ul>
       <li>Consistency</li>
       <ul>
-        <li>Inconsistency can happen when user updates short url but update is not synced to all data nodes</li>
-        <li>Impact is that users are redirected to wrong original URLs</li>
-        <li>The impact is not too catastrophic, thus eventual consistency suffice</li>
+        <li>Inconsistency can happen when write is not synced to all data nodes</li>
+        <li>If the impact is not too catastrophic, eventual consistency is okay</li>
       </ul>
     </ul>
   </div>
