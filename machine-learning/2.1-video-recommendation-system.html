@@ -148,6 +148,7 @@
         <li>Option 3. hybrid filtering</li>
         <ul>
           <li>Use collaborative filtering first, followed by content-based filtering</li>
+          <li>Best option</li>
         </ul>
       </ul>
     </ul>
@@ -201,6 +202,7 @@
           <li>user_id</li>
           <li>video_id</li>
           <li>interaction_type - like, impression, watch, search, comment</li>
+          <li>timestamp</li>
         </ul>
       </ul>
     </ul>
@@ -224,7 +226,7 @@
           <li>gender - one-hot encoding</li>
           <li>language - embedding</li>
           <li>city - embedding</li>
-          <li>country- embedding</li>
+          <li>country - embedding</li>
         </ul>
         <li>Contextual information</li>
         <ul>
@@ -234,10 +236,10 @@
         </ul>
         <li>User-historical interactions</li>
         <ul>
-          <li>search_history - BERT</li>
-          <li>liked_videos - embedding layer</li>
-          <li>watched_videos - embedding layer</li>
-          <li>impressions - embedding layer</li>
+          <li>search_history - BERT to map each search query to embedding vector. Average the query embeddings to get a fixed-sized feature vector</li>
+          <li>liked_videos - embedding layer to map video_ids to embedding vector</li>
+          <li>watched_videos - embedding layer (Similar to liked_videos)</li>
+          <li>impressions - embedding layer (Similar to liked_videos)</li>
         </ul>
       </ul>
     </ul>
@@ -383,6 +385,7 @@
       <li>Diversity</li>
       <ul>
         <li>How dissimilar recommended videos are to each other</li>
+        <li>Calculate average pairwise similarity (Ex. cosine similarity or dot product) between videos outputed by the model</li>
       </ul>
     </ul>
 
@@ -391,12 +394,7 @@
       <li>Click-through rate</li>
       <li>The number of completed videos</li>
       <li>Total watch time</li>
-      <li>Explicit user feedback</li>
-    </ul>
-
-    <h3 class="card-title">Business</h3>
-    <ul>
-      <li>Revenue lift from video service</li>
+      <li>Explicit user feedback - for example, user likes and dislikes</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -408,16 +406,14 @@
   <div class="card-body">
     <h2 class="card-title">Serving</h2>
 
-    <h3 class="card-title">Components</h3>
-
-    <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/video-recommendation-system1.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-1/video-recommendation-system1.png" alt="Card image cap">
 
     <ul>
       <li>Candidate generation</li>
       <ul>
         <li>Narrow down videos from billions to thousands</li>
         <li>Use model that does not rely on video feature for efficiency</li>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/video-recommendation-system2.png" alt="Card image cap">
+        <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-1/video-recommendation-system2.png" alt="Card image cap">
         <li>Two-tower neural network without video features (collaborative filtering) can be used to capture relevant videos</li>
         <li>Use additional candidate generations to capture popular and trending videos</li>
         <li>Then use content-based filtering to further narrow down the videos</li>
@@ -426,23 +422,12 @@
       <ul>
         <li>Takes user and candidate videos as input, scores each video, and outputs a ranked list of videos</li>
         <li>Accuracy is more important than efficiency</li>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/video-recommendation-system3.png" alt="Card image cap">
+        <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-1/video-recommendation-system3.png" alt="Card image cap">
         <li>Two-tower neural network using both user and video features can be used</li>
       </ul>
       <li>Re-ranking</li>
       <ul>
         <li>Filter out certain videos like misinformation, clickbait, violence, nudity, hates</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Workflow</h3>
-    <ul>
-      <li>Video</li>
-      <ul>
-        <li>Relevant videos are gathered based on historical user interaction with the videos</li>
-        <li>Popular and trending videos are added to the set of relevant vidoes</li>
-        <li>The set of videos are narrowed down based on video features</li>
-        <li>Narrowed set of videos are scored based on both user and video features</li>
       </ul>
     </ul>
   </div>
