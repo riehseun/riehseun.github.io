@@ -560,7 +560,7 @@
 
 <div class="card mb-4" id="graph-bfs">
   <div class="card-body">
-    <h2 class="card-title">Shortest Path in Binary Matrix (M) (F) !</h2>
+    <h2 class="card-title">Shortest Path in Binary Matrix (M) (F) #</h2>
 
 <pre><code class="python">class Solution:
     def shortestPathBinaryMatrix(self, grid: List[List[int]]) -> int:
@@ -571,39 +571,40 @@
             return -1
 
         graph = defaultdict(set)
+        directions = [
+            (-1, -1), 
+            (-1, 0), 
+            (-1, 1), 
+            (0, -1), 
+            (0, 1), 
+            (1, -1), 
+            (1, 0), 
+            (1, 1)
+        ]
 
-        # Time O(n) n = number of elements in grid
+        # Time O(n) 
+        #   n = number of elements in grid
         # Space O(n)
         for i in range(len(grid)):
             for j in range(len(grid[0])):
                 if grid[i][j] == 0:
-                    if i-1 >=0 and j-1 >= 0:
-                        graph[(i,j)].add((i-1,j-1))
-                    if i-1 >= 0:
-                        graph[(i,j)].add((i-1,j))
-                    if i-1 >= 0 and j+1 < len(grid[0]):
-                        graph[(i,j)].add((i-1,j+1))
-                    if j+1 < len(grid[0]):
-                        graph[(i,j)].add((i,j+1))
-                    if i+1 < len(grid) and j+1 < len(grid[0]):
-                        graph[(i,j)].add((i+1,j+1))
-                    if i+1 < len(grid):
-                        graph[(i,j)].add((i+1,j))
-                    if i+1 < len(grid) and j-1 >= 0:
-                        graph[(i,j)].add((i+1,j-1))
-                    if j-1 >= 0:
-                        graph[(i,j)].add((i,j-1))
+                    for row, col in directions:
+                        if 0 <= row + i < len(grid) \
+                            and 0 <= col + j < len(grid):
+                            graph[(i,j)].add((row+i,col+j))
 
         if not graph:
             return 1
-
-        # Time O(n+m) m = number of edges
+  
+        # Time O(n) 
+        #   There can be maxinum of 8 edges for each node
+        #   Thus, number of edges is constant
         # Space O(n)
         def bfs(graph, start, end):
 
             explored = set()
             explored.add(start)
-
+            
             queue = deque()
             queue.append((start, 0))
 
@@ -619,7 +620,7 @@
                         queue.append((next_node, depth+1))
 
             return -1
-
+        
         return bfs(graph, (0,0), (len(grid)-1, len(grid[0])-1))</code></pre>
   </div>
   <div class="card-footer text-muted">
