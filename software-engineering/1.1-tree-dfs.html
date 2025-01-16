@@ -1290,7 +1290,7 @@ class Solution:
 
 <div class="card mb-4" id="tree-dfs">
   <div class="card-body">
-    <h2 class="card-title">Range sum of bst (E) (F) !</h2>
+    <h2 class="card-title">Range sum of bst (E) (F) #</h2>
 
 <pre><code class="python"># Definition for a binary tree node.
 # class TreeNode:
@@ -1301,28 +1301,29 @@ class Solution:
 class Solution:
     def rangeSumBST(self, root: Optional[TreeNode], low: int, high: int) -> int:
 
-        # Get all nodes first
-        # Then, find numbers within the range
+        # Pre order traversal
+        # Add node value only if it is in the range
+        # Traverse to left only if node value > low
+        # Traverse to right only if node value < high 
 
-        self.nodes = []
+        self.result = 0
 
-        # Time O(n) where n is number of nodes
+        # Time O(n)
+        #   n = number of nodes
         # Space O(n)
-        def pre_order(root):
+        def pre_order(root, low, high):
 
             if root:
-                self.nodes.append(root.val)
-                pre_order(root.left)
-                pre_order(root.right)
+                if low <= root.val <= high:
+                    self.result += root.val
+                if root.val > low:
+                    pre_order(root.left, low, high)
+                if root.val < high:
+                    pre_order(root.right, low, high)
 
-        pre_order(root)
+        pre_order(root, low, high)
 
-        range_sum = 0
-        for node in self.nodes:
-            if node >= low and node <= high:
-                range_sum += node
-
-        return range_sum</code></pre>
+        return self.result</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/range-sum-of-bst">938. Range Sum of BST</a>
