@@ -63,8 +63,8 @@
       <ul>
         <li>What is the business objective? Maximize revenue</li>
         <li>Where are the Ads placed? (pop up, timeline, etc?) Timeline only</li>
-        <li>Can the same Ad be shown to the same user more than once? Yes</li>
         <li>Does every Ad generate the same revenue? Yes</li>
+        <li>Can the same Ad be shown to the same user more than once? Yes</li>
       </ul>
       <li>System features</li>
       <ul>
@@ -81,14 +81,7 @@
         <li>Should the model be trained continuously? Yes</li>
       </ul>
       <li>Scale</li>
-      <ul>
-        <li>How many active users are there on platform? 1M per day</li>
-        <li>How many events are there on platform? 1M per month</li>
-      </ul>
       <li>Performance</li>
-      <ul>
-        <li>Is accuracy or latency more important? Both</li>
-      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -115,7 +108,10 @@
 
     <h3 class="card-title">ML category</h3>
     <ul>
-      <li>Supervised, learning to rank (LTR), pointwise LTR with binary classification</li>
+      <li>Supervised, recommendation system, learning to rank (LTR)</li>
+      <ul>
+        <li>Pointwise LTR with binary classification</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -148,12 +144,11 @@
         <ul>
           <li>user_id</li>
           <li>username</li>
+          <li>email</li>
           <li>age</li>
           <li>gender</li>
           <li>city</li>
           <li>country</li>
-          <li>language</li>
-          <li>timezone</li>
         </ul>
         <li>User-ad interation</li>
         <ul>
@@ -161,6 +156,7 @@
           <li>ad_id</li>
           <li>interaction_type - impression, click, conversion</li>
           <li>dwell_time</li>
+          <li>timestamp</li>
         </ul>
       </ul>
     </ul>
@@ -170,8 +166,8 @@
       <li>Ad</li>
       <ul>
         <li>Advertiser id - embedding</li>
-        <li>Category - CBOW</li>
         <li>Image and video - SimCLR</li>
+        <li>Category - CBOW</li>
         <li>Total impressions or clicks on the Ad</li>
         <li>Total impressions or clicks on the Ad supplied by an advertiser</li>
       </ul>
@@ -251,7 +247,9 @@
       </ul>
       <li>Option 4. GBDT + LR</li>
       <ul>
-        <li>Use GBDT just to select features and also extract features</li>
+        <li>Use GBDT to select features</li>
+        <li>Use GBDT to extract features (reduce number of features by creating new features from existing ones) </li>
+        <li>Use these features for LR</li>
         <li>Pros</li>
         <ul>
           <li>Extracted features are more predictive</li>
@@ -265,11 +263,7 @@
       <li>Option 5. neural network</li>
       <ul>
         <li>Single NN - NN takes original features as input and outputs the click probability</li>
-        <li>Two-tower NN - user encoder and Ad encoder are used. Similarity between user and Ad mbeddings is used to determine relevance</li>
-        <li>Pros</li>
-        <ul>
-          <li></li>
-        </ul>
+        <li>Two-tower NN - user encoder and Ad encoder are used. Similarity between user and Ad embeddings is used to determine relevance</li>
         <li>Cons</li>
         <ul>
           <li>Because feature space is usually sparse, most features are filled with zeros</li>
@@ -293,11 +287,11 @@
       <li>Option 7. factorization machines (FM)</li>
       <ul>
         <li>Learn embedding vector for each feature to find all pairwise feature interactions</li>
-        <li>\( \hat{y}(x) = w_{0} + \displaystyle\sum_{i} w_{i}x_{i} + \displaystyle\sum_{i}\displaystyle\sum_{j} &lt;v_{i}, v_{j}&gt; x_{i}x_{j} \)</li>
+        <li>\( \hat{y}(x) = \underbrace{w_{0} + \displaystyle\sum_{i} w_{i}x_{i}}_{\text{logistic regression}} + \underbrace{\displaystyle\sum_{i}\displaystyle\sum_{j} &lt;v_{i}, v_{j}&gt; x_{i}x_{j}}_{\text{pairwise interactions}} \)</li>
         <ul>
-          <li>\( x_{i} \) - ith feature</li>
+          <li>\( x_{i} \) - \( i \)th feature</li>
           <li>\( w_{i} \) - learned weight</li>
-          <li>\( v_{i} \) - embedding of ith feature</li>
+          <li>\( v_{i} \) - embedding of \( i \)th feature</li>
           <li>\( &lt;v_{i}, v_{j}&gt; \) - dot product between two embeddings</li>
         </ul>
         <li>Pros</li>
@@ -313,13 +307,14 @@
       <ul>
         <li>DNN captures sophisticated higher-order features</li>
         <li>FM captures low-level pairwise feature interactions</li>
-        <li>Pros</li>
-        <ul>
-          <li></li>
-        </ul>
+      </ul>
+      <li>Option 9. GBDT + DeepFM</li>
+      <ul>
+        <li>Use GBDT to select arnd extract features</li>
+        <li>Use those features for DeepFM</li>
         <li>Cons</li>
         <ul>
-          <li></li>
+          <li>Slow training and inference</li>
         </ul>
       </ul>
     </ul>
@@ -392,10 +387,9 @@
         <li>\( \dfrac{\text{Total number of conversions}}{\text{Total number of impressions}} \)</li>
       </ul>
       <li>Hide rate</li>
-    </ul>
-
-    <h3 class="card-title">Business</h3>
-    <ul>
+      <ul>
+        <li>\( \dfrac{\text{Number of Ads hidden by users}}{\text{Number of shown Ads}} \)</li>
+      </ul>
       <li>Revenue lift</li>
     </ul>
   </div>
@@ -408,9 +402,7 @@
   <div class="card-body">
     <h2 class="card-title">Serving</h2>
 
-    <h3 class="card-title">Components</h3>
-
-    <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/ad-click-prediction-on-social-platform1.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-1/ad-click-prediction-on-social-platform1.png" alt="Card image cap">
 
     <ul>
       <li>Data preparation pipeline</li>
