@@ -64,27 +64,19 @@
         <li>What is the business objective? Increase number of bookings</li>
         <li>What is definition of similarity? When two listings are in same neighborhood, city, price range, etc</li>
         <li>Should the listing be personalized to users? No</li>
+        <li>When does new listings appear in recommendation list? One day after being posted</li>
       </ul>
       <li>Features that the system supports</li>
-      <ul>
-        <li></li>
-      </ul>
       <li>Data</li>
       <ul>
         <li>Do we have training data available? No, only user-listing interaction data is available</li>
       </ul>
       <li>Constraints</li>
-      <ul>
-        <li></li>
-      </ul>
       <li>Scale</li>
       <ul>
         <li>How many listings are there in the platform? 5M</li>
       </ul>
       <li>Performance</li>
-      <ul>
-        <li></li>
-      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -151,7 +143,9 @@
           <li>listing_id</li>
           <li>host_id</li>
           <li>price</li>
+          <li>sqft</li>
           <li>rating</li>
+          <li>type</li>
           <li>city</li>
           <li>country</li>
         </ul>
@@ -163,7 +157,6 @@
           <li>gender</li>
           <li>city</li>
           <li>country</li>
-          <li>language</li>
           <li>timezone</li>
         </ul>
         <li>User-listing interation</li>
@@ -199,7 +192,7 @@
 
     <h3 class="card-title">Model selection</h3>
     <ul>
-      <li>Neural network to learn embeddings</li>
+      <li>Shallow neural network to learn embeddings</li>
       <li>Initialize embeddings to random vectors</li>
       <li>As sliding window moves, embeddings of central listing become close to embedding of nearby listings and far from embeddings of listings outside the window</li>
     </ul>
@@ -212,11 +205,12 @@
         <li>First term computes loss over positive pairs</li>
         <li>Second term computes loss over negative pairs</li>
         <li>Third term helps push embeddings of central listing closer to embeddings of eventually booked listings</li>
-        <li>Third term helps push embeddings of central listing away from embeddings of random listings</li>
+        <li>Fourth term helps push embeddings of central listing away from embeddings of random listings</li>
         <li>\( c \) - central listing</li>
         <li>\( p \) - positive listing (co-occured with \( c \))</li>
         <li>\( n \) - negative listing (did not co-occur with \( c \))</li>
         <li>\( b \) - eventually booked listing</li>
+        <li>\( D_{\text{booked}} \) - pair of contral and booked listng</li>
         <li>\( D_{\text{hard}} \) - pair of contral and negative listng (that are from the same region as the central listing)</li>
       </ul>
       <li>Hyperparameters</li>
@@ -243,14 +237,8 @@
 
     <h3 class="card-title">Online</h3>
     <ul>
-      <li>Click-through rate = total number of clicked Ads / total number of shown Ads</li>
-      <li>Conversion rate = total number of conversions / total number of impressions</li>
-      <li>Hide rate</li>
-    </ul>
-
-    <h3 class="card-title">Online</h3>
-    <ul>
-      <li>Revenue lift</li>
+      <li>Click-through rate = \( \dfrac{\text{total number of clicked listings}}{\text{Number of recommended listings}} \)</li>
+      <li>Session book rate = \( \dfrac{\text{Number of sessions turned into booking}}{\text{Total number of sessions}} \)</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -262,9 +250,7 @@
   <div class="card-body">
     <h2 class="card-title">Serving</h2>
 
-    <h3 class="card-title">Components</h3>
-
-    <img class="img-fluid" class="card-img-top" src="/machine-learning/machine-learning-system-design/similar-listings-on-vacation-rental-platform1.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-1/similar-listings-on-vacation-rental-platform1.png" alt="Card image cap">
 
     <ul>
       <li>Training pipeline</li>
@@ -292,18 +278,6 @@
           <li>Apply user filters (Ex. price, etc) to remove listings</li>
           <li>Listings in cities other than currently viewed listing can also be removed</li>
         </ul>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Workflow</h3>
-    <ul>
-      <li>User-listing interaction</li>
-      <ul>
-        <li>Used to retrain the model</li>
-      </ul>
-      <li>Listing</li>
-      <ul>
-        <li>Its embedding is computed by the model and stored in index table</li>
       </ul>
     </ul>
   </div>
