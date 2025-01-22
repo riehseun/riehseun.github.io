@@ -240,9 +240,54 @@
 
 <div class="card mb-4" id="sort">
   <div class="card-body">
-    <h2 class="card-title">Top K frequent elements (M) (F/A) !!</h2>
+    <h2 class="card-title">Top K frequent elements (M) (F/A) #!</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+
+        # Quickselect
+        # Partition
+        #   Frequencies greater than pivot should be on left side
+        #   Frequencies less than pivot should be on right side
+        # If k < p, search on left side
+        # If k > p, search on right side
+        # If k == p, return value at pivot
+
+        # Time O(n)
+        #   n = len(nums)
+        # Space O(n)
+        nums_dict = defaultdict(int)
+        for num in nums:
+            nums_dict[num] += 1
+
+        nums_arr = list(nums_dict.keys())
+        
+        # Time O(n) on average
+        # Space O(1)
+        def quickselect(nums_dict, nums_arr, l, r):
+
+            p = partition(nums_dict, nums_arr, l, r)
+            if k-1 < p:
+                return quickselect(nums_dict, nums_arr, l, p-1)
+            elif k-1 > p:
+                return quickselect(nums_dict, nums_arr, p+1, r)
+            else:
+                return nums_arr[:p+1]
+
+        def partition(nums_dict, nums_arr, l, r):
+
+            p = random.randint(l, r)
+            
+            for i in range(l, r+1):
+                if nums_dict[nums_arr[i]] > nums_dict[nums_arr[p]] and i > p:
+                    nums_arr[i], nums_arr[p] = nums_arr[p], nums_arr[i]
+                if nums_dict[nums_arr[i]] < nums_dict[nums_arr[p]] and i < p:
+                    nums_arr[i], nums_arr[p] = nums_arr[p], nums_arr[i]
+                p = i
+
+            return p
+                
+        return quickselect(nums_dict, nums_arr, 0, len(nums_arr)-1)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/top-k-frequent-elements">347. Top K Frequent Elements</a>
