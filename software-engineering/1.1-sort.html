@@ -412,7 +412,47 @@
   <div class="card-body">
     <h2 class="card-title">K closest points to origin (M) (F) !</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def kClosest(self, points: List[List[int]], k: int) -> List[List[int]]:
+
+        # Quickselect
+        # Partition
+        #   Distances less than pivot should be on left side
+        #   Distances greater than pivot should be on right side
+        # If k < p, search on left side
+        # If k > p, search on right side
+        # If k == p, return value at pivot
+
+        # Time O(n) on average 
+        #   n = len(points)
+        # Space O(1)
+        def quickselect(points, l, r):
+
+            p = partition(points, l, r)
+            if k-1 < p:
+                return quickselect(points, l, p-1)
+            elif k-1 > p:
+                return quickselect(points, p+1, r)
+            else:
+                return points[:p+1]
+
+        def partition(points, l, r):
+
+            p = random.randint(l, r)
+            
+            for i in range(l, r+1):
+                if dist(points[i]) < dist(points[p]) and i > p:
+                    points[i], points[p] = points[p], points[i]
+                if dist(points[i]) > dist(points[p]) and i < p:
+                    points[i], points[p] = points[p], points[i]
+                p = i
+
+            return p
+
+        def dist(point):
+            return point[0]**2+point[1]**2
+                
+        return quickselect(points, 0, len(points)-1)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/k-closest-points-to-origin">973. K Closest Points to Origin</a>
