@@ -243,6 +243,7 @@
           <li>video_id</li>
           <li>interaction_type - like, impression, watch, search, comment</li>
           <li>timestamp</li>
+          <li>position_of_video_in_displayed_list</li>
         </ul>
         <li>Friendship</li>
         <ul>
@@ -257,21 +258,26 @@
     <ul>
       <li>User</li>
       <ul>
-        <li>User ID - embedding since the dimension is sparse</li>
-        <li>Username - can't use due to dependecy with user ID</li>
-        <li>Email -  can't use due to dependecy with user ID</li>
-        <li>City - embedding</li>
-        <li>Country - embedding</li>
-        <li>Age - can't use due to bias and fairness concern</li>
-        <li>Gender - can't use due to bias and fairness concern</li>
-        <li>Clicked ADs' IDs - embedding</li>
-        <li>Time of day - bucketize + one-hot since the dimension is not sparse</li>
-        <li>Device - bucketize + one-hot</li>
+        <li>Demographics</li>
+        <ul>
+          <li>User ID - embedding since the dimension is sparse</li>
+          <li>Username - can't use due to dependecy with user ID</li>
+          <li>Email -  can't use due to dependecy with user ID</li>
+          <li>City - embedding</li>
+          <li>Country - embedding</li>
+          <li>Age - can't use due to bias and fairness concern</li>
+          <li>Gender - can't use due to bias and fairness concern</li>
+        </ul>
+        <li>Context</li>
+        <ul>
+          <li>day_of_week - embedding</li>
+          <li>time_of_day - bucketize + one-hot</li>
+          <li>device - one-hot</li>
+        </ul>
       </ul>
-      <li>AD</li>
+      <li>Post</li>
       <ul>
-        <li>AD ID - embedding since the dimension is sparse</li>
-        <li>Category - CBOW since we don't need to know the context of each word</li>
+        <li>Post ID - embedding since the dimension is sparse</li>
         <li>Description</li>
         <ul>
           <li>Preprocessing</li>
@@ -302,14 +308,81 @@
           </ul>
         </ul>
         <li>Video</li>
+        <ul>
+          <li>Clip</li>
+        </ul>
         <li>Tag</li>
         <ul>
           <li>Use Viterbi to tokenzie hashtags into different words</li>
           <li>Use feature hashing to convert words to Ids</li>
           <li>Use TF-IDF or word2vec to vectorize tags</li>
         </ul>
-        <li>Total number of impressions - scale</li>
-        <li>Total number of clicks - scale</li>
+        <li>Post's age - bucketize + one-hot</li>
+      </ul>
+      <li>AD</li>
+      <ul>
+        <li>Advertiser id - embedding</li>
+        <li>Image and video - SimCLR</li>
+        <li>Category - CBOW</li>
+        <li>Total impressions or clicks on the Ad</li>
+        <li>Total impressions or clicks on the Ad supplied by an advertiser</li>
+      </ul>
+      <li>Video</li>
+      <ul>
+        <li>video_id - categorical data, embedding</li>
+        <li>length</li>
+        <li>language - categorical data, embedding</li>
+        <li>manual_tags - CBOW for each tag and aggregate</li>
+        <li>title - BERT</li>
+      </ul>
+      <li>Author</li>
+      <ul>
+        <li>Author's violation history</li>
+        <ul>
+          <li>Number of violations</li>
+          <li>Total user reports</li>
+          <li>Profane word rate</li>
+        </ul>
+        <li>Author's demographics</li>
+        <ul>
+          <li>Age</li>
+          <li>Gender - one-hot encoding</li>
+          <li>City and country - embedding</li>
+        </ul>
+        <li>Account information</li>
+        <ul>
+          <li>Number of followers and followings</li>
+          <li>Account age</li>
+        </ul>
+      </ul>
+      <li>User-post interaction</li>
+      <ul>
+        <li>View - scale</li>
+        <li>Like - scale</li>
+        <li>Comment - BERT</li>
+        <li>Share - scale</li>
+        <li>Hide - scale</li>
+        <li>Report - scale</li>
+      </ul>
+      <li>User-AD interaction</li>
+      <ul>
+        <li>Cliked Ads - embedding</li>
+        <li>User's historical engagement statistics - scale</li>
+      </ul>
+      <li>User-video interaction</li>
+      <ul>
+        <li>search_history - BERT to map each search query to embedding vector. Average the query embeddings to get a fixed-sized feature vector</li>
+        <li>liked_videos - embedding layer to map video_ids to embedding vector</li>
+        <li>watched_videos - embedding layer (Similar to liked_videos)</li>
+        <li>impressions - embedding layer (Similar to liked_videos)</li>
+      </ul>
+      <li>User-author interaction</li>
+      <ul>
+        <li>Duration at which user followed the author - scale</li>
+        <li>Duration at which author followed the user - scale</li>
+        <li>like/click/comment/share rate</li>
+        <li>length of friendship</li>
+        <li>close friends and family - binary value 0 or 1</li>
       </ul>
     </ul>
   </div>
