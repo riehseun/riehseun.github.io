@@ -460,30 +460,30 @@ class Solution:
 class Solution:
     def verticalTraversal(self, root: Optional[TreeNode]) -> List[List[int]]:
 
-        # Use BFS
-        # Use hash table to store nodes
-        #   Storing nodes as traversing guarantees vertical order
-        #   Use key in hash table to remember horizontal order
+        # BFS
+        # Storing node depth as guarantees vertical order
+        # Subtract 1 from column value for left child
+        # Add 1 to column value for right child
 
-        # Time O(nlogn) n = number of nodes
+        # Time O(nlogn) 
+        #   n = number of nodes
         # Space O(n)
 
         nodes = []
-
+        
         queue = deque()
         queue.append((root, 0, 0))
 
         while queue:
-            node, row, column = queue.popleft()
+            node, depth, column = queue.popleft()
 
             if node:
-                nodes.append((node.val, row, column))
-
-                queue.append((node.left, row+1, column-1))
-                queue.append((node.right, row+1, column+1))
+                nodes.append((node.val, depth, column))
+                queue.append((node.left, depth+1, column-1))
+                queue.append((node.right, depth+1, column+1))
 
         nodes.sort(key = lambda x: (x[2], x[1], x[0]))
-
+        
         result = []
         last_column = -math.inf
         group = []
