@@ -1141,7 +1141,7 @@ class Solution:
 
 <div class="card mb-4" id="tree-dfs">
   <div class="card-body">
-    <h2 class="card-title">Convert Binary Search Tree to Sorted Doubly Linked List (M) (F) !</h2>
+    <h2 class="card-title">Convert Binary Search Tree to Sorted Doubly Linked List (M) (F) #</h2>
 
 <pre><code class="python">"""
 # Definition for a Node.
@@ -1155,9 +1155,9 @@ class Node:
 class Solution:
     def treeToDoublyList(self, root: 'Optional[Node]') -> 'Optional[Node]':
 
-        # Do in-order traversal
+        # DFS in-order
         # Link nodes while traversing
-
+    
         if not root:
             return None
 
@@ -1165,27 +1165,33 @@ class Solution:
         self.first = None
         self.last = None
 
-        # Time O(n) n = number of nodes
-        # Space O(n) recursion stack of the size of tree height
-        def in_order(root):
+        # Time O(n) 
+        #   n = number of nodes
+        # Space O(h) 
+        #   recursion stack of tree height
+        def in_order(node):
+            
+            if node:
+                in_order(node.left)
 
-            if root:
-                in_order(root.left)
-
-                # Link two nodes
                 if self.last:
-                    self.last.right = root
-                    root.left = self.last
+                    self.last.right = node
+                    node.left = self.last
                 else:
-                    self.first = root
-                self.last = root
+                    # If no nodes existed, set current node 
+                    # as first node in linked list
+                    self.first = node
+                # Set current node as last node
+                self.last = node
 
-                in_order(root.right)
+                in_order(node.right)
 
         in_order(root)
-        self.last.right = self.first
+        # Connect head and tail to construct 
+        # circular linked list
         self.first.left = self.last
-
+        self.last.right = self.first
+        
         return self.first</code></pre>
   </div>
   <div class="card-footer text-muted">
