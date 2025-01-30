@@ -56,24 +56,35 @@
   <div class="card-body">
     <h2 class="card-title">Attention</h2>
     <ul>
-      <li>Unlike RNN where tokens are analyzed in sequence, attention relates every token to every other tokens in a sequence</li>
-      <li>Attention runs dot products between word vectors and find the strongest relationship of a word with all other words</li>
-      <li>\( X \) - input of dimension \( n \times  d_{model} \), a single word is represented by \( d_{model} \) vector and \( n \) represents the number of words</li>
-      <li>\( W_{Q} \) - weights to be trained of dimension \( d_{model} \times d_{k} \)</li>
-      <li>\( W_{K} \) - weights to be trained of dimension \( d_{model} \times d_{k} \)</li>
-      <li>\( W_{V} \) - weights to be trained of dimension \( d_{model} \times d_{k} \)</li>
-      <li>\( Q \) - \( X \times W_{Q} \), matrix where each query that has dimension \( n \times d_{k} \)</li>
-      <li>\( K \) - \( X \times W_{K} \), matrix where each key that has dimension \( n \times d_{k} \)</li>
-      <li>\( V \) - \( X \times W_{V} \), matrix where each value that has dimension \( n \times d_{v} \)</li>
+      <li>Unlike RNN where tokens are analyzed in sequence, attention <strong>relates every token to every other tokens</strong> in a sequence</li>
+      <li>Input sentence is represented as \( Q, K, V \) where these matrices are multipled to find relationship between all words to all words</li>
+      <ul>
+        <li>Value of diagonal element should be the highest since a word would stongly be related to itself</li>
+        <li>\( Q, K, V \) - dimension is \( n \times  d_{model} \), a word is represented by \( d_{model} \) vector, number of words in vocabulary is represented by \( n \)</li>
+      </ul>
       <li>\( \text{Attention}(Q,K,V) = \text{softmax} \left( \dfrac{QK^{T}}{\sqrt{d_{k}}} \right) V \)</li>
       <li>For large values of \( d_{k} \), dot product becomes big and softmax function can have very small gradient, so scale by \( \frac{1}{\sqrt{d_{k}}} \)</li>
     </ul>
 
     <h3 class="card-title">Multi-head attention</h3>
     <ul>
-      <li>Run attentions in parallel, instead of single attention with \( d_{model} \) dimensional queries, key, values</li>
-      <li>Divide \( d_{model} = 512 \) dimensions, into \( 8 \) of \( d_{model} = 64 \) dimensions for all input workds/tokens</li>
-      <li>\( \text{Multi-head attention}(Q,K,V) = \text{Concat}(\text{Attention}_{1} \dots \text{Attention}_{h}) \)</li>
+      <li>\( W_{Q} \) - parameter matrix whose dimension is \( d_{model} \times d_{model} \)</li>
+      <li>\( W_{K} \) - parameter matrix whose dimension is \( d_{model} \times d_{model} \)</li>
+      <li>\( W_{V} \) - parameter matrix whose dimension is \( d_{model} \times d_{model} \)</li>
+      <li>\( Q^{\prime} \) - \( Q \times W_{Q} \), matrix where each query that has dimension \( n \times d_{model} \)</li>
+      <li>\( K^{\prime} \) - \( K \times W_{K} \), matrix where each key that has dimension \( n \times d_{model} \)</li>
+      <li>\( V^{\prime} \) - \( V \times W_{V} \), matrix where each value that has dimension \( n \times d_{model} \)</li>
+      <li>\( Q^{\prime} \) is split into \( Q_{1} \dots Q_{8} \) where each head only sees smaller part of embedding of words</li>
+      <li>\( K^{\prime} \) is split into \( K_{1} \dots K_{8} \)</li>
+      <li>\( V^{\prime} \) is split into \( V_{1} \dots V_{8} \)</li>
+      <li>\( \text{head}_{1} \) is computed from \( Q_{1}, K_{1}, V_{1} \)</li>
+      <li>\( \text{Multi-head attention}(Q,K,V) = \text{Concat}(\text{head}_{1} \dots \text{head}_{h}) W_{O} \)</li>
+      <li>Each head watches different aspect of word</li>
+      <ul>
+        <li>A head may learn a word as noun</li>
+        <li>Another head may learn the same word as verb</li>
+        <li>Another head may learn the same word as adjective</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -129,10 +140,10 @@
       <ul>
         <li>Converts input tokens to vector of \( d_{\text{model}} = 512 \) dimension using learned embeddings</li>
         <ul>
-          <li>Tokenizer transforms a sentence into tokens</li>
+          <li>Tokenizer transforms a sentence into tokens (each token is a single word)</li>
           <ul>
             <li>Ex. text = "The cat slept on the couch.It was too tired to get up."</li>
-            <li>Ex. tokenized_text = [1996, 4937, 7771, 2006, 1996, 6411, 1012, 2009, 2001, 2205, 5458, 2000, 2131, 2039, 1012]</li>
+            <li>Ex. input_ids = [1996, 4937, 7771, 2006, 1996, 6411, 1012, 2009, 2001, 2205, 5458, 2000, 2131, 2039, 1012]</li>
           </ul>
           <li>An embedding method (Ex. skip gram) is used to convert each word to a vector of \( 512 \) numbers</li>
           <ul>
@@ -145,9 +156,16 @@
       <ul>
         <li>Considers position of a word in a sentence</li>
         <li>\( PE_{pos 2i} = \sin\left(\dfrac{pos}{10000^{\frac{2i}{d_{model}}}}\right) \)</li>
+        <ul>
+          <li>Applied to even position in the vector of \( d_{model} \)</li>
+        </ul>
         <li>\( PE_{pos 2i+1} = \cos\left(\dfrac{pos}{10000^{\frac{2i}{d_{model}}}}\right) \)</li>
+        <ul>
+          <li>Applied to odd position in the vector of \( d_{model} \)</li>
+        </ul>
         <li>Original authors added positional encoding to input embedding to produce final encoding</li>
         <li>To minimize loss of information of word embedding, we can multiply word embedding by \( \sqrt{\text{d_{model}}} \)</li>
+        <li>Positional encoding is computed once and re-used through the training</li>
 <pre><code class="python">def encoding(pos, positional_vector)
     for i in range(0, 512,2):
         val =  pos / (10000**((2*i)/d_model))
