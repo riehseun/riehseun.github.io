@@ -144,7 +144,7 @@
 
 <div class="card mb-4" id="graph-bfs-">
   <div class="card-body">
-    <h2 class="card-title">Clone graph (M) (F) !</h2>
+    <h2 class="card-title">Clone graph (M) (F) #</h2>
 
 <pre><code class="python">"""
 # Definition for a Node.
@@ -154,22 +154,26 @@ class Node:
         self.neighbors = neighbors if neighbors is not None else []
 """
 
-from typing import Optional
 class Solution:
     def cloneGraph(self, node: Optional['Node']) -> Optional['Node']:
 
-        # Do standard BFS
+        # BFS
+        # Construct "explored" as a dictionary
+        #   key is node object of original graph
+        #   value is node object of deep copy graph
 
         if not node:
             return node
-
-        explored = {}
-        explored[node] = Node(node.val)
-
+        
         queue = deque()
         queue.append(node)
 
-        # Time O(n+m) n = number of nodes, m = number of edges
+        explored = defaultdict(Node)
+        explored[node] = Node(node.val)
+
+        # Time O(n+m) 
+        #   n = number of nodes
+        #   m = number of edges
         # Space O(n)
         while queue:
 
@@ -179,9 +183,9 @@ class Solution:
                 if next_node not in explored:
                     explored[next_node] = Node(next_node.val)
                     queue.append(next_node)
-
+                
                 explored[n].neighbors.append(explored[next_node])
-
+                        
         return explored[node]</code></pre>
   </div>
   <div class="card-footer text-muted">
