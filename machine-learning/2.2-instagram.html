@@ -511,7 +511,7 @@
         <ul>
           <li>Use MAE / MSE for regression task for dwell time prediction</li>
           <li>Use cross-entropy for other binary classification predictions</li>
-          <li>\( \text{loss} = \lambda L_{\text{dwell}} + L_{\text{skip}} + L_{\text{like}} + \dots + L_{\text{share}} \)</li>
+          <li>\( \text{Loss} = \lambda L_{\text{dwell}} + L_{\text{skip}} + L_{\text{like}} + \dots + L_{\text{share}} \)</li>
         </ul>
         <li>AD recommendation</li>
         <ul>
@@ -522,7 +522,6 @@
           <li>This is binary classification, thus use cross-entropy</li>
         </ul>
         <li>Search</li>
-
         <li>Harmful content detection</li>
         <ul>
           <li>In multi-task training, each task is assigned a loss function based on its ML category</li>
@@ -560,50 +559,130 @@
 
     <h3 class="card-title">Offline</h3>
     <ul>
-      <li>Precision@k</li>
+      <li>Option 1. precision@k</li>
       <ul>
-        <li>\( \dfrac{\text{Number of relevant ADs in top k items}}{\text{k}} \)</li>
-        <li>Does not consider ranking quality</li>
+        <li>\( \dfrac{\text{Number of relevant items in top k items}}{\text{k}} \)</li>
+        <li>Cons</li>
+        <ul>
+          <li>Does not consider ranking quality</li>
+        </ul>
       </ul>
-      <li>Recall@k</li>
+      <li>Option 1. recall@k</li>
       <ul>
-        <li>\( \dfrac{\text{Number of relevant ADs in top k items}}{\text{total number of relevant ADs}} \)</li>
-        <li>Does not consider ranking quality</li>
+        <li>\( \dfrac{\text{Number of relevant items in top k items}}{\text{total number of relevant items}} \)</li>
+        <li>Cons</li>
+        <ul>
+          <li>Does not consider ranking quality</li>
+          <li>Denominator can be very big resulting in very small recall values</li>
+        </ul>
       </ul>
-      <li>Mean reciprobal rank (MRR)</li>
+      <li>Option 1. mean reciprobal rank (MRR)</li>
       <ul>
         <li>\( MRR = \dfrac{1}{m} \displaystyle\sum_{i=1}^{m} \dfrac{1}{\text{rank}_{i}} \)</li>
         <ul>
           <li>\( {\text{rank}_{i}} \) is position on which the first relevant item appears in the output list</li>
         </ul>
-        <li>Consider only the first relevant AD in each output list, then average the reciprocal rank</li>
-        <li>Ignores other relevant ADs in the list other than the first one</li>
+        <li>Consider only the first relevant item in each output list, then average the reciprocal rank</li>
+        <li>Cons</li>
+        <ul>
+          <li>Ignores other relevant items in the list other than the first one</li>
+        </ul>
       </ul>
-      <li>Normalized discounted cumulative gain (nDCG)</li>
+      <li>Option 1. mean average precision (mAP)</li>
+      <ul>
+        <li>AP</li>
+        <ul>
+          <li>\( AP = \dfrac{\displaystyle\sum_{i=1}^{k} \text{precision}@i}{n} \)</li>
+          <ul>
+            <li>\( n = \) total relevant items</li>
+          </ul>
+          <li>Averages precision@k at different values of k</li>
+          <li>AP is high if more relevant items are located at the top of list</li>
+        </ul>
+        <li>mAP</li>
+        <ul>
+          <li>Compute AP for each output list, then average them</li>
+        </ul>
+        <li>Cons</li>
+        <ul>
+          <li>Works well when each item is either relevant or irrelevant, but does not work well for relevance scores</li>
+        </ul>
+      </ul>
+      <li>Option 1. normalized discounted cumulative gain (nDCG)</li>
       <ul>
         <li>\( DCG_{p} = \displaystyle\sum_{i=1}^{p} \dfrac{\text{rel}_{i}}{log_{2}(i+1)} \)</li>
         <ul>
-          <li>\( \text{rel}_{i} \) is ground truth relevance score of AD ranked at \( i \)</li>
+          <li>\( \text{rel}_{i} \) is ground truth relevance score of item ranked at \( i \)</li>
         </ul>
         <li>\( nDCG_{p} = \dfrac{DCG_{p}}{IDCG_{p}} \)</li>
         <ul>
           <li>where \( {IDCG_{p}} \) is \( {DCG_{p}} \) of ideal ranking</li>
         </ul>
-        <li>Training data only consists of 0 or 1 representing user click on AD, not the ordering of ADs for each user</li>
-        <li>Therefore, we don't have ground truth, which is the ideal ranking</li>
+        <li>Cons</li>
+        <ul>
+          <li>If training data only consists of 0 or 1, not the ordering of items based on relevancy, then it is not possbile to construct ground truth</li>
+        </ul>
       </ul>
-      <li>Cross-entropy</li>
+      <li>Option 1. PR curve</li>
+      <ul>
+        <li>Trade-off between precision and recall</li>
+        <li>PR-AUC calculates area beneath PR curve</li>
+        <li>High PR-AUC indicates more accurate model</li>
+      </ul>
+      <li>Option 1. ROC curve</li>
+      <ul>
+        <li>Trade-off between true positive (recall) and false positive</li>
+        <li>ROC-AUC calculates area beneath POC curve</li>
+        <li>High ROC-AUC indicates more accurate model</li>
+      </ul>
+      <li>Option 1. cross-entropy</li>
       <ul>
         <li>Multiply ground truth label (0 or 1) with the probability of AD being clicked for each AD</li>
         <li>Then, sum it to assess the model performance</li>
+        <li>\( \text{CE} = -\displaystyle\sum_{i} y_{i}log\hat{y_{i}} + (1-y_{i})log(1-\hat{y_{i}}) \)</li>
       </ul>
+      <!-- <li>Option 1. diversity</li>
+      <ul>
+        <li>How dissimilar recommended items are to each other</li>
+        <li>Calculate average pairwise similarity (Ex. cosine similarity or dot product) between items outputed by the model</li>
+      </ul> -->
     </ul>
 
     <h3 class="card-title">Online</h3>
     <ul>
       <li>Click-through rate (CTR)</li>
       <ul>
-        <li>\( \dfrac{\text{number of clicked ADs}}{\text{total number of shown ADs}} \)</li>
+        <li>\( \dfrac{\text{number of clicked items}}{\text{total number of shown items}} \)</li>
+      </ul>
+      <li>Revenue lift</li>
+      <li>Feed ranking</li>
+      <ul>
+        <li>Reaction rate</li>
+        <ul>
+          <li>\( \dfrac{\text{number of liked/shared/commented/hidden/blocked/skipped posts}}{\text{total number of impressions}} \)</li>
+        </ul>
+      </ul>
+      <li>AD recommendation</li>
+      <ul>
+        <li>Number of hides on ADs</li>
+      </ul>
+      <li>Reel recommendation</li>
+      <ul>
+        <li>Total watch time of videos</li>
+        <li>User reaction to videos such as likes, share, etc</li>
+      </ul>
+      <li>Search</li>
+      <li>Harmful content detection</li>
+      <ul>
+        <li>Number of user reports on posts (per harmful class)</li>
+        <li>Valid appeals</li>
+        <ul>
+          <li>\( \dfrac{\text{number of reversed appeals}}{\text{number of harmful posts detected by system}} \)</li>
+        </ul>
+        <li>Proactive rate</li>
+        <ul>
+          <li>\( \dfrac{\text{number of harmful posts detected by system}}{\text{number of harmful posts detected by system} + \text{reported by users}} \)</li>
+        </ul>
       </ul>
     </ul>
 
