@@ -266,32 +266,38 @@
 
 <div class="card mb-4" id="greedy-">
   <div class="card-body">
-    <h2 class="card-title">Maximum Swap (M) (F/100) !!</h2>
+    <h2 class="card-title">Maximum Swap (M) (F/100) #!</h2>
 
-<pre><code class="python">class Solution:
+<pre><code class="python">cclass Solution:
     def maximumSwap(self, num: int) -> int:
 
-        # Scanning from left to right, if there is larger digit laster,
-        # it is best to swap at the current number
-        # For each digit, remember the index of last occurance
-        # Then, find the largest digit to the right
-        # If there are multiple largest digits, swap with the later one
+        # Scan from right to left, tracking largest number
+        # If there is smaller number left to largest number,
+        # save it for comparison
 
-        # Time O(n) n = len(num)
+        # Time O(n) 
+        #   n = len(num)
         # Space O(n)
-        digits = list(str(num))
-        last_occurance = defaultdict(int)
-        for i, digit in enumerate(digits):
-            last_occurance[int(digit)] = i
+        
+        nums = list(str(num))
+        largest_num_index = -1
+        largest_num = -1
+        swap_index_1 = -1
+        swap_index_2 = -1
 
-        for i, c in enumerate(str(num)):
-            # Check if larger digit than c occurs to the right
-            for digit in range(9, int(c), -1):
-                if last_occurance[digit] > i:
-                    digits[i], digits[last_occurance[digit]] = digits[last_occurance[digit]], digits[i]
-                    return int("".join(digits))
+        for i in range(len(nums)-1, -1, -1):
+            num = int(nums[i])
+            if num < largest_num:
+                swap_index_1 = i
+                swap_index_2 = largest_num_index 
+            if num > largest_num:
+                largest_num_index = i
+                largest_num = num
 
-        return num</code></pre>
+        if swap_index_1 != -1 and swap_index_2 != -1:
+            nums[swap_index_1], nums[swap_index_2] = nums[swap_index_2], nums[swap_index_1]
+            
+        return int("".join(nums))</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/maximum-swap">670. Maximum Swap</a>
