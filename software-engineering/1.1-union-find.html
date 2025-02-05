@@ -39,27 +39,113 @@
 <div class="col-md-12">
 <h1 class="my-4">Software Engineering</h1>
 
-<!-- Union Find BEGIN -->
-<div class="card mb-4" id="union-find">
+<!-- Union find BEGIN -->
+<div class="card mb-4" id="graph">
   <div class="card-body">
-    <h2 class="card-title">Union Find</h2>
+    <h2 class="card-title">Union find</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#union-find-">The Earliest Moment When Everyone Become Friends</a></li>
+      <li><a href="#union-find-">Making A Large Island</a></li>
     </ul>
   </div>
 </div>
 
-<div class="card mb-4" id="union-find-">
+<div class="card mb-4" id="union-find">
   <div class="card-body">
-    <h2 class="card-title">The Earliest Moment When Everyone Become Friends (M) (G) !</h2>
+    <h2 class="card-title">Making A Large Island (H) (F) #</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class UnionFind:
+
+    def __init__(self):
+        self.parent = defaultdict(tuple)
+        self.size = defaultdict(int)
+
+    def union(self, node_1: tuple, node_2: tuple):
+
+        leader_1 = self.find(node_1)
+        leader_2 = self.find(node_2)
+
+        if leader_1 == leader_2:
+            return
+
+        if self.size[leader_1] > self.size[leader_2]:
+            self.parent[leader_2] = leader_1
+            self.size[leader_1] += self.size[leader_2]
+        else:
+            self.parent[leader_1] = leader_2
+            self.size[leader_2] += self.size[leader_1]
+
+    def find(self, node: tuple) -> int:
+
+        if self.parent[node] == node:
+            return node
+
+        return self.find(self.parent[node])
+
+class Solution:
+    def largestIsland(self, grid: List[List[int]]) -> int:
+
+        # UnionFind
+        # Initialize 
+        #   Parent of each node to be itself
+        #   Size of each node is 1
+        # For each node with value 1, 
+        # find neighbors with value 1, then union them
+        # Then, for each node with value 0, 
+        # find neighboring islands
+
+        unionfind = UnionFind()
+        directions = [
+            (-1, 0), 
+            (0, -1), 
+            (0, 1), 
+            (1, 0),
+        ]
+
+        is_zero = False
+        for i in range(len(grid)):
+            for j in range(len(grid[0])):
+                unionfind.parent[(i,j)] = (i,j)
+                unionfind.size[(i,j)] = 1
+                if grid[i][j] == 0:
+                    is_zero = True
+        
+        if not is_zero:
+            return len(grid) * len(grid[0])
+
+        for i in range(len(grid)):
+            for j in range(len(grid[0])):
+                if grid[i][j] == 1:
+                    for row, col in directions:
+                        if 0 <= row + i < len(grid) \
+                            and 0 <= col + j < len(grid) \
+                            and grid[row+i][col+j] == 1:
+                            unionfind.union((i,j),(row+i,col+j))
+
+        max_size = 0
+        unique_roots = set()
+        for i in range(len(grid)):
+            for j in range(len(grid[0])):
+                if grid[i][j] == 0:
+                    current_size = 1
+                    for row, col in directions:
+                        if 0 <= row + i < len(grid) \
+                            and 0 <= col + j < len(grid) \
+                            and grid[row+i][col+j] == 1:
+                            root = unionfind.find((row+i,col+j))
+                            unique_roots.add(root)
+                    for root in unique_roots:
+                        current_size += unionfind.size[root]
+                    unique_roots.clear()
+                    max_size = max(max_size, current_size)
+
+        print(unionfind.size)
+        return max_size</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/the-earliest-moment-when-everyone-become-friends">1101. The Earliest Moment When Everyone Become Friends</a>
+    Reference: <a href="https://leetcode.com/problems/making-a-large-island">827. Making A Large Island</a>
   </div>
 </div>
-<!-- Union Find END -->
+<!-- Union find END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->
