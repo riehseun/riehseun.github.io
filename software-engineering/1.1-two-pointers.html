@@ -179,37 +179,51 @@
 
 <div class="card mb-4" id="two-pointers-">
   <div class="card-body">
-    <h2 class="card-title">3Sum (M) (G/F/A/100) !!!!</h2>
+    <h2 class="card-title">3Sum (M) (G/F/A/100) !#!!</h2>
 
 <pre><code class="python">class Solution:
     def threeSum(self, nums: List[int]) -> List[List[int]]:
-
-        # For each element in the array
-        #   Prepare sorted version of the array
-        #   Initialize two pointers at each end
-        #     If sum is less than zero, increment start
-        #     Else, decrement end
+        
+        # First sort the array
+        # Initialize two pointers at each end 
+        #   If sum is less than zero, increment start
+        #   Else, decrement end
+        # Do this for each element of the array
 
         result = []
-        sorted_nums = sorted(nums)
+        nums.sort()
+        print(nums)
 
-        # Time O(n^2) n = len(nums)
-        # Space O(1) if ignoring space for output
-        for i, num in enumerate(sorted_nums):
+        # Time O(n^2) 
+        #   n = len(nums)
+        # Space O(logn)
+        #   Assuming quicksort where recursion stack costs logn
+        #   Ignoring space for output 
+        for i, num in enumerate(nums):
 
-            # Make sure there is no two items that have different
-            # ordering of same numbers
-            start = i + 1  # No need to check numbers before i again
-            end = len(sorted_nums) - 1
+            # If current value > 0, the sum can never be 0
+            if num > 0:
+                break
+            # Avoid computing starting from the same number
+            if i != 0 and nums[i-1] == nums[i]:
+                continue
+
+            # There should be no two same items that 
+            # just have different ordering
+            start = i + 1
+            end = len(nums) - 1
 
             while start < end:
-                three_sum = num + sorted_nums[start] + sorted_nums[end]
+                three_sum = num + nums[start] + nums[end]
                 if three_sum == 0:
-                    candidate = [num, sorted_nums[start], sorted_nums[end]]
-                    if candidate not in result:
-                        result.append(candidate)
-                    # Can move either start or end
+                    candidate = [num, nums[start], nums[end]]
+                    result.append(candidate)
+                    # Can move both start and end
                     start += 1
+                    end -= 1
+                    # Avoid computing starting from the same number
+                    while start < end and nums[start] == nums[start-1]:
+                        start += 1
                 elif three_sum < 0:
                     start += 1
                 else:
