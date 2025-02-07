@@ -425,61 +425,62 @@ class Solution:
 
 <div class="card mb-4" id="graph-">
   <div class="card-body">
-    <h2 class="card-title">Accounts Merge (M) (F) !</h2>
+    <h2 class="card-title">Accounts Merge (M) (F) #</h2>
 
 <pre><code class="python">class Solution:
     def accountsMerge(self, accounts: List[List[str]]) -> List[List[str]]:
 
         # Construct a graph
         #   Node is email
-        #   Edge between nodes (emails) is when they belong to the same person
+        #   Edge between nodes exists when they belong to same person
         # Compute connected components
 
         graph = defaultdict(set)
         email_to_person = defaultdict(str)
+        emails = set()
 
         for account in accounts:
-            # There is only one email
-            if len(account) == 2:
-                graph[account[1]]
-                email_to_person[account[1]] = account[0]
             for i in range(1, len(account)):
-                for j in range(1, len(account)):
-                    if i != j:
-                        graph[account[i]].add(account[j])
-                        email_to_person[account[i]] = account[0]
+                graph[account[1]]
+                emails.add(account[i])
+                email_to_person[account[i]] = account[0]
+                for j in range(i+1, len(account)):
+                    graph[account[i]].add(account[j])
+                    graph[account[j]].add(account[i])
 
-        # Time O(n+m)
+        # Time max(O(n+m), O(nlogn)) 
         #   n = number of emails
-        #   m = number of connnected emails
-        # Space O(n)
+        #   m = number of edges betweem emails
+        #   Sorting the output at the end
+        # Space O(n^2)
         def bfs(graph, explored, start):
 
             queue = deque()
             queue.append(start)
 
-            nodes = []
-
+            explored.add(start)
+            nodes = set()
+            
             while queue:
                 node = queue.popleft()
-                if node not in nodes:
-                    nodes.append(node)
-
+                nodes.add(node)
+                
                 for next_node in graph[node]:
                     if next_node not in explored:
                         explored.add(next_node)
                         queue.append(next_node)
-
+                        
             return nodes
 
         result = []
 
         explored = set()
-        for node in email_to_person.keys():
+        for node in emails:
             if node not in explored:
                 nodes = bfs(graph, explored, node)
-                nodes.sort()
+                nodes = list(nodes)
                 person = email_to_person[nodes[0]]
+                nodes.sort()       
                 result.append([person]+nodes)
 
         return result</code></pre>
