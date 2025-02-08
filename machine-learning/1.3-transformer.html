@@ -54,46 +54,6 @@
 
 <div class="card mb-4" id="transformer-">
   <div class="card-body">
-    <h2 class="card-title">Attention</h2>
-    <ul>
-      <li>Unlike RNN where tokens are analyzed in sequence, attention <strong>relates every token to every other tokens</strong> in a sequence</li>
-      <li>Input sentence is represented as \( Q, K, V \) where these matrices are multipled to find relationship between all words to all words</li>
-      <ul>
-        <li>Value of diagonal element should be the highest since a word would stongly be related to itself</li>
-        <li>\( Q, K, V \) - dimension is \( n \times  d_{model} \), a word is represented by \( d_{model} \) vector, number of words in vocabulary is represented by \( n \)</li>
-      </ul>
-      <li>\( \text{Attention}(Q,K,V) = \text{softmax} \left( \dfrac{QK^{T}}{\sqrt{d_{k}}} \right) V \)</li>
-      <li>For large values of \( d_{k} \), dot product becomes big and softmax function can have very small gradient, so scale by \( \frac{1}{\sqrt{d_{k}}} \)</li>
-    </ul>
-
-    <h3 class="card-title">Multi-head attention</h3>
-    <ul>
-      <li>\( W_{Q} \) - parameter matrix whose dimension is \( d_{model} \times d_{model} \)</li>
-      <li>\( W_{K} \) - parameter matrix whose dimension is \( d_{model} \times d_{model} \)</li>
-      <li>\( W_{V} \) - parameter matrix whose dimension is \( d_{model} \times d_{model} \)</li>
-      <li>\( Q^{\prime} \) - \( Q \times W_{Q} \), matrix where each query that has dimension \( n \times d_{model} \)</li>
-      <li>\( K^{\prime} \) - \( K \times W_{K} \), matrix where each key that has dimension \( n \times d_{model} \)</li>
-      <li>\( V^{\prime} \) - \( V \times W_{V} \), matrix where each value that has dimension \( n \times d_{model} \)</li>
-      <li>\( Q^{\prime} \) is split into \( Q_{1} \dots Q_{8} \) where each head only sees smaller part of embedding of words</li>
-      <li>\( K^{\prime} \) is split into \( K_{1} \dots K_{8} \)</li>
-      <li>\( V^{\prime} \) is split into \( V_{1} \dots V_{8} \)</li>
-      <li>\( \text{head}_{1} \) is computed from \( Q_{1}, K_{1}, V_{1} \)</li>
-      <li>\( \text{Multi-head attention}(Q,K,V) = \text{Concat}(\text{head}_{1} \dots \text{head}_{h}) W_{O} \)</li>
-      <li>Each head watches different aspect of word</li>
-      <ul>
-        <li>A head may learn a word as noun</li>
-        <li>Another head may learn the same word as verb</li>
-        <li>Another head may learn the same word as adjective</li>
-      </ul>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: Attention Is All You Need, Ashish Vaswani et al | Transformers for Natural Language Processing, Denis Rothman
-  </div>
-</div>
-
-<div class="card mb-4" id="transformer-">
-  <div class="card-body">
     <h2 class="card-title">Transformer</h2>
     <ul>
       <li>Original transformer was used for machine translation</li>
@@ -136,138 +96,6 @@
           <li>Reduces computation</li>
         </ul>
       </ul>
-      <li>Input embedding</li>
-      <ul>
-        <li>Converts input tokens to vector of \( d_{\text{model}} = 512 \) dimension using learned embeddings</li>
-        <ul>
-          <li>Tokenizer transforms a sentence into tokens (each token is a single word)</li>
-          <ul>
-            <li>Ex. text = "The cat slept on the couch.It was too tired to get up."</li>
-            <li>Ex. input_ids = [1996, 4937, 7771, 2006, 1996, 6411, 1012, 2009, 2001, 2205, 5458, 2000, 2131, 2039, 1012]</li>
-          </ul>
-          <li>An embedding method (Ex. skip gram) is used to convert each word to a vector of \( 512 \) numbers</li>
-          <ul>
-            <li>Ex. black = [[-0.01206071 ... -0.04273562]]</li>
-            <li>Ex. brown = [[0.00135794589 ... -0.0490022525]]</li>
-          </ul>
-        </ul>
-      </ul>
-      <li>Positional encoding</li>
-      <ul>
-        <li>Considers position of a word in a sentence</li>
-        <li>\( PE_{pos 2i} = \sin\left(\dfrac{pos}{10000^{\frac{2i}{d_{model}}}}\right) \)</li>
-        <ul>
-          <li>Applied to even position in the vector of \( d_{model} \)</li>
-        </ul>
-        <li>\( PE_{pos 2i+1} = \cos\left(\dfrac{pos}{10000^{\frac{2i}{d_{model}}}}\right) \)</li>
-        <ul>
-          <li>Applied to odd position in the vector of \( d_{model} \)</li>
-        </ul>
-        <li>Original authors added positional encoding to input embedding to produce final encoding</li>
-        <li>To minimize loss of information of word embedding, we can multiply word embedding by \( \sqrt{\text{d_{model}}} \)</li>
-        <li>Positional encoding is computed once and re-used through the training</li>
-<pre><code class="python">def encoding(pos, positional_vector)
-    for i in range(0, 512,2):
-        val =  pos / (10000**((2*i)/d_model))
-        positional_vector[0][i] = math.sin(val)
-        positional_vector[0][i+1] = math.cos(val)
-        positional_encoding[0][i] = (embedding_vector[0][i]*math.sqrt(d_model)) + positional_vector[0][i]
-        positional_encoding[0][i+1] = (embedding_vector[0][i+1]*math.sqrt(d_model)) + positional_vector[0][i+1]</code></pre>
-      </ul>
-      <li>Multi-head attention</li>
-      <ul>
-        <li>Each word is represented by vector of \( 512 \) dimension</li>
-        <li>Ex. The cat sat on the rug and it was dry-cleaned</li>
-        <li>Model is trained to find if "it" is related to "cat" or "rug"</li>
-        <li>There are \( 8 \) heads whose dimension is \( 64 \)</li>
-        <li>In each head, weight matrices whose dimension is \( 512 \times 64 \) must be trained</li>
-        <ul>
-          <li>\( W_{Q} \) - train the queries</li>
-          <li>\( W_{K} \) - train the keys</li>
-          <li>\( W_{V} \) - train the values</li>
-        </ul>
-        <li>Example</li>
-        <ul>
-          <li>Represent the input</li>
-          <ul>
-            <li>Assume \( 3 \) input tokens (or words)</li>
-            <li>Assume \( d_{\text{model}} = 4 \)</li>
-<pre><code class="python">X = np.array([[1.0, 0.0, 1.0, 0.0],   # Input token 1
-              [0.0, 2.0, 0.0, 2.0],   # Input token 2
-              [1.0, 1.0, 1.0, 1.0]])  # Input token 3</code></pre>
-          </ul>
-          <li>Initialize the weight matrices</li>
-          <ul>
-            <li>Assume \( d_{k} = 3 \)</li>
-<pre><code class="python">W_query = np.array([[1, 0, 1],
-                    [1, 0, 0],
-                    [0, 0, 1],
-                    [0, 1, 1]])
-W_key = np.array([[0, 0, 1],
-                  [1, 1, 0],
-                  [0, 1, 0],
-                  [1, 1, 0]])
-W_value = np.array([[0, 2, 0],
-                    [0, 3, 0],
-                    [1, 0, 3],
-                    [1, 1, 0]])</code></pre>
-          </ul>
-          <li>Compute \( Q, K, V \)</li>
-          <ul>
-            <li>Assume there is one set of \( W_{Q}, W_{K}, W_{V} \) for all inputs</li>
-<pre><code class="python">Q = np.matmul(X, W_query)
-K = np.matmul(X, W_key)
-V = np.matmul(X, W_value)</code></pre>
-          </ul>
-          <li>Compute attention score</li>
-          <ul>
-            <li>\( \text{Attention}(Q,K,V) = \text{softmax} \left( \dfrac{QK^{T}}{\sqrt{d_{k}}} \right) V \)</li>
-<pre><code class="python">d_k = 1   # Square root of k_d simplified to 1 for this example
-attention_scores = (Q@K.transpose()) / d_k</code></pre>
-            <li>Softmax score for each input token</li>
-<pre><code class="python">attention_scores[0] = softmax(attention_scores[0])
-attention_scores[1] = softmax(attention_scores[1])
-attention_scores[2] = softmax(attention_scores[2])</code></pre>
-            <li>Attention for each input token</li>
-<pre><code class="python">attention1 = attention_scores[0].reshape(-1,1)
-attention1 = attention_scores[0][0] * V[0]
-attention2 = attention_scores[0][1] * V[1]
-attention3 = attention_scores[0][2] * V[2]</code></pre>
-            <li>Sum up the result</li>
-<pre><code class="python">attention_input1 = attention1 + attention2 + attention3</code></pre>
-          </ul>
-        </ul>
-      </ul>
-      <li>Post-layer normalization</li>
-      <ul>
-        <li>Add</li>
-        <ul>
-          <li>Processes residual connections, which transports unprocessed input \( X \) to normalization</li>
-          <li>This prevents key information, such as positional encoding, from being lost on the way</li>
-        </ul>
-        <li>Normalization</li>
-        <ul>
-          <li>\( \text{LayerNormalization}(v) = \gamma \dfrac{v-\mu}{\sigma} + \beta \)</li>
-          <li>\( \mu \) is the mean of \( v \) of dimension \( d \)</li>
-          <ul>
-            <li>\( \mu = \dfrac{1}{d} \displaystyle\sum_{k=1}^{d} v_{k} \)</li>
-          </ul>
-          <li>\( \sigma \) is the standard deviation of \( v \) dimension \( d \)</li>
-          <ul>
-            <li>\( \sigma^{2} = \dfrac{1}{d} \displaystyle\sum_{k=1}^{d} (v_{k}-\mu) \)</li>
-          </ul>
-          <li>\( \gamma \) is a scaling vector</li>
-          <li>\( \beta \) is a bias vector</li>
-        </ul>
-      </ul>
-      <li>Feedforward network</li>
-      <ul>
-        <li>Contains two layers and applies ReLU</li>
-        <li>Input and output has \( d_{\text{model}} = 512 \) but inner layer has \( d_{\text{ff}} = 2048 \)</li>
-        <li>\( \text{FFN}(x) = max(0, xW_{1} + b_{1})W_{2} + b_{2} \)</li>
-        <li>Can be considered as two convolutions with size \( 1 \) kernels</li>
-        <li>Output goes to layer normalization, then to next layer of encoder and multi-head attention layer of decoder</li>
-      </ul>
     </ul>
 
     <h3 class="card-title">Decoder stack</h3>
@@ -298,6 +126,231 @@ attention3 = attention_scores[0][2] * V[2]</code></pre>
       </ul>
     </ul>
   </div>
+  <div class="card-footer text-muted">
+    Reference: Transformers for Natural Language Processing, Denis Rothman
+  </div>
+</div>
+
+<div class="card mb-4" id="transformer-">
+  <div class="card-body">
+    <h2 class="card-title">Attention</h2>
+    <ul>
+      <li>Unlike RNN where tokens are analyzed in sequence, attention <strong>relates every token to every other tokens</strong> in a sequence</li>
+      <li>Input sentence is represented as \( Q, K, V \) where these matrices are multipled to find relationship between all words to all words</li>
+      <ul>
+        <li>Value of diagonal element should be the highest since a word would stongly be related to itself</li>
+        <li>\( Q, K, V \) - dimension is \( n \times  d_{model} \), a word is represented by \( d_{model} \) vector, number of words in vocabulary is represented by \( n \)</li>
+      </ul>
+      <li>\( \text{Attention}(Q,K,V) = \text{softmax} \left( \dfrac{QK^{T}}{\sqrt{d_{k}}} \right) V \)</li>
+      <li>For large values of \( d_{k} \), dot product becomes big and softmax function can have very small gradient, so scale by \( \frac{1}{\sqrt{d_{k}}} \)</li>
+    </ul>
+
+    <h3 class="card-title">Multi-head attention</h3>
+    <ul>
+      <li>\( W_{Q} \) - parameter matrix whose dimension is \( d_{model} \times d_{model} \)</li>
+      <li>\( W_{K} \) - parameter matrix whose dimension is \( d_{model} \times d_{model} \)</li>
+      <li>\( W_{V} \) - parameter matrix whose dimension is \( d_{model} \times d_{model} \)</li>
+      <li>\( Q^{\prime} \) - \( Q \times W_{Q} \), matrix where each query that has dimension \( n \times d_{model} \)</li>
+      <li>\( K^{\prime} \) - \( K \times W_{K} \), matrix where each key that has dimension \( n \times d_{model} \)</li>
+      <li>\( V^{\prime} \) - \( V \times W_{V} \), matrix where each value that has dimension \( n \times d_{model} \)</li>
+      <li>\( Q^{\prime} \) is split into \( Q_{1} \dots Q_{8} \) where each head only sees smaller part of embedding of words</li>
+      <li>\( K^{\prime} \) is split into \( K_{1} \dots K_{8} \)</li>
+      <li>\( V^{\prime} \) is split into \( V_{1} \dots V_{8} \)</li>
+      <li>\( \text{head}_{1} \) is computed from \( Q_{1}, K_{1}, V_{1} \)</li>
+      <li>\( \text{Multi-head attention}(Q,K,V) = \text{Concat}(\text{head}_{1} \dots \text{head}_{h}) W_{O} \)</li>
+      <li>Each head watches different aspect of word</li>
+      <ul>
+        <li>A head may learn a word as noun</li>
+        <li>Another head may learn the same word as verb</li>
+        <li>Another head may learn the same word as adjective</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Multi-head attention</h3>
+    <ul>
+      <li>Each word is represented by vector of \( 512 \) dimension</li>
+      <li>Ex. The cat sat on the rug and it was dry-cleaned</li>
+      <li>Model is trained to find if "it" is related to "cat" or "rug"</li>
+      <li>There are \( 8 \) heads whose dimension is \( 64 \)</li>
+      <li>In each head, weight matrices whose dimension is \( 512 \times 64 \) must be trained</li>
+      <ul>
+        <li>\( W_{Q} \) - train the queries</li>
+        <li>\( W_{K} \) - train the keys</li>
+        <li>\( W_{V} \) - train the values</li>
+      </ul>
+      <li>Example</li>
+      <ul>
+        <li>Represent the input</li>
+        <ul>
+          <li>Assume \( 3 \) input tokens (or words)</li>
+          <li>Assume \( d_{\text{model}} = 4 \)</li>
+<pre><code class="python">X = np.array([[1.0, 0.0, 1.0, 0.0],   # Input token 1
+            [0.0, 2.0, 0.0, 2.0],   # Input token 2
+            [1.0, 1.0, 1.0, 1.0]])  # Input token 3</code></pre>
+        </ul>
+        <li>Initialize the weight matrices</li>
+        <ul>
+          <li>Assume \( d_{k} = 3 \)</li>
+<pre><code class="python">W_query = np.array([[1, 0, 1],
+                  [1, 0, 0],
+                  [0, 0, 1],
+                  [0, 1, 1]])
+W_key = np.array([[0, 0, 1],
+                [1, 1, 0],
+                [0, 1, 0],
+                [1, 1, 0]])
+W_value = np.array([[0, 2, 0],
+                  [0, 3, 0],
+                  [1, 0, 3],
+                  [1, 1, 0]])</code></pre>
+        </ul>
+        <li>Compute \( Q, K, V \)</li>
+        <ul>
+          <li>Assume there is one set of \( W_{Q}, W_{K}, W_{V} \) for all inputs</li>
+<pre><code class="python">Q = np.matmul(X, W_query)
+K = np.matmul(X, W_key)
+V = np.matmul(X, W_value)</code></pre>
+        </ul>
+        <li>Compute attention score</li>
+        <ul>
+          <li>\( \text{Attention}(Q,K,V) = \text{softmax} \left( \dfrac{QK^{T}}{\sqrt{d_{k}}} \right) V \)</li>
+<pre><code class="python">d_k = 1   # Square root of k_d simplified to 1 for this example
+attention_scores = (Q@K.transpose()) / d_k</code></pre>
+          <li>Softmax score for each input token</li>
+<pre><code class="python">attention_scores[0] = softmax(attention_scores[0])
+attention_scores[1] = softmax(attention_scores[1])
+attention_scores[2] = softmax(attention_scores[2])</code></pre>
+          <li>Attention for each input token</li>
+<pre><code class="python">attention1 = attention_scores[0].reshape(-1,1)
+attention1 = attention_scores[0][0] * V[0]
+attention2 = attention_scores[0][1] * V[1]
+attention3 = attention_scores[0][2] * V[2]</code></pre>
+          <li>Sum up the result</li>
+<pre><code class="python">attention_input1 = attention1 + attention2 + attention3</code></pre>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Attention Is All You Need, Ashish Vaswani et al | Transformers for Natural Language Processing, Denis Rothman
+  </div>
+</div>
+
+<div class="card mb-4" id="transformer-">
+  <div class="card-body">
+    <h2 class="card-title">Input embedding</h2>
+    <ul>
+      <li>Converts input tokens to vector of \( d_{\text{model}} = 512 \) dimension using learned embeddings</li>
+      <ul>
+        <li>Tokenizer transforms a sentence into tokens (each token is a single word)</li>
+        <ul>
+          <li>Ex. text = "The cat slept on the couch.It was too tired to get up."</li>
+          <li>Ex. input_ids = [1996, 4937, 7771, 2006, 1996, 6411, 1012, 2009, 2001, 2205, 5458, 2000, 2131, 2039, 1012]</li>
+        </ul>
+        <li>An embedding method (Ex. skip gram) is used to convert each word to a vector of \( 512 \) numbers</li>
+        <ul>
+          <li>Ex. black = [[-0.01206071 ... -0.04273562]]</li>
+          <li>Ex. brown = [[0.00135794589 ... -0.0490022525]]</li>
+        </ul>
+      </ul>
+    </ul>
+  <div class="card-footer text-muted">
+    Reference: Transformers for Natural Language Processing, Denis Rothman
+  </div>
+</div>
+
+<div class="card mb-4" id="transformer-">
+  <div class="card-body">
+    <h2 class="card-title">Positional encoding</h2>
+    <ul>
+      <li>Considers position of a word in a sentence</li>
+      <li>\( PE_{pos 2i} = \sin\left(\dfrac{pos}{10000^{\frac{2i}{d_{model}}}}\right) \)</li>
+      <ul>
+        <li>Applied to even position in the vector of \( d_{model} \)</li>
+      </ul>
+      <li>\( PE_{pos 2i+1} = \cos\left(\dfrac{pos}{10000^{\frac{2i}{d_{model}}}}\right) \)</li>
+      <ul>
+        <li>Applied to odd position in the vector of \( d_{model} \)</li>
+      </ul>
+      <li>Original authors added positional encoding to input embedding to produce final encoding</li>
+      <li>To minimize loss of information of word embedding, we can multiply word embedding by \( \sqrt{\text{d_{model}}} \)</li>
+      <li>Positional encoding is computed once and re-used through the training</li>
+<pre><code class="python">def encoding(pos, positional_vector)
+  for i in range(0, 512,2):
+      val =  pos / (10000**((2*i)/d_model))
+      positional_vector[0][i] = math.sin(val)
+      positional_vector[0][i+1] = math.cos(val)
+      positional_encoding[0][i] = (embedding_vector[0][i]*math.sqrt(d_model)) + positional_vector[0][i]
+      positional_encoding[0][i+1] = (embedding_vector[0][i+1]*math.sqrt(d_model)) + positional_vector[0][i+1]</code></pre>
+    </ul>
+  <div class="card-footer text-muted">
+    Reference: Transformers for Natural Language Processing, Denis Rothman
+  </div>
+</div>
+
+<div class="card mb-4" id="transformer-">
+  <div class="card-body">
+    <h2 class="card-title">Post-layer normalization</h2>
+    <ul>
+      <li>Add</li>
+      <ul>
+        <li>Processes residual connections, which transports unprocessed input \( X \) to normalization</li>
+        <li>This prevents key information, such as positional encoding, from being lost on the way</li>
+      </ul>
+      <li>Normalization</li>
+      <ul>
+        <li>\( \text{LayerNormalization}(v) = \gamma \dfrac{v-\mu}{\sigma} + \beta \)</li>
+        <li>\( \mu \) is the mean of \( v \) of dimension \( d \)</li>
+        <ul>
+          <li>\( \mu = \dfrac{1}{d} \displaystyle\sum_{k=1}^{d} v_{k} \)</li>
+        </ul>
+        <li>\( \sigma \) is the standard deviation of \( v \) dimension \( d \)</li>
+        <ul>
+          <li>\( \sigma^{2} = \dfrac{1}{d} \displaystyle\sum_{k=1}^{d} (v_{k}-\mu) \)</li>
+        </ul>
+        <li>\( \gamma \) is a scaling vector</li>
+        <li>\( \beta \) is a bias vector</li>
+      </ul>
+    </ul>
+  <div class="card-footer text-muted">
+    Reference: Transformers for Natural Language Processing, Denis Rothman
+  </div>
+</div>
+
+<div class="card mb-4" id="transformer-">
+  <div class="card-body">
+    <h2 class="card-title">Feedforward network</h2>
+    <ul>
+      <li>Contains two layers and applies ReLU</li>
+      <li>Input and output has \( d_{\text{model}} = 512 \) but inner layer has \( d_{\text{ff}} = 2048 \)</li>
+      <li>\( \text{FFN}(x) = max(0, xW_{1} + b_{1})W_{2} + b_{2} \)</li>
+      <li>Can be considered as two convolutions with size \( 1 \) kernels</li>
+      <li>Output goes to layer normalization, then to next layer of encoder and multi-head attention layer of decoder</li>
+    </ul>
+  <div class="card-footer text-muted">
+    Reference: Transformers for Natural Language Processing, Denis Rothman
+  </div>
+</div>
+
+<div class="card mb-4" id="transformer-">
+  <div class="card-body">
+    <h2 class="card-title"></h2>
+  <div class="card-footer text-muted">
+    Reference: Transformers for Natural Language Processing, Denis Rothman
+  </div>
+</div>
+
+<div class="card mb-4" id="transformer-">
+  <div class="card-body">
+    <h2 class="card-title"></h2>
+  <div class="card-footer text-muted">
+    Reference: Transformers for Natural Language Processing, Denis Rothman
+  </div>
+</div>
+
+<div class="card mb-4" id="transformer-">
+  <div class="card-body">
+    <h2 class="card-title"></h2>
   <div class="card-footer text-muted">
     Reference: Transformers for Natural Language Processing, Denis Rothman
   </div>
