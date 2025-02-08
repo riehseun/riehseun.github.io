@@ -44,8 +44,12 @@
   <div class="card-body">
     <h2 class="card-title">Transformer</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#transformer-">Attention</a></li>
       <li><a href="#transformer-">Transformer</a></li>
+      <li><a href="#transformer-">Input embedding</a></li>
+      <li><a href="#transformer-">Positional encoding</a></li>
+      <li><a href="#transformer-">Multi-head attention</a></li>
+      <li><a href="#transformer-">Layer normalization</a></li>
+      <li><a href="#transformer-">Feedforward network</a></li>
       <li><a href="#transformer-">Transformer evaluation</a></li>
       <li><a href="#transformer-">T5</a></li>
     </ul>
@@ -126,6 +130,58 @@
       </ul>
     </ul>
   </div>
+  <div class="card-footer text-muted">
+    Reference: Transformers for Natural Language Processing, Denis Rothman
+  </div>
+</div>
+
+<div class="card mb-4" id="transformer-">
+  <div class="card-body">
+    <h2 class="card-title">Input embedding</h2>
+    <ul>
+      <li>Converts input tokens to vector of \( d_{\text{model}} = 512 \) dimension using learned embeddings</li>
+      <ul>
+        <li>Tokenizer transforms a sentence into tokens (each token is a single word)</li>
+        <ul>
+          <li>Ex. text = "The cat slept on the couch.It was too tired to get up."</li>
+          <li>Ex. input_ids = [1996, 4937, 7771, 2006, 1996, 6411, 1012, 2009, 2001, 2205, 5458, 2000, 2131, 2039, 1012]</li>
+        </ul>
+        <li>An embedding method (Ex. skip gram) is used to convert each word to a vector of \( 512 \) numbers</li>
+        <ul>
+          <li>Ex. black = [[-0.01206071 ... -0.04273562]]</li>
+          <li>Ex. brown = [[0.00135794589 ... -0.0490022525]]</li>
+        </ul>
+      </ul>
+    </ul>
+  <div class="card-footer text-muted">
+    Reference: Transformers for Natural Language Processing, Denis Rothman
+  </div>
+</div>
+
+<div class="card mb-4" id="transformer-">
+  <div class="card-body">
+    <h2 class="card-title">Positional encoding</h2>
+    <ul>
+      <li>Considers position of a word in a sentence</li>
+      <li>\( PE_{pos 2i} = \sin\left(\dfrac{pos}{10000^{\frac{2i}{d_{model}}}}\right) \)</li>
+      <ul>
+        <li>Applied to even position in the vector of \( d_{model} \)</li>
+      </ul>
+      <li>\( PE_{pos 2i+1} = \cos\left(\dfrac{pos}{10000^{\frac{2i}{d_{model}}}}\right) \)</li>
+      <ul>
+        <li>Applied to odd position in the vector of \( d_{model} \)</li>
+      </ul>
+      <li>Original authors added positional encoding to input embedding to produce final encoding</li>
+      <li>To minimize loss of information of word embedding, we can multiply word embedding by \( \sqrt{\text{d_{model}}} \)</li>
+      <li>Positional encoding is computed once and re-used through the training</li>
+<pre><code class="python">def encoding(pos, positional_vector)
+  for i in range(0, 512,2):
+      val =  pos / (10000**((2*i)/d_model))
+      positional_vector[0][i] = math.sin(val)
+      positional_vector[0][i+1] = math.cos(val)
+      positional_encoding[0][i] = (embedding_vector[0][i]*math.sqrt(d_model)) + positional_vector[0][i]
+      positional_encoding[0][i+1] = (embedding_vector[0][i+1]*math.sqrt(d_model)) + positional_vector[0][i+1]</code></pre>
+    </ul>
   <div class="card-footer text-muted">
     Reference: Transformers for Natural Language Processing, Denis Rothman
   </div>
@@ -238,58 +294,6 @@ attention3 = attention_scores[0][2] * V[2]</code></pre>
 
 <div class="card mb-4" id="transformer-">
   <div class="card-body">
-    <h2 class="card-title">Input embedding</h2>
-    <ul>
-      <li>Converts input tokens to vector of \( d_{\text{model}} = 512 \) dimension using learned embeddings</li>
-      <ul>
-        <li>Tokenizer transforms a sentence into tokens (each token is a single word)</li>
-        <ul>
-          <li>Ex. text = "The cat slept on the couch.It was too tired to get up."</li>
-          <li>Ex. input_ids = [1996, 4937, 7771, 2006, 1996, 6411, 1012, 2009, 2001, 2205, 5458, 2000, 2131, 2039, 1012]</li>
-        </ul>
-        <li>An embedding method (Ex. skip gram) is used to convert each word to a vector of \( 512 \) numbers</li>
-        <ul>
-          <li>Ex. black = [[-0.01206071 ... -0.04273562]]</li>
-          <li>Ex. brown = [[0.00135794589 ... -0.0490022525]]</li>
-        </ul>
-      </ul>
-    </ul>
-  <div class="card-footer text-muted">
-    Reference: Transformers for Natural Language Processing, Denis Rothman
-  </div>
-</div>
-
-<div class="card mb-4" id="transformer-">
-  <div class="card-body">
-    <h2 class="card-title">Positional encoding</h2>
-    <ul>
-      <li>Considers position of a word in a sentence</li>
-      <li>\( PE_{pos 2i} = \sin\left(\dfrac{pos}{10000^{\frac{2i}{d_{model}}}}\right) \)</li>
-      <ul>
-        <li>Applied to even position in the vector of \( d_{model} \)</li>
-      </ul>
-      <li>\( PE_{pos 2i+1} = \cos\left(\dfrac{pos}{10000^{\frac{2i}{d_{model}}}}\right) \)</li>
-      <ul>
-        <li>Applied to odd position in the vector of \( d_{model} \)</li>
-      </ul>
-      <li>Original authors added positional encoding to input embedding to produce final encoding</li>
-      <li>To minimize loss of information of word embedding, we can multiply word embedding by \( \sqrt{\text{d_{model}}} \)</li>
-      <li>Positional encoding is computed once and re-used through the training</li>
-<pre><code class="python">def encoding(pos, positional_vector)
-  for i in range(0, 512,2):
-      val =  pos / (10000**((2*i)/d_model))
-      positional_vector[0][i] = math.sin(val)
-      positional_vector[0][i+1] = math.cos(val)
-      positional_encoding[0][i] = (embedding_vector[0][i]*math.sqrt(d_model)) + positional_vector[0][i]
-      positional_encoding[0][i+1] = (embedding_vector[0][i+1]*math.sqrt(d_model)) + positional_vector[0][i+1]</code></pre>
-    </ul>
-  <div class="card-footer text-muted">
-    Reference: Transformers for Natural Language Processing, Denis Rothman
-  </div>
-</div>
-
-<div class="card mb-4" id="transformer-">
-  <div class="card-body">
     <h2 class="card-title">Post-layer normalization</h2>
     <ul>
       <li>Add</li>
@@ -327,30 +331,6 @@ attention3 = attention_scores[0][2] * V[2]</code></pre>
       <li>Can be considered as two convolutions with size \( 1 \) kernels</li>
       <li>Output goes to layer normalization, then to next layer of encoder and multi-head attention layer of decoder</li>
     </ul>
-  <div class="card-footer text-muted">
-    Reference: Transformers for Natural Language Processing, Denis Rothman
-  </div>
-</div>
-
-<div class="card mb-4" id="transformer-">
-  <div class="card-body">
-    <h2 class="card-title"></h2>
-  <div class="card-footer text-muted">
-    Reference: Transformers for Natural Language Processing, Denis Rothman
-  </div>
-</div>
-
-<div class="card mb-4" id="transformer-">
-  <div class="card-body">
-    <h2 class="card-title"></h2>
-  <div class="card-footer text-muted">
-    Reference: Transformers for Natural Language Processing, Denis Rothman
-  </div>
-</div>
-
-<div class="card mb-4" id="transformer-">
-  <div class="card-body">
-    <h2 class="card-title"></h2>
   <div class="card-footer text-muted">
     Reference: Transformers for Natural Language Processing, Denis Rothman
   </div>
