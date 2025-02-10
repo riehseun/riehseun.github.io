@@ -94,7 +94,7 @@
           <li>Ensure key information like positional encoding is not lost on the way</li>
           <li>\( \text{LayerNormalization}(x+\text{sublayer}(x)) \)</li>
         </ul>
-        <li>Output of every sublayer \( d_{model} \) remain constant</li>
+        <li>Output of every sublayer \( d_{\text{model}} \) remain constant</li>
         <ul>
           <li>All key operations in transformer is dot product</li>
           <li>Reduces computation</li>
@@ -164,17 +164,17 @@
       <li>Considers position of a word in a sentence</li>
       <li>For each word, create a vector of \( d_{\text{model}} = 512 \) dimension</li>
       <ul>
-        <li>\( PE_{pos 2i} = \sin\left(\dfrac{pos}{10000^{\frac{2i}{d_{model}}}}\right) \)</li>
+        <li>\( PE_{pos 2i} = \sin\left(\dfrac{pos}{10000^{\frac{2i}{d_{\text{model}}}}}\right) \)</li>
         <ul>
           <li>Applied to even position in the vector of \( d_{\text{model}} = 512 \)</li>
         </ul>
-        <li>\( PE_{pos 2i+1} = \cos\left(\dfrac{pos}{10000^{\frac{2i}{d_{model}}}}\right) \)</li>
+        <li>\( PE_{pos 2i+1} = \cos\left(\dfrac{pos}{10000^{\frac{2i}{d_{\text{model}}}}}\right) \)</li>
         <ul>
           <li>Applied to odd position in the vector of \( d_{\text{model}} = 512 \)</li>
         </ul>
       </ul>
       <li>Original authors added positional encoding to input embedding to produce final encoding</li>
-      <li>To minimize loss of information of word embedding, we can multiply word embedding by \( \sqrt{\text{d_{model}}} \)</li>
+      <li>To minimize loss of information of word embedding, we can multiply word embedding by \( \sqrt{d_{\text{model}}} \)</li>
       <li>Positional encoding is computed once and re-used throughout the training</li>
 <pre><code class="python">def encoding(pos, positional_vector)
   for i in range(0, 512,2):
@@ -193,29 +193,38 @@
   <div class="card-body">
     <h2 class="card-title">Attention</h2>
     <ul>
-      <li>Unlike RNN where tokens are analyzed in sequence, attention <strong>relates every token to every other tokens</strong> in a sequence</li>
+      <li>Unlike RNN where each token goes to network one by one, attention <strong>relates every token to every other tokens</strong></li>
       <li>Input sentence is represented as \( Q, K, V \) where these matrices are multipled to find relationship between all words to all words</li>
       <ul>
         <li>Value of diagonal element should be the highest since a word would stongly be related to itself</li>
-        <li>\( Q, K, V \) - dimension is \( n \times  d_{model} \), a word is represented by \( d_{model} \) vector, number of words in vocabulary is represented by \( n \)</li>
+        <li>Dimension of \( Q, K, V \) is \( n \times  d_{\text{model}} \)</li>
+        <li>A word is represented by \( d_{\text{model}} \) vector</li>
+        <li>Number of words in vocabulary is represented by \( n \)</li>
       </ul>
       <li>\( \text{Attention}(Q,K,V) = \text{softmax} \left( \dfrac{QK^{T}}{\sqrt{d_{k}}} \right) V \)</li>
-      <li>For large values of \( d_{k} \), dot product becomes big and softmax function can have very small gradient, so scale by \( \frac{1}{\sqrt{d_{k}}} \)</li>
+      <ul>
+        <li>For large values of \( d_{k} \), dot product becomes big and softmax function can have very small gradient, so scale by \( \frac{1}{\sqrt{d_{k}}} \)</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Multi-head attention</h3>
     <ul>
-      <li>\( W_{Q} \) - parameter matrix whose dimension is \( d_{model} \times d_{model} \)</li>
-      <li>\( W_{K} \) - parameter matrix whose dimension is \( d_{model} \times d_{model} \)</li>
-      <li>\( W_{V} \) - parameter matrix whose dimension is \( d_{model} \times d_{model} \)</li>
-      <li>\( Q^{\prime} \) - \( Q \times W_{Q} \), matrix where each query that has dimension \( n \times d_{model} \)</li>
-      <li>\( K^{\prime} \) - \( K \times W_{K} \), matrix where each key that has dimension \( n \times d_{model} \)</li>
-      <li>\( V^{\prime} \) - \( V \times W_{V} \), matrix where each value that has dimension \( n \times d_{model} \)</li>
-      <li>\( Q^{\prime} \) is split into \( Q_{1} \dots Q_{8} \) where each head only sees smaller part of embedding of words</li>
+      <li>Input \( (\text{max_seq_len} \times d_{\text{model}}) \)</li>
+      <li>\( Q \) \( (\text{max_seq_len} \times d_{\text{model}}) \)</li>
+      <li>\( K \) \( (\text{max_seq_len} \times d_{\text{model}}) \)</li>
+      <li>\( V \) \( (\text{max_seq_len} \times d_{\text{model}}) \)</li>
+      <li>\( W_{O} \) \( (d_{\text{model}} \times d_{\text{model}}) \)</li>
+      <li>\( W_{Q} \) \( (d_{\text{model}} \times d_{\text{model}}) \)</li>
+      <li>\( W_{K} \) \( (d_{\text{model}} \times d_{\text{model}}) \)</li>
+      <li>\( W_{V} \) \( (d_{\text{model}} \times d_{\text{model}}) \)</li>
+      <li>\( Q^{\prime} \) - \( (Q \times W_{Q}) \), matrix where each query that has dimension \( (\text{max_seq_len} \times d_{\text{model}}) \)</li>
+      <li>\( K^{\prime} \) - \( (K \times W_{K}) \), matrix where each key that has dimension \( (\text{max_seq_len} \times d_{\text{model}}) \)</li>
+      <li>\( V^{\prime} \) - \( (V \times W_{V}) \), matrix where each value that has dimension \( (\text{max_seq_len} \times d_{\text{model}}) \)</li>
+      <li>\( Q^{\prime} \) is split into \( Q_{1} \dots Q_{8} \) \( (d_{k} \times \text{max_seq_len}) \) where each head only sees smaller part of embedding of words</li>
       <li>\( K^{\prime} \) is split into \( K_{1} \dots K_{8} \)</li>
       <li>\( V^{\prime} \) is split into \( V_{1} \dots V_{8} \)</li>
-      <li>\( \text{head}_{1} \) is computed from \( Q_{1}, K_{1}, V_{1} \)</li>
-      <li>\( \text{Multi-head attention}(Q,K,V) = \text{Concat}(\text{head}_{1} \dots \text{head}_{h}) W_{O} \)</li>
+      <li>\( \text{head}_{i} \) - \( (d_{k} \times \text{max_seq_len}) \) is computed from \( Q_{i}, K_{i}, V_{i} \)</li>
+      <li>\( \text{Multi-head attention}(Q,K,V) = \text{Concat}(\text{head}_{1} \dots \text{head}_{h}) W_{O} \) \( (\text{max_seq_len} \times d_{\text{model}}) \)</li>
       <li>Each head watches different aspect of word</li>
       <ul>
         <li>A head may learn a word as noun</li>
@@ -334,7 +343,7 @@ attention3 = attention_scores[0][2] * V[2]</code></pre>
     <h2 class="card-title">Feedforward network</h2>
     <ul>
       <li>Contains two layers and applies ReLU</li>
-      <li>Input and output has \( d_{model} = 512 \) but inner layer has \( d_{\text{ff}} = 2048 \)</li>
+      <li>Input and output has \( d_{\text{model}} = 512 \) but inner layer has \( d_{\text{ff}} = 2048 \)</li>
       <li>\( \text{FFN}(x) = max(0, xW_{1} + b_{1})W_{2} + b_{2} \)</li>
       <li>Can be considered as two convolutions with size \( 1 \) kernels</li>
       <li>Output goes to layer normalization, then to next layer of encoder and multi-head attention layer of decoder</li>
