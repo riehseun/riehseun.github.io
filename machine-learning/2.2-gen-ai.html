@@ -95,9 +95,50 @@
     <h3 class="card-title">ML category</h3>
     <ul>
       <li>Option 1. pre-training</li>
+      <ul>
+        <li>Pros</li>
+        <ul>
+          <li></li>
+        </ul>
+        <li>Cons</li>
+        <ul>
+          <li>Very expensive</li>
+        </ul>
+      </ul>
       <li>Option 2. fine-tuning</li>
+      <ul>
+        <li>Pros</li>
+        <ul>
+          <li>Higher quality than prompt engineering (few shot learning) since there is no need to provide big prompt that has context</li>
+        </ul>
+        <li>Cons</li>
+        <ul>
+          <li>Still expensive</li>
+          <li>May replace existing knowledge with new knowledge</li>
+        </ul>
+      </ul>
       <li>Option 3. retrieval augmented generation</li>
+      <ul>
+        <li>Pros</li>
+        <ul>
+          <li></li>
+        </ul>
+        <li>Cons</li>
+        <ul>
+          <li></li>
+        </ul>
+      </ul>
       <li>Option 4. retrieval augmented generation with pre-trained splitter and reranker</li>
+      <ul>
+        <li>Pros</li>
+        <ul>
+          <li></li>
+        </ul>
+        <li>Cons</li>
+        <ul>
+          <li></li>
+        </ul>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -112,7 +153,13 @@
     <h3 class="card-title">Data engineering</h3>
     <ul>
       <li>Training data</li>
+      <ul>
+        <li>Documents with domain specific knowledge</li>
+      </ul>
       <li>Database</li>
+      <ul>
+        <li></li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Feature engineering</h3>
@@ -137,35 +184,42 @@
         <ul>
           <li>Text splitter</li>
           <ul>
-            <li>Split documents into chunks</li>
+            <li>Split documents into chunks (chunks are usually single sentences)</li>
             <li>We want to pass only the relevant texts to LLM</li>
           </ul>
           <li>Embedding</li>
           <ul>
             <li>Create embedding for each chunk</li>
+            <ul>
+              <li>For example, use Sentence BERT</li>
+              <li>Feed two sentences represented by matrix \( (\text{seq_len} \times d_{\text{model}}) \) as input embedding to two BERTs</li>
+              <li>Compute avarage of embeddings of all words in sentence</li>
+              <li>Two BERTs produce to sentence embeddings \( (\text{seq_len} \times d_{\text{model}}) \)</li>
+              <li>Calculate cosine simliarity</li>
+              <li>Loss (MSE) uses target cosine simliarity and calculated cosine simliarity</li>
+            </ul>
             <li>We want to use embedding to find the most relevant chunks</li>
           </ul>
           <li>Vector database</li>
           <ul>
-            <li>Stores chunks and embeddings</li>
+            <li>Stores embeddings of chunks</li>
           </ul>
         </ul>
         <li>Query</li>
         <ul>
-          <li>System prompt</li>
-          <ul>
-            <li></li>
-            <li></li>
-          </ul>
           <li>Query expansion</li>
           <ul>
             <li>Produces standalone questions from chat history</li>
             <li>Can include spelling correction, adding additional keyword, etc</li>
+            <li>Query is transformned into embedding</li>
           </ul>
           <li>Retriever</li>
           <ul>
-            <li>Executes search on vector database using standalone prompt</li>
-            <li>Outputs sections of the documents that are most relevant to standalone prompt</li>
+            <li>Executes search on vector database using embedding of standalone prompt</li>
+            <li>Outputs chunks that are most relevant to standalone prompt</li>
+            <ul>
+              <li>Cosine similairy between query embedding and chuck embedding is computed</li>
+            </ul>
             <li>Focused on optimizing recall</li>
           </ul>
           <li>Re-ranker</li>
@@ -173,6 +227,11 @@
             <li>Takes \( k \) candidate chunks from retriever and reorders them</li>
             <li>Permutes the chunk to remove noisy parts and only keep most relevant ones</li>
             <li>Focused on optimizing precision while maintaining recall</li>
+          </ul>
+          <li>System prompt</li>
+          <ul>
+            <li>A template</li>
+            <li>Query and chucks are added to system propmt, then fed to LLM</li>
           </ul>
           <li>Generation</li>
           <ul>
