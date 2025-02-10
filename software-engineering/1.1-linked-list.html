@@ -63,7 +63,7 @@
 
 <div class="card mb-4" id="linkedlist-">
   <div class="card-body">
-    <h2 class="card-title">Add two numbers (M) (G/F/A/100) !!!!</h2>
+    <h2 class="card-title">Add two numbers (M) (G/F/A/100) !#!!</h2>
 
 <pre><code class="python"># Definition for singly-linked list.
 # class ListNode:
@@ -72,54 +72,37 @@
 #         self.next = next
 class Solution:
     def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:
-
+        
         # Add digits by digits while maintaining the carry
 
         prev = None
         carry = 0
 
-        # Time O(max(n,m)) n = len of linked list1, m = len of linked list2
-        while l1 and l2:
-            val = (l1.val + l2.val + carry) % 10
+        # Time O(max(n,m)) 
+        #   n = len of linked list1
+        #   m = len of linked list2
+        # Space O(1)
+        while l1 or l2:
+            value = carry
 
-            if l1.val + l2.val + carry >= 10:
+            if l1:
+                value += l1.val
+                l1 = l1.next
+            if l2:
+                value += l2.val
+                l2 = l2.next
+
+            if value >= 10:
                 carry = 1
             else:
                 carry = 0
-
-            l1 = l1.next
-            l2 = l2.next
 
             if not prev:
-                prev = ListNode(val, None)
+                prev = ListNode(value%10, None)
                 head = prev
             else:
-                prev.next = ListNode(val, None)
+                prev.next = ListNode(value%10, None)
                 prev = prev.next
-
-        while l1:
-            val = (l1.val + carry) % 10
-
-            if l1.val + carry >= 10:
-                carry = 1
-            else:
-                carry = 0
-
-            l1 = l1.next
-            prev.next = ListNode(val, None)
-            prev = prev.next
-
-        while l2:
-            val = (l2.val + carry) % 10
-
-            if l2.val + carry >= 10:
-                carry = 1
-            else:
-                carry = 0
-
-            l2 = l2.next
-            prev.next = ListNode(val, None)
-            prev = prev.next
 
         if carry == 1:
             prev.next = ListNode(1, None)
