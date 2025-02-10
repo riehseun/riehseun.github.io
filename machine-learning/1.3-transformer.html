@@ -140,17 +140,16 @@
     <h2 class="card-title">Input embedding</h2>
     <ul>
       <li>Converts input tokens to vector of \( d_{\text{model}} = 512 \) dimension using learned embeddings</li>
+      <li>Tokenizer transforms a sentence into tokens (input_ids)</li>
+      <li>Same word is represented by the same token (input_id)</li>
       <ul>
-        <li>Tokenizer transforms a sentence into tokens (each token is a single word)</li>
-        <ul>
-          <li>Ex. text = "The cat slept on the couch.It was too tired to get up."</li>
-          <li>Ex. input_ids = [1996, 4937, 7771, 2006, 1996, 6411, 1012, 2009, 2001, 2205, 5458, 2000, 2131, 2039, 1012]</li>
-        </ul>
-        <li>An embedding method (Ex. skip gram) is used to convert each word to a vector of \( 512 \) numbers</li>
-        <ul>
-          <li>Ex. black = [[-0.01206071 ... -0.04273562]]</li>
-          <li>Ex. brown = [[0.00135794589 ... -0.0490022525]]</li>
-        </ul>
+        <li>Ex. text = "The cat slept on the couch.It was too tired to get up."</li>
+        <li>Ex. input_ids = [1996, 4937, 7771, 2006, 1996, 6411, 1012, 2009, 2001, 2205, 5458, 2000, 2131, 2039, 1012]</li>
+      </ul>
+      <li>An embedding method (Ex. skip gram) is used to convert each word to a vector of \( 512 \) numbers</li>
+      <ul>
+        <li>Ex. black = [[-0.01206071 ... -0.04273562]]</li>
+        <li>Ex. brown = [[0.00135794589 ... -0.0490022525]]</li>
       </ul>
     </ul>
   <div class="card-footer text-muted">
@@ -163,17 +162,20 @@
     <h2 class="card-title">Positional encoding</h2>
     <ul>
       <li>Considers position of a word in a sentence</li>
-      <li>\( PE_{pos 2i} = \sin\left(\dfrac{pos}{10000^{\frac{2i}{d_{model}}}}\right) \)</li>
+      <li>For each word, create a vector of \( d_{\text{model}} = 512 \) dimension</li>
       <ul>
-        <li>Applied to even position in the vector of \( d_{model} \)</li>
-      </ul>
-      <li>\( PE_{pos 2i+1} = \cos\left(\dfrac{pos}{10000^{\frac{2i}{d_{model}}}}\right) \)</li>
-      <ul>
-        <li>Applied to odd position in the vector of \( d_{model} \)</li>
+        <li>\( PE_{pos 2i} = \sin\left(\dfrac{pos}{10000^{\frac{2i}{d_{model}}}}\right) \)</li>
+        <ul>
+          <li>Applied to even position in the vector of \( d_{\text{model}} = 512 \)</li>
+        </ul>
+        <li>\( PE_{pos 2i+1} = \cos\left(\dfrac{pos}{10000^{\frac{2i}{d_{model}}}}\right) \)</li>
+        <ul>
+          <li>Applied to odd position in the vector of \( d_{\text{model}} = 512 \)</li>
+        </ul>
       </ul>
       <li>Original authors added positional encoding to input embedding to produce final encoding</li>
       <li>To minimize loss of information of word embedding, we can multiply word embedding by \( \sqrt{\text{d_{model}}} \)</li>
-      <li>Positional encoding is computed once and re-used through the training</li>
+      <li>Positional encoding is computed once and re-used throughout the training</li>
 <pre><code class="python">def encoding(pos, positional_vector)
   for i in range(0, 512,2):
       val =  pos / (10000**((2*i)/d_model))
