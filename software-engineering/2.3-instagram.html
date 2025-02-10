@@ -262,19 +262,17 @@
         <ul>
           <li>API gateway writes policy in cache and worker asynchronuously stores in DB</li>
         </ul>
+        <li>Returns 429 too many request when rate limiting</li>
       </ul>
       <li>Authentication</li>
       <li>Authorization</li>
-      <li>Integration with load balancer</li>
+      <li>Load balance</li>
       <ul>
-        <li>Option 1. load balancer -> API gateway</li>
-        <ul>
-          <li>Mutiple sets of API gateway are needed</li>
-        </ul>
-        <li>Option 2. API gateway -> load balancer</li>
-        <ul>
-          <li>Only one set of API gateway is needed</li>
-        </ul>
+        <li>Policy can determine load distribution rule</li>
+      </ul>
+      <li>Reverse proxy</li>
+      <ul>
+        <li>Policy can filer out clients</li>
       </ul>
     </ul>
 
@@ -287,8 +285,23 @@
         <li>Mod image_id, video_id, post_id by number of servers to compute server_id where data goes to</li>
         <li>When servers are added/removed, server_ids change and data needs to be re-distributed</li>
       </ul>
-      <li>Option 2. </li>
-      <li></li>
+      <li>Option 2. consistent hashing</li>
+      <ul>
+        <li>Use hash function to generate hash values and put them in conceptual ring</li>
+        <ul>
+          <li>Ex. SHA-1 generates values \( 0 \dots 2^{160}-1 \)</li>
+        </ul>
+        <li>Use the same hash function to compute hash value for each server_id</li>
+        <li>Use the same hash function to compute hash value for image_id, video,_id, post_id</li>
+        <li>The data is served by the next server in the conceptual ring</li>
+        <li>When servers are added/removed, only a fraction of data will see its "next server" is changed</li>
+        <li>Data can be ununiformly distributed as servers are added/removed</li>
+      </ul>
+      <li>Option 3. consistent hashing with virtual nodes</li>
+      <ul>
+        <li>Each server is represented by many points (100-200) in the ring</li>
+        <li>Data can be more evenly spread out</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Text storage</h3>
