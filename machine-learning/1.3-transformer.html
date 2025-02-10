@@ -308,7 +308,8 @@ attention3 = attention_scores[0][2] * V[2]</code></pre>
         <li>For each sentence, compute mean and variance of all words in the sentence</li>
         <li>Then, standardized each value using the mean and variance</li>
         <li>\( \gamma \) and \( \beta \) is multiplied and added to allow model to amplify the values</li>
-        <li>\( \text{LayerNormalization}(v) = \gamma \dfrac{v-\mu}{\sigma} + \beta \)</li>
+        <li>\( \text{LayerNormalization}(v) = \gamma \dfrac{v-\mu}{\sqrt{\sigma^{2}+\epsilon}} + \beta \)</li>
+        <li>\( \epsilon \) is added so that the values don't become too big or too small</li>
         <ul>
           <li>\( \mu \) is the mean of \( v \) of dimension \( d \)</li>
           <ul>
@@ -333,7 +334,7 @@ attention3 = attention_scores[0][2] * V[2]</code></pre>
     <h2 class="card-title">Feedforward network</h2>
     <ul>
       <li>Contains two layers and applies ReLU</li>
-      <li>Input and output has \( d_{\text{model}} = 512 \) but inner layer has \( d_{\text{ff}} = 2048 \)</li>
+      <li>Input and output has \( d_{model} = 512 \) but inner layer has \( d_{\text{ff}} = 2048 \)</li>
       <li>\( \text{FFN}(x) = max(0, xW_{1} + b_{1})W_{2} + b_{2} \)</li>
       <li>Can be considered as two convolutions with size \( 1 \) kernels</li>
       <li>Output goes to layer normalization, then to next layer of encoder and multi-head attention layer of decoder</li>
