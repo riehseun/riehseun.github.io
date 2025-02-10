@@ -73,6 +73,7 @@
       <li><a href="#tree-dfs">Alien dictionary</a></li>
       <li><a href="#tree-dfs">Diameter of binary tree</a></li>
       <!-- <li><a href="#tree-dfs">Longest univalue path</a></li> -->
+      <li><a href="#tree-dfs">All Nodes Distance K in Binary Tree</a></li>
       <li><a href="#tree-dfs">Range Sum of BST</a></li>
       <li><a href="#tree-dfs">Lowest Common Ancestor of a Binary Tree III</a></li>
     </ul>
@@ -991,31 +992,31 @@ class Solution:
         #   If target < root.val, search on left
 
         self.min_diff = math.inf
-        self.node = None
+        self.result = None
 
         # Time O(h) 
         #   h = height of tree
         # Space O(1)
-        def pre_order(root, target):
+        def pre_order(node, target):
 
-            if root:
+            if node:
 
-                if abs(root.val-target) < self.min_diff:
-                    self.min_diff = abs(root.val-target)
-                    self.node = root
+                if abs(node.val-target) < self.min_diff:
+                    self.min_diff = abs(node.val-target)
+                    self.result = node
                 # If difference is the same, keep smaller node value
-                elif abs(root.val-target) == self.min_diff:
-                    if root.val < self.node.val:
-                        self.node = root  
+                elif abs(node.val-target) == self.min_diff:
+                    if node.val < self.result.val:
+                        self.result = node
                 
-                if target < root.val:
-                    pre_order(root.left, target)
+                if target < node.val:
+                    pre_order(node.left, target)
                 else:
-                    pre_order(root.right, target)
+                    pre_order(node.right, target)
         
         pre_order(root, target)
 
-        return self.node.val</code></pre>
+        return self.result.val</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/closest-binary-search-tree-value">270. Closest Binary Search Tree Value</a>
@@ -1303,6 +1304,73 @@ class Solution:
     Reference: <a href="https://leetcode.com/problems/longest-univalue-path">687. Longest univalue path</a>
   </div>
 </div> -->
+
+<div class="card mb-4" id="tree-dfs-">
+  <div class="card-body">
+    <h2 class="card-title">All Nodes Distance K in Binary Tree (M) (F/A) #!</h2>
+
+<pre><code class="python"># Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.left = None
+#         self.right = None
+
+class Solution:
+    def distanceK(self, root: TreeNode, target: TreeNode, k: int) -> List[int]:
+
+        # DFS on tree to convert to graph
+        # DFS on graph
+
+        graph = defaultdict(set)
+
+        # Time O(n)
+        #   n = number of nodes in tree
+        # Space O(n)
+        def pre_order(node, parent, graph):
+
+            if node:
+                
+                if parent:
+                    graph[parent.val].add(node.val)
+                    graph[node.val].add(parent.val)
+
+                pre_order(node.left, node, graph)
+                pre_order(node.right, node, graph)
+
+        pre_order(root, None, graph)
+
+        distances = defaultdict(list)
+
+        # Time O(n+m) 
+        #   n = number of nodes
+        #   m = number of edges
+        # Space O(n)
+        def dfs(graph, start):
+            
+            explored = set()
+            explored.add(start)
+
+            stack = []
+            stack.append((start, 0))
+
+            while stack:
+                node, depth = stack.pop()
+                distances[depth].append(node)
+                
+                for next_node in graph[node]:
+                    if next_node not in explored:
+                        explored.add(next_node)
+                        stack.append((next_node, depth+1))
+                        
+        dfs(graph, target.val)
+
+        return distances[k]</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/accounts-merge">863. All Nodes Distance K in Binary Tree</a>
+  </div>
+</div>
 
 <div class="card mb-4" id="tree-dfs">
   <div class="card-body">
