@@ -216,11 +216,38 @@
           <li>Retriever</li>
           <ul>
             <li>Executes search on vector database using embedding of standalone prompt</li>
-            <li>Outputs chunks that are most relevant to standalone prompt</li>
+            <li>Uses variants of NN to search similar embeddings</li>
             <ul>
-              <li>Cosine similairy between query embedding and chuck embedding is computed</li>
+              <li>Option 1. naive</li>
+              <ul>
+                <li>Exact KNN</li>
+                <li>Compare query embedding with all embeddings to compute cosine similarity</li>
+                <li>Sort by cosine similarity and keep top k</li>
+                <li>Very slow \( \mathcal{O}(ND) \)</li>
+              </ul>
+              <li>Option 2. hierarchical navigable small worlds (HNSW)</li>
+              <ul>
+                <li>ANN</li>
+                <li>Focused on recall</li>
+                <li>Build a graph where nodes are embeddings and edges are connections between embeddings</li>
+                <li>Number of connections that each node has should be small (For example, less than 6)</li>
+                <li>When a query enters the graph, entry node is randomly chosen</li>
+                <li>Compare similarity between query and random node versus similairty between query and neighboring nodes of the random node</li>
+                <li>If random node has higher similarity with query, algorithm stops there</li>
+                <li>Else, algorithm moves to the neighoboring node that has highest similarity with query, and repeats</li>
+                <li>When the algorithm stops, all visited nodes are ordered based on similarity and top k is returned</li>
+                <li>Search is repeated many time with different random entry nodes</li>
+                <li>How to add a new sentence to graph?</li>
+                <ul>
+                  <li>Do the search and connect the nodes with top k nodes based on cosine similarity</li>
+                </ul>
+                <li>SkipList</li>
+                <ul>
+                  <li>Lists where indices of each list are connected by pointers as if nodes in linked lists</li>
+                  <li>Search and insert is \( \mathcal{O}(logn) \)</li>
+                </ul>
+              </ul>
             </ul>
-            <li>Focused on optimizing recall</li>
           </ul>
           <li>Re-ranker</li>
           <ul>
