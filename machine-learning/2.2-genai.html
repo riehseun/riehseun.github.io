@@ -180,92 +180,48 @@
     <ul>
       <li>Retrival augmented generation</li>
       <ul>
-        <li>Data ingestion</li>
+        <li>Embedding</li>
         <ul>
-          <li>Text splitter</li>
-          <ul>
-            <li>Split documents into chunks (chunks are usually single sentences)</li>
-            <li>We want to pass only the relevant texts to LLM</li>
-          </ul>
-          <li>Embedding</li>
-          <ul>
-            <li>Create embedding for each chunk</li>
-            <ul>
-              <li>For example, use Sentence BERT</li>
-              <li>Feed two sentences represented by matrix \( (\text{seq_len} \times d_{\text{model}}) \) as input embedding to two BERTs</li>
-              <li>Compute avarage of embeddings of all words in sentence</li>
-              <li>Two BERTs produce to sentence embeddings \( (\text{seq_len} \times d_{\text{model}}) \)</li>
-              <li>Calculate cosine simliarity</li>
-              <li>Loss (MSE) uses target cosine simliarity and calculated cosine simliarity</li>
-            </ul>
-            <li>We want to use embedding to find the most relevant chunks</li>
-          </ul>
-          <li>Vector database</li>
-          <ul>
-            <li>Stores embeddings of chunks</li>
-          </ul>
+          <li>For example, use Sentence BERT</li>
+          <li>Feed two sentences represented by matrix \( (\text{seq_len} \times d_{\text{model}}) \) as input embedding to two BERTs</li>
+          <li>Compute avarage of embeddings of all words in sentence</li>
+          <li>Two BERTs produce to sentence embeddings \( (\text{seq_len} \times d_{\text{model}}) \)</li>
+          <li>Calculate cosine simliarity</li>
+          <li>Loss (MSE) uses target cosine simliarity and calculated cosine simliarity</li>
         </ul>
-        <li>Query</li>
+        <li>Retriever</li>
         <ul>
-          <li>Query expansion</li>
+          <li>Option 1. naive</li>
           <ul>
-            <li>Produces standalone questions from chat history</li>
-            <li>Can include spelling correction, adding additional keyword, etc</li>
-            <li>Query is transformned into embedding</li>
+            <li>Exact KNN</li>
+            <li>Compare query embedding with all embeddings to compute cosine similarity</li>
+            <li>Sort by cosine similarity and keep top k</li>
+            <li>Very slow \( \mathcal{O}(ND) \)</li>
           </ul>
-          <li>Retriever</li>
+          <li>Option 2. hierarchical navigable small worlds (HNSW)</li>
           <ul>
-            <li>Executes search on vector database using embedding of standalone prompt</li>
-            <li>Uses variants of NN to search similar embeddings</li>
+            <li>ANN</li>
+            <li>Focused on recall</li>
+            <li>Build a graph where nodes are embeddings and edges are connections between embeddings</li>
+            <li>Number of connections that each node has should be small (For example, less than 6)</li>
+            <li>When a query enters the graph, entry node is randomly chosen</li>
+            <li>Compare similarity between query and random node versus similairty between query and neighboring nodes of the random node</li>
+            <li>If random node has higher similarity with query, algorithm stops there</li>
+            <li>Else, algorithm moves to the neighoboring node that has highest similarity with query, and repeats</li>
+            <li>When the algorithm stops, all visited nodes are ordered based on similarity and top k is returned</li>
+            <li>Search is repeated many time with different random entry nodes</li>
+            <li>How to add a new sentence to graph?</li>
             <ul>
-              <li>Option 1. naive</li>
-              <ul>
-                <li>Exact KNN</li>
-                <li>Compare query embedding with all embeddings to compute cosine similarity</li>
-                <li>Sort by cosine similarity and keep top k</li>
-                <li>Very slow \( \mathcal{O}(ND) \)</li>
-              </ul>
-              <li>Option 2. hierarchical navigable small worlds (HNSW)</li>
-              <ul>
-                <li>ANN</li>
-                <li>Focused on recall</li>
-                <li>Build a graph where nodes are embeddings and edges are connections between embeddings</li>
-                <li>Number of connections that each node has should be small (For example, less than 6)</li>
-                <li>When a query enters the graph, entry node is randomly chosen</li>
-                <li>Compare similarity between query and random node versus similairty between query and neighboring nodes of the random node</li>
-                <li>If random node has higher similarity with query, algorithm stops there</li>
-                <li>Else, algorithm moves to the neighoboring node that has highest similarity with query, and repeats</li>
-                <li>When the algorithm stops, all visited nodes are ordered based on similarity and top k is returned</li>
-                <li>Search is repeated many time with different random entry nodes</li>
-                <li>How to add a new sentence to graph?</li>
-                <ul>
-                  <li>Do the search and connect the nodes with top k nodes based on cosine similarity</li>
-                </ul>
-                <li>SkipList</li>
-                <ul>
-                  <li>Lists where indices of each list are connected by pointers as if nodes in linked lists</li>
-                  <li>Search and insert is \( \mathcal{O}(logn) \)</li>
-                </ul>
-              </ul>
+              <li>Do the search and connect the nodes with top k nodes based on cosine similarity</li>
+            </ul>
+            <li>SkipList</li>
+            <ul>
+              <li>Lists where indices of each list are connected by pointers as if nodes in linked lists</li>
+              <li>Search and insert is \( \mathcal{O}(logn) \)</li>
             </ul>
           </ul>
-          <li>Re-ranker</li>
-          <ul>
-            <li>Takes \( k \) candidate chunks from retriever and reorders them</li>
-            <li>Permutes the chunk to remove noisy parts and only keep most relevant ones</li>
-            <li>Focused on optimizing precision while maintaining recall</li>
-          </ul>
-          <li>System prompt</li>
-          <ul>
-            <li>A template</li>
-            <li>Query and chucks are added to system propmt, then fed to LLM</li>
-          </ul>
-          <li>Generation</li>
-          <ul>
-            <li>Original document of most relevant sections plus a system prompt are sent to LLM</li>
-            <li>LLM response includes citations to the referenced documents</li>
-          </ul>
         </ul>
+        <li>Re-ranker</li>
       </ul>
     </ul>
 
@@ -300,6 +256,56 @@
 <div class="card mb-4" id="north-american-customer-operation-6">
   <div class="card-body">
     <h2 class="card-title">Serving</h2>
+
+    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-0/genai-1.png" alt="Card image cap">
+    <h3>Data ingestion</h3>
+    <ul>
+      <li>Text splitter</li>
+      <ul>
+        <li>Split documents into chunks (chunks are usually single sentences)</li>
+        <li>We want to pass only the relevant texts to LLM</li>
+      </ul>
+      <li>Embedding</li>
+      <ul>
+        <li>Create embedding for each chunk</li>
+        <li>We want to use embedding to find the most relevant chunks</li>
+      </ul>
+      <li>Vector database</li>
+      <ul>
+        <li>Stores embeddings of chunks</li>
+      </ul>
+    </ul>
+
+    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-0/genai-2.png" alt="Card image cap">
+    <h3>Query</h3>
+    <ul>
+      <li>Query expansion</li>
+      <ul>
+        <li>Produces standalone questions from chat history</li>
+        <li>Can include spelling correction, adding additional keyword, etc</li>
+        <li>Query is transformned into embedding</li>
+      </ul>
+      <li>Retriever</li>
+      <ul>
+        <li>Executes search on vector database using embedding of standalone prompt</li>
+        <li>Uses variants of NN to search similar embeddings</li>
+      </ul>
+      <li>Re-ranker</li>
+      <ul>
+        <li>Takes \( k \) candidate chunks from retriever and come up with smaller subset</li>
+        <li>Focused on optimizing precision while maintaining recall</li>
+      </ul>
+      <li>System prompt</li>
+      <ul>
+        <li>A template</li>
+        <li>Query and chucks are added to system propmt, then fed to LLM</li>
+      </ul>
+      <li>LLM</li>
+      <ul>
+        <li>Original document of most relevant sections plus a system prompt are sent to LLM</li>
+        <li>LLM response includes citations to the referenced documents</li>
+      </ul>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: 
