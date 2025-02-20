@@ -255,7 +255,7 @@
         <img class="img-fluid" class="card-img-top" src="/software-engineering/image/system-design-0/instagram-10.png" alt="Card image cap">
         <li>Counter is stored in cache</li>
         <ul>
-          <li>When there are multiple API gateways, they must use the same cache to avoid synchronization issue</li>
+          <li>If there are multiple API gateways, they must use the same cache to avoid synchronization issue</li>
         </ul>
         <li>Policy needs to be persisted and stored in DB</li>
         <li>Use write-back cache for fast read and write</li>
@@ -269,14 +269,22 @@
       <li>Load balance</li>
       <ul>
         <li>Policy can determine load distribution rule</li>
+        <li>Option 1. round robin</li>
+        <ul>
+          <li>Traffic is evenly distributed</li>
+          <li>Use for stateless application</li>
+        </ul>
+        <li>Option 2. session based</li>
+        <ul>
+          <li>Traffic will be unevenly distributed</li>
+          <li>Use for stateful application</li>
+        </ul>
       </ul>
       <li>Reverse proxy</li>
       <ul>
         <li>Policy can filer out clients</li>
       </ul>
     </ul>
-
-    <h3 class="card-title">Cache</h3>
 
     <h3 class="card-title">Data scaling</h3>
     <ul>
@@ -304,9 +312,59 @@
       </ul>
     </ul>
 
-    <h3 class="card-title">Text storage</h3>
+    <h3 class="card-title">Data replication</h3>
+    <ul>
+      <li>Use ideas from consistent hashing</li>
+      <li>Rather than storing data in next server in the ring, store data in first \( N \) physical servers</li>
+      <ul>
+        <li>The first \( N \) servers must be located different zone/region</li>
+      </ul>
+      <li>Consistency</li>
+      <ul>
+        <li>Write data to nodes reponsible for write operations and read data from all nodes</li>
+        <li>R = 1 or W = 1 means that coordinator need at least 1 node acknowledging read/write</li>
+        <li>Option 1. W + R > N</li>
+        <ul>
+          <li>Strong consistency (Quorum is achieved) since at least one node has latest data</li>
+        </ul>
+        <li>Option 2. W = N and R = 1</li>
+        <ul>
+          <li>Fast read</li>
+        </ul>
+        <li>Option 3. W = 1 and R = N</li>
+        <ul>
+          <li>Fast write</li>
+        </ul>
+      </ul>
+    </ul>
 
     <h3 class="card-title">ID genearation of DB</h3>
+    <ul>
+      <li>Need unique value for user_id and post_id</li>
+      <li>Option 1. twitter snowflake using 64 bit number as unique ID</li>
+      <ul>
+        <li>1 bit - 0</li>
+        <li>41 bits - timestamp</li>
+        <ul>
+          <li>Miliseconds since the epoch or custom epoch</li>
+        </ul>
+        <li>5 bits - datacenter Id</li>
+        <ul>
+          <li>2^5 = 32 data centers</li>
+          <li>Chosen at start up time and is fixed</li>
+        </ul>
+        <li>5 bits - machine Id</li>
+        <ul>
+          <li>2^5 = 32 machines per data center</li>
+          <li>Chosen at start up time and is fixed</li>
+        </ul>
+        <li>12 bits - sequence number</li>
+        <ul>
+          <li>Every machine increments sequence number by 1 for each Id generated on that machine</li>
+          <li>The number is reset to 0 every milisecond</li>
+        </ul>
+      </ul>
+    </ul>
 
     <h3 class="card-title">Notification</h3>
 
