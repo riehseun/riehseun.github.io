@@ -52,44 +52,42 @@
 
 <div class="card mb-4" id="prefix-sum-">
   <div class="card-body">
-    <h2 class="card-title">Continuous Subarray Sum (M) (F) !</h2>
+    <h2 class="card-title">Continuous Subarray Sum (M) (F) #</h2>
 
 <pre><code class="python">class Solution:
     def checkSubarraySum(self, nums: List[int], k: int) -> bool:
 
         # Compute cummulative sum
         # Compute mod of those sums by k
-        # If two mods have the same value,
+        # If two mods have the same value, 
         # sum betweem them should be divisible by k
-
-        # Ex.
-        # [23, 2, 4, 6, 7]
+        
+        # Ex. 
+        # [23, 2, 4, 6, 7] k = 6
         # [23, 25, 29, 35, 42]
         # [5, 1, 5, 5, 0]
 
-        mods = defaultdict(list)
-
-        cummulative_sum = 0
-        cummulative_sums = []
-
-        # Time O(n) n = len(nums)
+        mods = defaultdict(int)
+        prefix_sum = 0
+        
+        # Time O(n) 
+        #   n = len(nums)
         # Space O(n)
-        for num in nums:
-            cummulative_sum += num
-            cummulative_sums.append(cummulative_sum)
-
-        for i, num in enumerate(cummulative_sums):
-            mods[num%k].append(i)
-
-        for key, val in mods.items():
-            if len(val) > 2:
+        for i, num in enumerate(nums):
+            prefix_sum += num
+            mod = prefix_sum%k
+            
+            # If any prefix sum is multuple of k and legnth > 1
+            if mod == 0 and i > 0:
                 return True
-            if len(val) == 2:
-                if abs(val[0]-val[1]) > 1:
-                    return True
 
-        if 0 in mods and mods[0] != [0]:
-            return True
+            # If mod is already seen
+            if mod in mods:
+                # If subarray length > 1
+                if i - mods[mod] > 1:
+                    return True
+            else:
+                mods[mod] = i
 
         return False</code></pre>
   </div>
