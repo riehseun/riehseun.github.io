@@ -64,12 +64,19 @@
     <ul>
       <li>What is the purpose of the application? Design social platform like Instagram</li>
       <li>Should the system generate feeds? Yes</li>
-      <li>What does a feed consist of? Posts with text, image, video</li>
-      <li>What user actions are supported on posts? Like, share, comment, hide, report</li>
-      <li>How should posts be ranked? Assume chronological order</li>
-      <li>Should feeds be personalized for each user? No</li>
-      <li>Should feeds contains ADs? No</li>
+      <ul>
+        <li>What does a feed consist of? Posts with text, image, video</li>
+        <li>What user actions are supported on posts? Like, share, comment, hide, report</li>
+        <li>How should posts be ranked? Assume chronological order</li>
+        <li>Should feeds be personalized for each user? No</li>
+        <li>Should feeds contains ADs? No</li>
+      </ul>
       <li>Should the system support notification? Yes</li>
+      <ul>
+        <li>What triggers notification? Someone reacts (like, comment, etc) to your post, someone follows you</li>
+        <li>What devices should notifications be sent to? iOS, Andriod, email</li>
+        <li>Should the system allow users to opt-out from notification? Yes</li>
+      </ul>
       <li>Should the system support messaging? Yes</li>
       <li>Should the system support search? Yes</li>
       <li>Can users follow each other? Yes</li>
@@ -189,6 +196,13 @@
       <ul>
         <li>GET api/v1/feed</li>
       </ul>
+      <li><code>send_notification(user_id, subject, content)</code></li>
+      <ul>
+        <li>POST api/v1/notification</li>
+        <li><code>user_id</code> - recepient of notification</li>
+        <li><code>subject</code></li>
+        <li><code>content</code></li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -208,14 +222,14 @@
         <li>email (varchar)</li>
         <li>first_name (varchar)</li>
         <li>first_name (varchar)</li>
-        <li>creation_date (datetime)</li>
+        <li>timestamp (datetime)</li>
       </ul>
       <li>Post</li>
       <ul>
         <li>post_id (int, pk)</li>
         <li>image_path (varchar)</li>
         <li>video_path (varchar)</li>
-        <li>creation_date (datetime)</li>
+        <li>timestamp(datetime)</li>
         <li>text (varchar)</li>
       </ul>
       <li>User_post_interaction</li>
@@ -223,19 +237,25 @@
         <li>user_id (int)</li>
         <li>post_id (int)</li>
         <li>interaction_type (varchar) - like, share, comment, hide, report</li>
-        <li>creation_date (datetime)</li>
+        <li>timestamp (datetime)</li>
       </ul>
       <li>Comment</li>
       <ul>
         <li>user_id (int)</li>
         <li>post_id (int)</li>
         <li>comment (varchar)</li>
-        <li>creation_date (datetime)</li>
+        <li>timestamp (datetime)</li>
       </ul>
       <li>Following</li>
       <ul>
         <li>user_id_1 (int)</li>
         <li>user_id_2 (int)</li>
+      </ul>
+      <li>Notification</li>
+      <ul>
+        <li>notification_id (int)</li>
+        <li>user_id (int) - receipient of notification</li>
+        <li>timestamp (datetime)</li>
       </ul>
     </ul>
   </div>
@@ -367,6 +387,14 @@
     </ul>
 
     <h3 class="card-title">Notification</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/software-engineering/image/system-design-0/instagram-11.png" alt="Card image cap">
+
+    <ul>
+      <li>Notification server fetches template and user info, then sent requests to message queue</li>
+      <li>Workers store notification data in notification log DB</li>
+      <li>When third party fails to send notification, notification is added to message queue for retrying</li>
+    </ul>
 
     <h3 class="card-title">Feed generation</h3>
 
