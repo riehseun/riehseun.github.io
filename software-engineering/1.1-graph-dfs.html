@@ -113,26 +113,25 @@
 
 <div class="card mb-4" id="graph-dfs-">
   <div class="card-body">
-    <h2 class="card-title">Course schedule (M) (G/A) !!</h2>
+    <h2 class="card-title">Course schedule (M) (G/F/A) !#!</h2>
 
 <pre><code class="python">class Solution:
     def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
-
-        # Each element in prerequisites is two nodes in directed graph
+        
         # Do DFS
         # If cycle, return False
-
+        
         graph = defaultdict(set)
-
-        # Time O(k^2) k = numCourses
-        # Space O(k^2)
+        nodes = set()
+        
+        # Time O(k^2) 
+        #   k = numCourses
+        # Space O(k^2) 
         for pair in prerequisites:
             graph[pair[1]].add(pair[0])
-
-        # Time O(n+m)
-        #   n = number of nodes, which is k
-        #   m = number of edges, which is k^2
-        # Space O(n)
+            nodes.add(pair[0])
+            nodes.add(pair[1])
+        
         def dfs(graph, start):
 
             explored = set()
@@ -140,25 +139,27 @@
 
             stack = []
             stack.append(start)
-
+            
             while stack:
                 node = stack.pop()
-                if node in graph:
-                    for next_node in graph[node]:
-                        if next_node not in explored:
-                            explored.add(next_node)
-                            stack.append(next_node)
-                        else:
-                            if next_node == start:
-                                return True
-
+                for next_node in graph[node]:
+                    if next_node not in explored:
+                        explored.add(next_node)
+                        stack.append(next_node)
+                    else:
+                        if next_node == start:
+                            return True
+                            
             return False
 
-        # Time O(k^2)
-        for node in graph:
+        # Time O(n+m)
+        #   n = number of nodes, which is k
+        #   m = number of edges, which is k^2 
+        # Space O(n)
+        for node in nodes:
             if dfs(graph, node):
                 return False
-
+            
         return True</code></pre>
   </div>
   <div class="card-footer text-muted">
