@@ -839,7 +839,7 @@ class Solution:
 
 <div class="card mb-4" id="tree-dfs-">
   <div class="card-body">
-    <h2 class="card-title">Binary search tree iterator (M) (F) !</h2>
+    <h2 class="card-title">Binary search tree iterator (M) (F) #</h2>
 
 <pre><code class="python"># Definition for a binary tree node.
 # class TreeNode:
@@ -849,33 +849,39 @@ class Solution:
 #         self.right = right
 class BSTIterator:
 
-    # During init, store in-order traversal result into a list
+    # During init, store only the left subtrees into stack
+    #   Node at top of stack is next smallest element
 
+    # Time O(n) for skewed tree
+    #   O(1) on average
+    # Space O(n)
+    def left_child(self, node):
+
+        if node:
+            self.stack.append(node)
+            self.left_child(node.left)
+        
     def __init__(self, root: Optional[TreeNode]):
 
-        self.nodes = []
-        self.index = -1
+        self.stack = []        
+        self.left_child(root)
 
-        def in_order(root):
-
-            if root:
-                in_order(root.left)
-                self.nodes.append(root.val)
-                in_order(root.right)
-
-        in_order(root)
-
-    # Time O(n) n = number of nodes in tree
-    # Space O(n)
+    # Time O(n) for skewed tree
+    #   O(1) on average    
     def next(self) -> int:
-        self.index += 1
-        return self.nodes[self.index]
-
+        node = self.stack.pop()
+        
+        if node.right:
+            self.left_child(node.right)
+        
+        return node.val
+        
+    # Time O(1)
     def hasNext(self) -> bool:
-        if self.index + 1 >= len(self.nodes):
-            return False
+        if len(self.stack) > 0:
+            return True
 
-        return True
+        return False
 
 
 # Your BSTIterator object will be instantiated and called as such:
