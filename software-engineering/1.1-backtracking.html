@@ -52,6 +52,7 @@
       <!-- <li><a href="#backtracking-">Restore IP addresses</a></li> -->
       <!-- <li><a href="#backtracking-">Palindrome partitioning</a></li> -->
       <li><a href="#backtracking-">Word Search II</a></li>
+      <li><a href="#backtracking-">Expression Add Operators</a></li>
       <!-- <li><a href="#backtracking-">House robber III</a></li> -->
       <!-- <li><a href="#backtracking-">Matchsticks to square</a></li> -->
     </ul>
@@ -459,6 +460,71 @@ class Solution:
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/expression-add-operators">212. Word Search II</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="backtracking-">
+  <div class="card-body">
+    <h2 class="card-title">Expression Add Operators (H) (F) #</h2>
+
+<pre><code class="python">class Solution:
+    def addOperators(self, num: str, target: int) -> List[str]:
+
+        # Backtracking
+        #   At every digit, there are 4 choices
+        #   Expand operand by one digit
+        #   Try *
+        #   Try +
+        #   Try -
+
+        result = []
+
+        # Time O(n4**n)
+        #   n = len(num)
+        # Space O(n)
+        #   Space for expression is O(n)
+        #   Recursion stack takes O(n)
+        def backtrack(i, prev_operand, curr_operand, expression, value):
+
+            if i == len(num):
+                if value == target and curr_operand == 0:
+                    result.append("".join(expression[1:]))
+                return
+
+            curr_operand = curr_operand * 10 + int(num[i])
+            
+            # Expand
+            if curr_operand > 0:
+                backtrack(i+1, prev_operand, curr_operand, expression, value)
+
+            # Add
+            expression.append("+")
+            expression.append(str(curr_operand))
+            backtrack(i+1, curr_operand, 0, expression, value+curr_operand)
+            expression.pop()
+            expression.pop()
+
+            # Subtrack
+            if expression:
+                expression.append("-")
+                expression.append(str(curr_operand))
+                backtrack(i+1, -curr_operand, 0, expression, value-curr_operand)
+                expression.pop()
+                expression.pop()
+
+            # Multiply
+            if expression:
+                expression.append("*")
+                expression.append(str(curr_operand))
+                backtrack(i+1, prev_operand*curr_operand, 0, expression, value-prev_operand+(curr_operand*prev_operand))
+                expression.pop()
+                expression.pop()
+
+        backtrack(0, 0, 0, [], 0)
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/expression-add-operators">282. Expression Add Operators</a>
   </div>
 </div>
 
