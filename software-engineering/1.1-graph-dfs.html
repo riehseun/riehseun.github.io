@@ -56,7 +56,7 @@
 
 <div class="card mb-4" id="graph-dfs-">
   <div class="card-body">
-    <h2 class="card-title">Word break (M) (F/A) !!</h2>
+    <h2 class="card-title">Word break (M) (F/A) #!</h2>
 
 <pre><code class="python">class Solution(object):
     def wordBreak(self, s, wordDict):
@@ -66,44 +66,45 @@
         :rtype: bool
         """
 
-        # Consider indices in string as nodes in graph
+        # Consider indices of start and end char of string 
+        # as nodes in graph
         # For example, because "leet" is in "leetcode", 0->4
-
+        # Return True if there is path from 0 to len(s)
+        
         occurences = defaultdict(set)
-
+        
+        # Time O(nml)
+        #   n = len(s)
+        #   m = len(wordDict)
+        #   l = average length of each word in wordDict
+        # Space O(m)
         for word in wordDict:
-            start = 0
-            end = len(s)
-            while start < end:
-                index = s.find(word, start, end)
-                if index == -1:
-                    break
-                else:
-                    occurences[index].add(index+len(word))
-                    start = index + 1
-
-        # Time O(mn) where m = len(wordDict), n = len(s)
-        # Space O(mn)
+            for i in range(len(s)):
+                if s[i:].startswith(word):
+                    occurences[i].add(i+len(word))
+            
+        # Time O(m)
+        # Space O(m)
         def dfs(graph, start, end):
 
             explored = set()
             explored.add(start)
-
+            
             stack = []
             stack.append(start)
-
+            
             while stack:
                 node = stack.pop()
                 for next_node in graph[node]:
                     if next_node == end:
                         return True
-
+                        
                     if next_node not in explored:
                         stack.append(next_node)
                         explored.add(next_node)
-
+                
             return False
-
+                    
         return dfs(occurences, 0, len(s))</code></pre>
   </div>
   <div class="card-footer text-muted">
