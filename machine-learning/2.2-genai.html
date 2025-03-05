@@ -62,6 +62,7 @@
       <li>Business</li>
       <ul>
         <li>What should the model do? Automate chat responses that meet business purpose</li>
+        <li>Should the system text, image, video? Yes</li>
       </ul>
       <li>Data</li>
       <ul>
@@ -128,17 +129,6 @@
           <li></li>
         </ul>
       </ul>
-      <li>Option 4. retrieval augmented generation with pre-trained splitter and reranker</li>
-      <ul>
-        <li>Pros</li>
-        <ul>
-          <li></li>
-        </ul>
-        <li>Cons</li>
-        <ul>
-          <li></li>
-        </ul>
-      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -180,7 +170,7 @@
     <ul>
       <li>Retrival augmented generation</li>
       <ul>
-        <li>Text spliter</li>
+        <li>Chunking</li>
         <ul>
           <li>Option 1. fixed-size chunking</li>
           <ul>
@@ -200,12 +190,43 @@
         </ul>
         <li>Embedding</li>
         <ul>
-          <li>For example, use Sentence BERT</li>
-          <li>Feed two sentences represented by matrix \( (\text{seq_len} \times d_{\text{model}}) \) as input embedding to two BERTs</li>
-          <li>Compute avarage of embeddings of all words in sentence</li>
-          <li>Two BERTs produce to sentence embeddings \( (\text{seq_len} \times d_{\text{model}}) \)</li>
-          <li>Calculate cosine simliarity</li>
-          <li>Loss (MSE) uses target cosine simliarity and calculated cosine simliarity</li>
+          <li>Option 1. late chuncking</li>
+          <ul>
+            <li>Embed entire document into token-level representation</li>
+            <li>Token-level representations are groupd into chunks</li>
+            <li>Each chunk has contextual information from entire document</li>
+            <li>Pros</li>
+            <ul>
+              <li>Context awareness</li>
+            </ul>
+            <li>Cons</li>
+            <ul>
+              <li>Requires long context models</li>
+            </ul>
+          </ul>
+          <li>Option 2. late interaction</li>
+          <ul>
+            <li>Ex. ColBERT</li>
+            <li>Generate token-level embeddings for document and query independently</li>
+            <li>Compare similarity between query tokens and document tokens one by one</li>
+            <li>Highest similarity score gets selected</li>
+            <li>Pros</li>
+            <ul>
+              <li>High precision</li>
+            </ul>
+            <li>Cons</li>
+            <ul>
+              <li>Compute intensive</li>
+            </ul>
+          </ul>
+          <li>Option 3. Sentence BERT</li>
+          <ul>
+            <li>Feed two sentences represented by matrix \( (\text{seq_len} \times d_{\text{model}}) \) as input embedding to two BERTs</li>
+            <li>Compute avarage of embeddings of all words in sentence</li>
+            <li>Two BERTs produce to sentence embeddings \( (\text{seq_len} \times d_{\text{model}}) \)</li>
+            <li>Calculate cosine simliarity</li>
+            <li>Loss (MSE) uses target cosine simliarity and calculated cosine simliarity</li>
+          </ul>
         </ul>
         <li>Retriever</li>
         <ul>
@@ -254,8 +275,7 @@
 
     <h3 class="card-title">Model training</h3>
     <ul>
-      <li>Choose loss function</li>
-      <li>Hyperparameters</li>
+      <li>There is no model training in RAG</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -267,13 +287,26 @@
   <div class="card-body">
     <h2 class="card-title">Evaluation</h2>
 
-    <h3 class="card-title">Offline</h3>
+    <h3 class="card-title">Retrieval</h3>
     <ul>
-      <li>Precision and recall using document chunks after re-ranking</li>
-      <li>Precision and recall using document citation in model response</li>
+      <li>Context precision</li>
+      <li>Context recall</li>
+      <li>Context relevance</li>
     </ul>
 
-    <h3 class="card-title">Online</h3>
+    <h3 class="card-title">Generation</h3>
+    <ul>
+      <li>Faithfulness</li>
+      <li>Answer relevance</li>
+    </ul>
+
+    <h3 class="card-title">End-to-end</h3>
+    <ul>
+      <li>Summarization score</li>
+      <li>Context entities recall</li>
+      <li>Answer semantic similarity</li>
+      <li>Answer correctness</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: 
