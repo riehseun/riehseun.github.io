@@ -396,7 +396,64 @@
       <li>When third party fails to send notification, notification is added to message queue for retrying</li>
     </ul>
 
-    <h3 class="card-title">Feed generation</h3>
+    <h3 class="card-title">Feed serving</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/software-engineering/image/system-design-0/instagram-12.png" alt="Card image cap">
+
+    <ul>
+      <li>Generation</li>
+      <ul>
+        <li>Generation server gets friend IDs from graph DB</li>
+        <li>Generation server gets friends metadata from user cache</li>
+        <li>Generation server sends friend IDs and metadata to message queue</li>
+        <li>Workers generate feeds and store &lt;post_id, user_id&gt; mapping to feed cache</li>
+      </ul>
+      <li>Retrieval</li>
+      <ul>
+        <li>Image and videos are directly served via CDN</li>
+        <li>Retrieval server gets post IDs from feed cache</li>
+        <li>Retrieval server gets post contents from user cache and post cache</li>
+      </ul>
+      <li>Generation server</li>
+      <ul>
+        <li>Option 1. push</li>
+        <ul>
+          <li>Feed is pre-computed during write time</li>
+          <li>Pros</li>
+          <ul>
+            <li>Feed can be propagated to friends immediately because fetching feed is fast</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>If user has many friends, generating feed for all the friends can be compute intensive</li>
+            <li>Generating feed for inactive friends can be wasteful</li>
+          </ul>
+        </ul>
+        <li>Option 2. pull model</li>
+        <ul>
+          <li>Feed is generated during read time</li>
+          <li>Pros</li>
+          <ul>
+            <li>More efficient for handling inactive users</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Fetching feed is slow</li>
+          </ul>
+        </ul>
+        <li>Option 3. hybrid model</li>
+        <ul>
+          <li>For celebrities, use pull model</li>
+          <ul>
+            <li>Let followers pull new contents on-demand to avoid system overload</li>
+          </ul>
+          <li>For all other users, use push model</li>
+          <ul>
+            <li>Generating feed fast is critical</li>
+          </ul>
+        </ul>
+      </ul>
+    </ul>
 
     <h3 class="card-title">Direct messaging</h3>
 
