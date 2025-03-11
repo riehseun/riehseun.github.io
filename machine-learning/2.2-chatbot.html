@@ -291,21 +291,21 @@
     <ul>
       <li>Context precision</li>
       <ul>
-        <li>For each query, determine if chunk returned by retriever is relevant or not</li>
-        <li>Compute precision @ k for each chuck</li>
+        <li>For each query, determine if chunks returned by retriever is relevant or not</li>
+        <li>Compute precision @ k for each k in the retrieved chunks</li>
         <ul>
           <li>\( \text{precision @ k} = \dfrac{\text{true positive @ k}}{\text{true positive @ k} + \text{false positive @ k}} \)</li>
         </ul>
-        <li>Compute context precision @ k by averaging precision @ k for all relevant items in top k results</li>
+        <li>Compute context precision @ K by averaging precision @ k for all relevant chunk in top k results</li>
         <ul>
-          <li>\( \text{context precision @ K} = \dfrac{\displaystyle\sum_{k=1}^{K} \text{precision @ k} \times v_{k}}{\text{total number of items in top k result}} \)</li>
-          <li>\( v_{k} \) is an indicator whether item is relevant or not</li>
+          <li>\( \text{context precision @ K} = \dfrac{\displaystyle\sum_{k=1}^{K} \text{precision @ k} \times v_{k}}{\text{total number of relevant chunks in top k result}} \)</li>
+          <li>\( v_{k} \) is an indicator whether chunk is relevant or not</li>
           <li>\( K \) is total number of chunks</li>
         </ul>
       </ul>
       <li>Context recall</li>
       <ul>
-          <li>\( \dfrac{\text{relevant sentences in ground truth}}{\text{total sentences in ground truth}} \)</li>
+          <li>\( \dfrac{\text{relevant chunks in ground truth}}{\text{total chunks in ground truth}} \)</li>
         </ul>
     </ul>
 
@@ -317,7 +317,7 @@
       </ul>
       <li>Answer relevance</li>
       <ul>
-        <li>Calculate mean cosine similarity between original question and generated questions reverse engineered based on provided answers</li>
+        <li>Calculate mean cosine similarity between original question and generated (artificial) questions that are reverse engineered based on provided answers</li>
         <li>\( \dfrac{1}{N}\displaystyle\sum_{i=1}^{N} \cos(E_{g_{i}}, E_{o}) = \dfrac{1}{N}\displaystyle\sum_{i=1}^{N} \dfrac{E_{g_{i}} \cdot E_{o}}{\|E_{g_{i}}\|\|{E_{o}}\|} \)</li>
         <li>\( E_{g_{i}} \) is embedding of generated question \( i \)</li>
         <li>\( E_{o} \) is embedding of original question</li>
@@ -328,9 +328,18 @@
     <h3 class="card-title">End-to-end</h3>
     <ul>
       <li>Summarization score</li>
+      <ul>
+        <li>\( \text{QA score} = \dfrac{\text{number of correctly answered questions}}{\text{total number of questions}} \)</li>
+        <li>\( \text{consciousness score} = \dfrac{\text{length of summary}}{\text{length of context}} \)</li>
+        <li>\( \text{summarization score} = \dfrac{\text{QA score+consciousness score}}{\text{2}} \)</li>
+      </ul>
       <li>Context entities recall</li>
-      <li>Answer semantic similarity</li>
-      <li>Answer correctness</li>
+      <ul>
+        <li>\( \dfrac{|CE \cap GE|}{|GE|} \)</li>
+        <li>\( CE \) - entities present in provided answer</li>
+        <li>\( GE \) - entities present in ground truth</li>
+        <li>\( |CE \cap GE| \) - entities that are both in provided answer and ground truth</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
