@@ -78,6 +78,11 @@
         <li>Should the system allow users to opt-out from notification? Yes</li>
       </ul>
       <li>Should the system support messaging? Yes</li>
+      <ul>
+        <li>Should the system show user status? Yes</li>
+        <li>Should the system support group chat? Yes</li>
+        <li>Should the system persist messages? Yes</li>
+      </ul>
       <li>Should the system support search? Yes</li>
       <li>Can users follow each other? Yes</li>
     </ul>
@@ -386,16 +391,6 @@
       </ul>
     </ul>
 
-    <h3 class="card-title">Notification</h3>
-
-    <img class="img-fluid" class="card-img-top" src="/software-engineering/image/system-design-0/instagram-11.png" alt="Card image cap">
-
-    <ul>
-      <li>Notification server fetches template and user info, then sent requests to message queue</li>
-      <li>Workers store notification data in notification log DB</li>
-      <li>When third party fails to send notification, notification is added to message queue for retrying</li>
-    </ul>
-
     <h3 class="card-title">Feed serving</h3>
 
     <img class="img-fluid" class="card-img-top" src="/software-engineering/image/system-design-0/instagram-12.png" alt="Card image cap">
@@ -455,7 +450,49 @@
       </ul>
     </ul>
 
+    <h3 class="card-title">Notification</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/software-engineering/image/system-design-0/instagram-11.png" alt="Card image cap">
+
+    <ul>
+      <li>Notification server fetches template and user info, then sent requests to message queue</li>
+      <li>Workers store notification data in notification log DB</li>
+      <li>When third party fails to send notification, notification is added to message queue for retrying</li>
+    </ul>
+
     <h3 class="card-title">Direct messaging</h3>
+    <ul>
+      <li>1-on-1 chat</li>
+<img class="img-fluid" class="card-img-top" src="/software-engineering/image/system-design-0/instagram-13.png" alt="Card image cap">
+      <ul>
+        <li>User 1 and 2 maintains web socket connection to chat server 1 and 2 respectively</li>
+        <li>User 1 sends message to chat server 1</li>
+        <li>Chat server 1 obtains message ID from ID generator</li>
+        <li>Chat server 1 sends message to message queue 2</li>
+        <li>Message is stored in key-value store</li>
+        <li>If user 2 is online, notification servers sends message to user 2</li>
+        <li>If user 2 is offline, user 2 retrieves message from queue when it becomes online</li>
+      </ul>
+      <li>Group chat</li>
+      <ul>
+        <li>Each user has their own chat server and message queue</li>
+        <li>Each user is connected to its chat server with web socket for persistent connection</li>
+        <li>Message from user 1 is sent to message queues for user 2, 3, 4, and so on</li>
+      </ul>
+      <li>Sync messages</li>
+      <ul>
+        <li>User may be connected to different devices</li>
+        <li>Each device can keep the latest message ID it has seen</li>
+        <li>Each device can lookup key-value store periodically and pull messages whose ID is later than latest message ID it has seen</li>
+      </ul>
+      <li>User status</li>
+<img class="img-fluid" class="card-img-top" src="/software-engineering/image/system-design-0/instagram-14.png" alt="Card image cap">
+      <ul>
+        <li>Create user status server for each user</li>
+        <li>Create one process or thread for every user that the user is connected to via chat</li>
+        <li>All users send heartbeats periodically</li>
+      </ul>
+    </ul>
 
     <h3 class="card-title">Video encoding</h3>
 
