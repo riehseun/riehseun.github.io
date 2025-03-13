@@ -49,6 +49,7 @@
       <li><a href="#stack-">Simplify path</a></li>
       <!-- <li><a href="#stack-">Evaluate reverse polish notation</a></li> -->
       <!-- <li><a href="#stack-">Min stack</a></li> -->
+      <li><a href="#stack-">Basic Calculator</a></li>
       <!-- <li><a href="#stack-">Remove duplicate letters</a></li> -->
       <!-- <li><a href="#stack-">Flatten nested list iterator</a></li> -->
       <li><a href="#stack-">Decode string</a></li>
@@ -282,6 +283,83 @@
     Reference: <a href="https://leetcode.com/problems/min-stack">155. Min Stack</a>
   </div>
 </div> -->
+
+<div class="card mb-4" id="stack-">
+  <div class="card-body">
+    <h2 class="card-title">Basic Calculator (H)</h2>
+
+<pre><code class="python">class Solution:
+    def calculate(self, s: str) -> int:
+
+        # Stack
+        # First reverse s
+        # Then, when seeing "(", pop and evaluate 
+        # until seeing ")", then push back to stack
+        # After iterating "s", pop from stack one by one,
+        # and evaluate
+
+        s = s.replace(" ", "")
+        s = s[::-1]
+        print(s)
+
+        stack = []
+        operand, n = 0, 0
+
+        # Time O(n)
+        #   n = len(s)
+        # Space O(n)
+        for c in s:
+        
+            if c.isdigit():
+                operand = (10**n*int(c)) + operand
+                n += 1
+            else:
+                if n:
+                    stack.append(operand)
+                    operand, n = 0, 0
+                
+                if c == "(":
+                    # Deal with case like 1+(-2)
+                    if stack[-1] == "-":
+                        stack.append(0)
+                    val = int(stack.pop())
+                    while stack and stack[-1] != ")":
+                        sign = stack.pop()
+                        if sign == "+":
+                            val += int(stack.pop())
+                        if sign == "-":
+                            val -= int(stack.pop())
+                    # Pop ")" from stack
+                    stack.pop()  
+                    # Push evaludated result inside bracket to stack
+                    stack.append(val)
+                else:
+                    stack.append(c)
+
+        if n:
+            stack.append(operand)
+                    
+        print(stack)
+        while stack:
+            if len(stack) == 1:
+                break
+            # Deal with case like 1+(-2)
+            if stack[-1] == "-":
+                stack.append(0)
+            val = int(stack.pop())
+            sign = stack.pop()
+            if sign == "+":
+                val += int(stack.pop())
+            if sign == "-":
+                val -= int(stack.pop()) 
+            stack.append(val)           
+        
+        return int(stack[0])</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/basic-calculator">224. Basic Calculator</a>
+  </div>
+</div>
 
 <!-- <div class="card mb-4" id="stack-">
   <div class="card-body">
