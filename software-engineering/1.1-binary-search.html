@@ -52,6 +52,7 @@
       <!-- <li><a href="#binary-search-">Find minimum in rotated sorted array</a></li> -->
       <li><a href="#binary-search-">Find peak element</a></li>
       <li><a href="#binary-search-">Longest Increasing Subsequence</a></li>
+      <li><a href="#binary-search-">Kth smallest element in a sorted matrix</a></li>
       <li><a href="#binary-search-">Split Array Largest Sum</a></li>
       <!-- <li><a href="#binary-search-">Single element in a sorted array</a></li> -->
       <!-- <li><a href="#binary-search-">Find K closest elements</a></li> -->
@@ -382,6 +383,65 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/longest-increasing-subsequence">300. Longest Increasing Subsequence</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="binary-search-">
+  <div class="card-body">
+    <h2 class="card-title">Kth smallest element in a sorted matrix (M) (F) #</h2>
+
+<pre><code class="python">class Solution:
+    def kthSmallest(self, matrix: List[List[int]], k: int) -> int:
+
+        # Binary search
+        # Min number is top-left and max number is bottom-right
+        # Compute mid = min + (max - min) / 2
+        # Count numbers <= mid
+        # Track smallest number > mid and biggest numbers <= mid
+        # If count == k, return count
+        # Elif count < k, search from right of smallest number
+        # Elif count > k, search from left of biggest number 
+
+        n = len(matrix)
+        left = matrix[0][0]
+        right = matrix[n-1][n-1]
+
+        # Time O(nlog(max-min))
+        #   n = len(matrix) = len(matrix[0])
+        # Space O(1)
+        while left < right:
+            mid = left + (right-left) / 2
+
+            count = 0
+            biggest = matrix[0][0] 
+            smallest = matrix[n-1][n-1]
+
+            i = n - 1
+            j = 0
+
+            # Time O(n)
+            # Space O(1)
+            while i >= 0 and j < n:
+                if matrix[i][j] <= mid:
+                    count += i + 1
+                    biggest = max(biggest, matrix[i][j])
+                    j += 1
+                else:
+                    smallest = min(smallest, matrix[i][j])
+                    i -= 1
+
+            if count == k:
+                return biggest
+            elif count < k:
+                left = smallest
+            else:
+                right = biggest
+
+        return left
+</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/kth-smallest-element-in-a-sorted-matrix">378. Kth Smallest Element in a Sorted Matrix</a>
   </div>
 </div>
 
