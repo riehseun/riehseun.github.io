@@ -271,14 +271,14 @@
         </ul>
         <li>Context</li>
         <ul>
-          <li>day_of_week - embedding</li>
+          <li>day_of_week - one-hot</li>
           <li>time_of_day - bucketize + one-hot</li>
           <li>device - one-hot</li>
         </ul>
       </ul>
       <li>Post</li>
       <ul>
-        <li>Post ID - embedding since the dimension is sparse</li>
+        <li>Post ID - embedding</li>
         <li>Description</li>
         <ul>
           <li>Preprocessing</li>
@@ -362,16 +362,17 @@
       <li>AD</li>
       <ul>
         <li>Advertiser id - embedding</li>
-        <li>Image and video - SimCLR</li>
+        <li>Image - SimCLR</li>
+        <li>Video - VideoMoCo</li>
         <li>Category - CBOW</li>
-        <li>Total impressions or clicks on the Ad</li>
-        <li>Total impressions or clicks on the Ad supplied by an advertiser</li>
+        <li>Total impressions or clicks on the Ad - normalize</li>
+        <li>Total impressions or clicks on the Ad supplied by an advertiser - normalize</li>
       </ul>
       <li>Video</li>
       <ul>
-        <li>video_id - categorical data, embedding</li>
-        <li>length</li>
-        <li>language - categorical data, embedding</li>
+        <li>video_id - embedding</li>
+        <li>length - normalize</li>
+        <li>language - embedding</li>
         <li>manual_tags - CBOW for each tag and aggregate</li>
         <li>title - BERT</li>
       </ul>
@@ -379,49 +380,49 @@
       <ul>
         <li>Author's violation history</li>
         <ul>
-          <li>Number of violations</li>
-          <li>Total user reports</li>
-          <li>Profane word rate</li>
+          <li>Number of violations - normalize</li>
+          <li>Total user reports - normalize</li>
+          <li>Profane word rate - normalize</li>
         </ul>
         <li>Author's demographics</li>
         <ul>
-          <li>Age</li>
-          <li>Gender - one-hot encoding</li>
+          <li>Age - can't use due to bias and fairness concern</li>
+          <li>Gender - can't use due to bias and fairness concern</li>
           <li>City and country - embedding</li>
         </ul>
         <li>Account information</li>
         <ul>
-          <li>Number of followers and followings</li>
-          <li>Account age</li>
+          <li>Number of followers and followings - normalize</li>
+          <li>Account's age - bucketize + one-hot</li>
         </ul>
       </ul>
       <li>User-post interaction</li>
       <ul>
-        <li>View - scale</li>
-        <li>Like - scale</li>
+        <li>View - normalize</li>
+        <li>Like - normalize</li>
         <li>Comment - BERT</li>
-        <li>Share - scale</li>
-        <li>Hide - scale</li>
-        <li>Report - scale</li>
+        <li>Share - normalize</li>
+        <li>Hide - normalize</li>
+        <li>Report - normalize</li>
       </ul>
       <li>User-AD interaction</li>
       <ul>
         <li>Cliked Ads - embedding</li>
-        <li>User's historical engagement statistics - scale</li>
+        <li>User's historical engagement statistics - normalize</li>
       </ul>
       <li>User-video interaction</li>
       <ul>
         <li>search_history - BERT to map each search query to embedding vector. Average the query embeddings to get a fixed-sized feature vector</li>
-        <li>liked_videos - embedding layer to map video_ids to embedding vector</li>
-        <li>watched_videos - embedding layer to map video_ids to embedding vector</li>
-        <li>impressions - embedding layer to map video_ids to embedding vector</li>
+        <li>liked_videos - embedding (averged over all liked videos) to map video_ids to embedding vector</li>
+        <li>watched_videos - embedding (averged over all liked videos) to map video_ids to embedding vector</li>
+        <li>impressions - embedding (averged over all liked impressions) to map video_ids to embedding vector</li>
       </ul>
       <li>User-author interaction</li>
       <ul>
-        <li>Duration at which user followed the author - scale</li>
-        <li>Duration at which author followed the user - scale</li>
-        <li>like/click/comment/share rate</li>
-        <li>length of friendship</li>
+        <li>Duration at which user followed the author - bucketize + one-hot</li>
+        <li>Duration at which author followed the user - bucketize + one-hot</li>
+        <li>like/click/comment/share rate - normalized</li>
+        <li>length of friendship - bucketize + one-hot</li>
         <li>close friends and family - binary value 0 or 1</li>
       </ul>
     </ul>
@@ -441,13 +442,35 @@
       <ul>
         <li>Collaborative filtering</li>
         <ul>
-          <li>User based</li>
-          <li>Item based</li>
+          <li>Assume similar users are interested in similar items</li>
+          <li>Uses user-user or item-item similarities to recommend new videos</li>
+          <li>Uses users historical engagement only (No need to use item features)</li>
+          <li>Pros</li>
+          <ul>
+            <li>No need for domain knowledge because item features are not used</li>
+            <li>Can discover users new interest</li>
+            <li>Less compute intensive than content-based filtering</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Cold-start problem when lack of user interaction data</li>
+            <li>Hard to capture unique interest of users</li>
+          </ul>
         </ul>
         <li>Content-based filtering</li>
         <ul>
-          <li>User based</li>
-          <li>Item based</li>
+          <li>Uses item features</li>
+          <li>Recommend items similar to items that user liked</li>
+          <li>Pros</li>
+          <ul>
+            <li>No need to wait for user interaction data. Recommendation depends on item features only</li>
+            <li>Captures unique interest of users</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Requires domain knowledge. Features are often engineered manually</li>
+            <li>Hard to discover users new interest</li>
+          </ul>
         </ul>
       </ul>
       <li>Ranking</li>
