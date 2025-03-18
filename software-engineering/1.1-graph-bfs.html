@@ -167,35 +167,41 @@
 
 <div class="card mb-4" id="graph-bfs">
   <div class="card-body">
-    <h2 class="card-title">Word ladder (H) (A) !</h2>
+    <h2 class="card-title">Word ladder (H) (F/A) #!</h2>
 
 <pre><code class="python">class Solution:
     def ladderLength(self, beginWord: str, endWord: str, wordList: List[str]) -> int:
 
-        # Construct a graph where edge consists of nodes (words differ by one char)
+        # Construct a graph where nodes are 
+        # words differ by one char
         # BFS to compute shrotest distance
 
         graph = defaultdict(set)
         words = [beginWord] + wordList
         n = len(words)
 
-        # Construct a set that contains all words that differ by one char
-        # Space O(n * s) where s is length of word
-        all_words_differ_by_one_char = defaultdict(set)
+        # Time O(kl)
+        #   k = number of words 
+        #   l = length of each word
+        # Space O(kl)
+        differ_by_one_char = defaultdict(set)
         for word in words:
             for i in range(len(word)):
                 for c in 'abcdefghijklmnopqrstuvwxyz':
-                    all_words_differ_by_one_char[word].add(word[:i]+c+word[i+1:])
+                    differ_by_one_char[word].add(word[:i]+c+word[i+1:])
 
-        # Time O(n^2) length of each word is constant
-        # Space O(n)
+        # Time O(k**2)
+        # Space O(k**2)
         for i in range(n):
             for j in range(i+1,n):
-                if words[j] in all_words_differ_by_one_char[words[i]]:
+                if words[j] in differ_by_one_char[words[i]]:
                     graph[words[i]].add(words[j])
                     graph[words[j]].add(words[i])
 
         # Time O(n+m)
+        #   n = number of nodes = k
+        #   m = number of edges = k ** 2 every node can be connected
+        # Space O(n)
         def bfs(graph, start, end):
 
             explored = set()
