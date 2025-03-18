@@ -57,6 +57,7 @@
       <li><a href="#backtracking-">Expression Add Operators</a></li>
       <!-- <li><a href="#backtracking-">House robber III</a></li> -->
       <!-- <li><a href="#backtracking-">Matchsticks to square</a></li> -->
+      <li><a href="#backtracking-">Robot Room Cleaner</a></li>
     </ul>
   </div>
 </div>
@@ -690,6 +691,101 @@ class Solution:
     Reference: <a href="https://leetcode.com/problems/matchsticks-to-square">473. Matchsticks to Square</a>
   </div>
 </div> -->
+
+<div class="card mb-4" id="backtracking-">
+  <div class="card-body">
+    <h2 class="card-title">Robot Room Cleaner (H) (F) !</h2>
+
+<pre><code class="python"># """
+# This is the robot's control interface.
+# You should not implement it, or speculate about its implementation
+# """
+#class Robot:
+#    def move(self):
+#        """
+#        Returns true if the cell in front is open and robot moves into the cell.
+#        Returns false if the cell in front is blocked and robot stays in the current cell.
+#        :rtype bool
+#        """
+#
+#    def turnLeft(self):
+#        """
+#        Robot will stay in the same cell after calling turnLeft/turnRight.
+#        Each turn will be 90 degrees.
+#        :rtype void
+#        """
+#
+#    def turnRight(self):
+#        """
+#        Robot will stay in the same cell after calling turnLeft/turnRight.
+#        Each turn will be 90 degrees.
+#        :rtype void
+#        """
+#
+#    def clean(self):
+#        """
+#        Clean the current cell.
+#        :rtype void
+#        """
+
+class Solution:
+    def cleanRoom(self, robot):
+        """
+        :type robot: Robot
+        :rtype: None
+        """
+
+        # Backtracking
+        # Always turn right
+        # Consider visited cell as obstacle
+        # Explore up, right, down, left in order
+        #   if no obstacle
+        #     Move
+        #     Explore the next cell
+        #     Backtrack 
+        #   Else
+        #     Turn right    
+
+        # Up, down, right, left
+        dirs = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+        visited = set()
+
+        def move_back():
+            robot.turnRight()
+            robot.turnRight()
+            robot.move()
+            robot.turnRight()
+            robot.turnRight()
+
+        # Time O(n-m)
+        #   n = number of cells
+        #   m = number of obstacles
+        # Space O(n-m)
+        def backtrack(p, d):
+
+            visited.add(p)
+            # Clean the current cell
+            robot.clean()
+
+            # Explore up, right, down, left in order
+            # Let up = 0, right = 1, down = 2, left = 3
+            for i in range(4):
+                new_d = (d+i) % 4
+                new_p = (p[0]+dirs[new_d][0], p[1]+dirs[new_d][1])
+                
+                # If no obstacle, move and explore the next cell
+                if new_p not in visited and robot.move():
+                    backtrack(new_p, new_d)
+                    move_back()
+                robot.turnRight()
+
+        # Initial direction of the robot will be facing up
+        backtrack((0, 0), 0)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/robot-room-cleaner">489. Robot Room Cleaner</a>
+  </div>
+</div>
 <!-- Backtracking END -->
 
 </div> <!-- /.col-md-12 -->
