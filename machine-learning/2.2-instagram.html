@@ -453,7 +453,7 @@
     <ul>
       <li>Candidate generation</li>
       <ul>
-        <li>Option 1. matrix factorization</li>
+        <li>Option 1. matrix factorization (collaborative filtering)</li>
         <ul>
           <li>Feedback matrix</li>
           <ul>
@@ -475,7 +475,7 @@
             <li>Map user and item into embeddings such that their distance represents their relevance</li>
             <li>Decomposes feedback matric into two lower dimensional matrices, where one represents user embedding and the other represents item embedding</li>
           </ul>
-          <li>Matrix factorization inference</li>
+          <li>Inference</li>
           <ul>
             <li>Take a dot product between user and item embeddings</li>
           </ul>
@@ -496,15 +496,100 @@
           <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-0/instagram-21.png" alt="Card image cap">
           <li>Narrow down videos from billions to thousands</li>
           <li>Use model that does not rely on item feature for efficiency</li>
+          <li>Inference</li>
+          <ul>
+            <li>Use ANN to find most relevant videos for a given user from their embeddings</li>
+          </ul>
+          <li>Pros</li>
+          <ul>
+            <li>Utilizes user features</li>
+            <li>Capable of handling new users</li>
+            <li>Model performance is higher</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Slow serving having to compute user embeddings at query time</li>
+            <li>Slow inference (if using content-based filtering) because model needs to transform item features to item embeddings</li>
+            <li>More learning paramaters, thus traning is more expensive</li>
+          </ul>
         </ul>
       </ul>
       <li>Ranking</li>
       <ul>
-        <li>Option 1. Decision tree (XGBoost)</li>
-        <li>Option 1. two-tower network (content based filtering - use item features)</li>
+        <li>Option 1. point-wise</li>
         <ul>
-          <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-0/instagram-22.png" alt="Card image cap">
-          <li>Accuracy is more important than efficiency</li>
+          <li>Pros</li>
+          <ul>
+            <li>Simpler to implement</li>
+            <li>Less computation</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Hard to capture relations between items</li>
+            <li>Less accurate</li>
+          </ul>
+          <li>Option 1a. Logistic regression</li>
+          <ul>
+            <li></li>
+            <li>Pros</li>
+            <ul>
+              <li>Fast inference</li>
+              <li>Fast training</li>
+              <li>Interpretable</li>
+            </ul>
+            <li>Cons</li>
+            <ul>
+              <li>Non-linear problems can't be solved</li>
+              <li>Cannot handle dependency between features</li>
+            </ul>
+          </ul>
+          <li>Option 1b. Decision tree (XGBoost)</li>
+          <ul>
+            <li>User-item interaction data is used as features to output score for items</li>
+            <li>Pros</li>
+            <ul>
+              <li>Interpretable</li>
+              <li>Little dataprep is needed</li>
+            </ul>
+            <li>Cons</li>
+            <ul>
+              <li>Feature changes require training the entire model from scratch</li>
+              <li>Cannot handle embedding</li>
+            </ul>
+          </ul>
+          <li>Option 1c. two-tower network (content based filtering - use item features)</li>
+          <ul>
+            <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-0/instagram-22.png" alt="Card image cap">
+            <li>Accuracy is more important than efficiency</li>
+          </ul>
+        </ul>
+        <li>Option 2. pair-wise</li>
+        <ul>
+          <li>Pros</li>
+          <ul>
+            <li>More accutate</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Complex to implement</li>
+            <li>High computation</li>
+          </ul>
+          <li>Option 2a. RankNet</li>
+          <li>Option 2b. LambdaRank</li>
+        </ul>
+        <li>Option 3. list-wise</li>
+        <ul>
+          <li>Pros</li>
+          <ul>
+            <li>More accutate</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Complex to implement</li>
+            <li>High computation</li>
+          </ul>
+          <li>Option 3a. ListNet</li>
+          <li>Option 3b. LambdaMart</li>
         </ul>
       </ul>
       <li>Re-ranking</li>
@@ -552,6 +637,8 @@
         <ul>
           <li>Feed ranking</li>
           <ul>
+            <li>Multi-task DNN is appropriate to handle different types of user-post interaction</li>
+            <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-0/instagram-23.png" alt="Card image cap">
             <li>Use MAE / MSE for regression task for dwell time prediction</li>
             <li>Use cross-entropy for other binary classification predictions</li>
             <li>\( \text{Loss} = \lambda L_{\text{dwell}} + L_{\text{skip}} + L_{\text{like}} + \dots + L_{\text{share}} \)</li>
