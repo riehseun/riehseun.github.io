@@ -105,7 +105,7 @@
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference:
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu | Aman Chadha
   </div>
 </div>
 
@@ -169,7 +169,7 @@
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference:
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu | Aman Chadha
   </div>
 </div>
 
@@ -441,7 +441,7 @@
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: Aman Chadha
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu | Aman Chadha
   </div>
 </div>
 
@@ -454,12 +454,58 @@
       <li>Candidate generation</li>
       <ul>
         <li>Option 1. matrix factorization</li>
+        <ul>
+          <li>Feedback matrix</li>
+          <ul>
+            <li>2D matrix (user and item) where 1 means user finds item relevant</li>
+            <li>Relevancy can be defined using both explicit and implicit feedback</li>
+            <li>Explicit feedback</li>
+            <ul>
+              <li>User likes/dislikes, shares, reports, etc</li>
+              <li>Data is sparse</li>
+            </ul>
+            <li>Implicit feedback</li>
+            <ul>
+              <li>User clicks or dwell/watch time</li>
+              <li>Data might be noisy</li>
+            </ul>
+          </ul>
+          <li>Matrix factorization model</li>
+          <ul>
+            <li>Map user and item into embeddings such that their distance represents their relevance</li>
+            <li>Decomposes feedback matric into two lower dimensional matrices, where one represents user embedding and the other represents item embedding</li>
+          </ul>
+          <li>Matrix factorization inference</li>
+          <ul>
+            <li>Take a dot product between user and item embeddings</li>
+          </ul>
+          <li>Pros</li>
+          <ul>
+            <li>Fast training because there are only two embedding matrices to learn</li>
+            <li>Fast serving because learned embeddings are static</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Only relies on user-item interactions, not using user or item features</li>
+            <li>Handling new users is difficult</li>
+            <li>Model performance is lower</li>
+          </ul>
+        </ul>
         <li>Option 1. two-tower network (collaborative filtering - no item features)</li>
+        <ul>
+          <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-0/instagram-21.png" alt="Card image cap">
+          <li>Narrow down videos from billions to thousands</li>
+          <li>Use model that does not rely on item feature for efficiency</li>
+        </ul>
       </ul>
       <li>Ranking</li>
       <ul>
         <li>Option 1. Decision tree (XGBoost)</li>
         <li>Option 1. two-tower network (content based filtering - use item features)</li>
+        <ul>
+          <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-0/instagram-22.png" alt="Card image cap">
+          <li>Accuracy is more important than efficiency</li>
+        </ul>
       </ul>
       <li>Re-ranking</li>
       <ul>
@@ -474,19 +520,50 @@
     <ul>
       <li>Loss function</li>
       <ul>
-        <li>Feed ranking</li>
+        <li>Matrix factorization</li>
         <ul>
-          <li>Use MAE / MSE for regression task for dwell time prediction</li>
-          <li>Use cross-entropy for other binary classification predictions</li>
-          <li>\( \text{Loss} = \lambda L_{\text{dwell}} + L_{\text{skip}} + L_{\text{like}} + \dots + L_{\text{share}} \)</li>
+          <li>Randomly initializes two embedding matrices</li>
+          <li>Mimimizes the loss between predicted scores matrix and feedback matrix</li>
+          <ul>
+            <li>Option 1. squared distance over observed user-item pairs</li>
+            <ul>
+              <li>\( \text{loss} = \displaystyle\sum_{(i,j) \in \text{obs}} (A_{ij}-U_{i}V_{j})^{2} \)</li>
+              <li>Loss function does not penalize for bad prediction on unobserved pairs</li>
+            </ul>
+            <li>Option 2. squared distance over observed and unobserved user-item pairs</li>
+            <ul>
+              <li>\( \text{loss} = \displaystyle\sum_{(i,j)} (A_{ij}-U_{i}V_{j})^{2} \)</li>
+              <li>Unobserved pairs dominate observed pairs during training because feedback matrix is sparce</li>
+            </ul>
+            <li>Option 3. weighted combination of squared distance over observed and unobserved user-item pairs</li>
+            <ul>
+              <li>\( \text{loss} = \displaystyle\sum_{(i,j) \in \text{obs}} (A_{ij}-U_{i}V_{j})^{2} + w\displaystyle\sum_{(i,j) \notin \text{obs}} (A_{ij}-U_{i}V_{j})^{2} \)</li>
+              <li>\( w \) is a hyperparameter</li>
+            </ul>
+          </ul>
+          <li>Weighted alternating least squares (WALS) - specific to matrix factorization</li>
+          <ul>
+            <li>Fix one embedding matrix \( U \) and optimize the other embedding matrix \( V \)</li>
+            <li>Fix the other embedding matrix \( V \) and optimize the embedding matrix \( U \)</li>
+            <li>Repeat</li>
+          </ul>
         </ul>
-        <li>AD recommendation</li>
+        <li>Two-tower</li>
         <ul>
-          <li>Binary classification, thus use cross-entropy</li>
-        </ul>
-        <li>Reel recommendation</li>
-        <ul>
-          <li>This is binary classification, thus use cross-entropy</li>
+          <li>Feed ranking</li>
+          <ul>
+            <li>Use MAE / MSE for regression task for dwell time prediction</li>
+            <li>Use cross-entropy for other binary classification predictions</li>
+            <li>\( \text{Loss} = \lambda L_{\text{dwell}} + L_{\text{skip}} + L_{\text{like}} + \dots + L_{\text{share}} \)</li>
+          </ul>
+          <li>AD recommendation</li>
+          <ul>
+            <li>Binary classification, use cross-entropy</li>
+          </ul>
+          <li>Reel recommendation</li>
+          <ul>
+            <li>Binary classification, use cross-entropy</li>
+          </ul>
         </ul>
 <!--         <li>Search</li>
         <li>Harmful content detection</li>
@@ -516,7 +593,7 @@
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: Aman Chadha
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu | Aman Chadha
   </div>
 </div>
 
@@ -643,7 +720,7 @@
         <li>Total watch time of videos</li>
         <li>User reaction to videos such as likes, share, etc</li>
       </ul>
-      <li>Search</li>
+<!--       <li>Search</li>
       <li>Harmful content detection</li>
       <ul>
         <li>Number of user reports on posts (per harmful class)</li>
@@ -655,11 +732,11 @@
         <ul>
           <li>\( \dfrac{\text{number of harmful posts detected by system}}{\text{number of harmful posts detected by system} + \text{reported by users}} \)</li>
         </ul>
-      </ul>
+      </ul> -->
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference:
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu | Aman Chadha
   </div>
 </div>
 
@@ -694,7 +771,7 @@
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference:
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu | Aman Chadha
   </div>
 </div>
 
@@ -705,7 +782,7 @@
     <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-0/instagram-11.png" alt="Card image cap">
   </div>
   <div class="card-footer text-muted">
-    Reference:
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu | Aman Chadha
   </div>
 </div>
 
@@ -728,7 +805,7 @@
       <li>Explain how to personalize newsfeed for new users</li>
       <li>Explain how to mitigate positional bias</li>
       <li>Explain how to determine re-training frequency</li>
-      
+
       <li>Explain how to leverage the sequence of videos in user's search history or watch history</li>
       <ul>
         <li></li>
@@ -749,7 +826,7 @@
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: Aman Chadha
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu | Aman Chadha
   </div>
 </div>
 <!-- Instagram END -->
