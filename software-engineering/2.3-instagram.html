@@ -70,6 +70,7 @@
         <li>How should posts be ranked? Assume chronological order</li>
         <li>Should feeds be personalized for each user? No</li>
         <li>Should feeds contains ADs? No</li>
+        <li>Can users follow each other? Yes</li>
       </ul>
       <li>Should the system support notification? Yes</li>
       <ul>
@@ -83,8 +84,7 @@
         <li>Should the system support group chat? Yes</li>
         <li>Should the system persist messages? Yes</li>
       </ul>
-      <li>Should the system support search? Yes</li>
-      <li>Can users follow each other? Yes</li>
+      <li>Should the system support search? No</li>
     </ul>
 
     <h3 class="card-title">Non-functional</h3>
@@ -178,35 +178,86 @@
   <div class="card-body">
     <h2 class="card-title">API</h2>
     <ul>
-      <li><code>sign_up(email, password, first_name, last_name, date_of_birth)</code></li>
+      <li>General</li>
       <ul>
-        <li>POST api/v1/signup</li>
-        <li>Returns a user_id</li>
-        <li>Creates a user in DB</li>
+        <li><code>sign_up(email, password, first_name, last_name, date_of_birth)</code></li>
+        <ul>
+          <li>POST api/v1/signup</li>
+          <li>Returns a user_id</li>
+          <li>Creates a user in DB</li>
+        </ul>
+        <li><code>log_in(email, password)</code></li>
+        <ul>
+          <li>GET api/v1/login</li>
+          <li>Authenticate a user in DB</li>
+        </ul>
       </ul>
-      <li><code>log_in(email, password)</code></li>
+      <li>Feed</li>
       <ul>
-        <li>GET api/v1/login</li>
-        <li>Authenticate a user in DB</li>
+        <li><code>upload_post(user_id, post_text, image_path, video_path)</code></li>
+        <ul>
+          <li>POST api/v1/post</li>
+        </ul>
+        <li><code>update_post(user_id, post_id, post_text, image_path, video_path)</code></li>
+        <ul>
+          <li>PUT api/v1/post</li>
+        </ul>
+        <li><code>delete_post(user_id, post_id)</code></li>
+        <ul>
+          <li>DELETE api/v1/post</li>
+        </ul>
+        <li><code>like_or_dislike_post(user_id, post_id, like)</code></li>
+        <ul>
+          <li>POST api/v1/like</li>
+        </ul>
+        <li><code>create_comment(user_id, post_id, comment_text)</code></li>
+        <ul>
+          <li>POST api/v1/comment</li>
+        </ul>
+        <li><code>update_comment(user_id, post_id, comment_id, comment_text)</code></li>
+        <ul>
+          <li>PUT api/v1/comment</li>
+        </ul>
+        <li><code>delete_comment(user_id, post_id, comment_id)</code></li>
+        <ul>
+          <li>DELETE api/v1/comment</li>
+        </ul>
+        <li><code>view_feed(user_id)</code></li>
+        <ul>
+          <li>GET api/v1/feed</li>
+        </ul>
       </ul>
-      <li><code>upload_post(user_id, text, image_path, video_path)</code></li>
+      <li>Notification</li>
       <ul>
-        <li>POST api/v1/post</li>
+        <li><code>send_notification(user_id, subject, content)</code></li>
+        <ul>
+          <li>POST api/v1/notification</li>
+          <li><code>user_id</code> - recepient of notification</li>
+          <li><code>subject</code></li>
+          <li><code>content</code></li>
+        </ul>
       </ul>
-      <li><code>update_post(user_id, text, image_path, video_path)</code></li>
+      <li>Messaging</li>
       <ul>
-        <li>PUT api/v1/post</li>
+        <li><code>send_msessage(sender_id, reciever_id, text)</code></li>
+        <ul>
+          <li>POST api/v1/message</li>
+        </ul>
+        <li><code>get_message(user_id)</code></li>
+        <ul>
+          <li>GET api/v1/message</li>
+        </ul>
       </ul>
-      <li><code>view_feed(user_id)</code></li>
+      <li>Video</li>
       <ul>
-        <li>GET api/v1/feed</li>
-      </ul>
-      <li><code>send_notification(user_id, subject, content)</code></li>
-      <ul>
-        <li>POST api/v1/notification</li>
-        <li><code>user_id</code> - recepient of notification</li>
-        <li><code>subject</code></li>
-        <li><code>content</code></li>
+        <li><code>upload_video(user_id, video_file, title, description, tags, default_language)</code></li>
+        <ul>
+          <li>POST api/v1/video/upload</li>
+        </ul>
+        <li><code>stream_video(user_id, video_id, resolution)</code></li>
+        <ul>
+          <li>GET api/v1/video/stream</li>
+        </ul>
       </ul>
     </ul>
   </div>
@@ -494,9 +545,23 @@
       </ul>
     </ul>
 
-    <h3 class="card-title">Video encoding</h3>
-
-    <h3 class="card-title">Cache</h3>
+    <h3 class="card-title">Video</h3>
+    <ul>
+      <li>Upload</li>
+      <ul>
+        <li><img class="img-fluid" class="card-img-top" src="/software-engineering/image/system-design-0/instagram-15.png" alt="Card image cap"></li>
+        <li>Generate different resolutions of same video to serve users with different bandwidth</li>
+        <li>For each resolution of a video, split it into chunks and encode in parallel</li>
+        <li>Split audio from video, and generate audio encoding</li>
+        <li>Extract metadata from video</li>
+        <li>Encoded chunks are uploaded in parallel along with audio and metadata</li>
+      </ul>
+      <li>Streaming</li>
+      <ul>
+        <li>Videos are streamed directly from CDN</li>
+        <li>Only popular vidoes are stored in CDN</li>
+      </ul>
+    </ul>
 
     <h3 class="card-title">User experience during failure</h3>
 
@@ -609,9 +674,6 @@
 <div class="card mb-4" id="instagram-8">
   <div class="card-body">
     <h2 class="card-title">Follow up</h2>
-    <ul>
-      <li></li>
-    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference:
