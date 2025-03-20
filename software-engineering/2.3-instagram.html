@@ -140,11 +140,8 @@
   <div class="card-body">
     <h2 class="card-title">High level design</h2>
 
-    <h3 class="card-title">Components</h3>
-
     <img class="img-fluid" class="card-img-top" src="/software-engineering/image/system-design-0/instagram-1.png" alt="Card image cap">
 
-    <h3 class="card-title">Workflow</h3>
     <ul>
       <li>User sign up</li>
       <ul>
@@ -327,8 +324,10 @@
     <h3 class="card-title">API gateway</h3>
     <ul>
       <li>Rate limiting</li>
+
+      <img class="img-fluid" class="card-img-top" src="/software-engineering/image/system-design-0/instagram-10.png" alt="Card image cap">
+
       <ul>
-        <img class="img-fluid" class="card-img-top" src="/software-engineering/image/system-design-0/instagram-10.png" alt="Card image cap">
         <li>Counter is stored in cache</li>
         <ul>
           <li>If there are multiple API gateways, they must use the same cache to avoid synchronization issue</li>
@@ -514,8 +513,11 @@
     <h3 class="card-title">Direct messaging</h3>
     <ul>
       <li>1-on-1 chat</li>
-<img class="img-fluid" class="card-img-top" src="/software-engineering/image/system-design-0/instagram-13.png" alt="Card image cap">
+
+      <img class="img-fluid" class="card-img-top" src="/software-engineering/image/system-design-0/instagram-13.png" alt="Card image cap">
+      
       <ul>
+        <li></li>
         <li>User 1 and 2 maintains web socket connection to chat server 1 and 2 respectively</li>
         <li>User 1 sends message to chat server 1</li>
         <li>Chat server 1 obtains message ID from ID generator</li>
@@ -537,7 +539,9 @@
         <li>Each device can lookup key-value store periodically and pull messages whose ID is later than latest message ID it has seen</li>
       </ul>
       <li>User status</li>
-<img class="img-fluid" class="card-img-top" src="/software-engineering/image/system-design-0/instagram-14.png" alt="Card image cap">
+
+      <img class="img-fluid" class="card-img-top" src="/software-engineering/image/system-design-0/instagram-14.png" alt="Card image cap">
+
       <ul>
         <li>Create user status server for each user</li>
         <li>Create one process or thread for every user that the user is connected to via chat</li>
@@ -563,12 +567,32 @@
       </ul>
     </ul>
 
-    <h3 class="card-title">User experience during failure</h3>
+    <h3 class="card-title">Recap</h3>
 
-    <h3 class="card-title">Potential bottlenecks</h3>
+    <img class="img-fluid" class="card-img-top" src="/software-engineering/image/system-design-0/instagram-21.png" alt="Card image cap">
 
-    <h3 class="card-title">10x scale</h3>
-
+    <ul>
+      <li>User experience during failure</li>
+      <ul>
+        <li>DNS, load balancer, API gateway - users can't use feed related service</li>
+        <li>CDN - users can't watch image and videos in the posts</li>
+        <li>Feed service - users can't create new post, can't see up-to-date feed</li>
+        <li>Video service - users can't create new post, cat't see posts that contain new videos</li>
+        <li>Messaging service - users can't chat with people</li>
+        <li>Notification service - users can't receive notification</li>
+      </ul>
+      <li>Potential bottlenecks</li>
+      <ul>
+        <li>Load balancer, API gateway - must have enough number of works to handle all incoming traffic</li>
+        <li>CND - enough resources to stream videos to users in each geographical region</li>
+      </ul>
+      <li>10x scale</li>
+      <ul>
+        <li>Compute - consider vertical scaling as well as horizontal scaling</li>
+        <li>DB - consider migrating DB to highly scalable types</li>
+        <li>CDN - consider private CDN for public ones can cost a lot as number of users increases</li>
+      </ul>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference:
@@ -581,7 +605,9 @@
 
     <h3 class="card-title">Functional</h3>
     <ul>
-      <li></li>
+      <li>Feed</li>
+      <li>Notification</li>
+      <li>Messaging</li>
     </ul>
 
     <h3 class="card-title">Non-functional</h3>
@@ -592,8 +618,7 @@
         <ul>
           <li>Replicate each web server, cache, DB</li>
           <ul>
-            <li>DB - if the system is read-heavy, go for single-master replication</li>
-            <li>DB - if the system is write-heavy, go for leaderless replication</li>
+            <li>DBs are mostly write-heavy, go for leaderless replication</li>
           </ul>
           <li>Replicate entire system to different zone or geographical region</li>
           <ul>
@@ -619,6 +644,7 @@
         <li>Data loss</li>
         <ul>
           <li>Periodically take snapshot of data and store snapshots in multi zone or region to prevent data loss</li>
+          <li>Each snapshot can store only the incremental difference from previous one</li>
         </ul>
         <li>Handling failure</li>
         <ul>
@@ -631,7 +657,7 @@
           <li>Relational DB</li>
           <ul>
             <li>Master - promote one slave to master</li>
-            <li>Slave - use anotehr slave for read operation</li>
+            <li>Slave - use another slave for read operation</li>
           </ul>
           <li>Queue - other queue can be subscribed by consumers</li>
         </ul>
@@ -645,7 +671,7 @@
         <li>Data partitioning</li>
         <ul>
           <li>Horizontal partitioning or sharding since the system is less concerned about atomic operation</li>
-          <li>Using UUID generator, create ID for each data point</li>
+          <li>Using ID generator, create ID for each data point</li>
           <li>Using that ID, use consistent hashing to spread notification different data nodes</li>
         </ul>
       </ul>
@@ -657,12 +683,12 @@
           <li>DB is paritioned to scale to handle the load</li>
           <li>Horizontal scaling of compute conponents</li>
         </ul>
-        <li>Cache improves the performance of redirection</li>
+        <li>Cache</li>
       </ul>
       <li>Consistency</li>
       <ul>
         <li>Inconsistency can happen when write is not synced to all data nodes</li>
-        <li>If the impact is not too catastrophic, eventual consistency is okay</li>
+        <li>Not seeing latest posts is okay, so eventual consistency is okay</li>
       </ul>
     </ul>
   </div>
@@ -674,6 +700,14 @@
 <div class="card mb-4" id="instagram-8">
   <div class="card-body">
     <h2 class="card-title">Follow up</h2>
+    <ul>
+      <li>Messaging</li>
+      <ul>
+        <li>Explain how to enable end-to-end encryption</li>
+        <li>Explain if caching messages on client-side can help</li>
+        <li>Explain how to optimize the load time of messages</li>
+      </ul>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference:
