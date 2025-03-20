@@ -640,7 +640,13 @@
             <li>Multi-task DNN is appropriate to handle different types of user-post interaction</li>
             <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-0/instagram-23.png" alt="Card image cap">
             <li>Use MAE / MSE for regression task for dwell time prediction</li>
+            <ul>
+              <li>\( L = \dfrac{1}{N} \displaystyle\sum_{i} (y_{i}-\hat{y_{i}})^{2} \)</li>
+            </ul>
             <li>Use cross-entropy for other binary classification predictions</li>
+            <ul>
+              <li>\( L = -\displaystyle\sum_{i} y_{i}log\hat{y_{i}} + (1-y_{i})log(1-\hat{y_{i}}) \)</li>
+            </ul>
             <li>\( \text{Loss} = \lambda L_{\text{dwell}} + L_{\text{skip}} + L_{\text{like}} + \dots + L_{\text{share}} \)</li>
           </ul>
           <li>AD recommendation</li>
@@ -677,6 +683,16 @@
         </ul> -->
       </ul>
       <li>Hyperparameters</li>
+      <ul>
+        <li>Two-tower</li>
+        <ul>
+          <li>Size of embedding vector</li>
+          <li>Number of hidden layers</li>
+          <li>Number of neurons in each layer</li>
+          <li>Learning rate</li>
+          <li>Choice of activation function</li>
+        </ul>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -690,107 +706,132 @@
 
     <h3 class="card-title">Offline</h3>
     <ul>
-      <li>Option 1. precision@k</li>
+      <li>Candidate generation</li>
       <ul>
-        <li>\( \dfrac{\text{Number of relevant items in top k items}}{\text{k}} \)</li>
-        <li>Cons</li>
+        <li>Option 1. precision@k</li>
         <ul>
-          <li>Does not consider ranking quality</li>
-        </ul>
-      </ul>
-      <li>Option 1. recall@k</li>
-      <ul>
-        <li>\( \dfrac{\text{Number of relevant items in top k items}}{\text{total number of relevant items}} \)</li>
-        <li>Cons</li>
-        <ul>
-          <li>Does not consider ranking quality</li>
-          <li>Denominator can be very big resulting in very small recall values</li>
-        </ul>
-      </ul>
-      <li>Option 1. mean reciprobal rank (MRR)</li>
-      <ul>
-        <li>\( MRR = \dfrac{1}{m} \displaystyle\sum_{i=1}^{m} \dfrac{1}{\text{rank}_{i}} \)</li>
-        <ul>
-          <li>\( {\text{rank}_{i}} \) is position on which the first relevant item appears in the output list</li>
-        </ul>
-        <li>Consider only the first relevant item in each output list, then average the reciprocal rank</li>
-        <li>Cons</li>
-        <ul>
-          <li>Ignores other relevant items in the list other than the first one</li>
-        </ul>
-        <li>Suitable for search</li>
-      </ul>
-      <li>Option 1. mean average precision (mAP)</li>
-      <ul>
-        <li>AP</li>
-        <ul>
-          <li>\( AP = \dfrac{\displaystyle\sum_{i=1}^{k} \text{precision}@i}{n} \)</li>
+          <li>\( \dfrac{\text{Number of relevant items in top k items}}{\text{k}} \)</li>
+          <li>Cons</li>
           <ul>
-            <li>\( n = \) total relevant items</li>
+            <li>Does not consider ranking quality</li>
           </ul>
-          <li>Averages precision@k at different values of k</li>
-          <li>AP is high if more relevant items are located at the top of list</li>
         </ul>
-        <li>mAP</li>
+        <li>Option 1. recall@k</li>
         <ul>
-          <li>Compute AP for each output list, then average them</li>
+          <li>\( \dfrac{\text{Number of relevant items in top k items}}{\text{total number of relevant items}} \)</li>
+          <li>Cons</li>
+          <ul>
+            <li>Does not consider ranking quality</li>
+            <li>Denominator can be very big resulting in very small recall values</li>
+          </ul>
         </ul>
-        <li>Cons</li>
+        <li>Option 1. PR curve</li>
         <ul>
-          <li>Works well when each item is either relevant or irrelevant, but does not work well for relevance scores</li>
+          <li>Trade-off between precision and recall</li>
+          <li>PR-AUC calculates area beneath PR curve</li>
+          <li>High PR-AUC indicates more accurate model</li>
+          <li>Suitable for feed ranking, harmful content detection</li>
         </ul>
-        <li>Suitable for reel recommendation</li>
-      </ul>
-      <li>Option 1. normalized discounted cumulative gain (nDCG)</li>
-      <ul>
-        <li>\( DCG_{p} = \displaystyle\sum_{i=1}^{p} \dfrac{\text{rel}_{i}}{log_{2}(i+1)} \)</li>
+        <li>Option 1. ROC curve</li>
         <ul>
-          <li>\( \text{rel}_{i} \) is ground truth relevance score of item ranked at \( i \)</li>
+          <li>Trade-off between true positive and false positive</li>
+          <li>ROC-AUC calculates area beneath POC curve</li>
+          <li>High ROC-AUC indicates more accurate model</li>
+          <li>Suitable for feed ranking, harmful content detection</li>
         </ul>
-        <li>\( nDCG_{p} = \dfrac{DCG_{p}}{IDCG_{p}} \)</li>
+        <li>Option 1. cross-entropy</li>
         <ul>
-          <li>where \( {IDCG_{p}} \) is \( {DCG_{p}} \) of ideal ranking</li>
+          <li>Multiply ground truth label (0 or 1) with the probability of item</li>
+          <li>Then, sum it to assess the model performance</li>
+          <li>\( \text{CE} = -\displaystyle\sum_{i} y_{i}log\hat{y_{i}} + (1-y_{i})log(1-\hat{y_{i}}) \)</li>
+          <li>Suitable for AD recommendation</li>
         </ul>
-        <li>Cons</li>
+      </ul>
+      <li>Ranking</li>
+      <ul>
+        <li>Option 1. mean reciprobal rank (MRR)</li>
         <ul>
-          <li>If training data only consists of 0 or 1, not the ordering of items based on relevancy, then it is not possbile to construct ground truth</li>
+          <li>\( MRR = \dfrac{1}{m} \displaystyle\sum_{i=1}^{m} \dfrac{1}{\text{rank}_{i}} \)</li>
+          <ul>
+            <li>\( {\text{rank}_{i}} \) is position on which the first relevant item appears in the output list</li>
+          </ul>
+          <li>Consider only the first relevant item in each output list, then average the reciprocal rank</li>
+          <li>Cons</li>
+          <ul>
+            <li>Ignores other relevant items in the list other than the first one</li>
+          </ul>
+          <li>Suitable for search</li>
+        </ul>
+        <li>Option 1. mean average precision (mAP)</li>
+        <ul>
+          <li>AP</li>
+          <ul>
+            <li>\( AP = \dfrac{\displaystyle\sum_{i=1}^{k} \text{precision}@i}{n} \)</li>
+            <ul>
+              <li>\( n = \) total relevant items</li>
+            </ul>
+            <li>Averages precision@k at different values of k</li>
+            <li>AP is high if more relevant items are located at the top of list</li>
+          </ul>
+          <li>mAP</li>
+          <ul>
+            <li>Compute AP for each output list, then average them</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Works well when each item is either relevant or irrelevant, but does not work well for relevance scores</li>
+          </ul>
+          <li>Suitable for reel recommendation</li>
+        </ul>
+        <li>Option 1. normalized discounted cumulative gain (nDCG)</li>
+        <ul>
+          <li>\( DCG_{p} = \displaystyle\sum_{i=1}^{p} \dfrac{\text{rel}_{i}}{log_{2}(i+1)} \)</li>
+          <ul>
+            <li>\( \text{rel}_{i} \) is ground truth relevance score of item ranked at \( i \)</li>
+          </ul>
+          <li>\( nDCG_{p} = \dfrac{DCG_{p}}{IDCG_{p}} \)</li>
+          <ul>
+            <li>where \( {IDCG_{p}} \) is \( {DCG_{p}} \) of ideal ranking</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>If training data only consists of 0 or 1, not the ordering of items based on relevancy, then it is not possbile to construct ground truth</li>
+          </ul>
         </ul>
       </ul>
-      <li>Option 1. PR curve</li>
+      <li>Re-ranking</li>
       <ul>
-        <li>Trade-off between precision and recall</li>
-        <li>PR-AUC calculates area beneath PR curve</li>
-        <li>High PR-AUC indicates more accurate model</li>
-        <li>Suitable for feed ranking, harmful content detection</li>
+        <li>Option 1. diversity</li>
+        <ul>
+          <li>How dissimilar recommended items are to each other</li>
+          <li>Calculate average pairwise similarity (Ex. cosine similarity or dot product) between items outputed by the model</li>
+        </ul>
+        <li>Option 1. freshness</li>
+        <ul>
+          <li>How new is the item to the user</li>
+        </ul>  
+        <li>Serendipity</li>
+        <ul>
+          <li>How unexpected is the item to the user</li>
+        </ul>
       </ul>
-      <li>Option 1. ROC curve</li>
-      <ul>
-        <li>Trade-off between true positive (recall) and false positive</li>
-        <li>ROC-AUC calculates area beneath POC curve</li>
-        <li>High ROC-AUC indicates more accurate model</li>
-        <li>Suitable for feed ranking, harmful content detection</li>
-      </ul>
-      <li>Option 1. cross-entropy</li>
-      <ul>
-        <li>Multiply ground truth label (0 or 1) with the probability of item</li>
-        <li>Then, sum it to assess the model performance</li>
-        <li>\( \text{CE} = -\displaystyle\sum_{i} y_{i}log\hat{y_{i}} + (1-y_{i})log(1-\hat{y_{i}}) \)</li>
-        <li>Suitable for AD recommendation</li>
-      </ul>
-      <!-- <li>Option 1. diversity</li>
-      <ul>
-        <li>How dissimilar recommended items are to each other</li>
-        <li>Calculate average pairwise similarity (Ex. cosine similarity or dot product) between items outputed by the model</li>
-      </ul> -->
     </ul>
 
     <h3 class="card-title">Online</h3>
     <ul>
-      <li>Click-through rate (CTR)</li>
+      <li>General</li>
       <ul>
-        <li>\( \dfrac{\text{number of clicked items}}{\text{total number of shown items}} \)</li>
+        <li>Click-through rate (CTR)</li>
+        <ul>
+          <li>\( \dfrac{\text{number of clicks}}{\text{number of impressions}} \)</li>
+          <li>Does not consider quality of recommended items</li>
+          <li>Can be biasd towards popular or frequently recommended items</li>
+        </ul>
+        <li>Averge number of clicks per user</li>
+        <ul>
+          <li>\( \dfrac{\text{number of clicks}}{\text{number of users}} \)</li>
+        </ul>
       </ul>
-      <li>Revenue lift</li>
       <li>Feed ranking</li>
       <ul>
         <li>Reaction rate</li>
