@@ -48,6 +48,7 @@
       <li><a href="#graph-bfs-">Word ladder</a></li>
       <li><a href="#graph-bfs-">Number of islands</a></li>
       <!-- <li><a href="#graph-bfs-">Remove invalid parentheses</a></li> -->
+      <li><a href="#graph-bfs-">Longest increasing path in a matrix</a></li>
       <!-- <li><a href="#graph-bfs-">Water and jug problem</a></li> -->
       <!-- <li><a href="#graph-bfs-">Longest Absolute File Path</a></li> -->
       <li><a href="#graph-bfs-">Number of provinces</a></li>
@@ -362,6 +363,80 @@
     Reference: <a href="https://leetcode.com/problems/remove-invalid-parentheses">301. Remove Invalid Parentheses</a>
   </div>
 </div> -->
+
+<div class="card mb-4" id="graph-bfs-">
+  <div class="card-body">
+    <h2 class="card-title">Longest increasing path in a matrix (H) (F) #</h2>
+
+<pre><code class="python">class Solution:
+    def longestIncreasingPath(self, matrix: List[List[int]]) -> int:
+
+        # BFS 
+        # Construct graph
+        #   x goes to y if x < y
+        # Remember depth while traversing
+        n = len(matrix)
+        m = len(matrix[0])
+
+        graph = defaultdict(set)
+        dirs = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+
+        # Time O(nm)
+        #   n = number of rows
+        #   m = number of columns
+        # Space O(nm)
+        for i in range(n):
+            for j in range(m):
+                for x,y in dirs:
+                    if 0 <= i + x < n \
+                        and 0 <= j + y < m \
+                        and matrix[i][j] < matrix[i+x][j+y]:
+                        graph[(i, j)].add((i+x, j+y))
+
+        # Memorize solutions
+        memory = defaultdict(int)
+
+        # Time O(nm)
+        #   With memory, traverse takes only once at each node
+        # Space O(nm)
+        #   Memory stores max path length starting at each node
+        def bfs(graph, start):
+
+            # Should not have explored set
+            # because we are checking every path
+            # (we know there is no cycle) 
+
+            queue = deque()
+            queue.append((start, 1))
+
+            max_depth = 0
+            
+            while queue:
+                node, depth = queue.popleft()
+
+                for next_node in graph[node]:
+                    if next_node in memory:
+                        max_depth = max(
+                            max_depth, 
+                            memory[next_node]+depth
+                        )
+                    else:
+                        queue.append((next_node, depth+1))
+
+            return max(max_depth, depth)
+
+        max_length = 0
+        for i in range(n):
+            for j in range(m):
+                memory[(i,j)] = bfs(graph, (i,j))        
+                max_length = max(max_length, memory[(i,j)])
+                
+        return max_length</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/longest-increasing-path-in-a-matrix">329. Longest Increasing Path in a Matrix</a>
+  </div>
+</div>
 
 <!-- <div class="card mb-4" id="graph-bfs">
   <div class="card-body">
