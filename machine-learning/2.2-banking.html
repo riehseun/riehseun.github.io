@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="/img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/monokai-sublime.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="/js/jquery.min.js"></script>
+<script src="/js/bootstrap.bundle.min.js"></script>
+<script src="/js/highlight.pack.js"></script>
+<script src="/js/include_html.js" type="text/javascript"></script>
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script src="/js/site.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<include src="/header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Machine Learning</h1>
+
+<!-- Gen AI BEGIN -->
+<div class="card mb-4" id="banking">
+  <div class="card-body">
+    <h2 class="card-title">Banking</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#banking-1">Requirement</a></li>
+      <li><a href="#banking-2">Problem</a></li>
+      <li><a href="#banking-3">Data preparation</a></li>
+      <li><a href="#banking-4">Model development</a></li>
+      <li><a href="#banking-5">Evaluation</a></li>
+      <li><a href="#banking-6">Serving</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="banking-1">
+  <div class="card-body">
+    <h2 class="card-title">Requirement</h2>
+    <ul>
+      <li>Business</li>
+      <ul>
+        <li>What system do I need to design? Banking system such as fraud detection, credit approval, etc</li>
+        <li>What types of accounts do customers have? Debit and credit</li>
+        <li>Does the system have access to personal credit score? No</li>
+        <li>Should the system handle multiple currency? Yes</li>
+      </ul>
+      <li>Data</li>
+      <ul>
+        <li>Do we have training data available? We have historical customer transaction data</li>
+        <li>In what type of DB is data stored? SQL</li>
+        <li>Up to how many years of transaction data does the system keep? System keeps entire history</li>
+      </ul>
+      <li>Constraints</li>
+      <ul>
+        <li>How much compute is available for training? Large GPU clusters are available</li>
+        <li>Does the model need to be deployed to mobile devices? No</li>
+        <li>Should the inference be batch or online? Both</li>
+        <li>How fast should online inference be? Less than 200ms</li>
+        <li>Should model be continuously trained? Model should be re-trained when distrubtion drift happens</li>
+      </ul>
+      <li>Estimation</li>
+      <ul>
+        <li>How many customers does the bank have? 100M</li>
+        <li>On average, how many accounts each customer have? 3</li>
+      </ul>
+    </ul>
+  <div class="card-footer text-muted">
+    Reference:
+  </div>
+</div>
+
+<div class="card mb-4" id="banking-2">
+  <div class="card-body">
+    <h2 class="card-title">Problem</h2>
+
+    <h3 class="card-title">ML objective</h3>
+    <ul>
+      <li>Given customer/transaction, compute the probability of default/fraud</li>
+      <li>Input</li>
+      <ul>
+        <li>Customer ID or transaction ID</li>
+      </ul>
+      <li>Output</li>
+      <ul>
+        <li>Score representing probability of default in certain number of days in the future or fraud</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">ML category</h3>
+    <ul>
+      <li>Option 1. regression</li>
+      <ul>
+        <li></li>
+      </ul>
+      <li>Option 2. classification</li>
+      <ul>
+        <li>Create buckets for low, medium, high risk transactions or customers</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: 
+  </div>
+</div>
+
+<div class="card mb-4" id="banking-3">
+  <div class="card-body">
+    <h2 class="card-title">Data preparation</h2>
+
+    <h3 class="card-title">Data engineering</h3>
+    <ul>
+      <li>Training data</li>
+      <ul>
+        <li>Spilt data such that 80% is training set and 20% is test set (split based on time)</li>
+        <li>Among 80% training data, use 70% for 5-bin cross-validation and 30% for validation set for hyperparameter tuning</li>
+        <li>Based population (transaction ID or customer ID) must not co-exist in bins and in any one of bins and validation set</li>
+      </ul>
+      <li>Database</li>
+      <ul>
+        <li>Customer</li>
+        <ul>
+          <li>ID</li>
+          <li>first name</li>
+          <li>last name</li>
+          <li>DOB</li>
+          <li>email</li>
+          <li>created_at</li>
+          <li>updated_at</li>
+        </ul>
+        <li>Account</li>
+        <ul>
+          <li>ID</li>
+          <li>type</li>
+          <li>balance</li>
+          <li>opening_date</li>
+          <li>active</li>
+        </ul>
+        <li>Transaction</li>
+        <ul>
+          <li>ID</li>
+          <li>from_account_ID</li>
+          <li>to_account_ID</li>
+          <li>amount</li>
+          <li>timestamp</li>
+        </ul>
+        <li>Currency</li>
+        <ul>
+          <li>currency_1</li>
+          <li>currency_2</li>
+          <li>exchange_rate</li>
+          <li>timestamp</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Feature engineering</h3>
+    <ul>
+      <li>Customer</li>
+      <ul>
+        <li>average month-end account balance (debit) for past 6 months - averged value over time is more robust again distribution shift</li>
+        <li>average month-end account balance (credit) for past 6 months</li>
+        <li>average month-end number of transactions (debit) for past 6 months</li>
+        <li>average month-end number of transactions (credit) for past 6 months</li>
+      </ul>
+      <li>Account</li>
+      <ul>
+        <li>average month-end sum of accrued interest for past 12 month</li>
+        <li>opening_date</li>
+      </ul>
+      <li>Transaction</li>
+      <li>
+        <li>dollar amount for transaction (currency adjusted)</li>
+      </li>
+      <li>Feature selections</li>
+      <ul>
+        <li>Too many features can lead to overfitting, technical debt</li>
+        <li>Run XGBoost with a single feature to compute predictive power for that feature</li>
+        <li>Rank all features by thier predictive power</li>
+        <li>Add first feature to feature set</li>
+        <li>Add next feature if the dependecy with the first feature is lower than certain threshold</li>
+        <li>Repeat until a pre-defined number of features are collected</li>
+      </ul>
+    </li>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: 
+  </div>
+</div>
+
+<div class="card mb-4" id="banking-4">
+  <div class="card-body">
+    <h2 class="card-title">Model development</h2>
+
+    <h3 class="card-title">Model selection</h3>
+    <ul>
+      <li>XGBoost</li>
+      <ul>
+        <li>Pros</li>
+        <ul>
+          <li>Handles structured data very well</li>
+          <li>No need to standardize input features</li>
+          <li>Handles missing values (no need to do delete/impute)</li>
+          <li>Explanable - contribution from each feature to the prediction can be numerically shown via shapely values</li>
+        </ul>
+        <li>Cons</li>
+        <ul>
+          <li>Feature change requires re-training from scratch</li>
+          <li>Lots of hyperpameter tuning work</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Model training</h3>
+    <ul>
+      <li>Loss function</li>
+      <li>Hyperparemeters</li>
+      <ul>
+        <li>booster - type of booster to use</li>
+        <li>tree_method - method for constructing trees</li>
+        <li>n_estimators - number of trees to ensemble</li>
+        <li>learning_rate - step size in gradient descent</li>
+        <li>reg_lambda - L2 regularization</li>
+        <li>reg_alpha - L1 regularization</li>
+        <li>max_depth - maximum depth of nodes in each tree</li>
+        <li>scale_pos_weight - weight assigned to positive instances</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference:
+  </div>
+</div>
+
+<div class="card mb-4" id="banking-5">
+  <div class="card-body">
+    <h2 class="card-title">Evaluation</h2>
+
+    <h3 class="card-title">Offline</h3>
+    <ul>
+      <li>PR-AUC</li>
+      <li>ROC-AUC</li>
+      <li>Precision at 1%, 5%</li>
+      <li>Recall at 1%, 5%</li>
+    </ul>
+
+    <h3 class="card-title">Online</h3>
+    <ul>
+      <li>Feature PSI - PSI calculated for each feature</li>
+      <li>Score PSI</li>
+      <li>Kendall's Tau Rank Correlation - measure the changes in the ranking of all features</li>
+      <li>ShapBand - measure tha deviation of SHAP values from baseline to inference data for each feature</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: 
+  </div>
+</div>
+
+<div class="card mb-4" id="banking-6">
+  <div class="card-body">
+    <h2 class="card-title">Serving</h2>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: 
+  </div>
+</div>
+<!-- Gen AI END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+</html>
