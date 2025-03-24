@@ -54,6 +54,7 @@
       <li><a href="#graph-bfs-">Number of provinces</a></li>
       <li><a href="#graph-bfs-">Bus Routes</a></li>
       <li><a href="#graph-bfs-">Shortest Path in Binary Matrix</a></li>
+      <li><a href="#graph-bfs-">Diagonal Traverse II</a></li>
     </ul>
   </div>
 </div>
@@ -706,6 +707,62 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/shortest-path-in-binary-matrix">1091. Shortest Path in Binary Matrix</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-bfs">
+  <div class="card-body">
+    <h2 class="card-title">Diagonal Traverse II (M) (F) #</h2>
+
+<pre><code class="python">class Solution:
+    def findDiagonalOrder(self, nums: List[List[int]]) -> List[int]:
+
+        # BFS
+        # Traverse from top-left and construct graph
+        # At each node, the next node is right and bottom 
+
+        graph = defaultdict(list)  # We need ordering!
+        dirs = [(1, 0), (0, 1)]
+        n = len(nums)
+        
+        # Time O(nm)
+        # Space O(nm)
+        for i in range(n):
+            m = len(nums[i])
+            for j in range(m):
+                for x, y in dirs:
+                    if 0 <= i + x < n \
+                        and 0 <= j + y < len(nums[i+x]):
+                        print(len(nums[i+x]))
+                        graph[(i,j)].append((i+x,j+y))
+        
+        result = []
+
+        # Time O(l+k) = O(nm)
+        #   l = number of nodes = nm
+        #   k = number of edges = max 2 edges per nodes
+        # Space O(nm)
+        def bfs(graph, start):
+
+            explored = set()
+            explored.add(start)
+
+            queue = deque()
+            queue.append(start)
+
+            while queue:
+                node = queue.popleft()
+                result.append(nums[node[0]][node[1]])
+                for next_node in graph[node]:
+                    if next_node not in explored:
+                        explored.add(next_node)
+                        queue.append(next_node)
+
+        bfs(graph, (0,0))
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/diagonal-traverse-ii">1424. Diagonal Traverse II</a>
   </div>
 </div>
 <!-- Graph BFS END -->
