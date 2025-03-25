@@ -685,7 +685,7 @@ class Solution:
 
 <div class="card mb-4" id="tree-dfs">
   <div class="card-body">
-    <h2 class="card-title">Binary tree maximum path sum (H) (G) !</h2>
+    <h2 class="card-title">Binary tree maximum path sum (H) (G/F) !#</h2>
 
 <pre><code class="python"># Definition for a binary tree node.
 # class TreeNode:
@@ -695,34 +695,40 @@ class Solution:
 #         self.right = right
 class Solution:
     def maxPathSum(self, root: Optional[TreeNode]) -> int:
+        
+        # Need to process children before the root
+        # DFS post order
 
-        # If node is None, return 0
-        # Consider each node. Max sum at each node is the sum of
-        #   node value itself
-        #   max sum of left subtree
-        #   max sum of right subtree
         # Also, in each node, the path can only take either left or right
 
         self.max_sums = []
 
-        # Time O(n) n = number of nodes
-        # Space O(n) for each node, we are constructing its max sum
-        def helper(root):
+        # Time O(n) 
+        #   n = number of nodes
+        # Space O(n) 
+        #   For each node, we are constructing its max sum
+        def post_order(node):
 
-            if not root:
+            if not node:
                 return 0
 
-            max_sum_left = max(helper(root.left), 0)
-            max_sum_right = max(helper(root.right), 0)
+            # If negative value, consider not using that node
+            # and set the sum to 0
+            max_sum_left = max(post_order(node.left), 0)
+            max_sum_right = max(post_order(node.right), 0)
 
-            max_sum = root.val + max_sum_left + max_sum_right
+            # If includes both children, it wouldn't be valid path
+            # Thus, include only one that has bigger sum
+            max_path = node.val + max(max_sum_left, max_sum_right)
+
+            # In case, the path that constructs the max sum
+            # does not include root of tree
+            max_sum = node.val + max_sum_left + max_sum_right
             self.max_sums.append(max_sum)
 
-            max_path = root.val + max(max_sum_left, max_sum_right)
             return max_path
 
-        helper(root)
-
+        post_order(root)
         return max(self.max_sums)</code></pre>
   </div>
   <div class="card-footer text-muted">
