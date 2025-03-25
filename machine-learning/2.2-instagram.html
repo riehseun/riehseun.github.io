@@ -63,7 +63,9 @@
       <li>Business</li>
       <ul>
         <li>What is the business objective? use ML for feed ranking, AD recommendation, reel recommendataion</li>
-        <li>What does a post consist of? Text, iamge, video</li>
+        <li>What does a feed consist of? Posts and ADs</li>
+        <li>What does reel consist of? Short videos and ADs</li>
+        <li>What does a post consist of? Text, image, video</li>
         <ul>
           <li>Should the feed be personalized for each user? Yes</li>
           <li>Can users follow each other? Yes</li>
@@ -115,10 +117,8 @@
 
     <h3 class="card-title">ML problem</h3>
     <ul>
-      <li>For each user, produce feeds where</li>
-      <ul>
-        <li>Posts, ADs, reels show up basd on probability of being clicked</li>
-      </ul>
+      <li>For each user, produce feeds where posts and ADs show up basd on probability of being clicked</li>
+      <li>For each user, produce reels where videos and ADs show up basd on probability of being clicked</li>
       <li>Input</li>
       <ul>
         <li>User</li>
@@ -136,8 +136,8 @@
         <li>Collaborative filtering</li>
         <ul>
           <li>Assume similar users are interested in similar items</li>
-          <li>Uses user-user or item-item similarities to recommend new videos</li>
-          <li>Uses users historical engagement only (No need to use item features)</li>
+          <li>Uses user-item interaction data only (No need to use item features)</li>
+          <li>Needs to compute user-user or item-item similarities</li>
           <li>Pros</li>
           <ul>
             <li>No need for domain knowledge because item features are not used</li>
@@ -153,7 +153,7 @@
         <li>Content-based filtering</li>
         <ul>
           <li>Uses item features</li>
-          <li>Recommend items similar to items that user liked</li>
+          <li>Recommend items that are similar to those that were relevant to user</li>
           <li>Pros</li>
           <ul>
             <li>No need to wait for user interaction data. Recommendation depends on item features only</li>
@@ -183,17 +183,13 @@
       <ul>
         <li>Human label</li>
         <ul>
-          <li>Expensive</li>
-          <li>Less noisy</li>
+          <li>People manually labelling posts, ADs, reels, that they find relevant</li>
+          <li>Accurate but expensive</li>
         </ul>
         <li>User interaction</li>
         <ul>
-          <li>Noisy</li>
-          <li>Classes will be imbalanced</li>
-        </ul>
-        <li>Self-supervision</li>
-        <ul>
-          <li>Not applicable</li>
+          <li>Utilize user-item interaction data</li>
+          <li>Data is noisy and classes will be imbalanced, but inexpensive</li>
         </ul>
       </ul>
       <li>Database</li>
@@ -243,6 +239,10 @@
           <li>ad_id</li>
           <li>interaction - impression, click</li>
           <li>timestamp</li>
+          <li>position_of_AD_in_feed</li>
+          <li>position_of_AD_in_reel</li>
+          <li>order_of_interaction_after_feed_is_shown</li>
+          <li>order_of_interaction_after_reel_is_shown</li>
         </ul>
         <li>User-post interation</li>
         <ul>
@@ -250,6 +250,8 @@
           <li>post_id</li>
           <li>interaction_type - click, like, share, etc</li>
           <li>timestamp</li>
+          <li>position_of_post_in_feed</li>
+          <li>order_of_interaction_after_feed_is_shown</li>
         </ul>
         <li>User-video interation</li>
         <ul>
@@ -257,7 +259,8 @@
           <li>video_id</li>
           <li>interaction_type - like, impression, watch, search, comment</li>
           <li>timestamp</li>
-          <li>position_of_video_in_displayed_list</li>
+          <li>position_of_video_in_reel</li>
+          <li>order_of_interaction_after_reel_is_shown</li>
         </ul>
         <li>Friendship</li>
         <ul>
@@ -292,7 +295,7 @@
       <li>Post</li>
       <ul>
         <li>Post ID - embedding</li>
-        <li>Description</li>
+        <li>Description - embedding</li>
         <ul>
           <li>Preprocessing</li>
           <ul>
@@ -330,11 +333,10 @@
           <li>Vectorization</li>
           <ul>
             <li>Statistical methods like BoW and TF-IDF cannot capture semantics</li>
-            <li>BERT takes long time to produce text embeddings and is for english only</li>
-            <li>DistlimBERT can be used here</li>
+            <li>Use SentenceBERT</li>
           </ul>
         </ul>
-        <li>Image</li>
+        <li>Image - embedding</li>
         <ul>
           <li>Preprocessing</li>
           <ul>
@@ -345,10 +347,10 @@
           </ul>
           <li>Feature extraction</li>
           <ul>
-            <li>CLIP's visual encoder, SimCLR</li>
+            <li>CLIP's visual encoder, ViT, SimCLR</li>
           </ul>
         </ul>
-        <li>Video</li>
+        <li>Video - embedding</li>
         <ul>
           <li>Preprocessing</li>
           <ul>
@@ -364,11 +366,12 @@
             <li>VideoMoCo</li>
           </ul>
         </ul>
-        <li>Tag</li>
+        <li>Tag - embedding</li>
         <ul>
           <li>Use Viterbi to tokenzie hashtags into different words</li>
           <li>Use feature hashing to convert words to Ids</li>
-          <li>Use TF-IDF or word2vec to vectorize tags</li>
+          <li>Use TF-IDF or word2vec to vectorize each tag</li>
+          <li>Average embeddings of each tag</li>
         </ul>
         <li>Post's age - bucketize + one-hot</li>
       </ul>
@@ -379,7 +382,6 @@
         <li>Video - VideoMoCo</li>
         <li>Category - CBOW</li>
         <li>Total impressions or clicks on the Ad - normalize</li>
-        <li>Total impressions or clicks on the Ad supplied by an advertiser - normalize</li>
       </ul>
       <li>Video</li>
       <ul>
@@ -387,7 +389,7 @@
         <li>length - normalize</li>
         <li>language - embedding</li>
         <li>manual_tags - CBOW for each tag and aggregate</li>
-        <li>title - BERT</li>
+        <li>title - SentenceBERT</li>
       </ul>
       <li>Author</li>
       <ul>
@@ -413,28 +415,28 @@
       <ul>
         <li>View - normalize</li>
         <li>Like - normalize</li>
-        <li>Comment - BERT</li>
+        <li>Comment - SentenceBERT</li>
         <li>Share - normalize</li>
         <li>Hide - normalize</li>
         <li>Report - normalize</li>
       </ul>
       <li>User-AD interaction</li>
       <ul>
-        <li>Cliked Ads - embedding</li>
+        <li>Cliked Ads - average embeddings for each clicked AD</li>
         <li>User's historical engagement statistics - normalize</li>
       </ul>
       <li>User-video interaction</li>
       <ul>
-        <li>search_history - BERT to map each search query to embedding vector. Average the query embeddings to get a fixed-sized feature vector</li>
-        <li>liked_videos - embedding (averged over all liked videos) to map video_ids to embedding vector</li>
-        <li>watched_videos - embedding (averged over all liked videos) to map video_ids to embedding vector</li>
-        <li>impressions - embedding (averged over all liked impressions) to map video_ids to embedding vector</li>
+        <li>search_history - SentenceBERT to map each search query to embedding vector, then average the query embeddings</li>
+        <li>liked_videos - average embeddings for each liked video</li>
+        <li>watched_videos - average embeddings for each watched video</li>
+        <li>impressions - average embeddings for each video with just impressions</li>
       </ul>
       <li>User-author interaction</li>
       <ul>
         <li>Duration at which user followed the author - bucketize + one-hot</li>
         <li>Duration at which author followed the user - bucketize + one-hot</li>
-        <li>like/click/comment/share rate - normalized</li>
+        <li>like/click/comment/share rate - normalize</li>
         <li>length of friendship - bucketize + one-hot</li>
         <li>close friends and family - binary value 0 or 1</li>
       </ul>
@@ -486,7 +488,6 @@
           </ul>
           <li>Cons</li>
           <ul>
-            <li>Only relies on user-item interactions, not using user or item features</li>
             <li>Handling new users is difficult</li>
             <li>Model performance is lower</li>
           </ul>
@@ -494,11 +495,11 @@
         <li>Option 1. two-tower network (collaborative filtering - no item features)</li>
         <ul>
           <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-0/instagram-21.png" alt="Card image cap">
-          <li>Narrow down videos from billions to thousands</li>
+          <li>Narrow down items from billions to thousands</li>
           <li>Use model that does not rely on item feature for efficiency</li>
           <li>Inference</li>
           <ul>
-            <li>Use ANN to find most relevant videos for a given user from their embeddings</li>
+            <li>Use ANN to find most relevant items for a given user from their embeddings</li>
           </ul>
           <li>Pros</li>
           <ul>
@@ -509,7 +510,7 @@
           <li>Cons</li>
           <ul>
             <li>Slow serving having to compute user embeddings at query time</li>
-            <li>Slow inference (if using content-based filtering) because model needs to transform item features to item embeddings</li>
+            <li>Slow inference (if using content-based filtering) because model needs to transform item IDs to item embeddings</li>
             <li>More learning paramaters, thus traning is more expensive</li>
           </ul>
         </ul>
@@ -530,7 +531,7 @@
           </ul>
           <li>Option 1a. Logistic regression</li>
           <ul>
-            <li></li>
+            <li>User-item interaction data is used as features</li>
             <li>Pros</li>
             <ul>
               <li>Fast inference</li>
@@ -684,6 +685,10 @@
       </ul>
       <li>Hyperparameters</li>
       <ul>
+        <li>Matrix factorization</li>
+        <ul>
+          <li></li>
+        </ul>
         <li>Two-tower</li>
         <ul>
           <li>Size of embedding vector</li>
@@ -711,40 +716,30 @@
         <li>Option 1. precision@k</li>
         <ul>
           <li>\( \dfrac{\text{Number of relevant items in top k items}}{\text{k}} \)</li>
-          <li>Cons</li>
-          <ul>
-            <li>Does not consider ranking quality</li>
-          </ul>
+          <li>Does not consider ranking quality, but ranking is out of scope for candidate generation</li>
         </ul>
-        <li>Option 1. recall@k</li>
+        <li>Option 2. recall@k</li>
         <ul>
           <li>\( \dfrac{\text{Number of relevant items in top k items}}{\text{total number of relevant items}} \)</li>
-          <li>Cons</li>
-          <ul>
-            <li>Does not consider ranking quality</li>
-            <li>Denominator can be very big resulting in very small recall values</li>
-          </ul>
+          <li>Does not consider ranking quality, but ranking is out of scope for candidate generation</li>
         </ul>
-        <li>Option 1. PR curve</li>
-        <ul>
-          <li>Trade-off between precision and recall</li>
-          <li>PR-AUC calculates area beneath PR curve</li>
-          <li>High PR-AUC indicates more accurate model</li>
-          <li>Suitable for feed ranking, harmful content detection</li>
-        </ul>
-        <li>Option 1. ROC curve</li>
+        <li>Option 3. ROC curve</li>
         <ul>
           <li>Trade-off between true positive and false positive</li>
           <li>ROC-AUC calculates area beneath POC curve</li>
           <li>High ROC-AUC indicates more accurate model</li>
-          <li>Suitable for feed ranking, harmful content detection</li>
         </ul>
-        <li>Option 1. cross-entropy</li>
+        <li>Option 4. PR curve</li>
+        <ul>
+          <li>Trade-off between precision and recall</li>
+          <li>PR-AUC calculates area beneath PR curve</li>
+          <li>High PR-AUC indicates more accurate model</li>
+        </ul>
+        <li>Option 5. cross-entropy</li>
         <ul>
           <li>Multiply ground truth label (0 or 1) with the probability of item</li>
           <li>Then, sum it to assess the model performance</li>
           <li>\( \text{CE} = -\displaystyle\sum_{i} y_{i}log\hat{y_{i}} + (1-y_{i})log(1-\hat{y_{i}}) \)</li>
-          <li>Suitable for AD recommendation</li>
         </ul>
       </ul>
       <li>Ranking</li>
@@ -756,13 +751,9 @@
             <li>\( {\text{rank}_{i}} \) is position on which the first relevant item appears in the output list</li>
           </ul>
           <li>Consider only the first relevant item in each output list, then average the reciprocal rank</li>
-          <li>Cons</li>
-          <ul>
-            <li>Ignores other relevant items in the list other than the first one</li>
-          </ul>
-          <li>Suitable for search</li>
+          <li>Ignores other relevant items in the list other than the first one, thus not suitable for feed ranking problem</li>
         </ul>
-        <li>Option 1. mean average precision (mAP)</li>
+        <li>Option 2. mean average precision (mAP)</li>
         <ul>
           <li>AP</li>
           <ul>
@@ -777,13 +768,10 @@
           <ul>
             <li>Compute AP for each output list, then average them</li>
           </ul>
-          <li>Cons</li>
-          <ul>
-            <li>Works well when each item is either relevant or irrelevant, but does not work well for relevance scores</li>
-          </ul>
-          <li>Suitable for reel recommendation</li>
+          <li>Works well when each item is either relevant or irrelevant, but does not work well for scoring relevance</li>
+          <li>We need relative score to rank posts, AD, videos not whether each item should be recommended or not</li>
         </ul>
-        <li>Option 1. normalized discounted cumulative gain (nDCG)</li>
+        <li>Option 3. normalized discounted cumulative gain (nDCG)</li>
         <ul>
           <li>\( DCG_{p} = \displaystyle\sum_{i=1}^{p} \dfrac{\text{rel}_{i}}{log_{2}(i+1)} \)</li>
           <ul>
@@ -792,10 +780,6 @@
           <li>\( nDCG_{p} = \dfrac{DCG_{p}}{IDCG_{p}} \)</li>
           <ul>
             <li>where \( {IDCG_{p}} \) is \( {DCG_{p}} \) of ideal ranking</li>
-          </ul>
-          <li>Cons</li>
-          <ul>
-            <li>If training data only consists of 0 or 1, not the ordering of items based on relevancy, then it is not possbile to construct ground truth</li>
           </ul>
         </ul>
       </ul>
@@ -806,11 +790,11 @@
           <li>How dissimilar recommended items are to each other</li>
           <li>Calculate average pairwise similarity (Ex. cosine similarity or dot product) between items outputed by the model</li>
         </ul>
-        <li>Option 1. freshness</li>
+        <li>Option 2. freshness</li>
         <ul>
           <li>How new is the item to the user</li>
         </ul>  
-        <li>Serendipity</li>
+        <li>Option 3. Serendipity</li>
         <ul>
           <li>How unexpected is the item to the user</li>
         </ul>
@@ -884,12 +868,12 @@
       <li>Candidate generation</li>
       <ul>
         <li>Gather relevant feeds, ADs, reels from pool of items</li>
-        <li>Matrix Factorization, ANN, two tower NN can be used</li>
+        <li>Matrix Factorization, two-tower NN (with no item features) can be used</li>
         <li>Filter can be used to exclude irrelevant items</li>
       </ul>
       <li>Ranking</li>
       <ul>
-        <li>Sophisticated models are used to score items</li>
+        <li>Two-tower NN (with item features) can be used</li>
       </ul>
       <li>Re-ranking</li>
       <ul>
