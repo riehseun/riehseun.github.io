@@ -350,27 +350,31 @@
 
 <div class="card mb-4" id="string-">
   <div class="card-body">
-    <h2 class="card-title">Group Anagrams (M) (G/A/100) !!!</h2>
+    <h2 class="card-title">Group Anagrams (M) (G/F/A/100) !#!!</h2>
 
 <pre><code class="python">class Solution:
     def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
 
-        # Use hash table to store sorted version of each string
+        # Use hash table to store anagram
+        # Anagrams have the same count for each character
+        # Use tuple of size 26 (size of alphabet)
+        # Represent each string as
+        # Ex. aab => (2, 1, 0, ... , 0)
+        # Ex. ayzz => (1, 0, ... , 0, 1, 2)
 
-        anagrams_dict = defaultdict(list)
+        anagrams = defaultdict(list)
 
-        # Time O(nlogm) n = len(strs), m = max length of each string
+        # Time O(n)
+        #   n = total number of characters in input string
         # Space O(n)
-        for string in strs:
-            string_sorted = ''.join(sorted(string))
-            anagrams_dict[string_sorted].append(string)
+        for s in strs:
+            representation = [0] * 26
+            for c in s:
+                index = ord(c) - ord("a")
+                representation[index] += 1
+            anagrams[tuple(representation)].append(s)
 
-        result = []
-
-        for k,v in anagrams_dict.items():
-            result.append(v)
-
-        return result</code></pre>
+        return list(anagrams.values())</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/group-anagrams">49. Group Anagrams</a>
