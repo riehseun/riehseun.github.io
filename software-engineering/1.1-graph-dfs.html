@@ -47,7 +47,8 @@
       <li><a href="#graph-dfs-">Word break</a></li>
       <li><a href="#graph-dfs-">Course schedule</a></li>
       <li><a href="#graph-dfs-">Course schedule II</a></li>
-      <!-- <li><a href="#graph-dfs-">Alien dictionary</a></li> -->
+      <li><a href="#graph-dfs-">Alien dictionary</a></li>
+      <li><a href="#graph-dfs-">Minesweeper</a></li>
       <!-- <li><a href="#graph-dfs-">Find eventual safe states</a></li> -->
       <!-- <li><a href="#graph-dfs-">Employee Importance</a></li> -->
     </ul>
@@ -319,6 +320,89 @@
   </div>
 </div>
 
+<div class="card mb-4" id="graph-dfs-">
+  <div class="card-body">
+    <h2 class="card-title">Minesweeper (M) (F) #</h2>
+
+<pre><code class="python">class Solution:
+    def updateBoard(self, board: List[List[str]], click: List[int]) -> List[List[str]]:
+
+        # If input hits M, change to X
+        # Else (If input hits E), DFS
+        #   If mine is adjacent, change to digit
+        #   Else, change to B 
+        #   Recurse on adjacent tiles (that are not mines)
+        
+        dirs = [
+            (-1, -1), 
+            (-1, 0), 
+            (-1, 1), 
+            (0, 1), 
+            (1, 1), 
+            (1, 0), 
+            (1, -1), 
+            (0, -1)
+        ]
+        n = len(board)
+        m = len(board[0])
+        row = click[0]
+        col = click[1]
+
+        # Time O(nm+n)
+        #   nm = number of nodes
+        #   Each node can have max 8 edges
+        # Space O(nm)
+        def dfs(board, start):
+
+            explored = set()
+            explored.add(start)
+
+            stack = []
+            stack.append(start)
+
+            while stack:
+                i, j = stack.pop()
+
+                # If current tile is mine, skip
+                if board[i][j] == "M":
+                    continue
+                
+                # Calculate number of mines
+                count = 0
+                for x,y in dirs:
+                    if 0 <= i + x < n \
+                        and 0 <= j + y < m \
+                        and board[i+x][j+y] == "M":
+                        count += 1
+                
+                if count > 0:
+                    board[i][j] = str(count)
+                else:
+                    board[i][j] = "B"
+
+                # Check all adjacent tiles
+                for x,y in dirs:
+                    if 0 <= i + x < n \
+                        and 0 <= j + y < m:
+                        next_node = (i+x, j+y)
+
+                        # If there is mine nearby, don't explore
+                        if next_node not in explored and count == 0:
+                            explored.add(next_node)
+                            stack.append(next_node)
+
+            return board
+        
+        if board[row][col] == "M":
+            board[row][col] = "X"
+            return board
+        else:
+            return dfs(board, (row,col))</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/minesweeper">529. Minesweeper</a>
+  </div>
+</div>
 
 <!-- <div class="card mb-4" id="graph-dfs-">
   <div class="card-body">
