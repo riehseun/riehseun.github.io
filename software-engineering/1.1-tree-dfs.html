@@ -72,6 +72,7 @@
       <li><a href="#tree-dfs">Convert Binary Search Tree to Sorted Doubly Linked List</a></li>
       <li><a href="#tree-dfs">Alien dictionary</a></li>
       <li><a href="#tree-dfs">Diameter of binary tree</a></li>
+      <li><a href="#tree-dfs">Boundary of Binary Tree</a></li>
       <!-- <li><a href="#tree-dfs">Longest univalue path</a></li> -->
       <li><a href="#tree-dfs">All Nodes Distance K in Binary Tree</a></li>
       <li><a href="#tree-dfs">Range Sum of BST</a></li>
@@ -1264,6 +1265,81 @@ class Solution:
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/diameter-of-binary-tree">543. Diameter of Binary Tree</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="tree-dfs">
+  <div class="card-body">
+    <h2 class="card-title">Boundary of Binary Tree (M) (F) #</h2>
+
+<pre><code class="python"># Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def boundaryOfBinaryTree(self, root: Optional[TreeNode]) -> List[int]:
+        
+        # root 
+        # + left boundry (left most children other than root and leaf)
+        # + leaves from left to right 
+        # + reverse of right boundry 
+
+        # Time O(n)
+        #   n = number of nodes in tree
+        # Space O(n)
+        def left_boundry(node):
+
+            if node:
+                left_nodes.append(node.val)
+                if node.left:
+                    left_boundry(node.left)
+                else:
+                    left_boundry(node.right)
+
+        def right_boundry(node):
+
+            if node:
+                right_nodes.append(node.val)
+                if node.right:
+                    right_boundry(node.right)
+                else:
+                    right_boundry(node.left)
+
+        def pre_order(node, root):
+
+            if node:
+                # Find leaf nodes
+                if not node.left \
+                    and not node.right:
+                    leaf_nodes.append(node.val)
+                pre_order(node.left, root)
+                pre_order(node.right, root)
+
+        leaf_nodes = []
+        left_nodes = []
+        right_nodes = []
+
+        if not root.left and not root.right:
+            return [root.val]   
+
+        left_boundry(root.left)
+        pre_order(root, root)
+        right_boundry(root.right)
+        right_nodes.reverse()
+
+        result = []   
+        if left_nodes:
+            leaf_nodes = leaf_nodes[1:]
+        if right_nodes:
+            leaf_nodes = leaf_nodes[:-1]
+        result = [root.val] + left_nodes +leaf_nodes + right_nodes
+
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/boundary-of-binary-tree">545. Boundary of Binary Tree</a>
   </div>
 </div>
 
