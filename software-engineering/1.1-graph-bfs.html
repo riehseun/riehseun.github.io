@@ -48,6 +48,7 @@
       <li><a href="#graph-bfs-">Word ladder</a></li>
       <li><a href="#graph-bfs-">Number of islands</a></li>
       <!-- <li><a href="#graph-bfs-">Remove invalid parentheses</a></li> -->
+      <li><a href="#graph-bfs-">Shortest Distance from All Buildings</a></li>
       <li><a href="#graph-bfs-">Longest increasing path in a matrix</a></li>
       <!-- <li><a href="#graph-bfs-">Water and jug problem</a></li> -->
       <!-- <li><a href="#graph-bfs-">Longest Absolute File Path</a></li> -->
@@ -364,6 +365,100 @@
     Reference: <a href="https://leetcode.com/problems/remove-invalid-parentheses">301. Remove Invalid Parentheses</a>
   </div>
 </div> -->
+
+<div class="card mb-4" id="graph-bfs-">
+  <div class="card-body">
+    <h2 class="card-title">Shortest Distance from All Buildings (H) (F) #</h2>
+
+<pre><code class="python">class Solution:
+    def shortestDistance(self, grid: List[List[int]]) -> int:
+
+        # BFS
+        # Start from a node and compute distance 
+        # to reach all houses
+
+        graph = defaultdict(set)
+        nodes = set()
+        dirs = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+        houses = set()
+        n = len(grid)
+        m = len(grid[0])
+
+        # Save nodes from where all housese cannot be visited
+        bad_nodes = set()
+
+        # Time O(nm)
+        #   n = number of rows
+        #   m = number of columns
+        # Space O(nm)
+        for i in range(n):
+            for j in range(m):
+                # Obstacle
+                if grid[i][j] == 2:
+                    continue
+                # House
+                if grid[i][j] == 1:
+                    houses.add((i,j))
+                    continue
+                # Empty land
+                if grid[i][j] == 0:
+                    nodes.add((i,j))
+                    for x, y in dirs:
+                        if 0 <= i + x < n \
+                            and 0 <= j + y < m \
+                            and grid[i][j] != 2:
+                            graph[(i,j)].add((i+x,j+y))
+
+        # Time O(p+q)
+        #   p = number of nodes = nm
+        #   q = number of edges (each node can have max 4 edges) = mn
+        def bfs(grid, houses, graph, start, bad_nodes):
+
+            explored = set()
+            explored.add(start)
+
+            queue = deque()
+            queue.append((start, 0))
+            
+            total_dist = 0
+            visited_houses = 0
+
+            while queue:
+                node, dist = queue.popleft()
+                if node in bad_nodes:
+                    return 0, 0
+ 
+                if grid[node[0]][node[1]] == 1:
+                    total_dist += dist
+
+                for next_node in graph[node]:
+                    if next_node not in explored:
+                        explored.add(next_node)
+                        queue.append((next_node, dist+1))
+                        if next_node in houses:
+                            visited_houses += 1
+                    
+            return total_dist, visited_houses
+
+        min_dist = math.inf
+
+        # Time O((nm)**2)
+        # Space O(nm)
+        for node in nodes:
+            dist, visited_houses = bfs(grid, houses, graph, node, bad_nodes)
+            if visited_houses < len(houses):
+                bad_nodes.add(node)
+                continue
+            min_dist = min(min_dist, dist)
+
+        if not nodes or min_dist == math.inf:
+            return -1
+        return min_dist</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/shortest-distance-from-all-buildings">317. Shortest Distance from All Buildings</a>
+  </div>
+</div>
 
 <div class="card mb-4" id="graph-bfs-">
   <div class="card-body">
