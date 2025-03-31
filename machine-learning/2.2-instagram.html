@@ -62,9 +62,8 @@
     <ul>
       <li>Business</li>
       <ul>
-        <li>What is the business objective? use ML for feed ranking, AD recommendation, reel recommendataion</li>
+        <li>What is the business objective? use ML for feed ranking</li>
         <li>What does a feed consist of? Posts and ADs</li>
-        <li>What does reel consist of? Short videos and ADs</li>
         <li>What does a post consist of? Text, image, video</li>
         <ul>
           <li>Should the feed be personalized for each user? Yes</li>
@@ -77,10 +76,6 @@
           <li>Whare are the ADs placed? In the feeds</li>
           <li>Does each AD generate the same revenue? Yes</li>
           <li>Can an AD be shown to a user more than once? Yes</li>
-        </ul>
-        <li>What does a reel consist of? Image and video</li>
-        <ul>
-          <li>Should reels be personalized for each user? Yes</li>  
         </ul>
       </ul>
       <li>Data</li>
@@ -101,8 +96,8 @@
       <li>Estimation</li>
       <ul>
         <li>How many users are using the system? 1M daily users, 1B total users</li>
+        <li>How many posts are in the system? each user creates 1 post per day on average</li>
         <li>How many ADs are in the system? 1M per month</li>
-        <li>How many videos in the system? 1B per month</li>
       </ul>
     </ul>
   </div>
@@ -118,14 +113,13 @@
     <h3 class="card-title">ML problem</h3>
     <ul>
       <li>For each user, produce feeds where posts and ADs show up basd on probability of being clicked</li>
-      <li>For each user, produce reels where videos and ADs show up basd on probability of being clicked</li>
       <li>Input</li>
       <ul>
         <li>User</li>
       </ul>
       <li>Output</li>
       <ul>
-        <li>List of posts, ADs, reels basd on probability of being clicked</li>
+        <li>List of posts and ADs basd on probability of being clicked</li>
       </ul>
     </ul>
 
@@ -223,16 +217,6 @@
           <li>video_path</li>
           <li>manual_tags</li>
         </ul>
-        <li>Video</li>
-        <ul>
-          <li>video_id</li>
-          <li>length</li>
-          <li>manual_tags</li>
-          <li>manual_title</li>
-          <li>likes</li>
-          <li>views</li>
-          <li>language</li>
-        </ul>
         <li>User-AD interaction</li>
         <ul>
           <li>user_id</li>
@@ -240,27 +224,16 @@
           <li>interaction - impression, click</li>
           <li>timestamp</li>
           <li>position_of_AD_in_feed</li>
-          <li>position_of_AD_in_reel</li>
           <li>order_of_interaction_after_feed_is_shown</li>
-          <li>order_of_interaction_after_reel_is_shown</li>
         </ul>
         <li>User-post interation</li>
         <ul>
           <li>user_id</li>
           <li>post_id</li>
-          <li>interaction_type - click, like, share, etc</li>
+          <li>interaction_type - click, like, share, comment, report, hide, etc</li>
           <li>timestamp</li>
           <li>position_of_post_in_feed</li>
           <li>order_of_interaction_after_feed_is_shown</li>
-        </ul>
-        <li>User-video interation</li>
-        <ul>
-          <li>user_id</li>
-          <li>video_id</li>
-          <li>interaction_type - like, impression, watch, search, comment</li>
-          <li>timestamp</li>
-          <li>position_of_video_in_reel</li>
-          <li>order_of_interaction_after_reel_is_shown</li>
         </ul>
         <li>Friendship</li>
         <ul>
@@ -275,27 +248,18 @@
     <ul>
       <li>User</li>
       <ul>
-        <li>Demographics</li>
-        <ul>
-          <li>User ID - embedding since the dimension is sparse</li>
-          <li>Username - can't use due to dependecy with user ID</li>
-          <li>Email -  can't use due to dependecy with user ID</li>
-          <li>City - embedding</li>
-          <li>Country - embedding</li>
-          <li>Age - can't use due to bias and fairness concern</li>
-          <li>Gender - can't use due to bias and fairness concern</li>
-        </ul>
-        <li>Context</li>
-        <ul>
-          <li>day_of_week - one-hot</li>
-          <li>time_of_day - bucketize + one-hot</li>
-          <li>device - one-hot</li>
-        </ul>
+        <li>User ID - embedding since the dimension is sparse</li>
+        <li>Username - can't use due to dependecy with user ID</li>
+        <li>Email -  can't use due to dependecy with user ID</li>
+        <li>City - embedding</li>
+        <li>Country - embedding</li>
+        <li>Age - can't use due to bias and fairness concern</li>
+        <li>Gender - can't use due to bias and fairness concern</li>
       </ul>
       <li>Post</li>
       <ul>
         <li>Post ID - embedding</li>
-        <li>Description - embedding</li>
+        <li>Description - BERT</li>
         <ul>
           <li>Preprocessing</li>
           <ul>
@@ -336,7 +300,7 @@
             <li>Use SentenceBERT</li>
           </ul>
         </ul>
-        <li>Image - embedding</li>
+        <li>Image - CILP</li>
         <ul>
           <li>Preprocessing</li>
           <ul>
@@ -350,7 +314,7 @@
             <li>CLIP's visual encoder, ViT, SimCLR</li>
           </ul>
         </ul>
-        <li>Video - embedding</li>
+        <li>Video - VideoMoco</li>
         <ul>
           <li>Preprocessing</li>
           <ul>
@@ -366,7 +330,7 @@
             <li>VideoMoCo</li>
           </ul>
         </ul>
-        <li>Tag - embedding</li>
+        <li>Tag - CBOW</li>
         <ul>
           <li>Use Viterbi to tokenzie hashtags into different words</li>
           <li>Use feature hashing to convert words to Ids</li>
@@ -382,14 +346,6 @@
         <li>Video - VideoMoCo</li>
         <li>Category - CBOW</li>
         <li>Total impressions or clicks on the Ad - normalize</li>
-      </ul>
-      <li>Video</li>
-      <ul>
-        <li>video_id - embedding</li>
-        <li>length - normalize</li>
-        <li>language - embedding</li>
-        <li>manual_tags - CBOW for each tag and aggregate</li>
-        <li>title - SentenceBERT</li>
       </ul>
       <li>Author</li>
       <ul>
@@ -425,13 +381,6 @@
         <li>Cliked Ads - average embeddings for each clicked AD</li>
         <li>User's historical engagement statistics - normalize</li>
       </ul>
-      <li>User-video interaction</li>
-      <ul>
-        <li>search_history - SentenceBERT to map each search query to embedding vector, then average the query embeddings</li>
-        <li>liked_videos - average embeddings for each liked video</li>
-        <li>watched_videos - average embeddings for each watched video</li>
-        <li>impressions - average embeddings for each video with just impressions</li>
-      </ul>
       <li>User-author interaction</li>
       <ul>
         <li>Duration at which user followed the author - bucketize + one-hot</li>
@@ -439,6 +388,13 @@
         <li>like/click/comment/share rate - normalize</li>
         <li>length of friendship - bucketize + one-hot</li>
         <li>close friends and family - binary value 0 or 1</li>
+      </ul>
+      <li>Context</li>
+      <ul>
+        <li>month - one-hot</li>
+        <li>day_of_week - one-hot</li>
+        <li>time_of_day - bucketize + one-hot</li>
+        <li>device - one-hot</li>
       </ul>
     </ul>
   </div>
@@ -659,29 +615,6 @@
             <li>Binary classification, use cross-entropy</li>
           </ul>
         </ul>
-<!--         <li>Search</li>
-        <li>Harmful content detection</li>
-        <ul>
-          <li>In multi-task training, each task is assigned a loss function based on its ML category</li>
-          <li>Since each task is binary classification, cross-entropy is used for each task</li>
-          <li>Overall loss is computed by combining task-specific losses</li>
-          <ul>
-            <li>\( \text{Loss} = L_{1} + L_{2} + \dots L_{n} \)</li>
-          </ul>
-          <li>In multimodal systems, overfitting is likely</li>
-          <ul>
-            <li>Gradient blending or focal loss is used to deal with overfitting</li>
-          </ul>
-        </ul> -->
-        <!-- <li>Constrastive loss function</li>
-        <ul>
-          <li>Dot product or cosine similarity is used to compute distances in embedding space</li>
-          <ul>
-            <li>Euclidean distance is not used due to curse of dimensionality</li>
-          </ul>
-          <li>Softmax is applied to distances to make them sum to 1</li>
-          <li>Cross-entropy is used to measure how close the probabilities are to the ground truth</li>
-        </ul> -->
       </ul>
       <li>Hyperparameters</li>
       <ul>
@@ -981,6 +914,11 @@
       <li>Explain how to leverage the sequence of item in user's search history</li>
       <ul>
         <li></li>
+      </ul>
+      <li>Explain how to recommend reel</li>
+      <ul>
+        <li>What does a reel consist of? Image and video</li>
+        <li>Should reels be personalized for each user? Yes</li>  
       </ul>
       <li>Explain how to enable search function</li>
       <ul>
