@@ -54,6 +54,7 @@
       <!-- <li><a href="#array-">Contains duplicate</a></li> -->
       <li><a href="#array-">Contains Duplicate II</a></li>
       <li><a href="#array-">Product of array except self</a></li>
+      <li><a href="#array-">Strobogrammatic Number</a></li>
       <!-- <li><a href="#array-">Missing number</a></li> -->
       <!-- <li><a href="#array-">Find duplicate number</a></li> -->
       <!-- <li><a href="#array-">Intersection of Two Arrays</a></li> -->
@@ -428,35 +429,88 @@
 
 <div class="card mb-4" id="array-">
   <div class="card-body">
-    <h2 class="card-title">Product of array except self (M) (G) !</h2>
+    <h2 class="card-title">Product of array except self (M) (G/F) !#</h2>
 
 <pre><code class="python">class Solution:
     def productExceptSelf(self, nums: List[int]) -> List[int]:
 
-        # Compute the running products from both sides
+        # If there are more than one 0 in the arry,
+        # result is always 0
+        # if there is one 0 in the array,
+        # result is product of all array except that 0 divied by each num
+        # If tehre is no 0 in the array, 
+        # result is product of all array divided by each num
 
-        # Time O(n) n = len(nums)
-        # Space O(n)
-        products_from_left = defaultdict(int)
-        products_from_left[-1] = 1
+        num_zeros = 0
 
-        for i, num in enumerate(nums):
-            products_from_left[i] = products_from_left[i-1] * num
-
-        products_from_right = defaultdict(int)
-        products_from_right[len(nums)] = 1
-
-        for i in range(len(nums)-1, -1, -1):
-            products_from_right[i] = products_from_right[i+1] * nums[i]
+        # Time O(n)
+        #   n = len(nums)
+        # Space O(1)
+        #   Ignoring space for result
+        for num in nums:
+            if num == 0:
+                num_zeros += 1
 
         result = []
-        for i, num in enumerate(nums):
-            result.append(products_from_left[i-1]*products_from_right[i+1])
+        product = 1
+        for num in nums:
+            if num != 0:
+                product *= num
+
+        if num_zeros > 1:
+            return [0] * len(nums)
+        elif num_zeros == 1: 
+            for num in nums:
+                if num == 0:
+                    result.append(int(product))
+                else:
+                    result.append(0)
+        else:
+            for num in nums:
+                result.append(int(product/num))
 
         return result</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/product-of-array-except-self">238. Product of Array Except Self</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="array-">
+  <div class="card-body">
+    <h2 class="card-title">Strobogrammatic Number (E) F #</h2>
+
+<pre><code class="python">class Solution:
+    def isStrobogrammatic(self, num: str) -> bool:
+
+        # Identify valid pairs
+        # flip 6 => 9
+        # flip 8 => 8
+        # flip 1 => 1
+        # flip 0 => 0
+        # Rotate numbers
+
+        rotated_num = ""
+
+        # Time O(n)
+        #   n = len(num)
+        # Space O(n)
+        for c in num:
+            if c in ("0", "1", "8"):
+                rotated_num += c
+            if c == "6":
+                rotated_num += "9"
+            if c == "9":
+                rotated_num += "6"
+
+        rotated_num = list(rotated_num)
+        rotated_num.reverse()
+        rotated_num = "".join(rotated_num)
+        
+        return num == rotated_num</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/strobogrammatic-number">246. Strobogrammatic Number</a>
   </div>
 </div>
 
