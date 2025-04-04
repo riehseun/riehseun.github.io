@@ -54,6 +54,7 @@
       <!-- <li><a href="#graph-bfs-">Longest Absolute File Path</a></li> -->
       <li><a href="#graph-bfs-">Number of provinces</a></li>
       <li><a href="#graph-bfs-">Max Area of Island</a></li>
+      <li><a href="#graph-bfs-">Accounts Merge</a></li>
       <!-- <li><a href="#graph-bfs-">Bus Routes</a></li> -->
       <li><a href="#graph-bfs-">Shortest Path in Binary Matrix</a></li>
       <li><a href="#graph-bfs-">Diagonal Traverse II</a></li>
@@ -780,6 +781,73 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/max-area-of-island">695. Max Area of Island</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-bfs-">
+  <div class="card-body">
+    <h2 class="card-title">Accounts Merge (M) (F) #</h2>
+
+<pre><code class="python">class Solution:
+    def accountsMerge(self, accounts: List[List[str]]) -> List[List[str]]:
+
+        # Construct a graph
+        #   Node is email
+        #   Edge between nodes exists when they belong to same person
+        # Compute connected components
+
+        graph = defaultdict(set)
+        email_to_person = defaultdict(str)
+        emails = set()
+
+        for account in accounts:
+            for i in range(1, len(account)):
+                graph[account[1]]
+                emails.add(account[i])
+                email_to_person[account[i]] = account[0]
+                for j in range(i+1, len(account)):
+                    graph[account[i]].add(account[j])
+                    graph[account[j]].add(account[i])
+
+        # Time max(O(n+m), O(nlogn)) 
+        #   n = number of emails
+        #   m = number of edges betweem emails
+        #   Sorting the output at the end
+        # Space O(n^2)
+        def bfs(graph, explored, start):
+
+            queue = deque()
+            queue.append(start)
+
+            explored.add(start)
+            nodes = set()
+            
+            while queue:
+                node = queue.popleft()
+                nodes.add(node)
+                
+                for next_node in graph[node]:
+                    if next_node not in explored:
+                        explored.add(next_node)
+                        queue.append(next_node)
+                        
+            return nodes
+
+        result = []
+
+        explored = set()
+        for node in emails:
+            if node not in explored:
+                nodes = bfs(graph, explored, node)
+                nodes = list(nodes)
+                person = email_to_person[nodes[0]]
+                nodes.sort()       
+                result.append([person]+nodes)
+
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/accounts-merge">721. Accounts Merge</a>
   </div>
 </div>
 
