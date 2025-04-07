@@ -56,6 +56,7 @@
       <!-- <li><a href="#dynamic-programming-1d">Minimum number of refueling stops</a></li> -->
       <!-- <li><a href="#dynamic-programming-1d">Nth tribonacci number</a></li> -->
       <li><a href="#dynamic-programming-1d">Stone Game II</a></li>
+      <li><a href="#dynamic-programming-1d">Maximum Profit in Job Scheduling</a></li>
     </ul>
   </div>
 </div>
@@ -416,6 +417,66 @@
     Reference: <a href="https://leetcode.com/problems/stone-game-ii">1140. Stone Game II</a>
   </div>
 </div> -->
+
+<div class="card mb-4" id="dynamic-programming-1d">
+  <div class="card-body">
+    <h2 class="card-title">Maximum Profit in Job Scheduling (H) (Doordash)</h2>
+
+<pre><code class="python">class Solution:
+    def jobScheduling(self, startTime: List[int], endTime: List[int], profit: List[int]) -> int:
+
+        # Sort jobs based on start time
+        # At each interval, there are two choices
+        #   Skip the current job and move to next job
+        #   Execute current job and move to next non-conflicting job
+        # Let dp[i] = profit from jobs from index i to n
+        #   If skip job i, dp[i] = dp[i+1]
+        #   If execute job i, dp[i] = profit at i + d[next_i]
+        # Use binary search to find next_i since start time is sorted
+
+        # Time O(nlogn)
+        intervals = []
+        for x, y, z in zip(startTime, endTime, profit):
+            intervals.append([x,y,z])
+
+        intervals.sort(key=lambda x: x[0])
+        
+        n = len(intervals)
+        dp = [0] * (n+1)
+
+        def binary_search(i, intervals):
+
+            end_t = intervals[i][1]
+            left = 0
+            right = len(intervals) - 1
+            next_i = len(intervals)
+            
+            while left <= right:
+                mid = (left+right) // 2
+                if intervals[mid][0] >= end_t:
+                    right = mid - 1
+                    next_i = mid
+                else:
+                    left = mid + 1
+                
+            return next_i
+
+        # Time O(nlogn)
+        # Space O(n)
+        for i in range(n-1, -1, -1):
+            next_i = binary_search(i, intervals)
+            print(f"{i}, {next_i}")
+            if next_i == -1:
+                dp[i] = max(dp[i+1], intervals[i][2])
+            else:
+                dp[i] = max(dp[i+1], intervals[i][2]+dp[next_i])
+
+        return dp[0]</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/maximum-profit-in-job-scheduling">1235. Maximum Profit in Job Scheduling</a>
+  </div>
+</div>
 <!-- Dynamic programming 1D END -->
 
 </div> <!-- /.col-md-12 -->
