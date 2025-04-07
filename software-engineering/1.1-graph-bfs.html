@@ -305,7 +305,7 @@
 
 <div class="card mb-4" id="graph-bfs">
   <div class="card-body">
-    <h2 class="card-title">Walls And Gates (M) (Doordash) #</h2>
+    <h2 class="card-title">Walls And Gates (M) (Doordash)</h2>
 
 <pre><code class="python">class Solution:
     def wallsAndGates(self, rooms: List[List[int]]) -> None:
@@ -525,7 +525,7 @@
 
 <div class="card mb-4" id="graph-bfs-">
   <div class="card-body">
-    <h2 class="card-title">Longest increasing path in a matrix (H) (F) #</h2>
+    <h2 class="card-title">Longest increasing path in a matrix (H) (Meta/Doordash)</h2>
 
 <pre><code class="python">class Solution:
     def longestIncreasingPath(self, matrix: List[List[int]]) -> int:
@@ -534,23 +534,15 @@
         # Construct graph
         #   x goes to y if x < y
         # Remember depth while traversing
+
         n = len(matrix)
         m = len(matrix[0])
-
-        graph = defaultdict(set)
         dirs = [(-1, 0), (0, 1), (1, 0), (0, -1)]
 
         # Time O(nm)
         #   n = number of rows
         #   m = number of columns
         # Space O(nm)
-        for i in range(n):
-            for j in range(m):
-                for x,y in dirs:
-                    if 0 <= i + x < n \
-                        and 0 <= j + y < m \
-                        and matrix[i][j] < matrix[i+x][j+y]:
-                        graph[(i, j)].add((i+x, j+y))
 
         # Memorize solutions
         memory = defaultdict(int)
@@ -559,11 +551,10 @@
         #   With memory, traverse takes only once at each node
         # Space O(nm)
         #   Memory stores max path length starting at each node
-        def bfs(graph, start):
+        def bfs(matrix, n, m, dirs, start, momory):
 
-            # Should not have explored set
-            # because we are checking every path
-            # (we know there is no cycle) 
+            # Because we are checking increasing path only
+            # There is no cycle
 
             queue = deque()
             queue.append((start, 1))
@@ -572,23 +563,36 @@
             
             while queue:
                 node, depth = queue.popleft()
+                i = node[0]
+                j = node[1]
 
-                for next_node in graph[node]:
-                    if next_node in memory:
-                        max_depth = max(
-                            max_depth, 
-                            memory[next_node]+depth
-                        )
-                    else:
-                        queue.append((next_node, depth+1))
+                for x, y in dirs: 
+                    if 0 <= i + x < n \
+                        and 0 <= j + y < m \
+                        and matrix[i+x][j+y] > matrix[i][j]:
+                        next_node = (i+x, j+y)
+
+                        # Don't explore if the path has been
+                        # explored
+                        if next_node in memory:
+                            max_depth = max(
+                                max_depth, 
+                                memory[next_node]+depth
+                            )
+                        else:
+                            queue.append((next_node, depth+1))
 
             return max(max_depth, depth)
 
         max_length = 0
         for i in range(n):
             for j in range(m):
-                memory[(i,j)] = bfs(graph, (i,j))        
-                max_length = max(max_length, memory[(i,j)])
+                if (i, j) not in memory:
+                    length = bfs(matrix, n, m, dirs, (i,j), memory)
+                    memory[(i,j)] = length      
+                    max_length = max(max_length, length)
+
+        print(memory)
                 
         return max_length</code></pre>
   </div>
