@@ -53,8 +53,9 @@
       <li><a href="#graph-bfs-">Longest increasing path in a matrix</a></li>
       <!-- <li><a href="#graph-bfs-">Water and jug problem</a></li> -->
       <!-- <li><a href="#graph-bfs-">Longest Absolute File Path</a></li> -->
+      <li><a href="#graph-bfs-">01 Matrix</a></li>
       <li><a href="#graph-bfs-">Number of provinces</a></li>
-      <li><a href="#graph-bfs-">Max Area of Island</a></li>
+      <!-- <li><a href="#graph-bfs-">Max Area of Island</a></li> -->
       <li><a href="#graph-bfs-">Accounts Merge</a></li>
       <!-- <li><a href="#graph-bfs-">Bus Routes</a></li> -->
       <li><a href="#graph-bfs-">Shortest Path in Binary Matrix</a></li>
@@ -431,7 +432,7 @@
 
 <div class="card mb-4" id="graph-bfs-">
   <div class="card-body">
-    <h2 class="card-title">Shortest Distance from All Buildings (H) (F) #</h2>
+    <h2 class="card-title">Shortest Distance from All Buildings (H) (Doordash)</h2>
 
 <pre><code class="python">class Solution:
     def shortestDistance(self, grid: List[List[int]]) -> int:
@@ -735,6 +736,65 @@
   </div>
 </div> -->
 
+<div class="card mb-4" id="graph-bfs-">
+  <div class="card-body">
+    <h2 class="card-title">01 Matrix (M) (Doordash)</h2>
+
+<pre><code class="python">class Solution:
+    def updateMatrix(self, mat: List[List[int]]) -> List[List[int]]:
+
+        # From each cell whose value is 1, run BFS
+        #   Stop searching when seeing 0 and return depth
+        # Alternatively, for each cell whose value is 0, 
+        # run BFS
+        #   set dist[node] = 0
+        #   If node_next is 1, dist[next_node] = dist[node] + 1
+        #   Don't visit node that is already visited
+
+        dirs = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+        n = len(mat)
+        m = len(mat[0])
+
+        # Time O(p+q)
+        #   p = number of nodes = nm
+        #   q = number of edges = nm (each node can have max 4)
+        # Space O(p)
+        def bfs(dist, mat, n, m, dirs, queue, explored, start):
+
+            while queue:
+                i, j = queue.popleft()
+                
+                for x, y in dirs:
+                    if 0 <= i + x < n \
+                        and 0 <= j + y < m:
+                        next_node = (i+x, j+y)
+
+                        if next_node not in explored:
+                            explored.add(next_node)
+                            queue.append(next_node)
+                            dist[i+x][j+y] = dist[i][j] + 1
+
+            return -1
+
+        dist = [[-1] * m for _ in range(n)]
+
+        explored = set()
+        queue = deque()
+        for i in range(n):
+            for j in range(m):
+                if mat[i][j] == 0:
+                    dist[i][j] = 0
+                    queue.append((i,j))
+                    explored.add((i,j))
+        bfs(dist, mat, n, m, dirs, queue, explored, (i,j))
+
+        return dist</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/01-matrix">542. 01 Matrix</a>
+  </div>
+</div>
+
 <!-- <div class="card mb-4" id="graph-bfs">
   <div class="card-body">
     <h2 class="card-title">Number of provinces (M)</h2>
@@ -791,9 +851,9 @@
   </div>
 </div> -->
 
-<div class="card mb-4" id="graph-bfs">
+<!-- <div class="card mb-4" id="graph-bfs">
   <div class="card-body">
-    <h2 class="card-title">Max Area of Island (M) (F) #</h2>
+    <h2 class="card-title">Max Area of Island (M)</h2>
 
 <pre><code class="python">class Solution:
     def maxAreaOfIsland(self, grid: List[List[int]]) -> int:
@@ -847,7 +907,7 @@
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/max-area-of-island">695. Max Area of Island</a>
   </div>
-</div>
+</div> -->
 
 <div class="card mb-4" id="graph-bfs-">
   <div class="card-body">
