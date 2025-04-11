@@ -697,10 +697,18 @@ class Solution:
 class Solution:
     def maxPathSum(self, root: Optional[TreeNode]) -> int:
 
-        # At each node, compute max sum from left and child subtree
-        # If max sum is less than 0, set the sum to 0 meaning 
-        # we are not including that subtree
-        # Do pre order to traverse the tree
+        # The path sum is 
+        #   node.val 
+        #   + path sum of left subtree 
+        #   + path sum of right subtree
+        # The path sum of leaf nodes are its own value
+        #   When node does not exist, return 0
+        # Traverse tree
+        #   For each node, compute path sum
+        #   Since both left and right children must be
+        #   computed first, do post_order traversal
+        # Each child can either pick contribution from its
+        # left child or right child to have valid path
 
         self.max_sum = -math.inf
 
@@ -709,11 +717,11 @@ class Solution:
         # Space O(h)
         #   h = height of tree
         #   Call stack for recursion
-        def pre_order(node):
+        def post_order(node):
 
             if node:
-                max_sum_from_left = max(pre_order(node.left), 0)
-                max_sum_from_right = max(pre_order(node.right), 0)
+                max_sum_from_left = max(post_order(node.left), 0)
+                max_sum_from_right = max(post_order(node.right), 0)
                 node_sum = node.val + max_sum_from_left + max_sum_from_right
                 self.max_sum = max(node_sum, self.max_sum)
                 # Contribution from Subtree can either be 
@@ -726,8 +734,8 @@ class Solution:
             else:
                 return 0
 
-        pre_order(root)
-        return self.max_sum</code></pre>
+        post_order(root)
+        return self.max_sum/code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/binary-tree-maximum-path-sum">124. Binary Tree Maximum Path Sum</a>

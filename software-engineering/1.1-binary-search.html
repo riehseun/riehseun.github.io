@@ -494,10 +494,26 @@
 <pre><code class="python">class Solution:
     def findClosestElements(self, nums: List[int], k: int, num: int) -> List[int]:
 
-        # Because nums is sorted, closest items will be in
+        # Because nums is sorted, k closest integers will be in
         # consecutive array
-        # Use binary search to find closest item to num
-        # Then, expand to left and right till k items are collected
+        # Find a number that is closest to x
+        #   Then, expand left and right from that number
+        #   to gather k closest numbers
+        # Run binary seach to find closest number of x
+        #   If mid > x, search on left side
+        #   If mid < x, search on right side
+        #   If mid == x, return mid
+        #   Remember the last left and right pointer, 
+        #   and return it when right >= left
+        # Expand
+        #   Initialize k' = 1
+        #   Compare left and right numbers
+        #   If k' + 2 <= k
+        #     Then, include both numbers
+        #   Else
+        #     Compare left and right number and
+        #     pick number that is closer to the 
+        #     cloest number   
 
         # Time O(logn+k)
         #   n = len(nums)
@@ -547,12 +563,18 @@
 <pre><code class="python">class Solution:
     def minEatingSpeed(self, piles: List[int], h: int) -> int:
 
-        # Think about min and max range of k
+        # Think about the minimum and maximum eating speed
         #   Min is 1
-        #   Max is max(piles)
-        # Binary search
-        #   If can't finish eating before h, try higher
-        #   Try lower
+        #.  Max is max(piles)
+        # Contruct an integer array [min, max]
+        # Run binary search
+        #   Compute new hour (h') with eating speed mid
+        #   If h' < h, Koko is eating too fast
+        #   Slow down, decrease mid meaning search on left side
+        #   If h' > h, Koko is eating too slow
+        #   Speed up, increase mid meaning search on right side
+        #   If h' == h, try to see if Koko can finish eating 
+        #   with less speed (search on left)
 
         left = 1
         right = max(piles)
@@ -574,8 +596,6 @@
                     h_prime += quotient
                 else:
                     h_prime += quotient + 1
-
-            print(f"{mid}, {h_prime}")
 
             # Eating too fast, need to eat slower
             if h > h_prime:
