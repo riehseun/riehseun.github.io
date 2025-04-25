@@ -128,12 +128,29 @@
         <li>Statistics</li>
         <ul>
           <li>Explain difference between Type I and Type II error</li>
+          <ul>
+            <li>Type 1 error - rejecting the null hypothesis when it is actually true</li>
+            <li>Type 2 error - failing to reject the null hypothesis when it is actually false</li>
+          </ul>
           <li>Explain correlation</li>
           <li>Explain correlation coefficient</li>
           <li>Explain Pearson’s correlation coefficient</li>
           <li>Explain Spearman’s correlation coefficient</li>
           <li>Explain central limit theorem</li>
           <li>Explain Hypothesis testing and p-value</li>
+          <li>Explain statistical power</li>
+          <ul>
+            <li>Likelyhood that study will find effect when in fact there is effect</li>
+            <li>Higher statistical power, less likely to make false negative</li>
+          </ul>
+          <li>Explain how to deal with anomaly<li>
+          <ul>
+            <li>68% of data is one std away</li>
+            <li>95% of data is two std away</li>
+            <li>9% of data is three std away</li>
+            <li>Statistical method - consider data point with 3 std away as outlier and likely anomaly</li>
+            <li>Metric method - a point is considered anomaly if removing it significantly improves the model</li>
+          </ul>
         </ul>
         <li>CNN</li>
         <ul>
@@ -164,8 +181,37 @@
         <li>Dimension reduction</li>
         <ul>
           <li>Explain how to tackle curse of dimensionality</li>
+          <ul>
+            <li>High dimensional data is extremely sparse</li>
+            <li>It's hard to do machine learning on sparse data</li>
+          </ul>
           <li>Explain principal component analysis</li>
+          <ul>
+            <li>Special type of SVD</li>
+            <li>Left matrix and right matrix are eigenvectors</li>
+            <li>Diagonal matrix is eigenvalues</li>
+          </ul>
           <li>Explain t-SNE</li>
+          <li>Explain sigular value decomposition</li>
+          <ul>
+            <li>Refactor a matrix into three pieces - left matrix, diagonal matrix, right matrix</li>
+          </ul>
+        </ul>
+        <li>Recommendation system</li>
+        <ul>
+          <li>Explain collaborative filtering</li>
+          <ul>
+            <li>Recommendation is based on historical user-item interaction</li>
+            <li>Cold start problem - cannot make recommendation for new item, cannot find similarity with other users for new user</li>
+            <li>Item-based - rate an item based on ratings by users similar to current user</li>
+            <li>User-based - rate an item based on similar items that current user rated</li>
+          </ul>
+          <li>Explain content-based filtering</li>
+          <ul>
+            <li>An approach to solve cold start problem</li>
+            <li>Recommend items that are similar to items that user liked already</li>
+            <li>Do not take other users into consideration</li>
+          </ul>
         </ul>
       </ul>
     </ul>
@@ -366,6 +412,13 @@
         <li>Data that is not representative</li>
         <li>Data with outlier, error, noise, missing values</li>
         <li>Irrelevant features</li>
+      </ul>
+      <li>Explain how to perfrom error analysis</li>
+      <ul>
+        <li>Training-dev set - same distribution as training set, but not used in training</li>
+        <li>If dev error >> training error, it could be because both variance and distribution mismatch</li>
+        <li>If training-dev error >> training error, it is variance problem</li>
+        <li>If dev error >> training-dev error, it is not a variance problem. It is data mismatch problem</li>
       </ul>
     </ul>
 
@@ -864,13 +917,21 @@
       <li>Explain decision tree</li>
       <ul>
         <li>Depth of trees increases variance, trees are pruned to control variance</li>
-        <li>Classification - return majority vote of trees</li>
+        <li>Main parameters - maximum tree depth, minimum samples per tree node, impurity criterion</li>
+        <li>Classification - return majority vote of trees (branch - test outcome, leaf - class label)</li>
         <li>Regression - return average value of trees</li>
       </ul>
-      <li>Explain difference between bagging and boosting</li>
+      <li>Explain bagging</li>
       <ul>
-        <li>Bagging - train models independently in parallel and combine the result (Ex. random forest), Less prone to overfitting, faster training, less hyperparameter tuning</li>
-        <li>Boosting - train models in sequence where later models learn from mistakes from previous models (Ex. gradient boosting) More accurate, works well on unbalanced datatset</li>
+        <li>Train models independently in parallel and combine the result (Ex. random forest)</li>
+        <li>Less prone to overfitting, faster training, less hyperparameter tuning</li>
+      </ul>
+      <li>Explain boosting</li>
+      <ul>
+        <li>Train models in sequence where later models learn from mistakes from previous models (Ex. gradient boosting)</li>
+        <li>Tree is built starting from root, for each leaf, split selected to minimize MSE</li>
+        <li>Predictions of individual trees are summed</li>
+        <li>More accurate, works well on unbalanced datatset</li>
       </ul>
       <li>Explain information gain and entropy</li>
       <ul>
@@ -904,157 +965,6 @@
     Reference: 
   </div>
 </div>
-
-<!--
-<div class="card mb-4" id="machine-learning-">
-  <div class="card-body">
-    <h2 class="card-title">Orthogonalization</h2>
-    <ul>
-      <li>Models are trained on train set (Tackle underfitting)</li>
-      <ul>
-        <li>Better neural network architecture</li>
-        <li>Hyperparameter search</li>
-        <li>Bigger network/model</li>
-        <li>Better optimization algorithm</li>
-        <li>Train longer</li>
-      </ul>
-      <li>Hyperpameters are selected on validation set (Tackle overfitting)</li>
-      <ul>
-        <li>Better neural network architecture</li>
-        <li>Hyperparameter search</li>
-        <li>Regularization</li>
-        <li>Bigger training set</li>
-      </ul>
-      <li>Final evaluation is done on test set</li>
-      <ul>
-        <li>Bigger dev set</li>
-        <li>Dev and test set must come from the same distribution!</li>
-        <li>Test set may not be needed</li>
-      </ul>
-      <li>Perform in real world</li>
-      <ul>
-        <li>Change dev set</li>
-        <li>Change cost function</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Training and dev/test on different distribution</h3>
-
-    <h4 class="card-title">Example</h4>
-    <ul>
-      <li>Assume 200,000 is from web image and 10,000 is from mobile image</li>
-      <li>Goal is to do image recognition on mobile device</li>
-      <li>Then, use 2,500 mobile images for dev set and another 2,500 mobile images for test set</li>
-      <li>Use 200,000 + 5,000 for the training set</li>
-    </ul>
-
-    <h4 class="card-title">Error analysis</h4>
-    <ul>
-      <li>If dev error >> training error, it could be because both variance and distribution mismatch</li>
-      <li>Training-dev set - same distribution as training set, but not used in training</li>
-      <li>If training-dev error >> training error, it is variance problem</li>
-      <li>If dev error >> training-dev error, it is not a variance problem. It is data mismatch problem</li>
-    </ul>
-
-    <h4 class="card-title">Handle data mismatch</h4>
-    <ul>
-      <li>Make training data similar to dev/test set via synthesizing data</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
-  </div>
-</div> -->
-
-<!-- <div class="card mb-4" id="machine-learning-">
-  <div class="card-body">
-    <h2 class="card-title">Decision tree</h2>
-    <ul>
-      <li>Used for classification.</li>
-      <li>Internal node: test on attribute.</li>
-      <li>Branch: test outcome.</li>
-      <li>Leaf: class label.</li>
-      <li>Main parameters: maximum tree depth, minimum samples per tree node, impurity criterion.</li>
-    </ul>
-
-    <h3 class="card-title">Random forest</h3>
-    <ul>
-      <li>Used for regression and classification.</li>
-      <li>Consist of many decision trees.</li>
-    </ul>
-
-    <h3 class="card-title">Gradient boosting</h3>
-    <ul>
-      <li>Relies on regression trees, which minimizes MSE.</li>
-      <li>Greedy algorithm: tree is built starting from root. For each leaf, split selected to minimize MSE for this step.</li>
-      <li>Build collection of trees one by one. Then, predictions of individual trees are summed.</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href=""></a>
-  </div>
-</div> -->
-
-<!-- <div class="card mb-4" id="machine-learning-">
-  <div class="card-body">
-    <h2 class="card-title">Statistics</h2>
-    <ul>
-      <li>Type 1 error - rejecting the null hypothesis when it is actually true</li>
-      <li>Type 2 error - failing to reject the null hypothesis when it is actually false</li>
-    </ul>
-
-    <h3 class="card-title">Sparse data</h3>
-    <ul>
-      <li>L1 regularization</li>
-      <li>Linear regression if linear relationship</li>
-      <li>One-hot encoding</li>
-    </ul>
-
-    <h3 class="card-title">Statistical power</h3>
-    <ul>
-      <li>Likelyhood that study will find effect when in fact there is effect</li>
-      <li>Higher statistical power, less likely to make false negative</li>
-    </ul>
-
-    <h3 class="card-title">Outlier</h3>
-    <ul>
-      <li>Can be removed during data preparation using standard deviation</li>
-    </ul>
-
-    <h3 class="card-title">Anomaly</h3>
-    <ul>
-      <li>68% of data is one std away</li>
-      <li>95% of data is two std away</li>
-      <li>9% of data is three std away</li>
-      <li>Statistical method</li>
-      <ul>
-        <li>Consider data point with 3 std away as outlier and likely anomaly</li>
-      </ul>
-      <li>Metric method</li>
-      <ul>
-        <li>A point is considered anomaly if removing it significantly improves the model</li>
-        <li>Outlier score is a degree that a point doesn't belong to a cluster</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Gaussian mixture model Vs K-means</h3>
-    <ul>
-      <li>K-mean</li>
-      <ul>
-        <li>Data point must belong to one cluster</li>
-        <li>Computes distance</li>
-      </ul>
-      <li>GM</li>
-      <ul>
-        <li>Probability of point belonging to each cluster</li>
-        <li>Computes weighted distance</li>
-      </ul>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href=""></a>
-  </div>
-</div> -->
 
 <!-- <div class="card mb-4" id="linear-regression-1">
   <div class="card-body">
@@ -1125,119 +1035,6 @@ print("Output: " , output)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://github.com/alexeygrigorev/data-science-interviews/blob/master/theory.md">Theoretical interview questions</a> | <a href="https://www.educative.io/path/become-a-deep-learning-professional">Become a Deep Learning Professional</a> | <a href="https://github.com/alexeygrigorev/data-science-interviews/blob/master/theory.md">Theoretical interview questions</a>
-  </div>
-</div> -->
-
-<!-- <div class="card mb-4" id="machine-learning-">
-  <div class="card-body">
-    <h2 class="card-title">Dimensionality</h2>
-
-    <h3 class="card-title">Curse of dimensionalty</h3>
-    <ul>
-      <li>High dimensional data is extremely sparse</li>
-      <li>It's hard to do machine learning on sparse data</li>
-    </ul>
-
-    <h3 class="card-title">Sigular value decomposition</h3>
-    <ul>
-      <li>Refactor a matrix into three pieces - left matrix, diagonal matrix, right matrix</li>
-    </ul>
-
-    <h3 class="card-title">Priciple component analysis</h3>
-    <ul>
-      <li>Special type of SVD</li>
-      <li>Left matrix and right matrix are eigenvectors</li>
-      <li>Diagonal matrix is eigenvalues</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href=""></a>
-  </div>
-</div> -->
-
-<!-- <div class="card mb-4" id="machine-learning-">
-  <div class="card-body">
-    <h2 class="card-title">Recommender system</h2>
-    <ul>
-      <li>Relevant and personalized information</li>
-      <li>Should not be something users know well</li>
-      <li>Diverse suggestions</li>
-      <li>Users should explore new items</li>
-    </ul>
-
-    <h3 class="card-title">Collaborative filtering</h3>
-    <ul>
-      <li>Recommendation is calculated as average of other experiences</li>
-      <li>Does not work well on sparse data, also has <strong>cold start</strong> problem</li>
-      <ul>
-        <li>Cannot make recommendation for new item</li>
-        <li>Cannot find similarity with other users for new user</li>
-      </ul>
-      <li>Item-based - rate an item based on ratings by users similar to current user</li>
-      <li>User-based - rate an item based on similar items that current user rated</li>
-    </ul>
-
-    <h3 class="card-title">Content-based filtering</h3>
-    <ul>
-      <li>An approach to solve cold start problem</li>
-      <li>Recommend items that are similar to items that user liked already</li>
-      <li>Do not take other users into consideration</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href=""></a>
-  </div>
-</div> -->
-
-<!-- <div class="card mb-4" id="machine-learning-">
-  <div class="card-body">
-    <h2 class="card-title">Tranfer learning</h2>
-    <ul>
-      <li>When transfer learning A to B</li>
-      <ul>
-        <li>Task A and B have the same input</li>
-        <li>Task A has a lot more data than task B</li>
-      </ul>
-      <li>Transfer learning is almost always used in computer vision</li>
-      <li>Example</li>
-      <ul>
-        <li>Use image recognition to do x-ray diagnosis</li>
-        <li>Delete the last layer and weights that feed to the last layer</li>
-        <li>Create new randomly initialized weights for the last layer</li>
-        <li>Retain the network with x-ray dataset</li>
-        <li>In this case, training the network for image recognition task is called <strong>pre-training</strong></li>
-        <li>In this case, training the network for image x-ray diagnosis is called <strong>fine-tuning</strong></li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Fine tuning</h3>
-    <ul>
-      <li>Take a pre-trained model and train it on more specific dataset</li>
-      <li>Make model perform better in specific tasks that were not covered during pre-training</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
-  </div>
-</div> -->
-
-<!-- <div class="card mb-4" id="machine-learning-">
-  <div class="card-body">
-    <h2 class="card-title">Multitask learning</h2>
-    <ul>
-      <li>Cost function </li>
-      <ul>
-        <li>\( J = \dfrac{1}{m}\displaystyle\sum_{i=1}^{m}\sum_{j=1}^{C} L(\hat{y}_{i}^{(j)},y_{i}^{(j)}) \)</li>
-        <li>\( C \) is the number of different tasks</li>
-        <li>Unlike softmax regression, each data can have multiple labels</li>
-      </ul>
-      <li>Used when there is shared low-level features</li>
-      <li>Used when amount of data for each task is similar</li>
-      <li>Not used very much in practice</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
   </div>
 </div> -->
 <!-- Machine learning END -->
