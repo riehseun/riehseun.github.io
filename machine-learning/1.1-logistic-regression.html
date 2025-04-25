@@ -45,7 +45,9 @@
     <h2 class="card-title">Logistic regression</h2>
     <ul class="list-unstyled mb-0">
       <li><a href="#logistic-regression-">Logistic regression</a></li>
-      <li><a href="#logistic-regression-">Single layer network</a></li>
+      <li><a href="#logistic-regression-">Example - binary (torch)</a></li>
+      <li><a href="#logistic-regression-">Example - multi-class softmax regression (torch)</a></li>
+      <li><a href="#logistic-regression-">Example - binary (py)</a></li>
       <li><a href="#logistic-regression-">Derivation</a></li>
       <li><a href="#logistic-regression-">Softmax regression</a></li>
       <!-- <li><a href="#logistic-regression-">Logistic regression problems</a></li> -->
@@ -93,7 +95,262 @@
 
 <div class="card mb-4" id="logistic-regression-">
   <div class="card-body">
-    <h2 class="card-title">Single layer network</h2>
+    <h2 class="card-title">Example - binary (torch)</h2>
+
+<pre><code class="python"># Load data
+# Standardize data
+# Intialize parameters
+# Train
+#   Compute Z, A (forward porp)
+#   Compute cost
+#   Compute gradient (backward prop)
+#   Update weights
+# Inference
+
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from torch.utils.data import Dataset, DataLoader
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+# Data
+
+class CustomDataset(Dataset):
+
+    def __init__(self, X_train, y_train):
+        self.x = F.normalize(torch.from_numpy(X_train))  # (m, n)
+        self.y = torch.from_numpy(y_train) # (m)
+
+    def __len__(self):
+        return len(self.x)
+
+    def __getitem__(self, index):
+        return self.x[index].float(), self.y[index].float()
+
+dataset = load_breast_cancer()
+n = dataset.data.shape[1]
+print(f"num_features: {n}")
+m = len(dataset.data)
+print(f"num_data: {m}")
+X_train, X_test, y_train, y_test = train_test_split(dataset.data, dataset.target, test_size=0.2)
+train_data = CustomDataset(X_train, y_train)
+test_data = CustomDataset(X_test, y_test)
+train_dataloader = DataLoader(train_data, batch_size=64, shuffle=True)
+test_dataloader = DataLoader(test_data, batch_size=1, shuffle=True)
+
+# Model
+class LogisticRegression(nn.Module):
+
+    def __init__(self, num_features):
+        super().__init__()
+        # X (m,n) => Y (m, 1)
+        self.linear = nn.Linear(num_features, 1)
+
+    def forward(self, x):
+        x = self.linear(x)
+        x = torch.sigmoid(x)
+        x = torch.squeeze(x)
+        return x
+
+# Train
+model = LogisticRegression(n)
+learning_rate = 0.01
+criterion = nn.BCELoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+
+epoch = 1000
+
+for key, val in model.state_dict().items():
+    print(f"{key}: {val}")
+
+for e in range(epoch):
+    for x_batch, y_batch in train_dataloader:
+
+        optimizer.zero_grad()  # Reset grads
+
+        y_hat = model(x_batch)  # (m, 1)
+
+        # print(f"x_batch: {x_batch.shape}")
+        # print(f"y_batch: {y_batch.shape}")
+        # print(f"y_hat: {y_hat.shape}")
+        # print(y_batch)
+        # print(y_hat)
+
+        loss = criterion(y_hat, y_batch)  # Compute loss
+
+        loss.backward()  # Compute gradient
+
+        optimizer.step()  # Adjust learning rate
+
+        print(f"epoch: {e+1}, loss = {loss.item()}")
+
+for key, val in model.state_dict().items():
+    print(f"{key}: {val}")
+
+# Inference
+correct = 0
+incorrect = 0
+with torch.no_grad():
+    for x_batch, y_batch in test_dataloader:
+        y_pred = model(x_batch)  # no need to call model.forward()
+        if y_pred > 0.5:
+            y_pred = 1
+        else:
+            y_pred = 0
+        if y_pred == y_batch[0]:
+            correct += 1
+        else:
+            incorrect += 1
+    accuracy = correct/(correct+incorrect)
+    print(f"accurach: {accuracy}")</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href=""></a>
+  </div>
+</div>
+
+<div class="card mb-4" id="logistic-regression-">
+  <div class="card-body">
+    <h2 class="card-title">Example - multi-class softmax regression (torch)</h2>
+    <ul>
+      <li>Generalization of logistic regression</li>
+      <li>Number of units in the output layer is \( n^{L} = C \) the number of classes</li>
+      <li>If \( C = 2 \), applying softmax reduces to logistic regression</li>
+    </ul>
+
+    <h3 class="card-title">Activation in the output layer</h3>
+    <ul>
+      <li>In the output layer \( z^{[L]} = w^{[L]}a^{[L-1]} + b^{[l]} \)</li>
+      <li>The activation in the last layer for softmax is \( a^{[L]} = \dfrac{e^{z^{[L]}}}{\sum_{i=1}^{C}t_{i}} \) where \( t = e^{z^{[L]}} \)</li>
+    </ul>
+
+    <h3 class="card-title">Loss function</h3>
+    <ul>
+      <li>\( L(\hat{y},y) = -\displaystyle\sum_{j=1}^{C} y_{j}log\hat{y}_{j} \)</li>
+    </ul>
+
+    <h3 class="card-title">Gradient descent</h3>
+    <ul>
+      <li>\( \textbf{dZ} = \textbf{A} - \textbf{y} \)</li>
+    </ul>
+
+<pre><code class="python"># Load data
+# Standardize data
+# Intialize parameters
+# Train
+#   Compute Z, A (forward porp)
+#   Compute cost
+#   Compute gradient (backward prop)
+#   Update weights
+# Inference
+
+from sklearn.datasets import load_wine
+from sklearn.model_selection import train_test_split
+from torch.utils.data import Dataset, DataLoader
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+# Data
+
+class CustomDataset(Dataset):
+
+    def __init__(self, X_train, y_train, c):
+        self.x = F.normalize(torch.from_numpy(X_train))  # (m, n)
+        self.y = torch.from_numpy(y_train) # (m)
+
+    def __len__(self):
+        return len(self.x)
+
+    def __getitem__(self, index):
+        return self.x[index].float(), self.y[index]
+
+dataset = load_wine()
+n = dataset.data.shape[1]
+print(f"num_features: {n}")
+c = 3
+print(f"num_classes: {c}")
+m = len(dataset.data)
+print(f"num_data: {m}")
+X_train, X_test, y_train, y_test = train_test_split(dataset.data, dataset.target, test_size=0.2)
+train_data = CustomDataset(X_train, y_train, c)
+test_data = CustomDataset(X_test, y_test, c)
+train_dataloader = DataLoader(train_data, batch_size=64, shuffle=True)
+test_dataloader = DataLoader(test_data, batch_size=1, shuffle=True)
+
+# Model
+class LogisticRegression(nn.Module):
+
+    def __init__(self, num_features, num_classes):
+        super().__init__()
+        # X (m,n) => Y (m, num_classes)
+        self.linear = nn.Linear(num_features, num_classes)
+
+    def forward(self, x):
+        x = self.linear(x)
+        # x = torch.softmax(x, dim=1)
+        return x
+
+# Train
+model = LogisticRegression(n, c)
+learning_rate = 0.01
+criterion = nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+
+epoch = 1000
+
+for key, val in model.state_dict().items():
+    print(f"{key}: {val}")
+
+for e in range(epoch):
+    for x_batch, y_batch in train_dataloader:
+
+        optimizer.zero_grad()  # Reset grads
+
+        y_hat = model(x_batch)  # (m, 3)
+
+        # print(f"x_batch: {x_batch.shape}")
+        # print(f"y_batch: {y_batch.shape}")
+        # print(f"y_hat: {y_hat.shape}")
+        # print(y_hat)
+        # print(y_batch)
+
+        loss = criterion(y_hat, y_batch)  # Compute loss
+
+        loss.backward()  # Compute gradient
+
+        optimizer.step()  # Adjust learning rate
+
+        print(f"epoch: {e+1}, loss = {loss.item()}")
+
+for key, val in model.state_dict().items():
+    print(f"{key}: {val}")
+
+# Inference
+correct = 0
+incorrect = 0
+with torch.no_grad():
+    for x_batch, y_batch in test_dataloader:
+        y_pred = model(x_batch)  # no need to call model.forward()
+        # print(f"{torch.tensor(torch.argmax(y_pred))}:{y_batch}")
+        if torch.argmax(y_pred) == y_batch[0]:
+            correct += 1
+        else:
+            incorrect += 1
+    accuracy = correct/(correct+incorrect)
+    print(f"accurach: {accuracy}")</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href=""></a>
+  </div>
+</div>
+
+<div class="card mb-4" id="logistic-regression-">
+  <div class="card-body">
+    <h2 class="card-title">Example - binary (py)</h2>
     <ul>
       <li>\( m \) training examples</li>
       <li>\( \textbf{X} = \begin{bmatrix} \vdots & \vdots & \vdots \\ \vdots & \vdots & \vdots \\ x_{1} & x_{2} \ldots & x_{m} \\ \vdots & \vdots & \vdots \\ \vdots & \vdots & \vdots \end{bmatrix} \)</li>
@@ -155,6 +412,22 @@ cost = np.squeeze(cost)</code></pre>
       <li>\( \textbf{db} = \dfrac{1}{m}np.sum(\textbf{dZ}) \)</li>
       <li>\( \textbf{W} := \textbf{W} - \alpha \textbf{dW} \)</li>
       <li>\( \textbf{b} := \textbf{b} - \alpha \textbf{db} \)</li>
+    </ul>
+
+    <h3 class="card-title">Backward prop derivation (consider m=1 and n=2)</h3>
+    <ul>
+      <li>Let</li>
+      <ul>
+        <li>\( \hat{y} = a, L(a,y) = -\left( ylog(a) + (1-y)log(1-a) \right) \)</li>
+        <li>\( z = w_{1}x_{1} + w_{2}x_{2} + b \)</li>
+      </ul>
+      <li>\( da = \dfrac{dL}{da} = -\dfrac{y}{a} + \dfrac{1-y}{1-a} \)</li>
+      <li>\( dz = \dfrac{dL}{dz} = \dfrac{dL}{da}\dfrac{da}{dz} =  \left(-\dfrac{y}{a} + \dfrac{1-y}{1-a}\right) a(1-a) = a - y \)</li>
+      <li>Then</li>
+      <ul>
+        <li>\( dw_{1} = x_{1}dz, dw_{2} = x_{2}dz \)</li>
+        <li>\( db = dz \)</li>
+      </ul>
     </ul>
 
 <pre><code class="python">m = X.shape[1]
@@ -288,61 +561,6 @@ d = model(train_set_x, train_set_y, test_set_x, test_set_y, num_iterations = 200
     s = 1 / (1 + np.exp(-z))
 
     return s</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.coursera.org/specializations/deep-learning">Deep Learning Specialization</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="logistic-regression-">
-  <div class="card-body">
-    <h2 class="card-title">Derivation</h2>
-
-    <h3 class="card-title">Consider m=1 and n=2</h3>
-    <ul>
-      <li>Let</li>
-      <ul>
-        <li>\( \hat{y} = a, L(a,y) = -\left( ylog(a) + (1-y)log(1-a) \right) \)</li>
-        <li>\( z = w_{1}x_{1} + w_{2}x_{2} + b \)</li>
-      </ul>
-      <li>\( da = \dfrac{dL}{da} = -\dfrac{y}{a} + \dfrac{1-y}{1-a} \)</li>
-      <li>\( dz = \dfrac{dL}{dz} = \dfrac{dL}{da}\dfrac{da}{dz} =  \left(-\dfrac{y}{a} + \dfrac{1-y}{1-a}\right) a(1-a) = a - y \)</li>
-      <li>Then</li>
-      <ul>
-        <li>\( dw_{1} = x_{1}dz, dw_{2} = x_{2}dz \)</li>
-        <li>\( db = dz \)</li>
-      </ul>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.coursera.org/specializations/deep-learning">Deep Learning Specialization</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="logistic-regression-">
-  <div class="card-body">
-    <h2 class="card-title">Softmax regression</h2>
-    <ul>
-      <li>Generalization of logistic regression</li>
-      <li>Number of units in the output layer is \( n^{L} = C \) the number of classes</li>
-      <li>If \( C = 2 \), applying softmax reduces to logistic regression</li>
-    </ul>
-
-    <!-- <h3 class="card-title">Activation in the output layer</h3>
-    <ul>
-      <li>In the output layer \( z^{[L]} = w^{[L]}a^{[L-1]} + b^{[l]} \)</li>
-      <li>The activation in the last layer for softmax is \( a^{[L]} = \dfrac{e^{z^{[L]}}}{\sum_{i=1}^{C}t_{i}} \) where \( t = e^{z^{[L]}} \)</li>
-    </ul> -->
-
-    <h3 class="card-title">Loss function</h3>
-    <ul>
-      <li>\( L(\hat{y},y) = -\displaystyle\sum_{j=1}^{C} y_{j}log\hat{y}_{j} \)</li>
-    </ul>
-
-    <h3 class="card-title">Gradient descent</h3>
-    <ul>
-      <li>\( \textbf{dZ} = \textbf{A} - \textbf{y} \)</li>
-    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.coursera.org/specializations/deep-learning">Deep Learning Specialization</a>
