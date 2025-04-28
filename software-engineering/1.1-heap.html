@@ -48,6 +48,7 @@
       <li><a href="#heap-">Find median from data stream</a></li>
       <li><a href="#heap-">Sliding window median</a></li>
       <li><a href="#heap-">Minimum Cost to Hire K Workers</a></li>
+      <li><a href="#heap-">Stock Price Fluctuation</a></li>
       <li><a href="#heap-">Maximum profit from trading stocks</a></li>
     </ul>
   </div>
@@ -279,6 +280,72 @@ class Solution:
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/minimum-cost-to-hire-k-workers">857. Minimum Cost to Hire K Workers</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="heap-">
+  <div class="card-body">
+    <h2 class="card-title">Stock Price Fluctuation  (M) (Atlassian)</h2>
+
+<pre><code class="python">class StockPrice:
+
+    # We only need latest (or greatest) timestamp
+    # Use max heap to keep tuple of timestamp
+    # Use dictionary to keep latest price per timestamp
+    # How to find min and max?
+    #   Use min heap and max heap for prices
+    #   Insert incoming (timestamp, price) to both heaps
+    #   When getting min/max, if (price, timestamp) matches
+    #   the dictionary, return it. Otherwise, pop ot
+      
+    def __init__(self):
+        self.max_heap_timestamp = []
+        self.prices = defaultdict(int)
+        self.max_heap_price = []
+        self.min_heap_price = []
+        
+    # Time O(logn)
+    #   n = number of update operation
+    # Space O(n)
+    def update(self, timestamp: int, price: int) -> None:
+        heappush(self.max_heap_timestamp, -timestamp)
+        self.prices[timestamp] = price
+        heappush(self.max_heap_price, (-price, timestamp))
+        heappush(self.min_heap_price, (price, timestamp))
+        
+    # Time O(1)
+    def current(self) -> int:
+        timestamp = self.max_heap_timestamp[0]
+        return self.prices[-timestamp]
+
+    def maximum(self) -> int:
+        price, timestamp = self.max_heap_price[0]
+        # If price is not outdated
+        if -price == self.prices[timestamp]:
+            return -price
+        else:
+            heappop(self.max_heap_price)
+            return self.maximum() 
+
+    def minimum(self) -> int:
+        price, timestamp = self.min_heap_price[0]
+        # If price is not outdated
+        if price == self.prices[timestamp]:
+            return price
+        else:
+            heappop(self.min_heap_price)
+            return self.minimum()
+
+
+# Your StockPrice object will be instantiated and called as such:
+# obj = StockPrice()
+# obj.update(timestamp,price)
+# param_2 = obj.current()
+# param_3 = obj.maximum()
+# param_4 = obj.minimum()</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/stock-price-fluctuation">2034. Stock Price Fluctuation </a>
   </div>
 </div>
 
