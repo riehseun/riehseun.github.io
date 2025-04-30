@@ -989,7 +989,59 @@
   <div class="card-body">
     <h2 class="card-title">The Time When the Network Becomes Idle (M) (Attlasian)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def networkBecomesIdle(self, edges: List[List[int]], patience: List[int]) -> int:
+
+        # From each node, compute distane to node 0
+        #   Or find depth of tree starting at node 0 using BFS
+        # For each node, it takes (distance * 2) seconds to receive
+        # thg message back
+        # If distance * 2 < patience, it will not resend the message
+        # Else, the last message will be sent at 
+        #   time = ( (distance * 2 - 1) // patience) * patience
+        # The idle time is (distance * 2) + time + 1
+
+        graph = defaultdict(set)
+
+        for edge in edges:
+            graph[edge[0]].add(edge[1])
+            graph[edge[1]].add(edge[0])
+
+        # Time O(n+m)
+        #   n = number of nodes = len(patience)
+        #   m = number of edges = len(edges)
+        # Space O(n)
+        def bfs(graph, start):
+
+            explored = set()
+            explored.add(start)
+
+            queue = deque()
+            queue.append((start, 0))
+
+            distance = defaultdict(int)
+
+            while queue:
+                node, depth = queue.popleft()
+                distance[node] = depth
+
+                for next_node in graph[node]:
+                    if next_node not in explored:
+                        explored.add(next_node)
+                        queue.append((next_node, depth+1))
+
+            return distance
+
+        distance = bfs(graph, 0)
+        print(distance)
+
+        max_idle_time = 0
+        for i in range(1, len(patience)):
+            time = ((distance[i]*2-1)//patience[i]) * patience[i]
+            idle_time = (distance[i]*2) + time
+            max_idle_time = max(max_idle_time, idle_time)
+
+        return max_idle_time + 1</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/the-time-when-the-network-becomes-idle">2039. The Time When the Network Becomes Idle</a>
