@@ -155,7 +155,77 @@
   <div class="card-body">
     <h2 class="card-title">Design Snake Game (M) (Attlasian)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class SnakeGame:
+
+    # If snake moves to empty space
+    #   Move snake head to new slot
+    #   Move snake body in the same direction (use deque)
+    # If snake moves to food
+    #   Move snake head to new slot
+    #   Snake body stays in the same place
+    # If snake moves to itself
+    #   Game over
+    # If snake moves to out of bounds
+    #   Game over
+
+    def __init__(self, width: int, height: int, food: List[List[int]]):
+        self.height = height
+        self.width = width
+        self.directions = {
+            "L": (0, -1),
+            "D": (1, 0),
+            "R": (0, 1),
+            "U": (-1, 0)
+        }
+        self.score = 0
+        # Initialize snake
+        self.snake = deque()
+        self.snake.append((0, 0))
+        # Initialize food
+        self.food = food
+        self.food.reverse()
+        
+    # Time O(1)
+    # Space O(n)
+    #   n = length of snake = width * height in the worst case
+    def move(self, direction: str) -> int:
+        x, y = self.directions[direction]
+        i, j = self.snake[0]
+
+        if x + i < 0 or x + i >= self.height:
+            print("OOB X")
+            return -1
+        if y + j < 0 or y + j >= self.width:
+            print("OOB Y")
+            return -1
+
+        if (x+i, y+j) in self.snake:
+            # Check if snake moves circular
+            if (x+i, y+j) == self.snake[-1]:
+                self.snake.appendleft(self.snake.pop())
+                return self.score
+            else:
+                print("OUCH")
+                return -1
+
+        if self.food and (x+i, y+j) == tuple(self.food[-1]):
+            # Snake grows
+            self.snake.appendleft((x+i, y+j))
+            # Take out food that snake ate
+            self.food.pop()
+            # Increment score
+            self.score += 1
+            return self.score
+        
+        # Snake moves
+        self.snake.appendleft((x+i, y+j))
+        self.snake.pop()
+        return self.score
+        
+
+# Your SnakeGame object will be instantiated and called as such:
+# obj = SnakeGame(width, height, food)
+# param_1 = obj.move(direction)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/design-snake-game">353. Design Snake Game</a>
