@@ -64,7 +64,7 @@
         <li>What system do I need to design? Banking system such as fraud detection, credit approval, etc</li>
         <li>What types of accounts do customers have? Debit and credit</li>
         <li>Does the system have access to personal credit score? No</li>
-        <li>Should the system handle multiple currency? Yes</li>
+        <li>Should the system handle multiple currencies? Yes</li>
       </ul>
       <li>Data</li>
       <ul>
@@ -97,14 +97,14 @@
 
     <h3 class="card-title">ML objective</h3>
     <ul>
-      <li>Given customer/transaction, compute the probability of default/fraud</li>
+      <li>Given customer/account, compute the probability of default</li>
       <li>Input</li>
       <ul>
-        <li>Customer ID or transaction ID</li>
+        <li>Customer ID or account ID</li>
       </ul>
       <li>Output</li>
       <ul>
-        <li>Score representing probability of default in certain number of days in the future or fraud</li>
+        <li>Score representing probability of default in certain number of days in the future</li>
       </ul>
     </ul>
 
@@ -112,11 +112,11 @@
     <ul>
       <li>Option 1. regression</li>
       <ul>
-        <li>Compute scores for each transaction or customer</li>
+        <li>Compute scores for each customer or account</li>
       </ul>
       <li>Option 2. classification</li>
       <ul>
-        <li>Create buckets for low, medium, high risk transactions or customers</li>
+        <li>Create buckets for low, medium, high risk customers or accounts</li>
       </ul>
     </ul>
   </div>
@@ -135,7 +135,19 @@
       <ul>
         <li>Spilt data such that 80% is training set and 20% is test set (split based on time)</li>
         <li>Among 80% training data, use 70% for 5-bin cross-validation and 30% for validation set for hyperparameter tuning</li>
-        <li>Based population (transaction ID or customer ID) must not co-exist in bins and in any one of bins and validation set</li>
+        <li>Base population (transaction ID or customer ID) must not co-exist in bins and in any one of bins and validation set</li>
+        <li>Sampling - most samples will be negative (There are not many fraud transaction or default customers)</li>
+        <ul>
+          <li>Downsample positive</li>
+        </ul>
+        <li>Missing values - left untouched</li>
+        <li>Exclusion - some data points may be invalid, thus needs to be excluded</li>
+        <ul>
+          <li>Customers who are deceased</li>
+          <li>Custoemrs who are under 18</li>
+          <li>Accounts that are closed</li>
+        </ul>
+        <li>Ground truth - customers/accounts that are marked as bankrupcy</li>
       </ul>
       <li>Database</li>
       <ul>
@@ -145,6 +157,7 @@
           <li>first name</li>
           <li>last name</li>
           <li>DOB</li>
+          <li>Address</li>
           <li>email</li>
           <li>created_at</li>
           <li>updated_at</li>
@@ -165,7 +178,7 @@
           <li>amount</li>
           <li>timestamp</li>
         </ul>
-        <li>Currency</li>
+        <li>Currency - there will be many tables like this for each pair of currencies</li>
         <ul>
           <li>currency_1</li>
           <li>currency_2</li>
@@ -179,15 +192,18 @@
     <ul>
       <li>Customer</li>
       <ul>
-        <li>average month-end account balance (debit) for past 6 months - averged value over time is more robust again distribution shift</li>
-        <li>average month-end account balance (credit) for past 6 months</li>
-        <li>average month-end number of transactions (debit) for past 6 months</li>
-        <li>average month-end number of transactions (credit) for past 6 months</li>
+        <li>average month-end account balance (debit) for past 3,6,12 months - averged value over time is more robust again distribution shift</li>
+        <li>average month-end account balance (credit) for past 3,6,12 months</li>
+        <li>average month-end number of transactions (debit) for past 3,6,12 months</li>
+        <li>average month-end number of transactions (credit) for past 3,6,12 months</li>
+        <li>average month-end amount of transactions (debit) for past 3,6,12 months</li>
+        <li>average month-end amount of transactions (credit) for past 3,6,12 months</li>
       </ul>
       <li>Account</li>
       <ul>
-        <li>average month-end sum of accrued interest for past 12 month</li>
+        <li>average month-end balance for past 3,6,12 month</li>
         <li>opening_date</li>
+        <li>closing_date</li>
       </ul>
       <li>Transaction</li>
       <ul>
@@ -288,9 +304,20 @@
   <div class="card-body">
     <h2 class="card-title">Serving</h2>
     <ul>
-      <li>Detect fraud transactions - should be online</li>
-      <li>Detect customers that are likely to default - can be batch</li>
+      <li>Detect customers that are likely to default - can be API or batch</li>
     </ul>
+
+    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-0/banking-1.png" alt="Card image cap">
+    <ul>
+      <li>Check DB - check if new records of base population have been created</li>
+      <li>Transformed features are stored in feature store to be used by other models</li>
+      <li>Re-training is only when there is significant distribution drift thus degrading performance (XGBoost models are expensive to re-train)</li>
+    </ul>      
+    
+    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-0/banking-2.png" alt="Card image cap">
+    <ul>
+      <li>Feature transformation is done by API</li>
+    </ul>  
   </div>
   <div class="card-footer text-muted">
     Reference: 
