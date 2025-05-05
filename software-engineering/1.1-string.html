@@ -446,9 +446,75 @@
 
 <div class="card mb-4" id="string-">
   <div class="card-body">
-    <h2 class="card-title">Text Justification (H)</h2>
+    <h2 class="card-title">Text Justification (H) (Airbnb)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def fullJustify(self, words: List[str], maxWidth: int) -> List[str]:
+
+        # Compute running sum of available spaces
+        #   If length of accumulated text > available spaces left
+        #   then, insert the word in the next line
+        # Each word in each line must have equal space in between
+        #   Number of splits = number of words - 1
+        #   Number of spaces in each split = spaces // number of splits 
+        #   Extra spaces = spaces % number of splits
+
+        result = []
+        text = ""
+        char_count = 0
+        word_array = []
+        word_length = 0
+
+        # Time O(n)
+        #   n = len(words)
+        # Space O(n)
+        #   word_array may contain entire words in worst case
+        for word in words:
+            
+            if len(word) + char_count <= maxWidth:
+                char_count += len(word) + 1
+                word_array.append(word)
+                word_length += len(word)
+            else:
+                if len(word_array) == 1:
+                    extra_spaces = maxWidth - word_length
+                    text = word_array[0]
+                    for _ in range(extra_spaces):
+                        text += " "
+                    result.append(text)
+                else:
+                    num_splits = len(word_array) - 1
+                    num_spaces = (maxWidth-word_length) // num_splits
+                    extra_spaces = (maxWidth-word_length) % num_splits
+
+                    text = ""
+                    for j, w in enumerate(word_array[:-1]):
+                        text += w
+                        for _ in range(num_spaces):
+                            text += " "
+                        if extra_spaces > 0:
+                            text += " " 
+                            extra_spaces -= 1
+                    text += word_array[-1]
+                    result.append(text)
+                
+                char_count = len(word) + 1
+                word_array = [word]
+                word_length = len(word)
+
+        # Process remaining words in word_array
+        text = ""
+        for w in word_array:
+            text += w
+            if len(text) < maxWidth:
+                text += " "
+        
+        for _ in range(maxWidth-len(text)):
+            text += " "
+        
+        result.append(text)
+
+        return result</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/text-justification">68. Text Justification</a>
