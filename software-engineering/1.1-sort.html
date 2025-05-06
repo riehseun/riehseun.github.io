@@ -137,46 +137,51 @@
 
 <div class="card mb-4" id="sort-">
   <div class="card-body">
-    <h2 class="card-title">Kth largest element in an array (M)</h2>
+    <h2 class="card-title">Kth largest element in an array (M) (Meta)</h2>
 
 <pre><code class="python">class Solution:
     def findKthLargest(self, nums: List[int], k: int) -> int:
 
         # Quickselect
-        # Partition
-        #   Numbers greater than pivot should be on left side
-        #   Numbers less than pivot should be on right side
-        # If k < p, search on left side
-        # If k > p, search on right side
-        # If k == p, return value at pivot
+        # Partition array such that
+        #   Chooese pivot nums[p] (index p) 
+        #   Nums larger than nums[p] comes left side
+        #   Nums less than nums[p] comes right side
+        # If k > p, search on right
+        # If k < p, search on left
+        # If k == p, retur nums[p]
+        # k should be k - 1
 
-        # Time O(n) on average 
-        #   n = len(nums)
-        # Space O(1)
-        def quickselect(nums, l, r):
+        def partition(nums, start, end):
 
-            p = partition(nums, l, r)
-            if k-1 < p:
-                return quickselect(nums, l, p-1)
-            elif k-1 > p:
-                return quickselect(nums, p+1, r)
-            else:
-                return nums[p]
+            p = random.randint(start, end)
 
-        def partition(nums, l, r):
+            for i in range(start, end+1):
 
-            p = random.randint(l, r)
-            
-            for i in range(l, r+1):
                 if nums[i] > nums[p] and i > p:
                     nums[i], nums[p] = nums[p], nums[i]
                 if nums[i] < nums[p] and i < p:
                     nums[i], nums[p] = nums[p], nums[i]
+
                 p = i
 
             return p
-                
-        return quickselect(nums, 0, len(nums)-1)</code></pre>
+
+        # Time O(n) on average
+        #   n = len(nums)
+        # Space O(logn)
+        #   Recursion stack
+        def find_kth_largest(nums, start, end):
+
+            p = partition(nums, start, end)
+            if k-1 > p:
+                return find_kth_largest(nums, p+1, end)
+            elif k-1 < p:
+                return find_kth_largest(nums, start, p-1)
+            else:
+                return nums[p]
+
+        return find_kth_largest(nums, 0, len(nums)-1)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/merge-sorted-array">215. Kth Largest Element in an Array</a>

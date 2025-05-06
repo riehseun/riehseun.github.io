@@ -745,37 +745,41 @@
 
 <div class="card mb-4" id="string-">
   <div class="card-body">
-    <h2 class="card-title">Valid Word Abbreviation (E)</h2>
+    <h2 class="card-title">Valid Word Abbreviation (E) (Meta)</h2>
 
 <pre><code class="python">class Solution:
     def validWordAbbreviation(self, word: str, abbr: str) -> bool:
 
-        # Tokenize "abbr" by letters and numbers
-        # If any token is 0, return False
-        # Go through "word" by tokens
+        # Iterate word and abbr 
+        #   For abbr, differentate letters and digits
+        #   If numbers are found, move indices based on that number
+        #   If any indices between word and abbr don't match, return False
 
-        # Time O(n)
-        #   n = len(abbr)
+        n = len(word)
+        m = len(abbr)
+        i, j = 0, 0
+
+        # Time O(max(n,m))
         # Space O(1)
-        tokens = re.findall(r'\D+|\d+', abbr)
-        i = 0
-        
-        for token in tokens:
-            if token.isdigit():
-                # Leading zeros are not allowed
-                if token.startswith("0"):
+        while i < n and j < m:
+
+            digit = ""
+            while j < m and abbr[j].isdigit():
+                digit += abbr[j]
+                j += 1
+            if digit:
+                # Check if leading zeros
+                if digit.startswith("0"):
                     return False
-                i += int(token)
+                i += int(digit)
             else:
-                if word[i:i+len(token)] == token:
-                    i += len(token)
-                else:
-                    return False     
+                # Check if char matches in each index
+                if word[i] != abbr[j]:
+                    return False
+                i += 1
+                j += 1
 
-        if i != len(word):
-            return False
-
-        return True</code></pre>
+        return i == n and j == m</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/valid-word-abbreviation">408. Valid Word Abbreviation</a>
