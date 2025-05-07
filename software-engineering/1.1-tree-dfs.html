@@ -1230,7 +1230,7 @@ class Solution:
 
 <div class="card mb-4" id="tree-dfs">
   <div class="card-body">
-    <h2 class="card-title">Diameter of binary tree (E)</h2>
+    <h2 class="card-title">Diameter of binary tree (E) (Meta)</h2>
 
 <pre><code class="python"># Definition for a binary tree node.
 # class TreeNode:
@@ -1241,33 +1241,34 @@ class Solution:
 class Solution:
     def diameterOfBinaryTree(self, root: Optional[TreeNode]) -> int:
 
-        # Diameter of tree at a node is the sum of
-        #   Max height of right subtree
-        #   Max height of left subtree
+        # Diameter or longest path is sum of 
+        #   root + left subtree + right subtree
+        # Do post order traverse
+        #   If leaf node, return 1
+        #   Else, max path is
+        #     longest path of left + longest path of right + 1
+        #   Valid path can only have either left or right subtree 
 
-        self.max_diameter = 0
+        self.max_path = 0
 
-        # Time O(n) 
-        #   n = number of nodes
-        # Space O(h) 
-        #   h = n if worst case
-        #   h = log(n) if best case
+        # Time O(n)
+        #   n = number of nodes in tree
+        # Space O(h)
+        #   h = height of tree
+        #   h = n in the worst case
+        def post_order(node):
 
-        # Find max height of a tree
-        def helper(node):
-
-            if not node:
+            if node:
+                longest_path_left = post_order(node.left)
+                longest_path_right = post_order(node.right)
+                self.max_path = max(self.max_path, 
+                    longest_path_left+longest_path_right+1)
+                return max(longest_path_left, longest_path_right) + 1
+            else:
                 return 0
-
-            left = helper(node.left)
-            right = helper(node.right)
-            self.max_diameter = max(self.max_diameter, left+right)
-
-            return max(left, right) + 1
-        
-        helper(root)
-
-        return self.max_diameter</code></pre>
+                
+        post_order(root)
+        return self.max_path - 1</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/diameter-of-binary-tree">543. Diameter of Binary Tree</a>
