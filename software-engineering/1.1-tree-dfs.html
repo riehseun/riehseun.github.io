@@ -1515,7 +1515,7 @@ class Solution:
 
 <div class="card mb-4" id="tree-dfs">
   <div class="card-body">
-    <h2 class="card-title">Lowest Common Ancestor of a Binary Tree III (M)</h2>
+    <h2 class="card-title">Lowest Common Ancestor of a Binary Tree III (M) (Meta)</h2>
 
 <pre><code class="python">"""
 # Definition for a Node.
@@ -1530,46 +1530,49 @@ class Node:
 class Solution:
     def lowestCommonAncestor(self, p: 'Node', q: 'Node') -> 'Node':
 
-        # Traverse tree recursively
-        # At each node, if node itself is p or q, mark mid as True
-        # If left subtree return True, p or q is in left subtree
-        # If right subtree return True, p or q is in left subtree
-        # When two of mid, left, right returns True, LCA is mid
+        # Do post order traverse
+        #   If a node is p or q, return 1
+        #   Else, return 0
+        # If left and right returns 2, 
+        # then current root is lca
+        # Also, if either left or right return 1 and current root is p or q,
+        # then, current root is lca
 
+        # First, need to find root
+        
         self.lca = None
 
-        def get_root(p):
-
-            if not p.parent:
+        def find_root(p):
+            
+            if p.parent: 
+                return find_root(p.parent)
+            else:
                 return p
 
-            return get_root(p.parent)
+        # Time O(h) = O(n)
+        #   h = height of tree, worst case h = n
+        # Space O(1)
+        def post_order(node):
 
-        root = get_root(p)
-
-        # Time O(n) 
-        #   Height can be n if tree is not balanced     
-        #   n = number of nodes in tree
-        # Space O(n)
-        #   Number of recursion stack can be n  
-        def lowest_common_ancestor(root, p, q):
-
-            if not root:
-                return False
-
-            left = lowest_common_ancestor(root.left, p, q)
-            right = lowest_common_ancestor(root.right, p, q)
-
-            mid = False
-            if root == p or root == q:
-                mid = True
-
-            if mid + left + right == 2:
-                self.lca = root
-
-            return mid or left or right
+            if node:
+                left = post_order(node.left)
+                right = post_order(node.right)
                 
-        lowest_common_ancestor(root, p, q)
+                mid = 0
+                if node.val == p.val or node.val == q.val:
+                    mid = 1
+
+                if left + right + mid == 2 \
+                    and not self.lca:
+                    self.lca = node
+                    
+                return left + right + mid
+
+            else:
+                return 0
+
+        root = find_root(p)
+        post_order(root)
         return self.lca</code></pre>
   </div>
   <div class="card-footer text-muted">
