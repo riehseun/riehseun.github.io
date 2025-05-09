@@ -601,10 +601,154 @@ class Solution:
   <div class="card-body">
     <h2 class="card-title">All O`one Data Structure (H) (LinkedIn)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class ListNode:
+    def __init__(self, val, keys=None, next=None, prev=None):
+        self.val = val 
+        self.keys = keys
+        self.next = next
+        self.prev = prev
+
+
+class AllOne:
+
+    # Use dictionary to store string and node mapping
+    #   Look up is faster than iterating linked list
+    # Use linked list where head contains min and tail contains max
+    #   Each node stores frequency and keys with that frequency
+    # Increament
+    #   If key exists in dictionary
+    #     Consider node and node.next
+    #     If node.next.val != node.val + 1, create new node
+    #     Else, key should be moved from current node to next node   
+    #       If not node.keys, remove current node
+    #   If key does not exists in dictionary
+    #     If there is node with value 1, add key to that node
+    #     Else, create a new node with value 1 at head
+    # Decrement
+    #   If key exists in a dictionary and value is > 1
+    #     Consider node and node.prev
+    #     if node.prev.val != node.val - 1, create new node
+    #     Else, key should be moved from current node to previous node
+    #     If not node.keys, remove current node
+    #   If key exists in a dictionary and value is == 1
+    #     Remove key from node.keys
+    #     If not node.keys, remove current node
+    # Max
+    #   Return tail
+    # Min
+    #   Return head
+   
+    def __init__(self):
+        self.nodes = {}
+        self.head = ListNode(0)
+        self.tail = ListNode(0)
+        self.head.next = self.tail
+        self.tail.prev = self.head
+
+    def create_node_forward(self, node):
+        new_node = ListNode(node.val+1, set())
+        new_node.prev = node
+        new_node.next = node.next
+        node.next.prev = new_node
+        node.next = new_node
+        return new_node
+
+    def create_node_backward(self, node):
+        new_node = ListNode(node.val-1, set())
+        new_node.prev = node.prev
+        new_node.next = node
+        node.prev.next = new_node
+        node.prev = new_node
+        return new_node  
+        
+    def remove_node(self, node):
+        node.prev.next = node.next
+        node.next.prev = node.prev
+
+    def inc(self, key: str) -> None:
+
+        if key in self.nodes:
+            node = self.nodes[key]
+            if node.val + 1 == node.next.val:
+                # Move key
+                node.next.keys.add(key)
+                node.keys.remove(key)
+                # Remove current node and update dic
+                if not node.keys:
+                    self.remove_node(node)
+                self.nodes[key] = node.next    
+            else:
+                # Create new node (node.val+1)
+                new_node = self.create_node_forward(node)
+                new_node.keys.add(key)
+                node.keys.remove(key)
+                # Remove current node and update dic
+                if not node.keys:
+                    self.remove_node(node)    
+                self.nodes[key] = new_node    
+        else:
+            if self.head.next.val == 1:
+                self.head.next.keys.add(key)
+                self.nodes[key] = self.head.next
+            else:
+                # Create new node next to head
+                new_node = self.create_node_forward(self.head)
+                new_node.keys.add(key)
+                self.nodes[key] = new_node
+
+    def dec(self, key: str) -> None:
+        
+        node = self.nodes[key]
+        if node.val > 1:
+            if node.val - 1 == node.prev.val:
+                # Move key
+                node.prev.keys.add(key)
+                node.keys.remove(key)
+                # Remove current node and update dic
+                if not node.keys:
+                    self.remove_node(node)
+                self.nodes[key] = node.prev
+            else:
+                # Create new node (node.val-1)
+                new_node = self.create_node_backward(node)
+                new_node.keys.add(key)
+                node.keys.remove(key)
+                # Remove current node and update dic
+                if not node.keys:
+                    self.remove_node(node)
+                    del self.nodes[key]
+                self.nodes[key] = new_node
+        else:
+            node.keys.remove(key)
+            # Remove current node and update dic
+            if not node.keys:
+                self.remove_node(node)
+            del self.nodes[key]
+    
+    def getMaxKey(self) -> str:
+        
+        if not self.tail.prev.keys:
+            return ""
+        else:
+            return next(iter(self.tail.prev.keys))
+
+    def getMinKey(self) -> str:
+       
+        if not self.head.next.keys:
+            return ""
+        else:
+            return next(iter(self.head.next.keys))
+
+
+# Your AllOne object will be instantiated and called as such:
+# obj = AllOne()
+# obj.inc(key)
+# obj.dec(key)
+# param_3 = obj.getMaxKey()
+# param_4 = obj.getMinKey()</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/all-oone-data-structure">432. All O`one Data Structure</a>Ï5
+    Reference: <a href="https://leetcode.com/problems/all-oone-data-structure">432. All O`one Data Structure</a>
   </div>
 </div>
 
