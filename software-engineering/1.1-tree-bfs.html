@@ -342,7 +342,7 @@ class Solution:
 
 <div class="card mb-4" id="tree-bfs">
   <div class="card-body">
-    <h2 class="card-title">Binary tree right side view (M)</h2>
+    <h2 class="card-title">Binary tree right side view (M) (Meta)</h2>
 
 <pre><code class="python"># Definition for a binary tree node.
 # class TreeNode:
@@ -353,43 +353,31 @@ class Solution:
 class Solution:
     def rightSideView(self, root: Optional[TreeNode]) -> List[int]:
 
-        # Do BFS
-        # For each depth, find the right-most value
-        # Because BFS scans each depth left by right,
-        # the right-most value is the latest value
-        # explored in that layer
+        # Do BFS while keeping depth of node
+        #   Append right child first
+        # For each depth, print only the first node
 
-        self.right_side_view = {}
+        queue = deque()
+        if root:
+            queue.append((root, 0))
+        nodes = defaultdict(list)
 
-        # Time O(n) 
-        #   n = number of nodes
-        # Space O(d)
-        #   d = depth of tree
-        def bfs(root):
+        # Time O(n)
+        #   n = number of nodes in tree
+        # Space O(n)
+        while queue:
+            node, depth = queue.popleft()
+            if not nodes[depth]:
+                nodes[depth].append(node.val)
 
-            explored = set()
-            explored.add(root)
-
-            queue = deque()
-            queue.append((root,0))
-
-            while queue:
-                root, depth = queue.popleft()
-                self.right_side_view[depth] = root.val
-                if root.left and root.left not in explored:
-                    explored.add(root.left)
-                    queue.append((root.left,depth+1))
-                if root.right and root.right not in explored:
-                    explored.add(root.right)
-                    queue.append((root.right,depth+1))
-
-        if not root:
-            return []
-
+            if node and node.right:
+                queue.append((node.right, depth+1))
+            if node and node.left:
+                queue.append((node.left, depth+1))
+             
         result = []
-        bfs(root)
-        for key,val in self.right_side_view.items():
-            result.append(val)
+        for key, val in nodes.items():
+            result.append(val[0])
 
         return result</code></pre>
   </div>
