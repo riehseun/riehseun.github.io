@@ -55,43 +55,37 @@
 
 <div class="card mb-4" id="merge-interval-">
   <div class="card-body">
-    <h2 class="card-title">Merge interval (M)</h2>
+    <h2 class="card-title">Merge interval (M) (Meta)</h2>
 
 <pre><code class="python">class Solution:
     def merge(self, intervals: List[List[int]]) -> List[List[int]]:
 
-        # Sort intervals by starting time
-        # Save first interval into the result
-        # Iterate intervals
-        #   If end of last interval > start of current interval
-        #   and start of last interval < end of current interval,
-        #   then there is overlap 
-        #   Else, just append current interval to result
+        # Sort intervals by start time
+        # Check two intervals at a time [a,b] and [c,d]
+        #   If b >= c, there is an overlap
+        #   Merged interval is [min(a,c), max(b,d)]
+        # Insert fisrt item to result
+        # Then, iterate from second items in interval
+        # and compare with last item in the result
+        
+        intervals.sort(key=lambda x: x[0])
 
-        if len(intervals) <= 1:
-            return intervals
-
-        # Time O(nlogn) 
-        #   n = len(intervals)
-        # Space O(logn)
-        intervals.sort(key = lambda x: x[0])
         result = []
         result.append(intervals[0])
 
-        # Time O(n)
-        # Space O(n)
+        # Time O(nlogn)
+        #   n = len(intervals)
+        # Space O(logn)
+        #   Ignoring space for result
+        #   Recursive stack for quicksort
         for interval in intervals[1:]:
-            # If overlap is found
-            if result[-1][1] >= interval[0] \
-                and result[-1][0] <= interval[1]:
-                last_interval = result.pop()
-                merged_interval = [
-                    min(last_interval[0], interval[0]),
-                    max(last_interval[1], interval[1])
-                ]
-                result.append(merged_interval)
+            a, b = result[-1]
+            c, d = interval
+            if b >= c:
+                result.pop()
+                result.append([min(a,c), max(b,d)])
             else:
-                result.append(interval)
+                result.append([c,d])
 
         return result</code></pre>
   </div>
