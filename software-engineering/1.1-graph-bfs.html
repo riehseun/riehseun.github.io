@@ -861,68 +861,48 @@
 
 <div class="card mb-4" id="graph-bfs">
   <div class="card-body">
-    <h2 class="card-title">Shortest Path in Binary Matrix (M)</h2>
+    <h2 class="card-title">Shortest Path in Binary Matrix (M) (Meta)</h2>
 
 <pre><code class="python">class Solution:
     def shortestPathBinaryMatrix(self, grid: List[List[int]]) -> int:
 
-        # BFS shortest path
+        # Do BFS to compute shortest path
 
-        if grid[len(grid)-1][len(grid[0])-1] == 1:
+        dirs = [(-1,-1), (-1,0), (-1,1), (0,1), (1,1), (1,0), (1,-1), (0,-1)]
+
+        n = len(grid)
+        if grid[0][0] == 1 or grid[n-1][n-1] == 1:
             return -1
 
-        graph = defaultdict(set)
-        directions = [
-            (-1, -1), 
-            (-1, 0), 
-            (-1, 1), 
-            (0, -1), 
-            (0, 1), 
-            (1, -1), 
-            (1, 0), 
-            (1, 1)
-        ]
+        start = (0, 0)
+        end = (n-1, n-1)
+        
+        explored = set()
+        explored.add(start)
 
-        # Time O(n) 
-        #   n = number of elements in grid
-        # Space O(n^2)
-        for i in range(len(grid)):
-            for j in range(len(grid[0])):
-                if grid[i][j] == 0:
-                    for row, col in directions:
-                        if 0 <= row + i < len(grid) \
-                            and 0 <= col + j < len(grid):
-                            graph[(i,j)].add((row+i,col+j))
+        queue = deque()
+        queue.append((start, 0))
 
-        if not graph:
-            return 1
-  
-        # Time O(n) 
-        #   There can be maxinum of 8 edges for each node
-        #   Thus, number of edges is constant
-        # Space O(n)
-        def bfs(graph, start, end):
+        # Time O(p+q)
+        #   p = number of nodes = n**2
+        #   q = number of edges = 8*n = n
+        # Space O(p)
+        while queue:
+            node, depth = queue.popleft()
+            if node == end:
+                return depth + 1
 
-            explored = set()
-            explored.add(start)
-            
-            queue = deque()
-            queue.append((start, 0))
-
-            while queue:
-                node, depth = queue.popleft()
-
-                for next_node in graph[node]:
-                    if next_node == end:
-                        return depth + 2
-
+            i, j = node[0], node[1]
+            for x, y in dirs:
+                if 0 <= i + x < n \
+                    and 0 <= j + y < n \
+                    and grid[i+x][j+y] == 0:
+                    next_node = (i+x, j+y)
                     if next_node not in explored:
                         explored.add(next_node)
                         queue.append((next_node, depth+1))
 
-            return -1
-        
-        return bfs(graph, (0,0), (len(grid)-1, len(grid[0])-1))</code></pre>
+        return -1</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/shortest-path-in-binary-matrix">1091. Shortest Path in Binary Matrix</a>
