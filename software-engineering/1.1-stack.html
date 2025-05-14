@@ -159,48 +159,43 @@
 
 <div class="card mb-4" id="stack-">
   <div class="card-body">
-    <h2 class="card-title">Simplify path (M)</h2>
+    <h2 class="card-title">Simplify path (M) (Meta)</h2>
 
 <pre><code class="python">class Solution:
     def simplifyPath(self, path: str) -> str:
 
-        # Keep valid directory in a stack
-        # Split the input by delimiter "/"
-        # Read the tokens from right to left
-        #   If empty string or ".", skip
-        #   Elif "..", pop from stack
-        #   Else push to stack
+        # Split input path by / to create tokens
+        # Remove trailing slash
+        # Append each token to stack
+        #   If token is .. pop from stack
+        #   If token is . skip
+        #   if token is "" skip
 
-        # Ex. "/.../a/../b/c/../d/./"
-        # => "...", "a", "..", "b", "c", "..", "d", "."
-        # => /.../b/d
-
-        tokens = path.split("/")
+        paths = path.split("/")
         stack = []
-
-        # Time O(n) 
-        #   n = len(path)
+        
+        # Time O(n)
+        #   n = len(paths)
         # Space O(n)
-        for token in tokens:
+        for token in paths:
 
-            if token == "" or token == ".":
-                continue
-
-            elif token == "..":
+            if token == "..":
                 if stack:
                     stack.pop()
+                continue
+            
+            elif token == "." or token == "":
+                continue
+        
+            stack.append(token)
 
-            else:
-                stack.append(token)
+        if not stack:
+            return "/"
 
         result = ""
-        for directory in stack:
-            result += "/"
-            result += directory
+        for item in stack:
+            result += "/" + item 
 
-        if not result:
-            return "/"
-            
         return result</code></pre>
   </div>
   <div class="card-footer text-muted">
