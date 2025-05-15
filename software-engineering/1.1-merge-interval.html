@@ -233,49 +233,40 @@ class Solution:
 
 <div class="card mb-4" id="merge-interval-">
   <div class="card-body">
-    <h2 class="card-title">Interval List Intersections (M)</h2>
+    <h2 class="card-title">Interval List Intersections (M) (Meta)</h2>
 
 <pre><code class="python">class Solution:
     def intervalIntersection(self, firstList: List[List[int]], secondList: List[List[int]]) -> List[List[int]]:
 
-        # Loop through both lists
-        # Find intersection of each interval in two lists
-        # Based on end time of intervals from two lits, 
-        # determine which list to check interval next
-        
-        # Time O(n+m) 
+        # Compare A[0] and B[0]
+        # Then, compare either A[0] and B[1] or A[1] and B[0]
+        #   If B[0]'s end > A[0]'s end, compare A[1] and B[0]
+        #   If A[0]'s end > B[0]'s end, compare A[0] and B[1]
+        # [a,b] and [c,d] overlap is 
+        #   [max(a,c), min(b,d)]
+
+        intersections = []
+        i, j = 0, 0
+        n = len(firstList)
+        m = len(secondList)
+
+        # Time O(n+m)
         #   n = len(firstList)
         #   m = len(secondList)
-        # Space O(n+m)
-        
-        if not firstList or not secondList:
-            return []
-
-        def find_intersection(a, b):
-
-            if a[0] <= b[1] and b[0] <= a[1]:
-                intersection = [max(a[0], b[0]), min(a[1], b[1])]
-            else:
-                intersection = []
-
-            return intersection
-
-        result = []
-        i = 0
-        j = 0
-        while i < len(firstList) and j < len(secondList):
-
-            # Check for intersection
-            intersection = find_intersection(firstList[i], secondList[j])
-            if intersection:
-                result.append(intersection)
-
-            if firstList[i][1] <= secondList[j][1]:
+        # Space O(1)
+        #   Ignoring space for result
+        while i < n and j < m:
+            a, b = firstList[i]
+            c, d = secondList[j]
+            if min(b,d) >= max(a,c):
+                intersections.append([max(a,c), min(b,d)])
+            
+            if d > b:
                 i += 1
             else:
                 j += 1
 
-        return result/code></pre>
+        return intersections</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/interval-list-intersections">986. Interval List Intersections</a>
