@@ -145,34 +145,42 @@
 
 <div class="card mb-4" id="math-">
   <div class="card-body">
-    <h2 class="card-title">Pow(x, n) (M)</h2>
+    <h2 class="card-title">Pow(x, n) (M) (Meta)</h2>
 
 <pre><code class="python">class Solution:
     def myPow(self, x: float, n: int) -> float:
-        
-        # In while loop, multiply result, by x, n times
-        # If n < 0, invert x
-        # Optimize whule loop
-        #   If n is even, reduce n by half, and square x by x
-        
-        # Time O(logn)
-        #   n is reduced by half in each iteration
-        # Space O(1)
 
-        if n < 0:
-            n = -n
-            x = 1 / x
+        # Ex. 2 ** 10
+        #     = (2*2) ** 5
+        #.    = 4 ** 5
+        #.    = 4 * (4 ** 4)
+        #.    = 4 * (4*4) ** 2
+        #.    = 4 * (16 ** 2)
+        #     = 4 * (16*16) ** 1  
+        # If n is even, convert to (x*x) ** (n/2)
+        # If n is odd, convert to x * (x ** (n-1)) and multiply x to result
 
         result = 1
-        while n != 0:
 
-            if n % 2 == 1:
-                result *= x
-                n -= 1
-            else:
+        negative = False
+        if n < 0:
+            negative = True
+            n = -n
+
+        # Time O(n)
+        #   n is divided by half
+        # Space O(1)
+        while n > 0:
+
+            if n % 2 == 0:
                 x *= x
                 n /= 2
+            else:    
+                result *= x
+                n -= 1
 
+        if negative:
+            return 1/result
         return result</code></pre>
   </div>
   <div class="card-footer text-muted">
