@@ -267,37 +267,39 @@
 
 <div class="card mb-4" id="greedy-">
   <div class="card-body">
-    <h2 class="card-title">Maximum Swap (M)</h2>
+    <h2 class="card-title">Maximum Swap (M) (Meta)</h2>
 
 <pre><code class="python">class Solution:
     def maximumSwap(self, num: int) -> int:
 
-        # Scan from right to left, tracking largest number
-        # If there is smaller number left to largest number,
-        # save it for comparison
+        # Find largest number from right
+        #   When seeing smaller number than largest,
+        #   consider them as candidate for swapping 
+        # Remember index of largest number
+        #   When seeing a smaller number than largest,
+        #   only then set the indices to swap
 
-        # Time O(n) 
+        nums = list(str(num))
+        largest = 0
+        index_1 = -1
+        index_2 = -1
+        
+        # Time O(n)
         #   n = len(num)
         # Space O(n)
-        
-        nums = list(str(num))
-        largest_num_index = -1
-        largest_num = -1
-        swap_index_1 = -1
-        swap_index_2 = -1
-
         for i in range(len(nums)-1, -1, -1):
-            num = int(nums[i])
-            if num < largest_num:
-                swap_index_1 = i
-                swap_index_2 = largest_num_index 
-            if num > largest_num:
-                largest_num_index = i
-                largest_num = num
-
-        if swap_index_1 != -1 and swap_index_2 != -1:
-            nums[swap_index_1], nums[swap_index_2] = nums[swap_index_2], nums[swap_index_1]
-            
+            n = int(nums[i])
+            if n > largest:
+                largest = n
+                index_largest = i
+            if n < largest:
+                index_1 = index_largest
+                index_2 = i
+                
+        if index_2 == -1:
+            return num
+        
+        nums[index_2], nums[index_1] = nums[index_1], nums[index_2]
         return int("".join(nums))</code></pre>
   </div>
   <div class="card-footer text-muted">
