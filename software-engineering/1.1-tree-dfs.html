@@ -744,7 +744,7 @@ class Solution:
 
 <div class="card mb-4" id="tree-dfs">
   <div class="card-body">
-    <h2 class="card-title">Sum root to leaf numbers (M)</h2>
+    <h2 class="card-title">Sum root to leaf numbers (M) (Meta)</h2>
 
 <pre><code class="python"># Definition for a binary tree node.
 # class TreeNode:
@@ -755,29 +755,32 @@ class Solution:
 class Solution:
     def sumNumbers(self, root: Optional[TreeNode]) -> int:
 
-        # DFS pre-order 
-        # Find all path from root to all leaf nodes
-        
-        self.total_num = 0
+        # DFS pre-order
+        # Calculate running sum for each path
+        #   At each node, multiply running sum by 10
+        #   If leaf node, add running sum to total sum  
+
+        self.total_sum = 0
 
         # Time O(n)
-        #   n is number of nodes
+        #   n = number of nodes in tree
         # Space O(h)
-        #   h = height of tree 
-        def pre_order(node, num):
-            
+        #   Recursion stack
+        #   h = height of tree
+        def pre_order(node, running_sum):
+
             if node:
-                num = num * 10 + node.val
-
-                # If leaf node
-                if not node.left and not node.right:
-                    self.total_num += num
+                running_sum = running_sum * 10 + node.val
                 
-                pre_order(node.left, num)
-                pre_order(node.right, num)
+                if not node.left and not node.right:
+                    self.total_sum += running_sum
+                
+                pre_order(node.left, running_sum)
+                pre_order(node.right, running_sum)                
 
-        pre_order(root, 0)
-        return self.total_num</code></pre>
+        pre_order(root, 0)    
+
+        return self.total_sum</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/sum-root-to-leaf-numbers">129. Sum Root to Leaf Numbers</a>
