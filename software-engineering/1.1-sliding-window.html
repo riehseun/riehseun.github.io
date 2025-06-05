@@ -600,45 +600,46 @@ def min_window(str1, str2):
 
 <div class="card mb-4" id="sliding-window-">
   <div class="card-body">
-    <h2 class="card-title">Max Consecutive Ones III (M)</h2>
+    <h2 class="card-title">Max Consecutive Ones III (M) (Meta)</h2>
 
 <pre><code class="python">class Solution:
     def longestOnes(self, nums: List[int], k: int) -> int:
 
         # Sliding window
-        #   move end pointer until seeing more than k 0's
-        #   Keep calculating max distance 
-        #   Once seeing more than k 0's, move start pointer
-        #   until seeing 0 
-        
-        start = 0
-        end = 0
-        num_zeros = 0
-        max_dist = 0
+        #   Move end pointer while num is 1 or
+        #   num is 0 but num_zeros <= k
+        #   If num_zeros > k, move start pointer until 
+        #   subarray is valid
 
-        # Time O(n) 
+        start, end, num_zeros, max_dist = 0, 0, 0, 0  
+        
+        # Time O(n)
         #   n = len(nums)
         # Space O(1)
         while start <= end and end < len(nums):
 
-            if nums[end] == 0:
+            if nums[end] == 1:
+                end += 1
+            else:
                 if num_zeros < k:
                     num_zeros += 1
                     end += 1
-                # Seeing more zeros than k
                 else:
-                    if end == start:
+                    # If both start and end is at 0,
+                    # and there is no zeros to filp,
+                    # move until finding the first 1
+                    if start == end:
                         end += 1
                         start += 1
-                    else:
-                        if nums[start] == 0:
-                            num_zeros -= 1  
-                        start += 1
-                max_dist = max(max_dist, end-start)
-            else:
-                end += 1
-                max_dist = max(max_dist, end-start)
+                        continue
 
+                    if nums[start] == 0:
+                        num_zeros -= 1
+                    start += 1
+                    
+            max_dist = max(max_dist, end-start)
+
+        # max_dist = max(max_dist, end-start)
         return max_dist</code></pre>
   </div>
   <div class="card-footer text-muted">
