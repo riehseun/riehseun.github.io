@@ -68,38 +68,42 @@
 
 <div class="card mb-4" id="stack-">
   <div class="card-body">
-    <h2 class="card-title">Valid parentheses (E)</h2>
+    <h2 class="card-title">Valid parentheses (E) (Meta)</h2>
 
 <pre><code class="python">class Solution:
     def isValid(self, s: str) -> bool:
 
-        # Push opening brackets to stack
-        # Pop from stack if matching parenthesis
-
-        stack = []
-        brackets = {")": "(", "]": "[", "}": "{"}
+        # Use dictionary to pair matching brackets 
         
-        # Time O(n) 
-        #   n = len(s)
-        # Space O(n) 
-        #   Worst case if every token is opening parenthesis
+        brackets = {
+            "(": ")",
+            "{": "}",
+            "[": "]"
+        }
+        stack = []
 
-        for char in s:
-            # If opening parenthesis, push to stack
-            if char in brackets:
-                # If matching parenthesis
-                if stack and stack[-1] == brackets[char]:
+        # Time O(n)
+        #   n = len(s)
+        # Space O(n)
+        for c in s:
+
+            # If opening bracket
+            if not stack or c in brackets:
+                stack.append(c)
+                continue
+            
+            # If closing bracket
+            if stack and c not in brackets:
+                # If brackets match
+                if stack[-1] in brackets and brackets[stack[-1]] == c:
                     stack.pop()
                 else:
                     return False
-            else:
-                stack.append(char)
 
-        # If stack is empty
-        if not stack:
-            return True
-
-        return False</code></pre>
+        if stack:
+            return False
+        
+        return True</code></pre>
   </div>
   <div class="card-footer text-muted">
     <a href="https://leetcode.com/problems/valid-parentheses">20. Valid Parentheses</a>
