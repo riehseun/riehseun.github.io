@@ -328,93 +328,88 @@ class Solution:
 
 <div class="card mb-4" id="linkedlist-">
   <div class="card-body">
-    <h2 class="card-title">LRU cache (M)</h2>
+    <h2 class="card-title">LRU cache (M) (Amazon)</h2>
 
 <pre><code class="python">class ListNode:
 
-    def __init__(self, key, val):
-        self.prev = None
-        self.next = None
+    def __init__(self, key=0, val=0, prev=None, next=None):
         self.key = key
         self.val = val
+        self.prev = prev
+        self.next = next
 
 
 class LRUCache:
 
-    # Get
-    #   Use a dictionary
-    #   Key is number
-    #   Value is linked list node
-    #   Keep most recently used at the head
-    #     If existing element is get, append to head - O(1)
-    # Put
-    #   Use doubly linked list 
-    #   Keep least recently used at the tail
-    #     When the capacity exceeds, remove from tail - O(1)
-    #   Keep most recently used at the head
-    #     If new element is added, append to head - O(1)
-    #     If existing element is updated, move to head - O(1)
-    
+    # Use dictionary to store key and value
+    #   Get and put will be O(1)
+    #   Size of dictionary will be capacity
+    # How to know the least recently used key?
+    #   Use doubly linked list
+    #   Most recenly used keys are linked to head
+    #   Least recently used keys are linked to tail
+    #   Remove from tail when capacity exceed
+    #   Move to head when get is called on a node
+    #   Have dictioary to store LL nodes as value  
+
     def __init__(self, capacity: int):
-
-        self.capacity = capacity
-
-        # Initialize dictionary
-        self.dictionary = defaultdict(int)
-
-        # Initialize linked list
-        self.head = ListNode(-1, -1)
-        self.tail = ListNode(-1, -1)
+        self.capacity = capacity 
+        self.dic = defaultdict(ListNode)
+        self.head = ListNode()
+        self.tail = ListNode()
         self.head.next = self.tail
         self.tail.prev = self.head
-
+        
     def get(self, key: int) -> int:
-        if key in self.dictionary:
-            node = self.dictionary[key]
-            # Move the existing node to head
-            node.next.prev = node.prev
+        if key in self.dic:
+            # Update LL (Moving node next to head)
+            node = self.dic[key]
+            # Remove node
             node.prev.next = node.next
-            node.prev = self.head
+            node.next.prev = node.prev
+            # Add node to head
             node.next = self.head.next
+            node.prev = self.head
             self.head.next.prev = node
             self.head.next = node
-            return node.val
-        return -1
+
+            return self.dic[key].val
+        else:
+            return -1
 
     def put(self, key: int, value: int) -> None:
-        if key in self.dictionary:
-            node = self.dictionary[key]
-            # Update the existing node's key and val
-            node.key = key
-            node.val = value
-            # Move the existing node to head
-            node.next.prev = node.prev
+
+        if key in self.dic:
+            self.dic[key].val = value
+            # Update LL (Moving node next to head)
+            node = self.dic[key]
+            # Remove node
             node.prev.next = node.next
-            node.prev = self.head
+            node.next.prev = node.prev
+            # Add node to head
             node.next = self.head.next
+            node.prev = self.head
             self.head.next.prev = node
             self.head.next = node
         else:
-            # Create a new node
+            if self.capacity == len(self.dic):
+                # Update LL (Remove node from tail)
+                node = self.tail.prev
+                node.prev.next = self.tail
+                self.tail.prev = node.prev
+                # Update dic
+                del self.dic[node.key]
+
+            # Update LL (Adding new node to head)
             node = ListNode(key, value)
-            # Move the new node to head
             node.next = self.head.next
             node.prev = self.head
             self.head.next.prev = node
-            self.head.next = node
-            # Create a new item in dictionary
-            self.dictionary[key] = node
-
-            if len(self.dictionary) > self.capacity:
-                del self.dictionary[self.tail.prev.key]
-                # Remove a node from tail
-                temp = self.tail.prev.prev
-                self.tail.prev.prev = None
-                self.tail.prev.next = None
-                self.tail.prev = temp
-                temp.next = self.tail
+            self.head.next = node 
+            # Update dic
+            self.dic[key] = node
                 
-
+    
 # Your LRUCache object will be instantiated and called as such:
 # obj = LRUCache(capacity)
 # param_1 = obj.get(key)
