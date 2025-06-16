@@ -294,61 +294,43 @@ class Solution:
 <pre><code class="python">class Solution:
     def numIslands(self, grid: List[List[str]]) -> int:
 
-        # Construct a graph
-        # Two nodes are connected when node is 1 and adjacent is also 1
-        # Count number of connnected component using BFS
-        
-        graph = defaultdict(set)
-        nodes = set()
-        directions = [
-            (-1, 0), 
-            (0, -1), 
-            (0, 1), 
-            (1, 0)
-        ]
+        # BFS
+        # Compute number of connected component
 
-        # Time O(nm)
-        #   n = number of rows
-        #   m = number of columns
-        # Space O(nm) 
-        #   Worst case is that every number is 1
+        dirs = [(0, -1), (0, 1), (-1, 0), (1, 0)]
         n = len(grid)
         m = len(grid[0])
-        for i in range(n):
-            for j, num in enumerate(grid[i]):
-                if num == "1":
-                    if (i,j) not in nodes:
-                        nodes.add((i,j))
-                    for row, col in directions:
-                        if 0 <= row + i < len(grid) \
-                            and 0 <= col + j < len(grid[0]) \
-                            and grid[row+i][col+j] == "1":
-                            graph[(i,j)].add((row+i,col+j))
-                            graph[(row+i,col+j)].add((i,j))
-                    
-        explored = set()
-        count = 0
 
-        def bfs(graph, explored, start):
-            
+        # Time O(p+q) = O(nm)
+        #   p = number of nodes = nm
+        #   q = number of edges = maximum 4 per node = 4nm
+        # Space O(p) = O(nm)
+        def bfs(grid, dirs, explored, start):
+
             queue = deque()
             queue.append(start)
 
             while queue:
-                node = queue.popleft()
-                for next_node in graph[node]:
-                    if next_node not in explored:
-                        explored.add(next_node)
-                        queue.append(next_node)
+                i, j = queue.popleft()
 
-        # Time O(nm) 
-        #   Worst case visit every node in graph
-        # Space O(nm)
-        for (i,j) in nodes:
-            if (i,j) not in explored:
-                bfs(graph, explored, (i,j))
-                count += 1
-                
+                for x, y in dirs:
+                    if 0 <= i + x < n \
+                        and 0 <= j + y < m \
+                        and grid[i+x][j+y] == "1" \
+                        and (i+x, j+y) not in explored:
+                        explored.add((i+x, j+y))
+                        queue.append((i+x, j+y))
+
+        explored = set()
+        count = 0
+
+        for i in range(n):
+            for j in range(m):
+                if grid[i][j] == "1" \
+                    and (i,j) not in explored:
+                    bfs(grid, dirs, explored, (i,j))
+                    count += 1
+
         return count</code></pre>
   </div>
   <div class="card-footer text-muted">
