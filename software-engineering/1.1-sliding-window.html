@@ -64,38 +64,32 @@
 
 <div class="card mb-4" id="sliding-window-">
   <div class="card-body">
-    <h2 class="card-title">Longest substring without repeating characters (M)</h2>
+    <h2 class="card-title">Longest substring without repeating characters (M) (Amazon)</h2>
 
 <pre><code class="python">class Solution:
     def lengthOfLongestSubstring(self, s: str) -> int:
 
-        # Move the end pointer until seeing repeating chars
-        # Move the start pointer until substring has no repeating chars
-        # Keep the max diff between end and start pointer
-        # Scan finished when both start and end pointers reach the end of string
+        # Sliding window
+        # Move end pointer while there is no repeat
+        # When repeat, move start pointer until there is no repeat
+        # Use set to track unique chars 
 
-        start = 0
-        max_length = 0
-        char_indices = {}  # Store chracter and its index
+        start, end, max_length, chars = 0, 0, 0, set() 
 
-        # Time O(n) 
+        # Time O(n)
         #   n = len(s)
         # Space O(n)
-        for i,c in enumerate(s):
-
-            # If duplicate is found, compute the length 
-            # using start and the i pointer
-            # The second condition ensures that we are only looking 
-            # at the substring after the start index
-            if c in char_indices and char_indices[c] >= start:
-                max_length = max(max_length, i-start)
-                # Move the start pointer to plus 1 
-                # of the index where the duplicate is
-                start = char_indices[c] + 1
-            char_indices[c] = i
-
-        max_length = max(max_length, len(s)-start)
-
+        while start <= end and end < len(s):
+            
+            if s[end] not in chars:
+                chars.add(s[end])
+                end += 1
+                max_length = max(max_length, len(chars))
+            else:
+                if s[start] in chars:
+                    chars.remove(s[start])
+                start += 1
+            
         return max_length</code></pre>
   </div>
   <div class="card-footer text-muted">
