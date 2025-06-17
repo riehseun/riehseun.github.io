@@ -48,6 +48,7 @@
       <li><a href="#prefix-sum-">Random pick with weight</a></li>
       <li><a href="#prefix-sum-">Subarray Sum Equals K</a></li>
       <li><a href="#prefix-sum-">Count Vowel Strings in Ranges</a></li>
+      <li><a href="#prefix-sum-">Maximum Frequency After Subarray Operation</a></li>
     </ul>
   </div>
 </div>
@@ -263,6 +264,62 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/count-vowel-strings-in-ranges">2559. Count Vowel Strings in Ranges</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="prefix-sum-">
+  <div class="card-body">
+    <h2 class="card-title">Maximum Frequency After Subarray Operation (M) (Amazon)</h2>
+
+<pre><code class="python">class Solution:
+    def maxFrequency(self, nums: List[int], k: int) -> int:
+
+        # Try adding a number to entire array 
+        #   If any element becomes k, put 1 
+        #   If existing element is k, put -1
+        #   Otherwise, put 0
+        # Run maximum subarray sum on transformed array
+        #   Use prefix sum
+        #   Result is maximum sum + number of k
+
+        num_k, max_freq = 0, 0
+
+        def max_subarray_sum(nums):
+
+            prefix_sum = 0
+            largest_sum = nums[0]
+
+            for i in range(len(nums)):
+                prefix_sum += nums[i]
+                prefix_sum = max(prefix_sum, nums[i])
+                largest_sum = max(largest_sum, prefix_sum)
+                
+            return largest_sum
+
+        for num in nums:
+            if num == k:
+                num_k += 1
+
+        # Time O(n)
+        #   n = len(nums)
+        # Space O(n)
+        for i in range(-50, 50):
+            nums_new = []
+            for j in nums:
+                if j == k:
+                    nums_new.append(-1)
+                    continue
+                if i + j == k:
+                    nums_new.append(1) 
+                else:
+                    nums_new.append(0)
+                
+            max_freq = max(max_freq, max_subarray_sum(nums_new))
+
+        return max_freq + num_k</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/maximum-frequency-after-subarray-operation">3434. Maximum Frequency After Subarray Operation</a>
   </div>
 </div>
 <!-- Prefix sum END -->
