@@ -63,7 +63,7 @@
 
 <div class="card mb-4" id="linkedlist-">
   <div class="card-body">
-    <h2 class="card-title">Add two numbers (M)</h2>
+    <h2 class="card-title">Add two numbers (M) (Amazon)</h2>
 
 <pre><code class="python"># Definition for singly-linked list.
 # class ListNode:
@@ -73,40 +73,43 @@
 class Solution:
     def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:
         
-        # Add digits by digits while maintaining the carry
+        # Go through two lists at a time
+        # Remember the carry and apply in the next operation
 
-        prev = None
         carry = 0
+        head, prev = None, None
 
-        # Time O(max(n,m)) 
-        #   n = len of linked list1
-        #   m = len of linked list2
+        # Time O(n)
+        #   n = max length of l1 and l2
         # Space O(1)
         while l1 or l2:
-            value = carry
+
+            val = carry
 
             if l1:
-                value += l1.val
+                val += l1.val
                 l1 = l1.next
             if l2:
-                value += l2.val
+                val += l2.val
                 l2 = l2.next
 
-            if value >= 10:
+            if val > 9:
                 carry = 1
             else:
                 carry = 0
-
-            if not prev:
-                prev = ListNode(value%10, None)
-                head = prev
+            
+            node = ListNode(val%10)
+            if prev:
+                prev.next = node
+                prev = node
             else:
-                prev.next = ListNode(value%10, None)
-                prev = prev.next
-
+                prev = node
+                head = prev
+            
+        # Handle carry from the last digits
         if carry == 1:
-            prev.next = ListNode(1, None)
-            prev = prev.next
+            node = ListNode(1)
+            prev.next = node
 
         return head</code></pre>
   </div>
