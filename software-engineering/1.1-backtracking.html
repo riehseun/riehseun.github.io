@@ -114,38 +114,45 @@
 
 <div class="card mb-4" id="backtracking-">
   <div class="card-body">
-    <h2 class="card-title">Generate parentheses (M)</h2>
+    <h2 class="card-title">Generate parentheses (M) (Amazon)</h2>
 
 <pre><code class="python">class Solution:
     def generateParenthesis(self, n: int) -> List[str]:
         
-        # Backtracking
+        # Backtrack
+        # For each b in ["(", ")"] 
+        #   We can put "(" only when number of "(" < n
+        #   We can put ")" only when number of "(" > number of ")"
 
-        parenthesis = []
-
-        # Time O(4**n)
-        #   At each point, there are two choices "(" or ")"
-        #   Length of generated string is 2n
-        #   2 ** 2n = 4 ** n
+        # Time O(2n**n)
         # Space O(n)
-        #   Excluding space for result
-        #   Recursion stack takes O(n)
-        def backtrack(n, num_open, num_close, string, combinations):
+        def backtrack(result, parenthesis, n):
 
-            if num_open == n and num_close == n:
-                combinations.append(string)
+            for b in ["(", ")"]:
 
-            if num_open < n:
-                backtrack(n, num_open+1, num_close, string+"(", combinations)
+                if len(parenthesis) == n * 2:
+                    result.append("".join(parenthesis))
+                    return
+                
+                open_b, close_b = 0, 0
+                for c in parenthesis:
+                    if c == "(":
+                        open_b += 1
+                    else:
+                        close_b += 1
 
-            # Number of closing parenthesie cannot exceed the number of
-            # opening parenthesis at any point to construct valid patterns
-            if num_close < num_open:
-                backtrack(n, num_open, num_close+1, string+")", combinations)
+                if b == ")" and open_b > close_b:
+                    parenthesis.append(b)
+                    backtrack(result, parenthesis, n)
+                    parenthesis.pop()
+                if b == "(" and open_b < n:
+                    parenthesis.append("(")
+                    backtrack(result, parenthesis, n)
+                    parenthesis.pop()
 
-        backtrack(n, 0, 0, "", parenthesis)
-
-        return parenthesis</code></pre>
+        result = []
+        backtrack(result, [], n)
+        return result</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/generate-parentheses">22. Generate Parentheses</a>
