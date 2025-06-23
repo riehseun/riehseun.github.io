@@ -140,65 +140,53 @@
 
 <div class="card mb-4" id="sliding-window-">
   <div class="card-body">
-    <h2 class="card-title">Mimimum window substring (H)</h2>
+    <h2 class="card-title">Mimimum window substring (H) (Meta)</h2>
 
 <pre><code class="python">class Solution:
     def minWindow(self, s: str, t: str) -> str:
 
-        # Sliding window
-        # Use start and end pointer to iterate s
-        # Move end pointer until all chars in t are in the substring
-        # If all chars in t are in the substring
-        #   Move start pointer while substring is still valid
-        #   If substring is not valid, move the endpoint
-
-        # How to keep track whether all chars are in substring
-        #   Hash table to store number of each char in t
-        #   Increament/decrement the count while moving the window
-        #   When the number of each char <= 0, substring is valid
-        start = 0
-        end = 0
-        min_length = len(s)
-        min_window_substring = ""
-
-        chars_in_deficit = defaultdict(int)
-        chars = set() 
+        # Silding window
+        #   Move end pointer until substring is vaild
+        #   When substring is valid, move start pointer (remember substring)
+        # How to check valid substring
+        #   Use dictionary to count chars that are in t and s
+        #   s_chars represents deficit for each char
+          
+        t_chars, s_chars = defaultdict(int), defaultdict(int)
         for c in t:
-            chars_in_deficit[c] += 1
-            chars.add(c)
-        end_pointer_moved = True
+            t_chars[c] += 1
+        s_chars[s[0]] = 1
 
-        # Time O(n) 
-        #   n = len(s) 
-        # Space O(m)
-        #   m = len(t)
+        start, end, min_length, min_substring = 0, 0, len(s), ""
+        
+        def is_vaild_substring(s_chars, t_chars):
+
+            for key, val in t_chars.items():
+                if val > s_chars[key]:
+                    return False
+
+            return True
+
+        # Time O(nm)
+        #   n = len(s)
+        #   m = len(s)
+        # Space O(n+m)
         while start <= end and end < len(s):
 
-            substring = s[start:end+1]
-            if end_pointer_moved:
-                c = s[end]
-                if c in chars_in_deficit:
-                    chars_in_deficit[c] -= 1
-                    if chars_in_deficit[c] <= 0 and c in chars:
-                        chars.remove(c)
-            else:
-                c = s[start-1]
-                if c in chars_in_deficit:
-                    chars_in_deficit[c] += 1
-                    if chars_in_deficit[c] > 0:
-                        chars.add(c)
-                
-            if not chars:
-                if len(substring) <= min_length:
-                    min_window_substring = substring
-                    min_length = len(substring)
-                end_pointer_moved = False
-                start += 1
-            else:
-                end_pointer_moved = True
+            if not is_vaild_substring(s_chars, t_chars):
                 end += 1
-                
-        return min_window_substring</code></pre>
+                if end < len(s):
+                    s_chars[s[end]] += 1
+            else:
+                length = end - start
+                if length < min_length:
+                    min_length = length
+                    min_substring = s[start:end+1]
+                    
+                s_chars[s[start]] -= 1
+                start += 1
+
+        return min_substring</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/minimum-window-substring">76. Minimum Window Substring</a>
