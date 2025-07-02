@@ -66,6 +66,7 @@
       <li><a href="#array-">Walking Robot Simulation</a></li>
       <li><a href="#array-">Analyze User Website Visit Pattern</a></li>
       <li><a href="#array-">Design File System</a></li>
+      <li><a href="#array-">Invalid Transactions</a></li>
       <li><a href="#array-">Unique Number of Occurrences</a></li>
       <li><a href="#array-">Check If Array Pairs Are Divisible by k</a></li>
       <li><a href="#array-">Minimum Number of Increments on Subarrays to Form a Target Array</a></li>
@@ -771,6 +772,65 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/analyze-user-website-visit-pattern">1166. Design File System</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="array-">
+  <div class="card-body">
+    <h2 class="card-title">Invalid Transactions (M) (Bloomberg)</h2>
+
+<pre><code class="python">class Solution:
+    def invalidTransactions(self, transactions: List[str]) -> List[str]:
+
+        # Use dictionary where 
+        #   key = name 
+        #   value = another dictionary where
+        #     key = time
+        #     value = city
+        #   Scan trans between -60 and +60 from current time
+        #     See if trans happend in different city
+        # If amount > 1000, put transaction into result
+
+        result = []
+        trans = {}
+
+        for item in transactions:
+            it = item.split(",")
+            name, time, amount, city = it[0], int(it[1]), int(it[2]), it[3]
+            if name not in trans:
+                trans[name] = {}
+            if time not in trans[name]:
+                trans[name][time] = []
+            trans[name][time].append(city)
+
+        # Time O(n)
+        #   n = len(transactions)
+        # Space O(n)
+        for item in transactions:
+            it = item.split(",")
+            name, time, amount, city = it[0], int(it[1]), int(it[2]), it[3]
+            
+            if amount > 1000:
+                result.append(item)
+                continue
+
+            # Check all transactions within 60 range
+            # under the same name
+            break_outter = False
+            for t in range(int(time)-60, int(time)+60):
+                if t in trans[name]:
+                    for c in trans[name][t]:
+                        if c != city:
+                            result.append(item)
+                            break_outter = True
+                            break
+                if break_outter:
+                    break
+
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/invalid-transactions">1169. Invalid Transactions</a>
   </div>
 </div>
 
