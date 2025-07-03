@@ -451,29 +451,38 @@
 
 <div class="card mb-4" id="backtracking-">
   <div class="card-body">
-    <h2 class="card-title">Palindrome partitioning (M)</h2>
+    <h2 class="card-title">Palindrome partitioning (M) (Google)</h2>
 
 <pre><code class="python">class Solution:
     def partition(self, s: str) -> List[List[str]]:
 
         # Backtracking
+        #   For every possible substring, check palindrome
+
+        def is_palindrome(s):
+            return s == s[::-1]
+
+        # Time O(n*(2**n))
+        #   n = len(s)
+        #   O(n) to check if substring is palindrom
+        #   O(2**n) possible substrings
+        # Space O(n)
+        #   Recursion stack
+        def backtrack(s, i, result, partitions):
+
+            if i == len(s):
+                result.append(list(partitions))
+                
+            for j in range(i, len(s)):
+                if is_palindrome(s[i:j+1]):
+                    partitions.append(s[i:j+1])
+                    # After appending substring s[i:j+1],
+                    # Start scannign from index j + 1
+                    backtrack(s, j+1, result, partitions)
+                    partitions.pop()
 
         result = []
-
-        def backtrack(s, path, i, result):
-            if i == len(s) + 1:
-                result.append(list(path))
-                return
-            for j in range(i, len(s)+1):
-                if is_palindrome(s[i-1:j]):
-                    path.append(s[i-1:j])
-                    backtrack(s, path, j+1, result)
-                    path.pop()
-
-        def is_palindrome(x):
-            return x == x[::-1]
-
-        backtrack(s, [], 1, result)
+        backtrack(s, 0, result, [])
         return result</code></pre>
   </div>
   <div class="card-footer text-muted">
