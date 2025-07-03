@@ -57,7 +57,7 @@
 
 <div class="card mb-4" id="reverse-linked-list-">
   <div class="card-body">
-    <h2 class="card-title">Swap nodes in pairs (M)</h2>
+    <h2 class="card-title">Swap nodes in pairs (M) (Google)</h2>
 
 <pre><code class="python"># Definition for singly-linked list.
 # class ListNode:
@@ -67,65 +67,35 @@
 class Solution:
     def swapPairs(self, head: Optional[ListNode]) -> Optional[ListNode]:
 
-        # Calculate length of remaining linked list.
-        # If greater than or equat to 2, swap.
-        # Reconnect reversed nodes with the rest of linked list.
+        # Swap node A and B
+        #   A.next = B.next
+        #   B.next = A
+        #   A.prev.next = B
+        # Use dummy node that points to head
 
-        original_head = head
-        prev_head = None
+        node = head 
+        head = ListNode(0)
+        head.next = node
+        prev = head
 
-        while True:
-            length = self.get_linked_list_length(head)
-            if length >= 2:
-                pre, cur, first_head = self.reverse(head, 2)
-                # Only need to update the pointer coming to the node if the
-                # node is not the first node in the linked list.
-                if prev_head:
-                    prev_head.next = pre
-                # If swaped node was the first node in the linked list,
-                # need to update the original_node which should be the
-                # very beginning of the linked list.
-                else:
-                    original_head = pre
-                first_head.next = cur
-                prev_head = head
-                head = cur
-            else:
+        # Time O(n)
+        #   n = length of LL
+        # Space O(1)
+        while node:
+
+            a = node
+            if not node.next:
                 break
+            b = node.next
+            
+            a.next = b.next
+            b.next = a
+            prev.next = b
+            prev = a
 
-        return original_head
+            node = a.next
 
-    def get_linked_list_length(self, head):
-
-        i = 0
-
-        # Check if there are at least k nodes in the linked list.
-        while head:
-            head = head.next
-            i += 1
-
-        return i
-
-    def reverse(self, head, k):
-
-        first_head = head
-
-        pre = None
-        cur = head
-        nex = head.next
-
-        i = 0
-
-        while i < k:
-            cur.next = pre
-            pre = cur
-            cur = nex
-            if nex:
-                nex = nex.next
-            i += 1
-
-        # Key idea is to return the current node.
-        return pre, cur, first_head</code></pre>
+        return head.next</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/swap-nodes-in-pairs">24. Swap Nodes in Pairs</a>
