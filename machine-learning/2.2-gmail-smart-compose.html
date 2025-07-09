@@ -191,40 +191,58 @@
 
     <h3 class="card-title">Model selection</h3>
     <ul>
+      <li>Encoder-decoder</li>
+      <ul>
+        <li>Useful where output is transformation of input (Ex. language transation)</li>
+      </ul>
       <li>Encoder-only</li>
       <ul>
-        <li></li>
+        <li>Process input sequences and makes a prediction about it (Ex. sentiment analysis)</li>
       </ul>
       <li>Decoder-only</li>
       <ul>
-        <li></li>
-      </ul>
-      <li>Encoder-decoder</li>
-      <ul>
-        <li></li>
+        <li>Process input sequences and generates a new sequence (Ex. text generation)</li>
       </ul>
     </ul>
 
     <h3 class="card-title">Model training</h3>
     <ul>
+      <li>Architecture</li>
+      <ul>
+        <li>Text embedding</li>
+        <ul>
+          <li>Convert token ID to embedding vector</li>
+        </ul>
+        <li>Positional encoding</li>
+        <ul>
+          <li>Fixed encoding</li>
+          <li>Learned encoding</li>
+        </ul>
+        <li>Multi-head attention</li>
+        <li>Feed forward</li>
+        <li>Prediction head</li>
+        <ul>
+          <li>Convert model output into probabilities of each word</li>
+        </ul>
       <li>Loss function</li>
       <ul>
-        <li>Constrastive loss function</li>
+        <li>Direct training</li>
         <ul>
-          <li>Dot product or cosine similarity is used to compute distances in embedding space</li>
-          <ul>
-            <li>Euclidean distance is not used due to curse of dimensionality</li>
-          </ul>
-          <li>Softmax is applied to distances to make them sum to 1</li>
-          <li>Cross-entropy is used to measure how close the probabilities are to the ground truth</li>
+          <li>Lack of large training data</li>
+          <li>Risk of overfitting</li>
+        </ul>
+        <li>Pre-training</li>
+        <ul>
+          <li>Train on general data</li>
+          <li>Objective is to predict the next token</li>
+          <li>Cross-entropy loss to measure difference between predicted vs actual next token</li>
+        </ul>
+        <li>Fine-tuning</li>  
+        <ul>
+          <li>Very similar to pre-training but loss is calculated based on email data</li>
         </ul>
       </ul>
       <li>Hyperparameters</li>
-      <ul>
-        <li>Number of convolutional layers</li>
-        <li>Number of neurons in fully connected layers</li>
-        <li>Size of embedding vector</li>
-      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -238,85 +256,20 @@
 
     <h3 class="card-title">Offline</h3>
     <ul>
-      <li>Option 1. precision@k</li>
+      <li>Option 1. perplexity</li>
       <ul>
-        <li>\( \dfrac{\text{Number of relevant items in the output list (contaning top k items)}}{\text{k}} \)</li>
-        <li>Cons</li>
-        <ul>
-          <li>Does not consider ranking quality</li>
-        </ul>
+        <li>Evaluate if model can accurately predict next words given input words</li>
       </ul>
-      <li>Option 2. recall@k</li>
+      <li>Option 2. Exactmatch@N</li>
       <ul>
-        <li>\( \dfrac{\text{Number of relevant items in the output list (contaning top k items)}}{\text{total relevant items in the dataset}} \)</li>
-        <li>Cons</li>
-        <ul>
-          <li>Does not consider ranking quality</li>
-          <li>Denominator can be very big, which negatively impacts recall value</li>
-        </ul>
-      </ul>
-      <li>Option 3. mean reciprobal rank (MRR)</li>
-      <ul>
-        <li>\( MRR = \dfrac{1}{m} \displaystyle\sum_{i=1}^{m} \dfrac{1}{\text{rank}_{i}} \)</li>
-        <ul>
-          <li>\( {\text{rank}_{i}} \) is position on which the first relevant item appears in the output list</li>
-        </ul>
-        <li>Consider only the first relevant item in each output list, then average the reciprocal rank</li>
-        <li>Cons</li>
-        <ul>
-          <li>Ignores other relevant items in the list other than the first one</li>
-        </ul>
-      </ul>
-      <li>Option 4. mean average precision (mAP)</li>
-      <ul>
-        <li>AP</li>
-        <ul>
-          <li>\( AP = \dfrac{\displaystyle\sum_{i=1}^{k} \text{precision}@i}{n} \)</li>
-          <ul>
-            <li>\( n = \) total relevant items</li>
-          </ul>
-          <li>Averages precision@k at different values of k</li>
-          <li>AP is high if more relevant items are located at the top of list</li>
-        </ul>
-        <li>mAP</li>
-        <ul>
-          <li>Compute AP for each output list, then average them</li>
-        </ul>
-        <li>Cons</li>
-        <ul>
-          <li>Works well when each item is either relevant or irrelevant, but does not work well for relevance scores</li>
-        </ul>
-      </ul>
-      <li>Option 5. normalized discounted cumulative gain (nDCG)</li>
-      <ul>
-        <li>\( DCG_{p} = \displaystyle\sum_{i=1}^{p} \dfrac{\text{rel}_{i}}{log_{2}(i+1)} \)</li>
-        <ul>
-          <li>\( \text{rel}_{i} \) is ground truth relevance score of image ranked at \( i \)</li>
-        </ul>
-        <li>\( nDCG_{p} = \dfrac{DCG_{p}}{IDCG_{p}} \)</li>
-        <ul>
-          <li>where \( {IDCG_{p}} \) is \( {DCG_{p}} \) of ideal ranking</li>
-        </ul>
-        <li>Example</li>
-        <ul>
-          <li>Assume visual search system return images \( I1, I2, I3, I4 \) in the order of relevance</li>
-          <li>Assume human rates the images on scale of \( 0 \) to \( 3 \) such that \( I1=3, I2=2, I3=3, I4=0 \) (\( 3 \) is highly relevant, \( 0 \) is merely relevant)</li>
-          <li>\( DCG_{p} = \frac{3}{log(1+1)} + \frac{2}{log(2+1)} + \frac{3}{log(3+1)} + \frac{0}{log(4+1)} = 3 + 1.262 + 1.5 + 0 = 5.762 \)</li>
-        </ul>
-        <li>Cons</li>
-        <ul>
-          <li>nDCG does not penalize irrelevant search result</li>
-        </ul>
+        <li>Evaluate if predicted words and ground truth words exactly match up to N words</li>
       </ul>
     </ul>
 
     <h3 class="card-title">Online</h3>
     <ul>
-      <li>Click-through rate (CTR)</li>
-      <ul>
-        <li>\( \dfrac{\text{number of clicked images}}{\text{total number of suggested images}} \)</li>
-      </ul>
-      <li>Average daily/weekly/monthly time spent on suggested images</li>
+      <li>Email usage rate</li>
+      <li>Average completion time of emails</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -328,64 +281,22 @@
   <div class="card-body">
     <h2 class="card-title">Serving</h2>
 
-    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-1/gmail-smart-compose1.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-1/gmail-smart-compose-1.png" alt="Card image cap">
 
     <ul>
-      <li>Indexing pipeline</li>
+      <li>Trigger next words generation</li>
       <ul>
-        <li>Object storage</li>
-        <ul>
-          <li>Stores new images</li>
-        </ul>
-        <li>Indexing service</li>
-        <ul>
-          <li>Indexes the embeddings of new images so that NN search can easily find it</li>
-        </ul>
-        <li>Index table</li>
-        <ul>
-          <li>Stores images embeddings in sorted order</li>
-        </ul>
+        <li>When users start typing, based on number of chars that user typed, the service triggers next words generation</li>
       </ul>
-      <li>Prediction pipeline</li>
+      <li>Next word generation</li>
+      <li>
+        <li>Calls the model to receive words that are likely to be next words</li>
+      </li>
+      <li>Filtering</li>
       <ul>
-        <li>Embedding generation service</li>
-        <ul>
-          <li>Preprocess the input images and use trained model to determine its embedding</li>
-        </ul>
-        <li>Nearest neighbor service</li>
-        <ul>
-          <li>Retrieve similar images from embedding space</li>
-          <li>Option 1. exact NN</li>
-          <ul>
-            <li>Time \( \text{O}(ND) \) where \( N \) is total number of points and \( D \) is dimension</li>
-            <li>\( N \) could be billions</li>
-          </ul>
-          <li>Option 2. approximate NN</li>
-          <ul>
-            <li>Time \( \text{O}(\text{log}(N)D) \)</li>
-            <li>Option 1. tree-based</li>
-            <ul>
-              <li>Similar to gradient boosted tree</li>
-              <li>Ex. R-trees, Kd-trees, Annoy (Approximate Nearest Neighbor Oh Yeah)</li>
-            </ul>
-            <li>Option 2. locality sensitive hashing (LSH)</li>
-            <ul>
-              <li>Use hash function to reduce the dimensions of points and group them into buckets</li>
-              <li>Maps points in close proximity to same bucket</li>
-              <li>LSH searches only those points in the same bucket</li>
-            </ul>
-            <li>Option 3. clustering-based</li>
-            <ul>
-              <li>Group points based on simiarities</li>
-              <li>Algorithm only searches the subset of points in the cluster</li>
-            </ul>
-          </ul>
-          <li>Due to algorithm runtime, we choose ANN</li>
-        </ul>
-        <li>Re-ranking service</li>
-        <ul>
-          <li>Filters inappropriate results, removes duplicates, etc</li>
-        </ul>
+        <li>Remove long suggestions</li>
+        <li>Remove low-confidence suggestions</li>
+        <li>Filter out gender-sensitive, racial-sensitive, nudity, violence words</li>
       </ul>
     </ul>
   </div>
@@ -398,13 +309,13 @@
   <div class="card-body">
     <h2 class="card-title">Follow up</h2>
     <ul>
-      <li>Explain how to moderate images</li>
-      <li>Explain how to handle bias? (Ex. positional bias)</li>
-      <li>Explain how to use metadata (Ex. tags) to improve search result</li>
-      <li>Explain smart crop using object detection</li>
-      <li>Explain how to use GNN to learn better representation</li>
-      <li>Explain how to search images using text</li>
-      <li>Explain how to use active learning or human-in-the-loop ML to annotate data more efficiently</li>
+      <li>Explain how to support multiple languages</li>
+      <li>Explain how to personalize suggestions</li>
+      <li>Explain how to incorporate additional context for better predictions</li>
+      <li>Explain how to choose between BPE, SentencePiece, WordPiece</li>
+      <li>Explain masked lanaguage modeling (MLM)</li>
+      <li>Explain multi-token prediction</li>
+      <li>Explain how to balance inference quality and latency</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
