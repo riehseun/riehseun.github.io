@@ -193,57 +193,40 @@
 
 <div class="card mb-4" id="two-pointers-">
   <div class="card-body">
-    <h2 class="card-title">3Sum (M)</h2>
+    <h2 class="card-title">3Sum (M) (Google)</h2>
 
 <pre><code class="python">class Solution:
     def threeSum(self, nums: List[int]) -> List[List[int]]:
         
-        # First sort the array
-        # Initialize two pointers at each end 
-        #   If sum is less than zero, increment start
-        #   Else, decrement end
-        # Do this for each element of the array
+        # Sort input nums
+        # Fix a number 
+        # Run two pointers between the next index and last index
 
-        result = []
         nums.sort()
-        print(nums)
+        result = set()
 
-        # Time O(n^2) 
+        # Time O(n**2)
         #   n = len(nums)
-        # Space O(logn)
-        #   Assuming quicksort where recursion stack costs logn
-        #   Ignoring space for output 
-        for i, num in enumerate(nums):
+        # Space O(1)
+        #   Ignoring space for result 
+        for i in range(len(nums)):
 
-            # If current value > 0, the sum can never be 0
-            if num > 0:
-                break
-            # Avoid computing starting from the same number
-            if i != 0 and nums[i-1] == nums[i]:
-                continue
+            j, k = i + 1, len(nums) - 1
 
-            # There should be no two same items that 
-            # just have different ordering
-            start = i + 1
-            end = len(nums) - 1
+            while j < k:
+                sum = nums[i] + nums[j] + nums[k]
+                if sum == 0:
+                    triplet = [nums[i],nums[j],nums[k]]
+                    triplet.sort()
+                    result.add(tuple(triplet))
+                    j += 1
+                    k -= 1
+                elif sum > 0:
+                    k -= 1
+                elif sum < 0:
+                    j += 1
 
-            while start < end:
-                three_sum = num + nums[start] + nums[end]
-                if three_sum == 0:
-                    candidate = [num, nums[start], nums[end]]
-                    result.append(candidate)
-                    # Can move both start and end
-                    start += 1
-                    end -= 1
-                    # Avoid computing starting from the same number
-                    while start < end and nums[start] == nums[start-1]:
-                        start += 1
-                elif three_sum < 0:
-                    start += 1
-                else:
-                    end -= 1
-
-        return result</code></pre>
+        return list(result)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/3sum">15. 3Sum</a>
