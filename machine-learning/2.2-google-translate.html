@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="/img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/monokai-sublime.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="/js/jquery.min.js" type="text/javascript"></script>
+<script src="/js/bootstrap.bundle.min.js" type="text/javascript"></script>
+<script src="/js/highlight.pack.js" type="text/javascript"></script>
+<script src="/js/include_html.js" type="text/javascript"></script>
+<script src="/js/mathjax/tex-chtml.js" type="text/javascript"></script>
+<script src="/js/site.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<include src="/header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Machine Learning</h1>
+
+<!-- Google translate BEGIN -->
+<div class="card mb-4" id="google-translate">
+  <div class="card-body">
+    <h2 class="card-title">Google translate</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#google-translate-1">Requirement</a></li>
+      <li><a href="#google-translate-2">Problem</a></li>
+      <li><a href="#google-translate-3">Data preparation</a></li>
+      <li><a href="#google-translate-4">Model development</a></li>
+      <li><a href="#google-translate-5">Evaluation</a></li>
+      <li><a href="#google-translate-6">Serving</a></li>
+      <li><a href="#google-translate-7">Follow up</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="google-translate-1">
+  <div class="card-body">
+    <h2 class="card-title">Requirement</h2>
+    <ul>
+      <li>Business objective</li>
+      <ul>
+        <li>Should suggestions be personalized? No</li>
+        <li>Should suggestions be made only when the model is confident in prediction? Yes</li>
+        <li>Should the model use just email body or other apsects of email? Email body only</li>
+        <li>What language should the model support? English only</li>
+        <li>Should the model handle bias in its prediction? Yes</li>
+      </ul>
+      <li>System features</li>
+      <li>Data</li>
+      <ul>
+        <li>Do we have training data available? Yes</li>
+        <li>How large is dataset? 1B email messages</li>
+      </ul>
+      <li>Constraints</li>
+      <ul>
+        <li>Is there a limitation on computing cost for training and inference? No</li>
+      </ul>
+      <li>Scale</li>
+      <li>Performance</li>
+      <ul>
+        <li>How fast should the suggestions be? Under 100ms</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Generative AI System Design Interview, Ali Aminian & Hao Sheng
+  </div>
+</div>
+
+<div class="card mb-4" id="google-translate-2">
+  <div class="card-body">
+    <h2 class="card-title">Problem</h2>
+
+    <h3 class="card-title">ML problem</h3>
+    <ul>
+      <li>Suggest appropriate next words (several of them) based on what user already typed</li>
+      <li>Input</li>
+      <ul>
+        <li>Words typed by user</li>
+      </ul>
+      <li>Output</li>
+      <ul>
+        <li>Words that user will likely type next</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">ML category</h3>
+    <ul>
+      <li>Generation</li>
+      <ul>
+        <li>Transformer</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Generative AI System Design Interview, Ali Aminian & Hao Sheng
+  </div>
+</div>
+
+<div class="card mb-4" id="google-translate-3">
+  <div class="card-body">
+    <h2 class="card-title">Data preparation</h2>
+
+    <h3 class="card-title">Data engineering</h3>
+    <ul>
+      <li>Training data</li>
+      <ul>
+        <li>General data</li>
+        <li>Email data</li>
+      </ul>
+      <li>Database</li>
+      <ul>
+        <li>Email</li>
+        <ul>
+          <li>email_id</li>
+          <li>sender</li>
+          <li>receiver</li>
+          <li>subject</li>
+          <li>body</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Feature engineering</h3>
+    <ul>
+      <li>Text cleaning</li>
+      <ul>
+        <li>Remove non-english</li>
+        <li>Remove confidential info</li>
+        <li>Remove irrelevant chars</li>
+        <li>Remove duplicate data</li>
+      </ul>
+      <li>Text normalization</li>
+      <ul>
+        <li>Convert texts to consistent format</li>
+      </ul>
+      <li>Text tokenization</li>
+      <ul>
+        <li>Char-level</li>
+        <ul>
+          <li>Simple to implement</li>
+          <li>Difficult for model to understand meaning of each token</li>
+        </ul>
+        <li>Word level</li>
+        <ul>
+          <li>Easier for model to understand meaning of each token</li>
+          <li>Very large vocabulary size</li>
+        </ul>
+        <li>Subword-level</li>
+        <ul>
+          <li>Break uncommon words into known subwords, resulting in medium vocab size</li>
+          <li>Algorithm can be complex (Ex. Byte-Pair Encoding (BPE), SentencePiece)</li>
+        </ul>
+      </ul>
+      <li>Token indexing</li>
+      <ul>
+        <li>Convert texts to numbers</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Generative AI System Design Interview, Ali Aminian & Hao Sheng
+  </div>
+</div>
+
+<div class="card mb-4" id="google-translate-4">
+  <div class="card-body">
+    <h2 class="card-title">Model development</h2>
+
+    <h3 class="card-title">Model selection</h3>
+    <ul>
+      <li>Encoder-decoder</li>
+      <ul>
+        <li>Useful where output is transformation of input (Ex. language transation)</li>
+      </ul>
+      <li>Encoder-only</li>
+      <ul>
+        <li>Process input sequences and makes a prediction about it (Ex. sentiment analysis)</li>
+      </ul>
+      <li>Decoder-only</li>
+      <ul>
+        <li>Process input sequences and generates a new sequence (Ex. text generation)</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Model training</h3>
+    <ul>
+      <li>Architecture</li>
+      <ul>
+        <li>Text embedding</li>
+        <ul>
+          <li>Convert token ID to embedding vector</li>
+        </ul>
+        <li>Positional encoding</li>
+        <ul>
+          <li>Fixed encoding</li>
+          <li>Learned encoding</li>
+        </ul>
+        <li>Multi-head attention</li>
+        <li>Feed forward</li>
+        <li>Prediction head</li>
+        <ul>
+          <li>Convert model output into probabilities of each word</li>
+        </ul>
+      <li>Loss function</li>
+      <ul>
+        <li>Direct training</li>
+        <ul>
+          <li>Lack of large training data</li>
+          <li>Risk of overfitting</li>
+        </ul>
+        <li>Pre-training</li>
+        <ul>
+          <li>Train on general data</li>
+          <li>Objective is to predict the next token</li>
+          <li>Cross-entropy loss to measure difference between predicted vs actual next token</li>
+        </ul>
+        <li>Fine-tuning</li>  
+        <ul>
+          <li>Very similar to pre-training but loss is calculated based on email data</li>
+        </ul>
+      </ul>
+      <li>Hyperparameters</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Generative AI System Design Interview, Ali Aminian & Hao Sheng
+  </div>
+</div>
+
+<div class="card mb-4" id="google-translate-5">
+  <div class="card-body">
+    <h2 class="card-title">Evaluation</h2>
+
+    <h3 class="card-title">Offline</h3>
+    <ul>
+      <li>Option 1. perplexity</li>
+      <ul>
+        <li>Evaluate if model can accurately predict next words given input words</li>
+      </ul>
+      <li>Option 2. Exactmatch@N</li>
+      <ul>
+        <li>Evaluate if predicted words and ground truth words exactly match up to N words</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Online</h3>
+    <ul>
+      <li>Email usage rate</li>
+      <li>Average completion time of emails</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Generative AI System Design Interview, Ali Aminian & Hao Sheng
+  </div>
+</div>
+
+<div class="card mb-4" id="google-translate-6">
+  <div class="card-body">
+    <h2 class="card-title">Serving</h2>
+
+    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-1/google-translate-1.png" alt="Card image cap">
+
+    <ul>
+      <li>Trigger next words generation</li>
+      <ul>
+        <li>When users start typing, based on number of chars that user typed, the service triggers next words generation</li>
+      </ul>
+      <li>Next word generation</li>
+      <li>
+        <li>Calls the model to receive words that are likely to be next words</li>
+      </li>
+      <li>Filtering</li>
+      <ul>
+        <li>Remove long suggestions</li>
+        <li>Remove low-confidence suggestions</li>
+        <li>Filter out gender-sensitive, racial-sensitive, nudity, violence words</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Generative AI System Design Interview, Ali Aminian & Hao Sheng
+  </div>
+</div>
+
+<div class="card mb-4" id="google-translate-7">
+  <div class="card-body">
+    <h2 class="card-title">Follow up</h2>
+    <ul>
+      <li>Explain how to support multiple languages</li>
+      <li>Explain how to personalize suggestions</li>
+      <li>Explain how to incorporate additional context for better predictions</li>
+      <li>Explain how to choose between BPE, SentencePiece, WordPiece</li>
+      <li>Explain masked lanaguage modeling (MLM)</li>
+      <li>Explain multi-token prediction</li>
+      <li>Explain how to balance inference quality and latency</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Generative AI System Design Interview, Ali Aminian & Hao Sheng
+  </div>
+</div>
+<!-- Google translate END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+</html>
