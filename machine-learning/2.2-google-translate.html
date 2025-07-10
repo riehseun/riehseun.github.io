@@ -61,26 +61,24 @@
     <ul>
       <li>Business objective</li>
       <ul>
-        <li>Should suggestions be personalized? No</li>
-        <li>Should suggestions be made only when the model is confident in prediction? Yes</li>
-        <li>Should the model use just email body or other apsects of email? Email body only</li>
-        <li>What language should the model support? English only</li>
-        <li>Should the model handle bias in its prediction? Yes</li>
+        <li>Which languages should the system support? English and Korean</li>
+        <li>What should be the input length limit? 1000 words</li>
+        <li>Should the system detect input language automatically? Yes</li>
       </ul>
       <li>System features</li>
       <li>Data</li>
       <ul>
         <li>Do we have training data available? Yes</li>
-        <li>How large is dataset? 1B email messages</li>
+        <li>How large is dataset? 300M pairs of English and Korean sentences and terrabytes of general text data</li>
       </ul>
       <li>Constraints</li>
       <ul>
-        <li>Is there a limitation on computing cost for training and inference? No</li>
+        <li>Should the model be deployed to mobile devices? No</li>
       </ul>
       <li>Scale</li>
       <li>Performance</li>
       <ul>
-        <li>How fast should the suggestions be? Under 100ms</li>
+        <li>How fast should the suggestions be? Translation can be done offline</li>
       </ul>
     </ul>
   </div>
@@ -95,20 +93,20 @@
 
     <h3 class="card-title">ML problem</h3>
     <ul>
-      <li>Suggest appropriate next words (several of them) based on what user already typed</li>
+      <li>Translate betwen English and Korean</li>
       <li>Input</li>
       <ul>
-        <li>Words typed by user</li>
+        <li>English</li>
       </ul>
       <li>Output</li>
       <ul>
-        <li>Words that user will likely type next</li>
+        <li>Korean</li>
       </ul>
     </ul>
 
     <h3 class="card-title">ML category</h3>
     <ul>
-      <li>Generation</li>
+      <li>Generative</li>
       <ul>
         <li>Transformer</li>
       </ul>
@@ -147,36 +145,28 @@
     <ul>
       <li>Text cleaning</li>
       <ul>
-        <li>Remove non-english</li>
-        <li>Remove confidential info</li>
-        <li>Remove irrelevant chars</li>
+        <li>Remove missing data</li>
+        <li>Remove incorrect/noisy data</li>
         <li>Remove duplicate data</li>
-      </ul>
-      <li>Text normalization</li>
-      <ul>
-        <li>Convert texts to consistent format</li>
+        <li>Handle entity names</li>
+        <ul>
+          <li>Replace entities with placeholder in order not to confuse the model</li>
+        </ul>
+        <li>Lowercasing</li>
+        <li>Keep stop words and punctuations</li>
+        <ul>
+          <li>Ex. the, and, in</li>
+        </ul>
       </ul>
       <li>Text tokenization</li>
       <ul>
-        <li>Char-level</li>
+        <li>Byte-Pair Encoding (BPE)</li>
         <ul>
-          <li>Simple to implement</li>
-          <li>Difficult for model to understand meaning of each token</li>
+          <li>For all words in data set, append&lt;/w&gt; to mark the end of word</li>
+          <li>For all words in data set, split into chars and create frequency table for each char</li>
+          <li>Starting from chars with highest frequency, iteratively merge chars to create subwords and count frequency of those subwords</li>
+          <li>Iteration continues to merge subwords into bigger subwords until reaching pre-defined size</li>
         </ul>
-        <li>Word level</li>
-        <ul>
-          <li>Easier for model to understand meaning of each token</li>
-          <li>Very large vocabulary size</li>
-        </ul>
-        <li>Subword-level</li>
-        <ul>
-          <li>Break uncommon words into known subwords, resulting in medium vocab size</li>
-          <li>Algorithm can be complex (Ex. Byte-Pair Encoding (BPE), SentencePiece)</li>
-        </ul>
-      </ul>
-      <li>Token indexing</li>
-      <ul>
-        <li>Convert texts to numbers</li>
       </ul>
     </ul>
   </div>
@@ -192,54 +182,54 @@
     <h3 class="card-title">Model selection</h3>
     <ul>
       <li>Encoder-decoder</li>
-      <ul>
-        <li>Useful where output is transformation of input (Ex. language transation)</li>
-      </ul>
-      <li>Encoder-only</li>
-      <ul>
-        <li>Process input sequences and makes a prediction about it (Ex. sentiment analysis)</li>
-      </ul>
-      <li>Decoder-only</li>
-      <ul>
-        <li>Process input sequences and generates a new sequence (Ex. text generation)</li>
-      </ul>
     </ul>
 
     <h3 class="card-title">Model training</h3>
     <ul>
       <li>Architecture</li>
       <ul>
-        <li>Text embedding</li>
+        <li>Encoder</li>
         <ul>
-          <li>Convert token ID to embedding vector</li>
+          <li>Every word/token attends to all other word/token in sequence</li>
         </ul>
-        <li>Positional encoding</li>
+        <li>Decoder</li>
         <ul>
-          <li>Fixed encoding</li>
-          <li>Learned encoding</li>
+          <li>Cross attention integrates information from encoder</li>
+          <li>All word/token attends to only the word/token that comes before (future tokens are masked)</li>
+          <li>Model should only use previous tokens to generate next tokens</li>
+          <li>Prediction head contains linear layer followed by softmax layer</li>
         </ul>
-        <li>Multi-head attention</li>
-        <li>Feed forward</li>
-        <li>Prediction head</li>
-        <ul>
-          <li>Convert model output into probabilities of each word</li>
-        </ul>
+      </ul>
       <li>Loss function</li>
       <ul>
-        <li>Direct training</li>
-        <ul>
-          <li>Lack of large training data</li>
-          <li>Risk of overfitting</li>
-        </ul>
         <li>Pre-training</li>
         <ul>
-          <li>Train on general data</li>
-          <li>Objective is to predict the next token</li>
-          <li>Cross-entropy loss to measure difference between predicted vs actual next token</li>
+          <li>Train on general data that has English and Korean</li>
+          <li>Objective is to predict masked tokens (Masked Language Modeling)</li>
+          <ul>
+            <li>Some of input tokens are masked</li>
+            <li>Encoder encodes sentence with masked tokens</li>
+            <li>Decoder predicts those masked tokens</li>
+          </ul>
+          <li>Cross-entropy loss to measure difference between predicted vs actual masked token</li>
         </ul>
         <li>Fine-tuning</li>  
         <ul>
-          <li>Very similar to pre-training but loss is calculated based on email data</li>
+          <li>Train on pairs of English-Korean sentences</li>
+          <ul>
+            <li>Option 1. bilingual</li>
+            <ul>
+              <li>Higher accuracy</li>
+              <li>Hard to handle multiple languages in terms of trainning, deployment, monitoring</li>
+            </ul>
+            <li>Option 2. multilingual</li>
+            <ul>
+              <li>Lower accuracy</li>
+              <li>Simple</li>
+            </ul>
+          </ul>
+          <li>Objective is to predict next token</li>
+          <li>Cross-entropy loss to measure difference between predicted vs actual next token</li>
         </ul>
       </ul>
       <li>Hyperparameters</li>
