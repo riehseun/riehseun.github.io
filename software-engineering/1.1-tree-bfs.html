@@ -60,7 +60,7 @@
 
 <div class="card mb-4" id="tree-bfs">
   <div class="card-body">
-    <h2 class="card-title">Binary tree level order traversal (M)</h2>
+    <h2 class="card-title">Binary tree level order traversal (M) (Amazon)</h2>
 
 <pre><code class="python"># Definition for a binary tree node.
 # class TreeNode:
@@ -71,40 +71,33 @@
 class Solution:
     def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
 
-        # Do BFS
-
-        self.nodes = defaultdict(list)
-
-        # Time O(n) where n is number of nodes
-        # Space O(n) where n is number of nodes
-        def bfs(root):
-
-            explored = set()
-            explored.add(root)
-
-            queue = deque()
-            queue.append((root,0))
-
-            while queue:
-                root, depth = queue.popleft()
-                self.nodes[depth].append(root.val)
-                if root.left and root.left not in explored:
-                    explored.add(root.left)
-                    queue.append((root.left,depth+1))
-                if root.right and root.right not in explored:
-                    explored.add(root.right)
-                    queue.append((root.right,depth+1))
+        # BFS
 
         if not root:
             return []
 
-        bfs(root)
+        queue = deque()
+        queue.append((root,0))
+        nodes = defaultdict(list)
+        
+        # Time O(p+q)
+        #   p = number of nodes in tree
+        #   q = number of edges = max 2
+        # Space O(p)
+        while queue:
+            node, depth = queue.popleft()
+            nodes[depth].append(node.val) 
 
-        ret_val = []
-        for k,v in self.nodes.items():
-            ret_val.append(v)
+            if node.left:
+                queue.append((node.left, depth+1))
+            if node.right:
+                queue.append((node.right, depth+1))
 
-        return ret_val</code></pre>
+        result = []
+        for key, val in nodes.items():
+            result.append(val)
+
+        return result</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/binary-tree-level-order-traversal">102. Binary Tree Level Order Traversal</a>
