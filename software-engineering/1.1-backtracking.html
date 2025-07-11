@@ -356,46 +356,51 @@
 
 <div class="card mb-4" id="backtracking-">
   <div class="card-body">
-    <h2 class="card-title">Word search (M)</h2>
+    <h2 class="card-title">Word search (M) (Amazon)</h2>
 
 <pre><code class="python">class Solution:
     def exist(self, board: List[List[str]], word: str) -> bool:
 
-        # Time O(n*3^m) n = number of cells, m = len(word)
-        # Space O(m)
+        # Backtrack
+        # At each index, there are 4 directional choices
+        # Return when the path equals to word
 
-        # Sort the array
-        n = len(board)
-        m = len(board[0])
-        directions = [[0,1],[1,0],[0,-1],[-1,0]]
+        # Time O(m*(3**n))
+        #   n = len(word)
+        #   m = number of cells in board
+        #   At each position, there are 4 different path to take 
+        #   But, because we can't go back to previous position,
+        #   this reduces to 3 
+        # Space O(n)
+        def backtrack(board, word, path, explored, dirs, i, j, k, n, m, result):
 
-        def backtrack(board, word, directions, start, n, m, visited, word_index):
-            if board[start[0]][start[1]] == word[word_index]:
-                if word_index == len(word) - 1:
-                    return True
+            if len(path) == len(word):
+                result.append("".join(path))
+                return
+                
+            for x, y in dirs:
+                if 0 <= i + x < n \
+                    and 0 <= j + y < m \
+                    and board[i+x][j+y] == word[k] \
+                    and (i+x, j+y) not in explored:
+                    explored.add((i+x, j+y))
+                    path.append(board[i+x][j+y])
+                    backtrack(board, word, path, explored, dirs, i+x, j+y, k+1, n, m, result)
+                    path.pop()
+                    explored.remove((i+x, j+y))
 
-                for x1, y1 in directions:
-                    x = start[0] + x1
-                    y = start[1] + y1
-                    if 0 <= x < n \
-                        and 0 <= y < m \
-                        and (x,y) not in visited:
-                        # Make the move
-                        visited.add((x,y))
-                        # Move on to the next character in word
-                        if backtrack(board, word, directions, (x,y), n, m, visited, word_index+1):
-                            return True
-                        # Backtrack
-                        visited.remove((x,y))
-
-            return False
-
+        dirs = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+        result = []
+        n, m = len(board), len(board[0])
         for i in range(n):
             for j in range(m):
-                visited = {(i,j)}
-                if backtrack(board, word, directions, (i,j), n, m, visited, 0):
-                    return True
-
+                if board[i][j] == word[0]:
+                    explored = set()
+                    explored.add((i,j))
+                    backtrack(board, word, [word[0]], explored, dirs, i, j, 1, n, m, result)
+                    if result:
+                        return True
+                    
         return False</code></pre>
   </div>
   <div class="card-footer text-muted">
