@@ -492,7 +492,7 @@ class Solution:
 
 <div class="card mb-4" id="tree-bfs">
   <div class="card-body">
-    <h2 class="card-title">Vertical Order Traversal of a Binary Tree (H)</h2>
+    <h2 class="card-title">Vertical Order Traversal of a Binary Tree (H) (Meta)</h2>
 
 <pre><code class="python"># Definition for a binary tree node.
 # class TreeNode:
@@ -519,24 +519,22 @@ class Solution:
 
         while queue:
             node, depth, column = queue.popleft()
+            nodes.append((node.val, depth, column))
 
-            if node:
-                nodes.append((node.val, depth, column))
+            if node.left:
                 queue.append((node.left, depth+1, column-1))
+            if node.right:
                 queue.append((node.right, depth+1, column+1))
 
         nodes.sort(key = lambda x: (x[2], x[1], x[0]))
         
-        result = []
-        last_column = -math.inf
-        group = []
+        dic = defaultdict(list)
         for node in nodes:
-            if node[2] != last_column:
-                group = [node[0]]
-                last_column = node[2]
-                result.append(group)
-            else:
-                group.append(node[0])
+            dic[node[2]].append(node[0])
+
+        result = []
+        for key, val in dic.items():
+            result.append(val)
 
         return result</code></pre>
   </div>
