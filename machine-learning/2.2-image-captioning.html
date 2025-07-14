@@ -61,19 +61,22 @@
     <ul>
       <li>Business objective</li>
       <ul>
-        <li>Which languages should the system support? English only</li>
-        <li>Should the system moderate contents? Yes</li>
-        <li>Should the system support images and videos as input and output? No, text only</li>
-        <li>Should the system support follow up questions? Yes, context window should be at least 4096</li>
-        <li>Should the system browser website, call APIs? No</li>
-        <li>Should the system be personalized to each user? No</li>
+        <li>What type of images should the system support? General images</li>
+        <li>How long should the caption be? It should be short and clear</li>
+        <li>Should the system support multiple languages? No, English only</li>
+        <li>Should the system skip captioning if image is ambiguous? Yes</li>
+        <li>Should the system handle bias and fairness in captioning? Yes</li>
+        <li>What are dimensions of images? 256 by 256</li>
       </ul>
       <li>System features</li>
       <li>Data</li>
       <ul>
-        <li>Do we have training data available? Yes, 80k examples of questions and answers</li>
+        <li>Do we have training data available? Yes, 400M image-caption pairs</li>
       </ul>
       <li>Constraints</li>
+      <ul>
+        <li>Should the system generate captioning in real-time? Yes</li>
+      </ul>
       <li>Scale</li>
       <li>Performance</li>
     </ul>
@@ -89,14 +92,13 @@
 
     <h3 class="card-title">ML problem</h3>
     <ul>
-      <li>Generate texts based on prompt</li>
       <li>Input</li>
       <ul>
-        <li>User prompt</li>
+        <li>Image</li>
       </ul>
       <li>Output</li>
       <ul>
-        <li>Answer</li>
+        <li>Text describing the input image</li>
       </ul>
     </ul>
 
@@ -121,18 +123,18 @@
     <ul>
       <li>Training data</li>
       <ul>
-        <li>General data from web</li>
+        <li>Caption</li>
         <ul>
-          <li>Parse raw HTML and extract main body</li>
-          <li>Remove low quality data, spams, etc</li>
-          <li>Identify language</li>
+          <li>Remove data points that are not English</li>
+          <li>Remove duplicate image-caption data</li>
+          <li>Summarize long captions</li>
+          <li>Tokenize captions</li>
         </ul>
-        <li>General data from social media</li>
+        <li>Image</li>
         <ul>
-          <li>Remove inappropriate information</li>
-          <li>Mask sensitive information (PII)</li>
-          <li>Remove duplicate data</li>
-          <li>Remove irrelevant data such as non-standard characters</li>
+          <li>Remove low-resolution images that are less than 256 bu 256</li>
+          <li>Normalize images by scaling pixel values between 0 and 1</li>
+          <li>Remove low quality images</li>
         </ul>
       </ul>
       <li>Database</li>
@@ -151,65 +153,43 @@
 
     <h3 class="card-title">Model selection</h3>
     <ul>
-      <li>Decoder</li>
+      <li>Encoder-decoder where encoder processes images and decoder generates text description</li>
     </ul>
 
     <h3 class="card-title">Model training</h3>
     <ul>
       <li>Architecture</li>
       <ul>
-        <li>Positional encoding</li>
+        <li>Encoder</li>
         <ul>
-          <li>Option 1. absolute</li>
+          <li>Patchfy</li>
           <ul>
-            <li>Ex. sinusoidal, learnable</li>
-            <li>Hard to generalize for sequences with different length</li>
+            <li>Divide the image into fixed-sized patches (Ex. 64 by 64)</li>
+            <li>Flatten each patch</li>
+            <li>Linearly project each path</li>
           </ul>
-          <li>Option 2. relative</li>
+          <li>Positional encoding</li>
           <ul>
-            <li>Encodes difference in the positions of two tokens</li>
+            <li>Assign position information to each patch</li>
           </ul>
-          <li>Option 3. rotary (RoPE)</li>
-          <ul>
-            <li>Apply rotation matrix to token embedding</li>
-          </ul>
+        </ul>
+        <li>Decoder</li>
+        <ul>
+          <li>Generate token by token, constructing captions</li>
         </ul>
       </ul>
       <li>Loss function</li>
       <ul>
         <li>Pre-training</li>
         <ul>
-          <li>Train on general data that has English</li>
-          <li>Objective is to predict next token</li>
-          <li>Cross-entropy loss</li>
+          <li>Train encoder on general image data and decoder on general text data</li>
+          <li>Alternatively, use an existing pre-trained model for encoder (Ex. Clip) and for decoder (Ex. Llama)</li>
         </ul>
         <li>Fine-tuning</li>  
         <ul>
-          <li>Train on pairs of prompt-response</li>
+          <li>Train on pairs of image-caption</li>
           <li>Objective is to predict next token</li>
           <li>Cross-entropy loss</li>
-        </ul>
-        <li>Reinforcement learning from human feedback (RLHF)</li>  
-        <ul>
-          <li>Make model generate responses preferred by human</li>
-          <li>Train reward model</li>
-          <ul>
-            <li>Input - pair of prompt and response</li>
-            <li>Output - score representing helpfulness of response for the prompt</li>
-            <li>Copy model from fine-tuning and add a prediction head</li>
-            <li>Training data</li>
-            <ul>
-              <li>Generate multiple responses for given prompt</li>
-              <li>Rank responses</li>
-            </ul>
-          </ul>
-          <li>Optimize</li>
-          <ul>
-            <li>Proximal policy optimization (PPO)</li>
-            <ul>
-              <li></li>
-            </ul>
-          </ul>
         </ul>
       </ul>
       <li>Hyperparameters</li>
@@ -226,24 +206,15 @@
 
     <h3 class="card-title">Offline</h3>
     <ul>
-      <li>Option 1. BiLingual Evaludation Understudy (BLUE)</li>
+      <li>CIDEr</li>
       <ul>
-        <li>May unfairly penalize good translations that has just different ordering of words</li>
-      </ul>
-      <li>Option 2. Recall Oriented Understudy for Gisting Evaluation (ROUGE)</li>
-      <ul>
-        <li>Similar to BLUE (focus on recall rather than precision) and has same drawbacks</li>
-      </ul>
-      <li>Option 3. Metric for Evaluation of Translation with Explicit ORdering (METEOR)</li>
-      <ul>
-        <li>Matches synonyms rather than exact words</li>
+        <li></li>
       </ul>
     </ul>
 
     <h3 class="card-title">Online</h3>
     <ul>
-      <li>User feedback</li>
-      <li>User engagement</li>
+      <li></li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -258,14 +229,10 @@
     <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-1/image-captioning-1.png" alt="Card image cap">
 
     <ul>
-      <li>Language detector service</li>
+      <li></li>
       <ul>
-        <li>Use encoder-only model to detect language given input sentence</li>
+        <li></li>
       </ul>
-      <li>Translation service</li>
-      <li>
-        <li>Calls the model to receive translation of detected sentence</li>
-      </li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -277,13 +244,7 @@
   <div class="card-body">
     <h2 class="card-title">Follow up</h2>
     <ul>
-      <li>Explain how to deal with limited data via transfer learning</li>
-      <li>Explain how to build translation with decoder-only model</li>
-      <li>Explain how to improve translation using user feedback</li>
-      <li>Explain how to achieve efficient inference for models deployed on device</li>
-      <li>Explain how to develop a single multilingual model</li>
-      <li>Explain WER</li>
-      <li>Explain how to build a language detection model</li>
+      <li></li>
     </ul>
   </div>
   <div class="card-footer text-muted">
