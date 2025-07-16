@@ -712,438 +712,366 @@
     <h2 class="card-title">Detailed design</h2>
     <ul>
       <li>Distributed system</li>
+      <ul>
+        <li>Distributed system challenges</li>
+        <ul>
+          <li>Network asynchrony - messages take long to deliver, deliver out of order, or not deliver at all</li>
+          <li>Partial failures - only some components fail</li>
+          <li>Concurrency - execution of multiple computations intervene each other</li>
+        </ul>
+        <li>Failure types</li>
+        <ul>
+          <li>Fail-stop - a node halts and remains halted permanently (Easiest scenario)</li>
+          <li>Crash - a node halts, but silently</li>
+          <li>Omission - a node fails to respond to incoming requests</li>
+          <li>Byzantine - a node exhibits arbitrary behavior</li>
+        </ul>
+        <li>State</li>
+        <ul>
+          <li>Stateless - maintains no state. Performs purely based on the inputs</li>
+          <li>Stateful - maintains and updates states. Results depend on this state</li>
+        </ul>
+        <li>Quorum</li>
+        <ul>
+          <li>We write data to the nodes that are only resposible for write operations. We read data from all nodes and return the latest value</li>
+          <ul>
+            <li>Write is successful when w-1 nodes respond (Coordinator writes to itself first, so we get w writes in total)</li>
+            <li>Wait for r answers before returning the results to the client</li>
+          </ul>
+          <li>Quorum is achieved when R + W > N. At least one node should be both read and write so that readers could get the latest-written value</li>
+          <li>If w > r, fast write but slow read because need to go to many nodes for a value</li>
+          <li>If r > w, fast read but slow write because need to write to many nodes synchronously</li>
+        </ul>
+        <li>CAP theorem</li>
+        <ul>
+          <li>It is impossible to acheive all three at the same time. We can only have two out of three</li>
+          <ul>
+            <li>Consistency - all nodes see the same data at the same time, every read received the most recent write</li>
+            <li>Availability - system must be accessible even when nodes fail, every request receives a response</li>
+            <li>Partition tolerance - system must operate even when communications between nodes break</li>
+          </ul>
+          <li>Network is not reliable, thus we need to support partition tolerance</li>
+          <li>We can only choose between consistency or availability in distributed system</li>
+          <ul>
+            <li>CA - RDBMS (Non-distributed system)</li>
+            <li>AP - Dynamo, Cassandra, CouchDB</li>
+            <ul>
+              <li>BASE DBs choose availability - respond with local data w/o ensuring its the latest with peers</li>
+              <li>Good choice if system can live with eventual consistency</li>
+            </ul>
+            <li>CP - BigTable, HBase</li>
+            <ul>
+              <li>ACID DBs choose consistency - refuse to respond if cannot check peers</li>
+            </ul>
+          </ul>
+        </ul>
+        <li>PACELC theorem</li>
+        <ul>
+          <li>When there is no network partition during normal operation, then choose between latency or consistency</li>
+          <li>To guarantee data consistency, the system will have to delay write operations until the data has been propagated across the system successfully, taking a latency hit</li>
+          <li>PA system would go for L (latency) and PC system would go for C (consistency)</li>
+          <li><strong>Systems that choose A over C can still support eventual consistency but no strong/sequential/casual!</strong></li>
+        </ul>
+        <li>Isolation level</li>
+        <ul>
+          <li>Considers multi object operations</li>
+          <li>Serializability</li>
+          <ul>
+            <li>Two transactions executed concurrently should give same result</li>
+            <li>Prevents all anomalies</li>
+          </ul>
+          <li>Repeatable read</li>
+          <ul>
+            <li>Data once read by a transaction will not change throughout its course</li>
+          </ul>
+          <li>Snapshot isolation</li>
+          <ul>
+            <li>All reads made in a transaction see a consistent snapshot of the database</li>
+          </ul>
+          <li>Read committed</li>
+          <ul>
+            <li>Does not allows a transaction to read a data that has not yet been committed by other transaction</li>
+          </ul>
+        </ul>
+        <li>Anomaly</li>
+        <ul>
+          <li>Dirty write</li>
+          <ul>
+            <li>Transaction overwrites a value that was written by another transaction that is not committed yet</li>
+          </ul>
+          <li>Dirty read</li>
+          <ul>
+            <li>Transaction reads a value that was written by another transaction that is not committed yet</li>
+          </ul>
+          <li>Fuzzy or non-repeatable read</li>
+          <ul>
+            <li>Value is retrieved twice during a transaction and the value is different</li>
+          </ul>
+          <li>Phantom read</li>
+          <ul>
+            <li>For example, transaction of two queries runs to calculate the maximum and the average. However, another transaction intervenes to insert lots of record, thus making the first transaction return an average that is larger than the maximum</li>
+          </ul>
+          <li>Lost update</li>
+          <ul>
+            <li>Two transactions read the same value and then try to update it to two different values</li>
+          </ul>
+          <li>Read skew</li>
+          <ul>
+            <li>A transaction can only see partial results of another transaction</li>
+          </ul>
+          <li>Dirty write</li>
+          <ul>
+            <li>Two transactions read the same data, but then modify disjoint sets of data</li>
+          </ul>
+        </ul>
+      </ul>
       <li>Deployment</li>
+      <ul>
+        <li>Blue-Green</li>
+        <ul>
+          <li>Existing production instance is <strong>Blue</strong></li>
+          <li>Deploy new instance <strong>Green</strong></li>
+          <li>Run tests on <strong>Green</strong> instance</li>
+          <li>Make <strong>Green</strong> the production instance</li>
+          <ul>
+            <li>Re-map DNS to <strong>Green</strong>'s IP address</li>
+            <li>Remove <strong>Blue</strong> from load-balancer and add <strong>Green</strong></li>
+          </ul>
+        </ul>
+        <li>Carnary</li>
+        <ul>
+          <li>Similar to Blue-Green but redirect only subset of users instead of all users</li>
+          <ul>
+            <li>Choose users who are more active, etc</li>
+          </ul>
+          <li>Both <strong>Blue</strong> and <strong>Green</strong> would be up during this time</li>
+          <li>Great way to do capacity testing on new instance</li>
+          <ul>
+            <li>Can always roll-back by redirecting users to old instance</li>
+          </ul>
+          <li>Managing multiple versions of software is required</li>
+        </ul>
+        <li>Dark-launching</li>
+        <ul>
+          <li>Releasing production-ready features to subset of users prior to full release</li>
+          <li>Feature toggle - run specific part of code based on configuration stored online</li>
+          <li>Turn on features only for subset of users before releasing features to everybody</li>
+        </ul>
+        <li>Edge deployment</li>
+        <ul>
+          <li>Client data is analyzed as close to the source as possible</li>
+        </ul>
+      </ul>
       <li>Network</li>
+      <ul>
+        <li>Network Basics</li>
+        <ul>
+          <li>Computers can connect to themselves via 127.0.0.1 (localhost)</li>
+          <li>"ipconfig" file provides very useful information</li>
+          <li>TCP allows multiple services to share the same physical computer via port</li>
+          <ul>
+            <li>21 - file transfer (FTP)</li>
+            <li>22 - secure shell (SSH)</li>
+            <li>25, 110 - email (SMTP, POP3)</li>
+            <li>80 - web (HTTP)</li>
+            <li>443 - secure web (HTTPS)</li>
+            <li>993, 995 - secure email</li>
+          </ul>
+          <li>UDP is better suited for streaming media and online games</li>
+        </ul>
+        <li>TCP/IP</li>
+        <ul>
+          <li>Application layer - where end-user applications live</li>
+          <ul>
+            <li>Presentation - encoding, encryption, compression</li>
+            <li>Session - manages user session</li>
+          </ul>
+          <li>Transport layer - segments data into smaller chunks (Also, add checksum to these chunks)</li>
+          <li>Network layer - transports packets</li>
+          <li>Data link layer - error detection/correction</li>
+          <li>Physical layer - hardware</li>
+        </ul>
+        <li>CIDR</li>
+        <ul>
+          <li>Classless Inter-Domain Routing (CIDR) is a range of IP addresses a network uses</li>
+        </ul>
+        <li>IPv4</li>
+        <ul>
+          <li>32-bit address space</li>
+          <li>Example: 192.0.2.0/24 (24 means 8-bits / 256 addresses after 192.0.2.0)</li>
+          <li>Class A - 10.0.0.0/8 - 16 Million Hosts</li>
+          <li>Class B - 10.0.0.0/16 - 65,000 Hosts</li>
+          <li>Class C - 10.0.0.0/24 - 254 Hosts</li>
+        </ul>
+        <li>IPv6</li>
+        <ul>
+          <li>128-bit address space</li>
+          <li>Example: 2001:db8::/32 (32 means 96-bits / 76 octillion addresses after 2001:db8::)</li>
+        </ul>
+        <li>AJAX polling</li>
+        <ul>
+          <li>Client repeatedly polls the server</li>
+          <li>A lot of response could be empty, causing HTTP overhead</li>
+        </ul>
+        <li>Long-polling</li>
+        <ul>
+          <li>Client sends request to server</li>
+          <li>Server holds the request rather than sending empty response</li>
+          <li>Server pushes information to client only when there is new data</li>
+        </ul>
+        <li>WebSocket</li>
+        <ul>
+          <li>Persistent connection between client and server</li>
+        </ul>
+        <li>Communication</li>
+        <ul>
+          <li>Hypertext transfer protocol (HTTP)</li>
+          <ul>
+            <li>GET, POST, PUT, PATCH, DELETE</li>
+            <li>Application layer protocal relying on TCP or UDP</li>
+          </ul>
+          <li>Transmission control protocol (TCP)</li>
+          <ul>
+            <li>Guarantees that packets arrive on destination in the correct order and without corruption</li>
+          </ul>
+          <li>User datagram protocol (UDP)</li>
+          <ul>
+            <li>Lower latency but packages may arrive on destination out of order or not at all</li>
+            <li>Used in video streaming, voice chat, multiplayer game</li>
+          </ul>
+          <li>Remote procedure call (RPC)</li>
+          <ul>
+            <li>Client initiates client stub process by giving parameters</li>
+            <li>Client stub converts the parameters into standardized format and packs them into a message</li>
+            <li>Client RPC runtime delivers the message to the server over the network</li>
+            <li>Server RPC runtime receives the message and passes it to the server stub</li>
+            <li>Server stub unpacks the message to retrieve the parameters and calls the desired server routine</li>
+            <li>Server stub packs the returned result into a message and sends it to RPC runtime at the server</li>
+            <li>Server RPC runtime returns the packed result to Client RPC runtime over the network</li>
+            <li>Client RPC runtime sends the result to the client stub</li>
+            <li>Client stub unpacks the result</li>
+            <li>Ex. Protobuf, Thrift, Avro</li>
+          </ul>
+          <li>Representational State Transfer (REST)</li>
+          <ul>
+            <li>Architecture for design network applications</li>
+            <li>Stateless, client-server, cacheable communcation</li>
+            <li>HTTP protocol is used</li>
+            <li>Simpler than RPC, Web Services (SOAP, WSDL)</li>
+            <li>Ex. www</li>
+          </ul>
+        </ul>
+        <li>namp</li>
+        <ul>
+          <li>What machines are on our network</li>
+          <li>What ports are open on those machines</li>
+          <li>What operating systems are running on those machines</li>
+          <li><pre><code class="bash">nmap -A &lt;CIDR&gt;  # For example, 192.168.0.0/24</code></pre></li>
+        </ul>
+      </ul>
       <li>Security</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview, Alex Xu
-  </div>
-</div>
-
-<div class="card mb-4" id="system-design-">
-  <div class="card-body">
-    <h2 class="card-title">Deployment</h2>
-
-    <h3 class="card-text">Release strategy</h3>
-    <ul>
-      <li>Avoid downtown during deployment</li>
-    </ul>
-
-    <h4 class="card-text">Blue-Green</h4>
-    <ul>
-      <li>Existing production instance is <strong>Blue</strong></li>
-      <li>Deploy new instance <strong>Green</strong></li>
-      <li>Run tests on <strong>Green</strong> instance</li>
-      <li>Make <strong>Green</strong> the production instance</li>
       <ul>
-        <li>Re-map DNS to <strong>Green</strong>'s IP address</li>
-        <li>Remove <strong>Blue</strong> from load-balancer and add <strong>Green</strong></li>
-      </ul>
-    </ul>
-
-    <h4 class="card-text">Carnary</h4>
-    <ul>
-      <li>Similar to Blue-Green but redirect only subset of users instead of all users</li>
-      <ul>
-        <li>Choose users who are more active, etc</li>
-      </ul>
-      <li>Both <strong>Blue</strong> and <strong>Green</strong> would be up during this time</li>
-      <li>Great way to do capacity testing on new instance</li>
-      <ul>
-        <li>Can always roll-back by redirecting users to old instance</li>
-      </ul>
-      <li>Managing multiple versions of software is required</li>
-    </ul>
-
-    <h4 class="card-text">Dark-launching</h4>
-    <ul>
-      <li>Releasing production-ready features to subset of users prior to full release</li>
-      <li>Feature toggle - run specific part of code based on configuration stored online</li>
-      <li>Turn on features only for subset of users before releasing features to everybody</li>
-    </ul>
-
-    <h3 class="card-text">Edge deployment</h3>
-    <ul>
-      <li>Client data is analyzed as close to the source as possible</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference:
-  </div>
-</div>
-
-<div class="card mb-4" id="system-design-">
-  <div class="card-body">
-    <h2 class="card-title">Network</h2>
-
-    <h3 class="card-title">Network Basics</h3>
-    <ul>
-      <li>Computers can connect to themselves via 127.0.0.1 (localhost)</li>
-      <li>"ipconfig" file provides very useful information</li>
-      <li>TCP allows multiple services to share the same physical computer via port</li>
-      <ul>
-        <li>21 - file transfer (FTP)</li>
-        <li>22 - secure shell (SSH)</li>
-        <li>25, 110 - email (SMTP, POP3)</li>
-        <li>80 - web (HTTP)</li>
-        <li>443 - secure web (HTTPS)</li>
-        <li>993, 995 - secure email</li>
-      </ul>
-      <li>UDP is better suited for streaming media and online games</li>
-    </ul>
-
-    <h3 class="card-title">TCP/IP</h3>
-    <ul>
-      <li>Application layer - where end-user applications live</li>
-      <ul>
-        <li>Presentation - encoding, encryption, compression</li>
-        <li>Session - manages user session</li>
-      </ul>
-      <li>Transport layer - segments data into smaller chunks (Also, add checksum to these chunks)</li>
-      <li>Network layer - transports packets</li>
-      <li>Data link layer - error detection/correction</li>
-      <li>Physical layer - hardware</li>
-    </ul>
-
-    <h3 class="card-title">CIDR</h3>
-    <ul>
-      <li>Classless Inter-Domain Routing (CIDR) is a range of IP addresses a network uses</li>
-    </ul>
-
-    <h3 class="card-title">IPv4</h3>
-    <ul>
-      <li>32-bit address space</li>
-      <li>Example: 192.0.2.0/24 (24 means 8-bits / 256 addresses after 192.0.2.0)</li>
-    </ul>
-    <ul>
-      <li>Class A - 10.0.0.0/8 - 16 Million Hosts</li>
-      <li>Class B - 10.0.0.0/16 - 65,000 Hosts</li>
-      <li>Class C - 10.0.0.0/24 - 254 Hosts</li>
-    </ul>
-
-    <h3 class="card-title">IPv6</h3>
-    <ul>
-      <li>128-bit address space</li>
-      <li>Example: 2001:db8::/32 (32 means 96-bits / 76 octillion addresses after 2001:db8::)</li>
-    </ul>
-
-    <h3 class="card-text">AJAX polling</h3>
-    <ul>
-      <li>Client repeatedly polls the server</li>
-      <li>A lot of response could be empty, causing HTTP overhead</li>
-    </ul>
-
-    <h3 class="card-text">Long-polling</h3>
-    <ul>
-      <li>Client sends request to server</li>
-      <li>Server holds the request rather than sending empty response</li>
-      <li>Server pushes information to client only when there is new data</li>
-    </ul>
-
-    <h3 class="card-text">WebSocket</h3>
-    <ul>
-      <li>Persistent connection between client and server</li>
-    </ul>
-
-    <h3 class="card-title">Communication</h3>
-    <ul>
-      <li>Hypertext transfer protocol (HTTP)</li>
-      <ul>
-        <li>GET, POST, PUT, PATCH, DELETE</li>
-        <li>Application layer protocal relying on TCP or UDP</li>
-      </ul>
-      <li>Transmission control protocol (TCP)</li>
-      <ul>
-        <li>Guarantees that packets arrive on destination in the correct order and without corruption</li>
-      </ul>
-      <li>User datagram protocol (UDP)</li>
-      <ul>
-        <li>Lower latency but packages may arrive on destination out of order or not at all</li>
-        <li>Used in video streaming, voice chat, multiplayer game</li>
-      </ul>
-      <li>Remote procedure call (RPC)</li>
-      <ul>
-        <li>Client initiates client stub process by giving parameters</li>
-        <li>Client stub converts the parameters into standardized format and packs them into a message</li>
-        <li>Client RPC runtime delivers the message to the server over the network</li>
-        <li>Server RPC runtime receives the message and passes it to the server stub</li>
-        <li>Server stub unpacks the message to retrieve the parameters and calls the desired server routine</li>
-        <li>Server stub packs the returned result into a message and sends it to RPC runtime at the server</li>
-        <li>Server RPC runtime returns the packed result to Client RPC runtime over the network</li>
-        <li>Client RPC runtime sends the result to the client stub</li>
-        <li>Client stub unpacks the result</li>
-        <li>Ex. Protobuf, Thrift, Avro</li>
-      </ul>
-      <li>Representational State Transfer (REST)</li>
-      <ul>
-        <li>Architecture for design network applications</li>
-        <li>Stateless, client-server, cacheable communcation</li>
-        <li>HTTP protocol is used</li>
-        <li>Simpler than RPC, Web Services (SOAP, WSDL)</li>
-        <li>Ex. www</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">namp</h3>
-    <ul>
-      <li>What machines are on our network</li>
-      <li>What ports are open on those machines</li>
-      <li>What operating systems are running on those machines</li>
-    </ul>
-
-    <pre><code class="bash">nmap -A &lt;CIDR&gt;  # For example, 192.168.0.0/24</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://docs.rackspace.com/support/how-to/using-cidr-notation-in-cloud-networks">Using CIDR notation in Cloud Networks</a> | <a href="https://techlibrary.hpe.com/docs/otlink-wo/CIDR-Conversion-Table.html">CIDR Conversion Table</a> | <a href="https://www.ipqualityscore.com/free-ip-lookup-proxy-vpn-test/lookup/block">IPv4 CIDR Address Blocks</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="system-design-">
-  <div class="card-body">
-    <h2 class="card-title">Security</h2>
-
-    <h3 class="card-title">A layered approach to security</h3>
-    <ul>
-      <li>Data - attackers are always after this</li>
-      <li>Application - free of vulnerabilities, application secrets in a secure storage medium</li>
-      <li>Compute - secure access to VMs, implement endpoint protection, keep systems patched and current</li>
-      <li>Networking - deny by default, implement secure connectivity to on-premises networks, restrict inbound internet access</li>
-      <li>Perimeter - use distributed denial of service (DDoS) protection, use perimeter firewalls to identify malicious attacks</li>
-      <li>Identity and access - use SSO and multi-factor authentication</li>
-      <li>Physical security - access to physical data centre with compute machines</li>
-    </ul>
-
-    <h3 class="card-title">Examples of security breaches and attacks</h3>
-    <ul>
-      <li>Data - exposing an encryption key or using weak encryption</li>
-      <li>Application - malicious code injection and execution. For example, SQL injection and cross-site scripting (XSS)</li>
-      <li>Compute - malware executing malicious code to compromise system</li>
-      <li>Networking - unnecessary open ports to the internet. For example, leaving SSH or RDP open to virtual machines to leading brute-force attacks against your systems</li>
-      <li>Perimeter - denial-of-service (DoS) attacks</li>
-      <li>Identity and access - Exposed credentials and toxic combinations of permissions and authorization</li>
-      <li>Physical security - unauthorized access to facilities</li>
-    </ul>
-
-    <h3 class="card-title">Authentication vs Authorization</h3>
-    <ul>
-      <li>Authentication - process of establishing identity of a person</li>
-      <li>Authorization - process of establishing what level of access an authenticated person has</li>
-    </ul>
-
-    <h3 class="card-title">Authentication strategy</h3>
-    <ul>
-      <li>Single sign-on - access across applications is granted to a single identity/user, simplifying security model</li>
-      <li>Multi-factor authentication - requires two or more elements for full authentication</li>
-    </ul>
-
-    <h3 class="card-title">Encryption</h3>
-    <ul>
-      <li>Encryption - process of making data unreadable and unusable to unauthorized viewers</li>
-      <li>Symmetric encryption - uses the same key to encrypt and decrypt the data</li>
-      <li>Asymmetric encryption - uses public key and private key pair. Can use one key to encrypt but need both keys to decrypt. Ex. Transport Layer Security (TLS) used in HTTPS</li>
-    </ul>
-
-    <h3 class="card-title">Security concerns</h3>
-    <ul>
-      <li>Input and outputs - always validate input. Always use parameterized queries. Always encode your output</li>
-      <li>Key Vault - store connection strings, secrets, passwords, certificates, access policies, file locks, and automation scripts</li>
-      <li>Framework - for example, Java/Javascript. Keep them updated</li>
-      <li>Dependencies - track vulnerabilities on your 3rd party dependencies</li>
-    </ul>
-
-    <h3 class="card-title">SSL (Secure Sockets Layer)</h3>
-    <ul>
-      <li>Ensure that all data passed between web server and browsers remain private</li>
-      <li>Web server creates private and public Key</li>
-      <li>User submits CSR (Certificate Signing Request), which includes public key, to Certification Authority</li>
-      <li>Then, CA will issue SSL certificate</li>
-      <li>Web server will match user's SSL certificate to its private Key</li>
-      <li>When broswer connects to secure site, it will check whether SSL certificate is not expired, and it is isseud by Certification Authority that browser trusts, and it is being used by the website for which it has been issued</li>
-    </ul>
-
-    <h3>SSL handshake</h3>
-    <ul>
-      <li>Client hello - client to server with TLS version</li>
-      <li>Server hello - server to client with configuration it picked</li>
-      <li>Server key exchange message - server to client with required information to generate pre-master secret</li>
-      <li>Certificate request - server to client with certificate type, algorithm, and authorities</li>
-      <li>Client certificate - client to server with certificate chain</li>
-      <li>Client key exchange message - client to server so that a common key can be generated. Both sides then generate a master secret using pre-master secret, which is then used to generate symmetric key to encrypt session data</li>
-    </ul>
-
-    <h3 class="card-title">Active directory</h3>
-    <ul>
-      <li>Directory service implementation that provide authentication, group and user management, policy administration, etc</li>
-      <li>It supports both Kerberos and LDAP</li>
-      <li>It also provides SSO</li>
-    </ul>
-
-    <h3 class="card-title">LDAP (LightWeight Directory Acess Protocol)</h3>
-    <ul>
-      <li>Open protocol used for directory service authentication</li>
-      <li>Relationship between AD and LDAP is similar to Apache and HTTP</li>
-    </ul>
-
-    <h3 class="card-title">Encoding</h3>
-    <ul>
-      <li>base36 - [a-z ,0-9]</li>
-      <li>base62 - [A-Z, a-z, 0-9]</li>
-      <li>base64 - [A-Z, a-z ,0-9] plus '+' and '-'</li>
-    </ul>
-
-    <h3>OpenSSL (Generate JKS from SSL certificates)</h3>
-<pre><code class="bash">openssl pkcs12 -export -in &lt;your_cert&gt;.crt -inkey &lt;your_cert&gt;.key -out &lt;your_cert&gt;.p12
-keytool -importkeystore -srckeystore &lt;your_cert&gt;.p12 -srcstoretype PKCS12 -destkeystore &lt;your_cert&gt;.jks -deststoretype JKS -dname "CN:&lt;your_hostname&gt;"</code></pre>
-
-    <h3>OpenSSL command</h3>
-<pre><code class="bash"># Check common name.
+        <li>A layered approach to security</li>
+        <ul>
+          <li>Data - attackers are always after this</li>
+          <li>Application - free of vulnerabilities, application secrets in a secure storage medium</li>
+          <li>Compute - secure access to VMs, implement endpoint protection, keep systems patched and current</li>
+          <li>Networking - deny by default, implement secure connectivity to on-premises networks, restrict inbound internet access</li>
+          <li>Perimeter - use distributed denial of service (DDoS) protection, use perimeter firewalls to identify malicious attacks</li>
+          <li>Identity and access - use SSO and multi-factor authentication</li>
+          <li>Physical security - access to physical data centre with compute machines</li>
+        </ul>
+        <li>Examples of security breaches and attacks</li>
+        <ul>
+          <li>Data - exposing an encryption key or using weak encryption</li>
+          <li>Application - malicious code injection and execution. For example, SQL injection and cross-site scripting (XSS)</li>
+          <li>Compute - malware executing malicious code to compromise system</li>
+          <li>Networking - unnecessary open ports to the internet. For example, leaving SSH or RDP open to virtual machines to leading brute-force attacks against your systems</li>
+          <li>Perimeter - denial-of-service (DoS) attacks</li>
+          <li>Identity and access - Exposed credentials and toxic combinations of permissions and authorization</li>
+          <li>Physical security - unauthorized access to facilities</li>
+        </ul>
+        <li>Authentication vs Authorization</li>
+        <ul>
+          <li>Authentication - process of establishing identity of a person</li>
+          <li>Authorization - process of establishing what level of access an authenticated person has</li>
+        </ul>
+        <li>Authentication strategy</li>
+        <ul>
+          <li>Single sign-on - access across applications is granted to a single identity/user, simplifying security model</li>
+          <li>Multi-factor authentication - requires two or more elements for full authentication</li>
+        </ul>
+        <li>Encryption</li>
+        <ul>
+          <li>Encryption - process of making data unreadable and unusable to unauthorized viewers</li>
+          <li>Symmetric encryption - uses the same key to encrypt and decrypt the data</li>
+          <li>Asymmetric encryption - uses public key and private key pair. Can use one key to encrypt but need both keys to decrypt. Ex. Transport Layer Security (TLS) used in HTTPS</li>
+        </ul>
+        <li>Security concerns</li>
+        <ul>
+          <li>Input and outputs - always validate input. Always use parameterized queries. Always encode your output</li>
+          <li>Key Vault - store connection strings, secrets, passwords, certificates, access policies, file locks, and automation scripts</li>
+          <li>Framework - for example, Java/Javascript. Keep them updated</li>
+          <li>Dependencies - track vulnerabilities on your 3rd party dependencies</li>
+        </ul>
+        <li>SSL (Secure Sockets Layer)</li>
+        <ul>
+          <li>Ensure that all data passed between web server and browsers remain private</li>
+          <li>Web server creates private and public Key</li>
+          <li>User submits CSR (Certificate Signing Request), which includes public key, to Certification Authority</li>
+          <li>Then, CA will issue SSL certificate</li>
+          <li>Web server will match user's SSL certificate to its private Key</li>
+          <li>When broswer connects to secure site, it will check whether SSL certificate is not expired, and it is isseud by Certification Authority that browser trusts, and it is being used by the website for which it has been issued</li>
+        </ul>
+        <li>SSL handshake</li>
+        <ul>
+          <li>Client hello - client to server with TLS version</li>
+          <li>Server hello - server to client with configuration it picked</li>
+          <li>Server key exchange message - server to client with required information to generate pre-master secret</li>
+          <li>Certificate request - server to client with certificate type, algorithm, and authorities</li>
+          <li>Client certificate - client to server with certificate chain</li>
+          <li>Client key exchange message - client to server so that a common key can be generated. Both sides then generate a master secret using pre-master secret, which is then used to generate symmetric key to encrypt session data</li>
+        </ul>
+        <li>Active directory</li>
+        <ul>
+          <li>Directory service implementation that provide authentication, group and user management, policy administration, etc</li>
+          <li>It supports both Kerberos and LDAP</li>
+          <li>It also provides SSO</li>
+        </ul>
+        <li>LDAP (LightWeight Directory Acess Protocol)</li>
+        <ul>
+          <li>Open protocol used for directory service authentication</li>
+          <li>Relationship between AD and LDAP is similar to Apache and HTTP</li>
+        </ul>
+        <li>Encoding</li>
+        <ul>
+          <li>base36 - [a-z ,0-9]</li>
+          <li>base62 - [A-Z, a-z, 0-9]</li>
+          <li>base64 - [A-Z, a-z ,0-9] plus '+' and '-'</li>
+        </ul>
+        <li>OpenSSL (Generate JKS from SSL certificates)</li>
+        <ul>
+          <li><pre><code class="bash">openssl pkcs12 -export -in &lt;your_cert&gt;.crt -inkey &lt;your_cert&gt;.key -out &lt;your_cert&gt;.p12
+keytool -importkeystore -srckeystore &lt;your_cert&gt;.p12 -srcstoretype PKCS12 -destkeystore &lt;your_cert&gt;.jks -deststoretype JKS -dname "CN:&lt;your_hostname&gt;"</code></pre></li>
+          <li><pre><code class="bash"># Check common name.
 openssl x509 -noout -subject -in &lt;your_cert&gt;.crt
 
 # Check expiry date.
 openssl x509 -noout -enddate -in &lt;your_cert&gt;.crt
 
 # Check all subject alternative names.
-for i in $(openssl x509 -in &lt;your_cert&gt;.crt -noout -text | grep -A1 'Subject Alternative Name' | tail -n1 | tr -d ','); { echo $i | cut -f2 -d:; }</code></pre>
-
-    <h3 class="card-title">Tokenization vs Encryption</h3>
-    <ul>
-      <li>Tokenized data is irreversible (Detokenization can only be done by the original tokenization system)</li>
-      <li>Encryption is reversible with the key</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    <a href="https://medium.com/@kasunpdh/ssl-handshake-explained-4dabb87cdce">SSL Handshake explained</a> | <a href="https://www.varonis.com/blog/the-difference-between-active-directory-and-ldap/">The Difference Between Active Directory and LDAP</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="system-design-">
-  <div class="card-body">
-    <h2 class="card-title">Distributed System</h2>
-
-    <h3 class="card-title">Distributed system challenges</h3>
-    <ul>
-      <li>Network asynchrony - messages take long to deliver, deliver out of order, or not deliver at all</li>
-      <li>Partial failures - only some components fail</li>
-      <li>Concurrency - execution of multiple computations intervene each other</li>
-    </ul>
-
-    <h3 class="card-title">Failure types</h3>
-    <ul>
-      <li>Fail-stop - a node halts and remains halted permanently (Easiest scenario)</li>
-      <li>Crash - a node halts, but silently</li>
-      <li>Omission - a node fails to respond to incoming requests</li>
-      <li>Byzantine - a node exhibits arbitrary behavior</li>
-    </ul>
-
-    <h3 class="card-title">State</h3>
-    <ul>
-      <li>Stateless - maintains no state. Performs purely based on the inputs</li>
-      <li>Stateful - maintains and updates states. Results depend on this state</li>
-    </ul>
-
-    <h3 class="card-title">Quorum</h3>
-    <ul>
-      <li>We write data to the nodes that are only resposible for write operations. We read data from all nodes and return the latest value</li>
-      <ul>
-        <li>Write is successful when w-1 nodes respond (Coordinator writes to itself first, so we get w writes in total)</li>
-        <li>Wait for r answers before returning the results to the client</li>
-      </ul>
-      <li>Quorum is achieved when R + W > N. At least one node should be both read and write so that readers could get the latest-written value</li>
-      <li>If w > r, fast write but slow read because need to go to many nodes for a value</li>
-      <li>If r > w, fast read but slow write because need to write to many nodes synchronously</li>
-    </ul>
-
-    <h3 class="card-title">CAP theorem</h3>
-    <ul>
-      <li>It is impossible to acheive all three at the same time. We can only have two out of three</li>
-      <ul>
-        <li>Consistency - all nodes see the same data at the same time, every read received the most recent write</li>
-        <li>Availability - system must be accessible even when nodes fail, every request receives a response</li>
-        <li>Partition tolerance - system must operate even when communications between nodes break</li>
-      </ul>
-      <li>Network is not reliable, thus we need to support partition tolerance</li>
-      <li>We can only choose between consistency or availability in distributed system</li>
-      <ul>
-        <li>CA - RDBMS (Non-distributed system)</li>
-        <li>AP - Dynamo, Cassandra, CouchDB</li>
-        <ul>
-          <li>BASE DBs choose availability - respond with local data w/o ensuring its the latest with peers</li>
-          <li>Good choice if system can live with eventual consistency</li>
+for i in $(openssl x509 -in &lt;your_cert&gt;.crt -noout -text | grep -A1 'Subject Alternative Name' | tail -n1 | tr -d ','); { echo $i | cut -f2 -d:; }</code></pre></li>
         </ul>
-        <li>CP - BigTable, HBase</li>
+        <li>Tokenization vs Encryption</li>
         <ul>
-          <li>ACID DBs choose consistency - refuse to respond if cannot check peers</li>
+          <li>Tokenized data is irreversible (Detokenization can only be done by the original tokenization system)</li>
+          <li>Encryption is reversible with the key</li>
         </ul>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">PACELC theorem</h3>
-    <ul>
-      <li>When there is no network partition during normal operation, then choose between latency or consistency</li>
-      <li>To guarantee data consistency, the system will have to delay write operations until the data has been propagated across the system successfully, taking a latency hit</li>
-      <li>PA system would go for L (latency) and PC system would go for C (consistency)</li>
-    </ul>
-
-    <p class="card-text"><strong>Systems that choose A over C can still support eventual consistency but no strong/sequential/casual!</strong></p>
-
-    <h3 class="card-title">Isolation level</h3>
-    <ul>
-      <li>Considers multi object operations</li>
-      <li>Serializability</li>
-      <ul>
-        <li>Two transactions executed concurrently should give same result</li>
-        <li>Prevents all anomalies</li>
-      </ul>
-      <li>Repeatable read</li>
-      <ul>
-        <li>Data once read by a transaction will not change throughout its course</li>
-      </ul>
-      <li>Snapshot isolation</li>
-      <ul>
-        <li>All reads made in a transaction see a consistent snapshot of the database</li>
-      </ul>
-      <li>Read committed</li>
-      <ul>
-        <li>Does not allows a transaction to read a data that has not yet been committed by other transaction</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Anomaly</h3>
-    <ul>
-      <li>Dirty write</li>
-      <ul>
-        <li>Transaction overwrites a value that was written by another transaction that is not committed yet</li>
-      </ul>
-      <li>Dirty read</li>
-      <ul>
-        <li>Transaction reads a value that was written by another transaction that is not committed yet</li>
-      </ul>
-      <li>Fuzzy or non-repeatable read</li>
-      <ul>
-        <li>Value is retrieved twice during a transaction and the value is different</li>
-      </ul>
-      <li>Phantom read</li>
-      <ul>
-        <li>For example, transaction of two queries runs to calculate the maximum and the average. However, another transaction intervenes to insert lots of record, thus making the first transaction return an average that is larger than the maximum</li>
-      </ul>
-      <li>Lost update</li>
-      <ul>
-        <li>Two transactions read the same value and then try to update it to two different values</li>
-      </ul>
-      <li>Read skew</li>
-      <ul>
-        <li>A transaction can only see partial results of another transaction</li>
-      </ul>
-      <li>Dirty write</li>
-      <ul>
-        <li>Two transactions read the same data, but then modify disjoint sets of data</li>
       </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
+    Reference: System Design Interview, Alex Xu | <a href="https://docs.rackspace.com/support/how-to/using-cidr-notation-in-cloud-networks">Using CIDR notation in Cloud Networks</a> | <a href="https://techlibrary.hpe.com/docs/otlink-wo/CIDR-Conversion-Table.html">CIDR Conversion Table</a> | <a href="https://www.ipqualityscore.com/free-ip-lookup-proxy-vpn-test/lookup/block">IPv4 CIDR Address Blocks</a> | <a href="https://medium.com/@kasunpdh/ssl-handshake-explained-4dabb87cdce">SSL Handshake explained</a> | <a href="https://www.varonis.com/blog/the-difference-between-active-directory-and-ldap/">The Difference Between Active Directory and LDAP</a> | <a href="https://www.educative.io/path/deep-dive-into-system-design-interview">Deep Dive into System Design Interview</a>
   </div>
 </div>
 
