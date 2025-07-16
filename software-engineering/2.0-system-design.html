@@ -397,11 +397,148 @@
     <h2 class="card-title">High level design</h2>
     <ul>
       <li>DNS</li>
+      <ul>
+        <li>Maps domain names to IP addresses</li>
+        <li>Router or ISP tells which DNS server to contact for IP lookup</li>
+        <li>Resource record</li>
+        <ul>
+          <li>A - hostname to IP address mapping</li>
+          <li>CNAME - alias to hostname (canonical) mapping</li>
+          <ul>
+            <table>
+              <tr>
+                <td>NAME</td>
+                <td>TYPE</td>
+                <td>VALUE</td>
+              </tr>
+              <tr>
+                <td>bar.example.com</td>
+                <td>CNAME</td>
+                <td>foo.example.com</td>
+              </tr>
+              <tr>
+                <td>foo.example.com</td>
+                <td>A</td>
+                <td>192.0.2.23</td>
+              </tr>
+            </table>
+            <li>The canonical (true) name of "bar.example.com" is "foo.example.com"</li>
+            <li>"foo.example.com" has A record pointing to IP address 192.0.2.23</li>
+          </ul>
+        </ul>
+        <li>Ex. CloudFlare, Route 53</li>
+        <li>FQDN (Fully Qualified Domain Name)</li>
+        <ul>
+          <li>Complete domain name of computer, host, or internet</li>
+          <li>When connecting to a host, FQDN must be specified</li>
+          <li>Then, DNS server finds IP address from the hostname</li>
+          <li>Ex. www.github.com - [hostname].[domain].[tld] (tld - top-level domain)</li>
+        </ul>
+        <li>DNS server</li>
+        <ul>
+          <li>DNS resolver - forward requests to the other DNS name servers</li>
+          <ul>
+            <li>For example, <code>/etc/resolv.conf</code> in Linux contains DNS resolver's IP address</li>
+          </ul>
+          <li>Root-level name servers - return a list of top-level domain (TLD) servers that hold the IP addresses of the domain</li>
+          <ul>
+            <li>Domain examples - .com, .org, .io</li>
+          </ul>
+          <li>Top-level domain (TLD) name servers - hold IP addresses of authoritative name servers</li>
+          <li>Authoritative name servers - provide IP addresses of the web or application servers</li>
+        </ul>
+      </ul>
       <li>CDN</li>
+      <ul>
+        <li>Geographically distributed proxy servers, that are placed on the network edge, close to end users</li>
+        <li>Generally serves static contents like image, video, CSS, JS</li>
+        <li>Ex. Amazon CloudFront</li>
+        <li>Push CDN</li>
+        <ul>
+          <li>Content gets sent automatically to CDN proxy servers from the origin server</li>
+          <li>Appropriate for static content delivery and low traffic</li>
+        </ul>
+        <li>Pull CDN</li>
+        <ul>
+          <li>CDN pulls the unavailable data from origin servers when requested by users</li>
+          <li>TTL determines how long content is cached on CDN</li>
+          <li>Appropriate for dynamic content delivery and heavy traffic</li>
+        </ul>
+      </ul>
       <li>Load balancer</li>
-      <li>Database</li>
+      <ul>
+        <li>GSLB (Global Server Load Balancing) distributes traffic across different geographical regions</li>
+        <li>Private IP is used to communitcate between servers (reachable only within the same network, unreachable over internet)</li>
+        <li>Redundancy</li>
+        <ul>
+          <li>Use multiple LBs so that they can't be single point of failure</li>
+          <li>They monitor health of each other</li>
+          <li>In case primary fails, the secondary takes over</li>
+        </ul>
+        <li>Ex. NGINX, HAProxy</li>
+        <li>Benefites</li>
+        <ul>
+          <li>Throughput is improved by parallel processing</li>
+          <li>Yield higher availability</li>
+          <li>SSL offload - client connects to load balancer via SSL, but redirect requests to servers are made via unencrypted HTTP to reduce load on the servers</li>
+          <ul>
+            <li>No need to install X.509 certificates on each server</li>
+          </ul>
+          <li>Caching - load balancer can cache popular requests</li>
+        </ul>
+        <li>Serving response back</li>
+        <ul>
+          <li>Proxing - load balancer receives response from backend and relays it back to the client</li>
+          <li>TCP Handoff - server sends response directly to the client</li>
+        </ul>
+        <li>Types</li>
+        <ul>
+          <li>Equitable dispatching - uses simple round-robin algorithm to distribute traffic evenly between all nodes</li>
+          <ul>
+            <li>Ex. AWS Elastic Load Balancer (ELB)</li>
+          </ul>
+          <li>Hash-based distribution - requests from the same client for the duration of session are directed to the same server every time by hashing metadata</li>
+          <ul>
+            <li>Ex. Azure Load Balancer</li>
+            <li>Pros - store session data in memory rather than shared data storage like Redis cache</li>
+            <li>Cons - caching work causes small latency</li>
+          </ul>
+        </ul>
+        <li>Reverse proxy</li>
+        <ul>
+          <li>Proxy hides identity of clients. Reverse proxy hides identity of servers</li>
+          <li>Proxy sits on top of clients - used for blocking certain contents (servers are freely accessible through internet)</li>
+          <li>Reverse proxy sit on top of servers - used for protection from attacks and SSL encrypting (clients can freely connect to internet)</li>
+          <li>Can act as load-balancing but is also useful when there is a single server to increase security</li>
+          <li>Ex. NGINX, HAProxy (These are load balancers but they can serve as reverse proxy too</li>
+        </ul>
+      </ul>
       <li>Cache</li>
+      <ul>
+        <li>When receiving requests, servers check if cache has the responses</li>
+        <li>Cache-aside</li>
+        <ul>
+          <li>Cache does not interact with database</li>
+          <li>If cache miss, client fetches data from database. Then, client updates the cache</li>
+          <li>Cache miss causes three trips</li>
+          <li>Ex. Memcached</li>
+        </ul>
+        <li>Write-through</li>
+        <ul>
+          <li>Client write to cache, then cache synchronously write to database</li>
+          <li>Write operation is slow (Read is fast)</li>
+        </ul>
+        <li>Write-back</li>
+        <ul>
+          <li>Client write to cache, then cache asynchronously write to database</li>
+          <li>Data loss if cache goes down (Both read and write is fast)</li>
+        </ul>
+      </ul>
       <li>Message queue</li>
+      <ul>
+        <li>Decoupling producer and consumer makes system scalable and reliable</li>
+        <li>Ex. Redis, RabbitMQ, Amazon SQS</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Example</h3>
@@ -430,197 +567,6 @@
         <li>Blob store</li>
       </ul>
       <li>Task queue</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview, Alex Xu
-  </div>
-</div>
-
-<div class="card mb-4" id="system-design-">
-  <div class="card-body">
-    <h2 class="card-title">DNS</h2>
-    <ul>
-      <li>Maps domain names to IP addresses</li>
-      <li>Router or ISP tells which DNS server to contact for IP lookup</li>
-      <li>Resource record</li>
-      <ul>
-        <li>A - hostname to IP address mapping</li>
-        <li>CNAME - alias to hostname (canonical) mapping</li>
-        <ul>
-          <table>
-            <tr>
-              <td>NAME</td>
-              <td>TYPE</td>
-              <td>VALUE</td>
-            </tr>
-            <tr>
-              <td>bar.example.com</td>
-              <td>CNAME</td>
-              <td>foo.example.com</td>
-            </tr>
-            <tr>
-              <td>foo.example.com</td>
-              <td>A</td>
-              <td>192.0.2.23</td>
-            </tr>
-          </table>
-          <li>The canonical (true) name of "bar.example.com" is "foo.example.com"</li>
-          <li>"foo.example.com" has A record pointing to IP address 192.0.2.23</li>
-        </ul>
-      </ul>
-      <li>Ex. CloudFlare, Route 53</li>
-    </ul>
-
-    <h3 class="card-title">FQDN (Fully Qualified Domain Name)</h3>
-    <ul>
-      <li>Complete domain name of computer, host, or internet</li>
-      <li>When connecting to a host, FQDN must be specified</li>
-      <li>Then, DNS server finds IP address from the hostname</li>
-      <li>Ex. www.github.com - [hostname].[domain].[tld] (tld - top-level domain)</li>
-    </ul>
-
-    <h3 class="card-title">DNS server</h3>
-    <ul>
-      <li>DNS resolver - forward requests to the other DNS name servers</li>
-      <ul>
-        <li>For example, <code>/etc/resolv.conf</code> in Linux contains DNS resolver's IP address</li>
-      </ul>
-      <li>Root-level name servers - return a list of top-level domain (TLD) servers that hold the IP addresses of the domain</li>
-      <ul>
-        <li>Domain examples - .com, .org, .io</li>
-      </ul>
-      <li>Top-level domain (TLD) name servers - hold IP addresses of authoritative name servers</li>
-      <li>Authoritative name servers - provide IP addresses of the web or application servers</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview, Alex Xu
-  </div>
-</div>
-
-<div class="card mb-4" id="system-design-">
-  <div class="card-body">
-    <h2 class="card-title">CDN</h2>
-    <ul>
-      <li>Geographically distributed proxy servers, that are placed on the network edge, close to end users</li>
-      <li>Generally serves static contents like image, video, CSS, JS</li>
-      <li>Ex. Amazon CloudFront</li>
-    </ul>
-
-    <h3 class="card-title">Push CDN</h3>
-    <ul>
-      <li>Content gets sent automatically to CDN proxy servers from the origin server</li>
-      <li>Appropriate for static content delivery and low traffic</li>
-    </ul>
-
-    <h3 class="card-title">Pull CDN</h3>
-    <ul>
-      <li>CDN pulls the unavailable data from origin servers when requested by users</li>
-      <li>TTL determines how long content is cached on CDN</li>
-      <li>Appropriate for dynamic content delivery and heavy traffic</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview, Alex Xu
-  </div>
-</div>
-
-<div class="card mb-4" id="system-design-">
-  <div class="card-body">
-    <h2 class="card-title">Load balancer</h2>
-    <ul>
-      <li>GSLB (Global Server Load Balancing) distributes traffic across different geographical regions</li>
-      <li>Private IP is used to communitcate between servers (reachable only within the same network, unreachable over internet)</li>
-      <li>Redundancy</li>
-      <ul>
-        <li>Use multiple LBs so that they can't be single point of failure</li>
-        <li>They monitor health of each other</li>
-        <li>In case primary fails, the secondary takes over</li>
-      </ul>
-      <li>Ex. NGINX, HAProxy</li>
-    </ul>
-
-    <h3 class="card-text">Benefites</h3>
-    <ul>
-      <li>Throughput is improved by parallel processing</li>
-      <li>Yield higher availability</li>
-      <li>SSL offload - client connects to load balancer via SSL, but redirect requests to servers are made via unencrypted HTTP to reduce load on the servers</li>
-      <ul>
-        <li>No need to install X.509 certificates on each server</li>
-      </ul>
-      <li>Caching - load balancer can cache popular requests</li>
-    </ul>
-
-    <h3 class="card-text">Serving response back</h3>
-    <ul>
-      <li>Proxing - load balancer receives response from backend and relays it back to the client</li>
-      <li>TCP Handoff - server sends response directly to the client</li>
-    </ul>
-
-    <h3 class="card-text">Types</h3>
-    <ul>
-      <li>Equitable dispatching - uses simple round-robin algorithm to distribute traffic evenly between all nodes</li>
-      <ul>
-        <li>Ex. AWS Elastic Load Balancer (ELB)</li>
-      </ul>
-      <li>Hash-based distribution - requests from the same client for the duration of session are directed to the same server every time by hashing metadata</li>
-      <ul>
-        <li>Ex. Azure Load Balancer</li>
-        <li>Pros - store session data in memory rather than shared data storage like Redis cache</li>
-        <li>Cons - caching work causes small latency</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Reverse proxy</h3>
-    <ul>
-      <li>Proxy hides identity of clients. Reverse proxy hides identity of servers</li>
-      <li>Proxy sits on top of clients - used for blocking certain contents (servers are freely accessible through internet)</li>
-      <li>Reverse proxy sit on top of servers - used for protection from attacks and SSL encrypting (clients can freely connect to internet)</li>
-      <li>Can act as load-balancing but is also useful when there is a single server to increase security</li>
-      <li>Ex. NGINX, HAProxy (These are load balancers but they can serve as reverse proxy too</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview, Alex Xu
-  </div>
-</div>
-
-<div class="card mb-4" id="system-design-">
-  <div class="card-body">
-    <h2 class="card-title">Cache</h2>
-    <ul>
-      <li>When receiving requests, servers check if cache has the responses</li>
-      <li>Cache-aside</li>
-      <ul>
-        <li>Cache does not interact with database</li>
-        <li>If cache miss, client fetches data from database. Then, client updates the cache</li>
-        <li>Cache miss causes three trips</li>
-        <li>Ex. Memcached</li>
-      </ul>
-      <li>Write-through</li>
-      <ul>
-        <li>Client write to cache, then cache synchronously write to database</li>
-        <li>Write operation is slow (Read is fast)</li>
-      </ul>
-      <li>Write-back</li>
-      <ul>
-        <li>Client write to cache, then cache asynchronously write to database</li>
-        <li>Data loss if cache goes down (Both read and write is fast)</li>
-      </ul>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview, Alex Xu
-  </div>
-</div>
-
-<div class="card mb-4" id="system-design-">
-  <div class="card-body">
-    <h2 class="card-title">Message queue</h2>
-    <ul>
-      <li>Decoupling producer and consumer makes system scalable and reliable</li>
-      <li>Ex. Redis, RabbitMQ, Amazon SQS</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
