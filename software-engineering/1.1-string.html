@@ -88,39 +88,48 @@
 
 <div class="card mb-4" id="string-">
   <div class="card-body">
-    <h2 class="card-title">Zigzag Conversion (M)</h2>
+    <h2 class="card-title">Zigzag Conversion (M) (Google)</h2>
 
 <pre><code class="python">class Solution:
     def convert(self, s: str, numRows: int) -> str:
 
-        # Place each char into different rows
-        #   Increment rows until hitting the last row
-        #   Decremetn rows until hitting the first row
+        # Create matrix
+        #    Increment rows until reach numRows
+        #    Then, decrement row and increase col together
+        #    When reaching row 0, increment rows again
 
-        if numRows == 1:
-            return s
+        i, j, d = 0, 0, 1
+        n, m = numRows, len(s)
+        matrix = [[""] * m for _ in range(max(n,m))]
 
-        rows = [""] * numRows
-        index = 0
-        direction = -1
+        # Time O(n)
+        #   n = len(s)
+        # Space O(nm)
+        #   m = number of rows
+        for c in s:
 
-        # Time O(n) n = len(s)
-        # Space O(n)
-        for char in s:
-            rows[index] += char
+            matrix[i][j] = c
 
-            if index == 0 or index == numRows - 1:
-                if direction == 1:
-                    direction = -1
-                elif direction == -1:
-                    direction = 1
+            if d == 1:
+                i += 1
+            else:
+                i -= 1
+                j += 1
 
-            if direction == 1:
-                index += 1
-            elif direction == -1:
-                index -= 1
+            if i == 0:
+                d = 1
+            if i == n - 1:
+                d = -1
+            
+        result = ""
 
-        return "".join(rows)</code></pre>
+        # Time O(n)
+        #   n = len(s)
+        #   m = number of rows
+        for row in matrix:
+            result += "".join(row)
+
+        return result</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/zigzag-conversion">6. Zigzag Conversion</a>
