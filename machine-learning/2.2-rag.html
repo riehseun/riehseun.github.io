@@ -61,19 +61,24 @@
     <ul>
       <li>Business objective</li>
       <ul>
-        <li>Which languages should the system support? English only</li>
-        <li>Should the system moderate contents? Yes</li>
-        <li>Should the system support images and videos as input and output? No, text only</li>
-        <li>Should the system support follow up questions? Yes, context window should be at least 4096</li>
-        <li>Should the system browser website, call APIs? No</li>
-        <li>Should the system be personalized to each user? No</li>
+        <li>What does knowledge base look like? company's wiki pages and question-answer forum</li>
+        <li>Does knowledge base contain texts, images, and other modalities? Yes, the documents are PDFs and they includes text, images, tables, diagrams</li>
+        <li>Do documents have certain structure? No, they vary in structure</li>
+        <li>Should the system return citations of documents? Yes</li>
+        <li>Should the system support multiple languages? No, English only</li>
+        <li>Should the system support follow-up questions? Yes</li>
+        <li>Should the system handle safety, bias, fairness, etc? Yes</li>
       </ul>
       <li>System features</li>
       <li>Data</li>
       <ul>
-        <li>Do we have training data available? Yes, 80k examples of questions and answers</li>
+        <li>How many pages of documents are there? 5M pages</li>
+        <li>What is rate of growth of the documents? 20% per year</li>
       </ul>
       <li>Constraints</li>
+      <ul>
+        <li>Should the system respond in real-time? Yes, but few seconds of delay is fine</li>
+      </ul>
       <li>Scale</li>
       <li>Performance</li>
     </ul>
@@ -104,7 +109,48 @@
     <ul>
       <li>Generative</li>
       <ul>
-        <li>Transformer</li>
+        <li>Fine-tuning</li>
+        <ul>
+          <li>Pros</li>
+          <ul>
+            <li>Higher accuracy</li>
+          </ul>
+        </ul>
+        <ul>
+          <li>Cons</li>
+          <ul>
+            <li>Computationally expensive</li>
+            <li>Frequent retraining</li>
+            <li>Hard to provide references for the answers</li>
+          </ul>
+        </ul>
+        <li>Prompt engineering</li>
+        <ul>
+          <li>Pros</li>
+          <ul>
+            <li>No computation needed</li>
+          </ul>
+        </ul>
+        <ul>
+          <li>Cons</li>
+          <ul>
+            <li>Highly dependant of quality of prompt</li>
+            <li>Prompty often exceeds LLM's context window</li>
+          </ul>
+        </ul>
+        <li>Retrieval augmented generation (RAG)</li>
+        <ul>
+          <li>Pros</li>
+          <ul>
+            <li>Access to most current information</li>
+          </ul>
+        </ul>
+        <ul>
+          <li>Cons</li>
+          <ul>
+            <li>Highly dependant of quality of retriever</li>
+          </ul>
+        </ul>
       </ul>
     </ul>
   </div>
@@ -121,18 +167,39 @@
     <ul>
       <li>Training data</li>
       <ul>
-        <li>General data from web</li>
+        <li>Document parsing</li>
         <ul>
-          <li>Parse raw HTML and extract main body</li>
-          <li>Remove low quality data, spams, etc</li>
-          <li>Identify language</li>
+          <li>Convert texts, images, tables, diagrams into structured format that model can understand</li>
+          <li>Ex. Dedoc, Layout-Parser, Google Cloud Document AI, PDF.co</li>
         </ul>
-        <li>General data from social media</li>
+        <li>Document chunking</li>
         <ul>
-          <li>Remove inappropriate information</li>
-          <li>Mask sensitive information (PII)</li>
-          <li>Remove duplicate data</li>
-          <li>Remove irrelevant data such as non-standard characters</li>
+          <li>Length-based chunking (Ex. LangChain's CharacterTextSplitter, RecursiveCharacterTextSplitter)</li>
+          <li>Regular expression-based chunking</li>
+          <li>HTML, markdown, code splitters (Ex. LangChain's MarkdownHeaderTextSplitter, HTMLHeaderTextSplitter, PythonCodeTextSplitter)</li>
+        </ul>
+        <li>Indexing</li>
+        <ul>
+          <li>Keyword-based</li>
+          <ul>
+            <li>Match exact query terms</li>
+            <li>Struggle with synonyms and semantic search</li>
+          </ul>
+          <li>Full-text search</li>
+          <ul>
+            <li>Searches entire documents performs partial matches and phrase searches (Ex. Elasticsearch)</li>
+            <li>Computationally expensives</li>
+            <li>Struggle with semantic search</li>
+          </ul>
+          <li>Knowledge graph-based</li>
+          <ul>
+            <li>Uses relationship between entities (Ex. people, places)</li>
+            <li>Building graph is lots of work</li>
+          </ul>
+          <li>Vector-based</li>
+          <ul>
+            <li>Match based on similarity of embeddings of query and chunks</li>
+          </ul>
         </ul>
       </ul>
       <li>Database</li>
