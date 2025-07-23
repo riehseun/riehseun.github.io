@@ -241,7 +241,7 @@
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu | Designing Machine Learning Systems, Chip Huyen
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
   </div>
 </div>
 
@@ -253,172 +253,6 @@
     <ul>
       <li>Training data</li>
       <ul>
-        <li>Collect raw data</li>
-        <ul>
-          <li>Data source</li>
-          <ul>
-            <li>How data is collected?</li>
-            <li>How clean is data?</li>
-            <li>Can data source be trusted?</li>
-            <li>Is data user-generated or system-generated?</li>
-            <li>How often new data comes in?</li>
-            <li>Can data be stored in servers or data cannot leave user device?</li>
-            <li>Does data need to be tokenized?</li>
-          </ul>
-          <li>Data types</li>
-          <ul>
-            <li>Structured</li>
-            <ul>
-              <li>Numerical</li>
-              <ul>
-                <li>Discrete</li>
-                <li>Continuous</li>
-              </ul>
-              <li>Categorical</li>
-              <ul>
-                <li>Ordinal - data with sequential order (Ex. movie rating)</li>
-                <li>Nominal - no numerical relationship between categories (Ex. male and female)</li>
-              </ul>
-            </ul>
-            <li>Unstructured</li>
-            <ul>
-              <li>Audio</li>
-              <li>Video</li>
-              <li>Image</li>
-              <li>Text</li>
-            </ul>
-          </ul>
-          <li>Data formats</li>
-          <ul>
-            <li>JSON (Javascript object notation)</li>
-            <ul>
-              <li>Human readable, thus takes a lot of space</li>
-            </ul>
-            <li>CSV (comma separated values)</li>
-            <ul>
-              <li>Human readable, thus takes a lot of space</li>
-              <li>Row major, elements in a row are stored next to each other in memory</li>
-              <li>Accessing examples is fast</li>
-              <li>Writing data is fast</li>
-            </ul>
-            <li>Parquet</li>
-            <ul>
-              <li>Binary, thus not human readable</li>
-              <li>Column major, elements in a column are stored next to each other in memory</li>
-              <li>Accessing features is fast</li>
-            </ul>
-          </ul>
-          <li>Data flow</li>
-          <ul>
-            <li>Data passing through databases</li>
-            <ul>
-              <li>A writes to DB and B reads from DB</li>
-              <li>Both A and B need access to DB</li>
-              <li>DB cannot be fast for both read and write</li>
-            </ul>
-            <li>Data passing through services</li>
-            <ul>
-              <li>A requests data from B and B responds with data</li>
-              <li>Ex. REST, RPC</li>
-            </ul>
-            <li>Data passing through real-time transport (event bus)</li>
-            <ul>
-              <li>Ex. pubsub (Kafka), message queue (RocketMQ, RabbitMQ)</li>
-            </ul>
-          </ul>
-        </ul>
-        <li>Identify features and labels</li>
-        <ul>
-          <li>Hand labeling</li>
-          <ul>
-            <li>Expensive, slow, data privary issue, introduce bias, require domain knowledge</li>
-          </ul>
-          <li>Natural labeling</li>
-          <ul>
-            <li>Ground truth labels are inferred</li>
-          </ul>
-          <li>Handling insufficient lables</li>
-          <ul>
-            <li>Weak supervision</li>
-            <ul>
-              <li>Use heuristics to label data</li>
-              <li>Labeled data is noisy</li>
-            </ul>
-            <li>Semi-supervision</li>
-            <ul>
-              <li>Use structural assumptions to generate new labels based on initial labels</li>
-              <li>Purturbation-based method</li>
-              <ul>
-                <li>Assumption is that small purturbations to a sample should not change its label</li>
-                <li>Purturbation can be directly applied to the samples</li>
-                <ul>
-                  <li>Ex. adding white noise to images</li>
-                </ul>
-                <li>Purturbation can be applied to the representation of samples</li>
-                <ul>
-                  <li>Ex. adding small random values to embeddings of words</li>
-                </ul>
-              </ul>
-            </ul>
-            <li>Transfer learning</li>
-            <ul>
-              <li>Ex. language model</li>
-              <ul>
-                <li>Does not require labeled data and can be trained on any text</li>
-                <li>Given a sequence of tokens, predict the next token</li>
-                <ul>
-                  <li>Ex. "I bought NVIDIA shares because I believe in the importance of"</li>
-                  <li>Language model might output "hardware" or "GPU" as the next token</li>
-                </ul>
-                <li>The trained model can be used for downstream tasks</li>
-                <ul>
-                  <li>Ex. sentiment analysis, intent detection, question answering</li>
-                </ul>
-              </ul>
-            </ul>
-            <li>Active learning</li>
-            <ul>
-              <li>Model chooses which data samples to learn from</li>
-            </ul>
-          </ul>
-        </ul>
-        <li>Select sampling strategy</li>
-        <ul>
-          <li>Convenience sampling</li>
-          <ul>
-            <li>Samples are selected based on their availability</li>
-          </ul>
-          <li>Snowball sampling</li>
-          <ul>
-            <li>Samples are selected based on existing samples</li>
-          </ul>
-          <li>Stratified sampling</li>
-          <ul>
-            <li>Divide population into groups and sample from each group separately</li>
-            <li>Each group is called stratum</li>
-            <li>Problem is when one sample belongs to multiple groups (Ex. multilabel tasks)</li>
-          </ul>
-          <li>Weighted sampling</li>
-          <ul>
-            <li>If there are three samples and want them to be selected with probabilties 50%, 30%, 20%, give them weights \( 0.5, 0.3, 0.2 \)</li>
-          </ul>
-          <li>Reservior sampling</li>
-          <ul>
-            <li>Useful for streaming data</li>
-            <li>Put the first k elements into the reservior</li>
-            <li>For each incoming \( n^{\text{th}} \) element, generate a random number \( i \) such that \( 1 \le i \le n \)</li>
-            <ul>
-              <li>If \( 1 \le i \le k \), replace \( i^{\text{th}} \) element in the reservoir with \( n^{\text{th}} \) element</li>
-              <li>Else, do nothing</li>
-            </ul>
-            <li>Then, each incoming \( n^{\text{th}} \) element has \( \frac{k}{n} \) probability of being in the reservoir</li>
-          </ul>
-          <li>Importance sampling</li>
-          <ul>
-            <li>Assume we want to sample from \( P(x) \) but \( P(x) \) is really expensive to sample from</li>
-            <li>The, sample from \( Q(x) \) instead and weigh this sample by \( \frac{P(x)}{Q(x)} \)</li>
-          </ul>
-        </ul>
         <li>Split data</li>
         <ul>
           <li>Split must be repeatable</li>
@@ -426,47 +260,6 @@
             <li>Use fixed seed number</li>
             <li>If distributed training environment, store the splitted data</li>
           </ul>
-        </ul>
-        <li>Address imbalance</li>
-        <ul>
-          <li>Resample training data - oversample under-represented class or undersample over-represented class</li>
-          <li>Alter loss function - give more weights to data points from minority class</li>
-          <ul>
-            <li>Class-balanced loss</li>
-            <li>Focal loss</li>
-          </ul>
-        </ul>
-        <li>Watch for data leakage</li>
-        <ul>
-          <li>Splitting time-correlated data randomly instead of by time</li>
-          <ul>
-            <li>Should always train on data from \( 0 \) to time \( t \) and evaluate it on \( t+1 \)</li>
-            <li>If random split, information from future is leaked into training process</li>
-          </ul>
-          <li>Scaling before splitting</li>
-          <ul>
-            <li>Do not use entire training data to generate global statistics before splitting into bins</li>
-            <li>If not, it leaks the mean and variance of test set into training process</li>
-            <li>Always split data first, then apply scaling</li>
-          </ul>
-          <li>Filling in missing data with statistics from the test split</li>
-          <ul>
-            <li>Leaking occurs when mean or median is calculated using entire data instead of just the train split</li>
-          </ul>
-          <li>Poor handling of data duplication before splitting</li>
-          <ul>
-            <li>Same samples might appear in both train and validation/test set</li>
-            <li>If oversampling data, do it after splitting</li>
-          </ul>
-          <li>Group leakage</li>
-          <ul>
-            <li>Ex. CT scans that are a week apart with the same lables, one in train set and the other in test set</li>
-          </ul>
-        </ul>
-        <li>Detect data leakage</li>
-        <ul>
-          <li>Measure the predictive power of each feature (or a set of features) on target variable</li>
-          <li>If a feature has high correlation, investigate</li>
         </ul>
       </ul>
       <li>Database</li>
@@ -504,25 +297,6 @@
         <li>In which format should data be stored?</li>
         <li>How to store multimodal data? (Data containing both image and text)</li>
       </ul>
-      <li>ETL</li>
-      <ul>
-        <li>Extract - extract data from different data sources</li>
-        <li>Transform - data is cleansed and transformed into specific format</li>
-        <li>Load - transformed data is loaded into target destination</li>
-      </ul>
-      <li>Data processing</li>
-      <ul>
-        <li>Batch processing</li>
-        <ul>
-          <li>Compute features that do not change often (static features)</li>
-          <li>Ex. Spark</li>
-        </ul>
-        <li>Streaming processing</li>
-        <ul>
-          <li>Compute features that change frequently (dynamic features)</li>
-          <li>Ex. Flink</li>
-        </ul>
-      </ul>
     </ul>
 
     <h3 class="card-title">Feature engineering</h3>
@@ -551,103 +325,6 @@
         <ul>
           <li>Learn which features are contributing to the accuracy of model</li>
           <li>Ex. regularization (LASSO, elastic net, ridge regression)</li>
-        </ul>
-      </ul>
-      <li>Missing values</li>
-      <ul>
-        <li>Types</li>
-        <ul>
-          <li>Missing not at random</li>
-          <ul>
-            <li>Missing due to true value itself</li>
-            <li>Ex. respondants not disclosing their income and it turns out that those who don't disclose tend to have higher income</li>
-          </ul>
-          <li>Missing at random</li>
-          <ul>
-            <li>Missing due to another observed variable</li>
-            <li>Ex. age value of centain gender is missing because that gender tend not to disclose their age</li>
-          </ul>
-          <li>Missing completely at random</li>
-          <ul>
-            <li>There is no pattern in which the value is missing</li>
-          </ul>
-        </ul>
-        <li>Handle missing values</li>
-        <ul>
-          <li>Delete - data quantity is reduced</li>
-          <ul>
-            <li>Delete row to remove a data point</li>
-            <li>Delete column to remove a feature</li>
-          </ul>
-          <li>Imputation - dataset gets noisy</li>
-          <ul>
-            <li>Fill with default value, mean, median, mode</li>
-          </ul>
-        </ul>
-      </ul>
-      <li>Feature scaling</li>
-      <ul>
-        <li>Feature scaling is not needed if using XGBoost</li>
-        <li>Helps gradient descent to find the optimum faster</li>
-        <li>Scale inputs to [-1,1]</li>
-        <ul>
-          <li>Make error function more spherical, thus gradient descent converges faster</li>
-          <li>Not scaling inputs impacts regularization</li>
-          <li>Outliers are also valid inputs. Do not throw them away</li>
-        </ul>
-        <li>Normalization (min-max scaling)</li>
-        <ul>
-          <li>Does not change distribution</li>
-          <li>All values are \( [0,1] \)</li>
-          <li>\( z = \dfrac{x-x_{min}}{x_{max}-x_{min}} \)</li>
-          <li>Outliers can make real data shrunk in very narrow range</li>
-        </ul>
-        <li>Clipping</li>
-        <ul>
-          <li>Treat outliers as -1 or 1</li>
-          <li>Numerical values are linearly scaled</li>
-          <li>Works for uniformly distributed data</li>
-        </ul>
-        <li>Standardization (z-score normalization)</li>
-        <ul>
-          <li>Mean is \( 0 \) and standard deviation is \( 1 \)</li>
-          <li>\( z = \dfrac{x-\mu}{\sigma} \)</li>
-          <li>Works for normally distributed data</li>
-        </ul>
-        <li>Log scaling</li>
-        <ul>
-          <li>Mitigate skewness of a feature, so that gradient descent converges faster</li>
-          <li>\( z = log(x) \)</li>
-          <li>Used when data is neither uniformly or normally distributed</li>
-        </ul>
-      </ul>
-      <li>Bucketing</li>
-      <ul>
-        <li>Convert numerical feature to categorical feature</li>
-      </ul>
-      <li>Encoding</li>
-      <ul>
-        <li>Convert categorical features to numerical feature</li>
-        <li>Ex. integer encoding</li>
-        <ul>
-          <li>Integer value is assigned to each category</li>
-          <li>Cannot be used for nominal features</li>
-        </ul>
-        <li>Ex. one-hot encoding</li>
-        <ul>
-          <li>Binary value is assigned to each category</li>
-          <li>Not suitable for features with high cardinality</li>
-          <li>Not suitable when features values are not independent</li>
-        </ul>
-        <li>Ex. embedding</li>
-        <ul>
-          <li>Learn N-D vector for each categorial value</li>
-          <li>Just another hidden layer in neural network</li>
-          <li>When determining embedding dimension, hyperparameter tune between these two variables</li>
-          <ul>
-            <li>Fourth root of the total number of unique categorical elements</li>
-            <li>1.6 times the square root of the number of unique elements in the category, no less than 600</li>
-          </ul>
         </ul>
       </ul>
     </ul>
@@ -905,42 +582,6 @@
             </ul>
           </ul>
         </ul>
-        <li>Continual learning</li>
-        <ul>
-          <li>Stateless retraining</li>
-          <ul>
-            <li>Model is trained from scratch</li>
-            <li>Required when model architecture or features change</li>
-          </ul>
-          <li>Stateful retraining</li>
-          <ul>
-            <li>Model continues training on new data</li>
-            <li>Called fine-tuning or incremental learning</li>
-          </ul>
-          <li>Challenges</li>
-          <ul>
-            <li>Fresh data access challenge</li>
-            <li>Evaluation challenge</li>
-            <li>Algorithm challenge</li>
-          </ul>
-          <li>Stages</li>
-          <ul>
-            <li>Manual, stateless retraining</li>
-            <li>Automated retraining</li>
-            <li>Automated, stateful training</li>
-            <li>Continual learning</li>
-          </ul>
-        </ul>
-        <li>Two-phase prediction</li>
-        <ul>
-          <li>Split large use case into two phases</li>
-          <li>Only the simpler phase should be carried out on the edge</li>
-        </ul>
-        <li>Feature store</li>
-        <ul>
-          <li>Store precomputed features to be re-used</li>
-        </ul>
-        <li>Model versioning</li>
       </ul>
       <li>ML failure</li>
       <ul>

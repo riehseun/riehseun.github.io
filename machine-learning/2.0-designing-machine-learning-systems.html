@@ -44,192 +44,367 @@
   <div class="card-body">
     <h2 class="card-title">Designing machine learning systems</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#designing-machine-learning-systems-"></a></li>
-      <li><a href="#designing-machine-learning-systems-"></a></li>
-      <li><a href="#designing-machine-learning-systems-"></a></li>
+      <li><a href="#designing-machine-learning-systems-">Data engineering</a></li>
+      <li><a href="#designing-machine-learning-systems-">Training data</a></li>
+      <li><a href="#designing-machine-learning-systems-">Feature engineering</a></li>
+      <li><a href="#designing-machine-learning-systems-">Model development</a></li>
+      <li><a href="#designing-machine-learning-systems-">Model deployment and serving</a></li>
+      <li><a href="#designing-machine-learning-systems-">Data distribution shift and monitoring</a></li>
+      <li><a href="#designing-machine-learning-systems-">Continual learning</a></li>
     </ul>
   </div>
 </div>
 
 <div class="card mb-4" id="designing-machine-learning-systems-">
   <div class="card-body">
-    <h2 class="card-title">Data representation</h2>
+    <h2 class="card-title">Data engineering</h2>
     <ul>
-      <li>Feature hashing</li>
+      <li>Data source</li>
       <ul>
-        <li>Suitable when these problems exist</li>
-        <ul>
-          <li>Vocabulary is incomplete</li>
-          <li>Categorical variable has high cardinality</li>
-          <li>Cold start problem</li>
-        </ul>
-        <li>Ex. airport_id in USA where there are 347 of them</li>
-        <ul>
-          <li>Training data may not contain all airport_id</li>
-          <li>347 results in high cardinality</li>
-          <li>New airport will get built</li>
-        </ul>
-        <li>Convert categorical input to unique string, then apply hashing on the string</li>
-        <li>The number of buckets can be treated as a hyperparameter</li>
-        <li>Cons</li>
-        <ul>
-          <li>Model accuracy will suffer (especially when the distribution of categorical input is highly skewed)</li>
-        </ul>
+        <li>How data is collected?</li>
+        <li>How clean is data?</li>
+        <li>Can data source be trusted?</li>
+        <li>Is data user-generated or system-generated?</li>
+        <li>How often new data comes in?</li>
+        <li>Can data be stored in servers or data cannot leave user device?</li>
+        <li>Does data need to be tokenized?</li>
       </ul>
-      <li>Feature cross</li>
+      <li>Data types</li>
       <ul>
-        <li>Used when model complexity is insufficient to learn feature relationships</li>
-        <li>Concatenate categorical features to create combinations of feature values</li>
-        <li>Should never be used for numerical feature as it will result in infinite sparcity</li>
+        <li>Structured</li>
         <ul>
-          <li>Numerical features can be bucketized to become categorical features before applying feature cross</li>
-        </ul>
-        <li>Should not cross two features that are highly correlated</li>
-      </ul>
-      <li>Multimodal input</li>
-      <ul>
-        <li>Combine different types of inputs (Ex. numerical, one-hot, embedding, etc) into one representation</li>
-      </ul>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: Machine Learning Design Patterns, Valliappa Lakshmanan & Sara Robinson & Michael Munn
-  </div>
-</div>
-
-<div class="card mb-4" id="designing-machine-learning-systems-">
-  <div class="card-body">
-    <h2 class="card-title">Problem representation</h2>
-    <ul>
-      <li>Reframing</li>
-      <ul>
-        <li>Ex. regression problem to predict rainfall amount -> classification problem to model discrete probability distribution</li>
-      </ul>
-      <li>Multi-labeling</li>
-      <ul>
-        <li>Ex. image consists of multiple animals rather than just one animal like cat, dog, rabbit</li>
-        <li>Give more than one label to training example</li>
-        <li>Encode the label using a multi-hot array</li>
-        <li>Final output layer will have a sigmoid activation function where each value in the array is in range between \( 0 \) and \( 1 \)</li>
-      </ul>
-      <li>Ensembles</li>
-      <ul>
-        <li>Suitable for bia-variance trade-off on small to medium scale problems</li>
-        <li>Bagging</li>
-        <ul>
-          <li>Ex. Random Forest</li>
-        </ul>
-        <li>Boosting</li>
-        <ul>
-          <li>Ex. AdaBoost, XGBoost</li>
-        </ul>
-        <li>Stacking</li>
-        <ul>
-          <li>Combines the outputs of a collection of models to make a prediction</li>
-        </ul>
-      </ul>
-      <li>Cascade</li>
-      <ul>
-        <li>Break a problem into many sub-problems</li>
-        <li>Ex. predict the likelihood of a customer returning an item</li>
-        <ul>
-          <li>Predict whether a specific transaction is by a reseller or retail buyer</li>
-          <li>Train a model on sales to retail buyers</li>
-          <li>Train a model on sales to resellers</li>
-          <li>Combine the outputs of three seperate models to predict return likelihood</li>
-        </ul>
-      </ul>
-      <li>Neutral class</li>
-      <ul>
-        <li>Ex. three-class classifier that outputs disjoint probabilities for Yes, No, Maybe</li>
-      </ul>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: Machine Learning Design Patterns, Valliappa Lakshmanan & Sara Robinson & Michael Munn
-  </div>
-</div>
-
-<div class="card mb-4" id="designing-machine-learning-systems-">
-  <div class="card-body">
-    <h2 class="card-title">Model training</h2>
-    <ul>
-      <li>Transfer learning</li>
-      <ul>
-        <li>Feature extraction</li>
-        <ul>
-          <li>Final layer contains the classification label or output specific to the prediction task</li>
-          <li>Remove the final layer, freeze the weights, and replace the final layer with the output for the specialized prediction task</li>
-          <li>Layer before the last layer is referred as bottleneck layer</li>
-          <li>Suitable when dataset is small and computation budget is low</li>
-          <li>Works better when the prediction taks is different than the pre-trained model</li>
-        </ul>
-        <li>Fine-tuning</li>
-        <ul>
-          <li>Leave initial layers frozen and update weights on further layers</li>
-          <li>Suitable when dataset is large and computation budget is high</li>
-          <li>Works better when the prediction taks is similar to the pre-trained model</li>
-        </ul>
-      </ul>
-      <li>Checkpoints</li>
-      <ul>
-        <li>Save the model state at the end of every epoc</li>
-        <ul>
-          <li>If tree model, save the final rules for each intermediate node and the predicted value for each of the leaf nodes</li>
-          <li>If linear model, save the final values of the weights and biases</li>
-          <li>If neural network, save the final values of the weights and biases plus activation functions and the weights of the hidden connections</li>
-        </ul>
-        <li>Model state changes after every batch, but checkpointing at every batch is too expensive</li>
-        <li>Fine-tuning - when retraining the model on fresh data, train from a checkpoint</li>
-        <li>Instead of this</li>
-<pre><code class="python">model.fit(X_train, y_train,
-        batch_size=100,
-        epochs=15)</code></pre>
-        <li>Do this</li>
-<pre><code class="python">NUM_TRAINING_EXAMPLES = 1000 * 1000
-STOP_POINT = 14.3
-TOTAL_TRAINING_EXAMPLES = int(STOP_POINT*NUM_TRAINING_EXAMPLES)
-BATCH_SIZE = 100
-NUM_CHECKPOINTS = 15
-steps_per_epoch = TOTAL_TRAINING_EXAMPLES // (BATCH_SIZE*NUM_CHECKPOINTS)
-cp_callback = tf.keras.callbacks.ModelCheckpoint(...)
-history = model.fit(trainds,
-                  validation_data=evalds,
-                  epochs=NUM_CHECKPOINTS,
-                  steps_per_epoch =steps_per_epoch,
-                  batch_size=BATCH_SIZE,
-                  callbacks=[cp_callback])</code></pre>
-      </ul>
-      <li>Distributed training</li>
-      <ul>
-        <li>Data parallelism</li>
-        <ul>
-          <li>Computation is split across different machines</li>
-          <li>Different workers train on different subsets of training data</li>
-          <li>Synchronous training</li>
+          <li>Numerical</li>
           <ul>
-            <li>A mini-batch of data is split among each of the separate workers</li>
-            <li>Each device performs a forward pass with their portion of mini-batch and computes gradients for each parameter of the model</li>
-            <li>These locally computed gradients are collected from each device and aggregated to produce a single gradient update for each parameter</li>
-            <li>A central server performs the gradient step according to the gradients received from multiple workers</li>
+            <li>Discrete</li>
+            <li>Continuous</li>
           </ul>
-          <li>Asynchronous training</li>
+          <li>Categorical</li>
           <ul>
-            <li>A central server computes new parameters periodically based on whichever gradient updates it received since the last computation</li>
-            <li>Higher throughput since a slow worker does not block the progression of training steps</li>
-            <li>Some splits of mini-batch may be lost during training</li>
+            <li>Ordinal - data with sequential order (Ex. movie rating)</li>
+            <li>Nominal - no numerical relationship between categories (Ex. male and female)</li>
           </ul>
         </ul>
-        <li>Model parallelism</li>
+        <li>Unstructured</li>
         <ul>
-          <li>Model is split</li>
-          <li>Different workers carry out computation for different parts of the model</li>
+          <li>Audio</li>
+          <li>Video</li>
+          <li>Image</li>
+          <li>Text</li>
+        </ul>
+      </ul>
+      <li>Data formats</li>
+      <ul>
+        <li>JSON (Javascript object notation)</li>
+        <ul>
+          <li>Human readable, thus takes a lot of space</li>
+        </ul>
+        <li>CSV (comma separated values)</li>
+        <ul>
+          <li>Human readable, thus takes a lot of space</li>
+          <li>Row major, elements in a row are stored next to each other in memory</li>
+          <li>Accessing examples is fast</li>
+          <li>Writing data is fast</li>
+        </ul>
+        <li>Parquet</li>
+        <ul>
+          <li>Binary, thus not human readable</li>
+          <li>Column major, elements in a column are stored next to each other in memory</li>
+          <li>Accessing features is fast</li>
+        </ul>
+      </ul>
+      <li>Data flow</li>
+      <ul>
+        <li>Data passing through databases</li>
+        <ul>
+          <li>A writes to DB and B reads from DB</li>
+          <li>Both A and B need access to DB</li>
+          <li>DB cannot be fast for both read and write</li>
+        </ul>
+        <li>Data passing through services</li>
+        <ul>
+          <li>A requests data from B and B responds with data</li>
+          <li>Ex. REST, RPC</li>
+        </ul>
+        <li>Data passing through real-time transport (event bus)</li>
+        <ul>
+          <li>Ex. pubsub (Kafka), message queue (RocketMQ, RabbitMQ)</li>
+        </ul>
+      </ul>
+      <li>ETL</li>
+      <ul>
+        <li>Extract - extract data from different data sources</li>
+        <li>Transform - data is cleansed and transformed into specific format</li>
+        <li>Load - transformed data is loaded into target destination</li>
+      </ul>
+      <li>Data processing</li>
+      <ul>
+        <li>Batch processing</li>
+        <ul>
+          <li>Compute features that do not change often (static features)</li>
+          <li>Ex. Spark</li>
+        </ul>
+        <li>Streaming processing</li>
+        <ul>
+          <li>Compute features that change frequently (dynamic features)</li>
+          <li>Ex. Flink</li>
         </ul>
       </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: Machine Learning Design Patterns, Valliappa Lakshmanan & Sara Robinson & Michael Munn
+    Reference: Designing Machine Learning Systems, Chip Huyen
+  </div>
+</div>
+
+<div class="card mb-4" id="designing-machine-learning-systems-">
+  <div class="card-body">
+    <h2 class="card-title">Training data</h2>
+    <ul>
+      <li>Sampling</li>
+      <ul>
+        <li>Convenience sampling</li>
+        <ul>
+          <li>Samples are selected based on their availability</li>
+        </ul>
+        <li>Snowball sampling</li>
+        <ul>
+          <li>Samples are selected based on existing samples</li>
+        </ul>
+        <li>Stratified sampling</li>
+        <ul>
+          <li>Divide population into groups and sample from each group separately</li>
+          <li>Each group is called stratum</li>
+          <li>Problem is when one sample belongs to multiple groups (Ex. multilabel tasks)</li>
+        </ul>
+        <li>Weighted sampling</li>
+        <ul>
+          <li>If there are three samples and want them to be selected with probabilties 50%, 30%, 20%, give them weights \( 0.5, 0.3, 0.2 \)</li>
+        </ul>
+        <li>Reservior sampling</li>
+        <ul>
+          <li>Useful for streaming data</li>
+          <li>Put the first k elements into the reservior</li>
+          <li>For each incoming \( n^{\text{th}} \) element, generate a random number \( i \) such that \( 1 \le i \le n \)</li>
+          <ul>
+            <li>If \( 1 \le i \le k \), replace \( i^{\text{th}} \) element in the reservoir with \( n^{\text{th}} \) element</li>
+            <li>Else, do nothing</li>
+          </ul>
+          <li>Then, each incoming \( n^{\text{th}} \) element has \( \frac{k}{n} \) probability of being in the reservoir</li>
+        </ul>
+        <li>Importance sampling</li>
+        <ul>
+          <li>Assume we want to sample from \( P(x) \) but \( P(x) \) is really expensive to sample from</li>
+          <li>The, sample from \( Q(x) \) instead and weigh this sample by \( \frac{P(x)}{Q(x)} \)</li>
+        </ul>
+      </ul>
+      <li>Labeling</li>
+      <ul>
+        <li>Hand labeling</li>
+        <ul>
+          <li>Expensive, slow, data privary issue, introduce bias, require domain knowledge</li>
+        </ul>
+        <li>Natural labeling</li>
+        <ul>
+          <li>Ground truth labels are inferred</li>
+        </ul>
+        <li>Handling insufficient lables</li>
+        <ul>
+          <li>Weak supervision</li>
+          <ul>
+            <li>Use heuristics to label data</li>
+            <li>Labeled data is noisy</li>
+          </ul>
+          <li>Semi-supervision</li>
+          <ul>
+            <li>Use structural assumptions to generate new labels based on initial labels</li>
+            <li>Purturbation-based method</li>
+            <ul>
+              <li>Assumption is that small purturbations to a sample should not change its label</li>
+              <li>Purturbation can be directly applied to the samples</li>
+              <ul>
+                <li>Ex. adding white noise to images</li>
+              </ul>
+              <li>Purturbation can be applied to the representation of samples</li>
+              <ul>
+                <li>Ex. adding small random values to embeddings of words</li>
+              </ul>
+            </ul>
+          </ul>
+          <li>Transfer learning</li>
+          <ul>
+            <li>Ex. language model</li>
+            <ul>
+              <li>Does not require labeled data and can be trained on any text</li>
+              <li>Given a sequence of tokens, predict the next token</li>
+              <ul>
+                <li>Ex. "I bought NVIDIA shares because I believe in the importance of"</li>
+                <li>Language model might output "hardware" or "GPU" as the next token</li>
+              </ul>
+              <li>The trained model can be used for downstream tasks</li>
+              <ul>
+                <li>Ex. sentiment analysis, intent detection, question answering</li>
+              </ul>
+            </ul>
+          </ul>
+          <li>Active learning</li>
+          <ul>
+            <li>Model chooses which data samples to learn from</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>Class imbalance</li>
+      <ul>
+        <li>Resample training data - oversample under-represented class or undersample over-represented class</li>
+        <li>Alter loss function - give more weights to data points from minority class</li>
+        <ul>
+          <li>Class-balanced loss</li>
+          <li>Focal loss</li>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Designing Machine Learning Systems, Chip Huyen
+  </div>
+</div>
+
+<div class="card mb-4" id="designing-machine-learning-systems-">
+  <div class="card-body">
+    <h2 class="card-title">Feature engineering</h2>
+    <ul>
+      <li>Watch for data leakage</li>
+      <ul>
+        <li>Splitting time-correlated data randomly instead of by time</li>
+        <ul>
+          <li>Should always train on data from \( 0 \) to time \( t \) and evaluate it on \( t+1 \)</li>
+          <li>If random split, information from future is leaked into training process</li>
+        </ul>
+        <li>Scaling before splitting</li>
+        <ul>
+          <li>Do not use entire training data to generate global statistics before splitting into bins</li>
+          <li>If not, it leaks the mean and variance of test set into training process</li>
+          <li>Always split data first, then apply scaling</li>
+        </ul>
+        <li>Filling in missing data with statistics from the test split</li>
+        <ul>
+          <li>Leaking occurs when mean or median is calculated using entire data instead of just the train split</li>
+        </ul>
+        <li>Poor handling of data duplication before splitting</li>
+        <ul>
+          <li>Same samples might appear in both train and validation/test set</li>
+          <li>If oversampling data, do it after splitting</li>
+        </ul>
+        <li>Group leakage</li>
+        <ul>
+          <li>Ex. CT scans that are a week apart with the same lables, one in train set and the other in test set</li>
+        </ul>
+      </ul>
+      <li>Detect data leakage</li>
+      <ul>
+        <li>Measure the predictive power of each feature (or a set of features) on target variable</li>
+        <li>If a feature has high correlation, investigate</li>
+      </ul>
+    </ul>
+    <li>Missing values</li>
+    <ul>
+      <li>Types</li>
+      <ul>
+        <li>Missing not at random</li>
+        <ul>
+          <li>Missing due to true value itself</li>
+          <li>Ex. respondants not disclosing their income and it turns out that those who don't disclose tend to have higher income</li>
+        </ul>
+        <li>Missing at random</li>
+        <ul>
+          <li>Missing due to another observed variable</li>
+          <li>Ex. age value of centain gender is missing because that gender tend not to disclose their age</li>
+        </ul>
+        <li>Missing completely at random</li>
+        <ul>
+          <li>There is no pattern in which the value is missing</li>
+        </ul>
+      </ul>
+      <li>Handle missing values</li>
+      <ul>
+        <li>Delete - data quantity is reduced</li>
+        <ul>
+          <li>Delete row to remove a data point</li>
+          <li>Delete column to remove a feature</li>
+        </ul>
+        <li>Imputation - dataset gets noisy</li>
+        <ul>
+          <li>Fill with default value, mean, median, mode</li>
+        </ul>
+      </ul>
+    </ul>
+    <li>Feature scaling</li>
+    <ul>
+      <li>Feature scaling is not needed if using XGBoost</li>
+      <li>Helps gradient descent to find the optimum faster</li>
+      <li>Scale inputs to [-1,1]</li>
+      <ul>
+        <li>Make error function more spherical, thus gradient descent converges faster</li>
+        <li>Not scaling inputs impacts regularization</li>
+        <li>Outliers are also valid inputs. Do not throw them away</li>
+      </ul>
+      <li>Normalization (min-max scaling)</li>
+      <ul>
+        <li>Does not change distribution</li>
+        <li>All values are \( [0,1] \)</li>
+        <li>\( z = \dfrac{x-x_{min}}{x_{max}-x_{min}} \)</li>
+        <li>Outliers can make real data shrunk in very narrow range</li>
+      </ul>
+      <li>Clipping</li>
+      <ul>
+        <li>Treat outliers as -1 or 1</li>
+        <li>Numerical values are linearly scaled</li>
+        <li>Works for uniformly distributed data</li>
+      </ul>
+      <li>Standardization (z-score normalization)</li>
+      <ul>
+        <li>Mean is \( 0 \) and standard deviation is \( 1 \)</li>
+        <li>\( z = \dfrac{x-\mu}{\sigma} \)</li>
+        <li>Works for normally distributed data</li>
+      </ul>
+      <li>Log scaling</li>
+      <ul>
+        <li>Mitigate skewness of a feature, so that gradient descent converges faster</li>
+        <li>\( z = log(x) \)</li>
+        <li>Used when data is neither uniformly or normally distributed</li>
+      </ul>
+    </ul>
+    <li>Bucketing</li>
+    <ul>
+      <li>Convert numerical feature to categorical feature</li>
+    </ul>
+    <li>Encoding</li>
+    <ul>
+      <li>Convert categorical features to numerical feature</li>
+      <li>Ex. integer encoding</li>
+      <ul>
+        <li>Integer value is assigned to each category</li>
+        <li>Cannot be used for nominal features</li>
+      </ul>
+      <li>Ex. one-hot encoding</li>
+      <ul>
+        <li>Binary value is assigned to each category</li>
+        <li>Not suitable for features with high cardinality</li>
+        <li>Not suitable when features values are not independent</li>
+      </ul>
+      <li>Ex. embedding</li>
+      <ul>
+        <li>Learn N-D vector for each categorial value</li>
+        <li>Just another hidden layer in neural network</li>
+        <li>When determining embedding dimension, hyperparameter tune between these two variables</li>
+        <ul>
+          <li>Fourth root of the total number of unique categorical elements</li>
+          <li>1.6 times the square root of the number of unique elements in the category, no less than 600</li>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Designing Machine Learning Systems, Chip Huyen
   </div>
 </div>
 <!-- Designing machine learning systems END -->
