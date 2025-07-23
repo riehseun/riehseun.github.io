@@ -46,9 +46,11 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#linkedlist-">Add two numbers</a></li>
       <li><a href="#linkedlist-">Remove Nth node from end of list</a></li>
-      <li><a href="#linkedlist-">Merge k Sorted Lists</a></li>
+      <li><a href="#linkedlist-">Swap nodes in pairs</a></li>
+      <li><a href="#linkedlist-">Reverse nodes in k-group</a></li>
       <li><a href="#linkedlist-">Copy list with random pointer</a></li>
       <li><a href="#linkedlist-">LRU Cache</a></li>
+      <li><a href="#linkedlist-">Reverse linked list</a></li>
       <li><a href="#linkedlist-">Flatten a Multilevel Doubly Linked List</a></li>
       <li><a href="#linkedlist-">All O`one Data Structure</a></li>
       <li><a href="#linkedlist-">Insert into a Sorted Circular Linked List</a></li>
@@ -156,7 +158,7 @@ class Solution:
 
 <div class="card mb-4" id="linkedlist-">
   <div class="card-body">
-    <h2 class="card-title">Merge k Sorted Lists (H) (Meta)</h2>
+    <h2 class="card-title">Swap nodes in pairs (M) (Google)</h2>
 
 <pre><code class="python"># Definition for singly-linked list.
 # class ListNode:
@@ -164,51 +166,123 @@ class Solution:
 #         self.val = val
 #         self.next = next
 class Solution:
-    def mergeKLists(self, lists: List[Optional[ListNode]]) -> Optional[ListNode]:
+    def swapPairs(self, head: Optional[ListNode]) -> Optional[ListNode]:
 
-        # Merge two list at a time
-        #   Keep merged list in the original array 
-        # Repeat until only one list is left
+        # Swap node A and B
+        #   A.next = B.next
+        #   B.next = A
+        #   A.prev.next = B
+        # Use dummy node that points to head
 
-        def merge_two_lists(l1, l2):
+        node = head 
+        head = ListNode(0)
+        head.next = node
+        prev = head
 
-            head = l3 = ListNode()
-
-            while l1 and l2:
-                if l1.val < l2.val:
-                    l3.next = l1
-                    l1 = l1.next
-                else:
-                    l3.next = l2
-                    l2 = l2.next
-                l3 = l3.next
-
-            if l1:
-                l3.next = l1
-            if l2:
-                l3.next = l2
-
-            return head.next
-
-        n = len(lists)
-        interval = 1
-
-        # Time O(nlogk)
-        #   n = total number of nodes in all linked lists
-        #   k = number of linked lists
+        # Time O(n)
+        #   n = length of LL
         # Space O(1)
-        while interval < n:
-            for i in range(0, n-interval, interval*2):
-                lists[i] = merge_two_lists(lists[i], lists[i+interval])
-            interval *= 2
+        while node:
 
-        if n <= 0:
-            return None
+            a = node
+            if not node.next:
+                break
+            b = node.next
+            
+            a.next = b.next
+            b.next = a
+            prev.next = b
+            prev = a
 
-        return lists[0]</code></pre>
+            node = a.next
+
+        return head.next</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/merge-k-sorted-lists">23. Merge k Sorted Lists</a>
+    Reference: <a href="https://leetcode.com/problems/swap-nodes-in-pairs">24. Swap Nodes in Pairs</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="linkedlist-">
+  <div class="card-body">
+    <h2 class="card-title">Reverse nodes in k-group (H)</h2>
+
+<pre><code class="python"># Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def reverseKGroup(self, head: Optional[ListNode], k: int) -> Optional[ListNode]:
+        # Reverse linked list and reconnect various nodes
+        #   Helper function to check the length of remaining linked list
+        #   Reversed nodes themselves need to be reconnected to each other
+        #   Reversed nodes and the remaining nodes need to be reconnected
+
+        def get_linked_list_length(head):
+
+            i = 0
+
+            # Check if there are at least k nodes in the linked list
+            while head:
+                head = head.next
+                i += 1
+
+            return i
+
+        def reverse(head, k):
+
+            first_head = head
+
+            pre = None
+            cur = head
+            nex = head.next
+
+            i = 0
+
+            while i < k:
+                cur.next = pre
+                pre = cur
+                cur = nex
+                if nex:
+                    nex = nex.next
+                i += 1
+
+            # Key idea is to return the current node
+            return pre, cur, first_head
+
+        # This tracks the node that should be in the beginning
+        head_in_the_beginning = None
+
+        prev_first_head = None
+
+        # Time O(n)
+        # Space O(1)
+        while True:
+            length = get_linked_list_length(head)
+            if length < k:
+                # This connects reversed nodes to the node on the right
+                first_head.next = head
+                break
+            else:
+                pre, head, first_head = reverse(head, k)
+
+                # This connects between the reversed nodes
+                if prev_first_head:
+                    prev_first_head.next = pre
+
+                # In this case, this is the first time the reverse takes place
+                # Thus, pre will be the first node in the final linked list
+                else:
+                    head_in_the_beginning = pre
+
+                # This connects between the reversed nodes
+                prev_first_head = first_head
+
+        return head_in_the_beginning</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/reverse-nodes-in-k-group">25. Reverse Nodes in k-Group</a>
   </div>
 </div>
 
@@ -364,6 +438,52 @@ class LRUCache:
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/lru-cache">146. LRU Cache</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="linkedlist-">
+  <div class="card-body">
+    <h2 class="card-title">Reverse linked list (E) (Google)</h2>
+
+<pre><code class="python"># Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+
+        # Iterate LL
+        # At each node
+        #   Remember node.next (next = node.next)
+        #   Reverse link (node.next = prev)
+        #   Update prev (prev = node)
+        #   Move to next node (node = next)    
+        # Return prev
+
+        prev, temp = None, None
+
+        # Time O(n)
+        #   n = number of nodes in LL
+        # Space O(1)
+        while head:
+
+            # If head node
+            if not prev:
+                prev = head
+                head = head.next
+                prev.next = None
+            else:
+                next = head.next
+                head.next = prev
+                prev = head
+                if head.next:
+                    head = next
+                
+        return prev</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/reverse-linked-list">206. Reverse Linked List</a>
   </div>
 </div>
 
