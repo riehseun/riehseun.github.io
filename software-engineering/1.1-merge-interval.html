@@ -44,12 +44,56 @@
   <div class="card-body">
     <h2 class="card-title">Merge interval</h2>
     <ul class="list-unstyled mb-0">
+      <li><a href="#merge-interval-">Merge two sorted lists</a></li>
       <li><a href="#merge-interval-">Merge interval</a></li>
-      <li><a href="#merge-interval-">Insert interval</a></li>
       <li><a href="#merge-interval-">Meeting rooms II</a></li>
       <li><a href="#merge-interval-">Employee Free Time</a></li>
       <li><a href="#merge-interval-">Interval List Intersections</a></li>
     </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="merge-interval-">
+  <div class="card-body">
+    <h2 class="card-title">Merge two sorted lists (E) (Google)</h2>
+
+<pre><code class="python"># Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def mergeTwoLists(self, list1: Optional[ListNode], list2: Optional[ListNode]) -> Optional[ListNode]:
+
+        # Iterate list1 and list2 at the same time
+
+        result = ListNode()
+        dummy_head = result
+
+        # Time O(n+m) 
+        #   n = length of list1
+        #   m = length of list2
+        # Space O(1) 
+        while list1 and list2:
+            if list1.val < list2.val:
+                result.next = list1
+                list1 = list1.next
+            else:
+                result.next = list2
+                list2 = list2.next
+            result = result.next
+
+        if list1:
+            result.next = list1
+        if list2:
+            result.next = list2
+
+        # Returning result.next will return the last node in the linked
+        # list we computed. To return the first node, we use temp
+        return dummy_head.next</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://leetcode.com/problems/merge-two-sorted-lists/">21. Merge Two Sorted Lists</a>
   </div>
 </div>
 
@@ -96,84 +140,40 @@
 
 <div class="card mb-4" id="merge-interval-">
   <div class="card-body">
-    <h2 class="card-title">Insert interval (M)</h2>
-
-<pre><code class="python">class Solution:
-    def insert(self, intervals: List[List[int]], newInterval: List[int]) -> List[List[int]]:
-
-        # Time: O(n)
-        # Space: O(n)
-        # n = length of intervals
-
-        # Add intervals that start before the interval to be inserted into the an array.
-        # Then, add the interval to be inserted to the array.
-        # Then, add all other remaining intervals to the array.
-        # Now perform merge on the array.
-
-        result = []
-
-        i = 0
-        interval_inserted = False
-        while i < len(intervals):
-            if intervals[i][0] < newInterval[0]:
-                result.append(intervals[i])
-                i += 1
-            else:
-                if not interval_inserted:
-                    result.append(newInterval)
-                    interval_inserted = True
-                else:
-                    result.append(intervals[i])
-                    i += 1
-
-        if not interval_inserted:
-            result.append(newInterval)
-
-        return self.merge(result)</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/insert-interval">57. Insert Interval</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="merge-interval-">
-  <div class="card-body">
-    <h2 class="card-title">Meeting rooms II (M)</h2>
+    <h2 class="card-title">Meeting rooms II (M) (Amazon)</h2>
 
 <pre><code class="python">class Solution:
     def minMeetingRooms(self, intervals: List[List[int]]) -> int:
 
-        # Sort all the meetings by start time
-        # Insert the end time of the first meeting into min heap
-        # Loop through intervals
-        #   If earliest end time in heap <= start time of current meeting
-        #     No additional room is required
-        #     Pop from heap because the meeting 
-        #     at the root of heap is now
-        #     schedule back to back with the current meeting
-        #   Else
-        #     Increment room count
-        #   Insert the current meeting into heap 
-        #   to update the earlist end time
+        # Sort by start time in an array
+        # Also, sort by end time in a separate array
+        # Iterate start time array
+        #   If start[i] > end[j], some meeting has ended already
+        #   Then, we can re-use the room (Also, increment j)  
+        #   Else, increament room count
+
+        starts, ends, n, count = [], [], len(intervals), 0
+
+        # Time O(nlogn)
+        #   n = len(intervals)
+        # Space O(1)
+        for s, e in intervals:
+            starts.append(s)
+            ends.append(e)
         
-        heap = []
-        intervals.sort(key = lambda x: (x[0]))
-        heappush(heap, intervals[0][1])
-        num_rooms = 1
+        starts.sort()
+        ends.sort()
 
-        # Time O(nlogn) 
-        #   n = number of intervals, heap operation is logn
-        # Space O(n) 
-        #   Worst case every interval need separate room
-        for interval in intervals[1:]:
-            if heap[0] <= interval[0]:
-                heappop(heap)
+        i, j = 0, 0
+
+        while i < n and j < n:
+            if starts[i] >= ends[j]:
+                j += 1
             else:
-                num_rooms += 1
+                count += 1
+            i += 1
 
-            heappush(heap, interval[1])
-
-        return num_rooms</code></pre>
+        return count</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/meeting-rooms-ii">253. Meeting Rooms II</a>
