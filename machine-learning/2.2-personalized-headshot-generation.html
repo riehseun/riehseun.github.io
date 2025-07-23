@@ -39,40 +39,44 @@
 <div class="col-md-12">
 <h1 class="my-4">Machine Learning</h1>
 
-<!-- High-resolution image synthesis BEGIN -->
+<!-- Personalized headshot generation BEGIN -->
 <div class="card mb-4" id="rag">
   <div class="card-body">
-    <h2 class="card-title">High-resolution image synthesis</h2>
+    <h2 class="card-title">Personalized headshot generation</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#high-resolution-image-synthesis-1">Requirement</a></li>
-      <li><a href="#high-resolution-image-synthesis-2">Problem</a></li>
-      <li><a href="#high-resolution-image-synthesis-3">Data preparation</a></li>
-      <li><a href="#high-resolution-image-synthesis-4">Model development</a></li>
-      <li><a href="#high-resolution-image-synthesis-5">Evaluation</a></li>
-      <li><a href="#high-resolution-image-synthesis-6">Serving</a></li>
-      <li><a href="#high-resolution-image-synthesis-7">Follow up</a></li>
+      <li><a href="#personalized-headshot-generation-1">Requirement</a></li>
+      <li><a href="#personalized-headshot-generation-2">Problem</a></li>
+      <li><a href="#personalized-headshot-generation-3">Data preparation</a></li>
+      <li><a href="#personalized-headshot-generation-4">Model development</a></li>
+      <li><a href="#personalized-headshot-generation-5">Evaluation</a></li>
+      <li><a href="#personalized-headshot-generation-6">Serving</a></li>
+      <li><a href="#personalized-headshot-generation-7">Follow up</a></li>
     </ul>
   </div>
 </div>
 
-<div class="card mb-4" id="high-resolution-image-synthesis1">
+<div class="card mb-4" id="personalized-headshot-generation-1">
   <div class="card-body">
     <h2 class="card-title">Requirement</h2>
     <ul>
       <li>Business objective</li>
       <ul>
-        <li>What is kind of images should the system support? Natural scenes and urban landscapes</li>
-        <li>Should the system support input text describing desired images? Yes</li>
-        <li>What is resolution of images? 1024 by 1024 or 2048 by 2048</li>
+        <li>What is purpose of the system? Generate headshot image for business profile</li>
+        <li>How many images does user upload? 10-20 images</li>
+        <li>How many images should the system generate? 50 images</li>
+        <li>Should the system ask users to upload new images if images are bad? Yes</li>
+        <li>Should the system allow users to input desired attributes? No</li>
+        <li>Should the system allow users to input texts describing desired image? No</li>
+        <li>What is the resolution of image? 1024 by 1024</li>
       </ul>
       <li>System features</li>
-      <li>Data</li>
       <ul>
-        <li>Do we have training data available? Yes, 5M images</li>
+        <li>Can the system use a pre-trained model? Yes</li>
       </ul>
+      <li>Data</li>
       <li>Constraints</li>
       <ul>
-        <li>Should the system generate faces in real-time? Yes, within five seconds</li>
+        <li>Should the system generate faces in real-time? No, generation should be less than an hour</li>
       </ul>
       <li>Scale</li>
       <li>Performance</li>
@@ -83,20 +87,20 @@
   </div>
 </div>
 
-<div class="card mb-4" id="high-resolution-image-synthesis2">
+<div class="card mb-4" id="personalized-headshot-generation-2">
   <div class="card-body">
     <h2 class="card-title">Problem</h2>
 
     <h3 class="card-title">ML problem</h3>
     <ul>
-      <li>Generate high-resolution image</li>
+      <li>Generate headshot images based on user-provided images</li>
       <li>Input</li>
       <ul>
-        <li>There is no input</li>
+        <li>Images that users provide</li>
       </ul>
       <li>Output</li>
       <ul>
-        <li>High-resolution image</li>
+        <li>Professional headshot image</li>
       </ul>
     </ul>
 
@@ -104,18 +108,19 @@
     <ul>
       <li>Generative</li>
       <ul>
-        <li>Variational autoencoder</li>
-        <ul>
-          <li>Hard to generate high-resolution image</li>
-          <li>Decoder needs to be powerful to meet high-resolution requirement</li>
-          <li>But, decoder then ignores latent variables reducing diversity of images</li>
-        </ul>
-        <li>Generative adversarial network</li>
-        <ul>
-          <li>Same limitation as VAE</li>
-        </ul>
-        <li>Autoregressive model</li>
         <li>Diffusion model</li>
+        <ul>
+          <li>Start with T2I model</li>
+          <ul>
+            <li>Tuning-based</li>
+            <ul>
+              <li>Textual inversion</li>
+              <li>DreamBooth</li>
+              <li>Low-rank adaption (LoRA)</li>
+            </ul>
+            <li>Tuning-free</li>
+          </ul>
+        </ul>
       </ul>
     </ul>
   </div>
@@ -124,7 +129,7 @@
   </div>
 </div>
 
-<div class="card mb-4" id="high-resolution-image-synthesis3">
+<div class="card mb-4" id="personalized-headshot-generation-3">
   <div class="card-body">
     <h2 class="card-title">Data preparation</h2>
 
@@ -132,8 +137,9 @@
     <ul>
       <li>Training data</li>
       <ul>
-        <li>Remove low-quality or low-resolution images</li>
         <li>Resize and normalize images</li>
+        <li>Augment images</li>
+        <li>Add dataset of generic faces</li>
       </ul>
       <li>Database</li>
     </ul>
@@ -145,13 +151,13 @@
   </div>
 </div>
 
-<div class="card mb-4" id="high-resolution-image-synthesis4">
+<div class="card mb-4" id="personalized-headshot-generation-4">
   <div class="card-body">
     <h2 class="card-title">Model development</h2>
 
     <h3 class="card-title">Model selection</h3>
     <ul>
-      <li>Autoregressive</li>
+      <li>Diffusion</li>
     </ul>
 
     <h3 class="card-title">Model training</h3>
@@ -166,7 +172,7 @@
   </div>
 </div>
 
-<div class="card mb-4" id="high-resolution-image-synthesis5">
+<div class="card mb-4" id="personalized-headshot-generation-5">
   <div class="card-body">
     <h2 class="card-title">Evaluation</h2>
 
@@ -179,16 +185,16 @@
   </div>
 </div>
 
-<div class="card mb-4" id="high-resolution-image-synthesis6">
+<div class="card mb-4" id="personalized-headshot-generation-6">
   <div class="card-body">
     <h2 class="card-title">Serving</h2>
 
-    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-1/high-resolution-image-synthesis1.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-1/personalized-headshot-generation-1.png" alt="Card image cap">
 
     <ul>
-      <li>Image generator</li>
-      <li>Decoding serivce</li>
-      <li>Super-resolution service</li>
+      <li>Data pipeline</li>
+      <li>Training pipeline</li>
+      <li>Inference pipeline</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -196,23 +202,25 @@
   </div>
 </div>
 
-<div class="card mb-4" id="high-resolution-image-synthesis7">
+<div class="card mb-4" id="personalized-headshot-generation-7">
   <div class="card-body">
     <h2 class="card-title">Follow up</h2>
     <ul>
-      <li>Explain how to expand autoregressive models to support text-based generation</li>
-      <li>Explain how to support applications such as image completion and image super-resolution</li>
-      <li>Explain how to balance diversity and fidelity in sampling</li>
-      <li>Explain how to enhance stability with adversarial training, gradient clipping, learning rate scheduling</li>
-      <li>Explain how to use progressive growing and multi-scale architecture to improve image quality and detail</li>
-      <li>Explain how to create interactive systems for users to refine and customize generated images</li>
+      <li>Explain how to prevent catastrophic forgetting during fine-tuning</li>
+      <li>Explain details of choosing a rare token for new subject, and its importance</li>
+      <li>Explain details of class-specific prior preservation loss</li>
+      <li>Explain how to address the issue of reduced output diversity after fine-tuning</li>
+      <li>Explain how to support multiple sizes and aspect ratios in generated images</li>
+      <li>Explain details of tuning-free methods such as Meta's Imagine Yourself</li>
+      <li>Explain how to mitigate the risk and ethical concerns around deepfake generation and detection</li>
+      <li>Explain ML techniques to handle personally identifiable information (PII) securely while ensuring data privacy</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: Generative AI System Design Interview, Ali Aminian & Hao Sheng
   </div>
 </div>
-<!-- High-resolution image synthesis END -->
+<!-- Personalized headshot generation END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->
