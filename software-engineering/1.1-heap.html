@@ -44,63 +44,17 @@
   <div class="card-body">
     <h2 class="card-title">Heap</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#heap-">The skyline problem</a></li>
       <li><a href="#heap-">Find median from data stream</a></li>
       <li><a href="#heap-">Sliding window median</a></li>
       <li><a href="#heap-">Minimum Cost to Hire K Workers</a></li>
       <li><a href="#heap-">Stock Price Fluctuation</a></li>
-      <li><a href="#heap-">Maximum profit from trading stocks</a></li>
     </ul>
   </div>
 </div>
 
 <div class="card mb-4" id="heap-">
   <div class="card-body">
-    <h2 class="card-title">The skyline problem (H)</h2>
-
-<pre><code class="python">from heapq import heappush, heappop
-
-class Solution:
-    def getSkyline(self, buildings: List[List[int]]) -> List[List[int]]:
-
-        events = []
-
-        # Start building events.
-        for x1, x2, h in buildings:
-            events.append((x1,x2,h))
-
-        # End building events. (Building with 0 heights)
-        for x1, x2, h in buildings:
-            events.append((x2,0,0))
-
-        events.sort(key = lambda x: (x[0], -x[2]))
-
-        result = [[0,0]]  # [x1, h]
-        live = [[0, math.inf]]  # [h, x2]
-
-        for x1, x2, h in events:
-            # Remove all buildings that have ended within intervals.
-            while live[0][1] <= x1:
-                heappop(live)
-
-            # If start event, set the building alive.
-            if h:
-                heappush(live, [-h, x2])
-
-            if result[-1][1] != -live[0][0]:
-                result += [ [x1, -live[0][0]] ]
-
-        return result[1:]
-</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/the-skyline-problem">218. The Skyline Problem</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="heap-">
-  <div class="card-body">
-    <h2 class="card-title">Find median from data stream (H)</h2>
+    <h2 class="card-title">Find median from data stream (H) ()</h2>
 
 <pre><code class="python">class MedianFinder:
 
@@ -143,7 +97,7 @@ class Solution:
 
 <div class="card mb-4" id="heap-">
   <div class="card-body">
-    <h2 class="card-title">Sliding window median (H)</h2>
+    <h2 class="card-title">Sliding window median (H) ()</h2>
 
     <h3 class="card-title"></h3>
 
@@ -232,59 +186,6 @@ class Solution:
 
 <div class="card mb-4" id="heap-">
   <div class="card-body">
-    <h2 class="card-title">Minimum Cost to Hire K Workers (H)</h2>
-
-<pre><code class="python">class Solution:
-    def mincostToHireWorkers(self, quality: List[int], wage: List[int], k: int) -> float:
-
-        # Compute wage-to-quality ratio
-        # Cost = max ratio amongst k worker * total_quality of k workers
-        # Sort workers by ratio first
-        # Use heap
-        #   When heap size exceeds k, pop the highest quality worker (which causes
-        #   minimum wage to be maximized) first
-        # Ex. quality = [10,20,5], wage = [70,50,30], k = 2
-        # wage-to-quality ratio = [7, 2.5, 6]
-
-        # Time O(nlogn) n = len(quality)
-        # Space O(n)
-        workers = []
-        for q,w in zip(quality, wage):
-            workers.append([q,w,w/q])
-        workers.sort(key=lambda x: x[2])
-
-        heap = []
-        cost = math.inf
-        total_quality = 0
-        r_out = 0
-        for q, w, r in workers:
-            heappush(heap, [-q, w, r])
-            total_quality += q
-            if len(heap) > k:
-                q_out, w_out, r_out = heappop(heap)
-                total_quality += q_out
-            if len(heap) == k:
-                # If current worker got popped out from heap
-                if r_out == r:
-                    max_r = 0
-                    for q, w, r in heap:
-                        max_r = max(max_r, r)
-                    cost = min(cost, max_r*total_quality)
-                # If current worker is in the heap, the ratio of current worker
-                # is the maximum ratio in the heap because workers are sorted
-                # by ratio
-                else:
-                    cost = min(cost, r*total_quality)
-
-        return cost</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/minimum-cost-to-hire-k-workers">857. Minimum Cost to Hire K Workers</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="heap-">
-  <div class="card-body">
     <h2 class="card-title">Stock Price Fluctuation  (M) (Atlassian)</h2>
 
 <pre><code class="python">class StockPrice:
@@ -346,49 +247,6 @@ class Solution:
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/stock-price-fluctuation">2034. Stock Price Fluctuation </a>
-  </div>
-</div>
-
-<div class="card mb-4" id="heap-">
-  <div class="card-body">
-    <h2 class="card-title">Maximum profit from trading stocks (M)</h2>
-
-<pre><code class="python">def maximum_capital(capital, k, capitals, profits):
-
-    # Use min heap for capital and max heap for profit
-    # Time: O((n+k)logn)
-    # Space: O(n)
-
-    final_profit = capital
-    capital_min_heap = []
-    profit_max_heap = []
-
-    # Time O(n) * O(logn)
-    for i, c in enumerate(capitals):
-        heappush(capital_min_heap, (c, i))
-
-    # Time O(k) * O(logn)
-    for _ in range(k):
-        # Min heap shall contains all capitals less than or equal to the
-        # current available capital.
-        # Max shall contains all profits resulting from above capitals.
-        while capital_min_heap and capital_min_heap[0][0] <= capital:
-            c, i = heappop(capital_min_heap)
-            heappush(profit_max_heap, (-profits[i], i))
-
-        # If the current available capital cannot buy any capital,
-        # then the max heap will be empty.
-        if not profit_max_heap:
-            break
-
-        max_profit, i = heappop(profit_max_heap)
-        capital += -max_profit
-        final_profit += -max_profit
-
-    return final_profit</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/maximum-profit-from-trading-stocks">2291. Maximum Profit From Trading Stocks</a>
   </div>
 </div>
 <!-- Heap END -->
