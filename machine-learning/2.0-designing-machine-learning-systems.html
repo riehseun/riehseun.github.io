@@ -61,36 +61,15 @@
     <ul>
       <li>Data source</li>
       <ul>
-        <li>How data is collected?</li>
+        <li>User-generated</li>
+        <li>System-generated</li>
+        <!-- <li>How data is collected?</li>
         <li>How clean is data?</li>
         <li>Can data source be trusted?</li>
         <li>Is data user-generated or system-generated?</li>
         <li>How often new data comes in?</li>
         <li>Can data be stored in servers or data cannot leave user device?</li>
-        <li>Does data need to be tokenized?</li>
-      </ul>
-      <li>Data types</li>
-      <ul>
-        <li>Structured</li>
-        <ul>
-          <li>Numerical</li>
-          <ul>
-            <li>Discrete</li>
-            <li>Continuous</li>
-          </ul>
-          <li>Categorical</li>
-          <ul>
-            <li>Ordinal - data with sequential order (Ex. movie rating)</li>
-            <li>Nominal - no numerical relationship between categories (Ex. male and female)</li>
-          </ul>
-        </ul>
-        <li>Unstructured</li>
-        <ul>
-          <li>Audio</li>
-          <li>Video</li>
-          <li>Image</li>
-          <li>Text</li>
-        </ul>
+        <li>Does data need to be tokenized?</li> -->
       </ul>
       <li>Data formats</li>
       <ul>
@@ -112,6 +91,44 @@
           <li>Accessing features is fast</li>
         </ul>
       </ul>
+      <li>Data models</li>
+      <ul>
+        <li>SQL</li>
+        <ul>
+          <li>Data is stord in data warehouse</li>
+          <li>Structure is enforced during write time</li>
+          <li>Schema changes require updating all existing data</li>
+        </ul>
+        <li>NoSQL</li>
+        <ul>
+          <li>Data is stord in data lake</li>
+          <li>Document</li>
+          <ul>
+            <li>Read operation still needs to know some structure of the document</li>
+            <li>Joins are harder and inefficient</li>
+          </ul>
+          <li>Graph</li>
+        </ul>
+      </ul>
+      <li>ETL</li>
+      <ul>
+        <li>Extract</li>
+        <ul>
+          <li>Extract data from different data sources</li>
+          <li>Validate data</li>
+          <li>Reject data if applicable</li>
+        </ul>
+        <li>Transform</li>
+        <ul>
+          <li>Data is cleansed and transformed into specific format</li>
+          <li>De-duplication</li>
+          <li>Standardize</li>
+        </ul>
+        <li>Load</li>
+        <ul>
+          <li>Transformed data is loaded into target destination</li>
+        </ul>
+      </ul>
       <li>Data flow</li>
       <ul>
         <li>Data passing through databases</li>
@@ -130,13 +147,30 @@
           <li>Ex. pubsub (Kafka), message queue (RocketMQ, RabbitMQ)</li>
         </ul>
       </ul>
-      <li>ETL</li>
+      <!-- <li>Data types</li>
       <ul>
-        <li>Extract - extract data from different data sources</li>
-        <li>Transform - data is cleansed and transformed into specific format</li>
-        <li>Load - transformed data is loaded into target destination</li>
-      </ul>
-      <li>Data processing</li>
+        <li>Structured</li>
+        <ul>
+          <li>Numerical</li>
+          <ul>
+            <li>Discrete</li>
+            <li>Continuous</li>
+          </ul>
+          <li>Categorical</li>
+          <ul>
+            <li>Ordinal - data with sequential order (Ex. movie rating)</li>
+            <li>Nominal - no numerical relationship between categories (Ex. male and female)</li>
+          </ul>
+        </ul>
+        <li>Unstructured</li>
+        <ul>
+          <li>Audio</li>
+          <li>Video</li>
+          <li>Image</li>
+          <li>Text</li>
+        </ul>
+      </ul> -->
+      <!-- <li>Data processing</li>
       <ul>
         <li>Batch processing</li>
         <ul>
@@ -148,7 +182,7 @@
           <li>Compute features that change frequently (dynamic features)</li>
           <li>Ex. Flink</li>
         </ul>
-      </ul>
+      </ul> -->
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -272,6 +306,103 @@
   <div class="card-body">
     <h2 class="card-title">Feature engineering</h2>
     <ul>
+      <li>Missing values</li>
+      <ul>
+        <li>Types</li>
+        <ul>
+          <li>Missing not at random</li>
+          <ul>
+            <li>Missing due to true value itself</li>
+            <li>Ex. respondants not disclosing their income and it turns out that those who don't disclose tend to have higher income</li>
+          </ul>
+          <li>Missing at random</li>
+          <ul>
+            <li>Missing due to another observed variable</li>
+            <li>Ex. age value of centain gender is missing because that gender tend not to disclose their age</li>
+          </ul>
+          <li>Missing completely at random</li>
+          <ul>
+            <li>There is no pattern in which the value is missing</li>
+          </ul>
+        </ul>
+        <li>Handle missing values</li>
+        <ul>
+          <li>Delete - data quantity is reduced</li>
+          <ul>
+            <li>Delete row to remove a data point</li>
+            <li>Delete column to remove a feature</li>
+          </ul>
+          <li>Imputation - dataset gets noisy</li>
+          <ul>
+            <li>Fill with default value, mean, median, mode</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>Feature scaling</li>
+      <ul>
+        <li>Feature scaling is not needed if using XGBoost</li>
+        <li>Helps gradient descent to find the optimum faster</li>
+        <li>Scale inputs to [-1,1]</li>
+        <ul>
+          <li>Make error function more spherical, thus gradient descent converges faster</li>
+          <li>Not scaling inputs impacts regularization</li>
+          <li>Outliers are also valid inputs. Do not throw them away</li>
+        </ul>
+        <li>Normalization (min-max scaling)</li>
+        <ul>
+          <li>Does not change distribution</li>
+          <li>All values are \( [0,1] \)</li>
+          <li>\( z = \dfrac{x-x_{min}}{x_{max}-x_{min}} \)</li>
+          <li>Outliers can make real data shrunk in very narrow range</li>
+        </ul>
+        <li>Clipping</li>
+        <ul>
+          <li>Treat outliers as -1 or 1</li>
+          <li>Numerical values are linearly scaled</li>
+          <li>Works for uniformly distributed data</li>
+        </ul>
+        <li>Standardization (z-score normalization)</li>
+        <ul>
+          <li>Mean is \( 0 \) and standard deviation is \( 1 \)</li>
+          <li>\( z = \dfrac{x-\mu}{\sigma} \)</li>
+          <li>Works for normally distributed data</li>
+        </ul>
+        <li>Log scaling</li>
+        <ul>
+          <li>Mitigate skewness of a feature, so that gradient descent converges faster</li>
+          <li>\( z = log(x) \)</li>
+          <li>Used when data is neither uniformly or normally distributed</li>
+        </ul>
+      </ul>
+      <li>Bucketing</li>
+      <ul>
+        <li>Convert numerical feature to categorical feature</li>
+      </ul>
+      <li>Encoding</li>
+      <ul>
+        <li>Convert categorical features to numerical feature</li>
+        <li>Ex. integer encoding</li>
+        <ul>
+          <li>Integer value is assigned to each category</li>
+          <li>Cannot be used for nominal features</li>
+        </ul>
+        <li>Ex. one-hot encoding</li>
+        <ul>
+          <li>Binary value is assigned to each category</li>
+          <li>Not suitable for features with high cardinality</li>
+          <li>Not suitable when features values are not independent</li>
+        </ul>
+        <li>Ex. embedding</li>
+        <ul>
+          <li>Learn N-D vector for each categorial value</li>
+          <li>Just another hidden layer in neural network</li>
+          <li>When determining embedding dimension, hyperparameter tune between these two variables</li>
+          <ul>
+            <li>Fourth root of the total number of unique categorical elements</li>
+            <li>1.6 times the square root of the number of unique elements in the category, no less than 600</li>
+          </ul>
+        </ul>
+      </ul>
       <li>Watch for data leakage</li>
       <ul>
         <li>Splitting time-correlated data randomly instead of by time</li>
@@ -304,102 +435,21 @@
         <li>Measure the predictive power of each feature (or a set of features) on target variable</li>
         <li>If a feature has high correlation, investigate</li>
       </ul>
-    </ul>
-    <li>Missing values</li>
-    <ul>
-      <li>Types</li>
+      <li>Too many features</li>
       <ul>
-        <li>Missing not at random</li>
+        <li>Increased risk of data leakage</li>
+        <li>Can cause overfitting</li>
+        <li>Increases memory requirement</li>
+        <li>Increases inference latency, especially if prediction requires extracting features</li>
+        <li>Useless features become techinical debt</li>
         <ul>
-          <li>Missing due to true value itself</li>
-          <li>Ex. respondants not disclosing their income and it turns out that those who don't disclose tend to have higher income</li>
-        </ul>
-        <li>Missing at random</li>
-        <ul>
-          <li>Missing due to another observed variable</li>
-          <li>Ex. age value of centain gender is missing because that gender tend not to disclose their age</li>
-        </ul>
-        <li>Missing completely at random</li>
-        <ul>
-          <li>There is no pattern in which the value is missing</li>
+          <li>When data pipeline changes, all affected features need to adjust</li>
+          <li>In theory, regularization should reduce weight of useless features to 0. However, model learns faster without useless features</li>
         </ul>
       </ul>
-      <li>Handle missing values</li>
+      <li>Feature importance</li>
       <ul>
-        <li>Delete - data quantity is reduced</li>
-        <ul>
-          <li>Delete row to remove a data point</li>
-          <li>Delete column to remove a feature</li>
-        </ul>
-        <li>Imputation - dataset gets noisy</li>
-        <ul>
-          <li>Fill with default value, mean, median, mode</li>
-        </ul>
-      </ul>
-    </ul>
-    <li>Feature scaling</li>
-    <ul>
-      <li>Feature scaling is not needed if using XGBoost</li>
-      <li>Helps gradient descent to find the optimum faster</li>
-      <li>Scale inputs to [-1,1]</li>
-      <ul>
-        <li>Make error function more spherical, thus gradient descent converges faster</li>
-        <li>Not scaling inputs impacts regularization</li>
-        <li>Outliers are also valid inputs. Do not throw them away</li>
-      </ul>
-      <li>Normalization (min-max scaling)</li>
-      <ul>
-        <li>Does not change distribution</li>
-        <li>All values are \( [0,1] \)</li>
-        <li>\( z = \dfrac{x-x_{min}}{x_{max}-x_{min}} \)</li>
-        <li>Outliers can make real data shrunk in very narrow range</li>
-      </ul>
-      <li>Clipping</li>
-      <ul>
-        <li>Treat outliers as -1 or 1</li>
-        <li>Numerical values are linearly scaled</li>
-        <li>Works for uniformly distributed data</li>
-      </ul>
-      <li>Standardization (z-score normalization)</li>
-      <ul>
-        <li>Mean is \( 0 \) and standard deviation is \( 1 \)</li>
-        <li>\( z = \dfrac{x-\mu}{\sigma} \)</li>
-        <li>Works for normally distributed data</li>
-      </ul>
-      <li>Log scaling</li>
-      <ul>
-        <li>Mitigate skewness of a feature, so that gradient descent converges faster</li>
-        <li>\( z = log(x) \)</li>
-        <li>Used when data is neither uniformly or normally distributed</li>
-      </ul>
-    </ul>
-    <li>Bucketing</li>
-    <ul>
-      <li>Convert numerical feature to categorical feature</li>
-    </ul>
-    <li>Encoding</li>
-    <ul>
-      <li>Convert categorical features to numerical feature</li>
-      <li>Ex. integer encoding</li>
-      <ul>
-        <li>Integer value is assigned to each category</li>
-        <li>Cannot be used for nominal features</li>
-      </ul>
-      <li>Ex. one-hot encoding</li>
-      <ul>
-        <li>Binary value is assigned to each category</li>
-        <li>Not suitable for features with high cardinality</li>
-        <li>Not suitable when features values are not independent</li>
-      </ul>
-      <li>Ex. embedding</li>
-      <ul>
-        <li>Learn N-D vector for each categorial value</li>
-        <li>Just another hidden layer in neural network</li>
-        <li>When determining embedding dimension, hyperparameter tune between these two variables</li>
-        <ul>
-          <li>Fourth root of the total number of unique categorical elements</li>
-          <li>1.6 times the square root of the number of unique elements in the category, no less than 600</li>
-        </ul>
+        <li>SHAP</li>
       </ul>
     </ul>
   </div>
@@ -411,6 +461,14 @@
 <div class="card mb-4" id="designing-machine-learning-systems-">
   <div class="card-body">
     <h2 class="card-title">Model development and offline evaluation</h2>
+    <ul>
+      <li>Ensemble</li>
+      <ul>
+        <li>Bagging</li>
+        <li>Boosting</li>
+      </ul>
+      <li>Versioning</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: Designing Machine Learning Systems, Chip Huyen
