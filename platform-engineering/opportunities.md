@@ -128,6 +128,11 @@ Autodesk (Toronto)
 - R:
 - 3554706aA!
 
+Scotiabank
+- R:
+- 3554706aA!
+- I will succeed as a mle !
+
 
 Next batch
 
