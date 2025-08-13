@@ -45,6 +45,7 @@
     <h2 class="card-title">String simulation</h2>
     <ul class="list-unstyled mb-0">
       <li><a href="#string-simulation">Zigzag Conversion</a></li>
+      <li><a href="#string-simulation">Reorganize string</a></li>
     </ul>
   </div>
 </div>
@@ -96,6 +97,60 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/zigzag-conversion">6. Zigzag Conversion</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="string-simulation">
+  <div class="card-body">
+    <h2 class="card-title">Reorganize String (M)</h2>
+
+<pre><code class="python">class Solution:
+    def reorganizeString(self, s: str) -> str:
+
+        # Count frequency of each char in s
+        # If number of most frequent char > len(s) // 2, return ""
+        # Place most frequent char in every even indices
+        #   If there are remaiding even indices, place any char
+        #   Once even indices are all used, place chars in odd indices
+
+        frequencies = defaultdict(int)
+        max_count, max_char = 0, ""
+
+        # Time O(n)
+        #   n = len(s)
+        # Space O(1)
+        #   Ignoring space for result
+        for c in s:
+            frequencies[c] += 1
+            if frequencies[c] > max_count:
+                max_count = frequencies[c]
+                max_char = c
+
+        if len(s) % 2 == 0 and max_count > len(s) // 2:
+            return ""
+        if len(s) % 2 != 0 and max_count > len(s) // 2 + 1:
+            return ""
+
+        result = [""] * len(s)
+        i = 0
+
+        while frequencies[max_char] > 0:
+            result[i] = max_char
+            frequencies[max_char] -= 1
+            i += 2
+
+        for key, val in frequencies.items():
+            while frequencies[key] > 0:
+                if i >= len(s):
+                    i = 1
+                result[i] = key
+                frequencies[key] -= 1
+                i += 2
+
+        return "".join(result)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/reorganize-string">767. Reorganize String</a>
   </div>
 </div>
 <!-- String simulation END -->
