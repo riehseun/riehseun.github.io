@@ -220,27 +220,22 @@
         #   Extra spaces = spaces % number of splits
 
         result = []
-        text = ""
-        char_count = 0
-        word_array = []
-        word_length = 0
-
+        char_count, word_length, word_array = 0, 0, []
+        
         # Time O(n)
         #   n = len(words)
         # Space O(n)
         #   word_array may contain entire words in worst case
         for word in words:
             
-            if len(word) + char_count <= maxWidth:
+            if char_count + len(word) <= maxWidth:
                 char_count += len(word) + 1
-                word_array.append(word)
                 word_length += len(word)
+                word_array.append(word)
             else:
                 if len(word_array) == 1:
                     extra_spaces = maxWidth - word_length
-                    text = word_array[0]
-                    for _ in range(extra_spaces):
-                        text += " "
+                    text = word_array[0] + " " * extra_spaces 
                     result.append(text)
                 else:
                     num_splits = len(word_array) - 1
@@ -248,10 +243,9 @@
                     extra_spaces = (maxWidth-word_length) % num_splits
 
                     text = ""
-                    for j, w in enumerate(word_array[:-1]):
+                    for w in word_array[:-1]:
                         text += w
-                        for _ in range(num_spaces):
-                            text += " "
+                        text += " " * num_spaces
                         if extra_spaces > 0:
                             text += " " 
                             extra_spaces -= 1
@@ -259,19 +253,16 @@
                     result.append(text)
                 
                 char_count = len(word) + 1
-                word_array = [word]
                 word_length = len(word)
-
+                word_array = [word]
+                
         # Process remaining words in word_array
         text = ""
         for w in word_array:
             text += w
             if len(text) < maxWidth:
                 text += " "
-        
-        for _ in range(maxWidth-len(text)):
-            text += " "
-        
+        text += " " * (maxWidth-len(text))
         result.append(text)
 
         return result</code></pre>
@@ -321,7 +312,8 @@
 <pre><code class="python">class Solution:
     def numberToWords(self, num: int) -> str:
 
-        # Sparate by ones, tens, thousands, millions, billions
+        # Create mapping for ones, tens, thousands
+        # Keep diving the number by 1000
 
         # Corner case
         if num == 0:
