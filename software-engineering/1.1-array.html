@@ -162,9 +162,10 @@
         Do not return anything, modify nums in-place instead.
         """
 
-        # New index is (i+k) & len(nums)
+        # New index is (i+k) % len(nums)
 
-        # Time O(n) n = len(nums)
+        # Time O(n)
+        #   n = len(nums)
         # Space O(n)
         nums_copy = nums[:]
         for i, num in enumerate(nums):
@@ -211,12 +212,11 @@
 <pre><code class="python">class Solution:
     def productExceptSelf(self, nums: List[int]) -> List[int]:
 
-        # If there are more than one 0 in the arry,
-        # result is always 0
-        # if there is one 0 in the array,
-        # result is product of all array except that 0 divied by each num
-        # If tehre is no 0 in the array, 
-        # result is product of all array divided by each num
+        # If more than one 0, result is always 0
+        # if one 0
+        #   At 0, result is product of nums before 0 and after 0
+        #   Otherwise, result is 0
+        # If no 0, result is product of all nums
 
         num_zeros = 0
 
@@ -228,24 +228,27 @@
             if num == 0:
                 num_zeros += 1
 
-        result = []
         product = 1
         for num in nums:
             if num != 0:
                 product *= num
 
-        if num_zeros > 1:
-            return [0] * len(nums)
+        result = []
+
+        if num_zeros == 0:
+            for num in nums:
+                result.append(int(product/num))
+
         elif num_zeros == 1: 
             for num in nums:
                 if num == 0:
                     result.append(int(product))
                 else:
                     result.append(0)
-        else:
-            for num in nums:
-                result.append(int(product/num))
 
+        elif num_zeros > 1:
+            return [0] * len(nums)
+          
         return result</code></pre>
   </div>
   <div class="card-footer text-muted">
@@ -259,10 +262,21 @@
 
 <pre><code class="python">class Solution:
     def intersection(self, nums1: List[int], nums2: List[int]) -> List[int]:
+        
+        # Convert nums2 into a set
+        # Iterate nums1 and see if that number exists in nums2 set
 
-        set1 = set(nums1)
-        set2 = set(nums2)
-        return list(set2&set1)</code></pre>
+        nums2_set, result = set(nums2), set()
+
+        # Time O(max(n,m))
+        #   n = len(nums1)
+        #   m = len(nums2)
+        # Space O(m)
+        for num in nums1:
+            if num in nums2_set:
+                result.add(num)
+
+        return list(result)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/range-sum-query-2d-immutable">349. Intersection of Two Arrays</a>
@@ -281,7 +295,8 @@
         self.messages = defaultdict(int)
 
     # Time O(1)
-    # Space O(n) n = number of unique messages
+    # Space O(n) 
+    #   n = number of unique messages
     def shouldPrintMessage(self, timestamp: int, message: str) -> bool:
 
         if message in self.messages \
