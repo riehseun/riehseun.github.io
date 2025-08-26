@@ -49,8 +49,6 @@
       <li><a href="#tree-dfs">Lowest Common Ancestor of a Binary Tree</a></li>
       <li><a href="#tree-dfs">Serialize and Deserialize Binary Tree</a></li>
       <li><a href="#tree-dfs">Find Leaves of Binary Tree</a></li>
-      <li><a href="#tree-dfs">Convert Binary Search Tree to Sorted Doubly Linked List</a></li>
-      <li><a href="#tree-dfs">Alien dictionary</a></li>
       <li><a href="#tree-dfs">Diameter of Binary Tree</a></li>
       <li><a href="#tree-dfs">All Nodes Distance K in Binary Tree</a></li>
       <li><a href="#tree-dfs">Range Sum of BST</a></li>
@@ -227,8 +225,11 @@ class Solution:
 
 class Codec:
 
-    # Time O(n) where n is number of nodes
-    # Space O(h) where h = n if worst case, h = log(n) if best case
+    # Time O(n)
+    #   n = number of nodes
+    # Space O(h)
+    #   h = n if worst case
+    #   h = log(n) if best case
 
     def serialize(self, root):
         """Encodes a tree to a single string.
@@ -239,18 +240,18 @@ class Codec:
 
         self.data = ""
 
-        def helper(root):
+        def pre_order(node):
 
-            if root:
-                self.data += str(root.val)
+            if node:
+                self.data += str(node.val)
                 self.data += ","
-                helper(root.left)
-                helper(root.right)
+                pre_order(node.left)
+                pre_order(node.right)
             else:
                 self.data += "#"
                 self.data += ","
 
-        helper(root)
+        pre_order(root)
         return self.data[:len(self.data)-1]
 
     def deserialize(self, data):
@@ -262,15 +263,15 @@ class Codec:
 
         data_array = data.split(",")
 
-        def helper(data_array):
+        def pre_order(data_array):
             val = next(data_array)
             if val != "#":
-                root = TreeNode(int(val))
-                root.left = helper(data_array)
-                root.right = helper(data_array)
-                return root
+                node = TreeNode(int(val))
+                node.left = pre_order(data_array)
+                node.right = pre_order(data_array)
+                return node
 
-        return helper(iter(data_array))
+        return pre_order(iter(data_array))
 
 # Your Codec object will be instantiated and called as such:
 # ser = Codec()
@@ -300,100 +301,40 @@ class Solution:
         # Then, remove leaf nodes from the tree
         # Repeat until only the root remains
 
-        # Time O(h) h = height of tree
-        # Space O(n) n = number of nodes in tree
-        def post_order(root, array):
+        # Time O(h) 
+        #   h = height of tree
+        # Space O(n)
+        #   n = number of nodes in tree 
+        def post_order(node, array):
 
-            if root:
+            if node:
 
                 # Check if leaf node
-                if not root.left and not root.right:
-                    array.append(root.val)
+                if not node.left and not node.right:
+                    array.append(node.val)
                     return -1
-
-                left = post_order(root.left, array)
-                right = post_order(root.right, array)
+                
+                left = post_order(node.left, array)
+                right = post_order(node.right, array)
                 # Remove leaf node on left side
                 if left == -1:
-                    root.left = None
+                    node.left = None
                 # Remove leaf node on right side
                 if right == -1:
-                    root.right = None
-                print(root.val)
-
+                    node.right = None
+                
         result = []
 
         while root.left or root.right:
             array = []
             post_order(root, array)
             result.append(array)
-            print(array)
-
+            
         result.append([root.val])
         return result</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/find-leaves-of-binary-tree">366. Find Leaves of Binary Tree</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="tree-dfs">
-  <div class="card-body">
-    <h2 class="card-title">Convert Binary Search Tree to Sorted Doubly Linked List (M)</h2>
-
-<pre><code class="python">"""
-# Definition for a Node.
-class Node:
-    def __init__(self, val, left=None, right=None):
-        self.val = val
-        self.left = left
-        self.right = right
-"""
-
-class Solution:
-    def treeToDoublyList(self, root: 'Optional[Node]') -> 'Optional[Node]':
-
-        # DFS in-order
-        # Link nodes while traversing
-    
-        if not root:
-            return None
-
-        self.nodes = []
-        self.first = None
-        self.last = None
-
-        # Time O(n) 
-        #   n = number of nodes
-        # Space O(h) 
-        #   recursion stack of tree height
-        def in_order(node):
-            
-            if node:
-                in_order(node.left)
-
-                if self.last:
-                    self.last.right = node
-                    node.left = self.last
-                else:
-                    # If no nodes existed, set current node 
-                    # as first node in linked list
-                    self.first = node
-                # Set current node as last node
-                self.last = node
-
-                in_order(node.right)
-
-        in_order(root)
-        # Connect head and tail to construct 
-        # circular linked list
-        self.first.left = self.last
-        self.last.right = self.first
-        
-        return self.first</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/convert-binary-search-tree-to-sorted-doubly-linked-list">426. Convert Binary Search Tree to Sorted Doubly Linked List</a>
   </div>
 </div>
 
