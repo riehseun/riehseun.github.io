@@ -46,6 +46,7 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#heap-">Find Median from Data Stream</a></li>
       <li><a href="#heap-">Sliding Window Median</a></li>
+      <li><a href="#heap-">Max Stack</a></li>
       <li><a href="#heap-">Stock Price Fluctuation</a></li>
     </ul>
   </div>
@@ -103,6 +104,69 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/sliding-window-median">480. Sliding Window Median</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="heap-">
+  <div class="card-body">
+    <h2 class="card-title">Max Stack (H)</h2>
+
+<pre><code class="python">class MaxStack:
+
+    # Push, pop, top is handled by python list in O(1)
+    # Use heap to store max value and its index in the list
+    # Handle pop
+    #   Remember popped elements from stack or heap
+    #   Remove popped elements when top/pop/peekMax/popMax  
+
+    # Time O(logn)
+    # Space O(n)
+    def __init__(self):
+        self.count = 0
+        self.stack = []
+        self.max_heap = []
+        self.deleted = set() 
+        
+    def push(self, x: int) -> None:
+        self.stack.append((x, self.count))
+        heappush(self.max_heap, (-x, -self.count))
+        self.count += 1
+
+    def pop(self) -> int:
+        while self.stack and self.stack[-1][1] in self.deleted:
+            self.stack.pop()
+        num, index = self.stack.pop()
+        self.deleted.add(index)
+        return num
+
+    def top(self) -> int:
+        while self.stack and self.stack[-1][1] in self.deleted:
+            self.stack.pop()
+        return self.stack[-1][0]
+
+    def peekMax(self) -> int:
+        while self.max_heap and -self.max_heap[0][1] in self.deleted:
+            heappop(self.max_heap)
+        return -self.max_heap[0][0]
+
+    def popMax(self) -> int:
+        while self.max_heap and -self.max_heap[0][1] in self.deleted:
+            heappop(self.max_heap)
+        num, index = heappop(self.max_heap)
+        self.deleted.add(-index)
+        return -num
+
+
+# Your MaxStack object will be instantiated and called as such:
+# obj = MaxStack()
+# obj.push(x)
+# param_2 = obj.pop()
+# param_3 = obj.top()
+# param_4 = obj.peekMax()
+# param_5 = obj.popMax()</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/max-stack">716. Max Stack</a>
   </div>
 </div>
 
