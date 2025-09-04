@@ -333,7 +333,47 @@
   <div class="card-body">
     <h2 class="card-title">Analyze User Website Visit Pattern (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def mostVisitedPattern(self, username: List[str], timestamp: List[int], website: List[str]) -> List[str]:
+
+        # Group (timestamp, website) by each user
+        # Count sequence of websites for each user
+        #   First sort sequence by timestamp
+        #   Do not count sequence more than once for each user  
+        
+        users, count = defaultdict(list), defaultdict(int)
+
+        # Time O(n)
+        #   n = number of incoming data
+        # Space O(n)
+        for user, time, web in zip(username, timestamp, website):
+            users[user].append((time, web))
+
+        # Time O(nlogn)
+        for key, val in users.items():
+            val.sort(key=lambda x: x[0])
+
+        # Time O(n**3)
+        for key, val in users.items():
+            n, seen = len(val), set()
+            for i in range(n):
+                for j in range(i+1, n):
+                    for k in range(j+1, n):
+                        seq = (val[i][1],val[j][1],val[k][1])
+                        if seq not in seen:
+                            count[seq] += 1
+                            seen.add(seq)
+                        
+        ret_val, max_count = "", 0
+        for key, val in count.items():
+            if val > max_count:
+                max_count = val
+                ret_val = key
+            elif val == max_count:
+                if key < ret_val:
+                    ret_val = key
+
+        return ret_val</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/analyze-user-website-visit-pattern">1152. Analyze User Website Visit Pattern</a>
