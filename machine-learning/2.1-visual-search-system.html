@@ -113,7 +113,7 @@
 
     <h3 class="card-title">ML category</h3>
     <ul>
-      <li>Supervised, ranking problem, representation learning</li>
+      <li>Ranking problem</li>
       <ul>
         <li>Learn embeddings of images such that</li>
         <ul>
@@ -179,11 +179,9 @@
             <li>Constructed images differ from real data</li>
           </ul>
         </ul>
-        <li>We choose option 3 as main source of data since this is least expensive and fast</li>
       </ul>
       <li>Database</li>
       <ul>
-        <li>We use the following tables to keep user interaction data</li>
         <li>Image</li>
         <ul>
           <li>image_id</li>
@@ -219,7 +217,7 @@
       <ul>
         <li>Resize - models require fixed-sized images</li>
         <li>Scale - pixel values should be between 0 and 1</li>
-        <li>Standardization - pixel values should have mean 0 and variance 1</li>
+        <li>Normalize - pixel values should have mean 0 and variance 1</li>
         <li>Color mode - pick either RGB or CMYK</li>
       </ul>
     </ul>
@@ -239,19 +237,6 @@
       <ul>
         <li>Good at handling unstructured data like images</li>
         <li>Can produce embeddings of images</li>
-        <li>Option 1. ResNet</li>
-        <ul>
-          <li>Able to construct very deep neural network</li>
-          <li>Skip connections make model very robust against issues like vanishing gradient</li>
-          <li>Training cost is cheaper than transformer based models</li>
-        </ul>
-        <li>Option 2. ViT</li>
-        <ul>
-          <li>Generalize well with a wide range of image data</li>
-          <li>Excels in transfer learning</li>
-          <li>Can make accurate predictions with very limited training examples</li>
-          <li>Better accuracy than convolutional neural network</li>
-        </ul>
         <li>Use contrastive learning</li>
         <ul>
           <li>An input image</li>
@@ -259,7 +244,7 @@
           <ul>
             <li>Image must be constructed</li>
           </ul>
-          <li>Few dissimilar images from the input image (Negative)</li>
+          <li>Many dissimilar images from the input image (Negative)</li>
           <ul>
             <li>Images can be randomly selected</li>
           </ul>
@@ -271,22 +256,14 @@
     <ul>
       <li>Loss function</li>
       <ul>
-        <li>Constrastive loss function</li>
+        <li>Use dot product or cosine similarity to compute distances between query embedding and all other embeddings</li>
         <ul>
-          <li>Dot product or cosine similarity is used to compute distances in embedding space</li>
-          <ul>
-            <li>Euclidean distance is not used due to curse of dimensionality</li>
-          </ul>
-          <li>Softmax is applied to distances to make them sum to 1</li>
-          <li>Cross-entropy is used to measure how close the probabilities are to the ground truth</li>
+          <li>Euclidean distance is not used due to curse of dimensionality</li>
         </ul>
+        <li>Apply softmax to distances to make them sum to 1</li>
+        <li>Use cross-entropy to measure how close the probabilities are to the ground truth</li>
       </ul>
       <li>Hyperparameters</li>
-      <ul>
-        <li>Number of convolutional layers</li>
-        <li>Number of neurons in fully connected layers</li>
-        <li>Size of embedding vector</li>
-      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -303,19 +280,13 @@
       <li>Option 1. precision@k</li>
       <ul>
         <li>\( \dfrac{\text{Number of relevant items in the output list (contaning top k items)}}{\text{k}} \)</li>
-        <li>Cons</li>
-        <ul>
-          <li>Does not consider ranking quality</li>
-        </ul>
+        <li>Does not consider ranking quality</li>
       </ul>
       <li>Option 2. recall@k</li>
       <ul>
         <li>\( \dfrac{\text{Number of relevant items in the output list (contaning top k items)}}{\text{total relevant items in the dataset}} \)</li>
-        <li>Cons</li>
-        <ul>
-          <li>Does not consider ranking quality</li>
-          <li>Denominator can be very big, which negatively impacts recall value</li>
-        </ul>
+        <li>Does not consider ranking quality</li>
+        <li>Denominator can be very big, which negatively impacts recall value</li>
       </ul>
       <li>Option 3. mean reciprobal rank (MRR)</li>
       <ul>
@@ -324,10 +295,7 @@
           <li>\( {\text{rank}_{i}} \) is position on which the first relevant item appears in the output list</li>
         </ul>
         <li>Consider only the first relevant item in each output list, then average the reciprocal rank</li>
-        <li>Cons</li>
-        <ul>
-          <li>Ignores other relevant items in the list other than the first one</li>
-        </ul>
+        <li>Ignores other relevant items in the list other than the first one</li>
       </ul>
       <li>Option 4. mean average precision (mAP)</li>
       <ul>
@@ -344,10 +312,7 @@
         <ul>
           <li>Compute AP for each output list, then average them</li>
         </ul>
-        <li>Cons</li>
-        <ul>
-          <li>Works well when each item is either relevant or irrelevant, but does not work well for relevance scores</li>
-        </ul>
+        <li>Works well when each item is either relevant or irrelevant, but does not work well for relevance scores</li>
       </ul>
       <li>Option 5. normalized discounted cumulative gain (nDCG)</li>
       <ul>
@@ -365,10 +330,7 @@
           <li>Assume human rates the images on scale of \( 0 \) to \( 3 \) such that \( I1=3, I2=2, I3=3, I4=0 \) (\( 3 \) is highly relevant, \( 0 \) is merely relevant)</li>
           <li>\( DCG_{p} = \frac{3}{log(1+1)} + \frac{2}{log(2+1)} + \frac{3}{log(3+1)} + \frac{0}{log(4+1)} = 3 + 1.262 + 1.5 + 0 = 5.762 \)</li>
         </ul>
-        <li>Cons</li>
-        <ul>
-          <li>nDCG does not penalize irrelevant search result</li>
-        </ul>
+        <li>Deriving ground truth is not always possible</li>
       </ul>
     </ul>
 
