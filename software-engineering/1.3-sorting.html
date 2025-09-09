@@ -166,49 +166,58 @@
 <pre><code class="python">class Solution:
     def topKFrequent(self, nums: List[int], k: int) -> List[int]:
 
-        # Store frequency of each num in dictionary
-        # Do quickselect on the frequency
-        #   Move nums greater than pivot to left
-        #   If nums[i] > nums[p] and i > p, swap
-        #   If nums[i] < nums[p] and i < p, swap
-        # If p > k, search on left
-        # If p < k, search on right
-        # If p == k, return  
-
-        frequencies = defaultdict(int)
-        for num in nums:
-            frequencies[num] += 1
-
-        keys = list(frequencies.keys())
+        # Count occurance of each num
+        # Quickselect based on the occurance
+        # Partition array such that 
+        #   Pick pivot index randomly
+        #   Numbers higher than pivot value comes left
+        #   Numbers lower than pivot value comes right
+        # If pivot index < k, kth should be on right
+        # If pivot index > k, kth should be on left 
 
         # Time O(n)
         #   n = len(nums)
         # Space O(n)
         #   Storing frequencies and keys
-        def quickselect(frequencies, keys, left, right, k):
-
-            p = partition(frequencies, keys, left, right)
-            if p > k - 1:
-                return quickselect(frequencies, keys, left, p-1, k)
-            elif p < k - 1:
-                return quickselect(frequencies, keys, p+1, right, k)
-            else:
-                return keys[:p+1]
-
-        def partition(frequencies, keys, left, right):
-
+        def partition(left, right, array):
             p = random.randint(left, right)
             
             for i in range(left, right+1):
-                if frequencies[keys[i]] > frequencies[keys[p]] and i > p:
-                    keys[i], keys[p] = keys[p], keys[i] 
-                if frequencies[keys[i]] < frequencies[keys[p]] and i < p:
-                    keys[i], keys[p] = keys[p], keys[i] 
+                if array[i][0] < array[p][0] and i < p:
+                    array[i], array[p] = array[p], array[i] 
+                if array[i][0] > array[p][0] and i > p:
+                    array[i], array[p] = array[p], array[i] 
                 p = i
 
             return p
 
-        return quickselect(frequencies, keys, 0, len(keys)-1, k)</code></pre>
+        def quickselect(left, right, array, k):
+            
+            p = partition(left, right, array)
+
+            if p < k - 1:
+                return quickselect(p+1, right, array, k)
+            elif p > k - 1:
+                return quickselect(left, p-1, array, k)
+            else:
+                return array[:p+1]
+        
+        count = defaultdict(int)
+
+        for num in nums:
+            count[num] += 1
+
+        array = []
+        for key, val in count.items():
+            array.append([val, key])
+
+        ret_val = quickselect(0, len(array)-1, array, k)
+
+        result = []
+        for count, num in ret_val:
+            result.append(num)
+
+        return result</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/top-k-frequent-elements">347. Top K Frequent Elements</a>
