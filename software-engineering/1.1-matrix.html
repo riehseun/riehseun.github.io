@@ -56,51 +56,44 @@
   <div class="card-body">
     <h2 class="card-title">Valid Sudoku (M)</h2>
 
-<pre><code class="python">class Solution:
-    def isValidSudoku(self, board: List[List[str]]) -> bool:
+<pre><code class="python"># Validate row, column, square
 
         n = len(board)
-        seen = set()
 
-        # Time O(1)
-        # Space O(1)
+        # Time O(n**2)
+        #   n = length of grid
+        # Space O(n**2)
 
-        # Validate row
-        for row in board:
-            for num in row:
-                if num.isdigit():
-                    if num not in seen:
-                        seen.add(num)
-                    else:
-                        return False
-            seen = set()
+        for i in range(n):
+            seen_in_row = set()
+            for j in range(n):
+                if board[i][j] in seen_in_row:
+                    return False
+                if board[i][j] != ".":
+                    seen_in_row.add(board[i][j])
 
-        # Validate col
-        for j in range(n):
-            for i in range(n):
-                if board[i][j].isdigit():
-                    if board[i][j] not in seen:
-                        seen.add(board[i][j])
-                    else:
-                        return False
-            seen = set()
+        for i in range(n):
+            seen_in_col = set()
+            for j in range(n):
+                if board[j][i] in seen_in_col:
+                    return False
+                if board[j][i] != ".":
+                    seen_in_col.add(board[j][i])
 
-        # Validate square from each top left index
         for i in range(0, n, 3):
             for j in range(0, n, 3):
-                for k in range(0,3):
-                    for l in range(0,3):
-                        if board[i+k][j+l].isdigit():
-                            if board[i+k][j+l] not in seen:
-                                seen.add(board[i+k][j+l])
-                            else:
-                                return False
-                seen = set()
-
+                seen_in_square = set()
+                for k in range(i, i+3):
+                    for l in range(j, j+3):  
+                        if board[k][l] in seen_in_square:
+                            return False
+                        if board[k][l] != ".":
+                            seen_in_square.add(board[k][l])
+                            
         return True</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/valid-sudoku">36. Valid Sudoku</a>
+    Reference: <a href="https://leetcode.com/problems/valid-sudoku">36. Valid Sudoku</a> | <a href="https://https://neetcode.io/problems/valid-sudoku">Valid Sudoku</a>
   </div>
 </div>
 
