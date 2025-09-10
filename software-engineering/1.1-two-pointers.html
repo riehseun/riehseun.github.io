@@ -114,29 +114,25 @@
 
 <pre><code class="python">class Solution:
     def maxArea(self, height: List[int]) -> int:
+        
+        # Water that can be stored between i and j
+        # min(heights[i], heights[j]) * (j-i)
+        # if heights[i] > heights[j], try moving j
 
-        # Iterate from both ends
-        # The area is length * height 
-        #   height = lower height of left and right pillar
-        #   length = distance between two pillars
-
-        start, end, max_area = 0, len(height) - 1, 0
+        start, end, max_water = 0, len(height) - 1, 0
 
         # Time O(n)
         #   n = len(height)
         # Space O(1)
         while start < end:
-
-            h = min(height[start], height[end])
-            l = end - start
-            max_area = max(max_area, h*l)
-
-            if height[start] < height[end]:
-                start += 1
-            else:
+            water = min(height[start], height[end]) * (end-start)
+            max_water = max(max_water, water)
+            if height[start] > height[end]:
                 end -= 1
+            else:
+                start += 1
 
-        return max_area</code></pre>
+        return max_water</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/container-with-most-water">11. Container With Most Water</a>
