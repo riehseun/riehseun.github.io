@@ -112,43 +112,40 @@
 <pre><code class="python">class Solution:
     def generateParenthesis(self, n: int) -> List[str]:
         
-        # Backtrack
-        # For each b in ["(", ")"] 
-        #   We can put "(" only when number of "(" < n
-        #   We can put ")" only when number of "(" > number of ")"
+        # Backtracking
+        # Number of ( cannot be greater than n
+        # Number of ) cannot excced number of ( at any point 
+        # Generate n * 2 length of string
 
         # Time O(2n**n)
         # Space O(n)
-        def backtrack(result, parenthesis, n):
+        def backtrack(result, brackets, n, count):
 
-            for b in ["(", ")"]:
+            for c in ["(", ")"]:
 
-                if len(parenthesis) == n * 2:
-                    result.append("".join(parenthesis))
+                if len(brackets) == n * 2:
+                    result.append("".join(brackets))
                     return
-                
-                open_b, close_b = 0, 0
-                for c in parenthesis:
-                    if c == "(":
-                        open_b += 1
-                    else:
-                        close_b += 1
 
-                if b == ")" and open_b > close_b:
-                    parenthesis.append(b)
-                    backtrack(result, parenthesis, n)
-                    parenthesis.pop()
-                if b == "(" and open_b < n:
-                    parenthesis.append("(")
-                    backtrack(result, parenthesis, n)
-                    parenthesis.pop()
-
-        result = []
-        backtrack(result, [], n)
+                if c == ")" and count["("] > count[")"]:
+                    count[")"] += 1
+                    brackets.append(")")
+                    backtrack(result, brackets, n, count)
+                    brackets.pop()  
+                    count[")"] -= 1  
+                if c == "(" and count["("] < n:
+                    count["("] += 1
+                    brackets.append("(")
+                    backtrack(result, brackets, n, count)
+                    brackets.pop()
+                    count["("] -= 1
+            
+        result, count = [], defaultdict(int)
+        backtrack(result, [], n, count)
         return result</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/generate-parentheses">22. Generate Parentheses</a>
+    Reference: <a href="https://leetcode.com/problems/generate-parentheses">22. Generate Parentheses</a> | <a href="https://neetcode.io/problems/generate-parentheses">Generate Parentheses</a>
   </div>
 </div>
 
