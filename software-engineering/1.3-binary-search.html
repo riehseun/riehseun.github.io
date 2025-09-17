@@ -47,6 +47,7 @@
       <li><a href="#binary-search-">Median of Two Sorted Arrays</a></li>
       <li><a href="#binary-search-">Search in Rotated Sorted Array</a></li>
       <li><a href="#binary-search-">Find First and Last Position of Element in Sorted Array<</a></li>
+      <li><a href="#binary-search-">Search a 2D Matrix</a></li>
       <li><a href="#binary-search-">Find Peak Element</a></li>
       <li><a href="#binary-search-">Split Array Largest Sum</a></li>
       <li><a href="#binary-search-">Find K Closest Elements</a></li>
@@ -158,6 +159,67 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array">34. Find First and Last Position of Element in Sorted Array</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="binary-search-">
+  <div class="card-body">
+    <h2 class="card-title">Search a 2D Matrix (M)</h2>
+
+<pre><code class="python">class Solution:
+    def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
+
+        # Binary search to find the row that target belongs
+        # If target < first number in mid row
+        #   Search upper row
+        # Elif target > last number in mid row
+        #   Search lower row
+        # Else
+        #   Return current row
+        # Then, binary search on the row
+
+        left, right = 0, len(matrix) - 1
+
+        # Time O(log(mn))
+        #   n = number of rows
+        #   m = number of cols
+        # Space O(1)
+        def binary_search_row(left, right, matrix, target):
+
+            while left <= right:
+                mid = (left+right) // 2
+                print(f"{left},{mid},{right}")
+                if target < matrix[mid][0]:
+                    right = mid - 1
+                    continue
+                if target > matrix[mid][len(matrix[mid])-1]:
+                    left = mid + 1
+                    continue  
+                return mid
+
+            return -1
+
+        index = binary_search_row(left, right, matrix, target)
+        
+        def binary_search(left, right, row, target):
+
+            while left <= right:
+                mid = (left+right) // 2
+
+                if target < row[mid]:
+                    right = mid - 1
+                elif target > row[mid]:
+                    left = mid + 1
+                else:  
+                    return True
+
+            return False
+
+        left, right = 0, len(matrix[index]) - 1
+        return binary_search(left, right, matrix[index], target)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/search-a-2d-matrix">74. Search a 2D Matrix</a> | <a href="https://neetcode.io/problems/search-2d-matrix">Search a 2D Matrix</a>
   </div>
 </div>
 
