@@ -371,50 +371,40 @@
 <pre><code class="python">class Solution:
     def minEatingSpeed(self, piles: List[int], h: int) -> int:
 
-        # Think about the minimum and maximum eating speed
-        #   Min is 1
-        #   Max is max(piles)
-        # Contruct an integer array [min, max]
-        # Run binary search
-        #   Compute new hour (h') with eating speed mid
-        #   If h' < h, Koko is eating too fast
-        #   Slow down, decrease mid meaning search on left side
-        #   If h' > h, Koko is eating too slow
-        #   Speed up, increase mid meaning search on right side
-        #   If h' == h, try to see if Koko can finish eating 
-        #   with less speed (search on left)
+        # Binary search
+        # Consider the minimum and maximun eating speed
+        # Min = 1, Max = max(piles)
+        # Try eat with mid speed
+        # If eat too fast (h' < h)
+        #   Decrease eating speed
+        # Elif eat too slow (h' > h)
+        #   Increase eating speed
+        # Else
+        #   Speed is good enough
+        #   Try further lowering eating speed
 
-        left = 1
-        right = max(piles)
+        left, right = 1, max(piles)
 
-        # Time O(nlogn)
+        # Time O(nlogm)
         #   n = len(piles)
+        #   m = max(piles)
         # Space O(1)
         while left <= right:
-
             mid = (left+right) // 2
-            
-            # Calculate number of hours needed 
-            # to finish eating with speed "mid"
-            h_prime = 0
-            for pile in piles:
-                quotient = pile // mid
-                remainer = pile % mid
-                if remainer == 0:
-                    h_prime += quotient
-                else:
-                    h_prime += quotient + 1
 
-            # Eating too fast, need to eat slower
-            if h > h_prime:
+            h_prime = 0
+            for p in piles:
+                h_prime += p // mid
+                if p % mid != 0:
+                    h_prime += 1 
+
+            if h_prime < h:
                 right = mid - 1
-            # Easting too slow, need to eat faster
-            elif h < h_prime:
+            elif h_prime > h:
                 left = mid + 1
-            # When eating speed is good enough, try lower speed
             else:
                 right = mid - 1
-                
+
         return left</code></pre>
   </div>
   <div class="card-footer text-muted">
