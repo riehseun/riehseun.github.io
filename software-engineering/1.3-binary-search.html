@@ -64,10 +64,69 @@
   <div class="card-body">
     <h2 class="card-title">Median of Two Sorted Arrays (H)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def findMedianSortedArrays(self, nums1: List[int], nums2: List[int]) -> float:
+
+        # Compute mid of nums1 and nums2 (mid1, mid2)
+        # Assume mid1 < mid2
+        # Try splitting nums1
+        #   Let left num of split = max_left_1
+        #   Let right num of split = min_right_1
+        #.  Let split point = mid1  
+        # Try splitting nums2
+        #   max_left_2, min_right_2, mid2 = (n+m+1) // 2 - mid1
+        # If max_left_1 <= min_right_2 and max_left_2 <= min_right_1
+        #   Return 
+        # If max_left_1 > min_right_2
+        #   max_left_1 is too big, right = split point - 1
+        # If min_right_1 < max_left_2
+        #   min_right_1 is too small, left = split spoint + 1
+
+        if len(nums1) > len(nums2):
+            nums1, nums2 = nums2, nums1
+
+        n, m = len(nums1), len(nums2)
+        left, right = 0, n
+
+        # Time O(log(min(n,m)))
+        #   n = len(nums1)
+        #   m = len(nums2)
+        # Space O(1)
+        while left <= right:
+            mid1 = (left+right) // 2
+            mid2 = (n+m+1) // 2 - mid1
+
+            if mid1 == 0:
+                max_left_1 = -math.inf
+            else:
+                max_left_1 = nums1[mid1-1] 
+            if mid1 == n:
+                min_right_1 = math.inf
+            else:
+                min_right_1 = nums1[mid1] 
+            if mid2 == 0:
+                max_left_2 = -math.inf
+            else:
+                max_left_2 = nums2[mid2-1]
+            if mid2 == m:
+                min_right_2 = math.inf
+            else:
+                min_right_2 = nums2[mid2]
+
+            if max_left_1 > min_right_2:
+                right = mid1 - 1
+                continue
+            if min_right_1 < max_left_2:
+                left = mid1 + 1
+                continue
+            if max_left_1 <= min_right_2 and max_left_2 <= min_right_1:
+                if (m+n) % 2 == 0:
+                    return (max(max_left_1, max_left_2) + min(min_right_1, min_right_2)) / 2
+                else:
+                    return max(max_left_1, max_left_2)  </code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/median-of-two-sorted-arrays">4. Median of Two Sorted Arrays</a>
+    Reference: <a href="https://leetcode.com/problems/median-of-two-sorted-arrays">4. Median of Two Sorted Arrays</a> | <a href="https://neetcode.io/problems/median-of-two-sorted-arrays">Median of Two Sorted Arrays</a>
   </div>
 </div>
 
