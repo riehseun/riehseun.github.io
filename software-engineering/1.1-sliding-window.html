@@ -46,6 +46,7 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#sliding-window-">Longest Substring Without Repeating Characters</a></li>
       <li><a href="#sliding-window-">Minimum Window Substring</a></li>
+      <li><a href="#sliding-window-">Longest Repeating Character Replacement</a></li>
       <li><a href="#sliding-window-">Max Consecutive Ones III</a></li>
     </ul>
   </div>
@@ -138,6 +139,46 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/minimum-window-substring">76. Minimum Window Substring</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="sliding-window-">
+  <div class="card-body">
+    <h2 class="card-title">Longest Repeating Character Replacement (M)</h2>
+
+<pre><code class="python">class Solution:
+    def characterReplacement(self, s: str, k: int) -> int:
+
+        # Find substring that is only differ by k
+        # Use hash table to count frequency of elements
+        # Substring is valid if
+        #   total_count - max_count <= k 
+
+        start, end, max_length = 0, 0, 1
+        counts, max_cnt, total_cnt = defaultdict(int), 0, 0
+
+        # Time O(n)
+        #   n = len(s)
+        # Space O(n)
+        while start <= end and end < len(s):
+            
+            if total_cnt - max_cnt <= k:
+                counts[s[end]] += 1
+                total_cnt += 1
+                if counts[s[end]] > max_cnt:
+                    max_cnt = counts[s[end]]
+                if total_cnt - max_cnt <= k:
+                    max_length = max(max_length, end-start+1)
+                end += 1
+            else:
+                counts[s[start]] -= 1
+                total_cnt -= 1
+                start += 1
+
+        return max_length</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/longest-repeating-character-replacement">424. Longest Repeating Character Replacement</a> | <a href="https://neetcode.io/problems/longest-repeating-substring-with-replacement">Longest Repeating Character Replacement</a>
   </div>
 </div>
 
