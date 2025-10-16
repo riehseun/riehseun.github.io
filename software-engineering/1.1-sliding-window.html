@@ -47,6 +47,7 @@
       <li><a href="#sliding-window-">Longest Substring Without Repeating Characters</a></li>
       <li><a href="#sliding-window-">Minimum Window Substring</a></li>
       <li><a href="#sliding-window-">Longest Repeating Character Replacement</a></li>
+      <li><a href="#sliding-window-">Permutation in String</a></li>
       <li><a href="#sliding-window-">Max Consecutive Ones III</a></li>
     </ul>
   </div>
@@ -179,6 +180,71 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/longest-repeating-character-replacement">424. Longest Repeating Character Replacement</a> | <a href="https://neetcode.io/problems/longest-repeating-substring-with-replacement">Longest Repeating Character Replacement</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="sliding-window-">
+  <div class="card-body">
+    <h2 class="card-title">Permutation in String (M)</h2>
+
+<pre><code class="python">class Solution:
+    def checkInclusion(self, s1: str, s2: str) -> bool:
+
+        # Create frequency map for s1
+        # Slide s2 where window size is len(s1)
+        #   If new char exists in s1 decrement count
+        #   If old char exists in s1 increment count
+        # Keep track of number of mismatches
+
+        n, m = len(s1), len(s2)
+        counts, num_mismatch = defaultdict(int), 0
+
+        # Time O(n)
+        #   n = len(s1)
+        # Space O(1)
+        #   There are only 26 chars in alphabet
+        for c in s1:
+            counts[c] += 1
+            
+        for c in s2[:n]:
+            if c in counts:
+                counts[c] -= 1
+        
+        for k,v in counts.items():
+            num_mismatch += abs(v)
+
+        if num_mismatch == 0:
+            return True
+
+        # Time O(m)
+        #   m = len(s2)
+        # Space O(1)
+        #   There are only 26 chars in alphabet
+        for i in range(n, m):
+            new_c = s2[i]
+            old_c = s2[i-n]
+
+            if new_c in counts:
+                if counts[new_c] > 0:
+                    num_mismatch -= 1
+                else:
+                    num_mismatch += 1
+                counts[new_c] -= 1
+
+            if old_c in counts:
+                if counts[old_c] < 0:
+                    num_mismatch -= 1
+                else:
+                    num_mismatch += 1
+                counts[old_c] += 1
+
+            if num_mismatch == 0:
+                return True
+
+        return False</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/permutation-in-string">567. Permutation in String</a> | <a href="https://neetcode.io/problems/permutation-string">Permutation in String</a>
   </div>
 </div>
 
