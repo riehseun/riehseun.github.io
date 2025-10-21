@@ -195,30 +195,43 @@
       <ul>
         <li>Encoder</li>
         <ul>
-          <li>Every word/token attends to all other word/token in sequence</li>
+          <li>Token embedding</li>
+          <li>Positional encoding</li>
+          <li>Transformer</li>
         </ul>
         <li>Decoder</li>
         <ul>
-          <li>Cross attention integrates information from encoder</li>
-          <li>All word/token attends to only the word/token that comes before (future tokens are masked)</li>
-          <li>Model should only use previous tokens to generate next tokens</li>
-          <li>Prediction head contains linear layer followed by softmax layer</li>
+          <li>Token embedding</li>
+          <li>Positional encoding</li>
+          <li>Transformer</li>
+          <ul>
+            <li>Cross attention integrates information from encoder</li>
+            <li>All word/token attends to only the word/token that comes before (future tokens are masked)</li>
+            <li>Model should only use previous tokens to generate next tokens</li>
+          </ul>
+          <li>Prediction head</li>
+          <ul>
+            <li>Prediction head contains linear layer followed by softmax layer</li>
+          </ul>
         </ul>
       </ul>
       <li>Loss function</li>
       <ul>
-        <li>Pre-training</li>
+        <li>Pre-training (unsupervised)</li>
         <ul>
           <li>Train on general data that has English and Korean</li>
           <li>Objective is to predict masked tokens (Masked Language Modeling)</li>
           <ul>
-            <li>Some of input tokens are masked</li>
-            <li>Encoder encodes sentence with masked tokens</li>
-            <li>Decoder predicts those masked tokens</li>
+            <li>Randomly mask subset of input tokens by replacing them with [MASK]</li>
+            <li>Feed masked sequence to encoder</li>
+            <li>Encoder outputs a sequence of new embeddings for each token</li>
+            <li>Feed the same masked sequence to decoder but without masking and shifting one position to right by inserting start token &gt;BOS&lt;</li>
+            <li>Decoder predicts next token for each position in sequence</li>
+            <li>Calculate cross-entropy loss over predicted probabilities and ground truth for masked tokens only</li>
           </ul>
-          <li>Cross-entropy loss to measure difference between predicted vs actual masked token</li>
+          <li>Existing models (T5, BART) can be used instead</li>
         </ul>
-        <li>Fine-tuning</li>  
+        <li>Fine-tuning (supervised)</li>  
         <ul>
           <li>Train on pairs of English-Korean sentences</li>
           <ul>
