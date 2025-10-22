@@ -84,7 +84,7 @@
         return max_length</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/longest-substring-without-repeating-characters">3. Longest Substring Without Repeating Characters</a>
+    Reference: <a href="https://leetcode.com/problems/longest-substring-without-repeating-characters">3. Longest Substring Without Repeating Characters</a> | <a href="https://neetcode.io/problems/longest-substring-without-duplicates">Longest Substring Without Repeating Characters</a>
   </div>
 </div>
 
@@ -95,51 +95,51 @@
 <pre><code class="python">class Solution:
     def minWindow(self, s: str, t: str) -> str:
 
-        # Silding window
-        #   Move end pointer until substring is vaild
-        #   When substring is valid, move start pointer (remember substring)
-        # How to check valid substring
-        #   Use dictionary to count chars that are in t and s
-        #   s_chars represents deficit for each char
-          
-        t_chars, s_chars = defaultdict(int), defaultdict(int)
-        for c in t:
-            t_chars[c] += 1
-        s_chars[s[0]] = 1
+        # Sliding window
+        # Increse end pointer until substring is valid
+        # Then, increase start pointer while substring is valid
+        # How to check validity?
+        #   Keep frequency map of chars for t
+        #   Increment count of new char in window
+        #   Decrement count of old char in window
+        #   Remember number of mismatches
 
-        start, end, min_length, min_substring = 0, 0, len(s), ""
+        start, end, n = 0, 0, len(s) 
+        min_length, min_string = n, ""
+        counts, num_mismatch = defaultdict(int), 0
         
-        def is_vaild_substring(s_chars, t_chars):
+        for c in t:
+            counts[c] += 1
+        num_mismatch = len(counts)
 
-            for key, val in t_chars.items():
-                if val > s_chars[key]:
-                    return False
-
-            return True
-
-        # Time O(nm)
+        # Time O(n)
         #   n = len(s)
+        # Space O(m)
         #   m = len(t)
-        # Space O(n+m)
-        while start <= end and end < len(s):
-
-            if not is_vaild_substring(s_chars, t_chars):
+        while start <= end and end < n:
+    
+            if num_mismatch != 0:
+                if s[end] in counts:
+                    if counts[s[end]] == 1:
+                        num_mismatch -= 1 
+                    counts[s[end]] -= 1
                 end += 1
-                if end < len(s):
-                    s_chars[s[end]] += 1
-            else:
-                length = end - start
-                if length < min_length:
-                    min_length = length
-                    min_substring = s[start:end+1]
-                    
-                s_chars[s[start]] -= 1
-                start += 1
 
-        return min_substring</code></pre>
+            while num_mismatch == 0:
+                substr = s[start:end]
+                if len(substr) <= min_length:
+                    min_length = len(substr)
+                    min_string = substr
+                if s[start] in counts:
+                    if counts[s[start]] == 0:
+                        num_mismatch += 1
+                    counts[s[start]] += 1
+                start += 1
+            
+        return min_string</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/minimum-window-substring">76. Minimum Window Substring</a>
+    Reference: <a href="https://leetcode.com/problems/minimum-window-substring">76. Minimum Window Substring</a> | <a href="https://neetcode.io/problems/minimum-window-with-characters">Minimum Window Substring</a>
   </div>
 </div>
 
