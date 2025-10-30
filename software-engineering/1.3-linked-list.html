@@ -219,20 +219,19 @@ class Node:
 class Solution:
     def copyRandomList(self, head: 'Optional[Node]') -> 'Optional[Node]':
 
-        # For each node in original LL, 
-        #   Create a new node right next to each node
-        #   Set new_node.next = node.next
-        #   Set node.next = new_node 
-        #   
-        # Then, iterate newly created LL,
-        #   Set node.next.random = node.random.next
-        #
-        # Lastly, from copied LL, remove links to original LL
+        # Create new nodes after each node in original LL
+        # Set
+        #   new_node.next = node.next
+        #   node.next = new_node
+        # Then, iterate newly modified LL
+        #   node.next.random = node.random.next
+        # Then, remove links from original LL
+        #   node.next = node.next.next
+        #   node = node.next
 
         # Time O(n)
         #   n = number of nodes in LL
         # Space O(1)
-        #   Ignoring space for resulting LL
         node = head
         while node:
             new_node = Node(node.val)
@@ -241,26 +240,23 @@ class Solution:
             node = node.next.next
 
         node = head
-        while node and node.next:
+        while node:
             if node.random:
                 node.next.random = node.random.next
             node = node.next.next
 
-        head_next = None
-        
-        # Separate original and copied LL
-        node = head
+        node, node_copy = head, None
         while node and node.next:
-            if not head_next:
-                head_next = node.next
+            if not node_copy:
+                node_copy = node.next
             next_node = node.next
             node.next = node.next.next
             node = next_node
-    
-        return head_next</code></pre>
+
+        return node_copy</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/copy-list-with-random-pointer">138. Copy List with Random Pointer</a>
+    Reference: <a href="https://leetcode.com/problems/copy-list-with-random-pointer">138. Copy List with Random Pointer</a> | <a href="https://neetcode.io/problems/copy-linked-list-with-random-pointer">Copy Linked List with Random Pointer</a>
   </div>
 </div>
 
