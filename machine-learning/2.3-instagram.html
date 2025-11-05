@@ -45,13 +45,15 @@
     <h2 class="card-title">Instagram</h2>
     <ul class="list-unstyled mb-0">
       <li><a href="#instagram-1">Requirement</a></li>
-      <li><a href="#instagram-2">Problem</a></li>
+      <li><a href="#instagram-2">High-level design</a></li>
+      <li><a href="#instagram-3">Detailed design</a></li>
+      <!-- <li><a href="#instagram-2">Problem</a></li>
       <li><a href="#instagram-3">Data preparation</a></li>
       <li><a href="#instagram-4">Model development</a></li>
       <li><a href="#instagram-5">Evaluation</a></li>
       <li><a href="#instagram-6">Serving</a></li>
       <li><a href="#instagram-7">Infrastructure</a></li>
-      <li><a href="#instagram-8">Follow up</a></li>
+      <li><a href="#instagram-8">Follow up</a></li> -->
     </ul>
   </div>
 </div>
@@ -73,7 +75,7 @@
         <li>What does an AD consist of? Text, image, video</li>
         <ul>
           <li>Should ADs be personalized for each user? Yes</li>
-          <li>Whare are the ADs placed? In the feeds</li>
+          <li>Whare are the ADs placed? In the feeds</li>s
           <li>Does each AD generate the same revenue? Yes</li>
           <li>Can an AD be shown to a user more than once? Yes</li>
         </ul>
@@ -99,6 +101,111 @@
         <li>How many posts are in the system? each user creates 1 post per day on average</li>
         <li>How many ADs are in the system? 1M per month</li>
       </ul>
+      <li>Input/output</li>
+      <ul>
+        <li>Input - user</li>
+        <li>Output - List of posts and ADs basd on probability of being clicked</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu | Aman Chadha
+  </div>
+</div>
+
+<div class="card mb-4" id="instagram-6">
+  <div class="card-body">
+    <h2 class="card-title">High-level design</h2>
+    <ul>
+      <li>Data pipeline</li>
+      <ul>
+        <img class="img-fluid" class="card-img-top" src="/machine-learning/image/test/instagram-2.png" alt="Card image cap">
+      </ul>
+      <li>Training pipeline</li>
+      <ul>
+        <img class="img-fluid" class="card-img-top" src="/machine-learning/image/test/instagram-1.png" alt="Card image cap">
+        <li>Batch features (Ex. AD's text, image, video) don't change much, so they can be processed offline</li>
+        <li>Dynamic features (Ex. number of clicks for an AD) should be computed in real-time</li>
+      </ul>
+      <li>Serving pipeline</li>
+      <ul>
+        <img class="img-fluid" class="card-img-top" src="/machine-learning/image/test/instagram-3.png" alt="Card image cap">
+        <li>Candidate generation</li>
+        <ul>
+          <li>Gather relevant feeds, ADs, reels from pool of items</li>
+          <li>Matrix Factorization, two-tower NN (with no item features) can be used</li>
+          <li>Filter can be used to exclude irrelevant items</li>
+        </ul>
+        <li>Ranking</li>
+        <ul>
+          <li>Two-tower NN (with item features) can be used</li>
+        </ul>
+        <li>Re-ranking</li>
+        <ul>
+          <li>Re-orders items to generate dynamic mixture of recommendations</li>
+          <li>Apply additional criteria</li>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu | Aman Chadha
+  </div>
+</div>
+
+<div class="card mb-4" id="instagram-7">
+  <div class="card-body">
+    <h2 class="card-title">Detailed design</h2>
+
+    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/test/instagram-11.png" alt="Card image cap">
+
+    <ul>
+      <li>Availability</li>
+      <ul>
+        <li>Run mutiple replicas of servers to handle traffic in either active-active or active-passive setup</li>
+      </ul>
+      <li>Reliability</li>
+      <ul>
+        <li>Data - when partitioning data, store replicas of each partition in different geographical location</li>
+      </ul>
+      <li>Scalability</li>
+      <ul>
+        <li>Compute - horizontal auto scaling</li>
+        <li>Data - partitioning using consistent hashing</li>
+      </ul>
+      <li>Performance</li>
+      <ul>
+        <li>Model optimization</li>
+        <ul>
+          <li>Remove unnecessary features, thus the size of feature vectors</li>
+          <li>Pruning - remove non-contributing connections between neurons or neruons themselves</li>
+          <li>Quantization - use less number of bits to store weight values</li>
+        </ul>
+        <li>Data prep and feature transformation</li>
+        <ul>
+          <li>Spark takes time when it starts</li>
+          <li>Use native python</li>
+        </ul>
+        <li>Inference</li>
+        <ul>
+          <li>Candidate generation - do this offline since dynamic features (item features) are not needed</li>
+          <li>Store (user_id, item_ids) in key-value store for fast lookup</li>
+          <li>Ranking - pre-compute all batch features</li>
+        </ul>
+        <li>API</li>
+        <ul>
+          <li>Load balancing</li>
+          <li>Rate limiting</li>
+          <li>Caching responses with short TTL</li>
+        </ul>
+      </ul>
+      <li>Consistency</li>
+    </ul>
+
+    <ul>
+      <li>Latency</li>
+      <li>Error rate</li>
+      <li>Resource utilization</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -109,19 +216,6 @@
 <div class="card mb-4" id="instagram-2">
   <div class="card-body">
     <h2 class="card-title">Problem</h2>
-
-    <h3 class="card-title">ML problem</h3>
-    <ul>
-      <li>For each user, produce feeds where posts and ADs show up basd on probability of being clicked</li>
-      <li>Input</li>
-      <ul>
-        <li>User</li>
-      </ul>
-      <li>Output</li>
-      <ul>
-        <li>List of posts and ADs basd on probability of being clicked</li>
-      </ul>
-    </ul>
 
     <h3 class="card-title">ML category</h3>
     <ul>
@@ -453,7 +547,7 @@
         </ul>
         <li>Option 1. two-tower network (collaborative filtering - no item features)</li>
         <ul>
-          <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-0/instagram-21.png" alt="Card image cap">
+          <img class="img-fluid" class="card-img-top" src="/machine-learning/image/test/instagram-21.png" alt="Card image cap">
           <li>Narrow down items from billions to thousands</li>
           <li>Use model that does not rely on item feature for efficiency</li>
           <li>Inference</li>
@@ -519,7 +613,7 @@
           </ul>
           <li>Option 1c. two-tower network (content based filtering - use item features)</li>
           <ul>
-            <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-0/instagram-22.png" alt="Card image cap">
+            <img class="img-fluid" class="card-img-top" src="/machine-learning/image/test/instagram-22.png" alt="Card image cap">
             <li>Accuracy is more important than efficiency</li>
           </ul>
         </ul>
@@ -612,7 +706,7 @@
           <li>Feed ranking</li>
           <ul>
             <li>Multi-task DNN is appropriate to handle different types of user-post interaction</li>
-            <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-0/instagram-23.png" alt="Card image cap">
+            <img class="img-fluid" class="card-img-top" src="/machine-learning/image/test/instagram-23.png" alt="Card image cap">
             <li>Use MAE / MSE for regression task for dwell time prediction</li>
             <ul>
               <li>\( L = \dfrac{1}{N} \displaystyle\sum_{i} (y_{i}-\hat{y_{i}})^{2} \)</li>
@@ -791,101 +885,6 @@
           <li>\( \dfrac{\text{number of harmful posts detected by system}}{\text{number of harmful posts detected by system} + \text{reported by users}} \)</li>
         </ul>
       </ul> -->
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu | Aman Chadha
-  </div>
-</div>
-
-<div class="card mb-4" id="instagram-6">
-  <div class="card-body">
-    <h2 class="card-title">Serving</h2>
-
-    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-0/instagram-1.png" alt="Card image cap">
-    <ul>
-      <li>Batch features (Ex. AD's text, image, video) don't change much, so they can be processed offline</li>
-      <li>Dynamic features (Ex. number of clicks for an AD) should be computed in real-time</li>
-    </ul>
-
-    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-0/instagram-2.png" alt="Card image cap">
-    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-0/instagram-3.png" alt="Card image cap">
-    <ul>
-      <li>Candidate generation</li>
-      <ul>
-        <li>Gather relevant feeds, ADs, reels from pool of items</li>
-        <li>Matrix Factorization, two-tower NN (with no item features) can be used</li>
-        <li>Filter can be used to exclude irrelevant items</li>
-      </ul>
-      <li>Ranking</li>
-      <ul>
-        <li>Two-tower NN (with item features) can be used</li>
-      </ul>
-      <li>Re-ranking</li>
-      <ul>
-        <li>Re-orders items to generate dynamic mixture of recommendations</li>
-        <li>Apply additional criteria</li>
-      </ul>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu | Aman Chadha
-  </div>
-</div>
-
-<div class="card mb-4" id="instagram-7">
-  <div class="card-body">
-    <h2 class="card-title">Infrastructure</h2>
-
-    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-0/instagram-11.png" alt="Card image cap">
-
-    <ul>
-      <li>Availability</li>
-      <ul>
-        <li>Run mutiple replicas of servers to handle traffic in either active-active or active-passive setup</li>
-      </ul>
-      <li>Reliability</li>
-      <ul>
-        <li>Data - when partitioning data, store replicas of each partition in different geographical location</li>
-      </ul>
-      <li>Scalability</li>
-      <ul>
-        <li>Compute - horizontal auto scaling</li>
-        <li>Data - partitioning using consistent hashing</li>
-      </ul>
-      <li>Performance</li>
-      <ul>
-        <li>Model optimization</li>
-        <ul>
-          <li>Remove unnecessary features, thus the size of feature vectors</li>
-          <li>Pruning - remove non-contributing connections between neurons or neruons themselves</li>
-          <li>Quantization - use less number of bits to store weight values</li>
-        </ul>
-        <li>Data prep and feature transformation</li>
-        <ul>
-          <li>Spark takes time when it starts</li>
-          <li>Use native python</li>
-        </ul>
-        <li>Inference</li>
-        <ul>
-          <li>Candidate generation - do this offline since dynamic features (item features) are not needed</li>
-          <li>Store (user_id, item_ids) in key-value store for fast lookup</li>
-          <li>Ranking - pre-compute all batch features</li>
-        </ul>
-        <li>API</li>
-        <ul>
-          <li>Load balancing</li>
-          <li>Rate limiting</li>
-          <li>Caching responses with short TTL</li>
-        </ul>
-      </ul>
-      <li>Consistency</li>
-    </ul>
-
-    <ul>
-      <li>Latency</li>
-      <li>Error rate</li>
-      <li>Resource utilization</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
