@@ -55,7 +55,7 @@
   <div class="card-body">
     <h2 class="card-title">LRU cache (M)</h2>
 
-<pre><code class="python">class ListNode:
+<pre><code class="python">class Node:
 
     def __init__(self, key=0, val=0, prev=None, next=None):
         self.key = key
@@ -66,73 +66,71 @@
 
 class LRUCache:
 
-    # Use dictionary to store key and value
-    #   Get and put will be O(1)
-    #   Size of dictionary will be capacity
-    # How to know the least recently used key?
-    #   Use doubly linked list
-    #   Most recenly used keys are linked to head
-    #   Least recently used keys are linked to tail
-    #   Remove from tail when capacity exceed
-    #   Move to head when get is called on a node
-    #   Have dictioary to store LL nodes as value  
+    # Use hash table
+    # Get
+    #   Return the value or -1, done in O(1)
+    #   Mark the key as most recently used?
+    # Put
+    #   Add/update the value in dictionary - O(1)
+    #   Mark the key as most recently used?
+    #   Evict least recently used if necessary?
+    # Use LL
+    #   Head points to mostly recently used
+    #   Tail points to least recently used
+    #   Nodes in the middle are ordered 
 
     def __init__(self, capacity: int):
-        self.capacity = capacity 
-        self.dic = defaultdict(ListNode)
-        self.head = ListNode()
-        self.tail = ListNode()
+        self.dictionary = defaultdict(Node)
+        self.capacity = capacity
+        self.size = 0
+        self.head = Node()
+        self.tail = Node()
         self.head.next = self.tail
         self.tail.prev = self.head
-        
-    def get(self, key: int) -> int:
-        if key in self.dic:
-            # Update LL (Moving node next to head)
-            node = self.dic[key]
-            # Remove node
-            node.prev.next = node.next
-            node.next.prev = node.prev
-            # Add node to head
-            node.next = self.head.next
-            node.prev = self.head
-            self.head.next.prev = node
-            self.head.next = node
 
-            return self.dic[key].val
+    def get(self, key: int) -> int:
+        if key in self.dictionary:
+            self.mark(self.head, self.dictionary[key])
+            return self.dictionary[key].val
         else:
             return -1
-
+        
     def put(self, key: int, value: int) -> None:
-
-        if key in self.dic:
-            self.dic[key].val = value
-            # Update LL (Moving node next to head)
-            node = self.dic[key]
-            # Remove node
-            node.prev.next = node.next
-            node.next.prev = node.prev
-            # Add node to head
-            node.next = self.head.next
-            node.prev = self.head
-            self.head.next.prev = node
-            self.head.next = node
+        if key in self.dictionary:
+            self.mark(self.head, self.dictionary[key])
+            self.dictionary[key].val = value
         else:
-            if self.capacity == len(self.dic):
-                # Update LL (Remove node from tail)
-                node = self.tail.prev
-                node.prev.next = self.tail
-                self.tail.prev = node.prev
-                # Update dic
-                del self.dic[node.key]
+            node = Node(key,value)
+            self.add(self.head, node)
+            self.dictionary[key] = node
+            self.size += 1
+        
+        if self.size > self.capacity:
+            key = self.evict(self.tail)
+            del self.dictionary[key]
+            self.size -= 1
 
-            # Update LL (Adding new node to head)
-            node = ListNode(key, value)
-            node.next = self.head.next
-            node.prev = self.head
-            self.head.next.prev = node
-            self.head.next = node 
-            # Update dic
-            self.dic[key] = node
+    def add(self, head: Node, node: Node) -> None:
+        node.next = head.next
+        head.next.prev = node
+        head.next = node
+        node.prev = head
+        
+    def mark(self, head: Node, node: Node) -> None:
+        # Remove
+        node.prev.next = node.next
+        node.next.prev = node.prev
+        # Add
+        node.next = head.next
+        head.next.prev = node
+        head.next = node
+        node.prev = head
+        
+    def evict(self, tail: Node) -> None:
+        key = tail.prev.key
+        tail.prev.prev.next = tail
+        tail.prev = tail.prev.prev
+        return key
                 
     
 # Your LRUCache object will be instantiated and called as such:
@@ -141,7 +139,7 @@ class LRUCache:
 # obj.put(key,value)</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/lru-cache">146. LRU Cache</a>
+    Reference: <a href="https://leetcode.com/problems/lru-cache">146. LRU Cache</a> | <a href="https://neetcode.io/problems/lru-cache">LRU Cache</a>
   </div>
 </div>
 
