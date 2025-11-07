@@ -46,11 +46,9 @@
     <h2 class="card-title">Gen AI</h2>
     <ul class="list-unstyled mb-0">
       <li><a href="#genai-1">Requirement</a></li>
-      <li><a href="#genai-2">Problem</a></li>
-      <li><a href="#genai-3">Data preparation</a></li>
-      <li><a href="#genai-4">Model development</a></li>
-      <li><a href="#genai-5">Evaluation</a></li>
-      <li><a href="#genai-6">Serving</a></li>
+      <li><a href="#genai-2">High-level design</a></li>
+      <li><a href="#genai-3">Detailed design</a></li>
+      <li><a href="#genai-4">Follow up</a></li>
     </ul>
   </div>
 </div>
@@ -79,6 +77,11 @@
       <ul>
         <li>How many users should the system expect? 100M</li>
       </ul>
+      <li>Input/output</li>
+      <ul>
+        <li>Input - prompt</li>
+        <li>Output - answer</li>
+      </ul>
     </ul>
   <div class="card-footer text-muted">
     Reference:
@@ -87,20 +90,92 @@
 
 <div class="card mb-4" id="genai-2">
   <div class="card-body">
-    <h2 class="card-title">Problem</h2>
+    <h2 class="card-title">High-level design</h2>
 
-    <h3 class="card-title">ML objective</h3>
+    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/test/genai-1.png" alt="Card image cap">
+    <h3>Data ingestion</h3>
     <ul>
-      <li>Given questions, generate appropriate responses</li>
-      <li>Input</li>
+      <li>Text splitter</li>
       <ul>
-        <li>Prompt</li>
+        <li>Split documents into chunks (chunks are usually single sentences)</li>
+        <li>We want to pass only the relevant texts to LLM</li>
       </ul>
-      <li>Output</li>
+      <li>Embedding</li>
       <ul>
-        <li>Answer</li>
+        <li>Create embedding for each chunk</li>
+        <li>We want to use embedding to find the most relevant chunks</li>
+      </ul>
+      <li>Vector database</li>
+      <ul>
+        <li>Stores embeddings of chunks</li>
       </ul>
     </ul>
+
+    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/test/genai-2.png" alt="Card image cap">
+    <h3>Query</h3>
+    <ul>
+      <li>Query expansion</li>
+      <ul>
+        <li>Produces standalone questions from chat history</li>
+        <li>Can include spelling correction, adding additional keyword, etc</li>
+        <li>Query is transformned into embedding</li>
+      </ul>
+      <li>Retriever</li>
+      <ul>
+        <li>Executes search on vector database using embedding of standalone prompt</li>
+        <li>Uses variants of NN to search similar embeddings</li>
+      </ul>
+      <li>Re-ranker</li>
+      <ul>
+        <li>Takes \( k \) candidate chunks from retriever and come up with smaller subset</li>
+        <li>Focused on optimizing precision while maintaining recall</li>
+      </ul>
+      <li>System prompt</li>
+      <ul>
+        <li>A template</li>
+        <li>Query and chucks are added to system propmt, then fed to LLM</li>
+      </ul>
+      <li>LLM</li>
+      <ul>
+        <li>Original document of most relevant sections plus a system prompt are sent to LLM</li>
+        <li>LLM response includes citations to the referenced documents</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Umar Jamil
+  </div>
+</div>
+
+<div class="card mb-4" id="genai-3">
+  <div class="card-body">
+    <h2 class="card-title">Detailed design</h2>
+
+    <h3 class="card-title">Data engineering</h3>
+    <ul>
+      <li>Training data</li>
+      <ul>
+        <li>Documents that has domain specific knowledge to business</li>
+      </ul>
+      <li>Database</li>
+      <ul>
+        <li>Inverted index</li>
+        <ul>
+          <li>Text</li>
+          <li>Document</li>
+        </ul>
+        <li>Index</li>
+        <ul>
+          <li>Embedding</li>
+          <li>chunk</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Feature engineering</h3>
+    <ul>
+      <li>In RAG, there is no feature engineering</li>
+    </li>
 
     <h3 class="card-title">ML category</h3>
     <ul>
@@ -139,50 +214,6 @@
         </ul>
       </ul>
     </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: 
-  </div>
-</div>
-
-<div class="card mb-4" id="genai-3">
-  <div class="card-body">
-    <h2 class="card-title">Data preparation</h2>
-
-    <h3 class="card-title">Data engineering</h3>
-    <ul>
-      <li>Training data</li>
-      <ul>
-        <li>Documents that has domain specific knowledge to business</li>
-      </ul>
-      <li>Database</li>
-      <ul>
-        <li>Inverted index</li>
-        <ul>
-          <li>Text</li>
-          <li>Document</li>
-        </ul>
-        <li>Index</li>
-        <ul>
-          <li>Embedding</li>
-          <li>chunk</li>
-        </ul>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Feature engineering</h3>
-    <ul>
-      <li>In RAG, there is no feature engineering</li>
-    </li>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: 
-  </div>
-</div>
-
-<div class="card mb-4" id="genai-4">
-  <div class="card-body">
-    <h2 class="card-title">Model development</h2>
 
     <h3 class="card-title">Model selection</h3>
     <ul>
@@ -337,17 +368,8 @@
     <ul>
       <li>There is no model training in RAG</li>
     </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: Aman Chadha
-  </div>
-</div>
 
-<div class="card mb-4" id="genai-5">
-  <div class="card-body">
-    <h2 class="card-title">Evaluation</h2>
-
-    <h3 class="card-title">Retrieval</h3>
+    <h3 class="card-title">Offline evaluation - retrieval</h3>
     <ul>
       <li>Context precision</li>
       <ul>
@@ -370,7 +392,7 @@
       </ul>
     </ul>
 
-    <h3 class="card-title">Generation</h3>
+    <h3 class="card-title">Offline evaluation - generation</h3>
     <ul>
       <li>Faithfulness</li>
       <ul>
@@ -386,7 +408,7 @@
       </ul>
     </ul>
 
-    <h3 class="card-title">End-to-end</h3>
+    <h3 class="card-title">Offline evaluation - end-to-end</h3>
     <ul>
       <li>Summarization score</li>
       <ul>
@@ -404,79 +426,11 @@
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: Aman Chadha
+    Reference: 
   </div>
 </div>
 
-<div class="card mb-4" id="genai-6">
-  <div class="card-body">
-    <h2 class="card-title">Serving</h2>
-
-    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-0/genai-1.png" alt="Card image cap">
-    <h3>Data ingestion</h3>
-    <ul>
-      <li>Text splitter</li>
-      <ul>
-        <li>Split documents into chunks (chunks are usually single sentences)</li>
-        <li>We want to pass only the relevant texts to LLM</li>
-      </ul>
-      <li>Embedding</li>
-      <ul>
-        <li>Create embedding for each chunk</li>
-        <li>We want to use embedding to find the most relevant chunks</li>
-      </ul>
-      <li>Vector database</li>
-      <ul>
-        <li>Stores embeddings of chunks</li>
-      </ul>
-    </ul>
-
-    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-system-design-0/genai-2.png" alt="Card image cap">
-    <h3>Query</h3>
-    <ul>
-      <li>Query expansion</li>
-      <ul>
-        <li>Produces standalone questions from chat history</li>
-        <li>Can include spelling correction, adding additional keyword, etc</li>
-        <li>Query is transformned into embedding</li>
-      </ul>
-      <li>Retriever</li>
-      <ul>
-        <li>Executes search on vector database using embedding of standalone prompt</li>
-        <li>Uses variants of NN to search similar embeddings</li>
-      </ul>
-      <li>Re-ranker</li>
-      <ul>
-        <li>Takes \( k \) candidate chunks from retriever and come up with smaller subset</li>
-        <li>Focused on optimizing precision while maintaining recall</li>
-      </ul>
-      <li>System prompt</li>
-      <ul>
-        <li>A template</li>
-        <li>Query and chucks are added to system propmt, then fed to LLM</li>
-      </ul>
-      <li>LLM</li>
-      <ul>
-        <li>Original document of most relevant sections plus a system prompt are sent to LLM</li>
-        <li>LLM response includes citations to the referenced documents</li>
-      </ul>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: Umar Jamil
-  </div>
-</div>
-
-<div class="card mb-4" id="instagram-7">
-  <div class="card-body">
-    <h2 class="card-title">Infrastructure</h2>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu | Aman Chadha
-  </div>
-</div>
-
-<div class="card mb-4" id="instagram-8">
+<div class="card mb-4" id="genai-4">
   <div class="card-body">
     <h2 class="card-title">Follow up</h2>
     <ul>
