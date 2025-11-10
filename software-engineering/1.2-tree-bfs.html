@@ -146,37 +146,33 @@ class Solution:
 class Solution:
     def rightSideView(self, root: Optional[TreeNode]) -> List[int]:
 
-        # Do BFS while keeping depth of node
-        #   Append right child first
-        # For each depth, print only the first node
-
-        queue = deque()
-        if root:
-            queue.append((root, 0))
-        nodes = defaultdict(list)
+        # BFS
+        # Only keep hte last item for each level
 
         # Time O(n)
         #   n = number of nodes in tree
-        # Space O(n)
+        # Space O(d)
+        #   d = depth of tree
+        values = defaultdict(int)
+        queue = deque()
+        queue.append((root, 0))
+
         while queue:
             node, depth = queue.popleft()
-            if not nodes[depth]:
-                nodes[depth].append(node.val)
+            if node:
+                values[depth] = node.val
 
-            if node and node.right:
-                queue.append((node.right, depth+1))
             if node and node.left:
                 queue.append((node.left, depth+1))
-             
-        result = []
-        for key, val in nodes.items():
-            result.append(val[0])
+            if node and node.right:
+                queue.append((node.right, depth+1))
 
-        return result</code></pre>
+        return list(values.values())</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/binary-tree-right-side-view">199. Binary Tree Right Side View</a>
+    Reference: <a href="https://leetcode.com/problems/binary-tree-right-side-view">199. Binary Tree Right Side View</a> | <a href="https://neetcode.io/problems/binary-tree-right-side-view">Binary Tree Right Side View</a>
   </div>
+  </div> 
 </div>
 
 <div class="card mb-4" id="tree-bfs">
