@@ -241,48 +241,35 @@ class Solution:
 class Solution:
     def maxPathSum(self, root: Optional[TreeNode]) -> int:
 
-        # The path sum is 
-        #   node.val 
-        #   + path sum of left subtree 
-        #   + path sum of right subtree
-        # The path sum of leaf nodes are its own value
-        #   When node does not exist, return 0
-        # Traverse tree
-        #   For each node, compute path sum
-        #   Since both left and right children must be
-        #   computed first, do post_order traversal
-        # Each child can either pick contribution from its
-        # left child or right child to have valid path
+        # Max path sum at a specific node is max of
+        # node.val, node.val + left, node.val + right
+        # Post-order traversal
 
-        self.max_sum = -math.inf
+        self.max_path_sum = -math.inf
 
         # Time O(n)
         #   n = number of nodes in tree
-        # Space O(h)
-        #   h = height of tree
-        #   Call stack for recursion
+        # Space O(n)
+        #   Recursion stack - O(h), h = height of tree
+        #   Worst case - height of tree can be n
         def post_order(node):
 
             if node:
-                max_sum_from_left = max(post_order(node.left), 0)
-                max_sum_from_right = max(post_order(node.right), 0)
-                node_sum = node.val + max_sum_from_left + max_sum_from_right
-                self.max_sum = max(node_sum, self.max_sum)
-                # Contribution from Subtree can either be 
-                # from left or right, not both 
-                return max(
-                    node.val+max_sum_from_left, 
-                    node.val+max_sum_from_right
-                )
-
+                left = post_order(node.left)
+                right = post_order(node.right)
+                
+                path_sum = max(node.val, node.val+left, node.val+right)
+                self.max_path_sum = max(self.max_path_sum, 
+                    path_sum, node.val+left+right)
+                return path_sum
             else:
                 return 0
-
+        
         post_order(root)
-        return self.max_sum</code></pre>
+        return self.max_path_sum</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/binary-tree-maximum-path-sum">124. Binary Tree Maximum Path Sum</a>
+    Reference: <a href="https://leetcode.com/problems/binary-tree-maximum-path-sum">124. Binary Tree Maximum Path Sum</a> | <a href="https://neetcode.io/problems/binary-tree-maximum-path-sum">Binary Tree Maximum Path Sum</a>
   </div>
 </div>
 
