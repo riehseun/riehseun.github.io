@@ -473,21 +473,23 @@ class Codec:
         :rtype: str
         """
 
-        self.data = ""
+        # Pre-order traversal
+
+        self.array = []
 
         def pre_order(node):
 
             if node:
-                self.data += str(node.val)
-                self.data += ","
+                self.array.append(str(node.val))
+                self.array.append(",")
                 pre_order(node.left)
                 pre_order(node.right)
             else:
-                self.data += "#"
-                self.data += ","
+                self.array.append("#")
+                self.array.append(",")
 
         pre_order(root)
-        return self.data[:len(self.data)-1]
+        return "".join(self.array)
 
     def deserialize(self, data):
         """Decodes your encoded data to tree.
@@ -496,17 +498,18 @@ class Codec:
         :rtype: TreeNode
         """
 
-        data_array = data.split(",")
+        def pre_order(array):
 
-        def pre_order(data_array):
-            val = next(data_array)
+            val = array.pop(0)
             if val != "#":
                 node = TreeNode(int(val))
-                node.left = pre_order(data_array)
-                node.right = pre_order(data_array)
+                node.left = pre_order(array)
+                node.right = pre_order(array)
                 return node
 
-        return pre_order(iter(data_array))
+        data = data.split(",")
+        return pre_order(data)
+
 
 # Your Codec object will be instantiated and called as such:
 # ser = Codec()
@@ -514,7 +517,7 @@ class Codec:
 # ans = deser.deserialize(ser.serialize(root))</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/serialize-and-deserialize-binary-tree">297. Serialize and Deserialize Binary Tree</a>
+    Reference: <a href="https://leetcode.com/problems/serialize-and-deserialize-binary-tree">297. Serialize and Deserialize Binary Tree</a> | <a href="hhttps://neetcode.io/problems/serialize-and-deserialize-binary-tree">Serialize and Deserialize Binary Tree</a>
   </div>
 </div>
 
