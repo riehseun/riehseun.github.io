@@ -1,4 +1,4 @@
-Batch 1
+USA
 
 Google (SF)
 - R: Alfred Donovan
@@ -28,9 +28,6 @@ Mendal AI (SF)
 
 Assembly AI (SF)
 - R:
-
-
-Batch 2
 
 DoorDash (SF - Seattle)
 - R: sho sato
@@ -65,7 +62,7 @@ Capital One
 - R:
 
 
-Batch 3
+US-Canada
 
 Autonomic (SF - Toronto)
 - R: Cyndi Tran
@@ -106,6 +103,9 @@ World Quants (Connecticut - Toronto)
 Collimator AI (Denver - Toronto)
 - R: Allahverdi Suleymanov
 
+
+Canada
+
 Intact (Toronto)
 - R: Stephen Wong
 - Screen: 3 AL (Add two numbers represented by linked list, the smallest string can be formed from all possible combo of strings in given array, the number of palindrom combo possible by 4 increasing indexes (ghhhgh - 0124, 0234, 0134, 1235))
@@ -134,7 +134,7 @@ Scotiabank
 - I will succeed as a mle !
 
 
-Next batch
+Others
 
 Airbnb
 
