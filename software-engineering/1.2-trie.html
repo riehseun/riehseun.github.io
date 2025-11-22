@@ -46,7 +46,7 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#trie-">Implement Trie (Prefix Tree)</a></li>
       <li><a href="#trie-">Design Add and Search Word Data Structure</a></li>
-      <li><a href="#trie-">Search Suggestions System</a></li>
+      <li><a href="#trie-">Word Search II</a></li>
     </ul>
   </div>
 </div>
@@ -160,78 +160,52 @@
 
 <div class="card mb-4" id="trie-">
   <div class="card-body">
-    <h2 class="card-title">Search Suggestions System (M)</h2>
+    <h2 class="card-title">Word Search II (H)</h2>
 
 <pre><code class="python">class Solution:
-    def suggestedProducts(self, products: List[str], searchWord: str) -> List[List[str]]:
+    def findWords(self, board: List[List[str]], words: List[str]) -> List[str]: 
 
-        # Contruct a trie where
-        #   root contains 1 char
-        #   next children contain 2 chars
-        #   and so on
-        # Sort the children alphabetically
-        # Run DFS using searchWord
-        #   Start node should be first word, first 2 words, and so on
-        #   Collect the first 3 results and return
+        # Use Trie
+        # Insert all words in words into Trie
 
-        trie = defaultdict(set)
-
-        # Time O(n)
-        #   n = total number of chars in products
-        # Space O(n)
-        for product in products:
-            for i in range(len(product)):
-                # "m" -> "mo" -> "mob"
-                trie[product[:i]].add(product[:i+1])
-
-        # Sort trie in alphabetical order
-        # Time O(26*m*klogk) = O(mklogk)
-        #   m = len(searchWord)
-        #   There are 26 letters in alphabet
-        #   k = max length of set containing prefixes
-        for key, val in trie.items():
-            val = list(val)
-            val.sort()
-            val.reverse()
-            trie[key] = val
-        
-        # Time O(p+q)
-        #   p = number of nodes = 26*m = m
-        #   q = number of edges = p*k = mk
-        # Space O(p) 
-        def dfs(trie, start, products):
-
-            explored = set()
-            explored.add(start)
-
-            stack = []
-            stack.append(start)
-
-            result = []
-
-            while stack:
-                node = stack.pop()
-
-                if node in products:
-                    result.append(node)
-                    if len(result) >= 3:
-                        return result
-
-                for next_node in trie[node]:
-                    explored.add(next_node)
-                    stack.append(next_node)
-
-            return result
-
+        n, m = len(board), len(board[0])
         result = []
-        for i in range(len(searchWord)):
-            out = dfs(trie, searchWord[:i+1], products)
-            result.append(out)
+        
+        trie = {}
+        for word in words:
+            node = trie
+            for c in word:
+                if c not in node:
+                    node[c] = {}
+                node = node[c]
+            node["word"] = word
+        
+        def backtrack(board, result, node, i, j, n, m):
+    
+            c = board[i][j]
+            node = node[c]
+            if "word" in node:
+                if node["word"] not in result:
+                    result.append(node["word"])
 
+            dirs = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+            board[i][j] = "#"
+            for x, y in dirs:
+                if 0 <= i + x < n \
+                    and 0 <= j + y < m \
+                    and board[i+x][j+y] in node:
+                    backtrack(board, result, node, i+x, j+y, n, m)
+            board[i][j] = c
+
+        for i in range(n):
+            for j in range(m):
+                if board[i][j] in trie:
+                    backtrack(board, result, trie, i, j, n, m)
+                          
         return result</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/search-suggestions-system">1268. Search Suggestions System</a>
+    Reference: <a href="https://leetcode.com/problems/word-search-ii">212. Word Search II</a> | <a href="https://neetcode.io/problems/search-for-word-ii">Word Search II</a>
   </div>
 </div>
 <!-- Trie END -->
