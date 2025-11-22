@@ -251,48 +251,34 @@
   <div class="card-body">
     <h2 class="card-title">N-Queens (H)</h2>
 
-<pre><code class="python">class Solution:
-    def solveNQueens(self, n: int) -> List[List[str]]:
+<pre><code class="python">rows, columns, diags, anti_diags = set(), set(), set(), set()
 
-        # Backtracking
-        # In each cell, there are 2 choices
-        #   Place a queen or not
-        # To place a queen, there should be no queen
-        # in the same row, column, diag, antidiag
-
-        rows, columns, diags, antidiags = set(), set(), set(), set()
-
-        def backtrack(result, board, n, i, columns, diags, antidiags):
+        def backtrack(i, columns, diags, anti_diags):
 
             if i == n:
                 new_board = []
                 for row in board:
                     new_board.append("".join(row))
-                # if new_board not in result:
                 result.append(new_board)
-                print(result)
 
             for j in range(n):
                 if j not in columns \
                     and i + j not in diags \
-                    and i - j not in antidiags:
+                    and i - j not in anti_diags:
                     board[i][j] = "Q"
-                    # rows.add(i)
                     columns.add(j)
                     diags.add(i+j)
-                    antidiags.add(i-j)
-                    backtrack(result, board, n, i+1, columns, diags, antidiags)
+                    anti_diags.add(i-j)
+                    backtrack(i+1, columns, diags, anti_diags)
                     board[i][j] = "."
-                    # rows.remove(i)
                     columns.remove(j)
                     diags.remove(i+j)
-                    antidiags.remove(i-j)
+                    anti_diags.remove(i-j)
 
-        result = []
         board = [["."] * n for _ in range(n)]
-        backtrack(result, board, n, 0, columns, diags, antidiags)
-        return result</code></pre>
-  </div>
+        result = []
+        backtrack(0, columns, diags, anti_diags)
+        return result
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/n-queens">51. N-Queens</a>
   </div>
