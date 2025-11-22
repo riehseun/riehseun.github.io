@@ -45,7 +45,7 @@
     <h2 class="card-title">Trie</h2>
     <ul class="list-unstyled mb-0">
       <li><a href="#trie-">Implement Trie (Prefix Tree)</a></li>
-      <li><a href="#trie-">K-th Smallest in Lexicographical Order</a></li>
+      <li><a href="#trie-">Design Add and Search Word Data Structure</a></li>
       <li><a href="#trie-">Search Suggestions System</a></li>
     </ul>
   </div>
@@ -107,12 +107,54 @@
 
 <div class="card mb-4" id="trie-">
   <div class="card-body">
-    <h2 class="card-title">K-th Smallest in Lexicographical Order (H)</h2>
+    <h2 class="card-title">Design Add and Search Words Data Structure (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class WordDictionary:
+
+    def __init__(self):
+        self.trie = {}
+
+    # Time O(n)
+    #   n = len(word)
+    # Space O(n)
+    def addWord(self, word: str) -> None:
+        node = self.trie
+        for c in word:
+            if c not in node:
+                node[c] = {}
+            node = node[c] 
+        node["word"] = True
+
+    # Time O(26**n)
+    #   n = len(word)
+    # Space O(n)
+    #   Recursion stack
+    def search(self, word: str) -> bool:
+
+        def recursive_search(word, node):
+            for i, c in enumerate(word):
+                if c not in node:
+                    if c == ".":
+                        for child in node:
+                            if child != "word" \
+                                and recursive_search(word[i+1:], node[child]):
+                                return True
+                    return False
+                else:
+                    node = node[c]
+
+            return "word" in node
+
+        return recursive_search(word, self.trie)
+
+
+# Your WordDictionary object will be instantiated and called as such:
+# obj = WordDictionary()
+# obj.addWord(word)
+# param_2 = obj.search(word)</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/k-th-smallest-in-lexicographical-order">440. K-th Smallest in Lexicographical Order</a>
+    Reference: <a href="https://leetcode.com/problems/design-add-and-search-words-data-structure">211. Design Add and Search Words Data Structure</a> | <a href="https://neetcode.io/problems/design-word-search-data-structure">Design Add and Search Word Data Structure</a>
   </div>
 </div>
 
