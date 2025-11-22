@@ -334,53 +334,44 @@
   <div class="card-body">
     <h2 class="card-title">Word Search (M)</h2>
 
-<pre><code class="python">class Solution:
+<pre><code class="python">cclass Solution:
     def exist(self, board: List[List[str]], word: str) -> bool:
 
-        # Backtrack
-        # At each index, there are 4 directional choices
-        # Return when the path equals to word
+        # Backtracking
 
-        # Time O(m*(3**n))
-        #   n = len(word)
-        #   m = number of cells in board
-        #   At each position, there are 4 different path to take 
-        #   But, because we can't go back to previous position,
-        #   this reduces to 3 
-        # Space O(n)
-        def backtrack(board, word, path, explored, dirs, i, j, k, n, m, result):
+        n, m = len(board), len(board[0])
 
-            if len(path) == len(word):
-                result.append("".join(path))
+        def backtrack(i, j, k):
+            
+            if k == len(word) - 1:
+                print(f"{k},{word[k]}")
+                result.append(True)
                 return
-                
+
+            c = board[i][j]
+            dirs = [(-1,0),(1,0),(0,-1),(0,1)]
+            board[i][j] = "#"
+            
             for x, y in dirs:
                 if 0 <= i + x < n \
                     and 0 <= j + y < m \
-                    and board[i+x][j+y] == word[k] \
-                    and (i+x, j+y) not in explored:
-                    explored.add((i+x, j+y))
-                    path.append(board[i+x][j+y])
-                    backtrack(board, word, path, explored, dirs, i+x, j+y, k+1, n, m, result)
-                    path.pop()
-                    explored.remove((i+x, j+y))
+                    and board[i+x][j+y] == word[k+1]:
+                    backtrack(i+x, j+y, k+1)
+            board[i][j] = c
 
-        dirs = [(-1, 0), (1, 0), (0, -1), (0, 1)]
         result = []
-        n, m = len(board), len(board[0])
         for i in range(n):
             for j in range(m):
                 if board[i][j] == word[0]:
-                    explored = set()
-                    explored.add((i,j))
-                    backtrack(board, word, [word[0]], explored, dirs, i, j, 1, n, m, result)
-                    if result:
-                        return True
-                    
+                    print(f"start: {word[0]}")
+                    backtrack(i, j, 0)
+
+        if True in result:
+            return True
         return False</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/word-search">79. Word Search</a>
+    Reference: <a href="https://leetcode.com/problems/word-search">79. Word Search</a> | <a href="https://neetcode.io/problems/search-for-word">Word Search</a>
   </div>
 </div>
 
