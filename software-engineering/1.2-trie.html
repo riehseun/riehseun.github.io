@@ -55,45 +55,42 @@
   <div class="card-body">
     <h2 class="card-title">Implement Trie (Prefix Tree) (M)</h2>
 
-<pre><code class="python">class TrieNode():
-    def __init__(self):
-        self.children = defaultdict(TrieNode)
-        self.is_word = False
-
-class Trie:
+<pre><code class="python">class Trie:
 
     # Use nested dictionary for each char
     
     def __init__(self):
-        self.root = TrieNode()
+        self.trie = {}
 
     # Time O(n)
     #   n = len(word)
     # Space O(n)
     def insert(self, word: str) -> None:
-        node = self.root
+        node = self.trie
         for c in word:
-            node = node.children[c] 
-        node.is_word = True
+            if c not in node:
+                node[c] = {}
+            node = node[c] 
+        node["word"] = True
 
     # Time O(n)
     # Space O(1)
     def search(self, word: str) -> bool:
-        node = self.root
+        node = self.trie
         for c in word:
-            if c not in node.children:
+            if c not in node:
                 return False
-            node = node.children[c]  
-        return node.is_word
+            node = node[c]  
+        return "word" in node
 
     # Time O(n)
     # Space O(1)
     def startsWith(self, prefix: str) -> bool:
-        node = self.root
+        node = self.trie
         for c in prefix:
-            if c not in node.children:
+            if c not in node:
                 return False
-            node = node.children[c]  
+            node = node[c] 
         return True
 
 
