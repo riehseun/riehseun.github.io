@@ -123,39 +123,39 @@
         # If k == p, retur nums[p]
         # k should be k - 1
 
-        def partition(nums, start, end):
+        n = len(nums)
 
-            p = random.randint(start, end)
+        def partition(left, right):
 
-            for i in range(start, end+1):
-
-                if nums[i] > nums[p] and i > p:
+            p = random.randint(left, right)
+            p = (left+right) // 2
+            
+            for i in range(left, right+1):
+                if i < p and nums[i] > nums[p]:
                     nums[i], nums[p] = nums[p], nums[i]
-                if nums[i] < nums[p] and i < p:
+                if i > p and nums[i] < nums[p]:
                     nums[i], nums[p] = nums[p], nums[i]
-
                 p = i
 
             return p
 
-        # Time O(n) on average
-        #   n = len(nums)
-        # Space O(logn)
-        #   Recursion stack
-        def find_kth_largest(nums, start, end):
+        def quickselect(left, right):
 
-            p = partition(nums, start, end)
-            if k-1 > p:
-                return find_kth_largest(nums, p+1, end)
-            elif k-1 < p:
-                return find_kth_largest(nums, start, p-1)
-            else:
-                return nums[p]
+            p = len(nums)
+            while True:
+                p = partition(left, right)
+                
+                if n - k > p:
+                    left = p + 1
+                elif n - k < p:
+                    right = p - 1
+                else:
+                    return nums[p]
 
-        return find_kth_largest(nums, 0, len(nums)-1)</code></pre>
+        return quickselect(0, n-1)</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/merge-sorted-array">215. Kth Largest Element in an Array</a>
+    Reference: <a href="https://leetcode.com/problems/merge-sorted-array">215. Kth Largest Element in an Array</a> | <a href="https://neetcode.io/problems/kth-largest-element-in-an-array">Kth Largest Element in an Array</a>
   </div>
 </div>
 
@@ -228,7 +228,7 @@
   <div class="card-body">
     <h2 class="card-title">K Closest Points to Origin (M)</h2>
 
-<pre><code class="python">class Solution:
+<pre><code class="python">cclass Solution:
     def kClosest(self, points: List[List[int]], k: int) -> List[List[int]]:
 
         # Find k smallest distance
@@ -248,39 +248,35 @@
         def partition(left, right):
 
             p = random.randint(left, right)
-            dist_p = points[p][0]**2 + points[p][1]**2
+            
+            for i in range(left, right+1):
+                dist_p = points[p][0]**2 + points[p][1]**2
+                dist_i = points[i][0]**2 + points[i][1]**2
+                if i < p and dist_i > dist_p:
+                    points[i], points[p] = points[p], points[i]
+                if i > p and dist_i < dist_p:
+                    points[i], points[p] = points[p], points[i]
+                p = i
 
-            while left < right:
-                dist_l = points[left][0]**2 + points[left][1]**2
-                if dist_l < dist_p:
-                    left += 1
-                else:
-                    points[left], points[right] = points[right], points[left]
-                    right -= 1
-                
-            dist_l = points[left][0]**2 + points[left][1]**2
-            if dist_l < dist_p:
-                left += 1
-
-            return left
+            return p 
 
         def quickselect(left, right):
 
-            p = len(points)
-            while p != k:
+            while True:
                 p = partition(left, right)
 
-                if p < k:
-                    left = p
-                elif p > k:
+                if k - 1 > p:
+                    left = p + 1
+                elif k - 1 < p:
                     right = p - 1
+                else:
+                    return points[:p+1]
 
-            return points[:k]
-
-        return quickselect(0, len(points)-1)</code></pre>
+        n = len(points)
+        return quickselect(0, n-1)</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/k-closest-points-to-origin">973. K Closest Points to Origin</a>
+    Reference: <a href="https://leetcode.com/problems/k-closest-points-to-origin">973. K Closest Points to Origin</a> | <a href="https://neetcode.io/problems/k-closest-points-to-origin">K Closest Points to Origin</a>
   </div>
 </div>
 <!--Sort END -->
