@@ -101,6 +101,61 @@
 
 <div class="card mb-4" id="heap-">
   <div class="card-body">
+    <h2 class="card-title">Design Twitter (M)</h2>
+
+<pre><code class="python">from heapq import heappush, heappop
+class Twitter:
+
+    # Each user gets a heap
+    # Follow/unfollow using graph (dictionary)
+
+    def __init__(self):
+        self.tweets = defaultdict(set)
+        self.follows = defaultdict(set)
+        self.time = 0
+        
+    def postTweet(self, userId: int, tweetId: int) -> None:
+        self.time += 1
+        self.tweets[userId].add((self.time, tweetId))
+
+    def getNewsFeed(self, userId: int) -> List[int]:
+        heap, result, i = [], [], 10
+        for time, tweet_id in self.tweets[userId]:
+            heappush(heap, (-time, tweet_id))
+        for followee in self.follows[userId]: 
+            for time, tweet_id in self.tweets[followee]:
+                heappush(heap, (-time, tweet_id))
+        while heap and i > 0:
+            time, tweet_id = heappop(heap)
+            result.append(tweet_id) 
+            i -= 1
+        return result
+        
+    def follow(self, followerId: int, followeeId: int) -> None:
+        if followerId != followeeId:
+            self.follows[followerId].add(followeeId)
+
+    def unfollow(self, followerId: int, followeeId: int) -> None:
+        if followerId != followeeId \
+            and followerId in self.follows \
+            and followeeId in self.follows[followerId]:
+            self.follows[followerId].remove(followeeId)
+        
+
+# Your Twitter object will be instantiated and called as such:
+# obj = Twitter()
+# obj.postTweet(userId,tweetId)
+# param_2 = obj.getNewsFeed(userId)
+# obj.follow(followerId,followeeId)
+# obj.unfollow(followerId,followeeId)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/design-twitter">355. Design Twitter</a> | <a href="https://neetcode.io/problems/design-twitter-feed">Design Twitter</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="heap-">
+  <div class="card-body">
     <h2 class="card-title">Sliding Window Median (H)</h2>
 
 <pre><code class="python"></code></pre>
