@@ -46,6 +46,7 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#heap-">Find Median from Data Stream</a></li>
       <li><a href="#heap-">Sliding Window Median</a></li>
+      <li><a href="#heap-">Task Scheduler</a></li>
       <li><a href="#heap-">Kth Largest Element in a Stream</a></li>
       <li><a href="#heap-">Max Stack</a></li>
       <li><a href="#heap-">Last Stone Weight</a></li>
@@ -106,6 +107,55 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/sliding-window-median">480. Sliding Window Median</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="heap-">
+  <div class="card-body">
+    <h2 class="card-title">Task Scheduler (M)</h2>
+
+<pre><code class="python">class Solution:
+    def leastInterval(self, tasks: List[str], n: int) -> int:
+
+        # Create a heap
+        # Insert frequency of each char into heap
+        # Pop highest frequency item first
+        # Add idle time if necessary
+        # Each cycle should be n + 1
+
+        freq = defaultdict(int)
+        for task in tasks:
+            freq[task] += 1
+
+        heap = []
+        for k, v in freq.items():
+            heappush(heap, (-v, k))
+        
+        schedule = []
+        idle = 0
+
+        # Time O(n)
+        #   Only 26 chars in alphabet, thus insert/pop is O(1)
+        # Space O(1)
+        while heap:
+            cycle = n + 1
+            temp_storage = []  # Prevents popping same letter in same cycle
+            while cycle > 0 and heap:
+                count, task = heappop(heap)
+                schedule.append(task)
+                if -count > 1:
+                    temp_storage.append((count+1, task))
+                cycle -= 1
+            for count, task in temp_storage:
+                heappush(heap, (count, task))
+            while cycle > 0 and heap:
+                schedule.append("idle")
+                cycle -= 1
+            
+        return len(schedule)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/task-scheduler">621. Task Scheduler</a> | <a href="https://neetcode.io/problems/task-scheduling">Task Scheduler</a>
   </div>
 </div>
 
