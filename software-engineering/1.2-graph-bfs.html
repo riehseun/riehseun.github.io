@@ -45,6 +45,7 @@
     <h2 class="card-title">Graph BFS</h2>
     <ul class="list-unstyled mb-0">
       <li><a href="#graph-bfs-">Word Ladder</a></li>
+      <li><a href="#graph-bfs-">Surrounded Regions</a></li>
       <li><a href="#graph-bfs-">Number of Islands</a></li>
       <li><a href="#graph-bfs-">Walls And Gates</a></li>
       <li><a href="#graph-bfs-">Shortest Distance from All Buildings</a></li>
@@ -117,6 +118,75 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/word-ladder">127. Word Ladder</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-bfs">
+  <div class="card-body">
+    <h2 class="card-title">Surrounded Regions (M)</h2>
+
+<pre><code class="python">class Solution:
+    def solve(self, board: List[List[str]]) -> None:
+        """
+        Do not return anything, modify board in-place instead.
+        """
+
+        # How about 'O' at the edges?
+
+        # board = [] => invalid input
+        # board = ['O'] => ['O']
+        # board = ['X', 'O', 'X'] => ['X', 'O', 'X']
+
+        # At 'O' do BFS
+        # If can't each edge node, convert all explored nodes
+        # to 'X'
+        # Time O(nm) each node is visited once
+        # Space O(nm)
+
+        def bfs(start):
+
+            explored = set()
+            explored.add(start)
+
+            queue = deque()
+            queue.append(start)
+
+            is_edge = False
+        
+            while queue:
+                i, j = queue.popleft()
+                if i == 0 \
+                    or i == n - 1 \
+                    or j == 0 \
+                    or j == m - 1:
+                    is_edge = True
+                
+                dirs = [(-1,0), (1,0), (0,-1), (0,1)]
+                for x, y in dirs:
+                    if 0 <= i + x < n \
+                        and 0 <= j + y < m \
+                        and (i+x, j+y) not in explored \
+                        and board[i+x][j+y] == 'O':
+                        explored.add((i+x, j+y))
+                        queue.append((i+x, j+y))
+
+            if is_edge:
+                return []
+
+            return explored
+
+        n, m = len(board), len(board[0])
+
+        for i in range(n):
+            for j in range(m):
+                if board[i][j] == 'O':
+                    explored = bfs((i,j))
+                    if explored:
+                        for x, y in explored:
+                            board[x][y] = 'X'</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/surrounded-regions">130. Surrounded Regions</a> | <a href="https://neetcode.io/problems/surrounded-regions">Surrounded Regions</a>
   </div>
 </div>
 
