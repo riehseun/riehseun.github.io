@@ -54,56 +54,54 @@
   <div class="card-body">
     <h2 class="card-title">Rotting Oranges (M)</h2>
 
-<pre><code class="python">class Solution:
-    def orangesRotting(self, grid: List[List[int]]) -> int:
+<pre><code class="python"># Is 0,1,2 integer?
 
-        # BFS multi-source
+        # grid = [] => -1
+        # grid = [0,0,0] => -1
+        # grid = [2,2,2] => 0
+        # grid = [2,1,2] => 1
 
-        # Time O(p+q) = O(nm)
-        #   p = number of nodes = nm
-        #   q = number of edges = each node can have max 4 edges
-        # Space O(p) = O(nm)
-        def bfs(grid, dirs, n, m):
+        # From each fresh fruit, find max distance to rot fruit
+        # Update max distance for each fresh fruit, by DFSing
+        # at each fresh fruit
+        # Time O((nm)**2)
 
-            depth = 0
-
-            while queue:
-                node, depth = queue.popleft()
-                i, j = node[0], node[1]
-
-                for x, y in dirs:
-                    if 0 <= i + x < n \
-                        and 0 <= j + y < m \
-                        and grid[i+x][j+y] == 1:
-                        next_node = (i+x, j+y)
-                        if next_node not in explored:
-                            queue.append((next_node, depth+1))
-                            explored.add(next_node)
-
-            return depth
+        # From all rot fruit, do BFS
+        # If meet 2, skip
+        # If meet 1, convert to 2
+        # If meet 0, skip
 
         n, m = len(grid), len(grid[0])
-        queue, explored = deque(), set()
-        dirs = [(0, -1), (0, 1), (-1, 0), (1, 0)]
-        num_orange = 0
+        queue = deque()
+        explored = set()
+        depth = 0
 
         for i in range(n):
             for j in range(m):
                 if grid[i][j] == 2:
-                    node = (i,j)
-                    queue.append((node, 0))
-                    explored.add((node))
-                if grid[i][j] != 0:
-                    num_orange += 1
-        depth = bfs(grid, dirs, n, m)
+                    queue.append((i,j,depth))
 
-        if len(explored) < num_orange:
-            return -1
-
+        while queue:
+            i, j, depth = queue.popleft()            
+            dirs = [(-1,0), (1,0), (0,-1), (0,1)]
+            for x, y in dirs:
+                if 0 <= i + x < n \
+                    and 0 <= j + y < m \
+                    and grid[i+x][j+y] == 1 \
+                    and (i+x, j+y) not in explored:
+                        grid[i+x][j+y] = 2
+                        explored.add((i+x, j+y))
+                        queue.append((i+x, j+y, depth+1)) 
+                    
+        for i in range(n):
+            for j in range(m):
+                if grid[i][j] == 1:
+                    return -1
+                    
         return depth</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/rotting-oranges">994. Rotting Oranges</a>
+    Reference: <a href="https://leetcode.com/problems/rotting-oranges">994. Rotting Oranges</a> | <a href="https://neetcode.io/problems/rotting-fruit">Rotting Fruit</a>
   </div>
 </div>
 
