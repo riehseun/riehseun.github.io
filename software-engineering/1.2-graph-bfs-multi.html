@@ -42,9 +42,10 @@
 <!-- Graph BFS Multi BEGIN -->
 <div class="card mb-4" id="graph-bfs-multi">
   <div class="card-body">
-    <h2 class="card-title">Graph BFS</h2>
+    <h2 class="card-title">Graph BFS multi</h2>
     <ul class="list-unstyled mb-0">
       <li><a href="#graph-bfs-multi-">Rotting Oranges</a></li>
+      <li><a href="#graph-bfs-multi-">Islands and Treasure</a></li>
     </ul>
   </div>
 </div>
@@ -103,6 +104,60 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/rotting-oranges">994. Rotting Oranges</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-bfs-multi-">
+  <div class="card-body">
+    <h2 class="card-title">Islands and Treasure (M)</h2>
+
+<pre><code class="python">class Solution:
+    def islandsAndTreasure(self, grid: List[List[int]]) -> None:
+        
+        # Replace grid value with positive integer
+        # representing the distance to 0?
+        
+        # grid = [0] => [0]
+        # grid = [-1] => [1]
+        # grid = [inf, -1, 0, inf] -=> [inf, -1, 0, 1]
+
+        # At each inf, BFS till finding 0
+        # Time O((nm)**2)
+
+        # From all 0's, start BFS
+        # If meet -1, skip
+        # If meet inf, convert it to depth 
+        # If meet positive integer, put min(depth, pos int)
+        # Time O(nm)
+        # Space O(nm)
+
+        n, m = len(grid), len(grid[0])
+        queue = deque()
+        explored = set()
+
+        for i in range(n):
+            for j in range(m):
+                if grid[i][j] == 0:
+                    queue.append((i,j,0))
+
+        while queue:
+            i, j, depth = queue.popleft()            
+            dirs = [(-1,0), (1,0), (0,-1), (0,1)]
+            for x, y in dirs:
+                if 0 <= i + x < n \
+                    and 0 <= j + y < m \
+                    and (i+x, j+y) not in explored:
+                    if grid[i+x][j+y] == -1:
+                        continue
+                    elif grid[i+x][j+y] == math.inf:
+                        grid[i+x][j+y] = depth + 1
+                    else:
+                        grid[i+x][j+y] = min(grid[i+x][j+y], depth+1)
+                    explored.add((i+x, j+y))
+                    queue.append((i+x, j+y, depth+1))</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://neetcode.io/problems/islands-and-treasure">Islands and Treasure</a>
   </div>
 </div>
 <!-- Graph BFS Multi END -->
