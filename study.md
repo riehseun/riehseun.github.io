@@ -27,9 +27,21 @@ Topics
 
 2. MLSD
 
-https://www.hellointerview.com/learn/system-design/in-a-hurry/introduction
+Reference
+https://www.hellointerview.com/learn/ml-system-design/in-a-hurry/introduction
 
-Buy premium (not sponsored) to use their interactive question practice. This is by far the best tool I have seen to allow active learning. You are prompted questions, then need to draw and record your voice explaining it. Then an AI grades you and gives you actually useful feedback. (This is the best tool on the market imo, if you are applying for a 6 figure job, you can afford to spend 50$)
+Topics
+Applied ML System Design - in scope
+  - Recommendataion system
+  - Fraud detection
+  - Harmful content detection
+ML Infra Design - in scope
+  - Distributed training system
+  - Feature store for a large-scale ML platform
+  - Model serving system that can handle millions of requests per second
+AI/ML Research - out of scope
+AI/ML Research Engineering - out of scope
+
 
 3. MLFC
 
@@ -40,7 +52,15 @@ https://www.hellointerview.com/learn/system-design/in-a-hurry/introduction
 
 Topics
 Product design - in scope
-Infrasture design - out of scope
+  - Uber
+  - Slack
+  - Facebook
+infrastructure design - out of scope
+  - Rate limiter
+  - Message broker
+  - Key-value store
 Object-oriented design - out of scope
+  - Parking lot reservation system
+  - Vending machine
+  - Elevator control system
 Front-end design - out of scope
-
