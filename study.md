@@ -14,12 +14,6 @@ Behavioral
 1. DSA
 
 Topics
-- Leetcode 150 - in scope
-- Strivers - out of scope
-- Alphabet 150 - out of scope
-- Blind 75 - out of scope
-- Minmer's List of Varients - out of scope
-
 
 - Then do company specific questions from Leetcode tagged last 3/6 months and Leetcode Discuss
 - Now do Mocks. This is the most neglected part of preparation. These are a must to practice under time control, get feedback, and get the nerves out. These can be free or paid and you get out of it what you put into it.
@@ -31,16 +25,6 @@ Reference
 https://www.hellointerview.com/learn/ml-system-design/in-a-hurry/introduction
 
 Topics
-Applied ML System Design - in scope
-  - Recommendataion system
-  - Fraud detection
-  - Harmful content detection
-ML Infra Design - in scope
-  - Distributed training system
-  - Feature store for a large-scale ML platform
-  - Model serving system that can handle millions of requests per second
-AI/ML Research - out of scope
-AI/ML Research Engineering - out of scope
 
 
 3. MLFC
@@ -51,16 +35,3 @@ Reference
 https://www.hellointerview.com/learn/system-design/in-a-hurry/introduction
 
 Topics
-Product design - in scope
-  - Uber
-  - Slack
-  - Facebook
-infrastructure design - out of scope
-  - Rate limiter
-  - Message broker
-  - Key-value store
-Object-oriented design - out of scope
-  - Parking lot reservation system
-  - Vending machine
-  - Elevator control system
-Front-end design - out of scope
