@@ -46,6 +46,7 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#graph-dfs-">Clone Graph</a></li>  
       <li><a href="#graph-dfs-">Word Break</a></li>
+      <li><a href="#graph-dfs-">Graph Valid Tree</a></li>
       <li><a href="#graph-dfs-">Alien Dictionary</a></li>
     </ul>
   </div>
@@ -169,6 +170,60 @@ class Solution:
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/word-break">139. Word Break</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-dfs-">
+  <div class="card-body">
+    <h2 class="card-title">Word Break (M)</h2>
+
+<pre><code class="python">class Solution:
+    def validTree(self, n: int, edges: List[List[int]]) -> bool:
+        
+        # What is valid tree? Each node having max two children?
+        # There is no cycle
+        # Nodes are fully connected
+        
+        # [[0,1],[1,0]] => False
+        # [] => True
+
+        # DFS at any node
+        # Search must discover all nodes 
+        # It must not go back to parent node (except direct parent)
+        # Time O(n+m) n = number of nodes, m = number of edges
+        # Space O(n)
+
+        graph = defaultdict(list)
+
+        for a, b in edges:
+            graph[a].append(b)
+            graph[b].append(a)
+            
+        def dfs(start):
+
+            parent = {}
+            parent = {0: -1}
+
+            stack = []
+            stack.append(start)
+
+            while stack:
+                node = stack.pop()
+                
+                for next_node in graph[node]:
+                    if next_node not in parent:
+                        parent[next_node] = node
+                        stack.append(next_node)
+                    else:
+                        if next_node != parent[node]:
+                            return False
+
+            return len(parent) == n
+
+        return dfs(0)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/graph-valid-tree">261. Graph Valid Tree</a> | <a href="https://neetcode.io/problems/valid-tree">Graph Valid Tree</a>
   </div>
 </div>
 
