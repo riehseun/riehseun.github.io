@@ -65,59 +65,49 @@
 <pre><code class="python">class Solution:
     def ladderLength(self, beginWord: str, endWord: str, wordList: List[str]) -> int:
 
-        # Construct a graph where nodes are 
-        # words differ by one char
-        # BFS to compute shrotest distance
+        # b = [], end = [] => invalid input
+        # b = ["cat"], end = ["dog"] => 0
+        # b = ["cat"], end = ["tat"] => 1
 
-        graph = defaultdict(set)
-        words = [beginWord] + wordList
-        n = len(words)
+        # Create edge bewteen words with 1 chat diff
+        # Represent graph with adjacency list
+        # BFS to compute shortest distance
+        # Time O((n**2)*m) n = len(wordList), m = len(beginWord)
 
-        # Time O(kl)
-        #   k = number of words 
-        #   l = length of each word
-        # Space O(kl)
-        differ_by_one_char = defaultdict(set)
-        for word in words:
-            for i in range(len(word)):
-                for c in 'abcdefghijklmnopqrstuvwxyz':
-                    differ_by_one_char[word].add(word[:i]+c+word[i+1:])
-
-        # Time O(k**2)
-        # Space O(k**2)
+        wordList.append(beginWord)
+        n, graph = len(wordList), defaultdict(list)
+        
         for i in range(n):
-            for j in range(i+1,n):
-                if words[j] in differ_by_one_char[words[i]]:
-                    graph[words[i]].add(words[j])
-                    graph[words[j]].add(words[i])
+            for j in range(i+1, n):
+                diff_count = 0
+                for a, b in zip(wordList[i], wordList[j]):
+                    if a != b:
+                        diff_count += 1
+                        if diff_count > 1:
+                            break
+                if diff_count <= 1:
+                    graph[wordList[i]].append(wordList[j])
+                    graph[wordList[j]].append(wordList[i])
 
-        # Time O(n+m)
-        #   n = number of nodes = k
-        #   m = number of edges = k ** 2 every node can be connected
-        # Space O(n)
-        def bfs(graph, start, end):
+        print(graph)
 
-            explored = set()
-            explored.add(start)
+        queue, explored = deque(), set()
+        queue.append((beginWord,0))
+        explored.add(endWord)
 
-            queue = deque()
-            queue.append((start,0))
+        while queue:
+            node, dist = queue.popleft()
+            for next_node in graph[node]:
+                if next_node == endWord:
+                    return dist+2
+                if next_node not in explored:
+                    explored.add(next_node)
+                    queue.append((next_node,dist+1))
 
-            while queue:
-                node, dist = queue.popleft()
-                for next_node in graph[node]:
-                    if next_node == end:
-                        return dist+2
-                    if next_node not in explored:
-                        explored.add(next_node)
-                        queue.append((next_node,dist+1))
-
-            return 0
-
-        return bfs(graph, beginWord, endWord)</code></pre>
+        return 0</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/word-ladder">127. Word Ladder</a>
+    Reference: <a href="https://leetcode.com/problems/word-ladder">127. Word Ladder</a> | <a href="https://neetcode.io/problems/word-ladder">Word Ladder</a>
   </div>
 </div>
 
