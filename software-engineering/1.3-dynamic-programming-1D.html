@@ -242,35 +242,36 @@
 <pre><code class="python">class Solution:
     def coinChange(self, coins: List[int], amount: int) -> int:
 
-        # Let dp[j] minimum number of coins to make amount j
-        # dp[j] = minimum of dp[j-i] + 1 over all i's
-        # Ex. [1,2,5], 11
-        #   dp[8] = min(dp[7] + 1, dp[6] + 1, d[3] + 1)
-        #   dp[7] = min(dp[6] + 1, dp[5] + 1, dp[2] + 1)
-        #   Initially, dp[0] = 0
+        # coins = [], amount = 1 => Invalid
+        # coins = [1], amount = 2 => 2 (1+1)
+        # coins = [2], amount = 3 => -1
 
-        dp = [inf] * (amount+1)
+        # DP
+        # dp[i] = fewest number of coins to create i
+        # dp[0] = 0
+        # dp[1] = min(dp[1-j]+1) for j in coins 
+        # dp[2] = min(dp[2-j]+1) for j in coins
+        # Time O(n) n = amount
+        # Space O(n)
+
+        n = amount
+        dp = [0 for _ in range(n+1)]
         dp[0] = 0
 
-        # Time O(nm)
-        #   n = amount
-        #   m = len(coins)
-        # Space O(n)
-        for j in range(1, amount+1):
-            minimum = math.inf
-            for i in coins:
-                # Amount must be greater than each coin
-                if j - i >= 0:
-                    minimum = min(minimum, dp[j-i]+1)
-            dp[j] = minimum
+        for i in range(1, n+1):
+            min_num = math.inf
+            for j in coins:
+                if i - j >= 0:
+                    min_num = min(min_num, dp[i-j]+1)
+            dp[i] = min_num
 
-        if dp[amount] == math.inf:
+        if dp[n] == math.inf:
             return -1
-
-        return dp[amount]</code></pre>
+            
+        return dp[n]</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/coin-change">322. Coin Change</a>
+    Reference: <a href="https://leetcode.com/problems/coin-change">322. Coin Change</a> | <a href="https://neetcode.io/problems/coin-change">Coin Change</a>
   </div>
 </div>
 
