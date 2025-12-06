@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="/img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/monokai-sublime.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="/js/jquery.min.js" type="text/javascript"></script>
+<script src="/js/bootstrap.bundle.min.js" type="text/javascript"></script>
+<script src="/js/highlight.pack.js" type="text/javascript"></script>
+<script src="/js/include_html.js" type="text/javascript"></script>
+<script src="/js/mathjax.js" type="text/javascript"></script>
+<script src="/js/site.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<include src="/header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Software Engineering</h1>
+
+<!-- Interval BEGIN -->
+<div class="card mb-4" id="interval">
+  <div class="card-body">
+    <h2 class="card-title">Iterval</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#interval-">Merge Interval</a></li>
+      <li><a href="#interval-">Meeting Rooms</a></li>
+      <li><a href="#interval-">Meeting Rooms II</a></li>
+      <li><a href="#interval-">Non-overlapping Intervals</a></li>
+      <li><a href="#interval-">Interval List Intersections</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="interval-">
+  <div class="card-body">
+    <h2 class="card-title">Merge Interval (M)</h2>
+
+<pre><code class="python">class Solution:
+    def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+
+        # intervals = [[0,1],[1,2]] => [0,2]
+        # intervals = [[0,1]] => [0,1]
+
+        # Take first interval into result
+        # Compre first interval with second interval
+        #   If overlap, merge and put it in result
+        #   Else, move to next interval
+        # Need to sort by start time
+        # Time O(nlogn) n = len(intervals)
+        # Space O(n)
+
+        intervals.sort(key=lambda x: x[0])
+        result = []
+        result.append(intervals[0])
+
+        for c, d in intervals[1:]:
+            a, b = result[-1]
+            if b >= c:
+                result.pop()
+                result.append([min(a,c),max(b,d)])
+            else:
+                result.append([c,d])
+            
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/intervals">56. Merge Intervals</a> | <a href="https://neetcode.io/problems/intervals">Merge Intervals</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="interval-">
+  <div class="card-body">
+    <h2 class="card-title">Meeting Rooms (E)</h2>
+
+<pre><code class="python">class Solution:
+    def canAttendMeetings(self, intervals: List[List[int]]) -> bool:
+        
+        # intervals = [(0,1),(1,2)] => True
+        # intervals = [] => True
+
+        # Soft by start time
+        # Check if there is overlap
+        # Time O(nlogn) n = len(intervals)
+        # Space O(1)
+
+        if not intervals:
+            return True
+
+        intervals.sort(key=lambda x: x[0])
+        result = []
+        result.append(intervals[0])
+
+        for c, d in intervals[1:]:
+            a, b = result[-1]
+            if b > c:
+                return False
+            else:
+                result.pop()
+                result.append([c,d])
+
+        return True</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/meeting-rooms">252. Meeting Rooms</a> | <a href="https://neetcode.io/problems/meeting-schedule">Meeting Rooms</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="interval-">
+  <div class="card-body">
+    <h2 class="card-title">Meeting Rooms II (M)</h2>
+
+<pre><code class="python">class Solution:
+    def minMeetingRooms(self, intervals: List[List[int]]) -> int:
+
+        # Sort by start time in an array
+        # Also, sort by end time in a separate array
+        # Iterate start time array
+        #   If start[i] > end[j], some meeting has ended already
+        #   Then, we can re-use the room (Also, increment j)  
+        #   Else, increament room count
+
+        starts, ends, n, count = [], [], len(intervals), 0
+
+        # Time O(nlogn)
+        #   n = len(intervals)
+        # Space O(1)
+        for s, e in intervals:
+            starts.append(s)
+            ends.append(e)
+        
+        starts.sort()
+        ends.sort()
+
+        i, j = 0, 0
+
+        while i < n and j < n:
+            if starts[i] >= ends[j]:
+                j += 1
+            else:
+                count += 1
+            i += 1
+
+        return count</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/meeting-rooms-ii">253. Meeting Rooms II</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="interval-">
+  <div class="card-body">
+    <h2 class="card-title">Non-overlapping Intervals (M)</h2>
+
+<pre><code class="python">class Solution:
+    def eraseOverlapIntervals(self, intervals: List[List[int]]) -> int:
+        
+        # intervals = [[1,2], [3,4]] => 0
+        
+        # Sort by start time
+        # Find overlaps, remove interval with larger end time
+        # Time O(nlogn) n = len(intervals)
+        # Space O(1)
+
+        intervals.sort(key=lambda x: x[0])
+        count = 0
+        end = intervals[0][1]
+
+        for c, d in intervals[1:]:
+            if c < end:
+                end = min(end, d)
+                count += 1
+            else:
+                end = d
+            
+        return count</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/non-overlapping-intervals">435. Non-overlapping Intervals</a> | <a href="https://neetcode.io/problems/non-overlapping-intervals">Non-overlapping Intervals</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="interval-">
+  <div class="card-body">
+    <h2 class="card-title">Interval List Intersections (M)</h2>
+
+<pre><code class="python">class Solution:
+    def intervalIntersection(self, firstList: List[List[int]], secondList: List[List[int]]) -> List[List[int]]:
+
+        # Compare A[0] and B[0]
+        # Then, compare either A[0] and B[1] or A[1] and B[0]
+        #   If B[0]'s end > A[0]'s end, compare A[1] and B[0]
+        #   If A[0]'s end > B[0]'s end, compare A[0] and B[1]
+        # [a,b] and [c,d] overlap is 
+        #   [max(a,c), min(b,d)]
+
+        intersections = []
+        i, j = 0, 0
+        n = len(firstList)
+        m = len(secondList)
+
+        # Time O(n+m)
+        #   n = len(firstList)
+        #   m = len(secondList)
+        # Space O(1)
+        #   Ignoring space for result
+        while i < n and j < m:
+            a, b = firstList[i]
+            c, d = secondList[j]
+            if min(b,d) >= max(a,c):
+                intersections.append([max(a,c), min(b,d)])
+            
+            if d > b:
+                i += 1
+            else:
+                j += 1
+
+        return intersections</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/interval-list-intersections">986. Interval List Intersections</a>
+  </div>
+</div>
+<!-- Interval END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+</html>
