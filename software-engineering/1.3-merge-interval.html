@@ -58,37 +58,33 @@
 <pre><code class="python">class Solution:
     def merge(self, intervals: List[List[int]]) -> List[List[int]]:
 
-        # Sort intervals by start time
-        # Check two intervals at a time [a,b] and [c,d]
-        #   If b >= c, there is an overlap
-        #   Merged interval is [min(a,c), max(b,d)]
-        # Insert fisrt item to result
-        # Then, iterate from second items in interval
-        # and compare with last item in the result
-        
-        intervals.sort(key=lambda x: x[0])
+        # intervals = [[0,1],[1,2]] => [0,2]
+        # intervals = [[0,1]] => [0,1]
 
+        # Take first interval into result
+        # Compre first interval with second interval
+        #   If overlap, merge and put it in result
+        #   Else, move to next interval
+        # Need to sort by start time
+        # Time O(n) n = len(intervals)
+        # Space O(n)
+
+        intervals.sort(key=lambda x: x[0])
         result = []
         result.append(intervals[0])
 
-        # Time O(nlogn)
-        #   n = len(intervals)
-        # Space O(logn)
-        #   Ignoring space for result
-        #   Recursive stack for quicksort
-        for interval in intervals[1:]:
+        for c, d in intervals[1:]:
             a, b = result[-1]
-            c, d = interval
             if b >= c:
                 result.pop()
-                result.append([min(a,c), max(b,d)])
+                result.append([min(a,c),max(b,d)])
             else:
                 result.append([c,d])
-
+            
         return result</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/merge-intervals">56. Merge Intervals</a>
+    Reference: <a href="https://leetcode.com/problems/merge-intervals">56. Merge Intervals</a> | <a href="https://neetcode.io/problems/merge-intervals">Merge Intervals</a>
   </div>
 </div>
 
