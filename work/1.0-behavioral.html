@@ -459,31 +459,29 @@
     <ul>
       <li>S</li>
       <ul>
-        <li>Migrating to Job Clusters for Azure Databricks (TD Layer6 AI)</li>
-        <li>All ML use cases were using interactive clusters for computing inference</li>
-        <li>Interactive clusters will shut down after 120 minutes of inactivity, during which time the cost will incur</li>
+        <li>I was machine learning engineer at Layer6 AI, AI specialized org within TD Bank</li>
+        <li>My team was responsible for ML serving design, MLOps, and ML infrastucture</li>
+        <li>My team was using Azure Databricks for computing inference and ground truth</li>
+      </ul>
+      <li>T</li>
+      <ul>
+        <li>In Dec 2023, all ML use cases were using Databricks interactive clusters</li>
+        <li>Interactive clusters will shut down after certain inactivity, during which time the cost will incur</li>
         <li>I wanted to use job clusters because they would terminate immediately after job finishes</li>
       </ul>
-      <li>P</li>
+      <li>A</li>
       <ul>
-        <li>Inference pipeline was executed in Azure DataFactory and the most straight-forward way was to configure job clusters on ADF UI for each use case</li>
-        <li>However, TD internal process demanded that any change to ADF must be maded by TD internal pipeline and go through change approval process</li>
-        <li>Going through TD process for each use case whenever I needed to make changes to cluster configuration was unrealistic</li>
+        <li>Because we used Azure Data Factory to trigger Jobs in Databricks, natural solution was to configure Job Clusters on Azure Data Factory UI</li>
+        <li>However, TD internal process was that any change to Data Factory must be made by TD internal pipeline and chagne order</li>
+        <li>Doing this for each use case would take significant time and effort</li>
+        <li>I designed a workaround such that instead of configuring job clusters on Data Factory UI, I store configuration files in DBFS</li>
+        <li>When job is run, it would first read onfiguration file in DBFS, and create and run jobs based on that configuration</li>
+        <li>Instead of deploying Data Factory changes for all use case, I could just deploy one notebook in ADB which creates the configuration files in DBFS</li>
       </ul>
-      <li>S</li>
+      <li>R</li>
       <ul>
-        <li>I designed a workaround such that instead of configuring job clusters on ADF UI, I store configuration files for each use case in DBFS</li>
-        <li>When inference is run on ADF, it would first read corresponding configuration file in DBFS, and create and run jobs based on that configuration</li>
-        <li>When I needed to make changes to cluster configurations, instead of deploying ADF changes for all use case, I could just deploy one notebook in ADB which creates the configuration files in DBFS</li>
         <li>The workaround was accepted by the team and team successfully started using job clusters</li>
-      </ul>
-      <li>I</li>
-      <ul>
-        <li>47k - 70k cloud cost savings for each use case in production (9 use cases in total in production)</li>
-      </ul>
-      <li>L</li>
-      <ul>
-        <li>Sometimes, well thoughtout workaround is necesasry when process makes engineering impossible</li>
+        <li>47k - 70k cloud cost savings per year for each use case in production (9 use cases in total in production)</li>
       </ul>
     </ul>
 
@@ -491,22 +489,23 @@
     <ul>
       <li>S</li>
       <ul>
-        <li>Elasticsearch cluster migration (TD Layer6 AI)</li>
-        <li>Database for storing inference and ground truth data</li>
-        <li>The cluster was deployed in 3 virtual machines</li>
+        <li>I was machine learning engineer at Layer6 AI, AI specialized org within TD Bank</li>
+        <li>My team was responsible for ML serving design, MLOps, and ML infrastucture</li>
+        <li>My team was using Elasticsearch for storing inference and ground truth data, which is used by our internal application</li>
       </ul>
-      <li>P</li>
+      <li>T</li>
       <ul>
+        <li>In mid 2022, the cluster was deployed in 3 virtual machines</li>
         <li>Elasticsearch was outdated at version 6</li>
         <li>It was free version and did not support authentication</li>
         <li>Write was slow, taking more than 3 hours during inference and ground truth</li>
         <li>Disk was nearly full</li>
       </ul>
-      <li>S</li>
+      <li>A</li>
       <ul>
-        <li>Upgraded Elasticsearch version from 6 to 8</li>
+        <li>In Dec 2022, upgraded Elasticsearch version from 6 to 8</li>
         <li>Capacity estimate for the next 5 years</li>
-        <li>Deployed the cluster in kubernetes because model training and inference were also running in Kubernetes, and the integration could become smoother</li>
+        <li>Deployed the cluster in kubernetes to leverage auto-scaling and soother integration with inference/gt job also running in Kubernetes</li>
         <li>Higher compute and lower storage to hot nodes and lower compute and higher storage for cold nodes</li>
         <li>Splited each Elasticsearch index into many shards to achieve parallet reads (Each shard did not exceed 600MB)</li>
         <li>Replicated each index into different data nodes to achieve availability</li>
@@ -515,11 +514,8 @@
       <li>I</li>
       <ul>
         <li>2x in read/write</li>
-      </ul>
-      <li>L</li>
-      <ul>
         <li>Official documentation may not be fully correct</li>
-        <li>In particular, taking snapshot of data from version 6 and restoring it in version 8 did not work. Thus, I had to leaverage reindexing</li>
+        <li>In particular, taking snapshot of data from version 6 and restoring it in version 8 did not work. Thus, I had to leaverage something called reindexing</li>
         <li>Learned to leave lots of lead time for implementation to handel potential issues</li>
       </ul>
     </ul>
@@ -657,36 +653,34 @@
       <li>You had to be flexible with your approach</li>
     </ul>
 
-    <h3 class="card-title">Handle ambiguity, tradeoffs in your projects, had to manage unexpected changes in deadlines</h3>
+    <h3 class="card-title">Tradeoffs in your projects, had to manage unexpected changes in deadlines</h3>
     <ul>
       <li>S</li>
       <ul>
-        <li>Sandbox application provision for data platform (TD Securities) (Nov 2025)</li>
-        <li>I was given a task to provision something called sandbox environment into production by a fixed date</li>
-        <li>I was also given a small team of 3 people to achieve this (PM, Back-end, Front-end)</li>
+        <li>I was lead data engineer for TD Securities data management team</li>
+        <li>Our team owned data platform where users could ingest and consume data</li>
       </ul>
-      <li>P</li>
+      <li>T</li>
       <ul>
-        <li>I did not even know what was meant by sandbox, and this ask came from upper management</li>
-        <li>I was initially given 4 months, then after two weeks into working, I was told that the timeline is cut to 1 month (to leave just two weeks to complete it)</li>
+        <li>In October 2025, I was tasked to provision self-service data platform</li>
+        <li>I had three other members to work with, project manager, front-end developer, and back-end developer</li>
+        <li>Platform consisted of internal app rewritten in Reach and Java, and infrasturcture on Databricks and Azure Data Lake Storage</li>
+        <li>Initally, I was given until Feburary 2026 deliever it</li>
+        <li>However, in the middle of Novemeber, my manager told me that I needed to complete it in two weeks</li>
       </ul>
-      <li>S</li>
+      <li>A</li>
       <ul>
-        <li>Called my manager and team's PM into meetings to understand the context and reason behind this ask, which was really to sell our product to users ASAP</li>
-        <li>I wrote document stating functional requirement, including what is in scope and what is not in scope</li>
-        <li>For example, users uploading data via UI in Databricks and storing that in Storage Account is supported while sharing data is out of scope</li>
-        <li>Received agreement from the management, create tickets and planned them into multiple sprints, and distributed tasks amongst team members</li>
-        <li>Called in other team's members to create change records for us for we did not have time to do it</li>
-        <li>Made trade-off between speed and tech-debt by pushing micro-service API architecture to next interation and embedding all logics into a single API</li>
+        <li>I suggested the team to make a number of trade-off to choose speed over tech debt</li>
+        <li>We initially designed micro-service API architecture, but I proposed that we go with monolithic to save time</li>
+        <li>I suggested the team to skip PR approvals and do direct merge</li>
+        <li>I suggested the team to bypass TD internal process of writing change order</li>
+        <li>Bypassing PR approval and change order saved two weeks of infra deployment effort, and I provisioned infra in the first week</li>
+        <li>Bypassing micro-service API architecture saved months of effort, and the team deployed API in the second week</li>
       </ul>
-      <li>I</li>
+      <li>R</li>
       <ul>
-        <li></li>
-        <li></li>
-      </ul>
-      <li>L</li>
-      <ul>
-        <li></li>
+        <li>We aniticipated about 40 internal users, but in reality about 150 users came to use our platform within the first month</li>
+        <li>The executive leadership team complemented our team's effort to enabling data platform very fast</li>
       </ul>
     </ul>
 
@@ -694,31 +688,29 @@
     <ul>
       <li>S</li>
       <ul>
-        <li>Log4J (TD Layer6 AI) (Dec 2021)</li>
-        <li>Very serious security issue with a library called Log4j in December 2021</li>
-        <li>The package allowed remote code execution</li>
+        <li>I was machine learning engineer at Layer6 AI, AI specialized org within TD Bank</li>
+        <li>My team was responsible for ML serving design, MLOps, and ML infrastucture</li>
       </ul>
-      <li>P</li>
+      <li>T</li>
       <ul>
-        <li>The issue came during weekend, limited responses from the users</li>
+        <li>In December 2021, my manager reached out to me on Saturday</li>
+        <li>There was an industry-wide issue where a package that almost every Java application used contained a critical security risk</li>
+        <li>That package was called log4j and the risk allowed attacker to perform remote code execution (RCE)</li>
       </ul>
-      <li>S</li>
+      <li>A</li>
       <ul>
-        <li>Decided to shut down the containers knowing it will stop daily inference jobs</li>
-        <li>Patched the containers with updated log4j versions</li>
-        <li>Redeployed containers in production</li>
+        <li>I suggested the team to immediately shut down all running models in production</li>
+        <li>Our models were all batch models, whose inference result can be re-computed at any time</li>
+        <li>Impact of shutting down models is not producing inference results for only few days</li>
+        <li>I shut down all the containers, patch them with newer version of log4j, and redeployed them by Monday night</li>
       </ul>
-      <li>I</li>
+      <li>R</li>
       <ul>
-        <li>Resulted in business outage where inference result were not generated for 3 days</li>
-        <li>Business people were not happy about but I explained to them batch inference data can always be generated for past dates</li>
-        <li>Layer6 was not exploited</li>
-      </ul>
-      <li>L</li>
-      <ul>
-        <li>Assessing security risks verses business impact</li>
-        <li>Containers were running in closed environment where only the production support team could access</li>
-        <li>How to explain technical decisions to business people</li>
+        <li>Our models were not exploited by the vulnerability</li>
+        <li>If we had API models, I would not have shut down the containers</li>
+        <li>Attacker must first compromise firewall to access resources in Vnet in cloud</li>
+        <li>Then, they need to break into rules set by network security groups</li>
+        <li>This is unlikely to happen</li>
       </ul>
     </ul>
   </div>
@@ -904,37 +896,34 @@
       <li>You drove change across teams</li>
     </ul>
 
-    <h3 class="card-title">Took the initiative to solve a problem</h3>
+    <h3 class="card-title">Took the initiative to solve a problem, had to go beyond your responsibility</h3>
     <ul>
       <li>S</li>
       <ul>
-        <li>Model artifact testing (TD kayer6 AI) (Dec 2024)</li>
-        <li>Layer6 was using custom built python package to compute batch inference</li>
-        <li>Python package dependencies needed to be updated often for security patches</li>
+        <li>I was machine learning engineer at Layer6 AI, AI specialized org within TD Bank</li>
+        <li>My team was responsible for ML serving design, MLOps, and ML infrastucture</li>
+      </ul>
+      <li>T</li>
+      <ul>
+        <li>In Dec 2025, Layer6 was using custom built python package to compute batch inference</li>
+        <li>Python package dependencies were upgraded often for security patches</li>
         <li>Newly built package somethime broke production code</li>
         <li>I was tasked to setup tests to detect potential failures</li>
       </ul>
-      <li>P</li>
+      <li>A</li>
       <ul>
-        <li>The guideline provided to me was to enable manual test and use clusters in Azure Databricks</li>
+        <li>The ask was to enable manual testing using interactive clusters in Databricks</li>
         <li>Manully running the tests and documenting the result was too cumbersome</li>
         <li>Using interactive clsuters in Azure Databricks was not cost efficient</li>
-      </ul>
-      <li>S</li>
-      <ul>
         <li>I created three pipelines in Azure Datafactory and connected them for automatic execution</li>
         <li>First pipeline retrieves the run IDs of last inference and ground truth jobs generated by existing python package</li>
         <li>Second pipeline runs new inference and ground truth jobs using updated python package</li>
         <li>Third pipeline compares outputs from two pipelines and verifies checksum</li>
-        <li>Pipelines used job clusters that are cost effective than interactive clusters</li>
       </ul>
-      <li>I</li>
+      <li>R</li>
       <ul>
-        <li>The time and effort for manual test and documentation was removed</li>
-      </ul>
-      <li>L</li>
-      <ul>
-        <li></li>
+        <li>The time and effort for running manual test and documenting it was removed</li>
+        <li>I was given an award at TD (Above & Beyond) for this work</li>
       </ul>
     </ul>
 
@@ -966,7 +955,7 @@
       </ul>
     </ul>
 
-    <h3 class="card-title">Had to go beyond your responsibility</h3>
+    <h3 class="card-title">?</h3>
     <ul>
       <li>S</li>
       <ul>
