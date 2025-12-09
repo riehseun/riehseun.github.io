@@ -48,7 +48,6 @@
       <li><a href="#greedy-">Jump Game I</a></li>
       <li><a href="#greedy-">Best Time to Buy and Sell Stock</a></li>
       <li><a href="#greedy-">Best Time to Buy and Sell Stock II</a></li>
-      <li><a href="#greedy-">Gas Stations</a></li>
       <li><a href="#greedy-">Candy</a></li>
       <li><a href="#greedy-">Maximum Swap</a></li>
       <li><a href="#greedy-">Minimum Domino Rotations For Equal Row</a></li>
@@ -60,33 +59,26 @@
   <div class="card-body">
     <h2 class="card-title">Jump Game II (M)</h2>
 
-<pre><code class="python">class Solution:
-    def jump(self, nums: List[int]) -> int:
+<pre><code class="python"># nums = [1, 1, 2, 1] => 2
+        # nums = [2, 2, 0, 1] => 2
 
-        # Greedy
-        # From each index, find farthest index it can go to
-        #   Take maximun of farthest index reachable from previous indices
-        #   and i + nums[i]
-        # Keep index that we step on to jump (call it "curr_index")
-        # If cur_index == i, take farthest jump  
-        #   Also, increment jump count 
-        #   Also, set cur_index to far_index
-
-        cur_index, far_index, count = 0, 0, 0
-
-        # Time O(n)
-        #   n = len(nums)
+        # Find furthest point from current index
+        # Move to furthest point
+        # Time O(n) n = len(nums)
         # Space O(1)
-        for i in range(len(nums)-1):
-            far_index = max(far_index, i+nums[i])
-            if i == cur_index:
-                count += 1
-                cur_index = far_index
 
+        curr_index, furthest, count = 0, 0, 0
+
+        for i in range(len(nums)-1):
+            furthest = max(furthest, i+nums[i])
+            if i == curr_index:
+                curr_index = furthest
+                count += 1
+            
         return count</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/jump-game-ii">45. Jump Game II</a>
+    Reference: <a href="https://leetcode.com/problems/jump-game-ii">45. Jump Game II</a> | <a href="https://neetcode.io/problems/jump-game-ii">Jump Game II</a>
   </div>
 </div>
 
@@ -94,34 +86,26 @@
   <div class="card-body">
     <h2 class="card-title">Jump Game (M)</h2>
 
-<pre><code class="python">class Solution:
-    def canJump(self, nums: List[int]) -> bool:
+<pre><code class="python"># nums = [1, 0, 1] => False
+        # nums = [1, 1, 2, 1] => True
+        # nums = [2, 2, 0, 1] => True
 
-        # At each index, compute the farthest index it can reach
-        # Fartest index is the max of the two
-        #   Fartest from previous indexes
-        #   Fartest from the current index
-        # If at any point, current number is 0 and farthest index of all
-        # previous indices cannot reach beyoud the current number, return False
-
-        # Time O(n)
+        # Find furthest point from current index
+        # Move to furthest point
+        # Time O(n) n = len(nums)
         # Space O(1)
 
-        if len(nums) == 1:
-            return True
+        curr_index, furthest = 0, 0
 
-        farthest_index = 0
         for i in range(len(nums)-1):
-            farthest_index = max(farthest_index, nums[i]+i)
-            if nums[i] == 0 and farthest_index <= i:
-                return False
-            if farthest_index >= len(nums)-1:
-                return True
-
-        return False</code></pre>
+            furthest = max(furthest, i+nums[i])
+            if i == curr_index:
+                curr_index = furthest
+            
+        return curr_index >= len(nums) - 1</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/jump-game">55. Jump Game</a>
+    Reference: <a href="https://leetcode.com/problems/jump-game">55. Jump Game</a> | <a href="https://neetcode.io/problems/jump-game">Jump Game</a>
   </div>
 </div>
 
@@ -177,38 +161,6 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii">122. Best Time to Buy and Sell Stock II</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="greedy-">
-  <div class="card-body">
-    <h2 class="card-title">Gas Stations (M)</h2>
-
-<pre><code class="python">class Solution:
-    def canCompleteCircuit(self, gas: List[int], cost: List[int]) -> int:
-
-        # Since there is unique solution, check from each index
-        # If total cost > total gas, there is no solution
-        # Find the first index where the accumulated gas is positive
-
-        if sum(cost) > sum(gas):
-            return -1
-
-        index, accumulated_gas = 0, 0
-
-        # Time O(n) 
-        #   n = len(gas)
-        # Space O(1)
-        for i in range(len(gas)):
-            accumulated_gas += (gas[i]-cost[i])
-            if accumulated_gas < 0:
-                accumulated_gas = 0
-                index = i + 1
-
-        return index</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/gas-station">134. Gas Station</a>
   </div>
 </div>
 
