@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="/img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/monokai-sublime.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="/js/jquery.min.js" type="text/javascript"></script>
+<script src="/js/bootstrap.bundle.min.js" type="text/javascript"></script>
+<script src="/js/highlight.pack.js" type="text/javascript"></script>
+<script src="/js/include_html.js" type="text/javascript"></script>
+<script src="/js/mathjax/tex-chtml.js" type="text/javascript"></script>
+<script src="/js/site.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<include src="/header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Machine Learning</h1>
+
+<!-- Machine learning design patterns BEGIN -->
+<div class="card mb-4" id="machine-learning-design-patterns">
+  <div class="card-body">
+    <h2 class="card-title">Machine learning design patterns</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#machine-learning-design-patterns-">Data representation</a></li>
+      <li><a href="#machine-learning-design-patterns-">Problem representation</a></li>
+      <li><a href="#machine-learning-design-patterns-">Model training</a></li>
+      <li><a href="#machine-learning-design-patterns-">Model serving</a></li>
+      <li><a href="#machine-learning-design-patterns-">Reproducibility</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="machine-learning-design-patterns-">
+  <div class="card-body">
+    <h2 class="card-title">Data representation</h2>
+    <ul>
+      <li>Feature hashing</li>
+      <ul>
+        <li>Suitable when these problems exist</li>
+        <ul>
+          <li>Vocabulary is incomplete</li>
+          <li>Categorical variable has high cardinality</li>
+          <li>Cold start problem</li>
+        </ul>
+        <li>Ex. airport_id in USA where there are 347 of them</li>
+        <ul>
+          <li>Training data may not contain all airport_id</li>
+          <li>347 results in high cardinality</li>
+          <li>New airport will get built</li>
+        </ul>
+        <li>Convert categorical input to unique string, then apply hashing on the string</li>
+        <li>The number of buckets can be treated as a hyperparameter</li>
+        <li>Cons</li>
+        <ul>
+          <li>Model accuracy will suffer (especially when the distribution of categorical input is highly skewed)</li>
+        </ul>
+      </ul>
+      <li>Feature cross</li>
+      <ul>
+        <li>Used when model complexity is insufficient to learn feature relationships</li>
+        <li>Concatenate categorical features to create combinations of feature values</li>
+        <li>Should never be used for numerical feature as it will result in infinite sparcity</li>
+        <ul>
+          <li>Numerical features can be bucketized to become categorical features before applying feature cross</li>
+        </ul>
+        <li>Should not cross two features that are highly correlated</li>
+      </ul>
+      <li>Multimodal input</li>
+      <ul>
+        <li>Combine different types of inputs (Ex. numerical, one-hot, embedding, etc) into one representation</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning Design Patterns, Valliappa Lakshmanan & Sara Robinson & Michael Munn
+  </div>
+</div>
+
+<div class="card mb-4" id="machine-learning-design-patterns-">
+  <div class="card-body">
+    <h2 class="card-title">Problem representation</h2>
+    <ul>
+      <li>Reframing</li>
+      <ul>
+        <li>Ex. regression problem to predict rainfall amount -> classification problem to model discrete probability distribution</li>
+      </ul>
+      <li>Multi-labeling</li>
+      <ul>
+        <li>Ex. image consists of multiple animals rather than just one animal like cat, dog, rabbit</li>
+        <li>Give more than one label to training example</li>
+        <li>Encode the label using a multi-hot array</li>
+        <li>Final output layer will have a sigmoid activation function where each value in the array is in range between \( 0 \) and \( 1 \)</li>
+      </ul>
+      <li>Ensembles</li>
+      <ul>
+        <li>Suitable for bia-variance trade-off on small to medium scale problems</li>
+        <li>Bagging</li>
+        <ul>
+          <li>Ex. Random Forest</li>
+        </ul>
+        <li>Boosting</li>
+        <ul>
+          <li>Ex. AdaBoost, XGBoost</li>
+        </ul>
+        <li>Stacking</li>
+        <ul>
+          <li>Combines the outputs of a collection of models to make a prediction</li>
+        </ul>
+      </ul>
+      <li>Cascade</li>
+      <ul>
+        <li>Break a problem into many sub-problems</li>
+        <li>Ex. predict the likelihood of a customer returning an item</li>
+        <ul>
+          <li>Predict whether a specific transaction is by a reseller or retail buyer</li>
+          <li>Train a model on sales to retail buyers</li>
+          <li>Train a model on sales to resellers</li>
+          <li>Combine the outputs of three seperate models to predict return likelihood</li>
+        </ul>
+      </ul>
+      <li>Neutral class</li>
+      <ul>
+        <li>Ex. three-class classifier that outputs disjoint probabilities for Yes, No, Maybe</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning Design Patterns, Valliappa Lakshmanan & Sara Robinson & Michael Munn
+  </div>
+</div>
+
+<div class="card mb-4" id="machine-learning-design-patterns-">
+  <div class="card-body">
+    <h2 class="card-title">Model training</h2>
+    <ul>
+      <li>Transfer learning</li>
+      <ul>
+        <li>Feature extraction</li>
+        <ul>
+          <li>Final layer contains the classification label or output specific to the prediction task</li>
+          <li>Remove the final layer, freeze the weights, and replace the final layer with the output for the specialized prediction task</li>
+          <li>Layer before the last layer is referred as bottleneck layer</li>
+          <li>Suitable when dataset is small and computation budget is low</li>
+          <li>Works better when the prediction taks is different than the pre-trained model</li>
+        </ul>
+        <li>Fine-tuning</li>
+        <ul>
+          <li>Leave initial layers frozen and update weights on further layers</li>
+          <li>Suitable when dataset is large and computation budget is high</li>
+          <li>Works better when the prediction taks is similar to the pre-trained model</li>
+        </ul>
+      </ul>
+      <li>Checkpoints</li>
+      <ul>
+        <li>Save the model state at the end of every epoc</li>
+        <ul>
+          <li>If tree model, save the final rules for each intermediate node and the predicted value for each of the leaf nodes</li>
+          <li>If linear model, save the final values of the weights and biases</li>
+          <li>If neural network, save the final values of the weights and biases plus activation functions and the weights of the hidden connections</li>
+        </ul>
+        <li>Model state changes after every batch, but checkpointing at every batch is too expensive</li>
+        <li>Fine-tuning - when retraining the model on fresh data, train from a checkpoint</li>
+        <li>Instead of this</li>
+<pre><code class="python">model.fit(X_train, y_train,
+        batch_size=100,
+        epochs=15)</code></pre>
+        <li>Do this</li>
+<pre><code class="python">NUM_TRAINING_EXAMPLES = 1000 * 1000
+STOP_POINT = 14.3
+TOTAL_TRAINING_EXAMPLES = int(STOP_POINT*NUM_TRAINING_EXAMPLES)
+BATCH_SIZE = 100
+NUM_CHECKPOINTS = 15
+steps_per_epoch = TOTAL_TRAINING_EXAMPLES // (BATCH_SIZE*NUM_CHECKPOINTS)
+cp_callback = tf.keras.callbacks.ModelCheckpoint(...)
+history = model.fit(trainds,
+                  validation_data=evalds,
+                  epochs=NUM_CHECKPOINTS,
+                  steps_per_epoch =steps_per_epoch,
+                  batch_size=BATCH_SIZE,
+                  callbacks=[cp_callback])</code></pre>
+      </ul>
+      <li>Distributed training</li>
+      <ul>
+        <li>Data parallelism</li>
+        <ul>
+          <li>Computation is split across different machines</li>
+          <li>Different workers train on different subsets of training data</li>
+          <li>Synchronous training</li>
+          <ul>
+            <li>A mini-batch of data is split among each of the separate workers</li>
+            <li>Each device performs a forward pass with their portion of mini-batch and computes gradients for each parameter of the model</li>
+            <li>These locally computed gradients are collected from each device and aggregated to produce a single gradient update for each parameter</li>
+            <li>A central server performs the gradient step according to the gradients received from multiple workers</li>
+          </ul>
+          <li>Asynchronous training</li>
+          <ul>
+            <li>A central server computes new parameters periodically based on whichever gradient updates it received since the last computation</li>
+            <li>Higher throughput since a slow worker does not block the progression of training steps</li>
+            <li>Some splits of mini-batch may be lost during training</li>
+          </ul>
+        </ul>
+        <li>Model parallelism</li>
+        <ul>
+          <li>Model is split</li>
+          <li>Different workers carry out computation for different parts of the model</li>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Machine Learning Design Patterns, Valliappa Lakshmanan & Sara Robinson & Michael Munn
+  </div>
+</div>
+
+<div class="card mb-4" id="machine-learning-design-patterns-">
+  <div class="card-body">
+    <h2 class="card-title">Model serving</h2>
+    <ul>
+      <li>Continual learning</li>
+        <ul>
+          <li>Stateless retraining</li>
+          <ul>
+            <li>Model is trained from scratch</li>
+            <li>Required when model architecture or features change</li>
+          </ul>
+          <li>Stateful retraining</li>
+          <ul>
+            <li>Model continues training on new data</li>
+            <li>Called fine-tuning or incremental learning</li>
+          </ul>
+          <li>Challenges</li>
+          <ul>
+            <li>Fresh data access challenge</li>
+            <li>Evaluation challenge</li>
+            <li>Algorithm challenge</li>
+          </ul>
+          <li>Stages</li>
+          <ul>
+            <li>Manual, stateless retraining</li>
+            <li>Automated retraining</li>
+            <li>Automated, stateful training</li>
+            <li>Continual learning</li>
+          </ul>
+        </ul>
+      <li>Two-phase prediction</li>
+      <ul>
+        <li>Split large use case into two phases</li>
+        <li>Only the simpler phase should be carried out on the edge</li>
+      </ul>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="machine-learning-design-patterns-">
+  <div class="card-body">
+    <h2 class="card-title">Reproducibility</h2>
+    <ul>
+      <li>Feature store</li>
+      <ul>
+        <li>Store precomputed features to be re-used</li>
+      </ul>
+      <li>Model versioning</li>
+    </ul>
+  </div>
+</div>
+<!-- Machine learning design patterns END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+</html>
