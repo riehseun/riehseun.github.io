@@ -50,6 +50,7 @@
       <li><a href="#greedy-">Best Time to Buy and Sell Stock II</a></li>
       <li><a href="#greedy-">Candy</a></li>
       <li><a href="#greedy-">Maximum Swap</a></li>
+      <li><a href="#greedy-">Hand of Straights</a></li>
       <li><a href="#greedy-">Minimum Domino Rotations For Equal Row</a></li>
     </ul>
   </div>
@@ -236,6 +237,57 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/maximum-swap">670. Maximum Swap</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="greedy-">
+  <div class="card-body">
+    <h2 class="card-title">Hand of Straights (M)</h2>
+
+<pre><code class="python">class Solution:
+    def isNStraightHand(self, hand: List[int], groupSize: int) -> bool:
+        
+        # hand = [1,2,3,4], size = 2 => True [1,2],[3,4]
+        # hand = [1,2,3,5], size = 2 => False
+        
+        # Store frequency of each value in hash table
+        # Find a start of sequence
+        #   Take a value and check if value - 1 exists in hash table
+        # Then, create group with groupSize
+        # Time O(n) n = len(hand)
+        # Space O(n)
+
+        n, counts = len(hand), defaultdict(int)
+
+        if n % groupSize != 0:
+            return False 
+
+        for num in hand:
+            counts[num] += 1
+        
+        i = 0
+        while i < n // groupSize:
+            num = next(iter(counts.keys()))
+            while num in counts:
+                num -= 1 
+            num += 1
+            
+            for _ in range(groupSize):
+                if counts[num] > 1:
+                    counts[num] -= 1
+                else:
+                    del counts[num]
+                num += 1
+
+            i += 1
+
+        if counts:
+            return False
+
+        return True</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/hand-of-straights">846. Hand of Straights</a> | <a href="https://neetcode.io/problems/hand-of-straights">Hand of Straights</a>
   </div>
 </div>
 
