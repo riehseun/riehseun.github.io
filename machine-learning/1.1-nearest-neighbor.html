@@ -51,7 +51,37 @@
 
 <div class="card mb-4" id="nearest-neighbor-">
   <div class="card-body">
-    <h2 class="card-title">Nearest neighbor<</h2>
+    <h2 class="card-title">Nearest neighbor</h2>
+    <ul>
+      <li>Define k - pick odd number to avoid ties</li>
+      <li>Compute distance between a new point to all other points</li>
+      <li>Pick top k points that are closest</li>
+      <li>Amongst top k points, count number of points in each category</li>
+      <li>Assign new points to top category</li>
+    </ul>
+
+<pre><code class="python">import torch
+
+def find_knn_indices(X_train, X_test_point, k):
+    # Calculate Euclidean distance: sqrt(sum((train - test_point)^2))
+    distances = torch.sum((X_train - X_test_point) ** 2, axis=1).sqrt()
+    
+    # Sort distances to find the k smallest
+    _, indices = torch.sort(distances)
+    
+    # Return the indices of the k nearest neighbors
+    return indices[:k]
+
+# Example usage:
+train_data = torch.randn(20, 3) # 20 points, 3 dimensions
+query_point = torch.randn(1, 3) # 1 query point
+k_neighbors = 3
+
+nearest_indices = find_knn_indices(train_data, query_point, k_neighbors)
+
+print(f"Query point: {query_point}")
+print(f"Indices of {k_neighbors} nearest neighbors in train_data: {nearest_indices}")
+print(f"The actual neighbor points are:\n{train_data[nearest_indices]}")</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference:
