@@ -51,7 +51,75 @@
 
 <div class="card mb-4" id="clustering-">
   <div class="card-body">
-    <h2 class="card-title">Clustering<</h2>
+    <h2 class="card-title">Clustering</h2>
+  </div>
+  <div class="card-footer text-muted">
+    Reference:
+  </div>
+</div>
+
+<div class="card mb-4" id="clustering-">
+  <div class="card-body">
+    <h2 class="card-title">K-means</h2>
+    <ul>
+      <li>Pick k</li>
+      <li>Randomly pick k points and make them center of k clusters</li>
+      <li>Assign each point to one of k clusters based on distance to centroid</li>
+      <li>Adjust centroid of each cluster by taking mean of all points within the cluster</li>
+      <li>Repeat until cluster assignment no longer changes</li>
+    </ul>
+
+<pre><code class="python">import torch
+import numpy as np
+import matplotlib.pyplot as plt
+from kmeans_pytorch import kmeans, kmeans_predict
+
+# --- 1. Setup and Data Generation ---
+# Set random seed for reproducibility
+np.random.seed(123)
+torch.manual_seed(123)
+
+# Set device to GPU if available, otherwise CPU
+if torch.cuda.is_available():
+    device = torch.device('cuda:0')
+else:
+    device = torch.device('cpu')
+print(f"Running k-means on: {device}")
+
+# Generate some random data points
+data_size, dims, num_clusters = 1000, 2, 3
+x_numpy = np.random.randn(data_size, dims) / 6
+# Add offsets to create distinct clusters
+x_numpy[:300] += np.array([-0.5, -0.5])
+x_numpy[300:600] += np.array([0.5, 0.5])
+x_numpy[600:] += np.array([-0.5, 0.5])
+
+# Convert numpy array to PyTorch tensor and move to the correct device
+x = torch.from_numpy(x_numpy).float().to(device)
+
+# --- 2. Perform K-Means Clustering ---
+# The kmeans function returns the cluster IDs for each data point and the final cluster centers
+cluster_ids_x, cluster_centers = kmeans(
+    X=x,
+    num_clusters=num_clusters,
+    distance='euclidean',
+    device=device
+)
+
+# --- 3. (Optional) Predict new data points ---
+# Generate some new data for prediction
+y_numpy = np.random.randn(100, dims) / 6
+y = torch.from_numpy(y_numpy).float().to(device)
+
+# Predict cluster IDs for the new data
+cluster_ids_y = kmeans_predict(
+    y,
+    cluster_centers,
+    'euclidean',
+    device=device
+)
+
+print(cluster_ids_y)</code></pre>    
   </div>
   <div class="card-footer text-muted">
     Reference:
