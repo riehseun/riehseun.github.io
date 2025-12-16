@@ -52,7 +52,7 @@
       <li><a href="#graph-bfs-">Max Area of Island</a></li>
       <li><a href="#graph-bfs-">Accounts Merge</a></li>
       <li><a href="#graph-bfs-">Network Delay Time</a></li>
-      <li><a href="#graph-bfs-">Bus Routes</a></li>
+      <li><a href="#graph-bfs-">Cheapest Flights Within K Stops</a></li>
       <li><a href="#graph-bfs-">Shortest Path in Binary Matrix</a></li>
       <li><a href="#graph-bfs-">The Time When the Network Becomes Idle</a></li>
     </ul>
@@ -577,12 +577,39 @@
 
 <div class="card mb-4" id="graph-bfs">
   <div class="card-body">
-    <h2 class="card-title">Bus Routes (H)</h2>
+    <h2 class="card-title">Cheapest Flights Within K Stops (M)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def findCheapestPrice(self, n: int, flights: List[List[int]], src: int, dst: int, k: int) -> int:
+
+        # BFS
+        # Time O(n+m) n = number of nodes, m = number of edges
+        # Spae O(n)
+
+        graph = defaultdict(set)
+        for s, d, c in flights:
+            graph[s].add((d,c))
+
+        queue = deque()
+        queue.append((src, 0, 0))
+        costs = [math.inf] * n
+        costs[src] = 0
+
+        while queue:
+            node, curr_cost, depth = queue.popleft()
+            
+            for next_node, cost in graph[node]:
+                if curr_cost + cost < costs[next_node] and depth <= k:
+                    costs[next_node] = curr_cost + cost
+                    queue.append((next_node, costs[next_node], depth+1))
+
+        if costs[dst] == math.inf:
+            return -1
+
+        return costs[dst]</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/bus-routes">815. Bus Routes</a>
+    Reference: <a href="https://leetcode.com/problems/cheapest-flights-within-k-stops">787. Cheapest Flights Within K Stops</a> | <a href="https://neetcode.io/problems/cheapest-flight-path">Cheapest Flights Within K Stops</a>
   </div>
 </div>
 
