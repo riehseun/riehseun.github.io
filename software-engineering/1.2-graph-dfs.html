@@ -46,7 +46,6 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#graph-dfs-">Clone Graph</a></li>  
       <li><a href="#graph-dfs-">Word Break</a></li>
-      <li><a href="#graph-dfs-">Alien Dictionary</a></li>
       <li><a href="#graph-dfs-">Number of Connected Components in an Undirected Graph</a></li>
     </ul>
   </div>
@@ -112,93 +111,6 @@ class Solution:
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/clone-graph">133. Clone Graph</a> | <a href="https://neetcode.io/problems/clone-graph">Clone Graph</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="graph-dfs-">
-  <div class="card-body">
-    <h2 class="card-title">Alien Dictionary (H)</h2>
-
-<pre><code class="python">class Solution:
-    def alienOrder(self, words: List[str]) -> str:
-
-        # Compare two adjacent words at a time
-        # Only the first difference in char tells the ordering
-        #   If second word is prefix of first word, return ""
-        # Construct a graph based on the ordering
-        #   Letters than don't appear in the graph are not subject to
-        #   ordering, thus can go anywhere in the output
-        #   If there is cycle, return ""
-        # Then, apply topological order
-        #   Do DFS starting at each node and track finishing time
-        #   Idea is that longer finishing time means earlier in the order
-
-        # Track all chars in words
-        # Time O(c) 
-        #   c = all character in words
-        # Space O(1) 
-        #   There are only 26 chars in alphabet
-        all_chars = set()
-        for word in words:
-            for char in word:
-                all_chars.add(char)
-        
-        graph = defaultdict(set)
-
-        # Time O(c)
-        # Space O(c) 
-        for i in range(len(words)-1):
-            # If second word is prefix of first word, 
-            # it is not valid ordering
-            if words[i].startswith(words[i+1]) and len(words[i]) > len(words[i+1]):
-                return "" 
-            for c1, c2 in zip(words[i], words[i+1]):
-                if c1 != c2:
-                    graph[c1].add(c2)
-                    break
-
-        def dfs(graph, start):
-
-            explored = set()
-            explored.add(start)
-
-            stack = []
-            stack.append(start)
-            finishing_time = 0
-
-            while stack:
-                node = stack.pop()
-                for next_node in graph[node]:
-                    if next_node not in explored:
-                        explored.add(next_node)
-                        stack.append(next_node)
-                        finishing_time += 1
-                    if next_node == start:
-                        return -1
-
-            return finishing_time
-
-        ordering = []
-
-        # Time O(n*(n+m)) = O(1)
-        #   n = number of nodes = 26 (There are 26 chars in alpahbet)
-        #   m = number of edges = 26**2 worse case every node is connected
-        # Space O(1)
-        for char in all_chars:
-            finishing_time = dfs(graph, char)
-            if finishing_time == -1:
-                return ""
-            ordering.append([char, finishing_time])
-
-        ordering.sort(key = lambda x: (-x[1]))
-        
-        result = ""
-        for item in ordering:
-            result += item[0]
-        return result</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/alien-dictionary">269. Alien Dictionary</a>
   </div>
 </div>
 
