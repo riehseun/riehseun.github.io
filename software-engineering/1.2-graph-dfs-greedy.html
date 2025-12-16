@@ -45,6 +45,7 @@
     <h2 class="card-title">Graph DFS</h2>
     <ul class="list-unstyled mb-0">
       <li><a href="#graph-dfs-">Reconstruct Itinerary</a></li>
+      <li><a href="#graph-dfs-">Swim in Rising Water</a></li>
       <li><a href="#graph-dfs-">Min Cost to Connect All Points</a></li>
     </ul>
   </div>
@@ -81,6 +82,53 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/reconstruct-itinerary">332. Reconstruct Itinerary</a> | <a href="https://neetcode.io/problems/reconstruct-flight-path">Reconstruct Flight Path</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-dfs-">
+  <div class="card-body">
+    <h2 class="card-title">Swim in Rising Water (H)</h2>
+
+<pre><code class="python"># Minimum spanning tree
+        # Construct disjoint sets of a single node
+        # Greedly merge sets 
+        # Time O(n**2logn) n = number of cells in matrix
+        # Space O(n**2)
+
+        def find(a):
+            if parent[a] != a:
+                parent[a] = find(parent[a])
+            return parent[a]
+
+        def union(a, b):
+            parent[find(a)] = find(b)
+
+        n, m = len(grid), len(grid[0])
+        dirs = [(-1,0), (1,0), (0,-1), (0,1)]
+        edges = []
+
+        for i in range(n):
+            for j in range(m):
+                curr_num = i * n + j
+                up_num = (i-1) * n + j
+                left_num = i * n + (j-1)
+                if i > 0:
+                    edges.append((max(grid[i][j], grid[i-1][j]), up_num, curr_num))
+                if j > 0:
+                    edges.append((max(grid[i][j], grid[i][j-1]), left_num, curr_num))
+
+        edges.sort()
+        parent = [i for i in range(n*m)]
+
+        for cost, a, b in edges:
+            union(a, b)
+            if find(0) == find(n*m-1):
+                return cost
+
+        return grid[0][0]</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/swim-in-rising-water">778. Swim in Rising Water</a> | <a href="https://neetcode.io/problems/swim-in-rising-water">Swim in Rising Water</a>
   </div>
 </div>
 
