@@ -44,9 +44,127 @@
   <div class="card-body">
     <h2 class="card-title">Logistic regression</h2>
     <ul class="list-unstyled mb-0">
+      <li><a href="#logistic-regression-">Binary classification with pytorch</a></li>  
       <li><a href="#logistic-regression-">Binary classification with python</a></li>
-      <li><a href="#logistic-regression-">Binary classification with pytorch</a></li>
     </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="logistic-regression-">
+  <div class="card-body">
+    <h2 class="card-title">Binary classification with pytorch</h2>
+
+<pre><code class="python"># Load data
+# Standardize data
+# Intialize parameters
+# Train
+#   Compute Z, A (forward porp)
+#   Compute cost
+#   Compute gradient (backward prop)
+#   Update weights
+# Inference
+
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from torch.utils.data import Dataset, DataLoader
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+# Data
+
+class CustomDataset(Dataset):
+
+    def __init__(self, X_train, y_train):
+        self.x = F.normalize(torch.from_numpy(X_train))  # (m, n)
+        self.y = torch.from_numpy(y_train) # (m)
+
+    def __len__(self):
+        return len(self.x)
+
+    def __getitem__(self, index):
+        return self.x[index].float(), self.y[index].float()
+
+dataset = load_breast_cancer()
+n = dataset.data.shape[1]
+print(f"num_features: {n}")
+m = len(dataset.data)
+print(f"num_data: {m}")
+X_train, X_test, y_train, y_test = train_test_split(dataset.data, dataset.target, test_size=0.2)
+train_data = CustomDataset(X_train, y_train)
+test_data = CustomDataset(X_test, y_test)
+train_dataloader = DataLoader(train_data, batch_size=64, shuffle=True)
+test_dataloader = DataLoader(test_data, batch_size=1, shuffle=True)
+
+# Model
+class LogisticRegression(nn.Module):
+
+    def __init__(self, num_features):
+        super().__init__()
+        # X (m,n) => Y (m, 1)
+        self.linear = nn.Linear(num_features, 1)
+
+    def forward(self, x):
+        x = self.linear(x)
+        x = torch.sigmoid(x)
+        x = torch.squeeze(x)
+        return x
+
+# Train
+model = LogisticRegression(n)
+learning_rate = 0.01
+criterion = nn.BCELoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
+
+epoch = 1000
+
+for key, val in model.state_dict().items():
+    print(f"{key}: {val}")
+
+for e in range(epoch):
+    for x_batch, y_batch in train_dataloader:
+
+        optimizer.zero_grad()  # Reset grads
+
+        y_hat = model(x_batch)  # (m, 1)
+
+        # print(f"x_batch: {x_batch.shape}")
+        # print(f"y_batch: {y_batch.shape}")
+        # print(f"y_hat: {y_hat.shape}")
+        # print(y_batch)
+        # print(y_hat)
+
+        loss = criterion(y_hat, y_batch)  # Compute loss
+
+        loss.backward()  # Compute gradient
+
+        optimizer.step()  # Adjust learning rate
+
+        print(f"epoch: {e+1}, loss = {loss.item()}")
+
+for key, val in model.state_dict().items():
+    print(f"{key}: {val}")
+
+# Inference
+correct = 0
+incorrect = 0
+with torch.no_grad():
+    for x_batch, y_batch in test_dataloader:
+        y_pred = model(x_batch)  # no need to call model.forward()
+        if y_pred > 0.5:
+            y_pred = 1
+        else:
+            y_pred = 0
+        if y_pred == y_batch[0]:
+            correct += 1
+        else:
+            incorrect += 1
+    accuracy = correct/(correct+incorrect)
+    print(f"accurach: {accuracy}")</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href=""></a>
   </div>
 </div>
 
@@ -266,124 +384,6 @@ d = model(train_set_x, train_set_y, test_set_x, test_set_y, num_iterations = 200
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.coursera.org/specializations/deep-learning">Deep Learning Specialization</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="logistic-regression-">
-  <div class="card-body">
-    <h2 class="card-title">Binary classification with pytorch</h2>
-
-<pre><code class="python"># Load data
-# Standardize data
-# Intialize parameters
-# Train
-#   Compute Z, A (forward porp)
-#   Compute cost
-#   Compute gradient (backward prop)
-#   Update weights
-# Inference
-
-from sklearn.datasets import load_breast_cancer
-from sklearn.model_selection import train_test_split
-from torch.utils.data import Dataset, DataLoader
-
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-
-# Data
-
-class CustomDataset(Dataset):
-
-    def __init__(self, X_train, y_train):
-        self.x = F.normalize(torch.from_numpy(X_train))  # (m, n)
-        self.y = torch.from_numpy(y_train) # (m)
-
-    def __len__(self):
-        return len(self.x)
-
-    def __getitem__(self, index):
-        return self.x[index].float(), self.y[index].float()
-
-dataset = load_breast_cancer()
-n = dataset.data.shape[1]
-print(f"num_features: {n}")
-m = len(dataset.data)
-print(f"num_data: {m}")
-X_train, X_test, y_train, y_test = train_test_split(dataset.data, dataset.target, test_size=0.2)
-train_data = CustomDataset(X_train, y_train)
-test_data = CustomDataset(X_test, y_test)
-train_dataloader = DataLoader(train_data, batch_size=64, shuffle=True)
-test_dataloader = DataLoader(test_data, batch_size=1, shuffle=True)
-
-# Model
-class LogisticRegression(nn.Module):
-
-    def __init__(self, num_features):
-        super().__init__()
-        # X (m,n) => Y (m, 1)
-        self.linear = nn.Linear(num_features, 1)
-
-    def forward(self, x):
-        x = self.linear(x)
-        x = torch.sigmoid(x)
-        x = torch.squeeze(x)
-        return x
-
-# Train
-model = LogisticRegression(n)
-learning_rate = 0.01
-criterion = nn.BCELoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-
-epoch = 1000
-
-for key, val in model.state_dict().items():
-    print(f"{key}: {val}")
-
-for e in range(epoch):
-    for x_batch, y_batch in train_dataloader:
-
-        optimizer.zero_grad()  # Reset grads
-
-        y_hat = model(x_batch)  # (m, 1)
-
-        # print(f"x_batch: {x_batch.shape}")
-        # print(f"y_batch: {y_batch.shape}")
-        # print(f"y_hat: {y_hat.shape}")
-        # print(y_batch)
-        # print(y_hat)
-
-        loss = criterion(y_hat, y_batch)  # Compute loss
-
-        loss.backward()  # Compute gradient
-
-        optimizer.step()  # Adjust learning rate
-
-        print(f"epoch: {e+1}, loss = {loss.item()}")
-
-for key, val in model.state_dict().items():
-    print(f"{key}: {val}")
-
-# Inference
-correct = 0
-incorrect = 0
-with torch.no_grad():
-    for x_batch, y_batch in test_dataloader:
-        y_pred = model(x_batch)  # no need to call model.forward()
-        if y_pred > 0.5:
-            y_pred = 1
-        else:
-            y_pred = 0
-        if y_pred == y_batch[0]:
-            correct += 1
-        else:
-            incorrect += 1
-    accuracy = correct/(correct+incorrect)
-    print(f"accurach: {accuracy}")</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href=""></a>
   </div>
 </div>
 <!-- Logistic regression END -->
