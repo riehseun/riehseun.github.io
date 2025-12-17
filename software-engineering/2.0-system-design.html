@@ -48,7 +48,7 @@
       <li>Structure</li>
       <ul>
         <li><a href="#system-design-">Requirement and estimation</a> - 5 minutes</li>
-        <li><a href="#system-design-">Database</a> - 2 minutes</li>
+        <li><a href="#system-design-">Data model</a> - 2 minutes</li>
         <li><a href="#system-design-">API</a> - 5 minutes</li>
         <li><a href="#system-design-">High-level design</a> - 10 minutes</li>
   <!--       <ul>
@@ -368,7 +368,7 @@
 
 <div class="card mb-4" id="system-design-">
   <div class="card-body">
-    <h2 class="card-title">Database</h2>
+    <h2 class="card-title">Data model</h2>
     <ul>
       <li>Relational</li>
       <ul>
@@ -448,6 +448,9 @@
 <div class="card mb-4" id="system-design-">
   <div class="card-body">
     <h2 class="card-title">High-level design</h2>
+    <ul>
+      <li><img class="img-fluid" class="card-img-top" src="/software-engineering/image/system-design-0/building-blocks-1.png" alt="Card image cap"></li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu
@@ -458,43 +461,6 @@
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
     <ul>
-      <li>Deployment</li>
-      <ul>
-        <li>Blue-Green</li>
-        <ul>
-          <li>Existing production instance is <strong>Blue</strong></li>
-          <li>Deploy new instance <strong>Green</strong></li>
-          <li>Run tests on <strong>Green</strong> instance</li>
-          <li>Make <strong>Green</strong> the production instance</li>
-          <ul>
-            <li>Re-map DNS to <strong>Green</strong>'s IP address</li>
-            <li>Remove <strong>Blue</strong> from load-balancer and add <strong>Green</strong></li>
-          </ul>
-        </ul>
-        <li>Carnary</li>
-        <ul>
-          <li>Similar to Blue-Green but redirect only subset of users instead of all users</li>
-          <ul>
-            <li>Choose users who are more active, etc</li>
-          </ul>
-          <li>Both <strong>Blue</strong> and <strong>Green</strong> would be up during this time</li>
-          <li>Great way to do capacity testing on new instance</li>
-          <ul>
-            <li>Can always roll-back by redirecting users to old instance</li>
-          </ul>
-          <li>Managing multiple versions of software is required</li>
-        </ul>
-        <li>Dark-launching</li>
-        <ul>
-          <li>Releasing production-ready features to subset of users prior to full release</li>
-          <li>Feature toggle - run specific part of code based on configuration stored online</li>
-          <li>Turn on features only for subset of users before releasing features to everybody</li>
-        </ul>
-        <li>Edge deployment</li>
-        <ul>
-          <li>Client data is analyzed as close to the source as possible</li>
-        </ul>
-      </ul>
       <li>Network</li>
       <ul>
         <li>Communication protocol</li>
@@ -579,6 +545,622 @@
       <ul>
         <li>Choose availability with eventual consistency by default</li>
         <li>Choose consistency for Banking, Booking system</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Deployment</h3>
+    <ul>
+      <li>Blue-Green</li>
+      <ul>
+        <li>Existing production instance is <strong>Blue</strong></li>
+        <li>Deploy new instance <strong>Green</strong></li>
+        <li>Run tests on <strong>Green</strong> instance</li>
+        <li>Make <strong>Green</strong> the production instance</li>
+        <ul>
+          <li>Re-map DNS to <strong>Green</strong>'s IP address</li>
+          <li>Remove <strong>Blue</strong> from load-balancer and add <strong>Green</strong></li>
+        </ul>
+      </ul>
+      <li>Carnary</li>
+      <ul>
+        <li>Similar to Blue-Green but redirect only subset of users instead of all users</li>
+        <ul>
+          <li>Choose users who are more active, etc</li>
+        </ul>
+        <li>Both <strong>Blue</strong> and <strong>Green</strong> would be up during this time</li>
+        <li>Great way to do capacity testing on new instance</li>
+        <ul>
+          <li>Can always roll-back by redirecting users to old instance</li>
+        </ul>
+        <li>Managing multiple versions of software is required</li>
+      </ul>
+      <li>Dark-launching</li>
+      <ul>
+        <li>Releasing production-ready features to subset of users prior to full release</li>
+        <li>Feature toggle - run specific part of code based on configuration stored online</li>
+        <li>Turn on features only for subset of users before releasing features to everybody</li>
+      </ul>
+      <li>Edge deployment</li>
+      <ul>
+        <li>Client data is analyzed as close to the source as possible</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">DNS</h3>
+    <ul>
+      <li>Maps domain names to IP addresses</li>
+      <li>Router or ISP tells which DNS server to contact for IP lookup</li>
+      <li>Resource record</li>
+      <ul>
+        <li>A - hostname to IP address mapping</li>
+        <li>CNAME - alias to hostname (canonical) mapping</li>
+        <ul>
+          <table>
+            <tr>
+              <td>NAME</td>
+              <td>TYPE</td>
+              <td>VALUE</td>
+            </tr>
+            <tr>
+              <td>bar.example.com</td>
+              <td>CNAME</td>
+              <td>foo.example.com</td>
+            </tr>
+            <tr>
+              <td>foo.example.com</td>
+              <td>A</td>
+              <td>192.0.2.23</td>
+            </tr>
+          </table>
+          <li>The canonical (true) name of "bar.example.com" is "foo.example.com"</li>
+          <li>"foo.example.com" has A record pointing to IP address 192.0.2.23</li>
+        </ul>
+      </ul>
+      <li>Ex. CloudFlare, Route 53</li>
+      <li>FQDN (Fully Qualified Domain Name)</li>
+      <ul>
+        <li>Complete domain name of computer, host, or internet</li>
+        <li>When connecting to a host, FQDN must be specified</li>
+        <li>Then, DNS server finds IP address from the hostname</li>
+        <li>Ex. www.github.com - [hostname].[domain].[tld] (tld - top-level domain)</li>
+      </ul>
+      <li>DNS server</li>
+      <ul>
+        <li>DNS resolver - forward requests to the other DNS name servers</li>
+        <ul>
+          <li>For example, <code>/etc/resolv.conf</code> in Linux contains DNS resolver's IP address</li>
+        </ul>
+        <li>Root-level name servers - return a list of top-level domain (TLD) servers that hold the IP addresses of the domain</li>
+        <ul>
+          <li>Domain examples - .com, .org, .io</li>
+        </ul>
+        <li>Top-level domain (TLD) name servers - hold IP addresses of authoritative name servers</li>
+        <li>Authoritative name servers - provide IP addresses of the web or application servers</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">CDN</h3>
+    <ul>
+      <li>Geographically distributed proxy servers, that are placed on the network edge, close to end users</li>
+      <li>Generally serves static contents like image, video, CSS, JS</li>
+      <li>Ex. Amazon CloudFront</li>
+      <li>Push CDN</li>
+      <ul>
+        <li>Content gets sent automatically to CDN proxy servers from the origin server</li>
+        <li>Appropriate for static content delivery and low traffic</li>
+      </ul>
+      <li>Pull CDN</li>
+      <ul>
+        <li>CDN pulls the unavailable data from origin servers when requested by users</li>
+        <li>TTL determines how long content is cached on CDN</li>
+        <li>Appropriate for dynamic content delivery and heavy traffic</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Load balancer</h3>
+    <ul>
+      <li>GSLB (Global Server Load Balancing) distributes traffic across different geographical regions</li>
+      <li>Private IP is used to communitcate between servers (reachable only within the same network, unreachable over internet)</li>
+      <li>Redundancy</li>
+      <ul>
+        <li>Use multiple LBs so that they can't be single point of failure</li>
+        <li>They monitor health of each other</li>
+        <li>In case primary fails, the secondary takes over</li>
+      </ul>
+      <li>Ex. NGINX, HAProxy</li>
+      <li>Benefites</li>
+      <ul>
+        <li>Throughput is improved by parallel processing</li>
+        <li>Yield higher availability</li>
+        <li>SSL offload - client connects to load balancer via SSL, but redirect requests to servers are made via unencrypted HTTP to reduce load on the servers</li>
+        <ul>
+          <li>No need to install X.509 certificates on each server</li>
+        </ul>
+        <li>Caching - load balancer can cache popular requests</li>
+      </ul>
+      <li>Serving response back</li>
+      <ul>
+        <li>Proxing - load balancer receives response from backend and relays it back to the client</li>
+        <li>TCP Handoff - server sends response directly to the client</li>
+      </ul>
+      <li>Types</li>
+      <ul>
+        <li>Equitable dispatching - uses simple round-robin algorithm to distribute traffic evenly between all nodes</li>
+        <ul>
+          <li>Ex. AWS Elastic Load Balancer (ELB)</li>
+        </ul>
+        <li>Hash-based distribution - requests from the same client for the duration of session are directed to the same server every time by hashing metadata</li>
+        <ul>
+          <li>Ex. Azure Load Balancer</li>
+          <li>Pros - store session data in memory rather than shared data storage like Redis cache</li>
+          <li>Cons - caching work causes small latency</li>
+        </ul>
+      </ul>
+      <li>Reverse proxy</li>
+      <ul>
+        <li>Proxy hides identity of clients. Reverse proxy hides identity of servers</li>
+        <li>Proxy sits on top of clients - used for blocking certain contents (servers are freely accessible through internet)</li>
+        <li>Reverse proxy sit on top of servers - used for protection from attacks and SSL encrypting (clients can freely connect to internet)</li>
+        <li>Can act as load-balancing but is also useful when there is a single server to increase security</li>
+        <li>Ex. NGINX, HAProxy (These are load balancers but they can serve as reverse proxy too</li>
+      </ul>
+    </ul>
+
+    <h2 class="card-title">Cache</h2>
+    <ul>
+      <li>When receiving requests, servers check if cache has the responses</li>
+      <li>Cache-aside</li>
+      <ul>
+        <li>Cache does not interact with database</li>
+        <li>If cache miss, client fetches data from database. Then, client updates the cache</li>
+        <li>Cache miss causes three trips</li>
+        <li>Ex. Memcached</li>
+      </ul>
+      <li>Write-through</li>
+      <ul>
+        <li>Client write to cache, then cache synchronously write to database</li>
+        <li>Write operation is slow (Read is fast)</li>
+      </ul>
+      <li>Write-back</li>
+      <ul>
+        <li>Client write to cache, then cache asynchronously write to database</li>
+        <li>Data loss if cache goes down (Both read and write is fast)</li>
+      </ul>
+    </ul>
+
+    <h2 class="card-title">Message queue</h2>
+    <ul>
+      <li>Decoupling producer and consumer makes system scalable and reliable</li>
+      <li>Ex. Redis, RabbitMQ, Amazon SQS</li>
+    </ul> 
+    
+    <h3 class="card-title">Database</h3>
+    <ul>
+      <li>Performance and scalability - separate read and write server so that queries can be procesed in parallel</li>
+      <li>Reliability - queries can still be served when some servers are down</li>
+      <li>Data types</li>
+      <ul>
+        <li>Structured - relational data</li>
+        <li>Semi-structured - ymal, json, xml</li>
+        <li>Unstructured - photo, video, audio, text</li>
+      </ul>
+      <li>When to choose what</li>
+      <ul>
+        <li>SQL - ACID, data is unchanging</li>
+        <li>NoSQL - large amount of data with no structure, rapid development</li>
+      </ul>
+      <li>Relational model (SQL)</li>
+      <ul>
+        <li>Attribute - a column</li>
+        <li>Tuple - a row</li>
+        <li>Degree - number of columns</li>
+        <li>Cardinality - number of rows</li>
+        <li>Ex. Oracle, DB2, Microsoft SQL Server, PostgreSQL, and MySQL</li>
+        <li>Transaction (ACID)</li>
+        <ul>
+          <li>Atomicity - either all is done or none is done</li>
+          <li>Consistency - data is consistent before and after transaction</li>
+          <li>Isolation - trasaction doesn't get affected by other transactions</li>
+          <li>Durablility - transactions are permanently saved</li>
+        </ul>
+        <li>Delete Vs. Truncate</li>
+        <ul>
+          <li>Truncate - DDL (Data Definition Language)</li>
+          <ul>
+            <li>Does not require commit to make the change permanent</li>
+            <li>Deleted rows cannot be rolled back</li>
+            <li>Always removes all rows from the table (Table structure remains intact)</li>
+          </ul>
+          <li>Delete - DML (Data Manipulation Language)</li>
+          <ul>
+            <li>Requires commit to make the change permanent</li>
+            <li><strong>where</strong> clause can be used</li>
+          </ul>
+        </ul>
+        <li>DB indexing</li>
+        <ul>
+          <li>Applying indexing on a field creates a data structure holding field value and pointer</li>
+          <li>Data structure gets sorted so that search time can be O(logn) with binary search</li>
+          <li>Fields with lots of duplicate values degrade benefits of indexing</li>
+          <li>Degrade write performance having to index data each time write happens</li>
+        </ul>
+        <li>Key</li>
+        <ul>
+          <li>Primary key - unique identifier which consists of a single attribute. Cannot be NULL</li>
+          <li>Candidate key - columns together can uniquely identify a row</li>
+          <li>Super key - colums together can uniquely identify all columns</li>
+          <li>Foreign key - primary key from another table</li>
+          <ul>
+            <li>Cannot insert foreign key (which is primary key in the original table) in reference table that does not actually exist in the original table</li>
+            <li>Cannot delete primary key in the original table if it is used in the reference table</li>
+          </ul>
+        </ul>
+        <li>Functional dependency</li>
+        <ul>
+          <li>Partial dependency - non-key attribute depends on subset of a composite primary key</li>
+          <li>Transitive dependency - non-key attribute depends on another non-key attribute</li>
+        </ul>
+        <li>Normalization</li>
+        <ul>
+          <li>Process of determining how much redundancy exists in a table</li>
+          <li>First normal form - attributes must have single value, not a set of values</li>
+          <li>Second normal form - must not have partial dependency</li>
+          <li>Third normal form - must not have transitive dependency</li>
+          <li>Boyce-Codd normal form - If A->B and B is primary key, then A must also be primary key</li>
+        </ul>
+      </ul>
+      <li>NoSQL</li>
+      <ul>
+        <li>Key-value store</li>
+        <ul>
+          <li>Array of key-value pairs</li>
+          <li>Efficient for session-oriented applications like web applications, cache</li>
+          <li>Ex. Redis, Voldemort, Amazon Dynamo DB, Memcached DB</li>
+        </ul>
+        <li>Document DB</li>
+        <ul>
+          <li>Documents (XML, JSON) are grouped into collections</li>
+          <li>Suitable for unstructured catalog data</li>
+          <li>Ex. CouchDB, MongoDB</li>
+        </ul>
+        <li>Column DB</li>
+        <ul>
+          <li>Columns instead of tables, no need to know columns up front, best for large datasets</li>
+          <li>Ex. Cassandra, HBase</li>
+        </ul>
+        <li>Graph DB</li>
+        <ul>
+          <li>When relations are best represented in graphs</li>
+          <li>Can be used in social applications</li>
+          <li>Ex. Neo4J, OrientDB, InfiniteGraph</li>
+        </ul>
+        <li>Search engines</li>
+        <ul>
+          <li>Ex. Solr, ElasticSearch, Splunk</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Network</h3>
+    <ul>
+      <li>Network Basics</li>
+      <ul>
+        <li>Computers can connect to themselves via 127.0.0.1 (localhost)</li>
+        <li>"ipconfig" file provides very useful information</li>
+        <li>TCP allows multiple services to share the same physical computer via port</li>
+        <ul>
+          <li>21 - file transfer (FTP)</li>
+          <li>22 - secure shell (SSH)</li>
+          <li>25, 110 - email (SMTP, POP3)</li>
+          <li>80 - web (HTTP)</li>
+          <li>443 - secure web (HTTPS)</li>
+          <li>993, 995 - secure email</li>
+        </ul>
+        <li>UDP is better suited for streaming media and online games</li>
+      </ul>
+      <li>TCP/IP</li>
+      <ul>
+        <li>Application layer - where end-user applications live</li>
+        <ul>
+          <li>Presentation - encoding, encryption, compression</li>
+          <li>Session - manages user session</li>
+        </ul>
+        <li>Transport layer - segments data into smaller chunks (Also, add checksum to these chunks)</li>
+        <li>Network layer - transports packets</li>
+        <li>Data link layer - error detection/correction</li>
+        <li>Physical layer - hardware</li>
+      </ul>
+      <li>CIDR</li>
+      <ul>
+        <li>Classless Inter-Domain Routing (CIDR) is a range of IP addresses a network uses</li>
+      </ul>
+      <li>IPv4</li>
+      <ul>
+        <li>32-bit address space</li>
+        <li>Example: 192.0.2.0/24 (24 means 8-bits / 256 addresses after 192.0.2.0)</li>
+        <li>Class A - 10.0.0.0/8 - 16 Million Hosts</li>
+        <li>Class B - 10.0.0.0/16 - 65,000 Hosts</li>
+        <li>Class C - 10.0.0.0/24 - 254 Hosts</li>
+      </ul>
+      <li>IPv6</li>
+      <ul>
+        <li>128-bit address space</li>
+        <li>Example: 2001:db8::/32 (32 means 96-bits / 76 octillion addresses after 2001:db8::)</li>
+      </ul>
+      <li>AJAX polling</li>
+      <ul>
+        <li>Client repeatedly polls the server</li>
+        <li>A lot of response could be empty, causing HTTP overhead</li>
+      </ul>
+      <li>Long-polling</li>
+      <ul>
+        <li>Client sends request to server</li>
+        <li>Server holds the request rather than sending empty response</li>
+        <li>Server pushes information to client only when there is new data</li>
+      </ul>
+      <li>WebSocket</li>
+      <ul>
+        <li>Persistent connection between client and server</li>
+      </ul>
+      <li>Communication</li>
+      <ul>
+        <li>Hypertext transfer protocol (HTTP)</li>
+        <ul>
+          <li>GET, POST, PUT, PATCH, DELETE</li>
+          <li>Application layer protocal relying on TCP or UDP</li>
+        </ul>
+        <li>Transmission control protocol (TCP)</li>
+        <ul>
+          <li>Guarantees that packets arrive on destination in the correct order and without corruption</li>
+        </ul>
+        <li>User datagram protocol (UDP)</li>
+        <ul>
+          <li>Lower latency but packages may arrive on destination out of order or not at all</li>
+          <li>Used in video streaming, voice chat, multiplayer game</li>
+        </ul>
+        <li>Remote procedure call (RPC)</li>
+        <ul>
+          <li>Client initiates client stub process by giving parameters</li>
+          <li>Client stub converts the parameters into standardized format and packs them into a message</li>
+          <li>Client RPC runtime delivers the message to the server over the network</li>
+          <li>Server RPC runtime receives the message and passes it to the server stub</li>
+          <li>Server stub unpacks the message to retrieve the parameters and calls the desired server routine</li>
+          <li>Server stub packs the returned result into a message and sends it to RPC runtime at the server</li>
+          <li>Server RPC runtime returns the packed result to Client RPC runtime over the network</li>
+          <li>Client RPC runtime sends the result to the client stub</li>
+          <li>Client stub unpacks the result</li>
+          <li>Ex. Protobuf, Thrift, Avro</li>
+        </ul>
+        <li>Representational State Transfer (REST)</li>
+        <ul>
+          <li>Architecture for design network applications</li>
+          <li>Stateless, client-server, cacheable communcation</li>
+          <li>HTTP protocol is used</li>
+          <li>Simpler than RPC, Web Services (SOAP, WSDL)</li>
+          <li>Ex. www</li>
+        </ul>
+      </ul>
+      <li>namp</li>
+      <ul>
+        <li>What machines are on our network</li>
+        <li>What ports are open on those machines</li>
+        <li>What operating systems are running on those machines</li>
+        <li><pre><code class="bash">nmap -A &lt;CIDR&gt;  # For example, 192.168.0.0/24</code></pre></li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Security</h3>
+    <ul>
+      <li>A layered approach to security</li>
+      <ul>
+        <li>Data - attackers are always after this</li>
+        <li>Application - free of vulnerabilities, application secrets in a secure storage medium</li>
+        <li>Compute - secure access to VMs, implement endpoint protection, keep systems patched and current</li>
+        <li>Networking - deny by default, implement secure connectivity to on-premises networks, restrict inbound internet access</li>
+        <li>Perimeter - use distributed denial of service (DDoS) protection, use perimeter firewalls to identify malicious attacks</li>
+        <li>Identity and access - use SSO and multi-factor authentication</li>
+        <li>Physical security - access to physical data centre with compute machines</li>
+      </ul>
+      <li>Examples of security breaches and attacks</li>
+      <ul>
+        <li>Data - exposing an encryption key or using weak encryption</li>
+        <li>Application - malicious code injection and execution. For example, SQL injection and cross-site scripting (XSS)</li>
+        <li>Compute - malware executing malicious code to compromise system</li>
+        <li>Networking - unnecessary open ports to the internet. For example, leaving SSH or RDP open to virtual machines to leading brute-force attacks against your systems</li>
+        <li>Perimeter - denial-of-service (DoS) attacks</li>
+        <li>Identity and access - Exposed credentials and toxic combinations of permissions and authorization</li>
+        <li>Physical security - unauthorized access to facilities</li>
+      </ul>
+      <li>Authentication vs Authorization</li>
+      <ul>
+        <li>Authentication - process of establishing identity of a person</li>
+        <li>Authorization - process of establishing what level of access an authenticated person has</li>
+      </ul>
+      <li>Authentication strategy</li>
+      <ul>
+        <li>Single sign-on - access across applications is granted to a single identity/user, simplifying security model</li>
+        <li>Multi-factor authentication - requires two or more elements for full authentication</li>
+      </ul>
+      <li>Encryption</li>
+      <ul>
+        <li>Encryption - process of making data unreadable and unusable to unauthorized viewers</li>
+        <li>Symmetric encryption - uses the same key to encrypt and decrypt the data</li>
+        <li>Asymmetric encryption - uses public key and private key pair. Can use one key to encrypt but need both keys to decrypt. Ex. Transport Layer Security (TLS) used in HTTPS</li>
+      </ul>
+      <li>Security concerns</li>
+      <ul>
+        <li>Input and outputs - always validate input. Always use parameterized queries. Always encode your output</li>
+        <li>Key Vault - store connection strings, secrets, passwords, certificates, access policies, file locks, and automation scripts</li>
+        <li>Framework - for example, Java/Javascript. Keep them updated</li>
+        <li>Dependencies - track vulnerabilities on your 3rd party dependencies</li>
+      </ul>
+      <li>SSL (Secure Sockets Layer)</li>
+      <ul>
+        <li>Ensure that all data passed between web server and browsers remain private</li>
+        <li>Web server creates private and public Key</li>
+        <li>User submits CSR (Certificate Signing Request), which includes public key, to Certification Authority</li>
+        <li>Then, CA will issue SSL certificate</li>
+        <li>Web server will match user's SSL certificate to its private Key</li>
+        <li>When broswer connects to secure site, it will check whether SSL certificate is not expired, and it is isseud by Certification Authority that browser trusts, and it is being used by the website for which it has been issued</li>
+      </ul>
+      <li>SSL handshake</li>
+      <ul>
+        <li>Client hello - client to server with TLS version</li>
+        <li>Server hello - server to client with configuration it picked</li>
+        <li>Server key exchange message - server to client with required information to generate pre-master secret</li>
+        <li>Certificate request - server to client with certificate type, algorithm, and authorities</li>
+        <li>Client certificate - client to server with certificate chain</li>
+        <li>Client key exchange message - client to server so that a common key can be generated. Both sides then generate a master secret using pre-master secret, which is then used to generate symmetric key to encrypt session data</li>
+      </ul>
+      <li>Active directory</li>
+      <ul>
+        <li>Directory service implementation that provide authentication, group and user management, policy administration, etc</li>
+        <li>It supports both Kerberos and LDAP</li>
+        <li>It also provides SSO</li>
+      </ul>
+      <li>LDAP (LightWeight Directory Acess Protocol)</li>
+      <ul>
+        <li>Open protocol used for directory service authentication</li>
+        <li>Relationship between AD and LDAP is similar to Apache and HTTP</li>
+      </ul>
+      <li>Encoding</li>
+      <ul>
+        <li>base36 - [a-z ,0-9]</li>
+        <li>base62 - [A-Z, a-z, 0-9]</li>
+        <li>base64 - [A-Z, a-z ,0-9] plus '+' and '-'</li>
+      </ul>
+      <li>OpenSSL (Generate JKS from SSL certificates)</li>
+      <ul>
+        <li><pre><code class="bash">openssl pkcs12 -export -in &lt;your_cert&gt;.crt -inkey &lt;your_cert&gt;.key -out &lt;your_cert&gt;.p12
+keytool -importkeystore -srckeystore &lt;your_cert&gt;.p12 -srcstoretype PKCS12 -destkeystore &lt;your_cert&gt;.jks -deststoretype JKS -dname "CN:&lt;your_hostname&gt;"</code></pre></li>
+        <li><pre><code class="bash"># Check common name.
+openssl x509 -noout -subject -in &lt;your_cert&gt;.crt
+
+# Check expiry date.
+openssl x509 -noout -enddate -in &lt;your_cert&gt;.crt
+
+# Check all subject alternative names.
+for i in $(openssl x509 -in &lt;your_cert&gt;.crt -noout -text | grep -A1 'Subject Alternative Name' | tail -n1 | tr -d ','); { echo $i | cut -f2 -d:; }</code></pre></li>
+      </ul>
+      <li>Tokenization vs Encryption</li>
+      <ul>
+        <li>Tokenized data is irreversible (Detokenization can only be done by the original tokenization system)</li>
+        <li>Encryption is reversible with the key</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Distributed system</h3>
+    <ul>
+      <li>Distributed system challenges</li>
+      <ul>
+        <li>Network asynchrony - messages take long to deliver, deliver out of order, or not deliver at all</li>
+        <li>Partial failures - only some components fail</li>
+        <li>Concurrency - execution of multiple computations intervene each other</li>
+      </ul>
+      <li>Failure types</li>
+      <ul>
+        <li>Fail-stop - a node halts and remains halted permanently (Easiest scenario)</li>
+        <li>Crash - a node halts, but silently</li>
+        <li>Omission - a node fails to respond to incoming requests</li>
+        <li>Byzantine - a node exhibits arbitrary behavior</li>
+      </ul>
+      <li>State</li>
+      <ul>
+        <li>Stateless - maintains no state. Performs purely based on the inputs</li>
+        <li>Stateful - maintains and updates states. Results depend on this state</li>
+      </ul>
+      <li>Quorum</li>
+      <ul>
+        <li>We write data to the nodes that are only resposible for write operations. We read data from all nodes and return the latest value</li>
+        <ul>
+          <li>Write is successful when w-1 nodes respond (Coordinator writes to itself first, so we get w writes in total)</li>
+          <li>Wait for r answers before returning the results to the client</li>
+        </ul>
+        <li>Quorum is achieved when R + W > N. At least one node should be both read and write so that readers could get the latest-written value</li>
+        <li>If w > r, fast write but slow read because need to go to many nodes for a value</li>
+        <li>If r > w, fast read but slow write because need to write to many nodes synchronously</li>
+      </ul>
+      <li>CAP theorem</li>
+      <ul>
+        <li>It is impossible to acheive all three at the same time. We can only have two out of three</li>
+        <ul>
+          <li>Consistency - all nodes see the same data at the same time, every read received the most recent write</li>
+          <li>Availability - system must be accessible even when nodes fail, every request receives a response</li>
+          <li>Partition tolerance - system must operate even when communications between nodes break</li>
+        </ul>
+        <li>Network is not reliable, thus we need to support partition tolerance</li>
+        <li>We can only choose between consistency or availability in distributed system</li>
+        <ul>
+          <li>CA - RDBMS (Non-distributed system)</li>
+          <li>AP - Dynamo, Cassandra, CouchDB</li>
+          <ul>
+            <li>BASE DBs choose availability - respond with local data w/o ensuring its the latest with peers</li>
+            <li>Good choice if system can live with eventual consistency</li>
+          </ul>
+          <li>CP - BigTable, HBase</li>
+          <ul>
+            <li>ACID DBs choose consistency - refuse to respond if cannot check peers</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>PACELC theorem</li>
+      <ul>
+        <li>When there is no network partition during normal operation, then choose between latency or consistency</li>
+        <li>To guarantee data consistency, the system will have to delay write operations until the data has been propagated across the system successfully, taking a latency hit</li>
+        <li>PA system would go for L (latency) and PC system would go for C (consistency)</li>
+        <li><strong>Systems that choose A over C can still support eventual consistency but no strong/sequential/casual!</strong></li>
+      </ul>
+      <li>Isolation level</li>
+      <ul>
+        <li>Considers multi object operations</li>
+        <li>Serializability</li>
+        <ul>
+          <li>Two transactions executed concurrently should give same result</li>
+          <li>Prevents all anomalies</li>
+        </ul>
+        <li>Repeatable read</li>
+        <ul>
+          <li>Data once read by a transaction will not change throughout its course</li>
+        </ul>
+        <li>Snapshot isolation</li>
+        <ul>
+          <li>All reads made in a transaction see a consistent snapshot of the database</li>
+        </ul>
+        <li>Read committed</li>
+        <ul>
+          <li>Does not allows a transaction to read a data that has not yet been committed by other transaction</li>
+        </ul>
+      </ul>
+      <li>Anomaly</li>
+      <ul>
+        <li>Dirty write</li>
+        <ul>
+          <li>Transaction overwrites a value that was written by another transaction that is not committed yet</li>
+        </ul>
+        <li>Dirty read</li>
+        <ul>
+          <li>Transaction reads a value that was written by another transaction that is not committed yet</li>
+        </ul>
+        <li>Fuzzy or non-repeatable read</li>
+        <ul>
+          <li>Value is retrieved twice during a transaction and the value is different</li>
+        </ul>
+        <li>Phantom read</li>
+        <ul>
+          <li>For example, transaction of two queries runs to calculate the maximum and the average. However, another transaction intervenes to insert lots of record, thus making the first transaction return an average that is larger than the maximum</li>
+        </ul>
+        <li>Lost update</li>
+        <ul>
+          <li>Two transactions read the same value and then try to update it to two different values</li>
+        </ul>
+        <li>Read skew</li>
+        <ul>
+          <li>A transaction can only see partial results of another transaction</li>
+        </ul>
+        <li>Dirty write</li>
+        <ul>
+          <li>Two transactions read the same data, but then modify disjoint sets of data</li>
+        </ul>
       </ul>
     </ul>
   </div>
