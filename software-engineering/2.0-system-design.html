@@ -39,10 +39,10 @@
 <div class="col-md-12">
 <h1 class="my-4">Software Engineering</h1>
 
-<!-- Software engineering and system design BEGIN -->
+<!-- System design BEGIN -->
 <div class="card mb-4" id="system-design">
   <div class="card-body">
-    <h2 class="card-title">Software engineering and system design</h2>
+    <h2 class="card-title">System design</h2>
     <!-- <ul class="list-unstyled mb-0"> -->
     <ul>
       <li>Structure</li>
@@ -1163,12 +1163,214 @@ for i in $(openssl x509 -in &lt;your_cert&gt;.crt -noout -text | grep -A1 'Subje
         </ul>
       </ul>
     </ul>
+
+    <h3 class="card-title">Availability</h3>
+    <ul>
+      <li>Percentage of time that the service is accessible to clients (Associated with time loss)</li>
+      <li>Ability of the system to remain functional despite failures</li>
+      <li>Achieved by replication (Keep multiple copies of data at preferrably different geographic location)</li>
+      <li>Reliability means availability, but the opposite is not true</li>
+      <li>Replication</li>
+      <ul>
+        <li>Single-master replication (primary-backup replication)</li>
+        <ul>
+          <li>Primary processes writes locally and propagates to backups</li>
+          <li>Scalable for read-heavy (read can happen from any backups) but not so for write-heavy (only primary can handle writes)</li>
+          <li>Statement based replication</li>
+          <ul>
+            <li>Problem - non-deterministic functions such as NOW() or RAND() lead to different values on different nodes</li>
+          </ul>
+          <li>Write-ahead log (WAL) shipping</li>
+          <ul>
+            <li>Primary node saves the query before executing it in a log file</li>
+            <li>Then, it uses these logs to copy data into the backup nodes</li>
+          </ul>
+          <li>Logical (row-based) log replication</li>
+          <ul>
+            <li>All backup nodes replicate the actual data changes</li>
+          </ul>
+        </ul>
+        <li>Multi-master replication (multi-primary replication)</li>
+        <ul>
+          <li>Multiple primary nodes that process the writes and send them to all other primary and backup nodes to replicate</li>
+          <li>Conflict can happen where mutiple nodes modify the same data</li>
+        </ul>
+        <li>Leaderless replication</li>
+        <ul>
+          <li>Always write or read from a majority (more than half) of the number of nodes in the system</li>
+          <li>The latest value is written to at least one of the nodes in the system</li>
+        </ul>
+      </ul>
+      <li>Fail over</li>
+      <ul>
+        <li>Acive-passive</li>
+        <ul>
+          <li>Heartbeats are sent from active to passive</li>
+          <li>If heartbeats are stopping, passive takes over IP address of active and resumes service</li>
+        </ul>
+        <li>Acive-active</li>
+        <ul>
+          <li>Both servers are managing traffic, spreading load between them</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Reliability</h3>
+    <ul>
+      <li>Probability that the service will perform its functions (Associated with frequency and impact of failure)</li>
+      <li>Metrics are mean time between failures and mean time to repair</li>
+      <li>Redunduncy of both software components and data, to prevent particularly the data loss</li>
+      <li>Data loss</li>
+      <ul>
+        <li></li>
+      </ul>
+      <li>Handling failure</li>
+      <ul>
+        <li></li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Scalability</h3>
+    <ul>
+      <li>Capability to manage increased demand (For example, number of requests or amounts of data)</li>
+      <ul>
+        <li>Performance problem - system is slow for a single user</li>
+        <li>Scailability problem - system is fast for a single user but slow under heavy load</li>
+      </ul>
+      <li>Compute load patterns</li>
+      <ul>
+        <li>Consistent growth</li>
+        <li>Constantly fluctuating loads</li>
+        <li>Cyclical loads</li>
+        <li>Unpredictable bursts</li>
+      </ul>
+      <li>Horizontal scaling</li>
+      <ul>
+        <li>Vertical scaling or scaling up - adds more resources to a single instance</li>
+        <li>Horizontal scaling or scaling out - addition more instances</li>
+      </ul>
+      <li>Data partitioning</li>
+      <ul>
+        <li>Vertical partitioning</li>
+        <ul>
+          <li>Divides tables into different servers based on features of data (Split columns)</li>
+          <li>Problem when data experiences additional growth</li>
+          <li>Queries must hit multiple servers and join operations are needed</li>
+        </ul>
+        <li>Horizontal partitioning (Sharding)</li>
+        <ul>
+          <li>Puts different rows to different tables</li>
+          <li>Atomic operation is hard to achieve</li>
+          <li>It is cheaper to add more servers than growing the existing server as data increases</li>
+          <li>Range partitioning</li>
+          <ul>
+            <li>Split dataset based on specific attribute</li>
+            <li>Range based query is easy to implement</li>
+            <li>May result in unbalanced servers</li>
+          </ul>
+          <li>Hash partitioning</li>
+          <ul>
+            <li>Apply hash function to some attribute of data and mod that hash value by the number of paritions</li>
+            <li>Uniform allocation of data across servers</li>
+            <li>Range based query is hard to implement</li>
+            <li>Adding new servers mean changing hash function and redistribution of data</li>
+          </ul>
+          <li>Consistent hashing</li>
+          <ul>
+            <li>Create conceptual ring of hashes from 0 to n−1, where n is the number of available hash values</li>
+            <li>Each node and request are put into the ring based on its hash value</li>
+            <li>Each request is served by the next node in the ring</li>
+            <li>When a new node is added to the ring, its next node need to share keys with the newly added node</li>
+            <li>Some node could be heavily loaded compared to others</li>
+            <li>Virtual node</li>
+            <ul>
+              <li>Each node is put into multiple positions in the ring based on multiple hash functions</li>
+              <li>Each node can have different number of virtual nodes based on hardware capability</li>
+              <li>Load is more uniform</li>
+              <li>Ex. Dynamo, Cassandra</li>
+            </ul>
+            <li>Fixed number of partitions</li>
+            <ul>
+              <li>Number of partitions is fixed when DB is setup</li>
+              <li>Higher number of partitions are created than the nodes</li>
+              <li>Paritions are assigned to nodes</li>
+              <li>If partition is too small, results in overhead. If partition is too large, rebalancing the nodes will be expensive</li>
+              <li>Ex. Elasticsearch</li>
+            </ul>
+            <li>Dynamic partitioning</li>
+            <ul>
+              <li>When the size of a partition reaches the threshold, it is split into two partitions</li>
+              <li>Difficult to apply dynamic rebalancing while serving the reads and writes</li>
+              <li>Ex. HBase, MongoDB</li>
+            </ul>
+            <li>Partition proportionally to nodes</li>
+            <ul>
+              <li>Number of partitions is proportionate to the number of nodes, so that every node has fixed partitions</li>
+              <li>As the number of nodes increases, the partitions shrink. Rebalancing between paritions may result in unfair split</li>
+              <li>Ex. Cassandra</li>
+            </ul>
+          </ul>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Performance</h3>
+    <ul>
+      <li>Caching</li>
+      <ul>
+        <li>Store frequently used data for fast retrieval</li>
+      </ul>
+      <li>Autoscaling</li>
+      <ul>
+        <li>Dynamically allocate resources to match performance requirements</li>
+      </ul>
+      <li>Background jobs</li>
+      <ul>
+        <li>Tasks such as batch jobs, intensive processing tasks, and long-running processes should run as background jobs, decoupled from application UI to minimize load</li>
+      </ul>
+      <li>Messaging</li>
+      <ul>
+        <li>Requests can continue to flow-in without error if application can’t keep up</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Consistency</h3>
+    <ul>
+      <li>Considers single object operations</li>
+      <li>Strong consistency (linearizability)</li>
+      <ul>
+        <li>Synchronous replication technique (Acknowledgment is not sent to the client until the new value is written to all replicas)</li>
+        <li>Once an operation is complete and the ack is delivered to client, it is visible to all other clients</li>
+        <li>Ex. updating account password</li>
+      </ul>
+      <li>Sequential consistency</li>
+      <ul>
+        <li>Preserves the ordering specified by each client’s program</li>
+        <li>For example, we don't care what’s the ordering of posts between our friends. But, the posts from a single friend has to be displayed in the right order</li>
+      </ul>
+      <li>Causal consistency</li>
+      <ul>
+        <li>Operations that are not causally related can be seen in different orders</li>
+        <li>For example, comments and their sub-comments must appear in the right order</li>
+      </ul>
+      <li>Eventual consistency</li>
+      <ul>
+        <li>Do not need to return the latest write as long as the system eventually arrives at a stable state</li>
+        <li>Can achieve high availability</li>
+        <li>Ex. DNS, Cassandra</li>
+      </ul>
+      <li>Weak consistency</li>
+      <ul>
+        <li>Read may or may not see the written data</li>
+        <li>Ex. Memcached</li>
+      </ul>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview, Alex Xu | <a href="https://www.hellointerview.com">hello interview</a>
   </div>
 </div>
-<!-- Software engineering and system design END -->
+<!-- System design END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->
