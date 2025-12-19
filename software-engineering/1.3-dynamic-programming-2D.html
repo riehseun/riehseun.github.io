@@ -47,6 +47,7 @@
       <li><a href="#dynamic-programming-2d">Regular Expression Matching</a></li>
       <li><a href="#dynamic-programming-2d">Unique Paths</a></li>
       <li><a href="#dynamic-programming-2d">Edit Distance</a></li>
+      <li><a href="#dynamic-programming-2d">Target Sum</a></li>
       <li><a href="#dynamic-programming-2d">Coin Change II</a></li>
       <li><a href="#dynamic-programming-2d">Longest Common Subsequence</a></li>
     </ul>
@@ -202,6 +203,42 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/edit-distance">72. Edit Distance</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="dynamic-programming-2d">
+  <div class="card-body">
+    <h2 class="card-title">Target Sum (M)</h2>
+
+<pre><code class="python">class Solution:
+    def findTargetSumWays(self, nums: List[int], target: int) -> int:
+        
+        # Let P = positive subset, N = negative subset
+        # Then, sum(P) + sum(N) = sum(nums)
+        # We want subsets such that, sum(P) - sum(N) = target
+        # Then sum(P) = (sum(nums)+target) // 2
+        # dp[i][j] = number of ways to have sum j with first i nums
+        # Time O(nm) n = len(nums) m = target
+        # Space O(nm)
+
+        if (sum(nums)+target) % 2 != 0 or (sum(nums)+target) < 0:
+            return 0   
+
+        m = (sum(nums)+target) // 2
+        n = len(nums)
+        dp = [[0]*(m+1) for _ in range(n+1)]
+        dp[0][0] = 1
+
+        for i in range(1, n+1):
+            for j in range(m+1):
+                dp[i][j] = dp[i-1][j] 
+                if j >= nums[i-1]:
+                    dp[i][j] = dp[i][j] + dp[i-1][j-nums[i-1]]
+                 
+        return dp[n][m]</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/target-sum">494. Target Sum</a> | <a href="https://neetcode.io/problems/target-sum">Target Sum</a>
   </div>
 </div>
 
