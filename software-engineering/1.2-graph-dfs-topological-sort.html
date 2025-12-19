@@ -48,6 +48,7 @@
       <li><a href="#graph-dfs-topological-sort-">Course Schedule II</a></li>
       <li><a href="#graph-dfs-topological-sort-">Graph Valid Tree</a></li>
       <li><a href="#graph-dfs-topological-sort-">Alien Dictionary</a></li>
+      <li><a href="#graph-dfs-topological-sort-">Longest Increasing Path in a Matrix</a></li>
       <li><a href="#graph-dfs-topological-sort-">Redundant Connection</a></li>
     </ul>
   </div>
@@ -284,6 +285,53 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/alien-dictionary">269. Alien Dictionary</a> | <a href="https://neetcode.io/problems/foreign-dictionary">Alien Dictionary</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-dfs-topological-sort-">
+  <div class="card-body">
+    <h2 class="card-title">Longest Increasing Path in a Matrix (H)</h2>
+
+<pre><code class="python">class Solution:
+    def longestIncreasingPath(self, matrix: List[List[int]]) -> int:
+
+        # Topological sort
+        # Time O(nm) nm = number of nodes
+        # Space O(nm)
+        
+        n, m = len(matrix), len(matrix[0])
+        dirs = [(-1,0), (1,0), (0,-1), (0,1)]
+        graph, indegree = defaultdict(list), defaultdict(int)
+
+        for i in range(n):
+            for j in range(m):
+                for x, y in dirs:
+                    if 0 <= i +x < n \
+                        and 0 <= j + y < m \
+                        and matrix[i+x][j+y] > matrix[i][j]:
+                        graph[(i,j)].append((i+x,j+y))
+                        indegree[(i+x,j+y)] += 1
+
+        queue = deque()
+        for key, val in graph.items():
+            if key not in indegree:
+                queue.append((key, 0))
+
+        max_depth = 0
+        
+        while queue:
+            node, depth = queue.popleft()
+            max_depth = max(max_depth, depth)
+            
+            for next_node in graph[node]:
+                indegree[next_node] -= 1
+                if indegree[next_node] == 0:
+                    queue.append((next_node, depth+1))
+        
+        return max_depth + 1</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/longest-increasing-path-in-a-matrix">329. Longest Increasing Path in a Matrix</a> | <a href="https://neetcode.io/problems/longest-increasing-path-in-matrix">Longest Increasing Path in Matrix</a>
   </div>
 </div>
 
