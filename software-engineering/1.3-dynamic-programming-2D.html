@@ -47,6 +47,7 @@
       <li><a href="#dynamic-programming-2d">Regular Expression Matching</a></li>
       <li><a href="#dynamic-programming-2d">Unique Paths</a></li>
       <li><a href="#dynamic-programming-2d">Edit Distance</a></li>
+      <li><a href="#dynamic-programming-2d">Interleaving String</a></li>
       <li><a href="#dynamic-programming-2d">Target Sum</a></li>
       <li><a href="#dynamic-programming-2d">Coin Change II</a></li>
       <li><a href="#dynamic-programming-2d">Longest Common Subsequence</a></li>
@@ -203,6 +204,44 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/edit-distance">72. Edit Distance</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="dynamic-programming-2d">
+  <div class="card-body">
+    <h2 class="card-title">Interleaving String (M)</h2>
+
+<pre><code class="python">class Solution:
+    def isInterleave(self, s1: str, s2: str, s3: str) -> bool:
+
+        # Check if s3 up to k can be formed by s1 and s2 up to i and j
+        # If s1[i] != s3[k] and s2[j] != s3[k], dp[i][j] = False
+        # If s1[i] == s3[k] or s2[j] == s3[k]
+        # Time O(nm) n = len(s1), m = len(s2)
+        # Space O(nm)
+
+        n, m = len(s1), len(s2)
+        if len(s3) != m + n:
+            return False 
+
+        dp = [[False]*(m+1) for _ in range(n+1)]
+        dp[0][0] = True
+
+        for i in range(n+1):
+            for j in range(m+1):
+                if i == 0 and j != 0:
+                    dp[i][j] = dp[i][j-1] and s2[j-1] == s3[i+j-1]
+                if i != 0 and j == 0:
+                    dp[i][j] = dp[i-1][j] and s1[i-1] == s3[i+j-1]
+                if i != 0 and j != 0:
+                    a = dp[i][j-1] and s2[j-1] == s3[i+j-1]
+                    b = dp[i-1][j] and s1[i-1] == s3[i+j-1]
+                    dp[i][j] = a or b
+
+        return dp[n][m]</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/interleaving-string">97. Interleaving String</a> | <a href="https://neetcode.io/problems/interleaving-string">Interleaving String</a>
   </div>
 </div>
 
