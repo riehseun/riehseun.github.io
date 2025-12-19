@@ -167,8 +167,9 @@
   <div class="card-body">
     <h2 class="card-title">Edit Distance (M)</h2>
 
-<pre><code class="python">class Solution:
-    def minDistance(self, word1: str, word2: str) -> int:
+<pre><code class="python"># DP
+        # Time O(nm) n = len(word1), m = len(word2)
+        # Space O(nm)
 
         # "horse" and "ros"
         #   0 1 2 3 4 5
@@ -177,34 +178,30 @@
         # 2 2
         # 3 3
 
-        # Edge case
-        if not word1:
-            return len(word2)
-        if not word2:
-            return len(word1)
-
-        delete_cost, insert_cost, replace_cost = 1, 1, 1
         n, m = len(word1), len(word2)
+
+        if n == 0:
+            return len(word2)
+        if m == 0:
+            return len(word1)
 
         dp = [[0]*(m+1) for _ in range(n+1)]
         for i in range(1, n+1):
-            dp[i][0] = dp[i-1][0] + delete_cost
+            dp[i][0] = dp[i-1][0] + 1
         for j in range(1, m+1):
-            dp[0][j] = dp[0][j-1] + insert_cost
+            dp[0][j] = dp[0][j-1] + 1
 
-        # Time O(nm)
-        # Space O(nm)
         for i in range(1, n+1):
             for j in range(1, m+1):
-                r_cost = replace_cost
-                if word1[i-1] == word2[j-1]:
-                    r_cost = 0
-                dp[i][j] = min(dp[i-1][j]+delete_cost, dp[i][j-1]+insert_cost, dp[i-1][j-1]+r_cost)
+                if word1[i-1] == word2[j-1]:\
+                    dp[i][j] = dp[i-1][j-1]
+                else:
+                    dp[i][j] = min(dp[i-1][j]+1, dp[i][j-1]+1, dp[i-1][j-1]+1)
 
         return dp[n][m]</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/edit-distance">72. Edit Distance</a>
+    Reference: <a href="https://leetcode.com/problems/edit-distance">72. Edit Distance</a> | <a href="https://neetcode.io/problems/edit-distance">Edit Distance</a>
   </div>
 </div>
 
