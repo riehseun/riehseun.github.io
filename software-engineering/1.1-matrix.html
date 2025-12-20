@@ -109,13 +109,11 @@
 
         # First, reverse up and down
         # Second, swap i and j
+        # Time O(nm) n = number of rows, m = number of cols
+        # Space O(1)
 
         i, j = 0, len(matrix) - 1
         
-        # Time O(nm)
-        #   n = number of rows
-        #   m = number of cols
-        # Space O(1)
         while i < j:
             matrix[i], matrix[j] = matrix[j], matrix[i]
             i += 1
@@ -126,7 +124,7 @@
                 matrix[i][j], matrix[j][i] = matrix[j][i], matrix[i][j]</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/rotate-image">48. Rotate Image</a>
+    Reference: <a href="https://leetcode.com/problems/rotate-image">48. Rotate Image</a> | <a href="https://neetcode.io/problems/rotate-matrix">Rotate Image</a>
   </div>
 </div>
 
@@ -144,13 +142,10 @@
         #   Remove last row
         #   Remove first col
         # Repeat
+        # Time O(nm) n = number of rows, m = number of columns
+        # Space O(1) Ignoring space for result
 
         result = []
-
-        # Time O(nm) 
-        #   n = number of rows
-        #   m = number of columns
-        # Space O(nm)
 
         while matrix:
             nums = matrix.pop(0)  # Remove first row
@@ -178,7 +173,7 @@
         return result</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/spiral-matrix">54. Spiral Matrix</a>
+    Reference: <a href="https://leetcode.com/problems/spiral-matrix">54. Spiral Matrix</a> | <a href="https://neetcode.io/problems/spiral-matrix">Spiral Matrix</a>
   </div>
 </div>
 
@@ -192,27 +187,40 @@
         Do not return anything, modify matrix in-place instead.
         """
         
-        # Use a dictionary to make rows and cols of 0s
+        # Set first row and col to 0 if there are 0 in the same row and col
+        # Time O(nm) n = number of rows, m = number of columns
+        # Space O(1)
 
-        rows, cols = defaultdict(bool), defaultdict(bool)
-        
-        # Time O(nm)
-        #   n = number of rows
-        #   m = number of columns
-        # Space O(n+m)
-        for i in range(len(matrix)):
-            for j in range(len(matrix[i])):
+        n, m = len(matrix), len(matrix[0])
+        first_row, first_col = False, False
+
+        for i in range(n):
+            for j in range(m):
                 if matrix[i][j] == 0:
-                    rows[i] = True
-                    cols[j] = True
+                    matrix[0][j] = 0
+                    matrix[i][0] = 0
+                    if i == 0:
+                        first_row = True
+                    if j == 0:
+                        first_col = True
 
-        for i in range(len(matrix)):
-            for j in range(len(matrix[i])):
-                if i in rows or j in cols:
-                    matrix[i][j] = 0</code></pre>
+        print(matrix)
+
+        for i in range(1, n):
+            for j in range(1, m):
+                if matrix[i][0] == 0 or matrix[0][j] == 0:
+                    matrix[i][j] = 0
+
+        if first_row:
+            for j in range(1, m):
+                matrix[0][j] = 0
+
+        if first_col:
+            for i in range(1, n):
+                matrix[i][0] = 0</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/set-matrix-zeroes">73. Set Matrix Zeroes</a>
+    Reference: <a href="https://leetcode.com/problems/set-matrix-zeroes">73. Set Matrix Zeroes</a> | <a href="https://neetcode.io/problems/set-zeroes-in-matrix">Set Matrix Zeroes</a>
   </div>
 </div>
 
