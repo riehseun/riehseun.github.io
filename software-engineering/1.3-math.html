@@ -46,6 +46,8 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#math-">Reverse Integer</a></li>
       <li><a href="#math-">Palindrome Number</a></li>
+      <li><a href="#math-">Pow(x, n)</a></li>
+      <li><a href="#math-">Plus One</a></li>
       <li><a href="#math-">Happy Number</a></li>
       <li><a href="#math-">Add Strings</a></li>
       <li><a href="#math-">Car Fleet</a></li>      
@@ -124,18 +126,17 @@
   <div class="card-body">
     <h2 class="card-title">Pow(x, n) (M)</h2>
 
-<pre><code class="python">class Solution:
-    def myPow(self, x: float, n: int) -> float:
-
-        # Ex. 2 ** 10
+<pre><code class="python"># Ex. 2 ** 10
         #     = (2*2) ** 5
-        #.    = 4 ** 5
-        #.    = 4 * (4 ** 4)
-        #.    = 4 * (4*4) ** 2
-        #.    = 4 * (16 ** 2)
+        #     = 4 ** 5
+        #     = 4 * (4 ** 4)
+        #     = 4 * (4*4) ** 2
+        #     = 4 * (16 ** 2)
         #     = 4 * (16*16) ** 1  
         # If n is even, convert to (x*x) ** (n/2)
         # If n is odd, convert to x * (x ** (n-1)) and multiply x to result
+        # Time O(n) n is divided by half in every two iteration
+        # Space O(1)
 
         result = 1
 
@@ -144,9 +145,6 @@
             negative = True
             n = -n
 
-        # Time O(n)
-        #   n is divided by half
-        # Space O(1)
         while n > 0:
 
             if n % 2 == 0:
@@ -158,10 +156,43 @@
 
         if negative:
             return 1/result
+            
         return result</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/powx-n">50. Pow(x, n)</a>
+    Reference: <a href="https://leetcode.com/problems/powx-n">50. Pow(x, n)</a> | <a href="https://neetcode.io/problems/pow-x-n">Pow(x, n)</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="math-">
+  <div class="card-body">
+    <h2 class="card-title">Plus One (E)</h2>
+
+<pre><code class="python">class Solution:
+    def plusOne(self, digits: List[int]) -> List[int]:
+
+        # Add 1 to the last element of array remembering the carry
+        # Time O(n) n = len(digits)
+        # Space O(n) create new array if final carry is 1
+
+        carry = 1
+        
+        for i in range(len(digits)-1, -1, -1):
+            if digits[i] + carry > 9:
+                carry = 1
+                digits[i] = 0
+            else:
+                carry = 0
+                digits[i] += 1
+                break
+
+        if carry == 1:
+            digits = [1] + digits
+            
+        return digits</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/plus-one">66. Plus One</a> | <a href="https://neetcode.io/problems/plus-one">Plus One</a>
   </div>
 </div>
 
@@ -175,10 +206,12 @@
         # When result exists in an array of seen numbers, terminate
         # If 1 is in seen numbers, return True
         # Else, return False
+        # Time O(logn)
+        # Space O(logn) recursion stack
 
         seen = set()
 
-        def next(n):
+        def get_next(n):
 
             r = 0
             for c in str(n):
@@ -186,12 +219,9 @@
 
             return r
 
-        # Time O(logn)
-        # Space O(logn)
-        #   Recursion stack
         while n not in seen:
             seen.add(n)
-            n = next(n)
+            n = get_next(n)
             
         if 1 in seen:
             return True
@@ -199,7 +229,7 @@
         return False</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/happy-number">202. Happy Number</a>
+    Reference: <a href="https://leetcode.com/problems/happy-number">202. Happy Number</a> | <a href="https://neetcode.io/problems/non-cyclical-number">Non-Cyclical Number</a>
   </div>
 </div>
 
