@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="/img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/monokai-sublime.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="/js/jquery.min.js" type="text/javascript"></script>
+<script src="/js/bootstrap.bundle.min.js" type="text/javascript"></script>
+<script src="/js/highlight.pack.js" type="text/javascript"></script>
+<script src="/js/include_html.js" type="text/javascript"></script>
+<script src="/js/mathjax.js" type="text/javascript"></script>
+<script src="/js/site.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<include src="/header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Software Engineering</h1>
+
+<!-- Backtracking BEGIN -->
+<div class="card mb-4" id="backtracking">
+  <div class="card-body">
+    <h2 class="card-title">Backtracking</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#backtracking-">Letter Combinations of a Phone Number</a></li>
+      <li><a href="#backtracking-">Generate Parentheses</a></li>
+      <li><a href="#backtracking-">Combination Sum</a></li>
+      <li><a href="#backtracking-">Combination Sum II</a></li>
+      <li><a href="#backtracking-">Permutations</a></li>
+      <li><a href="#backtracking-">N-Queens</a></li>
+      <li><a href="#backtracking-">Subset</a></li>
+      <li><a href="#backtracking-">Word Search</a></li>
+      <li><a href="#backtracking-">Subsets II</a></li>
+      <li><a href="#backtracking-">Palindrome Partitioning</a></li>
+      <li><a href="#backtracking-">Robot Room Cleaner</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="backtracking-">
+  <div class="card-body">
+    <h2 class="card-title">Letter Combinations of a Phone Number (150)</h2>
+
+<pre><code class="python">class Solution:
+    def letterCombinations(self, digits: str) -> List[str]:
+
+        # Backtracking
+        # At each digit, there are 3 choices
+
+        # Time O(3**n)
+        #   n = len(digits)
+        # Space O(n)
+        #   n is from recursion call stack
+        #   Ignoring space for output
+        map = {
+            "2": "abc",
+            "3": "def",
+            "4": "ghi",
+            "5": "jkl",
+            "6": "mno",
+            "7": "pqrs",
+            "8": "tuv",
+            "9": "wxyz"
+        }
+
+        def backtrack(i, path):
+
+            if i == len(digits):
+                result.append("".join(path))
+                return
+
+            for c in map[digits[i]]:
+               path.append(c)
+               backtrack(i+1, path)
+               path.pop() 
+
+        if len(digits) == 0:
+            return []
+            
+        result = []
+        backtrack(0, [])
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/letter-combinations-of-a-phone-number">17. Letter Combinations of a Phone Number</a> | <a href="https://neetcode.io/problems/combinations-of-a-phone-number">Letter Combinations of a Phone Number</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="backtracking-">
+  <div class="card-body">
+    <h2 class="card-title">Generate Parentheses (150)</h2>
+
+<pre><code class="python">class Solution:
+    def generateParenthesis(self, n: int) -> List[str]:
+        
+        # Backtracking
+        # Number of ( cannot be greater than n
+        # Number of ) cannot excced number of ( at any point 
+        # Generate n * 2 length of string
+
+        # Time O(2n**n)
+        # Space O(n)
+        def backtrack(result, brackets, n, count):
+
+            for c in ["(", ")"]:
+
+                if len(brackets) == n * 2:
+                    result.append("".join(brackets))
+                    return
+
+                if c == ")" and count["("] > count[")"]:
+                    count[")"] += 1
+                    brackets.append(")")
+                    backtrack(result, brackets, n, count)
+                    brackets.pop()  
+                    count[")"] -= 1  
+                if c == "(" and count["("] < n:
+                    count["("] += 1
+                    brackets.append("(")
+                    backtrack(result, brackets, n, count)
+                    brackets.pop()
+                    count["("] -= 1
+            
+        result, count = [], defaultdict(int)
+        backtrack(result, [], n, count)
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/generate-parentheses">22. Generate Parentheses</a> | <a href="https://neetcode.io/problems/generate-parentheses">Generate Parentheses</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="backtracking-">
+  <div class="card-body">
+    <h2 class="card-title">Combination Sum (75/150)</h2>
+
+<pre><code class="python">class Solution:
+    def combinationSum(self, candidates: List[int], target: int) -> List[List[int]]:
+        
+        # Backtracking
+
+        def backtrack(path, j, curr_num):
+
+            # result.append(path[:])
+            # print(f"{sum(path[:])},{path[:]}")
+            if curr_num < 0:
+                return
+            if curr_num == 0:
+                result.append(path[:])
+            
+            for i in range(j, len(candidates)):
+                path.append(candidates[i])
+                backtrack(path, i, curr_num-candidates[i])
+                path.pop()
+
+        result = []
+        backtrack([], 0, target)
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/combination-sum">39. Combination Sum</a> | <a href="https://neetcode.io/problems/combination-target-sum">Combination Sum</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="backtracking-">
+  <div class="card-body">
+    <h2 class="card-title">Combination Sum II (150)</h2>
+
+<pre><code class="python">class Solution:
+    def combinationSum2(self, candidates: List[int], target: int) -> List[List[int]]:
+        
+        # Backtracking
+
+        def backtrack(j, path, curr_num):
+
+            if curr_num < 0:
+                return
+            if curr_num == 0:
+                result.append(path[:]) 
+
+            for i in range(j, len(candidates)):
+                if i > j and candidates[i] == candidates[i-1]:
+                    continue
+                path.append(candidates[i])
+                backtrack(i+1, path, curr_num-candidates[i])
+                path.pop()
+
+        result = []
+        candidates.sort()
+        backtrack(0, [], target)
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/combination-sum-ii">40. Combination Sum II</a> | <a href="https://neetcode.io/problems/combination-target-sum-ii">Combination Sum II</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="backtracking-">
+  <div class="card-body">
+    <h2 class="card-title">Permutations (150)</h2>
+
+<pre><code class="python">class Solution:
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        
+        # Backtracking
+
+        def backtrack(path):
+
+            if len(path) == len(nums):
+                result.append(path[:])
+                return
+
+            for num in nums:
+                if num not in path:
+                    path.append(num)
+                    backtrack(path)
+                    path.pop()
+
+        result = []
+        backtrack([])
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/permutations">46. Permutations</a> | <a href="https://neetcode.io/problems/permutations">Permutations</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="backtracking-">
+  <div class="card-body">
+    <h2 class="card-title">N-Queens (150)</h2>
+
+<pre><code class="python">rows, columns, diags, anti_diags = set(), set(), set(), set()
+
+        def backtrack(i, columns, diags, anti_diags):
+
+            if i == n:
+                new_board = []
+                for row in board:
+                    new_board.append("".join(row))
+                result.append(new_board)
+
+            for j in range(n):
+                if j not in columns \
+                    and i + j not in diags \
+                    and i - j not in anti_diags:
+                    board[i][j] = "Q"
+                    columns.add(j)
+                    diags.add(i+j)
+                    anti_diags.add(i-j)
+                    backtrack(i+1, columns, diags, anti_diags)
+                    board[i][j] = "."
+                    columns.remove(j)
+                    diags.remove(i+j)
+                    anti_diags.remove(i-j)
+
+        board = [["."] * n for _ in range(n)]
+        result = []
+        backtrack(0, columns, diags, anti_diags)
+        return result
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/n-queens">51. N-Queens</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="binary-">
+  <div class="card-body">
+    <h2 class="card-title">Subsets (150)</h2>
+
+<pre><code class="python">class Solution:
+    def subsets(self, nums: List[int]) -> List[List[int]]:
+
+        # Backtracking
+        #   j is the index of first element to add to current combination
+
+        # Time O(n*(2**n))
+        #   n = len(nums)
+        # Space O(n)
+        def backtrack(j, path):
+
+            result.append(path[:])
+
+            for i in range(j, len(nums)):
+                path.append(nums[i])
+                backtrack(i+1, path)
+                path.pop()
+
+        result = []
+        backtrack(0, [])
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/subsets">78. Subsets</a> | <a href="https://neetcode.io/problems/subsets">Subsets</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="backtracking-">
+  <div class="card-body">
+    <h2 class="card-title">Word Search (75/150)</h2>
+
+<pre><code class="python">cclass Solution:
+    def exist(self, board: List[List[str]], word: str) -> bool:
+
+        # Backtracking
+
+        n, m = len(board), len(board[0])
+
+        def backtrack(i, j, k):
+            
+            if k == len(word) - 1:
+                print(f"{k},{word[k]}")
+                result.append(True)
+                return
+
+            c = board[i][j]
+            dirs = [(-1,0),(1,0),(0,-1),(0,1)]
+            board[i][j] = "#"
+            
+            for x, y in dirs:
+                if 0 <= i + x < n \
+                    and 0 <= j + y < m \
+                    and board[i+x][j+y] == word[k+1]:
+                    backtrack(i+x, j+y, k+1)
+            board[i][j] = c
+
+        result = []
+        for i in range(n):
+            for j in range(m):
+                if board[i][j] == word[0]:
+                    print(f"start: {word[0]}")
+                    backtrack(i, j, 0)
+
+        if True in result:
+            return True
+        return False</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/word-search">79. Word Search</a> | <a href="https://neetcode.io/problems/search-for-word">Word Search</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="binary-">
+  <div class="card-body">
+    <h2 class="card-title">Subsets II (150)</h2>
+
+<pre><code class="python">class Solution:
+    def subsetsWithDup(self, nums: List[int]) -> List[List[int]]:
+        
+        # Backtracking
+
+        def backtrack(j, path):
+
+            result.append(path[:])
+
+            for i in range(j, len(nums)):
+                if i > j and nums[i] == nums[i-1]:
+                    continue
+                path.append(nums[i])
+                backtrack(i+1, path)
+                path.pop()
+
+        result = []
+        nums.sort()
+        backtrack(0, [])
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/subsets-ii">90. Subsets II</a> | <a href="https://neetcode.io/problems/subsets-ii">Subsets II</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="binary-">
+  <div class="card-body">
+    <h2 class="card-title">Palindrome Partitioning (150)</h2>
+
+<pre><code class="python">class Solution:
+    def partition(self, s: str) -> List[List[str]]:
+
+        # Backtracking
+        #   For every possible substring, check palindrome
+
+        # Time O(n*(2**n))
+        #   n = len(s)
+        #   O(n) to check if substring is palindrom
+        #   O(2**n) possible substrings
+        # Space O(n)
+        #   Recursion stack
+        def backtrack(j, path):
+
+            if j == len(s):
+                result.append(path[:])
+
+            for i in range(j, len(s)):
+                if s[j:i+1] == s[j:i+1][::-1]:
+                    path.append(s[j:i+1])
+                    # After appending substring s[i:j+1],
+                    # Start scannign from index j + 1
+                    backtrack(i+1, path)
+                    path.pop()
+
+        result = []
+        backtrack(0, [])
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/palindrome-partitioning">131. Palindrome Partitioning</a> | <a href="https://neetcode.io/problems/palindrome-partitioning">Palindrome Partitioning</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="backtracking-">
+  <div class="card-body">
+    <h2 class="card-title">Robot Room Cleaner (H)</h2>
+
+<pre><code class="python"># """
+# This is the robot's control interface.
+# You should not implement it, or speculate about its implementation
+# """
+#class Robot:
+#    def move(self):
+#        """
+#        Returns true if the cell in front is open and robot moves into the cell.
+#        Returns false if the cell in front is blocked and robot stays in the current cell.
+#        :rtype bool
+#        """
+#
+#    def turnLeft(self):
+#        """
+#        Robot will stay in the same cell after calling turnLeft/turnRight.
+#        Each turn will be 90 degrees.
+#        :rtype void
+#        """
+#
+#    def turnRight(self):
+#        """
+#        Robot will stay in the same cell after calling turnLeft/turnRight.
+#        Each turn will be 90 degrees.
+#        :rtype void
+#        """
+#
+#    def clean(self):
+#        """
+#        Clean the current cell.
+#        :rtype void
+#        """
+
+class Solution:
+    def cleanRoom(self, robot):
+        """
+        :type robot: Robot
+        :rtype: None
+        """
+
+        # Backtracking
+        # Always turn right
+        # Consider visited cell as obstacle
+        # Explore up, right, down, left in order
+        #   if no obstacle
+        #     Move
+        #     Explore the next cell
+        #     Backtrack 
+        #   Else
+        #     Turn right    
+
+        # Up, down, right, left
+        dirs = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+        visited = set()
+
+        def move_back():
+            robot.turnRight()
+            robot.turnRight()
+            robot.move()
+            robot.turnRight()
+            robot.turnRight()
+
+        # Time O(n-m)
+        #   n = number of cells
+        #   m = number of obstacles
+        # Space O(n-m)
+        def backtrack(p, d):
+
+            visited.add(p)
+            # Clean the current cell
+            robot.clean()
+
+            # Explore up, right, down, left in order
+            # Let up = 0, right = 1, down = 2, left = 3
+            for i in range(4):
+                new_d = (d+i) % 4
+                new_p = (p[0]+dirs[new_d][0], p[1]+dirs[new_d][1])
+                
+                # If no obstacle, move and explore the next cell
+                if new_p not in visited and robot.move():
+                    backtrack(new_p, new_d)
+                    move_back()
+                robot.turnRight()
+
+        # Initial direction of the robot will be facing up
+        backtrack((0, 0), 0)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/robot-room-cleaner">489. Robot Room Cleaner</a>
+  </div>
+</div>
+<!-- Backtracking END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="/img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/monokai-sublime.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="/js/jquery.min.js" type="text/javascript"></script>
+<script src="/js/bootstrap.bundle.min.js" type="text/javascript"></script>
+<script src="/js/highlight.pack.js" type="text/javascript"></script>
+<script src="/js/include_html.js" type="text/javascript"></script>
+<script src="/js/mathjax.js" type="text/javascript"></script>
+<script src="/js/site.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<include src="/header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Software Engineering</h1>
+
+<!-- Monitonic queue BEGIN -->
+<div class="card mb-4" id="monotonic-queue">
+  <div class="card-body">
+    <h2 class="card-title">Monitonic queue</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#monotonic-queue-">Sliding Window Maximum</a></li>
+  </div>
+</div>
+
+<div class="card mb-4" id="monotonic-queue-">
+  <div class="card-body">
+    <h2 class="card-title">Sliding Window Maximum (150)</h2>
+
+<pre><code class="python">class Solution:
+    def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
+        
+        # Use a queue of size k
+        # Enqueue incoming number in queue
+        # Deque outgoing number in queue if size is exceeded
+        #   Keep maximum number in front by
+        #   removing all numbers smaller than incoming number
+        #   from the end
+        
+        # Ex. [1,2,1,-1,4,2,6]
+        # [1,2,1] => [2,1]
+        # [2,1,-1]  
+        # [2,1,-1,4] => [4]
+        # [4,2] 
+        # [4,2,6] => [6]
+
+        queue, result = deque(), []
+
+        for i in range(k):
+            while queue and nums[queue[-1]] < nums[i]:
+                queue.pop()
+            queue.append(i)
+        result.append(nums[queue[0]])
+        
+        # Time O(n)
+        #   n = len(nums)
+        # Space O(k)
+        for i in range(k, len(nums)):
+            while queue and nums[queue[-1]] < nums[i]:
+                queue.pop()
+            queue.append(i)
+            
+            while queue and queue[0] <= i - k:
+                queue.popleft()
+            result.append(nums[queue[0]])
+
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/sliding-window-maximum">239. Sliding Window Maximum</a> | <a href="https://neetcode.io/problems/sliding-window-maximum">Sliding Window Maximum</a>
+  </div>
+</div>
+<!-- Monitonic queue END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+</html>

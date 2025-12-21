@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="/img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/monokai-sublime.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="/js/jquery.min.js" type="text/javascript"></script>
+<script src="/js/bootstrap.bundle.min.js" type="text/javascript"></script>
+<script src="/js/highlight.pack.js" type="text/javascript"></script>
+<script src="/js/include_html.js" type="text/javascript"></script>
+<script src="/js/mathjax.js" type="text/javascript"></script>
+<script src="/js/site.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<include src="/header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Software Engineering</h1>
+
+<!-- Linked list BEGIN -->
+<div class="card mb-4" id="linked-list">
+  <div class="card-body">
+    <h2 class="card-title">Linked list</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#linked-list-">Add Two Numbers</a></li>
+      <li><a href="#linked-list-">Remove Nth Node From End of List</a></li>
+      <li><a href="#linked-list-">Merge Two Sorted Lists</a></li>
+      <li><a href="#linked-list-">Merge k Sorted Lists</a></li>
+      <li><a href="#linked-list-">Reverse Nodes in k-Group
+      <li><a href="#linked-list-">Copy List with Random Pointer</a></li>
+      <li><a href="#linked-list-">Linked List Cycle</a></li>
+      <li><a href="#linked-list-">Reorder List</a></li>
+      <li><a href="#linked-list-">Reverse Linked List</a></li>
+      <li><a href="#linked-list-">Find the Duplicate Number</a></li>
+      <li><a href="#linked-list-">Insert into a Sorted Circular Linked List</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="linked-list-">
+  <div class="card-body">
+    <h2 class="card-title">Add Two Numbers (150)</h2>
+
+<pre><code class="python"># Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:
+        
+        # Add numbers while remembering the carry
+
+        carry, prev, dummy_head = 0, None, None
+        
+        # Time O(n)
+        #   n = max length of l1 and l2
+        # Space O(1)
+        while l1 or l2:
+
+            v3 = carry
+            if l1:
+                v3 += l1.val
+                l1 = l1.next
+            if l2:
+                v3 += l2.val
+                l2 = l2.next
+            
+            carry = 1 if v3 > 9 else 0
+
+            l3 = ListNode(v3%10)
+            if prev:
+                prev.next = l3
+                prev = l3
+            else:
+                prev = l3
+                dummy_head = prev
+                
+        if carry == 1:
+            prev.next = ListNode(1)
+
+        return dummy_head</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/add-two-numbers">2. Add Two Numbers</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="linked-list-">
+  <div class="card-body">
+    <h2 class="card-title">Remove Nth Node From End of List (75/150)</h2>
+
+<pre><code class="python"># Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def removeNthFromEnd(self, head: Optional[ListNode], n: int) -> Optional[ListNode]:
+
+        # Find length of LL
+        # nth node is length - n
+        # Use "dummy_head" to deal with null cases
+
+        dummy_head = ListNode()
+        dummy_head.next = head
+        node, length = dummy_head, 0
+        
+        # Time O(n) 
+        #   n = lenght of linked list
+        # Space O(1)
+        while node:
+            node = node.next
+            length += 1
+
+        node = dummy_head
+        
+        while length - n > 1:
+            node = node.next
+            n += 1
+
+        node.next = node.next.next
+
+        return dummy_head.next</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/remove-nth-node-from-end-of-list">19. Remove Nth Node From End of List</a> | <a href="https://neetcode.io/problems/remove-node-from-end-of-linked-list">Remove Node From End of Linked List</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="linked-list-">
+  <div class="card-body">
+    <h2 class="card-title">Merge Two Sorted Lists (75/150)</h2>
+
+<pre><code class="python"># Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def mergeTwoLists(self, list1: Optional[ListNode], list2: Optional[ListNode]) -> Optional[ListNode]:
+
+        # Compare value of each node
+        # If val1 > val2:
+        #   head.next = val2
+        #   val1 = val1.next
+        # head = head.next
+
+        head = ListNode()
+        dummy_head = head
+
+        # Time O(n+m) 
+        #   n = length of list1
+        #   m = length of list2
+        # Space O(1) 
+        while list1 and list2:
+
+            if list1.val > list2.val:
+                head.next = list2
+                list2 = list2.next
+            else:
+                head.next = list1
+                list1 = list1.next
+            head = head.next
+
+        if list1:
+            head.next = list1
+
+        if list2:
+            head.next = list2
+
+        return dummy_head.next</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    <a href="https://leetcode.com/problems/merge-two-sorted-lists">21. Merge Two Sorted Lists</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="linked-list-">
+  <div class="card-body">
+    <h2 class="card-title">Merge k Sorted Lists (75/150)</h2>
+
+<pre><code class="python"># Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def mergeKLists(self, lists: List[Optional[ListNode]]) -> Optional[ListNode]:
+
+        # Merge two LL at a time
+        # Repeat until there is only one LL
+
+        def merge(l1, l2):
+            
+            head = dummy_head = ListNode()
+
+            while l1 and l2:
+                if l1.val < l2.val:
+                    head.next = l1
+                    l1 = l1.next
+                else:
+                    head.next = l2
+                    l2 = l2.next
+                head = head.next
+
+            if l1:
+                head.next = l1
+            if l2:
+                head.next = l2
+
+            return dummy_head.next
+            
+        # Time O(nlogk)
+        #   n = total number of nodes in all linked lists
+        #   k = number of linked lists
+        # Space O(1)
+        i, n = 1, len(lists)
+        while i < n:
+            for j in range(0, n-i, i*2):
+                lists[j] = merge(lists[j], lists[j+i])
+            i *= 2
+
+        if n <= 0:
+            return None
+
+        return lists[0]</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/merge-k-sorted-lists">23. Merge k Sorted Lists</a> | <a href="https://neetcode.io/problems/merge-k-sorted-linked-lists">Merge K Sorted Linked Lists</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="linked-list-">
+  <div class="card-body">
+    <h2 class="card-title">Reverse Nodes in k-Group (150)</h2>
+
+<pre><code class="python"># Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def reverseKGroup(self, head: Optional[ListNode], k: int) -> Optional[ListNode]:
+
+        # Move k nodes and reverse
+
+        if k == 1:
+            return head
+
+        def reverse(node, current_node):
+
+            prev = start = end = None
+
+            while node:
+
+                if not prev:
+                    end = node
+
+                next_node = node.next
+                node.next = prev
+                prev = node
+                node = next_node
+
+                if node == current_node:
+                    start = prev
+                    break
+
+            return start, end
+
+        dummy_node = node = head
+        start1 = end1 = start2 = end2 = None
+        count = k
+
+        # Time O(kn)
+        #   n = length of LL
+        # Space O(1)
+        while node:
+            count -= 1
+            node = node.next
+
+            if count == 0:
+                start2, end2 = reverse(dummy_node, node)
+                if not start1 and not end1:
+                    start1 = start2
+                    end1 = end2
+                else:
+                    end1.next = start2
+                    end1 = end2
+                dummy_node = node
+                count = k
+        
+        end2.next = dummy_node
+        return start1</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/reverse-nodes-in-k-group">25. Reverse Nodes in k-Group</a> | <a href="https://neetcode.io/problems/reverse-nodes-in-k-group">Reverse Nodes in K-Group</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="linked-list-">
+  <div class="card-body">
+    <h2 class="card-title">Copy List with Random Pointer (150)</h2>
+
+<pre><code class="python">"""
+# Definition for a Node.
+class Node:
+    def __init__(self, x: int, next: 'Node' = None, random: 'Node' = None):
+        self.val = int(x)
+        self.next = next
+        self.random = random
+"""
+
+class Solution:
+    def copyRandomList(self, head: 'Optional[Node]') -> 'Optional[Node]':
+
+        # Create new nodes after each node in original LL
+        # Set
+        #   new_node.next = node.next
+        #   node.next = new_node
+        # Then, iterate newly modified LL
+        #   node.next.random = node.random.next
+        # Then, remove links from original LL
+        #   node.next = node.next.next
+        #   node = node.next
+
+        # Time O(n)
+        #   n = number of nodes in LL
+        # Space O(1)
+        node = head
+        while node:
+            new_node = Node(node.val)
+            new_node.next = node.next
+            node.next = new_node
+            node = node.next.next
+
+        node = head
+        while node:
+            if node.random:
+                node.next.random = node.random.next
+            node = node.next.next
+
+        node, node_copy = head, None
+        while node and node.next:
+            if not node_copy:
+                node_copy = node.next
+            next_node = node.next
+            node.next = node.next.next
+            node = next_node
+
+        return node_copy</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/copy-list-with-random-pointer">138. Copy List with Random Pointer</a> | <a href="https://neetcode.io/problems/copy-linked-list-with-random-pointer">Copy Linked List with Random Pointer</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="linked-list-">
+  <div class="card-body">
+    <h2 class="card-title">Linked List Cycle (75/150)</h2>
+
+<pre><code class="python"># Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def hasCycle(self, head: Optional[ListNode]) -> bool:
+        
+        # Two pointers - slow and fast pointer
+        # slow = slow.next
+        # fast = fast.next.next
+
+        if not head:
+            return False
+
+        slow, fast = head, head.next
+
+        # Time O(n)
+        #   n = number of nodes in LL
+        # Space O(1)
+        while slow != fast:
+            if not fast or not fast.next:
+                return False
+            slow = slow.next
+            fast = fast.next.next
+
+        return True</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/linked-list-cycle">141. Linked List Cycle</a> | <a href="https://neetcode.io/problems/linked-list-cycle-detection">Linked List Cycle Detection</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="linked-list-">
+  <div class="card-body">
+    <h2 class="card-title">Reorder List (75/150)</h2>
+
+<pre><code class="python"># Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def reorderList(self, head: Optional[ListNode]) -> None:
+        """
+        Do not return anything, modify head in-place instead.
+        """
+
+        # Find middle of LL
+        # Reverse second half of LL
+        # Take nodes from first and second half one by one
+        # Ex. [0,1,2,3,4,5,6] => 
+        #     [0,1,2,3], [6,5,4] => 
+        #     [0,6,1,5,2,4,3]
+
+        slow, fast = head, head
+
+        # Middle node will be "slow" pointer
+        while fast and fast.next:
+            slow = slow.next
+            fast = fast.next.next
+
+        # Reverse second half
+        prev, node = None, slow
+        while node:
+            next_node = node.next
+            node.next = prev
+            prev = node
+            node = next_node
+
+        # Time O(n)
+        #   n = length of LL
+        # Space O(1)
+        while prev.next:
+            
+            head_next = head.next
+            head.next = prev
+            head = head_next
+
+            prev_next = prev.next
+            prev.next = head
+            prev = prev_next</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/reorder-list">143. Reorder List</a> | <a href="https://neetcode.io/problems/reorder-linked-list">Reorder Linked List</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="linked-list-">
+  <div class="card-body">
+    <h2 class="card-title">Reverse Linked List (75/150)</h2>
+
+<pre><code class="python"># Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+
+class Solution:
+    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+
+        # Traverse LL
+        # Revese the pointer 
+        #   node.next = prev
+
+        node, prev = head, None
+
+        # Time O(n)
+        #   n = number of nodes in LL
+        # Space O(1)
+        while node:
+
+            next_node = node.next
+            node.next = prev
+            prev = node
+            node = next_node
+
+        return prev</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/reverse-linked-list">206. Reverse Linked List</a> | <a href="https://neetcode.io/problems/reverse-a-linked-list">Reverse Linked List</a> 
+  </div>
+</div>
+
+<div class="card mb-4" id="linked-list-">
+  <div class="card-body">
+    <h2 class="card-title">Find the Duplicate Number (150)</h2>
+
+<pre><code class="python">class Solution:
+    def findDuplicate(self, nums: List[int]) -> int:
+        
+        # If there is no duplicate number, there should be
+        # 1-to-1 mapping between index and value
+        # Because there is duplicate number, more than two indexes
+        # map to same value, which creates a cycle
+        # How to find entrance to cycle?
+        #   When slow and fast pointers crash,
+        #   Move slow to the beginning,
+        #   And move slow and fast under the same speed  
+
+        slow, fast = nums[0], nums[0]
+
+        # Time O(n)
+        #   n = len(nums)
+        # Space O(1)
+        while True:
+            slow = nums[slow]
+            fast = nums[nums[fast]]
+            if slow == fast:
+                break
+
+        slow = nums[0]
+        while slow != fast:
+            slow = nums[slow]
+            fast = nums[fast]
+
+        return slow</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/find-the-duplicate-number">287. Find the Duplicate Number</a> | <a href="https://neetcode.io/problems/find-duplicate-integer">Find the Duplicate Number</a> 
+  </div>
+</div>
+
+<div class="card mb-4" id="linked-list-">
+  <div class="card-body">
+    <h2 class="card-title">Insert into a Sorted Circular Linked List (M)</h2>
+
+<pre><code class="python">"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val=None, next=None):
+        self.val = val
+        self.next = next
+"""
+
+class Solution:
+    def insert(self, head: 'Optional[Node]', insertVal: int) -> 'Node':
+
+        # Traverse linked list and find insertion point
+        # If linked list is increasing in value
+        #   node.val <= insertVal <= node.next.val
+        # If linked list is decreasing in value, 
+        # meaning node is at the end of linked list
+        #   node.val <= insertVal or node.next.val >= insertVal
+
+        # When there is no linked list, 
+        # just create node with insertVal and return
+        if not head:
+            head = Node(insertVal)
+            head.next = head
+            return head
+
+        node = head
+
+        # Time O(n) 
+        #   n = number of node in linked list
+        # Space O(1)
+        while node.next != head:
+            
+            # If increasing
+            if node.val <= node.next.val:
+                if node.val <= insertVal <= node.next.val:
+                    break
+            # If decreasing
+            else:
+                if node.val <= insertVal or insertVal <= node.next.val:
+                    break
+
+            node = node.next
+
+        next_node = node.next
+        node.next = Node(insertVal)
+        node.next.next = next_node
+
+        return head</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/insert-into-a-sorted-circular-linked-list">708. Insert into a Sorted Circular Linked List</a>
+  </div>
+</div>
+<!-- Linked list END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+</html>

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="/img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/monokai-sublime.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="/js/jquery.min.js" type="text/javascript"></script>
+<script src="/js/bootstrap.bundle.min.js" type="text/javascript"></script>
+<script src="/js/highlight.pack.js" type="text/javascript"></script>
+<script src="/js/include_html.js" type="text/javascript"></script>
+<script src="/js/mathjax.js" type="text/javascript"></script>
+<script src="/js/site.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<include src="/header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Software Engineering</h1>
+
+<!-- Interval BEGIN -->
+<div class="card mb-4" id="interval">
+  <div class="card-body">
+    <h2 class="card-title">Iterval</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#interval-">Merge Interval</a></li>
+      <li><a href="#interval-">Insert Interval</a></li>
+      <li><a href="#interval-">Meeting Rooms</a></li>
+      <li><a href="#interval-">Meeting Rooms II</a></li>
+      <li><a href="#interval-">Non-overlapping Intervals</a></li>
+      <li><a href="#interval-">Partition Labels</a></li>
+      <li><a href="#interval-">Interval List Intersections</a></li>
+      <li><a href="#interval-">Minimum Interval to Include Each Query</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="interval-">
+  <div class="card-body">
+    <h2 class="card-title">Merge Interval (75/150)</h2>
+
+<pre><code class="python">class Solution:
+    def merge(self, intervals: List[List[int]]) -> List[List[int]]:
+
+        # intervals = [[0,1],[1,2]] => [0,2]
+        # intervals = [[0,1]] => [0,1]
+
+        # Take first interval into result
+        # Compre first interval with second interval
+        #   If overlap, merge and put it in result
+        #   Else, move to next interval
+        # Need to sort by start time
+        # Time O(nlogn) n = len(intervals)
+        # Space O(n)
+
+        intervals.sort(key=lambda x: x[0])
+        result = []
+        result.append(intervals[0])
+
+        for c, d in intervals[1:]:
+            a, b = result[-1]
+            if b >= c:
+                result.pop()
+                result.append([min(a,c),max(b,d)])
+            else:
+                result.append([c,d])
+            
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/intervals">56. Merge Intervals</a> | <a href="https://neetcode.io/problems/intervals">Merge Intervals</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="interval-">
+  <div class="card-body">
+    <h2 class="card-title">Insert Interval (75/150)</h2>
+
+<pre><code class="python">class Solution:
+    def insert(self, intervals: List[List[int]], newInterval: List[int]) -> List[List[int]]:
+
+        # intervals = [[0,1],[2,3]], new = [1,2] => [0,3]
+        # intervals = [[1,2],[3,4]], new = [0,5] => [0,5]
+        # intervals = [[0,1],[9,10]], new = [4,5] => [[0,1],[4,5],[[9,10]]
+
+        # Compare each interval with newInterval
+        # If overlap, merge it and put it in result
+        #   Compare last item in result with next interval
+        # Else, put it in interval
+        # Time O(n) n = len(intervals)
+        # Space O(n)
+
+        if not intervals:
+            return [newInterval]
+
+        result = []
+        result.append(newInterval)
+
+        while intervals:
+            a, b = result.pop()
+            c, d = intervals.pop(0)
+            if c <= d < a <= b:
+                result.append([c,d])
+                result.append([a,b])
+            elif a <= b < c <= d:
+                result.append([a,b])
+                result.append([c,d])
+            else:
+                result.append([min(a,c), max(b,d)])
+            
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/insert-interval">57. Insert Interval</a> | <a href="https://neetcode.io/problems/insert-new-interval">Insert Interval</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="interval-">
+  <div class="card-body">
+    <h2 class="card-title">Meeting Rooms (75/150)</h2>
+
+<pre><code class="python">class Solution:
+    def canAttendMeetings(self, intervals: List[List[int]]) -> bool:
+        
+        # intervals = [(0,1),(1,2)] => True
+        # intervals = [] => True
+
+        # Soft by start time
+        # Check if there is overlap
+        # Time O(nlogn) n = len(intervals)
+        # Space O(1)
+
+        if not intervals:
+            return True
+
+        intervals.sort(key=lambda x: x[0])
+        result = []
+        result.append(intervals[0])
+
+        for c, d in intervals[1:]:
+            a, b = result[-1]
+            if b > c:
+                return False
+            else:
+                result.pop()
+                result.append([c,d])
+
+        return True</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/meeting-rooms">252. Meeting Rooms</a> | <a href="https://neetcode.io/problems/meeting-schedule">Meeting Rooms</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="interval-">
+  <div class="card-body">
+    <h2 class="card-title">Meeting Rooms II (75/150)</h2>
+
+<pre><code class="python">class Solution:
+    def minMeetingRooms(self, intervals: List[List[int]]) -> int:
+
+        # intervals = [(0,1),(1,2)] => 1
+        # intervals = [] => 0
+
+        # Soft by start time
+        # Insert first meeting (only ending time) into min heap
+        # If next meeting starts after first meeting, replace first meeting
+        # with second meeting in min heap
+        # Else, insert second meeting into min heap
+        # Time O(nlogn) n = len(intervals)
+        # Space O(n)
+
+        intervals.sort(key=lambda x: x[0])
+        min_heap = []
+        heappush(min_heap, intervals[0][1])
+
+        for interval in intervals[1:]:
+            if min_heap[0] <= interval[0]:
+                heappop(min_heap)
+            heappush(min_heap, interval[1])
+
+        return len(min_heap)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/meeting-rooms-ii">253. Meeting Rooms II</a> | <a href="https://neetcode.io/problems/meeting-schedule-ii">Meeting Rooms II</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="interval-">
+  <div class="card-body">
+    <h2 class="card-title">Non-overlapping Intervals (75/150)</h2>
+
+<pre><code class="python">class Solution:
+    def eraseOverlapIntervals(self, intervals: List[List[int]]) -> int:
+        
+        # intervals = [[1,2], [3,4]] => 0
+        
+        # Sort by start time
+        # Find overlaps, remove interval with larger end time
+        # Time O(nlogn) n = len(intervals)
+        # Space O(1)
+
+        intervals.sort(key=lambda x: x[0])
+        count = 0
+        end = intervals[0][1]
+
+        for c, d in intervals[1:]:
+            if c < end:
+                end = min(end, d)
+                count += 1
+            else:
+                end = d
+            
+        return count</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/non-overlapping-intervals">435. Non-overlapping Intervals</a> | <a href="https://neetcode.io/problems/non-overlapping-intervals">Non overlapping Intervals</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="interval-">
+  <div class="card-body">
+    <h2 class="card-title">Partition Labels (150)</h2>
+
+<pre><code class="python">class Solution:
+    def partitionLabels(self, s: str) -> List[int]:
+
+        # Each letter must be in one group
+        # ["abcd"] => [1,1,1,1]
+        # ["aabcd"] => [2,1,1,1]
+        # ["ababcc"] => [4,2]
+
+        # Consider position of first and last occurence of each letter
+        # Ex. ["ababcc"] => [0,2], [1,3], [4,5]
+        # If merge interval => [0,3] [4,5]
+        # Time O(n) n = len(s), sorting intervals? there are only 26 chars
+        # Space O(n)
+
+        occurences = defaultdict(list)
+
+        for i, c in enumerate(s):
+            if c not in occurences:
+                occurences[c].append(i)
+            else:
+                if len(occurences[c]) == 1:
+                    occurences[c].append(i)
+                elif len(occurences[c]) > 1:
+                    occurences[c][1] = i
+
+        intervals = []
+        for key, val in occurences.items():
+            if len(val) == 1:
+                val = [val[0], val[0]]
+            intervals.append(val)
+
+        intervals.sort(key=lambda x: x[0])
+        result = []
+        result.append(intervals[0])
+
+        for c, d in intervals[1:]:
+            a, b = result[-1]
+            if b >= c:
+                result.pop()
+                result.append([min(a,c),max(b,d)])
+            else:
+                result.append([c,d])
+        
+        new_result = []
+        for a,b in result:
+            new_result.append(b-a+1)
+            
+        return new_result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/partition-labels">763. Partition Labels</a> | <a href="https://neetcode.io/problems/partition-labels">Partition Labels</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="interval-">
+  <div class="card-body">
+    <h2 class="card-title">Interval List Intersections (M)</h2>
+
+<pre><code class="python">class Solution:
+    def intervalIntersection(self, firstList: List[List[int]], secondList: List[List[int]]) -> List[List[int]]:
+
+        # Compare A[0] and B[0]
+        # Then, compare either A[0] and B[1] or A[1] and B[0]
+        #   If B[0]'s end > A[0]'s end, compare A[1] and B[0]
+        #   If A[0]'s end > B[0]'s end, compare A[0] and B[1]
+        # [a,b] and [c,d] overlap is 
+        #   [max(a,c), min(b,d)]
+
+        intersections = []
+        i, j = 0, 0
+        n = len(firstList)
+        m = len(secondList)
+
+        # Time O(n+m)
+        #   n = len(firstList)
+        #   m = len(secondList)
+        # Space O(1)
+        #   Ignoring space for result
+        while i < n and j < m:
+            a, b = firstList[i]
+            c, d = secondList[j]
+            if min(b,d) >= max(a,c):
+                intersections.append([max(a,c), min(b,d)])
+            
+            if d > b:
+                i += 1
+            else:
+                j += 1
+
+        return intersections</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/interval-list-intersections">986. Interval List Intersections</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="interval-">
+  <div class="card-body">
+    <h2 class="card-title">Minimum Interval to Include Each Query (150)</h2>
+
+<pre><code class="python">class Solution:
+    def minInterval(self, intervals: List[List[int]], queries: List[int]) -> List[int]:
+        
+        # intervals = [[0,1],[1,3],[3,6]] queries = [1,3,7] => [2,3,-1]
+
+        # Sort intervals
+        # For each q, find all enclosing intervals
+        # Time O(nq) n = len(intervals), q = len(queries)
+
+        # Sort queries and interval
+        # For each query, find enclosing interval
+        #   If c <= q, push to heap by length
+        #   If d <= q, pop from heap
+        # Time O(nlogn+qlogq) n = len(interval), q = len(query)
+        # Space O(n+q) 
+
+        intervals.sort(key=lambda x: x[0])
+        result = {}
+        min_heap = []
+        
+        for q in sorted(queries):
+
+            while intervals and intervals[0][0] <= q:
+                c, d = intervals.pop(0)
+                if d >= q:
+                    heappush(min_heap, [d-c+1, c, d])
+
+            while min_heap and min_heap[0][2] < q:
+                heappop(min_heap)
+
+            if min_heap:
+                result[q] = min_heap[0][0]
+            else:
+                result[q] = -1
+
+        return [result[q] for q in queries]</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/minimum-interval-to-include-each-query">1851. Minimum Interval to Include Each Query</a> | <a href="https://neetcode.io/problems/minimum-interval-including-query">Minimum Interval to Include Each Query</a>
+  </div>
+</div>
+<!-- Interval END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+</html>
