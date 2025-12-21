@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="/img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/monokai-sublime.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="/js/jquery.min.js" type="text/javascript"></script>
+<script src="/js/bootstrap.bundle.min.js" type="text/javascript"></script>
+<script src="/js/highlight.pack.js" type="text/javascript"></script>
+<script src="/js/include_html.js" type="text/javascript"></script>
+<script src="/js/mathjax/tex-chtml.js" type="text/javascript"></script>
+<script src="/js/site.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<include src="/header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Software Engineering</h1>
+
+<!-- Graph BFS BEGIN -->
+<div class="card mb-4" id="graph">
+  <div class="card-body">
+    <h2 class="card-title">Graph BFS</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#graph-bfs-">Word Ladder</a></li>
+      <li><a href="#graph-bfs-">Surrounded Regions</a></li>
+      <li><a href="#graph-bfs-">Number of Islands</a></li>
+      <li><a href="#graph-bfs-">Walls And Gates</a></li>
+      <li><a href="#graph-bfs-">Shortest Distance from All Buildings</a></li>
+      <li><a href="#graph-bfs-">Max Area of Island</a></li>
+      <li><a href="#graph-bfs-">Accounts Merge</a></li>
+      <li><a href="#graph-bfs-">Network Delay Time</a></li>
+      <li><a href="#graph-bfs-">Cheapest Flights Within K Stops</a></li>
+      <li><a href="#graph-bfs-">Shortest Path in Binary Matrix</a></li>
+      <li><a href="#graph-bfs-">The Time When the Network Becomes Idle</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-bfs">
+  <div class="card-body">
+    <h2 class="card-title">Word Ladder (150)</h2>
+
+<pre><code class="python">class Solution:
+    def ladderLength(self, beginWord: str, endWord: str, wordList: List[str]) -> int:
+
+        # b = [], end = [] => invalid input
+        # b = ["cat"], end = ["dog"] => 0
+        # b = ["cat"], end = ["tat"] => 1
+
+        # Create edge bewteen words with 1 chat diff
+        # Represent graph with adjacency list
+        # BFS to compute shortest distance
+        # Time O((n**2)*m) n = len(wordList), m = len(beginWord)
+
+        wordList.append(beginWord)
+        n, graph = len(wordList), defaultdict(list)
+        
+        for i in range(n):
+            for j in range(i+1, n):
+                diff_count = 0
+                for a, b in zip(wordList[i], wordList[j]):
+                    if a != b:
+                        diff_count += 1
+                        if diff_count > 1:
+                            break
+                if diff_count <= 1:
+                    graph[wordList[i]].append(wordList[j])
+                    graph[wordList[j]].append(wordList[i])
+
+        print(graph)
+
+        queue, explored = deque(), set()
+        queue.append((beginWord,0))
+        explored.add(endWord)
+
+        while queue:
+            node, dist = queue.popleft()
+            for next_node in graph[node]:
+                if next_node == endWord:
+                    return dist+2
+                if next_node not in explored:
+                    explored.add(next_node)
+                    queue.append((next_node,dist+1))
+
+        return 0</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/word-ladder">127. Word Ladder</a> | <a href="https://neetcode.io/problems/word-ladder">Word Ladder</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-bfs">
+  <div class="card-body">
+    <h2 class="card-title">Surrounded Regions (150)</h2>
+
+<pre><code class="python">class Solution:
+    def solve(self, board: List[List[str]]) -> None:
+        """
+        Do not return anything, modify board in-place instead.
+        """
+
+        # How about 'O' at the edges?
+
+        # board = [] => invalid input
+        # board = ['O'] => ['O']
+        # board = ['X', 'O', 'X'] => ['X', 'O', 'X']
+
+        # At 'O' do BFS
+        # If can't each edge node, convert all explored nodes
+        # to 'X'
+        # Time O(nm) each node is visited once
+        # Space O(nm)
+
+        def bfs(start):
+
+            explored = set()
+            explored.add(start)
+
+            queue = deque()
+            queue.append(start)
+
+            is_edge = False
+        
+            while queue:
+                i, j = queue.popleft()
+                if i == 0 \
+                    or i == n - 1 \
+                    or j == 0 \
+                    or j == m - 1:
+                    is_edge = True
+                
+                dirs = [(-1,0), (1,0), (0,-1), (0,1)]
+                for x, y in dirs:
+                    if 0 <= i + x < n \
+                        and 0 <= j + y < m \
+                        and (i+x, j+y) not in explored \
+                        and board[i+x][j+y] == 'O':
+                        explored.add((i+x, j+y))
+                        queue.append((i+x, j+y))
+
+            if is_edge:
+                return []
+
+            return explored
+
+        n, m = len(board), len(board[0])
+
+        for i in range(n):
+            for j in range(m):
+                if board[i][j] == 'O':
+                    explored = bfs((i,j))
+                    if explored:
+                        for x, y in explored:
+                            board[x][y] = 'X'</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/surrounded-regions">130. Surrounded Regions</a> | <a href="https://neetcode.io/problems/surrounded-regions">Surrounded Regions</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-bfs">
+  <div class="card-body">
+    <h2 class="card-title">Number of Islands (75/150)</h2>
+
+<pre><code class="python">class Solution:
+    def numIslands(self, grid: List[List[str]]) -> int:
+
+        # Is grid a list of list?
+        # Is 0 or 1 string?
+
+        # Test cases
+        # grid = [[1,0,0],[0,1,0],[0,1,1]] => 3
+        # grid = [[0]] => 0
+        # grid = [[1]] => 1 
+
+        # Brute
+        
+        # BFS
+        # Create undirected graph
+        # Create edge between 1
+        # If node is already explored, skip
+        # Time O(nm) n = len(grid), m = len(grid[0])
+        # Space O(nm)
+
+        def bfs(start):
+
+            explored.add(start)
+
+            queue = deque()
+            queue.append(start)
+
+            dirs = [(-1,0), (1,0), (0,-1), (0,1)]
+            while queue:
+                i, j = queue.popleft()
+                for x, y in dirs:
+                    if 0 <= i + x < n \
+                        and 0 <= j + y < m \
+                        and (i+x, j+y) not in explored \
+                        and grid[i+x][j+y] == "1":
+                        explored.add((i+x, j+y))
+                        queue.append((i+x, j+y))
+
+        n, m, num_islands = len(grid), len(grid[0]), 0
+        explored = set()
+        for i in range(n):
+            for j in range(m):
+                if grid[i][j] == "1" \
+                    and (i,j) not in explored:
+                    bfs((i,j))
+                    num_islands += 1
+
+        return num_islands</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/number-of-islands">200. Number of Islands</a> | <a href="https://neetcode.io/problems/count-number-of-islands">Number of Islands</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-bfs">
+  <div class="card-body">
+    <h2 class="card-title">Walls And Gates (150)</h2>
+
+<pre><code class="python">class Solution:
+    def wallsAndGates(self, rooms: List[List[int]]) -> None:
+        """
+        Do not return anything, modify rooms in-place instead.
+        """
+
+        # From each empty cell, run BFS keeping the depth
+        # When hits a gate
+        #   Set the distance to the gate as the depth
+        #   Then, return (BFS guarantees shortest distance)
+
+        # Alternatively, run BFS from each gate
+        # When hits an empty cell,
+        #   Set the value of empty cell as the depth
+        #   If an empty cell sees more than one value, 
+        #   set to the minimum value it has seen 
+
+        # In graph, path only exists between empty cells
+        # and empty cell and gate
+       
+        n = len(rooms)
+        m = len(rooms[0])
+        dirs = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+
+        # Time O(p+q) 
+        #   p = number of nodes = n + m
+        #   q = number of edges (each node can have max 4 edges)
+        # Space O(p)
+        def bfs(rooms, start):
+
+            explored = set()
+            explored.add(start)
+
+            queue = deque()
+            queue.append((start,0))
+
+            while queue:
+                node, depth = queue.popleft()
+                i = node[0]
+                j = node[1]
+
+                for x, y in dirs:
+                    if 0 <= i + x < n \
+                        and 0 <= j + y < m \
+                        and rooms[i+x][j+y] != -1:
+                        next_node = (i+x, j+y)
+
+                        if next_node not in explored \
+                            and rooms[i+x][j+y] != 0 \
+                            and rooms[i+x][j+y] != 1:
+                            explored.add(next_node)
+                            queue.append((next_node, depth+1))
+                            rooms[i+x][j+y] = min(rooms[i+x][j+y], depth+1)
+                            
+        # Time O(k(p+q))
+        #   k = number of gates
+        for i in range(n):
+            for j in range(m):
+                if rooms[i][j] == 0:
+                    bfs(rooms, (i, j))</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/walls-and-gates">286. Walls And Gates</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-bfs-">
+  <div class="card-body">
+    <h2 class="card-title">Shortest Distance from All Buildings (H)</h2>
+
+<pre><code class="python">class Solution:
+    def shortestDistance(self, grid: List[List[int]]) -> int:
+
+        # BFS
+        # Start from a node and compute distance 
+        # to reach all houses
+
+        graph = defaultdict(set)
+        nodes = set()
+        dirs = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+        houses = set()
+        n = len(grid)
+        m = len(grid[0])
+
+        # Save nodes from where all housese cannot be visited
+        bad_nodes = set()
+
+        # Time O(nm)
+        #   n = number of rows
+        #   m = number of columns
+        # Space O(nm)
+        for i in range(n):
+            for j in range(m):
+                # Obstacle
+                if grid[i][j] == 2:
+                    continue
+                # House
+                if grid[i][j] == 1:
+                    houses.add((i,j))
+                    continue
+                # Empty land
+                if grid[i][j] == 0:
+                    nodes.add((i,j))
+                    for x, y in dirs:
+                        if 0 <= i + x < n \
+                            and 0 <= j + y < m \
+                            and grid[i][j] != 2:
+                            graph[(i,j)].add((i+x,j+y))
+
+        # Time O(p+q)
+        #   p = number of nodes = nm
+        #   q = number of edges (each node can have max 4 edges) = mn
+        def bfs(grid, houses, graph, start, bad_nodes):
+
+            explored = set()
+            explored.add(start)
+
+            queue = deque()
+            queue.append((start, 0))
+            
+            total_dist = 0
+            visited_houses = 0
+
+            while queue:
+                node, dist = queue.popleft()
+                if node in bad_nodes:
+                    return 0, 0
+ 
+                if grid[node[0]][node[1]] == 1:
+                    total_dist += dist
+
+                for next_node in graph[node]:
+                    if next_node not in explored:
+                        explored.add(next_node)
+                        queue.append((next_node, dist+1))
+                        if next_node in houses:
+                            visited_houses += 1
+                    
+            return total_dist, visited_houses
+
+        min_dist = math.inf
+
+        # Time O((nm)**2)
+        # Space O(nm)
+        for node in nodes:
+            dist, visited_houses = bfs(grid, houses, graph, node, bad_nodes)
+            if visited_houses < len(houses):
+                bad_nodes.add(node)
+                continue
+            min_dist = min(min_dist, dist)
+
+        if not nodes or min_dist == math.inf:
+            return -1
+        return min_dist</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/shortest-distance-from-all-buildings">317. Shortest Distance from All Buildings</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-bfs">
+  <div class="card-body">
+    <h2 class="card-title">Max Area of Island (150)</h2>
+
+<pre><code class="python">class Solution:
+    def maxAreaOfIsland(self, grid: List[List[int]]) -> int:
+
+        # Is 0 or 1 integer or string?
+        # Is grid a list of list?
+
+        # grid = [[1]] => 1
+        # grid = [[0]] => 0
+        # grid = [] => 0
+
+        # Brute?
+
+        # BFS
+        # Remember explored coordinates
+        # Time O(nm)
+        # Space O(nm)
+
+        def bfs(start):
+
+            explored.add(start)
+
+            queue = deque()
+            queue.append(start)
+
+            area = 0
+
+            dirs = [(-1,0), (1,0), (0,-1), (0,1)]
+            while queue:
+                i, j = queue.popleft()
+                area += 1
+                for x, y in dirs:
+                    if 0 <= i + x < n \
+                        and 0 <= j + y < m \
+                        and (i+x, j+y) not in explored \
+                        and grid[i+x][j+y] == 1:
+                        explored.add((i+x, j+y))
+                        queue.append((i+x, j+y))
+
+            return area
+
+        n, m, max_area = len(grid), len(grid[0]), 0
+        explored = set()
+        for i in range(n):
+            for j in range(m):
+                if grid[i][j] == 1 \
+                    and (i,j) not in explored:
+                    max_area = max(max_area, bfs((i,j)))
+                    
+        return max_area</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/max-area-of-island">695. Max Area of Island</a> | <a href="https://neetcode.io/problems/max-area-of-island">Max Area of Island</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-bfs-">
+  <div class="card-body">
+    <h2 class="card-title">Accounts Merge (M)</h2>
+
+<pre><code class="python">class Solution:
+    def accountsMerge(self, accounts: List[List[str]]) -> List[List[str]]:
+
+        # Construct a graph
+        #   Node is email
+        #   Edge between nodes exists when they belong to same person
+        # Compute connected components
+
+        graph = defaultdict(set)
+        email_to_person = defaultdict(str)
+        emails = set()
+
+        for account in accounts:
+            for i in range(1, len(account)):
+                graph[account[1]]
+                emails.add(account[i])
+                email_to_person[account[i]] = account[0]
+                for j in range(i+1, len(account)):
+                    graph[account[i]].add(account[j])
+                    graph[account[j]].add(account[i])
+
+        # Time max(O(n+m), O(nlogn)) 
+        #   n = number of emails
+        #   m = number of edges betweem emails
+        #   Sorting the output at the end
+        # Space O(n^2)
+        def bfs(graph, explored, start):
+
+            queue = deque()
+            queue.append(start)
+
+            explored.add(start)
+            nodes = set()
+            
+            while queue:
+                node = queue.popleft()
+                nodes.add(node)
+                
+                for next_node in graph[node]:
+                    if next_node not in explored:
+                        explored.add(next_node)
+                        queue.append(next_node)
+                        
+            return nodes
+
+        result = []
+
+        explored = set()
+        for node in emails:
+            if node not in explored:
+                nodes = bfs(graph, explored, node)
+                nodes = list(nodes)
+                person = email_to_person[nodes[0]]
+                nodes.sort()       
+                result.append([person]+nodes)
+
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/accounts-merge">721. Accounts Merge</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-bfs">
+  <div class="card-body">
+    <h2 class="card-title">Network Delay Time (150)</h2>
+
+<pre><code class="python">class Solution:
+    def networkDelayTime(self, times: List[List[int]], n: int, k: int) -> int:
+        
+        # times = [[1,2,1], [1,3,1], n = 2, k = 1 => 1
+        
+        # BFS
+        # For each time, store min time to get to that node
+        # Only move to next_node only if it is cheaper to do so
+        # Time O(n+m) m = len(times)
+        # Space O(n+m)
+
+        duration = defaultdict(int)
+        graph = defaultdict(set)
+        min_costs = [math.inf] * (n+1)
+        min_costs[k] = 0
+
+        for src, det, t in times:
+            graph[src].add(det)
+            duration[(src,det)] = t
+
+        queue = deque()
+        queue.append((k, 0))
+
+        while queue:
+            node, cost = queue.popleft()
+
+            for next_node in graph[node]:
+                if min_costs[next_node] > cost + duration[node, next_node]:
+                    min_costs[next_node] = cost + duration[node, next_node]
+                    queue.append((next_node, min_costs[next_node]))
+
+        min_costs.pop(0)
+        if math.inf in min_costs:
+            return -1
+
+        return max(min_costs)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/network-delay-time">743. Network Delay Time</a> | <a href="https://neetcode.io/problems/network-delay-time">Network Delay Time</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-bfs">
+  <div class="card-body">
+    <h2 class="card-title">Cheapest Flights Within K Stops (150)</h2>
+
+<pre><code class="python">class Solution:
+    def findCheapestPrice(self, n: int, flights: List[List[int]], src: int, dst: int, k: int) -> int:
+
+        # BFS
+        # Time O(n+m) n = number of nodes, m = number of edges
+        # Spae O(n)
+
+        graph = defaultdict(set)
+        for s, d, c in flights:
+            graph[s].add((d,c))
+
+        queue = deque()
+        queue.append((src, 0, 0))
+        costs = [math.inf] * n
+        costs[src] = 0
+
+        while queue:
+            node, curr_cost, depth = queue.popleft()
+            
+            for next_node, cost in graph[node]:
+                if curr_cost + cost < costs[next_node] and depth <= k:
+                    costs[next_node] = curr_cost + cost
+                    queue.append((next_node, costs[next_node], depth+1))
+
+        if costs[dst] == math.inf:
+            return -1
+
+        return costs[dst]</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/cheapest-flights-within-k-stops">787. Cheapest Flights Within K Stops</a> | <a href="https://neetcode.io/problems/cheapest-flight-path">Cheapest Flights Within K Stops</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-bfs">
+  <div class="card-body">
+    <h2 class="card-title">Shortest Path in Binary Matrix (M)</h2>
+
+<pre><code class="python">class Solution:
+    def shortestPathBinaryMatrix(self, grid: List[List[int]]) -> int:
+
+        # Do BFS to compute shortest path
+
+        dirs = [(-1,-1), (-1,0), (-1,1), (0,1), (1,1), (1,0), (1,-1), (0,-1)]
+
+        n = len(grid)
+        if grid[0][0] == 1 or grid[n-1][n-1] == 1:
+            return -1
+
+        start = (0, 0)
+        end = (n-1, n-1)
+        
+        explored = set()
+        explored.add(start)
+
+        queue = deque()
+        queue.append((start, 0))
+
+        # Time O(p+q)
+        #   p = number of nodes = n**2
+        #   q = number of edges = 8*n = n
+        # Space O(p)
+        while queue:
+            node, depth = queue.popleft()
+            if node == end:
+                return depth + 1
+
+            i, j = node[0], node[1]
+            for x, y in dirs:
+                if 0 <= i + x < n \
+                    and 0 <= j + y < n \
+                    and grid[i+x][j+y] == 0:
+                    next_node = (i+x, j+y)
+                    if next_node not in explored:
+                        explored.add(next_node)
+                        queue.append((next_node, depth+1))
+
+        return -1</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/shortest-path-in-binary-matrix">1091. Shortest Path in Binary Matrix</a>
+  </div>
+</div>
+<!-- Graph BFS END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+</html>
