@@ -48,6 +48,7 @@
       <li><a href="#array-">Majority Element</a></li>
       <li><a href="#array-">Rotate Array</a></li>
       <li><a href="#array-">Contains Duplicate</a></li>
+      <li><a href="#array-">Product of Array Except Self</a></li>
       <li><a href="#array-">Intersection of Two Arrays</a></li>
       <li><a href="#array-">Logger Rate Limiter</a></li>
       <li><a href="#array-">Insert Delete GetRandom O(1)</a></li>
@@ -56,6 +57,7 @@
       <li><a href="#array-">Invalid Transactions</a></li>
       <li><a href="#array-">Dot Product of Two Sparse Vectors</a></li>
       <li><a href="#array-">Buildings With an Ocean View</a></li>
+      <li><a href="#array-">Put Marbles in Bags</a></li>
     </ul>
   </div>
 </div>
@@ -201,6 +203,53 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/contains-duplicate">217. Contains Duplicate</a> | <a href="https://neetcode.io/problems/duplicate-integer">Contains Duplicate</a> 
+  </div>
+</div>
+
+<div class="card mb-4" id="array-">
+  <div class="card-body">
+    <h2 class="card-title">Product of Array Except Self (75/150)</h2>
+
+<pre><code class="python">class Solution:
+    def productExceptSelf(self, nums: List[int]) -> List[int]:
+
+        # If there is no zero in array, product is
+        # total product divided by itself
+        # If there is one zero in array, product is 
+        # zero except at the zero element
+        # If there is more than one zero in array,
+        # product is always zero
+
+        num_zeros, prod, prod_except_zero = 0, 1, 1
+        for num in nums:
+            if num == 0:
+                num_zeros += 1
+            else:
+                prod_except_zero *= num
+            prod *= num
+
+        result = []
+
+        # Time O(n)
+        # Space O(1)
+        #.  Ignoring space for result
+        if num_zeros == 0:
+            for num in nums:
+                result.append(prod//num)
+        elif num_zeros == 1:
+            for num in nums:
+                if num != 0:
+                    result.append(0)
+                else:
+                    result.append(prod_except_zero)
+        else:
+            for num in nums:
+                result.append(0)
+
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/product-of-array-except-self">238. Product of Array Except Self</a> | <a href="https://neetcode.io/problems/products-of-array-discluding-self">Products of Array Except Self</a>
   </div>
 </div>
 
@@ -457,6 +506,51 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/buildings-with-an-ocean-view">1762. Buildings With an Ocean View</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="array-">
+  <div class="card-body">
+    <h2 class="card-title">Put Marbles in Bags (H)</h2>
+
+<pre><code class="python">class Solution:
+    def putMarbles(self, weights: List[int], k: int) -> int:
+        
+        # Greedy
+        # There are k-1 splitting points
+        #   Ex. [1,2,3,4,5,6,7,8] k = 3
+        #   If [1,2,3], [4,5], [6,7,8], score is 1+3, 4+5, 6+8
+        # The score is always 
+        #   first num 
+        #   + left and right num of each split
+        #   last num
+        # Compute pair sum for all possible pairs
+        #   Then, find irst k-1 largest pairs
+        #   Then, find irst k-1 smallest pairs
+
+        pair_sums = []
+
+        # Time O(n)
+        #   n = len(weights)
+        # Space O(n)
+        for i in range(len(weights)-1):
+            pair_sums.append(weights[i]+weights[i+1])
+
+        # Time O(nlogn)
+        pair_sums.sort()
+
+        i, j, result = 0, len(pair_sums) - 1, 0
+
+        for _ in range(k-1):
+            result += pair_sums[j]
+            result -= pair_sums[i]
+            i += 1
+            j -= 1
+
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/put-marbles-in-bags">2551. Put Marbles in Bags</a>
   </div>
 </div>
 <!-- Array END -->
