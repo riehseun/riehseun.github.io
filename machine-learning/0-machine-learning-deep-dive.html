@@ -940,51 +940,1363 @@ rmse_test = MSE(y_test, y_pred) ** 0.5</code></pre></li>
 
 <div class="card mb-4" id="machine-learning-">
   <div class="card-body">
-    <h2 class="card-title">Test</h2>
-    
+    <h2 class="card-title">Activation</h2>
+    <ul>
+      <li>Non-linear functions that determine outputs of neurons</li>
+      <li>If activation is linear, \( \hat{y} \) is just linear function of \( x \)</li>
+      <ul>
+        <li>Then, this is just linear regression</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Sigmoid</h3>
+    <ul>
+      <li>Used for binary classification</li>
+      <li>\( \sigma(z) = \dfrac{1}{1+e^{-z}} \)</li>
+      <ul>
+        <li>If \( z \) is large positive, \( \sigma(z) \approx 1 \)</li>
+        <li>If \( z \) is large negative, \( \sigma(z) \approx 0 \)</li>
+      </ul>
+      <li>Normalizes the output between 0 and 1</li>
+      <li>Function flattens at the edges where gradients are close to 0</li>
+      <ul>
+        <li>Lead to vanishing gradient</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Tanh</h3>
+    <ul>
+      <li>\( \text{tanh}(z) \)</li>
+      <li>Similar to sigmoid but ranges between -1 and 1</li>
+    </ul>
+
+    <h3 class="card-title">ReLU</h3>
+    <ul>
+      <li>\( \text{max}(0,z) \)</li>
+      <li>Computationally efficient</li>
+      <li>For all negative inputs, neuron will not activate, and the weights will not update</li>
+      <li>Addresses problem of vanishing gradient</li>
+    </ul>
+
+    <h3 class="card-title">Leaky ReLU</h3>
+    <ul>
+      <li>\( \text{max}(0.01z,z) \)</li>
+      <li>Multiply all negative inputs with a small number</li>
+    </ul>
+
+    <h3 class="card-title">Softmax</h3>
+    <ul>
+      <li>A different type of activation used for multi-class classification</li>
+      <li>Assigns a probability to each class with all of them sum to 1</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: 
+    Reference: <a href="https://www.educative.io/path/become-a-deep-learning-professional">Become a Deep Learning Professional</a>
   </div>
 </div>
 
 <div class="card mb-4" id="machine-learning-">
   <div class="card-body">
-    <h2 class="card-title">Test</h2>
-    
+    <h2 class="card-title">Initialization</h2>
+
+    <h3 class="card-title">Zero initialization</h3>
+    <ul>
+      <li>If all weights are initalized to 0, all hidden units compute the same function due to symmetry</li>
+      <ul>
+        <li>Every neuron in each layer learns the same function</li>
+        <li>Effectively the same thing as setting the number of neurons in each layer to 1</li>
+        <li>As a result, network is no better than logistic regression</li>
+        <li>Bias vectors can be initialized to zero</li>
+      </ul>
+      <li>The weight matrices - \( \textbf{W}^{[1]}, \textbf{W}^{[2]}, \textbf{W}^{[3]} \dots \textbf{W}^{[L-1]}, \textbf{W}^{[L]} \)</li>
+      <li>The bias vectors - \( \textbf{b}^{[1]}, \textbf{b}^{[2]}, \textbf{b}^{[3]} \dots \textbf{b}^{[L-1]}, \textbf{b}^{[L]} \)</li>
+    </ul>
+
+<pre><code class="python">def initialize_parameters_zeros(layers_dims):
+
+    parameters = {}
+    L = len(layers_dims)
+
+    for l in range(1, L):
+        parameters['W' + str(l)] = np.zeros((layers_dims[l], layers_dims[l-1]))
+        parameters['b' + str(l)] = np.zeros((layers_dims[l], 1))
+
+    return parameters</code></pre>
+
+    <h3 class="card-title">Random initialization</h3>
+    <ul>
+      <li>Breaks symmetry by randomly initalizing weights</li>
+      <li>Poor initialization, for exampling randomly initializing weights to large numbers, leads to vanishing/exploding gradient</li>
+    </ul>
+
+<pre><code class="python">def initialize_parameters_random(layers_dims):
+
+    np.random.seed(3)
+    parameters = {}
+    L = len(layers_dims)
+
+    for l in range(1, L):
+        parameters['W' + str(l)] = np.random.randn(layers_dims[l], layers_dims[l-1]) * 10
+        parameters['b' + str(l)] = np.zeros((layers_dims[l], 1))
+
+    return parameters</code></pre>
+
+    <h3 class="card-title">He initialization</h3>
+    <ul>
+      <li>Xavier initialization</li>
+      <ul>
+        <li>\( W \sim U\left[-\dfrac{\sqrt{6}}{\sqrt{n_{j}+n_{j+1}}}, \dfrac{\sqrt{6}}{\sqrt{n_{j}+n_{j+1}}}\right] \)</li>
+        <li>Assume activation function is linear</li>
+        <li>All layers have equal variance</li>
+      </ul>
+      <li>He  initialization</li>
+      <ul>
+        <li>\( W \sim N\left(0, \dfrac{2}{n^{l}}\right) \)</li>
+        <li>Works well with ReLU activation</li>
+        <li>Partially overcomes vanishing/exploding gradient</li>
+      </ul>
+    </ul>
+
+<pre><code class="python">def initialize_parameters_he(layers_dims):
+
+    np.random.seed(3)
+    parameters = {}
+    L = len(layers_dims) - 1
+
+    for l in range(1, L + 1):
+        parameters['W' + str(l)] = np.random.randn(layers_dims[l], layers_dims[l-1]) * np.sqrt(2 / layers_dims[l-1])
+        parameters['b' + str(l)] = np.zeros((layers_dims[l], 1))
+
+    return parameters</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: 
+    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a>
   </div>
 </div>
 
 <div class="card mb-4" id="machine-learning-">
   <div class="card-body">
-    <h2 class="card-title">Test</h2>
-    
+    <h2 class="card-title">Learning rate decay</h2>
+    <ul>
+      <li>An example of adaptive learning rate</li>
+      <li>Helps gradient descent converge by taking smaller steps as it approaches the minimum</li>
+      <li>We want bigger \( \alpha \) in the beginning but smaller \( \alpha \) near the optimum</li>
+      <li>Let <code>decay_rate</code> \( = dr \)</li>
+      <li>Let <code>num_epocs</code> \( = ne \)</li>
+      <li>\( \alpha = \dfrac{1}{dr * ne}\alpha_{0} \)</li>
+    </ul>
+
+    <h3 class="card-title">Learning rate scheduler</h3>
+    <ul>
+      <li>Adjusts the learning rate between epochs or iterations</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: 
+    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a>
   </div>
 </div>
 
 <div class="card mb-4" id="machine-learning-">
   <div class="card-body">
-    <h2 class="card-title">Test</h2>
-    
+    <h2 class="card-title">Normalization</h2>
+    <ul>
+      <li>Normalize input features</li>
+      <li>Apply the same normalization to train and test set</li>
+      <li>If features have very different scale, the cost function will look very elongated. The gradient descent will oscilate a lot before converging</li>
+      <li>If normalize, the contour will look more symmetric. The gradient descent will oscilate less before converging</li>
+      <li>Standarization</li>
+      <ul>
+        <li>\( \mu = \dfrac{1}{m}\displaystyle\sum_{i=1}^{m} x_{i} \)</li>
+        <li>\( \sigma^{2} = \dfrac{1}{m}\displaystyle\sum_{i=1}^{m} x_{i}^{2} \)</li>
+        <li>\( x = \dfrac{x-\mu}{\sigma} \)</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Batch normalization vs layer normalization</h3>
+    <ul>
+      <li>Batch normalization - normalizes each feature within a batch of samples</li>
+      <li>Layer normalization - normalizes all features within each sample</li>
+    </ul>
+
+    <h3 class="card-title">Batch normalization</h3>
+    <ul>
+      <li>Normalize activations in neural network in order to train parameters</li>
+      <li>Normalizing \( \textbf{z} \) is more common than normalizing \( \textbf{a} \)</li>
+      <li>Given some intermediate values \( \textbf{z}_{i} \dots \textbf{z}_{n} \) in layer \( l \)</li>
+      <ul>
+        <li>\( \mu = \dfrac{1}{m}\displaystyle\sum_{i} \textbf{z}_{i} \)</li>
+        <li>\( \sigma^{2} = \dfrac{1}{m}\displaystyle\sum_{i} (\textbf{z}_{i}-\mu)^{2} \)</li>
+        <li>\( \textbf{z}^{norm}_{i} = \dfrac{\textbf{z}_{i}-\mu}{\sqrt{\sigma^{2}+\epsilon}} \)</li>
+        <li>\( \tilde{\textbf{z}}_{i} = \gamma \textbf{z}^{norm}_{i} + \beta \)</li>
+        <ul>
+          <li>Unlike inputs, we do not want activation to have mean \( 0 \) and variance \( 1 \)</li>
+          <li>\( \gamma \) and \( \beta \) are learnable parameters</li>
+        </ul>
+        <li>\( \textbf{X} \xrightarrow{\textbf{W}^{[1]}, \textbf{b}^{[1]}} \textbf{Z}^{[1]} \xrightarrow{\beta^{[1]}, \gamma^{[1]}} \tilde{\textbf{Z}}^{[1]} \rightarrow \textbf{A}^{[1]} = g^{[1]}(\tilde{\textbf{Z}}^{[1]}) \xrightarrow{\textbf{W}^{[2]}, \textbf{b}^{[2]}} \textbf{Z}^{[2]} \xrightarrow{\beta^{[2]}, \gamma^{[2]}} \tilde{\textbf{Z}}^{[2]} \rightarrow \textbf{A}^{[2]} \rightarrow \dots \)</li>
+      </ul>
+      <li>Neural network has additional paramters \( \gamma^{1}, \beta^{1} \dots \gamma^{l}, \beta^{l} \) to train</li>
+      <li>\( \gamma \) and \( \beta \) updated the same way via gradient descent like \( \textbf{W} \) and \( \textbf{b} \)</li>
+      <li>If using batch normalization, \( \textbf{Z}^{[l]} =  \textbf{W}^{[l]}\textbf{A}^{[l-1]} + \textbf{b}^{[l]} =  \textbf{W}^{[l]}\textbf{A}^{[l-1]} \) (We can drop \( \textbf{b} \) from neural network)</li>
+    </ul>
+
+    <h3 class="card-title">Working with min batches</h3>
+    <ul>
+      <li>For \( t = 1 \dots \) num_mini_batches</li>
+      <ul>
+        <li>Compute forward prop on \( \textbf{X}^{\{t\}} \)</li>
+        <ul>
+          <li>In each layer, use batch normalization to replace \( \textbf{z}^{[l]} \) with \( \tilde{\textbf{z}}^{[l]} \)</li>
+        </ul>
+        <li>Use backprop to compute \( \textbf{dW}^{[l]}, d\beta^{[l]}, d\gamma^{[l]} \) (no need for \( db^{[l]} \))</li>
+        <li>Update \( \textbf{W}^{[l]} = \textbf{W}^{[l]} - \alpha \textbf{dW}^{[l]}, \beta^{[l]} = \beta^{[l]} - \alpha d\beta^{[l]}, \gamma^{[l]} = \gamma^{[l]} - \alpha d\gamma^{[l]} \)</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Why batch norm works</h3>
+    <ul>
+      <li>During training, distribution of hidden units changes</li>
+      <li>Batch norm limits the distribution changes</li>
+    </ul>
+
+    <h3 class="card-title">Batch norm at test time</h3>
+    <ul>
+      <li>Unlike during training where a batch of sample is given, there is only one sample at test time</li>
+      <li>For each layer \( l \), remember \( \mu, \sigma \) for each batch. Then, take the exponentially weighted average over all batches for each layer</li>
+    </ul>
+
+    <h3 class="card-title">Batch norm as regularization</h3>
+    <ul>
+      <li>Each mini-batch is scaled by mean/variance computed on just that mini-batch</li>
+      <li>This has slight regularization effect</li>
+      <li>Do not use batch norm as regularization. Use dropout</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: 
+    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a>
   </div>
 </div>
 
 <div class="card mb-4" id="machine-learning-">
   <div class="card-body">
-    <h2 class="card-title">Test</h2>
-    
+    <h2 class="card-title">Optimization</h2>
+
+    <h3 class="card-title">Vanishing/exploding gradients</h3>
+    <ul>
+      <li>Happens in deep neural network</li>
+      <li>If \( \textbf{W}^{[l]} \) is slighly bigger than identity matrix \( \textbf{I} \), gradients will blow up as the number of layers increases</li>
+      <ul>
+        <li>For example, \( 1.1^{L} \)</li>
+      </ul>
+      <li>If \( \textbf{W}^{[l]} \) is slighly smaller than identity matrix \( \textbf{I} \), gradients will diminish as the number of layers increases</li>
+      <ul>
+        <li>For example, \( 0.9^{L} \)</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Gradient checking</h3>
+    <ul>
+      <li>Take \( \textbf{W}^{[1]}, \textbf{b}^{[1]} \dots \textbf{W}^{[L]}, \textbf{b}^{[L]} \) and reshape into a big vector \( \theta \)</li>
+      <li>Take \( \textbf{dW}^{[1]}, \textbf{db}^{[1]} \dots \textbf{dW}^{[L]}, \textbf{db}^{[L]} \) and reshape into a big vector \( d\theta \)</li>
+      <li>For each \( i \)</li>
+      <ul>
+        <li>\( d\theta_{approx} = \dfrac{J(\theta_{1} \dots \theta_{i} + \epsilon) - J(\theta_{1} \dots \theta_{i} - \epsilon)}{2\theta} \approx \dfrac{\partial J}{\partial \theta_{i}} \) where \( \epsilon = 10^{-7} \) and compare it against \( d\theta_{i} \)</li>
+        <li>\( \dfrac{||d\theta_{approx}-d\theta||_{2}}{||d\theta_{approx}||_{2} + ||d\theta||_{2}} \approx 10^{-7} \) is good</li>
+        <li>Bigger than \( 10^{-3} \) means something wrong</li>
+      </ul>
+      <li>Do not use gradient checking during training, only use it when debugging</li>
+      <li>Include regularization term in \( d\theta \) calculation</li>
+      <li>Gradient checking does not work with dropout</li>
+      <ul>
+        <li>Can do gradient checking with <code>keep_prop=1.0</code>, then later turn on dropout</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Gradient clipping</h3>
+    <ul>
+      <li>If gradient is more than a threshold value, set it to the threshold value</li>
+      <li>Prevents the exploding gradient</li>
+    </ul>
+
+    <h3 class="card-title">Gradient descent</h3>
+    <ul>
+      <li>Find values of parameters of function that minimize a cost function</li>
+      <li>Used when parameters cannot be calculated analytically</li>
+      <li>Take negative of gradients of a function at a point</li>
+      <li>Repeatedly update that point until reaching an optimal point</li>
+      <li>Error</li>
+      <ul>
+        <li>Difference between actual and predicted</li>
+      </ul>
+      <li>Loss</li>
+      <ul>
+        <li>Some aggregation of errors</li>
+      </ul>
+      <li>Learning rate </li>
+      <ul>
+        <li>Size of steps you want to take in particular direction</li>
+        <li>Updated location = previous location + step size * number of steps</li>
+        <li>Updated value = previous value - learning rate * gradient</li>
+        <li>Learning rate is critical to prevent overfitting</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Batch</h3>
+    <ul>
+      <li>Run through all samples to do single update of parameters</li>
+      <li>Used when training set is small (Less than 2,000)</li>
+    </ul>
+
+<pre><code class="python">for t in range(steps):
+    dw = gradient(loss, data, w)
+    w = w - learning_rate * dw</code></pre>
+
+    <h3 class="card-title">Min-batch</h3>
+    <ul>
+      <li>Run through subset of samples to do single update of parameters</li>
+      <li>Subsets of both inputs and labelled outputs</li>
+      <li>Typically, min-batch size is 64, 128, 256, 512</li>
+      <ul>
+        <li>Smaller batch size may lead to faster convergence because weights are updated more frequently</li>
+        <li>However, updates could be noisy</li>
+        <li>Some hardwares have better performance with larger batch size due to parallel processing capabilities</li>
+      </ul>
+      <li>Make sure each mini-batch \( \textbf{X}^{[t]}, \textbf{y}^{[t]} \) fits in CPU/GPU memory</li>
+    </ul>
+
+    <h4 class="card-title">How to get min-batches</h4>
+    <ul>
+      <li>Shuffle the training set \( \textbf{X} \) and \( \textbf{y} \)</li>
+      <li>Partition the shuffled set into min-batches</li>
+    </ul>
+
+<pre><code class="python">def random_mini_batches(X, Y, mini_batch_size = 64, seed = 0):
+
+    np.random.seed(seed)
+    m = X.shape[1]  # Number of training examples
+    mini_batches = []
+
+    # Shuffle
+    permutation = list(np.random.permutation(m))
+    shuffled_X = X[:, permutation]
+    shuffled_Y = Y[:, permutation].reshape((1,m))
+
+    # Partition (Minus the end case)
+    num_complete_minibatches = math.floor(m/mini_batch_size)
+    for k in range(0, num_complete_minibatches):
+        mini_batch_X = shuffled_X[:, k*mini_batch_size:(k+1)*mini_batch_size]
+        mini_batch_Y = shuffled_Y[:, k*mini_batch_size:(k+1)*mini_batch_size]
+        mini_batch = (mini_batch_X, mini_batch_Y)
+        mini_batches.append(mini_batch)
+
+    # Handling the end case
+    if m % mini_batch_size != 0:
+        mini_batch_X = shuffled_X[:, num_complete_minibatches*mini_batch_size:m]
+        mini_batch_Y = shuffled_Y[:, num_complete_minibatches*mini_batch_size:m]
+        mini_batch = (mini_batch_X, mini_batch_Y)
+        mini_batches.append(mini_batch)
+
+    return mini_batches</code></pre>
+
+    <h4 class="card-title">Implementation</h4>
+    <ul>
+      <li>In one epoc, min-batch gradient descent take \( nb \) gradient descents rather than 1 </li>
+      <li>Let <code>num_epocs</code> \( = ne \)</li>
+      <li>Let <code>batch_size</code> \( = bs \)</li>
+      <li>Let <code>num_batches</code> \( = nb \)</li>
+      <li>for \( t = 1 \dots ne \)</li>
+      <ul>
+        <li>for \( t = 1 \dots nb \)</li>
+        <ul>
+          <li>Forward prop on \( \textbf{X}^{\{t\}} \)</li>
+          <ul>
+            <li>\( \textbf{Z}^{[1]} = \textbf{W}^{[1]}\textbf{X}^{\{t\}} + \textbf{b}^{[1]} \)</li>
+            <li>\( \textbf{A}^{[1]} = g^{[1]}(\textbf{Z}^{[1]}) \)</li>
+            <li>\( \vdots \)</li>
+            <li>\( \textbf{A}^{[L]} = g^{[L]}(\textbf{Z}^{[L]}) \)</li>
+          </ul>
+          <li>Compute cost</li>
+          <ul>
+            <li>\( J^{\{t\}} = \dfrac{1}{bs}\displaystyle\sum_{i=1}^{l}L(\hat{y}^{(i)}, y^{(i)}) + \dfrac{\lambda}{2bs}\displaystyle\sum_{l}||\textbf{W}^{[l]}||_{F}^{2} \)</li>
+          </ul>
+          <li>Backward prop</li>
+          <ul>
+            <li>Use \( J^{\{t\}}, \textbf{X}^{\{t\}}, \textbf{y}^{\{t\}} \)</li>
+          </ul>
+          <li>Update parameter</li>
+          <ul>
+            <li>\( \textbf{W}^{[l]} = \textbf{W}^{[l]} - \alpha \textbf{dW}^{[l]} \)</li>
+            <li>\( \textbf{b}^{[l]} = \textbf{b}^{[l]} - \alpha \textbf{db}^{[l]} \)</li>
+          </ul>
+        </ul>
+      </ul>
+    </ul>
+
+<pre><code class="python">for t in range(steps):
+    for mini_batch in get_batches(data, batch_size):
+        dw = gradient(loss, mini_batch, w)
+        w = w - learning_rate * dw</code></pre>
+
+    <h3 class="card-title">Stochastic</h3>
+    <ul>
+      <li>Run through one sample to do single update of parameters</li>
+    </ul>
+
+<pre><code class="python">for t in range(steps):
+    for example in data:
+        dw = gradient(loss, example, w)
+        w = w - learning_rate * dw</code></pre>
+
+    <h3 class="card-title">Local optima</h3>
+    <ul>
+      <li>In high dimensions, when gradient is 0, it is almost always saddle points rather than local optima (So it is unlikely for the optimization algorithm to stuck at bad local optima)</li>
+      <li>Plateaus (where derivatives are close to 0) can slow down the learning</li>
+    </ul>
+
+<pre><code class="python">import torch
+import torch.nn as nn
+
+def train():
+
+    model = nn.Linear(4,2)
+
+    criterion = torch.nn.MSELoss()
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
+
+    for epoch in range(10):
+        # Convert inputs and labels to variable.
+        inputs = torch.Tensor([0.8,0.4,0.4,0.2])
+        labels = torch.Tensor([1,0])
+
+        # Clear gradient buffers because we don't want any gradient from previous epoch to carry forward.
+        optimizer.zero_grad()
+
+        # Get output from the model from the inputs.
+        outputs = model(inputs)
+
+        # Get loss for the predicted output.
+        loss = criterion(outputs, labels)
+        print(loss)
+
+        # Get gradients w.r.t to parameters.
+        loss.backward()
+
+        # Update parameters.
+        optimizer.step()
+
+        print('epoch {}, loss {}'.format(epoch, loss.item()))
+
+if __name__ == "__main__":
+    train()</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: 
+    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a> | <a href="https://www.educative.io/path/become-a-deep-learning-professional">Become a Deep Learning Professional</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="machine-learning-">
+  <div class="card-body">
+    <h2 class="card-title">Gradient optimization</h2>
+
+    <h3 class="card-title">Exponentially weighted averages (Moving average)</h3>
+    <ul>
+      <li>\( v_{t} = \beta v_{t-1} + (1-\beta) \theta_{t-1} \)</li>
+      <li>\( v_{t} \) is approximately averaging over \( \frac{1}{\beta-1} \) data points.</li>
+      <li>To improve initial phase of estimates, use \( \frac{v_{t}}{1-\beta} \). However, in ML, we don't usually bother with bias in the initial phase</li>
+    </ul>
+
+    <h3 class="card-title">Momentum</h3>
+    <ul>
+      <li>On vertical axis, we want slower learning & reduce oscilation ( \( \textbf{b} \) direction )</li>
+      <li>On horizontal axis, we want faster learning ( \( \textbf{W} \) direction )</li>
+      <li>Initialize \( \textbf{V}_{dW} = \textbf{V}_{db} = 0 \)</li>
+      <li>On each iteration \( t \)</li>
+      <ul>
+        <li>Compute \( \textbf{dW} \) and \( \textbf{db} \)</li>
+        <li>\( \textbf{V}_{dW} = \beta \textbf{V}_{dW} + (1-\beta) \textbf{dW} \)</li>
+        <li>\( \textbf{V}_{db} = \beta \textbf{V}_{db} + (1-\beta) \textbf{db} \)</li>
+        <li>\( \textbf{W} = \textbf{W} - \alpha \textbf{V}_{dW} \)</li>
+        <li>\( \textbf{b} = \textbf{b} - \alpha \textbf{V}_{db} \)</li>
+        <li>\( \beta \) is commonly chosen to be \( 0.9 \)</li>
+      </ul>
+      <li>On vertical direction, the derivates will average out to zero</li>
+      <li>Velocity is the running mean of gradients including the direction</li>
+      <li>At every step, update velocity, then update weights with the velocity</li>
+    </ul>
+
+<pre><code class="python">def initialize_velocity(parameters):
+
+    L = len(parameters) // 2  # Number of layers in the neural networks
+    v = {}
+
+    # Initialize velocity
+    for l in range(L):
+        v["dW" + str(l+1)] = np.zeros((parameters["W" + str(l+1)].shape[0], parameters["W" + str(l+1)].shape[1]))
+        v["db" + str(l+1)] = np.zeros((parameters["b" + str(l+1)].shape[0], parameters["b" + str(l+1)].shape[1]))
+
+    return v</code></pre>
+
+<pre><code class="python">def update_parameters_with_momentum(parameters, grads, v, beta, learning_rate):
+
+    L = len(parameters) // 2  # Number of layers in the neural networks
+
+    for l in range(L):
+        v["dW" + str(l+1)] = beta * v["dW" + str(l+1)] + (1- beta) * grads["dW" + str(l+1)]
+        v["db" + str(l+1)] = beta * v["db" + str(l+1)] + (1- beta) * grads["db" + str(l+1)]
+        parameters["W" + str(l+1)] = parameters["W" + str(l+1)] - learning_rate * v["dW" + str(l+1)]
+        parameters["b" + str(l+1)] = parameters["b" + str(l+1)] - learning_rate * v["db" + str(l+1)]
+
+    return parameters, v</code></pre>
+
+<pre><code class="python">for t in range(steps):
+    dw = gradient(loss, w)
+    v = beta * v + (1-beta) * dw
+    w = w - learning_rate * v</code></pre>
+
+    <h3 class="card-title">RMSprop</h3>
+    <ul>
+      <li>RMSprop has the same motivation as momentum</li>
+      <li>Initialize \( \textbf{S}_{dW} = \textbf{S}_{db} = 0 \)</li>
+      <li>On each iteration \( t \)</li>
+      <ul>
+        <li>Compute \( \textbf{dW} \) and \( \textbf{db} \)</li>
+        <li>\( \textbf{S}_{dW} = \beta \textbf{S}_{dW} + (1-\beta) \textbf{dW}^{2} \) (Square is applied to element-wise)</li>
+        <li>\( \textbf{S}_{db} = \beta \textbf{S}_{db} + (1-\beta) \textbf{db}^{2} \) (Square is applied to element-wise)</li>
+        <li>\( \textbf{W} = \textbf{W} - \alpha \frac{\textbf{dW}}{\sqrt{\textbf{S}_{dW}}+\epsilon} \)</li>
+        <li>\( \textbf{b} = \textbf{b} - \alpha \frac{\textbf{db}}{\sqrt{\textbf{S}_{db}}+\epsilon} \)</li>
+        <li>\( \epsilon \) is in order not to divide by zero</li>
+      </ul>
+      <li>We want small \( \textbf{S}_{dW} \) and large \( \textbf{S}_{db} \)</li>
+    </ul>
+
+<pre><code class="python">for t in range(steps):
+    dw = gradient(loss, w)
+    squared_gradients = beta * squared_gradients + (1-beta) * dw * dw
+    w = w - learning_rate * (dw/(squared_gradients.sqrt()+e)</code></pre>
+
+    <h3 class="card-title">Adam (Adaptive moment estimation)</h3>
+    <ul>
+      <li>Initialize \( \textbf{V}_{dW} = \textbf{V}_{db} = \textbf{S}_{dW} = \textbf{S}_{db} = 0 \)</li>
+      <li>On each iteration \( t \)</li>
+      <ul>
+        <li>Compute \( \textbf{dW} \) and \( \textbf{db} \)</li>
+        <li>\( \textbf{V}_{dW} = \beta_{1} \textbf{V}_{dW} + (1-\beta_{1}) \textbf{dW} \)</li>
+        <li>\( \textbf{V}_{db} = \beta_{1} \textbf{V}_{db} + (1-\beta_{1}) \textbf{db} \)</li>
+        <li>\( \textbf{S}_{dW} = \beta_{2} \textbf{S}_{dW} + (1-\beta_{2}) \textbf{dW}^{2} \)</li>
+        <li>\( \textbf{S}_{db} = \beta_{2} \textbf{S}_{db} + (1-\beta_{2}) \textbf{db}^{2} \)</li>
+        <li>\( \textbf{V}_{dW, corrected} = \dfrac{\textbf{V}_{dW}}{1-\beta_{1}^{t}} \)</li>
+        <li>\( \textbf{V}_{db, corrected} = \dfrac{\textbf{V}_{db}}{1-\beta_{1}^{t}} \)</li>
+        <li>\( \textbf{S}_{dW, corrected} = \dfrac{\textbf{S}_{dW}}{1-\beta_{2}^{t}} \)</li>
+        <li>\( \textbf{S}_{db, corrected} = \dfrac{\textbf{S}_{db}}{1-\beta_{2}^{t}} \)</li>
+        <li>\( \textbf{W} = \textbf{W} - \alpha \dfrac{\textbf{V}_{dW, corrected}}{\sqrt{\textbf{S}_{dW, corrected}}+\epsilon} \)</li>
+        <li>\( \textbf{b} = \textbf{b} - \alpha \dfrac{\textbf{V}_{db, corrected}}{\sqrt{\textbf{S}_{db, corrected}}+\epsilon} \)</li>
+        <li>\( \beta_{1} \) is commonly chosen to be \( 0.9 \)</li>
+        <li>\( \beta_{2} \) is commonly chosen to be \( 0.999 \)</li>
+      </ul>
+    </ul>
+
+<pre><code class="python">def initialize_adam(parameters):
+
+    L = len(parameters) // 2  # Number of layers in the neural networks
+    v = {}
+    s = {}
+
+    for l in range(L):
+        v["dW" + str(l+1)] = np.zeros((parameters["W" + str(l+1)].shape[0], parameters["W" + str(l+1)].shape[1]))
+        v["db" + str(l+1)] = np.zeros((parameters["b" + str(l+1)].shape[0], parameters["b" + str(l+1)].shape[1]))
+        s["dW" + str(l+1)] = np.zeros((parameters["W" + str(l+1)].shape[0], parameters["W" + str(l+1)].shape[1]))
+        s["db" + str(l+1)] = np.zeros((parameters["b" + str(l+1)].shape[0], parameters["b" + str(l+1)].shape[1]))
+
+    return v, s</code></pre>
+
+<pre><code class="python">def update_parameters_with_adam(parameters, grads, v, s, t, learning_rate = 0.01, beta1 = 0.9, beta2 = 0.999,  epsilon = 1e-8):
+
+    L = len(parameters) // 2  # Number of layers in the neural networks
+    v_corrected = {}
+    s_corrected = {}
+
+    for l in range(L):
+        v["dW" + str(l+1)] = beta1 * v["dW" + str(l+1)] + (1-beta1) * grads["dW" + str(l+1)]
+        v["db" + str(l+1)] = beta1 * v["db" + str(l+1)] + (1-beta1) * grads["db" + str(l+1)]
+        v_corrected["dW" + str(l+1)] = v["dW" + str(l+1)] / (1 - np.square(beta1))
+        v_corrected["db" + str(l+1)] = v["db" + str(l+1)] / (1 - np.square(beta1))
+        s["dW" + str(l+1)] = beta2 * s["dW" + str(l+1)] + (1-beta2) * np.square(grads["dW" + str(l+1)])
+        s["db" + str(l+1)] = beta2 * s["db" + str(l+1)] + (1-beta2) * np.square(grads["db" + str(l+1)])
+        s_corrected["dW" + str(l+1)] = s["dW" + str(l+1)] / (1 - np.square(beta2))
+        s_corrected["db" + str(l+1)] = s["db" + str(l+1)] / (1 - np.square(beta2))
+        parameters["W" + str(l+1)] = parameters["W" + str(l+1)] - learning_rate * v_corrected["dW" + str(l+1)] / ( np.sqrt(s_corrected["dW" + str(l+1)]) + epsilon)
+        parameters["b" + str(l+1)] = parameters["b" + str(l+1)] - learning_rate * v_corrected["db" + str(l+1)] / ( np.sqrt(s_corrected["db" + str(l+1)]) + epsilon)
+
+    return parameters, v, s</code></pre>
+
+<pre><code class="python">for t in range(steps):
+    dw = gradient(loss, w)
+    moment1 = beta1 * moment1 + (1-beta1) * dw
+    moment2 = beta2 * moment2 + (1-beta2) * dw * dw
+    moment1_unbiased = moment1 / (1-beta1**t)
+    moment2_unbiased = moment2 / (1-beta2**t)
+    w = w - learning_rate * moment1_unbiased / (moment2_unbiased.sqrt()+e)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a> | <a href="https://www.educative.io/path/become-a-deep-learning-professional">Become a Deep Learning Professional</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="machine-learning-">
+  <div class="card-body">
+    <h2 class="card-title">Norm</h2>
+
+    <h3 class="card-title">L1 norm</h3>
+    <ul>
+      <li>Used in logistic regression</li>
+      <li>Performs well on sparse data</li>
+      <li>Does not have analytical solution</li>
+      <li>\( J = \dfrac{1}{m}\displaystyle\sum_{i=1}^{m} L(\hat{y}_{i},y_{i}) + \dfrac{\lambda}{2m}||\textbf{W}||_{1} \)</li>
+    </ul>
+
+    <h3 class="card-title">L2 norm</h3>
+    <ul>
+      <li>Used in logistic regression</li>
+      <li>Performs better than L1 in practice</li>
+      <li>Useful when features are correlated</li>
+      <li>Has analytical solution</li>
+      <li>\( J = \dfrac{1}{m}\displaystyle\sum_{i=1}^{m} L(\hat{y}_{i},y_{i}) + \dfrac{\lambda}{2m}||\textbf{W}||_{2}^{2} \)</li>
+      <li>\( ||\textbf{W}||^{2} = \displaystyle\sum_{j=1}^{n_{x}}\textbf{W}_{j}^{2} = \textbf{W}^{T}\textbf{W} \)</li>
+    </ul>
+
+    <h3 class="card-title">Frobenius norm</h3>
+    <ul>
+      <li>Used in neural network</li>
+      <li>\( J = \dfrac{1}{m}\displaystyle\sum_{i=1}^{m} L(\hat{y}_{i},y_{i}) + \dfrac{\lambda}{2m}\displaystyle\sum_{l=1}^{m}||\textbf{W}^{[l]}||_{F}^{2} \)</li>
+      <li>\( ||\textbf{W}^{[l]}||_{F}^{2} = \displaystyle\sum_{i=1}^{n^{[l-1]}}\displaystyle\sum_{j=1}^{n^{[l]}}(\textbf{W}_{ij}^{[l]})^{2} \)</li>
+      <li>Add \( \dfrac{\lambda}{m}\textbf{W}^{[l]} \) to \( \textbf{dW}^{[l]} \)</li>
+      <li>\( \textbf{W}^{[l]} = \textbf{W}^{[l]} - \alpha \textbf{dW}^{[l]} \) remains the same</li>
+    </ul>
+
+    <h3 class="card-title">Forward prop</h3>
+
+<pre><code class="python">def forward_propagation(X, parameters):
+
+    W1 = parameters["W1"]
+    b1 = parameters["b1"]
+    W2 = parameters["W2"]
+    b2 = parameters["b2"]
+    W3 = parameters["W3"]
+    b3 = parameters["b3"]
+
+    # LINEAR -> RELU -> LINEAR -> RELU -> LINEAR -> SIGMOID
+    Z1 = np.dot(W1, X) + b1
+    A1 = relu(Z1)
+    Z2 = np.dot(W2, A1) + b2
+    A2 = relu(Z2)
+    Z3 = np.dot(W3, A2) + b3
+    A3 = sigmoid(Z3)
+
+    cache = (Z1, A1, W1, b1, Z2, A2, W2, b2, Z3, A3, W3, b3)
+
+    return A3, cache</code></pre>
+
+    <h3 class="card-title">Cost function</h3>
+    <ul>
+      <li>\( J_{regularized} = \underbrace{-\dfrac{1}{m} \displaystyle\sum_{i = 1}^{m}  \left(y^{(i)}\log\left(\textbf{a}^{[L](i)}\right) + (1-y^{(i)})\log\left(1-\textbf{a}^{[L](i)}\right)\right)}_\text{cross-entropy cost} + \underbrace{\dfrac{1}{m} \dfrac{\lambda}{2} \displaystyle\sum_{l}\displaystyle\sum_{k}\displaystyle\sum_{j} {\textbf{W}_{k,j}^{[l]}}^{2} }_\text{L2 regularization cost} \)</li>
+    </ul>
+
+<pre><code class="python">def compute_cost_with_regularization(A3, Y, parameters, lambd):
+
+    m = Y.shape[1]
+    W1 = parameters["W1"]
+    W2 = parameters["W2"]
+    W3 = parameters["W3"]
+
+    cross_entropy_cost = compute_cost(A3, Y)
+
+    L2_regularization_cost = lambd * ( np.sum(np.square(W1)) + np.sum(np.square(W2)) + np.sum(np.square(W3)) ) / (2 * m)
+
+    cost = cross_entropy_cost + L2_regularization_cost
+
+    return cost</code></pre>
+
+    <h3 class="card-title">Backward prop</h3>
+
+<pre><code class="python">def backward_propagation_with_regularization(X, Y, cache, lambd):
+
+    m = X.shape[1]
+    (Z1, A1, W1, b1, Z2, A2, W2, b2, Z3, A3, W3, b3) = cache
+
+    dZ3 = A3 - Y
+
+    dW3 = 1./m * np.dot(dZ3, A2.T) + (lambd * W3 / m)
+    db3 = 1./m * np.sum(dZ3, axis=1, keepdims = True)
+
+    dA2 = np.dot(W3.T, dZ3)
+    dZ2 = np.multiply(dA2, np.int64(A2 > 0))
+    dW2 = 1./m * np.dot(dZ2, A1.T) + (lambd * W2 / m)
+    db2 = 1./m * np.sum(dZ2, axis=1, keepdims = True)
+
+    dA1 = np.dot(W2.T, dZ2)
+    dZ1 = np.multiply(dA1, np.int64(A1 > 0))
+    dW1 = 1./m * np.dot(dZ1, X.T) + (lambd * W1 / m)
+    db1 = 1./m * np.sum(dZ1, axis=1, keepdims = True)
+
+    gradients = {"dZ3": dZ3, "dW3": dW3, "db3": db3,"dA2": dA2,
+                 "dZ2": dZ2, "dW2": dW2, "db2": db2, "dA1": dA1,
+                 "dZ1": dZ1, "dW1": dW1, "db1": db1}
+
+    return gradients</code></pre>
+
+<pre><code class="python">def model(X, Y, learning_rate = 0.3, num_iterations = 30000, lambd = 0):
+
+    grads = {}
+    costs = []
+    m = X.shape[1]
+    layers_dims = [X.shape[0], 20, 3, 1]
+
+    parameters = initialize_parameters(layers_dims)
+
+    for i in range(0, num_iterations):
+
+        a3, cache = forward_propagation(X, parameters)
+
+        cost = compute_cost_with_regularization(a3, Y, parameters, lambd)
+
+        grads = backward_propagation_with_regularization(X, Y, cache, lambd)
+
+        parameters = update_parameters(parameters, grads, learning_rate)
+
+    return parameters</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="machine-learning-">
+  <div class="card-body">
+    <h2 class="card-title">Dropout</h2>
+    <ul>
+      <li>Most effective regularization in neural network</li>
+      <li>Nodes in each layer in randomly deactivated in forward pass</li>
+      <li>In each iteration, only \( 1-\rho \) trained (Neurons are deactivated with probability \( \rho \))</li>
+      <li>Why dropout works</li>
+      <ul>
+        <li>For a particular neuron, its inputs can get eliminiated</li>
+        <li>Thus, the neuron become reluctant to put too much weight on one input feature</li>
+        <li>Rather, it wants to spread out weights, leading to smaller weights</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Inverted dropout</h3>
+    <ul>
+      <li>During training time</li>
+      <ul>
+        <li><code>keep_prob = 0.8</code> (20% chance that units will be shutdown)</li>
+        <li><code>d = np.random.rand(a.shape[0], a.shape[1]) < keep_prob</code></li>
+        <li><code>a = np.multiply(a,d)</code></li>
+        <li><code>a /= keep_prod</code></li>
+      </ul>
+      <li>Each layer in the network could have different <code>keep_prob</code>, but it will increase the number of hyperparameters to tune</li>
+      <li>Dropout is not to be used during test time</li>
+      <li>Cost function is no longer well-defined</li>
+    </ul>
+
+    <h3 class="card-title">Forward prop</h3>
+
+<pre><code class="python">def forward_propagation_with_dropout(X, parameters, keep_prob = 0.5):
+
+    np.random.seed(1)
+
+    # retrieve parameters
+    W1 = parameters["W1"]
+    b1 = parameters["b1"]
+    W2 = parameters["W2"]
+    b2 = parameters["b2"]
+    W3 = parameters["W3"]
+    b3 = parameters["b3"]
+
+    Z1 = np.dot(W1, X) + b1
+    A1 = relu(Z1)
+
+    D1 = np.random.rand(A1.shape[0], A1.shape[1])
+    D1 = (D1 < keep_prob).astype(int)
+    A1 = A1 * D1
+    A1 = A1 / keep_prob
+
+    Z2 = np.dot(W2, A1) + b2
+    A2 = relu(Z2)
+
+    D2 = np.random.rand(A2.shape[0], A2.shape[1])
+    D2 = (D2 < keep_prob).astype(int)
+    A2 = A2 * D2
+    A2 = A2 / keep_prob
+    Z3 = np.dot(W3, A2) + b3
+    A3 = sigmoid(Z3)
+
+    cache = (Z1, D1, A1, W1, b1, Z2, D2, A2, W2, b2, Z3, A3, W3, b3)
+
+    return A3, cache</code></pre>
+
+    <h3 class="card-title">Cost function</h3>
+
+<pre><code class="python">def compute_cost(A, Y):
+
+    m = Y.shape[1]
+
+    logprobs = np.multiply(-np.log(A),Y) + np.multiply(-np.log(1 - A), 1 - Y)
+    cost = 1./m * np.nansum(logprobs)
+
+    return cost</code></pre>
+
+   <h3 class="card-title">Backward prop</h3>
+
+<pre><code class="python">def backward_propagation_with_dropout(X, Y, cache, keep_prob):
+
+    m = X.shape[1]
+    (Z1, D1, A1, W1, b1, Z2, D2, A2, W2, b2, Z3, A3, W3, b3) = cache
+
+    dZ3 = A3 - Y
+    dW3 = 1./m * np.dot(dZ3, A2.T)
+    db3 = 1./m * np.sum(dZ3, axis=1, keepdims = True)
+    dA2 = np.dot(W3.T, dZ3)
+
+    dA2 = dA2 * D2
+    dA2 = dA2 / keep_prob
+
+    dZ2 = np.multiply(dA2, np.int64(A2 > 0))
+    dW2 = 1./m * np.dot(dZ2, A1.T)
+    db2 = 1./m * np.sum(dZ2, axis=1, keepdims = True)
+
+    dA1 = np.dot(W2.T, dZ2)
+
+    dA1 = dA1 * D1
+    dA1 = dA1 / keep_prob
+
+    dZ1 = np.multiply(dA1, np.int64(A1 > 0))
+    dW1 = 1./m * np.dot(dZ1, X.T)
+    db1 = 1./m * np.sum(dZ1, axis=1, keepdims = True)
+
+    gradients = {"dZ3": dZ3, "dW3": dW3, "db3": db3,"dA2": dA2,
+                 "dZ2": dZ2, "dW2": dW2, "db2": db2, "dA1": dA1,
+                 "dZ1": dZ1, "dW1": dW1, "db1": db1}
+
+    return gradients</code></pre>
+
+<pre><code class="python">def model(X, Y, learning_rate = 0.3, num_iterations = 30000, print_cost = True, lambd = 0, keep_prob = 1):
+
+    grads = {}
+    costs = []
+    m = X.shape[1]
+    layers_dims = [X.shape[0], 20, 3, 1]
+
+    parameters = initialize_parameters(layers_dims)
+
+    for i in range(0, num_iterations):
+
+        a3, cache = forward_propagation_with_dropout(X, parameters, keep_prob)
+
+        cost = compute_cost(a3, Y)
+
+        grads = backward_propagation_with_dropout(X, Y, cache, keep_prob)
+
+        parameters = update_parameters(parameters, grads, learning_rate)
+
+    return parameters</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="machine-learning-">
+  <div class="card-body">
+    <h2 class="card-title">2 layer network with python</h2>
+    <ul>
+      <li>Input layer \( \textbf{X} = \textbf{A}^{[0]} \) (We do not count the input layer)</li>
+      <li>hidden layer \( \textbf{A}^{[1]} \)</li>
+      <li>Output layer \( \textbf{A}^{[2]} \)</li>
+    </ul>
+
+    <h3 class="card-title">Parameters</h3>
+    <ul>
+      <li>Number of features \( n^{[0]} \)</li>
+      <li>Number of hidden units \( n^{[1]} \)</li>
+      <li>Number of output units \( n^{[2]} = 1 \)</li>
+    </ul>
+
+    <h3 class="card-title">Dimensions</h3>
+    <ul>
+      <li>\( X \).shape = \( (n^{[0]}, m) \)</li>
+      <li>\( W^{[1]} \).shape = \( (n^{[1]}, n^{[0]}) \)</li>
+      <li>\( b^{[1]} \).shape = \( (n^{[1]}, 1) \)</li>
+      <li>\( Z^{[1]} \).shape = \( A^{[1]} \).shape = \( (n^{[1]}, m) \)</li>
+      <li>\( W^{[2]} \).shape = \( (n^{[2]}, n^{[1]}) \)</li>
+      <li>\( b^{[2]} \).shape = \( (n^{[2]}, 1) \)</li>
+      <li>\( Z^{[2]} \).shape = \( A^{[2]} \).shape = \( (n^{[2]}, m) \)</li>
+    </ul>
+
+    <h3 class="card-title">Forward prop</h3>
+    <ul>
+      <li>\( \textbf{Z}^{[1]} = \textbf{W}^{[1]}\textbf{X} + \textbf{b}^{[1]} \)</li>
+      <li>\( \textbf{A}^{[1]} = g^{[1]}(\textbf{Z}^{[1]}) \)</li>
+      <li>\( \textbf{Z}^{[2]} = \textbf{W}^{[2]}\textbf{A}^{[1]} + \textbf{b}^{[2]} \)</li>
+      <li>\( \textbf{A}^{[2]} = g^{[2]}(\textbf{Z}^{[2]}) \)</li>
+    </ul>
+
+    <pre><code class="python">def forward_propagation(X, parameters):
+    W1 = parameters["W1"]
+    b1 = parameters["b1"]
+    W2 = parameters["W2"]
+    b2 = parameters["b2"]
+
+    Z1 = np.dot(W1, X) + b1
+    A1 = np.tanh(Z1)
+    Z2 = np.dot(W2, A1) + b2
+    A2 = sigmoid(Z2)
+
+    cache = {"Z1": Z1,
+             "A1": A1,
+             "Z2": Z2,
+             "A2": A2}
+
+    return A2, cache</code></pre>
+
+    <h3 class="card-title">Cost function</h3>
+    <ul>
+      <li>\( J = -\dfrac{1}{m} \displaystyle\sum_{i=1}^{m} \left(y_{i}\log(\textbf{a}_{i}^{[2]}) + (1-y_{i})\log(1-\textbf{a}_{i}^{[2]})\right) \)</li>
+    </ul>
+
+<pre><code class="python">def compute_cost(A2, Y, parameters):
+
+    m = Y.shape[1]
+    logprobs = np.multiply(np.log(A2), Y) + np.multiply(np.log(1-A2), (1-Y))
+    cost = - np.sum(logprobs) / m
+
+    return cost</code></pre>
+
+    <h3 class="card-title">Backward prop</h3>
+    <ul>
+      <li>\( \textbf{dZ}^{[2]} = \textbf{A}^{[2]} - \textbf{y} \)</li>
+      <li>\( \textbf{dW}^{[2]} = \frac{1}{m}\textbf{dZ}^{[2]}\textbf{A}^{[1]^{T}} \)</li>
+      <li>\( \textbf{db}^{[2]} = \frac{1}{m} \) np.sum \( (\textbf{dZ}^{[2]} \), axis=1, keepdims=True)</li>
+      <li>\( \textbf{dZ}^{[1]} = \textbf{W}^{[2]^{T}}\textbf{dZ}^{[2]} * g^{[1]^{'}}(\textbf{Z}^{[1]}) \)</li>
+      <li>\( \textbf{dW}^{[1]} = \frac{1}{m}\textbf{dZ}^{[1]}\textbf{X}^{T} \)</li>
+      <li>\( \textbf{db}^{[1]} = \frac{1}{m} \) np.sum \( (\textbf{dZ}^{[1]} \), axis=1, keepdims=True)</li>
+    </ul>
+
+<pre><code class="python">def backward_propagation(parameters, cache, X, Y):
+
+    m = X.shape[1]
+
+    W1 = parameters["W1"]
+    W2 = parameters["W2"]
+
+    A1 = cache["A1"]
+    A2 = cache["A2"]
+
+    dZ2 = A2 - Y
+    dW2 = np.dot(dZ2, A1.T) / m
+    db2 = np.sum(dZ2, axis=1, keepdims=True) / m
+    dZ1 = np.dot(W2.T, dZ2) * (1 - np.power(A1, 2))
+    dW1 = np.dot(dZ1, X.T) / m
+    db1 = np.sum(dZ1, axis=1, keepdims=True) / m
+
+    grads = {"dW1": dW1,
+             "db1": db1,
+             "dW2": dW2,
+             "db2": db2}
+
+    return grads</code></pre>
+
+    <h3 class="card-title">Full implementation</h3>
+
+<pre><code class="python">def update_parameters(parameters, grads, learning_rate = 1.2):
+
+    W1 = parameters["W1"]
+    b1 = parameters["b1"]
+    W2 = parameters["W2"]
+    b2 = parameters["b2"]
+
+    dW1 = grads["dW1"]
+    db1 = grads["db1"]
+    dW2 = grads["dW2"]
+    db2 = grads["db2"]
+
+    W1 = W1 - learning_rate * dW1
+    b1 = b1 - learning_rate * db1
+    W2 = W2 - learning_rate * dW2
+    b2 = b2 - learning_rate * db2
+
+    parameters = {"W1": W1,
+                  "b1": b1,
+                  "W2": W2,
+                  "b2": b2}
+
+    return parameters</code></pre>
+
+<pre><code class="python">def nn_model(X, Y, n_h, num_iterations = 10000, print_cost=False):
+
+    np.random.seed(3)
+    n_x = layer_sizes(X, Y)[0]
+    n_y = layer_sizes(X, Y)[2]
+
+    parameters = initialize_parameters(n_x, n_h, n_y)
+
+    for i in range(0, num_iterations):
+        A2, cache = forward_propagation(X, parameters)
+        cost = compute_cost(A2, Y, parameters)
+        grads = backward_propagation(parameters, cache, X, Y)
+        parameters = update_parameters(parameters, grads, learning_rate = 1.2)
+
+    return parameters</code></pre>
+
+<pre><code class="python">def predict(parameters, X):
+
+    A2, cache = forward_propagation(X, parameters)
+    predictions = (A2 > 0.5)
+
+    return predictions</code></pre>
+
+<pre><code class="python">X, Y = load_planar_dataset()
+parameters = nn_model(X, Y, n_h = 4, num_iterations = 10000, print_cost=True)
+predictions = predict(parameters, X)</code></pre>
+
+    <h3 class="card-title">Helper functions</h3>
+
+<pre><code class="python">def load_planar_dataset():
+    np.random.seed(1)
+    m = 400  # number of examples
+    N = int(m/2)  # number of points per class
+    D = 2  # dimensionality
+    X = np.zeros((m,D))  # data matrix where each row is a single example
+    Y = np.zeros((m,1), dtype='uint8')  # labels vector (0 for red, 1 for blue)
+    a = 4  # maximum ray of the flower
+
+    for j in range(2):
+        ix = range(N*j,N*(j+1))
+        t = np.linspace(j*3.12,(j+1)*3.12,N) + np.random.randn(N)*0.2  # theta
+        r = a*np.sin(4*t) + np.random.randn(N)*0.2  # radius
+        X[ix] = np.c_[r*np.sin(t), r*np.cos(t)]
+        Y[ix] = j
+
+    X = X.T
+    Y = Y.T
+
+    return X, Y</code></pre>
+
+<pre><code class="python">def initialize_parameters(n_x, n_h, n_y):
+
+    np.random.seed(1)
+
+    W1 = np.random.randn(n_h, n_x)*0.01
+    b1 = np.zeros((n_h, 1))
+    W2 = np.random.randn(n_y, n_h)*0.01
+    b2 = np.zeros((n_y, 1))
+
+    parameters = {"W1": W1,
+                  "b1": b1,
+                  "W2": W2,
+                  "b2": b2}
+
+    return parameters</code></pre>
+
+<pre><code class="python">def sigmoid(z):
+
+    s = 1 / (1 + np.exp(-z))
+
+    return s</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.coursera.org/specializations/deep-learning?">Deep Learning Specialization</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="machine-learning-">
+  <div class="card-body">
+    <h2 class="card-title">N layer network with python</h2>
+    <ul>
+      <li>\( L \) is the number of layers</li>
+      <li>\( n^{[l]} \) is the number of hidden units in layer \( l \)</li>
+    </ul>
+
+    <h3 class="card-title">Parameters</h3>
+    <ul>
+      <li>Number of features \( n^{[0]} \)</li>
+      <li>Number of hidden units \( n^{[1]}, n^{[2]}, n^{[3]} \dots n^{[L-1]} \)</li>
+      <li>Number of output units \( n^{[L]} = 1 \)</li>
+    </ul>
+
+    <h3 class="card-title">Hyperparameters</h3>
+    <ul>
+      <li>Learning rate \( \alpha \)</li>
+      <li>Number of epocs</li>
+      <li>Number of hidden layers</li>
+      <li>Number of hidden units in each layer</li>
+      <li>Choice of activation function</li>
+    </ul>
+
+    <h3 class="card-title">Dimensions</h3>
+    <ul>
+      <li>\( W^{[l]} \).shape = \( (n^{[l]} ,n^{[l-1]}) \)</li>
+      <li>\( b^{[l]} \).shape = \( (n^{[l]} ,m) \)</li>
+      <li>\( Z^{[l]} \).shape = \( (n^{[l]} ,m) \)</li>
+      <li>\( A^{[l]} \).shape = \( (n^{[l]} ,m) \)</li>
+    </ul>
+
+    <h3 class="card-title">Forward prop</h3>
+    <ul>
+      <li>\( \textbf{Z}^{[l]} = \textbf{W}^{[l]}\textbf{A}^{[l-1]} + \textbf{b}^{[l]} \)</li>
+      <li>\( \textbf{A}^{[l]} = g^{[l]}(\textbf{Z}^{[l]}) \)</li>
+    </ul>
+
+<pre><code class="python">def linear_forward(A, W, b):
+
+    Z = W.dot(A) + b
+    cache = (A, W, b)
+
+    return Z, cache</code></pre>
+
+<pre><code class="python">def linear_activation_forward(A_prev, W, b, activation):
+
+    if activation == "sigmoid":
+        Z, linear_cache = linear_forward(A_prev, W, b)
+        A, activation_cache = sigmoid(Z)
+
+    elif activation == "relu":
+        Z, linear_cache = linear_forward(A_prev, W, b)
+        A, activation_cache = relu(Z)
+
+    cache = (linear_cache, activation_cache)
+
+    return A, cache</code></pre>
+
+<pre><code class="python">def L_model_forward(X, parameters):
+
+    caches = []
+    A = X
+    L = len(parameters) // 2
+
+    for l in range(1, L):
+        A_prev = A
+        A, cache = linear_activation_forward(A_prev, parameters["W"+str(l)], parameters["b"+str(l)], "relu")
+        caches.append(cache)
+
+    AL, cache = linear_activation_forward(A, parameters["W"+str(L)], parameters["b"+str(L)], "sigmoid")
+    caches.append(cache)
+
+    return AL, caches</code></pre>
+
+    <h3 class="card-title">Cost function</h3>
+    <ul>
+      <li>\( J = -\dfrac{1}{m} \displaystyle\sum_{i=1}^{m} \left(y_{i}\log(\textbf{a}_{i}^{[L]}) + (1-y_{i})\log(1-\textbf{a}_{i}^{[L]})\right) \)</li>
+    </ul>
+
+<pre><code class="python">def compute_cost(AL, Y):
+
+    m = Y.shape[1]
+    cost = - ( np.dot(Y, np.log(AL.T)) + np.dot((1-Y), np.log(1-AL.T)) ) / m
+    cost = np.squeeze(cost) # To make sure your cost's shape is what we expect (e.g. this turns [[17]] into 17).
+
+    return cost</code></pre>
+
+    <h3 class="card-title">Backward prop</h3>
+    <ul>
+      <li>\( \textbf{dZ}^{[l]} = \textbf{W}^{[l+1]^{T}}\textbf{dZ}^{[l+1]} * g^{[l]^{'}}(\textbf{Z}^{[l]}) \)</li>
+      <li>\( \textbf{dW}^{[1]} = \frac{1}{m}\textbf{dZ}^{[1]}\textbf{A}^{[l-1]^{T}} \)</li>
+      <li>\( \textbf{db}^{[1]} = \frac{1}{m} \) np.sum \( (\textbf{dZ}^{[1]} \), axis=1, keepdims=True)</li>
+    </ul>
+
+<pre><code class="python">def linear_backward(dZ, cache):
+
+    A_prev, W, b = cache
+    m = A_prev.shape[1]
+
+    dW = 1./m * np.dot(dZ,A_prev.T)
+    db = 1./m * np.sum(dZ, axis = 1, keepdims = True)
+    dA_prev = np.dot(W.T,dZ)
+
+    return dA_prev, dW, db</code></pre>
+
+<pre><code class="python">def linear_activation_backward(dA, cache, activation):
+
+    linear_cache, activation_cache = cache
+
+    if activation == "relu":
+        dZ = relu_backward(dA, activation_cache)
+        dA_prev, dW, db = linear_backward(dZ, linear_cache)
+
+    elif activation == "sigmoid":
+        dZ = sigmoid_backward(dA, activation_cache)
+        dA_prev, dW, db = linear_backward(dZ, linear_cache)
+
+    return dA_prev, dW, db</code></pre>
+
+<pre><code class="python">def L_model_backward(AL, Y, caches):
+
+    grads = {}
+    L = len(caches)
+    m = AL.shape[1]
+    Y = Y.reshape(AL.shape)
+
+    dAL = - (np.divide(Y, AL) - np.divide(1-Y, 1-AL))
+
+    current_cache = caches[L-1]
+    grads["dA" + str(L)], grads["dW" + str(L)], grads["db" + str(L)] = linear_activation_backward(dAL, current_cache, activation = 'sigmoid')
+
+    for l in reversed(range(L-1)):
+        current_cache = caches[L-2-l]
+        dA_prev_temp, dW_temp, db_temp = linear_activation_backward(grads["dA" + str(L)], current_cache, activation = 'relu')
+        grads["dA" + str(l + 1)] = dA_prev_temp
+        grads["dW" + str(l + 1)] = dW_temp
+        grads["db" + str(l + 1)] = db_temp
+
+    return grads</code></pre>
+
+    <h3 class="card-title">Full implementation</h3>
+
+<pre><code class="python">def update_parameters(parameters, grads, learning_rate):
+
+    L = len(parameters)
+
+    for l in range(L):
+        parameters["W" + str(l+1)] = parameters["W" + str(l+1)] - learning_rate * grads["dW" + str(l+1)]
+        parameters["b" + str(l+1)] = parameters["b" + str(l+1)] - learning_rate * grads["db" + str(l+1)]
+
+    return parameters</code></pre>
+
+<pre><code class="python">def L_layer_model(X, Y, layers_dims, learning_rate = 0.0075, num_iterations = 3000, print_cost=False):#lr was 0.009
+
+    np.random.seed(1)
+    costs = []
+
+    parameters = initialize_parameters_deep(layers_dims)
+
+    for i in range(0, num_iterations):
+
+        AL, caches = L_model_forward(X, parameters)
+        cost = compute_cost(AL, Y)
+        grads = L_model_backward(AL, Y, caches)
+        parameters = update_parameters(parameters, grads, learning_rate)
+
+    return parameters</code></pre>
+
+<pre><code class="python">def predict(X, y, parameters):
+
+    m = X.shape[1]
+    n = len(parameters) // 2
+    p = np.zeros((1,m))
+
+    probas, caches = L_model_forward(X, parameters)
+
+    # Convert probas to 0/1 predictions
+    for i in range(0, probas.shape[1]):
+        if probas[0,i] > 0.5:
+            p[0,i] = 1
+        else:
+            p[0,i] = 0
+
+    return p</code></pre>
+
+<pre><code class="python"># Load the data. (cat/non-cat)
+train_set_location = 'data/train_catvnoncat.h5'
+test_set_location = 'data/test_catvnoncat.h5'
+train_set_x_orig, train_set_y, test_set_x_orig, test_set_y, classes = load_dataset(train_set_location, test_set_location)
+
+# Reshape the training and test examples such that matrices are flattened into vectors.
+train_set_x_flatten = train_set_x_orig.reshape(train_set_x_orig.shape[0], -1).T
+test_set_x_flatten = test_set_x_orig.reshape(test_set_x_orig.shape[0], -1).T
+
+# Center and standardize dataset dividing by the maximum value of a pixel channel.
+train_set_x = train_set_x_flatten / 255
+test_set_x = test_set_x_flatten / 255
+
+layers_dims = [12288, 20, 7, 5, 1] #  4-layer model
+parameters = L_layer_model(train_set_x, train_set_y, layers_dims, num_iterations = 2500, print_cost = True)
+pred_train = predict(train_x, train_y, parameters)
+pred_test = predict(test_x, test_y, parameters)</code></pre>
+
+    <h3 class="card-title">Helper functions</h3>
+
+<pre><code class="python">def load_dataset(train_set_location, test_set_location):
+
+    train_dataset = h5py.File(train_set_location, "r")
+    # These data sets are to be pre-preprocessed (Thus, appended "_orig")
+    train_set_x_orig = np.array(train_dataset["train_set_x"][:])  # Train set features
+    train_set_y_orig = np.array(train_dataset["train_set_y"][:])  # Train set labels
+
+    test_dataset = h5py.File(test_set_location, "r")
+    # These data sets are to be pre-preprocessed (Thus, appended "_orig")
+    test_set_x_orig = np.array(test_dataset["test_set_x"][:])  # Test set features
+    test_set_y_orig = np.array(test_dataset["test_set_y"][:])  # Test set labels
+
+    classes = np.array(test_dataset["list_classes"][:])  # List of classes
+
+    train_set_y_orig = train_set_y_orig.reshape((1, train_set_y_orig.shape[0]))
+    test_set_y_orig = test_set_y_orig.reshape((1, test_set_y_orig.shape[0]))
+
+    return train_set_x_orig, train_set_y_orig, test_set_x_orig, test_set_y_orig, classes</code></pre>
+
+<pre><code class="python">def initialize_parameters_deep(layer_dims):
+    np.random.seed(1)
+    parameters = {}
+    L = len(layer_dims)
+
+    for l in range(1, L):
+        parameters['W' + str(l)] = np.random.randn(layer_dims[l], layer_dims[l-1]) / np.sqrt(layer_dims[l-1]) #*0.01
+        parameters['b' + str(l)] = np.zeros((layer_dims[l], 1))
+
+    return parameters</code></pre>
+
+<pre><code class="python">def sigmoid(z):
+
+    s = 1 / (1 + np.exp(-z))
+
+    return s</code></pre>
+
+<pre><code class="python">def relu(x):
+
+    return np.maximum(0,x)</code></pre>
+
+<pre><code class="python">def sigmoid_backward(dA, cache):
+
+    Z = cache
+    s = 1/(1+np.exp(-Z))
+    dZ = dA * s * (1-s)
+
+    return dZ</code></pre>
+
+<pre><code class="python">def relu_backward(dA, cache):
+
+    Z = cache
+    dZ = np.array(dA, copy=True) # just converting dz to a correct object
+
+    # When z <= 0, you should set dz to 0 as well
+    dZ[Z <= 0] = 0
+
+    return dZ</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="machine-learning-">
+  <div class="card-body">
+    <h2 class="card-title">Multi-head neural network</h2>
+    <ul>
+      <li>Backbone - generates feature map</li>
+      <li>Head - solve specific tasks</li>
+      <li>Features are shared between different heads</li>
+      <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-1/multi-head-neural-network-1.png" style="width: 500px; height: 200px" alt="Card image cap">
+      <li>For example, backbone can learn embeddings (In this case, feature map would be embeddings)</li>
+      <ul>
+        <li>Alternatively, backbone can be fixed (Ex. BERT)</li>
+      </ul>
+      <li>Then, each head can perform spam detection, sentiment analysis, etc using the embedding generated by backbone</li>
+      <li>Each head computes losses from their own tasks, which are summed to generate the total loss</li>
+    </ul>
+
+<pre><code class="python"></code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href=""></a>
   </div>
 </div>
 <!-- Machine learning END -->
