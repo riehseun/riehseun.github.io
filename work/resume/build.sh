@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-docker build -t sb2nov/latex .
-docker run --rm -i -v "$PWD":/data sb2nov/latex pdflatex sourabh_bajaj_resume.tex
+/usr/local/bin/docker build -t rieh/latex .
+/usr/local/bin/docker run --rm -i -v "$PWD":/data rieh/latex pdflatex seungmoon_rieh_resume.tex
