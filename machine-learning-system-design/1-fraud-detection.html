@@ -44,151 +44,80 @@
   <div class="card-body">
     <h2 class="card-title">Fraud detection</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#fraud-detection-">Requirement and problem</a></li>
-      <li><a href="#fraud-detection-">High-level design</a></li>
-      <li><a href="#fraud-detection-">Data and feature engineering</a></li>
-      <li><a href="#fraud-detection-">Model development</a></li>
-      <li><a href="#fraud-detection-">Inference and evaluation</a></li>
+      <li><a href="#fraud-detection-">Fraud detection</a></li>
     </ul>
   </div>
 </div>
 
 <div class="card mb-4" id="fraud-detection-">
   <div class="card-body">
-    <h2 class="card-title">Requirement and problem</h2>
-    <ul>
-      <li>Business</li>
-      <ul>
-        <li>What kind of fraud are we talking about? Fradulent financial transaction - #1</li>
-      </ul>
-      <li>Data</li>
-      <ul>
-        <li>How does dataset look like? Structured - #2</li>
-        <li>Do we have labeled dataset? Yes</li>
-      </ul>
-      <li>Constraint</li>
-      <ul>
-        <li>Should we continously train the model? No</li>
-        <li>Should model be deployed to mobile devices? No</li>
-        <li>How fast should inference be? Under 200ms</li>
-        <li>Should inference be batch or real-time? Real-time - #3</li>
-      </ul>
-      <li>Problem - given transaction, determine whether it is fradulent or not</li>
-      <li>Input - transaction record</li>
-      <li>Output - 0 or 1 indicating fraud or not</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: 
-  </div>
-</div>
+    
+<pre><code class="markdown">
+Requirement and problem
 
-<div class="card mb-4" id="fraud-detection-">
-  <div class="card-body">
-    <h2 class="card-title">Data and feature engineering</h2>
-    <ul>
-      <li>Data</li>
-      <ul>
-        <li>Customer</li>
-        <li>Account</li>
-        <li>Transaction</li>
-      </ul>
-      <li>Feature</li>
-      <ul>
-        <li>Age/gender/ethnicity - can't use due to bias and fairness concern</li>
-        <li>Account balance - fraud people are not likely to have very high account balance</li>
-        <li>Duration of account - fraud people are likely to have newly created account</li>
-        <li>Number of transactions - fraud people are likely to have only recent transactions</li>
-        <li>Total amount of transactions - fraud people are likely to have little dollar amount of transactions</li>
-      </ul>
-      <li>Engineering</li>
-      <ul>
-        <li>No need to scale or nomalize if using Ensemble model</li>
-        <li>Ensemble models are expensive to re-train, thus need extra feature engineering to guard against distribution drift</li>
-        <li>Compute "averge metrics" like averge account balance for the past 12 months, as these values are less impacted by distribution drift</li>
-        <li>Create "other" columns for data points that are outside 99% of values and put it in</li>
-        <li>Convert date field to integer</li>
-      </ul>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: 
-  </div>
-</div>
+Business
+  What kind of fraud are we talking about? Fradulent financial transaction - #1
+Data
+  How does dataset look like? Structured - #2
+  Do we have labeled dataset? Yes
+Constraint
+  Should we continously train the model? No
+  Should model be deployed to mobile devices? No
+  How fast should inference be? Under 200ms
+  Should inference be batch or real-time? Real-time - #3
+Problem - given transaction, determine whether it is fradulent or not
+Input - transaction record
+Output - 0 or 1 indicating fraud or not
 
-<div class="card mb-4" id="fraud-detection-">
-  <div class="card-body">
-    <h2 class="card-title">Data and feature engineering</h2>
-    <ul>
-      <li>Data</li>
-      <ul>
-        <li>Customer</li>
-        <li>Account</li>
-        <li>Transaction</li>
-      </ul>
-      <li>Feature</li>
-      <ul>
-        <li>Age/gender/ethnicity - can't use due to bias and fairness concern</li>
-        <li>Account balance - fraud people are not likely to have very high account balance</li>
-        <li>Duration of account - fraud people are likely to have newly created account</li>
-        <li>Number of transactions - fraud people are likely to have only recent transactions</li>
-        <li>Total amount of transactions - fraud people are likely to have little dollar amount of transactions</li>
-      </ul>
-      <li>Engineering</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: 
-  </div>
-</div>
+High-level design
 
-<div class="card mb-4" id="fraud-detection-">
-  <div class="card-body">
-    <h2 class="card-title">Model development</h2>
-    <ul>
-      <li>Baseline</li>
-      <ul>
-        <li>Logistic regression - binary classification to determine whether transaction is fraud or not</li>
-        <li>If dataprep is too much overhead, may skip to Ensemble model directly</li>
-      </ul>
-      <li>Model</li>
-      <ul>
-        <li>Ensemble - explanable, works well with structured data, no need for data engineering, no need to worry about missing values</li>
-        <li>Neural network - lots of dataprep, not explanable</li>
-      </ul>
-      <li>Data split</li>
-      <ul>
-        <li>Split labeled data by time - 80% training set, 20% test set</li>
-        <li>Further split 80% training set into - 70% training set, 30% dev set</li>
-        <li>Run 5 bins cross-validation</li>
-        <li>Make sure each customer Id exist in exactly one of the bins and validation set, to avoid data leakage</li>
-      </ul>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: 
-  </div>
-</div>
+Data and feature engineering
 
-<div class="card mb-4" id="fraud-detection-">
-  <div class="card-body">
-    <h2 class="card-title">Inference and evaluation</h2>
-    <ul>
-      <li>Sampling</li>
-      <ul>
-        <li>N/A</li>
-      </ul>
-      <li>Offline metric</li>
-      <ul>
-        <li>Recall - need to get actual fraud as much as possible</li>
-        <li>Precision - predicted fraud better be actual fraud</li>
-        <li>PR curve</li>
-      </ul>
-      <li>Online metric</li>
-      <ul>
-        <li>Number of fraud found in transactions</li>
-      </ul>
-    </ul>
+Data
+  Customer
+  Account
+  Transaction
+Feature
+  Age/gender/ethnicity - can't use due to bias and fairness concern
+  Account balance - fraud people are not likely to have very high account balance
+  Duration of account - fraud people are likely to have newly created account
+  Number of transactions - fraud people are likely to have only recent transactions
+  Total amount of transactions - fraud people are likely to have little dollar amount of transactions
+Engineering
+  No need to scale or nomalize if using Ensemble model
+  Ensemble models are expensive to re-train, thus need extra feature engineering to guard against distribution drift
+  Compute "averge metrics" like averge account balance for the past 12 months, as these values are less impacted by distribution drift
+  Create "other" columns for data points that are outside 99% of values and put it in
+  Convert date field to integer
+
+Model development
+
+Baseline
+  Logistic regression - binary classification to determine whether transaction is fraud or not
+  If dataprep is too much overhead, may skip to Ensemble model directly
+Model
+  Ensemble - explanable, works well with structured data, no need for data engineering, no need to worry about missing values
+  Neural network - lots of dataprep, not explanable
+Data split
+  Split labeled data by time - 80% training set, 20% test set
+  Further split 80% training set into - 70% training set, 30% dev set
+  Run 5 bins cross-validation
+  Make sure each customer Id exist in exactly one of the bins and validation set, to avoid data leakage
+
+Inference and evaluation
+
+Sampling
+  N/A
+Offline metric
+  Recall - need to get actual fraud as much as possible
+  Precision - predicted fraud better be actual fraud
+  PR curve
+Online metric
+  Number of fraud found in transactions
+</code></pre>
+
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd1/fraud-detection-1.png" alt="Card image cap">
+
   </div>
   <div class="card-footer text-muted">
     Reference: 
