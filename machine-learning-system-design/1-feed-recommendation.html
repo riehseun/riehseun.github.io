@@ -44,163 +44,102 @@
   <div class="card-body">
     <h2 class="card-title">Feed recommendation</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#feed-recommendation-">Requirement and problem</a></li>
-      <li><a href="#feed-recommendation-">High-level design</a></li>
-      <li><a href="#feed-recommendation-">Data and feature engineering</a></li>
-      <li><a href="#feed-recommendation-">Model development</a></li>
-      <li><a href="#feed-recommendation-">Inference and evaluation</a></li>
+      <li><a href="#feed-recommendation-">Feed recommendation</a></li>
     </ul>
   </div>
 </div>
 
 <div class="card mb-4" id="feed-recommendation-">
   <div class="card-body">
-    <h2 class="card-title">Requirement and problem</h2>
-    <ul>
-      <li>Business</li>
-      <ul>
-        <li>What is the purpose of system? Display a list of videos to user</li>
-        <li>Should videos be personalized for each user? Yes - #1</li>
-        <li>Should the system support multiple language? No</li>
-      </ul>
-      <li>Data</li>
-      <ul>
-        <li>Is labeled data available? No</li>
-        <li>Can user interaction data be used for training? Yes - #2</li>
-      </ul>
-      <li>Constraint</li>
-      <ul>
-        <li>How many users are there? 1B</li>
-        <li>How many daily active users are there? 100M</li>
-        <li>How many videos are there? 10B</li>
-        <li>Should model be continously trained? Yes - #3 (if time)</li>
-        <li>How fast should the inference be? Under 200ms - #4 (if time)</li>
-      </ul>
-      <li>Problem - ranking problem</li>
-      <li>Input - a user</li>
-      <li>Output - ranked list of video by probability of user clicking it</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: 
-  </div>
-</div>
+    <h2 class="card-title">Feed recommendation</h2>
 
-<div class="card mb-4" id="feed-recommendation-">
-  <div class="card-body">
-    <h2 class="card-title">High-level design</h2>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: 
-  </div>
-</div>
+<pre><code class="markdown">
+Requirement and problem
 
-<div class="card mb-4" id="feed-recommendation-">
-  <div class="card-body">
-    <h2 class="card-title">Data and feature engineering</h2>
-    <ul>
-      <li>Data</li>
-      <ul>
-        <li>User</li>
-        <li>Video</li>
-        <li>User-video interaction</li>
-      </ul>
-      <li>Feature</li>
-      <ul>
-        <li>User geo location - people in different language and culture are interested in different videos</li>
-        <li>User age/gender/ethnicity - people under different groups... (Can't be used if bias/fairness is problem)</li>
-        <li>Video duration - length of videos are related to video quality</li>
-        <li>Video number of likes/shares/comments - popular videos might be better in quality</li>
-        <li>Whether current user liked/shared/commented video - if current user directly interacted with video, likely that user is very interested in it</li>
-      </ul>
-      <li>Engineering</li>
-      <ul>
-        <li>Numerical such as geo location, duration, number of likes, etc - standardize (scale and normalize)</li>
-        <li>Categorical (low-cardinality) such as age, gender - one-hot encoding</li>
-        <li>Categorical (high-cardinality) such as ethnicity - learnable embedding</li>
-        <li>Text such as comments - BERT embedding</li>
-        <li>Video such as video itself - CLIP video encoder embedding</li>
-      </ul>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: 
-  </div>
-</div>
+Business
+  What is the purpose of system? Display a list of videos to user
+  Should videos be personalized for each user? Yes - #1
+  Should the system support multiple language? No
+Data
+  Is labeled data available? No
+  Can user interaction data be used for training? Yes - #2
+Contraint
+  How many users are there? 1B
+  How many daily active users are there? 100M
+  How many videos are there? 10B
+  Should model be continously trained? Yes - #3 (if time)
+  How fast should the inference be? Under 200ms - #4 (if time)
+Problem - ranking problem
+Input - a user
+Output - ranked list of video by probability of user clicking it
 
-<div class="card mb-4" id="feed-recommendation-">
-  <div class="card-body">
-    <h2 class="card-title">Model development</h2>
-    <ul>
-      <li>Baseline</li>
-      <ul>
-        <li>Heuristics - show vidoes by number of total likes</li>
-        <li>Logistic regression to determine if user will click a video or not (Binary classification)</li>
-      </ul>
-      <li>Model</li>
-      <ul>
-        <li>Ensembles</li>
-        <ul>
-          <li>Classification to determine whether user will click video or not</li>
-          <li>Difficult to deal with text, video feature</li>
-        </ul> 
-        <li>Matrix factorization</li>
-        <ul>
-          <li>Learn both user and video embedding based on historical user-video interaction</li>
-          <li>Does not utilize user and video features, thus performance is low</li>
-        </ul>
-        <li>Neural network</li>
-        <ul>
-          <li>Learn both user and video embedding</li>
-          <li>Uses both user and video features</li>
-          <li>Constrct cost function such that dot product between user and video embedding is close 1 if there is interaction and 0 otherwise</li>
-        </ul>
-      </ul>
-      <li>Ground truth</li>
-      <ul>
-        <li>Explict interaction - like/comment/share</li>
-        <li>Implicit interaction - watch time greater than x%</li>
-      </ul>
-      <li>Data split</li>
-      <ul>
-        <li>Training set - 56% of data before date x, use implicit interaction as much as possible</li>
-        <li>Validation set - 24 % of data before date x, use implicit interaction as much as possible</li>
-        <li>Test set - 20% of data after date x, use direct interaction as much as possible</li>
-      </ul>
-      <li>Data imbalance</li>
-      <ul>
-        <li>Undersample negative examples</li>
-      </ul>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: 
-  </div>
-</div>
+Data and feature engineering
 
-<div class="card mb-4" id="feed-recommendation-">
-  <div class="card-body">
-    <h2 class="card-title">Inference and evaluation</h2>
-    <ul>
-      <li>Sampling</li>
-      <ul>
-        <li>Out of 100 videos, sample from the top in the ranking</li>
-        <li>Skip similar video (videos are similar if their embedding distance is lower than some value)</li>
-        <li>Skip videos that were previously recommended to user (Give penality to videos if recommended previous to current user)</li>
-      </ul>
-      <li>Offline metric</li>
-      <ul>
-        <li>Candidate generation - recall</li>
-        <li>Ranking - recall</li>
-        <li>Re-ranking - precision</li>
-        <li>Overall - NDCG</li>
-      </ul>
-      <li>Online metric</li>
-      <ul>
-        <li>Number of clicks over number of impressions</li>
-        <li>Total video watch time</li>
-      </ul>
-    </ul>
+Data
+  User
+  Video
+  User-video interaction
+Feature
+  User geo location - people in different language and culture are interested in different videos
+  User age/gender/ethnicity - people under different groups... (Can't be used if bias/fairness is problem)
+  Video duration - length of videos are related to video quality
+  Video number of likes/shares/comments - popular videos might be better in quality
+  Whether current user liked/shared/commented video - if current user directly interacted with video, likely that user is very interested in it
+Engineering
+  Numerical such as geo location, duration, number of likes, etc - standardize (scale and normalize)
+  Categorical (low-cardinality) such as age, gender - one-hot encoding
+  Categorical (high-cardinality) such as ethnicity - learnable embedding
+  Text such as comments - BERT embedding
+  Video such as video itself - CLIP video encoder embedding  
+
+Model development
+
+Baseline
+  Heuristics - show vidoes by number of total likes
+  Logistic regression to determine if user will click a video or not (Binary classification)
+Model
+  Ensembles
+    Classification to determine whether user will click video or not
+    Difficult to deal with text, video feature
+  Matrix factorization
+    Learn both user and video embedding based on historical user-video interaction
+    Does not utilize user and video features, thus performance is low
+  Neural network
+    Learn both user and video embedding
+    Uses both user and video features
+    Constrct cost function such that dot product between user and video embedding is close 1 if there is interaction and 0 otherwise
+Ground truth
+  Explict interaction - like/comment/share
+  Implicit interaction - watch time greater than x%
+Data split
+  Training set - 56% of data before date x, use implicit interaction as much as possible
+  Validation set - 24 % of data before date x, use implicit interaction as much as possible
+  Test set - 20% of data after date x, use direct interaction as much as possible
+Data imbalance
+  Undersample negative examples  
+
+Inference and evaluation
+
+Sampling
+  Out of 100 videos, sample from the top in the ranking
+  Skip similar video (videos are similar if their embedding distance is lower than some value)
+  Skip videos that were previously recommended to user (Give penality to videos if recommended previous to current user)
+
+Offline metric
+  Candidate generation - recall
+  Ranking - recall
+  Re-ranking - precision
+  Overall - NDCG
+
+Online metric
+  Number of clicks over number of impressions
+  Total video watch time
+</code></pre>
+
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd1/feed-recommendation-1.png" alt="Card image cap">
+
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd1/feed-recommendation-2.png" alt="Card image cap">
+
   </div>
   <div class="card-footer text-muted">
     Reference: 
