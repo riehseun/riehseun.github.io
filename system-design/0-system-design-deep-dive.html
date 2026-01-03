@@ -149,10 +149,6 @@
 <div class="card mb-4" id="system-design-">
   <div class="card-body">
     <h2 class="card-title">Requirement and estimation</h2>
-    <ul>
-      <li>Functional - prioritize top 3 requirements</li>
-      <li>Non-functional - each requirement should have target numbers</li>
-    </ul>
 
     <h3 class="card-title">Web servers</h3>
     <ul>
@@ -321,39 +317,8 @@
   <div class="card-body">
     <h2 class="card-title">Data model</h2>
     <ul>
-      <li>Relational</li>
-      <ul>
-        <li>Need strong consistency</li>
-        <li>Normalization</li>
-        <ul>
-          <li>Split data across tables to avoid duplicate</li>
-          <li>Joins are needed to get complete data</li>
-          <li>Normalization by default and only de-normalize for specific hot path</li>
-        </ul>
-        <li>De-normalization</li>
-        <ul>
-          <li>Avoid joins to make read faster</li>
-          <li>Updates are expensive</li>
-        </ul>
-      </ul>
+      <li>Relational</li>    
       <li>NoSQL</li>
-      <ul>
-        <li>Schema changes often</li>
-        <li>Need to know common queries upfront and design accordingly</li>
-      </ul>
-      <li>Index</li>
-      <ul>
-        <li>Sort data to make read faster</li>
-        <li>DB index</li>
-        <ul>
-          <li>B-tree - exact lookups and ranged queries</li>
-          <li>Hash index - specialized for exact lookups</li>
-        </ul>
-        <li>External system</li>
-        <ul>
-          <li>Elasticsearch - full-text search</li>
-        </ul>
-      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -364,32 +329,6 @@
 <div class="card mb-4" id="system-design-">
   <div class="card-body">
     <h2 class="card-title">API</h2>
-    <ul>
-      <li>Communication protocol</li>
-      <ul>
-        <li>REST</li>
-        <ul>
-          <li>Ex. <code>/users/{id}</code> - get a user</li>
-          <li>Ex. <code>/events/{id}/bookings</code> - create a booking</li>
-        </ul>
-        <li>GraphQL</li>
-        <ul>
-          <li>Request exactly the fields clients need in a single query</li>
-          <li>Address under-fetching/over-fetching issue</li>
-          <li>Add complexitiy to backend like query parsing, schema validation, N+1 query problem</li>
-        </ul>
-        <li>gRPC</li>
-        <ul>
-          <li>Common pattern is REST for external APIs and gRPC for internal microservice communication</li>
-        </ul>
-      </ul>
-      <li>Authentication</li>
-      <ul>
-        <li>JWT tokens for user sessions</li>
-        <li>API keys for service-to-service calls</li>
-      </ul>
-      <li>Rate limiting</li>
-    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.hellointerview.com">hello interview</a>
@@ -411,94 +350,7 @@
 <div class="card mb-4" id="system-design-">
   <div class="card-body">
     <h2 class="card-title">Detailed design</h2>
-    <ul>
-      <li>Network</li>
-      <ul>
-        <li>Communication protocol</li>
-        <ul>
-          <li>HTTP (REST)</li>
-          <ul>
-            <li>Used 90% of time</li>
-            <li>Used for external API</li>
-          </ul>
-          <li>Server-Sent Events</li>
-          <ul>
-            <li>Bidirectional communication</li>
-            <li>Stateful connection (can't simply put it in load-balancer)</li>
-            <li>Ex. chat</li>
-          </ul>
-          <li>WebSockets</li>
-          <ul>
-            <li>Check that HTTP with long-polling or SSE work first before considering WebSockets</li>
-            <li>Server-to-client push only</li>
-            <li>Stateful connection (can't simply put it in load-balancer)</li>
-            <li>Typically need Layer 4 balancing for maintaining persistent TCP connection</li>
-            <li>Ex. notification</li>
-          </ul>
-          <li>gRPC</li>
-          <ul>
-            <li>Uses binary serialization and HTTP/2 (Faster than JSON used by HTTP)</li>
-            <li>Browser support is limited</li>
-            <li>Used for internal service-to-service communication</li>
-          </ul>
-        </ul>
-        <li>Load balancer</li>
-        <ul>
-          <li>Layer 7</li>
-          <ul>
-            <li>Operate at application level</li>
-            <li>Route based on HTTP request content</li>
-          </ul>
-          <li>Layer 4</li>
-          <ul>
-            <li>Operate at TCP level</li>
-            <li>Distribute connections without looking at content</li>
-          </ul>
-        </ul>
-      </ul>
-      <li>Caching</li>
-      <ul>
-        <li>Only needed when read-heavy and data does not change frequently</li>
-        <li>Use cash-aside with Redis 90% of time</li>
-        <ul>
-          <li>If data in cache, return it</li>
-          <li>Else, query DB and put it in cache with TTL. Then, return it</li>
-        </ul>
-        <li>Invalidate cache</li>
-        <ul>
-          <li>Option 1. update cache immediate after DB is updated by write</li>
-          <li>Option 2. short TTL</li>
-        </ul>
-        <li>Cache failure</li>
-        <ul>
-          <li>Option 1. built in-process cache as fallback</li>
-        </ul>
-        <li>CDN</li>
-        <ul>
-          <li>JS files, images, videos are served from edge location close to uers</li>
-        </ul>
-      </ul>
-      <li>Sharding</li>
-      <ul>
-        <li>Only when a single database is not sufficient</li>
-        <ul>
-          <li>Single DB with read replica is enough for 10K writes per second and 100GB of data</li>
-        </ul>
-        <li>Shard key is most important</li>
-        <li>Consistent hashing</li>
-        <ul>
-          <li>Memcached and Redis Cluster uses it to distribute keys across cache nodes</li>
-          <li>Cassandra and DynamoDB use it for sharding</li>
-          <li>CDNs use it to route requests to edge servers</li>
-        </ul>
-      </ul>
-      <li>CAP</li>
-      <ul>
-        <li>Choose availability with eventual consistency by default</li>
-        <li>Choose consistency for Banking, Booking system</li>
-      </ul>
-    </ul>
-
+  
     <h3 class="card-title">Deployment</h3>
     <ul>
       <li>Blue-Green</li>
