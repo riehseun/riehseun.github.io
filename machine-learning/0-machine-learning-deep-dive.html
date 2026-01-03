@@ -44,6 +44,29 @@
   <div class="card-body">
     <h2 class="card-title">Machine learning</h2>
     <!-- <ul class="list-unstyled mb-0"> -->
+    <ul>
+      <li>Binary classification</li>
+      <li>Decision tree</li>
+      <li>Random forest</li>
+      <li>Gradient boosting</li>
+      <li>XGBoost</li>
+      <li>Activation</li>
+      <li>Initialization</li>
+      <li>Learning rate</li>
+      <li>Normalization</li>
+      <li>Optimization</li>
+      <li>Normalization</li>
+      <li>Regularization</li>
+      <li>Neural network</li>
+      <li>Multi-head neural network</li>
+      <li>Word embedding</li>
+      <li>Transformer</li>
+      <li>BERT</li>
+      <li>Machine translation</li>
+      <li>RoBERTa</li>
+      <li>CLIP</li>
+      <li>GPT</li>
+    </ul>
   </div>
 </div>
 
@@ -1491,7 +1514,7 @@ if __name__ == "__main__":
 
 <div class="card mb-4" id="machine-learning-">
   <div class="card-body">
-    <h2 class="card-title">Norm</h2>
+    <h2 class="card-title">Normalization</h2>
 
     <h3 class="card-title">L1 norm</h3>
     <ul>
@@ -1619,7 +1642,9 @@ if __name__ == "__main__":
 
 <div class="card mb-4" id="machine-learning-">
   <div class="card-body">
-    <h2 class="card-title">Dropout</h2>
+    <h2 class="card-title">Regularization</h2>
+
+    <h3 class="card-title">Dropout</h3>
     <ul>
       <li>Most effective regularization in neural network</li>
       <li>Nodes in each layer in randomly deactivated in forward pass</li>
@@ -2232,7 +2257,7 @@ pred_test = predict(test_x, test_y, parameters)</code></pre>
       <li>Backbone - generates feature map</li>
       <li>Head - solve specific tasks</li>
       <li>Features are shared between different heads</li>
-      <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-1/multi-head-neural-network-1.png" style="width: 500px; height: 200px" alt="Card image cap">
+      <img class="img-fluid" class="card-img-top" src="/machine-learning/image/ml-0/multi-head-neural-network-1.png" style="width: 500px; height: 200px" alt="Card image cap">
       <li>For example, backbone can learn embeddings (In this case, feature map would be embeddings)</li>
       <ul>
         <li>Alternatively, backbone can be fixed (Ex. BERT)</li>
@@ -2351,6 +2376,1472 @@ pred_test = predict(test_x, test_y, parameters)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="transformer-">
+  <div class="card-body">
+    <h2 class="card-title">Transformer</h2>
+    <ul>
+      <li>Original transformer was used for machine translation</li>
+      <li>Training data consisted of 4.5M English-German sentence pairs and 3.6M English-French sentence pairs</li>
+      <li>Training base model took 12 hours for 100k steps on a machine with 8 NVIDIA P100 GPUs</li>
+      <li>Training big model took 3.5 days for 300k steps</li>
+      <li>Adam optimizer was used with varying learning rates (linear during start, then decresing going forward)</li>
+    </ul>
+
+    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/ml-0/transformer-1.png" style="width: 500px; height: 700px" alt="Card image cap">
+
+    <ul>
+      <li>Output of layer \( l \) is becomes the input of layer \( l+1 \) until prediction is reached</li>
+      <li>There is no RNN or LSTM</li>
+      <li>There are 6 layers of encoder stack and 6 layers of decoder stack</li>
+      <li>Multi-head attention runs \( 8 \) attentions in parallel</li>
+    </ul>
+
+    <h3 class="card-title">Encoder stack</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/ml-0/transformer-2.png" style="width: 300px; height: 500px" alt="Card image cap">
+
+    <ul>
+      <li>Structure</li>
+      <ul>
+        <li>Two sublayers</li>
+        <ul>
+          <li>Multi-head attention</li>
+          <li>Fully connected position-wise feed forward</li>
+        </ul>
+        <li>Each sublayer has residual connection</li>
+        <ul>
+          <li>Transmit unprocessed input X of sublayer to layer normalization function</li>
+          <li>Ensure key information like positional encoding is not lost on the way</li>
+          <li>\( \text{LayerNormalization}(x+\text{sublayer}(x)) \)</li>
+        </ul>
+        <li>Output of every sublayer \( d_{\text{model}} \) remain constant</li>
+        <ul>
+          <li>All key operations in transformer is dot product</li>
+          <li>Reduces computation</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Decoder stack</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/ml-0/transformer-3.png" style="width: 300px; height: 700px" alt="Card image cap">
+
+    <ul>
+      <li>Masked multi-head attention</li>
+      <ul>
+        <li>Model must not see future words</li>
+        <li>In the output, at a given position, all subsequent words are masked (values are replaced with \( -\infty \))</li>
+        <li>Only lets attention apply to positions up to and including current position</li>
+      </ul>
+      <li>Multi-head attention</li>
+      <ul>
+        <li>Only attends to positions up to current position</li>
+        <li>This avoid seeing the sequence it must predict</li>
+        <li>Draws \( K, V \) from encoder and \( Q \) from decoder (masted multi-head attention) to compute attention</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Use case</h3>
+    <ul>
+      <li>Translation</li>
+      <ul>
+        <li>Input is English sentence, which goes through encoder layer</li>
+        <li>Output is French sentence, which goes through decoder layer</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Transformers for Natural Language Processing, Denis Rothman
+  </div>
+</div>
+
+<div class="card mb-4" id="transformer-">
+  <div class="card-body">
+    <h2 class="card-title">Input embedding</h2>
+    <ul>
+      <li>Converts input tokens to vector of \( d_{\text{model}} = 512 \) dimension using learned embeddings</li>
+      <li>Tokenizer transforms a sentence into tokens (input_ids)</li>
+      <li>Same word is represented by the same token (input_id)</li>
+      <ul>
+        <li>Ex. text = "The cat slept on the couch.It was too tired to get up."</li>
+        <li>Ex. input_ids = [1996, 4937, 7771, 2006, 1996, 6411, 1012, 2009, 2001, 2205, 5458, 2000, 2131, 2039, 1012]</li>
+      </ul>
+      <li>An embedding method (Ex. skip gram) is used to convert each word to a vector of \( 512 \) numbers</li>
+      <ul>
+        <li>Ex. black = [[-0.01206071 ... -0.04273562]]</li>
+        <li>Ex. brown = [[0.00135794589 ... -0.0490022525]]</li>
+      </ul>
+    </ul>
+  <div class="card-footer text-muted">
+    Reference: Transformers for Natural Language Processing, Denis Rothman
+  </div>
+</div>
+
+<div class="card mb-4" id="transformer-">
+  <div class="card-body">
+    <h2 class="card-title">Positional encoding</h2>
+    <ul>
+      <li>Considers position of a word in a sentence</li>
+      <li>For each word, create a vector of \( d_{\text{model}} = 512 \) dimension</li>
+      <ul>
+        <li>\( PE_{pos 2i} = \sin\left(\dfrac{pos}{10000^{\frac{2i}{d_{\text{model}}}}}\right) \)</li>
+        <ul>
+          <li>Applied to even position in the vector of \( d_{\text{model}} = 512 \)</li>
+        </ul>
+        <li>\( PE_{pos 2i+1} = \cos\left(\dfrac{pos}{10000^{\frac{2i}{d_{\text{model}}}}}\right) \)</li>
+        <ul>
+          <li>Applied to odd position in the vector of \( d_{\text{model}} = 512 \)</li>
+        </ul>
+      </ul>
+      <li>Original authors added positional encoding to input embedding to produce final encoding</li>
+      <li>To minimize loss of information of word embedding, we can multiply word embedding by \( \sqrt{d_{\text{model}}} \)</li>
+      <li>Positional encoding is computed once and re-used throughout the training</li>
+<pre><code class="python">def encoding(pos, positional_vector)
+  for i in range(0, 512,2):
+      val =  pos / (10000**((2*i)/d_model))
+      positional_vector[0][i] = math.sin(val)
+      positional_vector[0][i+1] = math.cos(val)
+      positional_encoding[0][i] = (embedding_vector[0][i]*math.sqrt(d_model)) + positional_vector[0][i]
+      positional_encoding[0][i+1] = (embedding_vector[0][i+1]*math.sqrt(d_model)) + positional_vector[0][i+1]</code></pre>
+    </ul>
+  <div class="card-footer text-muted">
+    Reference: Transformers for Natural Language Processing, Denis Rothman
+  </div>
+</div>
+
+<div class="card mb-4" id="transformer-">
+  <div class="card-body">
+    <h2 class="card-title">Attention</h2>
+    <ul>
+      <li>Unlike RNN where each token goes to network one by one, attention <strong>relates every token to every other tokens</strong></li>
+      <li>Input sentence is represented as \( Q, K, V \) where these matrices are multipled to find relationship between all words to all words</li>
+      <ul>
+        <li>Value of diagonal element should be the highest since a word would stongly be related to itself</li>
+        <li>Dimension of \( Q, K, V \) is \( n \times  d_{\text{model}} \)</li>
+        <li>A word is represented by \( d_{\text{model}} \) vector</li>
+        <li>Number of words in vocabulary is represented by \( n \)</li>
+      </ul>
+      <li>\( \text{Attention}(Q,K,V) = \text{softmax} \left( \dfrac{QK^{T}}{\sqrt{d_{k}}} \right) V \)</li>
+      <ul>
+        <li>For large values of \( d_{k} \), dot product becomes big and softmax function can have very small gradient, so scale by \( \frac{1}{\sqrt{d_{k}}} \)</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Multi-head attention</h3>
+    <ul>
+      <li>Input \( (\text{max_seq_len} \times d_{\text{model}}) \)</li>
+      <li>\( Q \) \( (\text{max_seq_len} \times d_{\text{model}}) \)</li>
+      <li>\( K \) \( (\text{max_seq_len} \times d_{\text{model}}) \)</li>
+      <li>\( V \) \( (\text{max_seq_len} \times d_{\text{model}}) \)</li>
+      <li>\( W_{O} \) \( (d_{\text{model}} \times d_{\text{model}}) \)</li>
+      <li>\( W_{Q} \) \( (d_{\text{model}} \times d_{\text{model}}) \)</li>
+      <li>\( W_{K} \) \( (d_{\text{model}} \times d_{\text{model}}) \)</li>
+      <li>\( W_{V} \) \( (d_{\text{model}} \times d_{\text{model}}) \)</li>
+      <li>\( Q^{\prime} \) - \( (Q \times W_{Q}) \), matrix where each query that has dimension \( (\text{max_seq_len} \times d_{\text{model}}) \)</li>
+      <li>\( K^{\prime} \) - \( (K \times W_{K}) \), matrix where each key that has dimension \( (\text{max_seq_len} \times d_{\text{model}}) \)</li>
+      <li>\( V^{\prime} \) - \( (V \times W_{V}) \), matrix where each value that has dimension \( (\text{max_seq_len} \times d_{\text{model}}) \)</li>
+      <li>\( Q^{\prime} \) is split into \( Q_{1} \dots Q_{8} \) \( (d_{k} \times \text{max_seq_len}) \) where each head only sees smaller part of embedding of words</li>
+      <li>\( K^{\prime} \) is split into \( K_{1} \dots K_{8} \)</li>
+      <li>\( V^{\prime} \) is split into \( V_{1} \dots V_{8} \)</li>
+      <li>\( \text{head}_{i} \) - \( (d_{k} \times \text{max_seq_len}) \) is computed from \( Q_{i}, K_{i}, V_{i} \)</li>
+      <li>\( \text{Multi-head attention}(Q,K,V) = \text{Concat}(\text{head}_{1} \dots \text{head}_{h}) W_{O} \) \( (\text{max_seq_len} \times d_{\text{model}}) \)</li>
+      <li>Each head watches different aspect of word</li>
+      <ul>
+        <li>A head may learn a word as noun</li>
+        <li>Another head may learn the same word as verb</li>
+        <li>Another head may learn the same word as adjective</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Multi-head attention</h3>
+    <ul>
+      <li>Each word is represented by vector of \( 512 \) dimension</li>
+      <li>Ex. The cat sat on the rug and it was dry-cleaned</li>
+      <li>Model is trained to find if "it" is related to "cat" or "rug"</li>
+      <li>There are \( 8 \) heads whose dimension is \( 64 \)</li>
+      <li>In each head, weight matrices whose dimension is \( 512 \times 64 \) must be trained</li>
+      <ul>
+        <li>\( W_{Q} \) - train the queries</li>
+        <li>\( W_{K} \) - train the keys</li>
+        <li>\( W_{V} \) - train the values</li>
+      </ul>
+      <li>Example</li>
+      <ul>
+        <li>Represent the input</li>
+        <ul>
+          <li>Assume \( 3 \) input tokens (or words)</li>
+          <li>Assume \( d_{\text{model}} = 4 \)</li>
+<pre><code class="python">X = np.array([[1.0, 0.0, 1.0, 0.0],   # Input token 1
+            [0.0, 2.0, 0.0, 2.0],   # Input token 2
+            [1.0, 1.0, 1.0, 1.0]])  # Input token 3</code></pre>
+        </ul>
+        <li>Initialize the weight matrices</li>
+        <ul>
+          <li>Assume \( d_{k} = 3 \)</li>
+<pre><code class="python">W_query = np.array([[1, 0, 1],
+                  [1, 0, 0],
+                  [0, 0, 1],
+                  [0, 1, 1]])
+W_key = np.array([[0, 0, 1],
+                [1, 1, 0],
+                [0, 1, 0],
+                [1, 1, 0]])
+W_value = np.array([[0, 2, 0],
+                  [0, 3, 0],
+                  [1, 0, 3],
+                  [1, 1, 0]])</code></pre>
+        </ul>
+        <li>Compute \( Q, K, V \)</li>
+        <ul>
+          <li>Assume there is one set of \( W_{Q}, W_{K}, W_{V} \) for all inputs</li>
+<pre><code class="python">Q = np.matmul(X, W_query)
+K = np.matmul(X, W_key)
+V = np.matmul(X, W_value)</code></pre>
+        </ul>
+        <li>Compute attention score</li>
+        <ul>
+          <li>\( \text{Attention}(Q,K,V) = \text{softmax} \left( \dfrac{QK^{T}}{\sqrt{d_{k}}} \right) V \)</li>
+<pre><code class="python">d_k = 1   # Square root of k_d simplified to 1 for this example
+attention_scores = (Q@K.transpose()) / d_k</code></pre>
+          <li>Softmax score for each input token</li>
+<pre><code class="python">attention_scores[0] = softmax(attention_scores[0])
+attention_scores[1] = softmax(attention_scores[1])
+attention_scores[2] = softmax(attention_scores[2])</code></pre>
+          <li>Attention for each input token</li>
+<pre><code class="python">attention1 = attention_scores[0].reshape(-1,1)
+attention1 = attention_scores[0][0] * V[0]
+attention2 = attention_scores[0][1] * V[1]
+attention3 = attention_scores[0][2] * V[2]</code></pre>
+          <li>Sum up the result</li>
+<pre><code class="python">attention_input1 = attention1 + attention2 + attention3</code></pre>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Attention Is All You Need, Ashish Vaswani et al | Transformers for Natural Language Processing, Denis Rothman
+  </div>
+</div>
+
+<div class="card mb-4" id="transformer-">
+  <div class="card-body">
+    <h2 class="card-title">Post-layer normalization</h2>
+    <ul>
+      <li>Add</li>
+      <ul>
+        <li>Processes residual connections, which transports unprocessed input \( X \) to normalization</li>
+        <li>This prevents key information, such as positional encoding, from being lost on the way</li>
+      </ul>
+      <li>Layer normalization</li>
+      <ul>
+        <li>For each sentence, compute mean and variance of all words in the sentence</li>
+        <li>Then, standardized each value using the mean and variance</li>
+        <li>\( \gamma \) and \( \beta \) is multiplied and added to allow model to amplify the values</li>
+        <li>\( \text{LayerNormalization}(v) = \gamma \dfrac{v-\mu}{\sqrt{\sigma^{2}+\epsilon}} + \beta \)</li>
+        <li>\( \epsilon \) is added so that the values don't become too big or too small</li>
+        <ul>
+          <li>\( \mu \) is the mean of \( v \) of dimension \( d \)</li>
+          <ul>
+            <li>\( \mu = \dfrac{1}{d} \displaystyle\sum_{k=1}^{d} v_{k} \)</li>
+          </ul>
+          <li>\( \sigma \) is the standard deviation of \( v \) dimension \( d \)</li>
+          <ul>
+            <li>\( \sigma^{2} = \dfrac{1}{d} \displaystyle\sum_{k=1}^{d} (v_{k}-\mu) \)</li>
+          </ul>
+          <li>\( \gamma \) is a scaling vector</li>
+          <li>\( \beta \) is a bias vector</li>
+        </ul>
+      </ul>
+    </ul>
+  <div class="card-footer text-muted">
+    Reference: Transformers for Natural Language Processing, Denis Rothman
+  </div>
+</div>
+
+<div class="card mb-4" id="transformer-">
+  <div class="card-body">
+    <h2 class="card-title">Feedforward network</h2>
+    <ul>
+      <li>Contains two layers and applies ReLU</li>
+      <li>Input and output has \( d_{\text{model}} = 512 \) but inner layer has \( d_{\text{ff}} = 2048 \)</li>
+      <li>\( \text{FFN}(x) = max(0, xW_{1} + b_{1})W_{2} + b_{2} \)</li>
+      <li>Can be considered as two convolutions with size \( 1 \) kernels</li>
+      <li>Output goes to layer normalization, then to next layer of encoder and multi-head attention layer of decoder</li>
+    </ul>
+  <div class="card-footer text-muted">
+    Reference: Transformers for Natural Language Processing, Denis Rothman
+  </div>
+</div>
+
+<div class="card mb-4" id="transformer-">
+  <div class="card-body">
+    <h2 class="card-title">Transformer evaluation</h2>
+
+    <h3 class="card-title">Human</h3>
+    <ul>
+      <li>Input - perception of raw events for layer 0</li>
+      <li>Output - language</li>
+      <li>Transduction - trial-and-error</li>
+      <ul>
+        <li>Take structure we perceive and represent them with patterns</li>
+      </ul>
+      <li>We learn that many events are related (Ex. sunrise-light, sunset-dark, etc)</li>
+      <li>New borns are find-tuned for many tasks by previous generations (Ex. we are taught that fire burns us)</li>
+    </ul>
+
+    <h3 class="card-title">Transformer</h3>
+    <ul>
+      <li>Perform transductions connecting all the tokens (subwords) that occur together in language sequence</li>
+      <li>Build inductions from these transductions</li>
+      <li>Train those inductions based on tokens to produce patterns of tokens</li>
+    </ul>
+
+    <h3 class="card-title">Attention</h3>
+    <ul>
+      <li>Attention sublayers can process millions of example for their inductive thinking operations</li>
+      <li>Attention sublayers find patterns in sequences through transduction and induction</li>
+      <li>Attention sublayers memorize these patterns using parameters that are stored with their model</li>
+    </ul>
+
+    <h3 class="card-title">SuperGLUE (GLUE - General language understanding evaluation)</h3>
+    <ul>
+      <li>Choice of plausible answers (COPA)</li>
+      <ul>
+        <li>Transformer chooses most plausible answer to a question</li>
+      </ul>
+      <li>BoolQ</li>
+      <ul>
+        <li>Yes-or-no answer task</li>
+      </ul>
+      <li>Commitment bank (CB)</li>
+      <ul>
+        <li>Transformer reads a premise, then examine a hypothesis</li>
+        <li>Hypothesis confirms the premise or contradict it</li>
+        <li>Transformer must label the hypothesis as neutral, entailment, or contradiction of the premise</li>
+      </ul>
+      <li>Multi-sentence reading comprehension (MultiRC)</li>
+      <ul>
+        <li>Transformer reads a text and choose from several possible choices</li>
+      </ul>
+      <li>Reading comprehension with commonsense reasoning dataset (ReCoRD)</li>
+      <ul>
+        <li>Dataset contains over 120,000 queries for more than 70,000 news articles</li>
+        <li>Transformer uses common-sense to solve the problems</li>
+      </ul>
+      <li>Recognizing textual entailment (RTE)</li>
+      <ul>
+        <li>Transformer must read the premise, examine a hypothesis, and predict the label of entailment hypothesis status</li>
+      </ul>
+      <li>Words in context (WiC)</li>
+      <ul>
+        <li>Transformer analyzes two sentences and determine whether the target word has the same meaning in both sentences</li>
+      </ul>
+      <li>The Winograd schemae challence (WSC)</li>
+      <ul>
+        <li>Each sentence contains an occupation, a participant, and a pronoun</li>
+        <li>Transformer determines whether the pronoun is coreferent with the occupation or the participant</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Transformers for Natural Language Processing, Denis Rothman
+  </div>
+</div>
+
+<div class="card mb-4" id="transformer-">
+  <div class="card-body">
+    <h2 class="card-title">T5</h2>
+    <ul>
+      <li>Stands for text-to-text transfer transformer</li>
+      <li>One input format for every task submitted to the transformer</li>
+      <li>Same model, hyperparameter, optimizer for a wide range of tasks</li>
+      <ul>
+        <li>Add a prefix to input sequence</li>
+        <li>Ex. translate English to German + [sequence] for machine translation problem</li>
+        <li>Ex. cola sentence + [sequence] for corpus of linguistic acceptability</li>
+        <li>Ex. stsb sentence + [sequence] for semantic textual similarity benchmarks</li>
+        <li>Ex. summarize + [sequence] for text summarization problem</li>
+      </ul>
+      <li>Same architecture as original transformer except</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Transformers for Natural Language Processing, Denis Rothman
+  </div>
+</div>
+
+<div class="card mb-4" id="transformer-">
+  <div class="card-body">
+    <h2 class="card-title">Transformer implementation</h2>
+<pre><code class="python">import torch
+import torch.nn as nn
+
+class InputEmbedding(nn.Module):
+
+    def __init__(self, vocab_size:int, d_model:int):
+        self.vocal_size = vocab_size
+        self.d_model = d_model
+        self.embedding = nn.Embedding(num_embeddings=vocab_size, embedding_dim=d_model)
+
+    def forward(self, x):
+        return self.embedding(x) * math.sqrt(self.d_model)
+
+class PositionalEncoding(nn.Module):
+
+    def __init__(self, seq_len:int, d_model:int, dropout: float):
+        self.seq_len = seq_len
+        self.d_model = d_model
+        self.dropout = nn.Dropout(p=dropout)
+
+        # Matrix of shape (seq_len, d_model)
+        pe = torch.zeros(seq_len, d_model)
+        # Vector of shape (seq_len, 1) This represents position of word in sentence
+        position = torch.arange(0, seq_len, dtype=torch.float).unsqueeze(1)
+        div_term = torch.exp(torch.arange(0, d_model, 2).float()*-(math.log(10000.0)/d_model))
+
+        # Apply sin to even indices
+        pos_enc[:, 0::2] = torch.sin(position*div_term)
+        # Apply cos to odd indices
+        pos_enc[:, 1::2] = torch.cos(position*div_term)
+
+        # (1, max_seq_len, d_model) We will have batch of sentences
+        pos_enc = pos_enc.unsqueeze(0)
+
+        # Save tensor as file since positional encoding is not learnable parameter
+        self.register_buffer('pos_enc', pos_enc)
+
+    def forward(self, x):
+        # Add positional encoding to every word in sentence
+        # No need to store grad in tensor
+        x = x + self.pe[:, :x.shape(1), :].requires_grad(False)
+        return self.dropout(x)
+
+class LayerNormalization(nn.Module):
+
+    def __init__(self, epsilon: float = 10**-6):
+        self.epsilon = epsilon
+        self.gamma = nn.Parameter(torch.ones(1))
+        self.beta = nn.Parameter(torch.zeros(1))
+
+    def forward(self, x):
+        mean = x.mean(dim=-1, keepdim=True)
+        std = x.std(dim=-1, keepdim=True)
+        return self.gamma * (x-mean) / (std+epsilon) + self.beta
+
+class FeedForwardNetwork(nn.Module):
+
+    def __init__(self, d_model: int, d_ff: float, dropout: float):
+        self.linear_1 = nn.Linear(d_model, d_ff)  # W1 and B1
+        self.dropout = nn.Dropout(dropout)
+        self.linear_2 = nn.Linear(d_ff, d_model)  # W2 and B2
+
+    def forward(self, x):
+        # (batch, max_seq_len, d_model) -> (batch, max_seq_len, d_ff) -> (batch, max_seq_len, d_model)
+        return self.linear2(self.dropout(torch.relu(self.linear_1(x))))
+
+class MultiHeadAttention(nn.Module):
+
+    def __init__(self, d_model: int, num_heads: int, dropout: float):
+        self.d_model = d_model
+        self.num_heads = num_heads
+        self.d_k = d_model // num_heads
+
+        self.w_q = nn.Linear(d_model, d_model)
+        self.w_k = nn.Linear(d_model, d_model)
+        self.w_v = nn.Linear(d_model, d_model)
+        self.w_o = nn.Linear(d_model, d_model)
+
+        self.dropout = nn.Dropout(dropout)
+
+    @staticmethod
+    def attention(self, q, k, v, mask):
+        d_k = query.shape[-1]
+
+        attention_scores = (query @ key.transpose(-2, -1)) / math.sqrt(d_k)
+        if mask:
+            attention_scores.masked_fill_(mask==0, -1e9)  # -1e9 represents negative infinity
+        attention_scores = attention_scores.softmax(dim-1)  # (batch, num_heads, seq_len, seq_len)
+
+        if dropout:
+            attention_scores = self.dropout(atten_scores)
+
+        return (attention_scores @ value), attention_scores
+
+    def forward(self, q, k, v, mask):
+        query = self.w_q(q)  # (batch, seq_len, d_model) -> (batch, seq_len, d_model)
+        key = self.w_q(k)  # (batch, seq_len, d_model) -> (batch, seq_len, d_model)
+        value = self.w_q(v)  # (batch, seq_len, d_model) -> (batch, seq_len, d_model)
+
+        # (batch, seq_len, d_model) -> (batch, seq_len, num_heads, d_k) -> (batch, num_heads, seq_len, d_k)
+        query = query.view(query.shape[0], query.shape[1], self.num_heads, self.d_k).transpose(1, 2)
+        key = key.view(key.shape[0], key.shape[1], self.num_heads, self.d_k).transpose(1, 2)
+        value = value.view(value.shape[0], value.shape[1], self.num_heads, self.d_k).transpose(1, 2)
+
+        x, self.attention_scores = MultiHeadAttention.attention(query, key, value, mask, self.dropout)
+
+class ResidualConnection(nn.Module):
+
+    def __init__(self, dropout: float):
+        self.dropout = nn.Dropout(dropout)
+        self.norm = LayerNormalization()
+
+    def forward(self, x, sublayer):
+        return x + self.dropout(sublayer(self.norm))</code></pre>
+
+<pre><code class="python">class EncoderBlock(nn.Module):
+
+    def __init__(self, multihead_attention: MultiHeadAttention, feed_forward: FeedForwardNetwork, dropout: float):
+        self.multihead_attention = multihead_attention
+        self.feed_forward = feed_forward
+        self.residual_connection = nn.ModuleList([ResidualConnection(dropout) for _ in range(2)])
+
+    # src_mask is needed in encoder because we don't want padded words to interact with other words
+    def forward(self, x, src_mask):
+        x = self.residual_connection[0](x, lambda x: self.multihead_attention(x, x, x, src_mask))
+        x = self.residual_connection[1](x, self.feed_forward)
+        return x
+
+class Encoder(nn.Module):
+
+    def __init__(self, layers: nn.ModuleList):
+        self.layers = layers
+        self.norm = LayerNormalization()
+
+    def forward(self, x):
+        for layer in self.layers:
+            x = layer(x, mask)
+        return self.norm(x)
+
+class DecoderBlock(nn.Module):
+
+    def __init__(self, multihead_attention: MultiHeadAttention, cross_attention: MultiHeadAttention, feed_forward: FeedForwardNetwork, dropout: float):
+        self.multihead_attention = multihead_attention
+        self.cross_attention = cross_attention
+        self.feed_forward = feed_forward
+        self.residual_connection = nn.ModuleList([ResidualConnection(dropout\) for _ in range(3)])
+
+    # src_mask is needed in encoder because we don't want padded words to interact with other words
+    def forward(self, x, encoder_output, src_mask, tgt_mast):
+        x = self.residual_connection[0](x, lambda x: self.multihead_attention(x, x, x, tgt_mask))
+        x = self.residual_connection[0](x, lambda x: self.cross_attention(x, encoder_output, encoder_output, src_mask))
+        x = self.residual_connection[1](x, self.feed_forward)
+        return x
+
+class Decoder(nn.Module):
+
+    def __init__(self, layers: nn.ModuleList):
+        self.layers = layers
+        self.norm = LayerNormalization()
+
+    def forward(self, encoder_output, src_mask, tgt_mask):
+        for layer in self.layers:
+            x = layer(x, encoder_output, src_mask, tgt_mask)
+        return self.norm(x)
+
+class Projection(nn.Module):
+
+    def __init__(self, vocab_size:int, d_model:int):
+        self.vocal_size = vocab_size
+        self.d_model = d_model
+        self.projection = nn.Linear(d_model, vocab_size)
+
+    def forward(self, x):
+        # (batch, max_seq_len, d_model) -> (batch, max_seq_len, vocab_size)
+        return torch.log_softmax(self.projection(x), dim=-1)</code></pre>
+
+<pre><code class="python">class Transformer(nn.Module):
+
+    def __init__(self, encoder: Encoder, deconder: Decoder, src_embedding: InputEmbedding, tgt_embedding:InputEmbedding, src_position: PositionalEncoding, tgt_position: PositionalEncoding, projection: Projection):
+        self.encoder = encoder
+        self.decoder = decoder
+        self.src_embedding = src_embedding
+        self.tgt_embedding = tgt_embedding
+        self.src_position = src_position
+        self.tgt_position = tgt_position
+        self.projection = projection
+
+    def encode(self, src, src_mask):
+        src = self.src_embedding(src)
+        src = self.src_position(src)
+        return self.encoder(src, src_mask)
+
+    def decode(self, encoder_output, src_mask, tgt, tgt_mask):
+        tgt = self.tgt_embedding(tgt)
+        tgt = self.src_position(tgt)
+        return self.encoder(tgt, encoder_output, src_mask, tgt_mask)
+
+    def project(self, x):
+        return self.projection(x)
+
+def build_transformer(src_vocab_size: int, tgt_vocab_size: int, src_seq_len: int, tgt_seq_len: int, d_model=512, num_layers=6, num_heads=8, dropout=0.1, d_ff=2048):
+
+    # Create embedding layers
+    src_embedding = InputEmbedding(src_vocab_size, d_model)
+    tgt_embedding = InputEmbedding(tgt_vocab_size, d_model)
+
+    # Positional encoding layers
+    src_position = PositionalEncoding(d_model, src_seq_len, dropout)
+    tgt_position = PositionalEncoding(d_model, tgt_seq_len, dropout)
+
+    # Encoder
+    encoders = []
+    for _ in range(n):
+        encoders.append(EncoderBlock(MultiHeadAttention(d_model, num_heads, dropout), FeedForwardNetwork(d_model, d_ff, dropout), dropout))
+    encoder = Encoder(nn.ModuleList(encoders))
+
+    # Decoder
+    decoders = []
+    for _ in range(n):
+        decoders.append(DecoderBlock(MultiHeadAttention(d_model, num_heads, dropout), CrossAttention(d_model, h, dropout), FeedForwardNetwork(d_model, d_ff, dropout), dropout))
+    decoder = Decoder(nn.ModuleList(decoders))
+
+    transformer(encoder, decoder, src_embedding, tgt_embedding, src_positional, tgt_position, Projection(d_model, tgt_vocab_size))
+
+    # Initialize parameter
+    for p in transformer.parameters():
+        if p.dim() > 1:
+            nn.init.xavier_uniform_(p)
+
+    return transformer</code></pre>
+
+<pre><code class="python">import torch
+import torch.nn as nn
+
+from torch.utils.data import Dataset, DataLoader, random_split
+from torch.utils.tensorboard import SummaryWriter
+from datasets import load_dataset
+from tokenizers import Tokenizer
+from tokenizers.model import WordLevel
+from tokenizers.trainers import WordLevelTrainer
+from tokenizers.pre_tokenizers import Whitespace
+from pathlib import Path
+from tqdm import tqdm
+
+def greedy_decode(model, source, source_mask, tokenizer_src, tokenizer_tgt, max_len, device):
+    sos_index = tokenizer_tgt.token_to_id("[SOS]")
+    eos_index = tokenizer_tgt.token_to_id("[EOS]")
+
+    # Precompute encoder output and reuse it for every token we get from the decoder
+    encoder_output = model.encode(source, source_mask)
+
+    # Initialize decoder input with sos token
+    decoder_input = torch.empty(1,1).fill_(sos_index).type_as(source).to(device)
+
+    while True:
+        if decoder_input.size(1) == max_len:
+            break
+
+        # Build mask for target (decoder input)
+        decoder_mask = casual_mask(decoder_input.size(1)).type_as(source_mask).to(device)
+
+        # Compute decoder output
+        out = model.decode(encoder_output, source_mask, decoder_input, decoder_mask)
+
+        # Get next token
+        prob = model.preject(out[:,-1])
+
+        # Select token with max probability
+        _, next_word = torch.max(prob, dim=1)
+
+        decoder_input = torch.cat([decoder_input, torch.empty(1,1).type_as(source).fill_(next_word.item()).to(device)], dim=1)
+
+        if next_word = eos_index:
+            break
+
+    return decoder_input.squeeze(0)
+
+def run_validation(model, validation_dataset, tokenizer_src, tokenizer_tgt, max_len, device, print_msg, global_step, writer, num_examples=2):
+    model.eval()
+    count = 0
+
+    # size of control window
+    control_width = 80
+
+    with torch.no_grad():
+        for batch in validation_dataset:
+            count += 1
+
+            encoder_input = batch["encoder_input"].to(device)
+            encoder_mask = batch["encoder_mask"].to(device)
+
+            model_out = greedy_decode(model, source, source_mask, tokenizer_src, tokenizer_tgt, max_len, device)
+
+            src_text = batch["src_text"][0]
+            tgt_text = batch["tgt_text"][0]
+            model_out_text = tokenizer_tgt.decode(model_out.detach().cpu().numpy())
+
+            print_msg("-"*control_with)
+            print_msg(f"SOURCE: {src_text}")
+            print_msg(f"TARGET: {tgt_text}")
+            print_msg(f"PREDICTED: {model_out_text}")
+
+            if count == num_examples:
+                break
+
+def get_all_sentences(dataset, language):
+    for item in dataset:
+        yield item["translation"][language]
+
+def get_or_build_tokenizer(config, dataset, language):
+    tokenizer_path = Path(config["tokenizer_file"].format(language))
+    if not Path.exist(tokenizer_path):
+        tokenizer = Tokenizer(WordLevel(unk_token="[UNK]"))
+        tokenizers.pre_tokenizers = WhiteSpace()
+        trainer = WordLevelTrainer(special_tokens=["[UNK]", "[PAD]", "[SOS]", "[EOD]"], min_frequency=2)
+        tokenizer.train_from_iterator(get_all_sentences(dataset, language), trainer=trainer)
+        tokenizer.save(str(tokenizer_path))
+    else:
+        tokenizer = Tokenizer.from_file(str(tokenizer_path))
+    return tokenizer
+
+def get_dataset(config):
+    dataset_raw = load_dataset("opus_books", f"{config["lang_src"]}-{config["lang_tgt"]}", split="train")
+
+    # Build tokenizer
+    tokenizer_src = get_or_build_tokenizer(config, dataset_raw, config["lang_src"])
+    tokenizer_tgt = get_or_build_tokenizer(config, dataset_raw, config["lang_tgt"])
+
+    # 90-10 split
+    train_dataset_size = int(0.9*len(dataset_raw))
+    validation_dataset_size = int(0.1*len(dataset_raw))
+    train_dataset_raw, validation_dataset_raw = random_split(dataset_raw, [train_dataset_size, validation_dataset_size])
+
+    train_dataset = BilingualDataset(train_dataset_raw, tokenizer_src, tokenizer_tgt, config["lang_src"], config["lang_tgt"], config["seq_len"])
+    validation_dataset = BilingualDataset(validation_dataset_raw, tokenizer_src, tokenizer_tgt, config["lang_src"], config["lang_tgt"], config["seq_len"])
+
+    max_len_src, max_len_tgt = 0, 0
+
+    for item in dataset_raw:
+        src_ids = tokenizer_src.encode(item["translation"][config["lang_src"]]).ids
+        tgt_ids = tokenizer_src.encode(item["translation"][config["lang_tgt"]]).ids
+        max_len_src = max(max_len_src, len(src_ids))
+        max_len_tgt = max(max_len_tgt, len(tgt_ids))
+
+    train_dataloader = DataLoader(trains_dataset, batch_size=config["batch_size"], shuffle=True)
+    validation_dataloader = DataLoader(validation_dataset, batch_size=1, shuffle=True)
+
+    return train_dataloader, validation_dataloader, tokenizer_src, tokenizer_tgt
+
+def get_model(config, src_vocal_len, tgt_vocal_len):
+
+    model = build_transformer(src_vocal_len, tgt_vocal_len, config["seq_len"], config["seq_len"], config["d_model"])
+    return model
+
+def train_model(config):
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print("Using device {device}")
+
+    Path(config["model_folder"]).mkdir(parents=True, exist_ok=True)
+
+    train_dataloader, val_dataloader, tokenizer_src, tokenizer_tgt = get_ds(config)
+
+    write = SummaryWriter(config["experiment_name"])
+
+    optimizer =
+
+    initial_epoch = 0
+    global_step = 0
+    if config["preload"]:
+        model_filename = get_weights_file_path(config, config["preload"])
+        print("Pre-loading model {model_filename}")
+        state = torch.load(model_filename)
+        initial_epoc = state["epoch"] + 1
+        optimizer.load_state_dict(state["optimizer_state_dict"])
+        global_step = state["global_step"]
+
+    loss_fn = nn.CrossEntropyLoss(ignore_index=tokenizer_src.token_to_id("[PAD]"), label_smoothing=0.1).to(device)
+
+    for epoch in range(initial_epoc, config["num_epocs"]):
+        
+        batch_iterator = tqdm(train_dataloader, desc=f'Processing epoch {epochL:02d}')
+
+        for batch in batch_iterator:
+            model.train()
+
+            encoder_input = batch["encoder_input"].to(device)  # (8, seq_len)
+            decoder_input = batch["decoder_input"].to(device)  # (8, seq_len)
+            encoder_mask = batch["encoder_mask"].to(device)  # (8, 1, 1, seq_len)
+            decoder_mask = batch["decoder_mask"].to(device)  # (8, 1, seq_len, seq_len)
+
+            # Run tensors through transformer
+            encoder_output = model.encode(encoder_input, encoder_mask)  # (8, seq_len, d_model)
+            decoder_output = model.decode(encoder_output, encoder_mask, decoder_input, decoder_mask)  # (8, seq_len, d_model)
+            proj_output = model.project(decoder_output)  # (8, seq_len, tgt_vocab_size)
+
+            label = batch["label"].to(device)  # (8, seq_len)
+
+            # (8, seq_len, tgt_vocab_size) -> # (8 * seq_len, tgt_vocab_size)
+            loss = loss_fn(proj_output.view(-1, tokenizer_tgt.get_vocab_size()), label_view(-1))
+            batch_iterator.set_postfix({f"loss": f"{loss.item():6.3f}"})
+
+            # Log the loss
+            writer.add_scalar("train_loss", loss.item(), global_step)
+            writer.flush()
+
+            # Backprop
+            loss.backward()
+
+            # Update weights
+            optimizer.stop()
+            optimizer.zero_grad()
+
+            global_step += 1
+
+        run_validation(model, val_dataloader, tokenizer_src, tokenizer_tgt, config["seq_len"], device, lambda msg: batch_iterator.write(msg), global_step, writer, num_examples=2)
+
+        # Save model at the end of every epoch
+        model_filename = get_weights_file_path(config, f"{epoch:02d}")
+        torch.save({
+            "epoch": epoch,
+            "model_state_dict": model.state_dict(),
+            "optimizer_state_dict": optimizer.state_dict(),
+            "global_step": global_step()
+        }, model_filename)
+
+if __name__ == "main":
+    warnings.filterwarnings("ignore")
+    config = get_config()
+    train_model(config)</code></pre>
+
+<pre><code class="python">import torch
+import torch.nn as nn
+
+from torch.utils.data import Dataset
+
+class BilingualDataset(Dataset):
+
+    def __init__(self, dataset, tokenizer_src, tokenizer_tgt, src_lang, tgt_lang, seq_len):
+
+        self.dataset = dataset
+        self.tokenizer_src = tokenizer_src
+        self.tokenizer_tgt = tokenizer_tgt
+        self.src_lang = src_lang
+        self.tgt_lang = tgt_lang
+        self.seq_len = seq_len
+
+        self.sos_token = torch.Tensor(tokenizer_src.token_to_id(["SOS"], dtype=torch.int64))
+        self.eos_token = torch.Tensor(tokenizer_src.token_to_id(["EOS"], dtype=torch.int64))
+        self.pad_token = torch.Tensor(tokenizer_src.token_to_id(["PAD"], dtype=torch.int64))
+
+    def __len__(self):
+
+        return len(self.dataset)
+
+    def __get_item__(self, index: any):
+        src_tgt_pair = self.dataset[index]
+        src_text = src_tgt_pair["translation"][src_lang]
+        tgt_text = src_tgt_pair["translation"][tgt_lang]
+
+        enc_input_tokens = self.tokenizer_src.encode(src_text).ids
+        dec_input_tokens = self.tokenizer_tgt.encode(tgt_text).ids
+
+        enc_num_padding_tokens = self.seq_len - len(enc_input_tokens) - 2
+        dec_num_padding_tokens = self.seq_len - len(dec_input_tokens) - 1
+
+        if enc_num_padding_tokens < 0 or dec_num_padding_tokens < 0:
+            raise ValueError("sentence is too long")
+
+        # Add SOS and EOS to source text
+        encoder = torch.cat(
+            [
+                self.sos_token,
+                torch.tensor(enc_input_tokens, dtype=torch.int64),
+                self.eos_token,
+                torch.tensor([self.pad_token] * enc_num_padding_tokens, dtype=torch.int64)
+            ]
+        )
+
+        # Add SOS to target text
+        decoder = torch.cat(
+            [
+                self.sos_token,
+                torch.tensor(dec_input_tokens, dtype=torch.int64),
+                torch.tensor([self.pad_token] * dec_num_padding_tokens, dtype=torch.int64)
+            ]
+        )
+
+        # Add EOS to label (ground truth - what we expect from decoder)
+        label = torch.cat(
+            [
+                torch.tensor(dec_input_tokens, dtype=torch.int64),
+                self.sos_token,
+                torch.tensor([self.pad_token] * dec_num_padding_tokens, dtype=torch.int64)
+            ]
+        )
+
+        return {
+            "encoder_input": encoder_input,  # (seq_len)
+            "decoder_input": decoder_input,  # (seq_len)
+            "encoder_mask": (encoder_input != self.pad_token).unsqeeze(0).unsqeeze(0).int(),  # (1, 1, seq_len)
+            "decoder_mask": (decoder_input != self.pad_token).unsqeeze(0).unsqeeze(0).int() & casual_mask(decoder_input.size(0)),  # (1, seq_len) (1, seq_len, seq_len)
+            "label": label,  # (seq_len)
+            "src_text": src_text,
+            "tgt_text": tgt_text
+        }
+
+    def casual_mask(size):
+
+        mask = torch.triu(torch.ones(1, size, size), diagonal=1).type(torch.int)
+        return mask == 0</code></pre>
+
+<pre><code>from pathlib import Path
+
+def get_config():
+
+    return {
+        "batch_size": 8,
+        "num_epocs": 20,
+        "lr": 10**-4,
+        "seq_len": 350,
+        "d_model": 512,
+        "lang_src": "en",
+        "lang_tgt": "it",
+        "model_folders": "weights",
+        "model_filename": "tmodel_",
+        "preload": None,
+        "tokenizer_file": "tokenizer_{0}.json",
+        "experiment_name": "runs/tmodel"
+    }
+
+def get_weights_file_path():
+    model_folder = config["model_folder"]
+    model_basename = config["model_basename"]
+    model_filename = config["model_filename"]
+    return str(Path('.')/model_folder/model_filename)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Umar Jamil
+  </div>
+</div>
+
+<div class="card mb-4" id="bert-">
+  <div class="card-body">
+    <h2 class="card-title">BERT (Bi-directional encoder representation from transformers)</h2>
+    <ul>
+      <li>Does not use decoder layers</li>
+      <li>Masked tokens are in the attention layers of the encoder</li>
+      <ul>
+        <li>Masked multi-head attention layer in the original transformer, that masks the rest of the sequence, impedes the attention process</li>
+        <ul>
+          <li>Ex., <q>The cat sat on it because it was a nice rug</q></li>
+          <li>If reached the word <q>it</q>, the input of the encode could be <q>The cat sat on it&lt;masked sequence&gt;</q></li>
+        </ul>
+        <li>Let attention head attend to all the words from left to right and right to left</li>
+        <li>Self-attention mask of an encoder could do the job without being hindered by the masked multi-head attention sub-layer of the decoder</li>
+      </ul>
+      <li>Input embedding and positional encoding of BERT sub-layer</li>
+      <ul>
+        <li>A sequence of words is broken down into tokens</li>
+        <li>A [MASK] token randomly replaces the inital word tokens for masked language modeling training</li>
+        <li>A [CLS] classification token is inserted at the beginning of a sequence for classification purpose</li>
+        <li>A [SEP] token separates two sentences for NSP training</li>
+        <li>Sentence embedding is added to token embedding, so that sentence A has a different sentence embedding value than sentence B</li>
+        <li>Positional encoding is learned (The positional encoding method of original transformer is not applied)</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Comparison</h3>
+    <ul>
+      <li>Original transformer</li>
+      <ul>
+        <li>Number of encoder and decoder stacks \( N = 6 \)</li>
+        <li>Number of dimensions \( d_{model} = 512 \)</li>
+        <li>Number of attention heads \( A = 8 \)</li>
+        <li>Number of dimensions of attention heads \( d_{k} = \dfrac{d_{model}}{A} = \dfrac{512}{8} = 64 \)</li>
+      </ul>
+      <li>BERT base</li>
+      <ul>
+        <li>Number of encoder stacks \( N = 12 \)</li>
+        <li>Number of dimensions \( d_{model} = 768 \)</li>
+        <li>Number of attention heads \( A = 12 \)</li>
+        <li>Number of dimensions of attention heads \( d_{k} = \dfrac{d_{model}}{A} = \dfrac{768}{12} = 64 \)</li>
+      </ul>
+      <li>BERT large</li>
+      <ul>
+        <li>Number of encoder stacks \( N = 24 \)</li>
+        <li>Number of dimensions \( d_{model} = 1024 \)</li>
+        <li>Number of attention heads \( A = 16 \)</li>
+        <li>Number of dimensions of attention heads \( d_{k} = \dfrac{d_{model}}{A} = \dfrac{1024}{16} = 64 \)</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Masked language modeling</h3>
+    <ul>
+      <li>BERT encoder makes a random token to make a prediction</li>
+      <ul>
+        <li>Ex. <q>The cat sat on it [MASK] because it was a nice rug.</q></li>
+      </ul>
+      <li>The multi-attention sub-layer can now see the whole sequence, run the self-attention process, and predict the masked token</li>
+      <li>Input sequence is masked in a tricky way</li>
+      <ul>
+        <li>Surprise the model by not masking a single token on 10% of dataset</li>
+        <ul>
+          <li>Ex. <q>The cat sat on it [because] it was a nice rug.</q></li>
+        </ul>
+        <li>Surprise the model by replacing the token with a random token on 10% of dataset</li>
+        <ul>
+          <li>Ex. <q>The cat sat on it [often] it was a nice rug.</q></li>
+        </ul>
+        <li>Replace a token by a [MASK] token on 80% of dataset</li>
+        <ul>
+          <li>Ex. <q>The cat sat on it [MASK] it was a nice rug.</q></li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Next sentence prediction</h3>
+    <ul>
+      <li>Input contains two sentences</li>
+      <ul>
+        <li>In 50% of the cases, the second sentence is the actual sentence of a document</li>
+        <li>In 50% of the cases, the second sentence is selected randomly</li>
+      </ul>
+      <li>Two new tokens are added</li>
+      <ul>
+        <li>[CLS] - binary classification token to predict if the second sentence follows the first sentence</li>
+        <li>[SEP] - separation token that signals the end of a sequence</li>
+        <li>Ex. <q>The cat slept on the rug. It likes sleeping all day.</q></li>
+        <ul>
+          <li>Becomes <q>[CLS] the cat slept on the rug [SEP] it likes sleep ##ing all day[SEP]</q></li>
+        </ul>
+      </ul>
+      <li>Additional encoding information is needed to distinguish sequence A from sequence B</li>
+      <li>Embedding process</li>
+      <ul>
+        <li>Input - [CLS] The cat slept on the rug [SEP] it likes sleep ##ing [SEP]</li>
+        <li>Token embeddings - E[CLS] E[The] E[cat] E[slept] E[on] E[the] E[rug] E[SEP] E[it] E[likes] E[sleep] E[##ing] E[SEP]</li>
+        <li>Sentence embeddings - E[A] E[A] E[A] E[A] E[A] E[A] E[A] E[A] E[B] E[B] E[B] E[B] E[B]</li>
+        <li>Positional embeddings - E[0] E[1] E[2] E[3] E[4] E[5] E[6] E[7] E[8] E[9] E[10] E[11] E[12]</li>
+        <li>Input embeddings are obtained by summing the token embeddings, sentence embeddings, and positional embeddings</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Pre-training and fune-tuning</h3>
+    <ul>
+      <li>Pre-training</li>
+      <ul>
+        <li>Define model architecture - number of layers, heads, dimensions, etc</li>
+        <li>Train the model on MLM and NSP tasks</li>
+      </ul>
+      <li>Fine-tuning</li>
+      <ul>
+        <li>Initialize downstream model chosen with trained parameters of pretained model</li>
+        <li>Fine-tune the parameters for specific downstream tasks (Ex. recognize textual entailment, question answering, situations with adversarial generations)</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Transformers for Natural Language Processing, Denis Rothman
+  </div>
+</div>
+
+<div class="card mb-4" id="bert-">
+  <div class="card-body">
+    <h2 class="card-title">Fine-tuning</h2>
+
+    <h3 class="card-title">Import modules</h3>
+
+<pre><code class="python">import transformers
+import torch
+import torch.nn as nn
+from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
+from keras.utils import pad_sequences
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import matthews_corrcoef
+from transformers import BertTokenizer, BertModel, BertConfig
+from transformers import AdamW, BertForSequenceClassification, get_linear_schedule_with_warmup
+from tqdm import tqdm, trange  # For progress bars
+import pandas as pd
+import io
+import numpy as np
+import matplotlib.pyplot as plt
+from IPython.display import Image  # For image rendering</code></pre>
+
+    <h3 class="card-title">Load dataset</h3>
+    <ul>
+      <li>Corpus of Linguistic Accepability (CoLA)</li>
+    </ul>
+
+<pre><code class="python">df = pd.read_csv("in_domain_train.tsv", delimiter='\t', header=None, names=['sentence_source', 'label', 'label_notes', 'sentence'])</code></pre>
+
+    <h3 class="card-title">Create sentences, label lists</h3>
+
+<pre><code class="python">labels = df.label.values
+sentences = df.sentence.values
+# Add CLS and SEP tokens at the beginning and end of each sentence
+sentences = ["[CLS] " + sentence + " [SEP]" for sentence in sentences]</code></pre>
+
+    <h3 class="card-title">Process data</h3>
+
+<pre><code class="python"># Set the maximum sequence length
+# The longest sequence in training set is 47, but will leave room on the end
+# In the original paper, the authors used a length of 512
+MAX_LEN = 128
+
+# Use BERT tokenizer to convert the tokens to their index numbers in the BERT vocabulary
+input_ids = [tokenizer.convert_tokens_to_ids(x) for x in tokenized_texts]
+
+# Pad our input tokens
+input_ids = pad_sequences(input_ids, maxlen=MAX_LEN, dtype="long", truncating="post", padding="post")</code></pre>
+
+    <h3 class="card-title">Create attention masks</h3>
+
+<pre><code class="python">attention_masks = []
+
+# Create a mask of 1s for each token followed by 0s for padding
+for seq in input_ids:
+    seq_mask = [float(i>0) for i in seq]
+    attention_masks.append(seq_mask)</code></pre>
+
+    <h3 class="card-title">Split data</h3>
+
+<pre><code class="python">train_inputs, validation_inputs, train_labels, validation_labels = train_test_split(input_ids, labels, random_state=2018, test_size=0.1)
+train_masks, validation_masks, _, _ = train_test_split(attention_masks, input_ids, random_state=2018, test_size=0.1)</code></pre>
+
+    <h3 class="card-title">Convert data to torch tensors</h3>
+
+<pre><code class="python">train_inputs = torch.tensor(train_inputs)
+validation_inputs = torch.tensor(validation_inputs)
+train_labels = torch.tensor(train_labels)
+validation_labels = torch.tensor(validation_labels)
+train_masks = torch.tensor(train_masks)
+validation_masks = torch.tensor(validation_masks)</code></pre>
+
+    <h3 class="card-title">Select batch size and create iterator</h3>
+
+<pre><code class="python"># Select a batch size for training
+# For fine-tuning BERT on a specific task, the authors recommend a batch size of 16 or 32
+batch_size = 32
+
+# Create an iterator of data with torch DataLoader
+# This helps save on memory during training
+# With an iterator (unlike a for loop) the entire dataset does not need to be loaded into memory
+
+train_data = TensorDataset(train_inputs, train_masks, train_labels)
+train_sampler = RandomSampler(train_data)
+train_dataloader = DataLoader(train_data, sampler=train_sampler, batch_size=batch_size)
+
+validation_data = TensorDataset(validation_inputs, validation_masks, validation_labels)
+validation_sampler = SequentialSampler(validation_data)
+validation_dataloader = DataLoader(validation_data, sampler=validation_sampler, batch_size=batch_size)</code></pre>
+
+    <h3 class="card-title">BERT model configuration</h3>
+
+<pre><code class="python"># Initialize BERT bert-base-uncased style configuration
+configuration = BertConfig()
+
+# Initialize model from bert-base-uncased style configuration
+model = BertModel(configuration)
+
+# Access the model configuration
+configuration = model.config</code></pre>
+
+    <h3 class="card-title">Load Hugging Face BERT uncased base model</h3>
+
+<pre><code class="python">model = BertForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=2)
+model = nn.DataParallel(model)
+model.to(device)</code></pre>
+
+    <h3 class="card-title">Optimizer grouped parameters</h3>
+
+<pre><code class="python"># Don't apply weight decay to any parameters whose names include these tokens
+# Here, the BERT doesn't have `gamma` or `beta` parameters, only `bias` terms
+param_optimizer = list(model.named_parameters())
+no_decay = ['bias', 'LayerNorm.weight']
+
+# Separate the `weight` parameters from the `bias` parameters
+#   For the `weight` parameters, this specifies a 'weight_decay_rate' of 0.01
+#   For the `bias` parameters, the 'weight_decay_rate' is 0.0
+optimizer_grouped_parameters = [
+    # Filter for all parameters which *don't* include 'bias', 'gamma', 'beta'
+    {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)],
+     'weight_decay_rate': 0.1},
+
+    # Filter for parameters which *do* include those
+    {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)],
+     'weight_decay_rate': 0.0}
+]
+# `optimizer_grouped_parameters` only includes the parameter values, not the names</code></pre>
+
+    <h3 class="card-title">Hyperparameters</h3>
+
+<pre><code class="python"># Number of training epochs (authors recommend between 2 and 4)
+epochs = 4
+
+optimizer = AdamW(optimizer_grouped_parameters,
+                  lr = 2e-5,  # args.learning_rate - default is 5e-5, our notebook had 2e-5
+                  eps = 1e-8  # args.adam_epsilon - default is 1e-8
+                  )
+# Total number of training steps is number of batches * number of epochs
+# `train_dataloader` contains batched data so `len(train_dataloader)` gives the number of batches
+total_steps = len(train_dataloader) * epochs
+
+# Create the learning rate scheduler
+scheduler = get_linear_schedule_with_warmup(optimizer,
+                                            num_warmup_steps = 0,  # Default value in run_glue.py
+                                            num_training_steps = total_steps)</code></pre>
+
+    <h3 class="card-title">Hyperparameters</h3>
+
+<pre><code class="python">def flat_accuracy(preds, labels):
+    pred_flat = np.argmax(preds, axis=1).flatten()
+    labels_flat = labels.flatten()
+    return np.sum(pred_flat == labels_flat) / len(labels_flat)</code></pre>
+
+<pre><code class="python">t = []
+
+# Store loss and accuracy for plotting
+train_loss_set = []
+
+# trange is a tqdm wrapper around the normal python range
+for _ in trange(epochs, desc="Epoch"):
+
+    # Training
+
+    # Set model to training mode
+    model.train()
+
+    # Tracking variables
+    tr_loss = 0
+    nb_tr_examples, nb_tr_steps = 0, 0
+
+    # Train the data for one epoch
+    for step, batch in enumerate(train_dataloader):
+
+        # Add batch to GPU
+        batch = tuple(t.to(device) for t in batch)
+
+        # Unpack the inputs from our dataloader
+        b_input_ids, b_input_mask, b_labels = batch
+
+        # Clear out the gradients (by default they accumulate)
+        optimizer.zero_grad()
+
+        # Forward pass
+        outputs = model(b_input_ids, token_type_ids=None, attention_mask=b_input_mask, labels=b_labels)
+        loss = outputs['loss']
+        train_loss_set.append(loss.item())
+
+        # Backward pass
+        loss.backward()
+
+        # Update parameters and take a step using the computed gradient
+        optimizer.step()
+
+        # Update the learning rate
+        scheduler.step()
+
+        # Update tracking variables
+        tr_loss += loss.item()
+        nb_tr_examples += b_input_ids.size(0)
+        nb_tr_steps += 1
+
+    print("Train loss: {}".format(tr_loss/nb_tr_steps))
+
+    # Validation
+
+    # Put model in evaluation mode to evaluate loss on the validation set
+    model.eval()
+
+    # Tracking variables
+    eval_loss, eval_accuracy = 0, 0
+    nb_eval_steps, nb_eval_examples = 0, 0
+
+    # Evaluate data for one epoch
+    for batch in validation_dataloader:
+
+        # Add batch to GPU
+        batch = tuple(t.to(device) for t in batch)
+
+        # Unpack the inputs from our dataloader
+        b_input_ids, b_input_mask, b_labels = batch
+
+        # Tell the model not to compute or store gradients, saving memory and speeding up validation
+        with torch.no_grad():
+            # Forward pass, calculate logit predictions
+            logits = model(b_input_ids, token_type_ids=None, attention_mask=b_input_mask)
+
+        # Move logits and labels to CPU
+        logits = logits['logits'].detach().cpu().numpy()
+        label_ids = b_labels.to('cpu').numpy()
+
+        tmp_eval_accuracy = flat_accuracy(logits, label_ids)
+
+        eval_accuracy += tmp_eval_accuracy
+        nb_eval_steps += 1</code></pre>
+
+    <h3 class="card-title">Predict and evaluate using the holdout dataset</h3>
+
+<pre><code class="python">df = pd.read_csv("out_of_domain_dev.tsv", delimiter='\t', header=None, names=['sentence_source', 'label', 'label_notes', 'sentence'])</code></pre>
+
+<pre><code class="python"># Create sentence and label lists
+sentences = df.sentence.values
+
+# We need to add special tokens at the beginning and end of each sentence for BERT to work properly
+sentences = ["[CLS] " + sentence + " [SEP]" for sentence in sentences]
+labels = df.label.values
+tokenized_texts = [tokenizer.tokenize(sent) for sent in sentences]
+
+MAX_LEN = 128
+
+# Use the BERT tokenizer to convert the tokens to their index numbers in the BERT vocabulary
+input_ids = [tokenizer.convert_tokens_to_ids(x) for x in tokenized_texts]
+# Pad our input tokens
+input_ids = pad_sequences(input_ids, maxlen=MAX_LEN, dtype="long", truncating="post", padding="post")
+# Create attention masks
+attention_masks = []
+
+# Create a mask of 1s for each token followed by 0s for padding
+for seq in input_ids:
+  seq_mask = [float(i>0) for i in seq]
+  attention_masks.append(seq_mask)
+
+prediction_inputs = torch.tensor(input_ids)
+prediction_masks = torch.tensor(attention_masks)
+prediction_labels = torch.tensor(labels)
+
+batch_size = 32
+
+prediction_data = TensorDataset(prediction_inputs, prediction_masks, prediction_labels)
+prediction_sampler = SequentialSampler(prediction_data)
+prediction_dataloader = DataLoader(prediction_data, sampler=prediction_sampler, batch_size=batch_size)</code></pre>
+
+<pre><code class="python">def softmax(logits):
+    e = np.exp(logits)
+    return e / np.sum(e)
+
+# Put model in evaluation mode
+model.eval()
+
+# Tracking variables
+raw_predictions, predicted_classes, true_labels = [], [], []
+
+# Predict
+for batch in prediction_dataloader:
+
+    # Add batch to GPU
+    batch = tuple(t.to(device) for t in batch)
+
+    # Unpack the inputs from dataloader
+    b_input_ids, b_input_mask, b_labels = batch
+
+    # Tell the model not to compute or store gradients, saving memory and speeding up prediction
+    with torch.no_grad():
+      # Forward pass, calculate logit predictions
+      outputs = model(b_input_ids, token_type_ids=None, attention_mask=b_input_mask)
+
+    # Move logits and labels to CPU
+    logits = outputs['logits'].detach().cpu().numpy()
+    label_ids = b_labels.to('cpu').numpy()
+
+    # Convert input_ids back to words
+    b_input_ids = b_input_ids.to('cpu').numpy()
+    batch_sentences = [tokenizer.decode(input_ids, skip_special_tokens=True) for input_ids in b_input_ids]
+
+    # Apply softmax function to convert logits into probabilities
+    probabilities = torch.nn.functional.softmax(torch.tensor(logits), dim=-1)
+
+    # The predicted class is the one with the highest probability
+    batch_predictions = np.argmax(probabilities, axis=1)
+
+    # Print the sentences and the corresponding predictions for this batch
+    for i, sentence in enumerate(batch_sentences):
+        print(f"Sentence: {sentence}")
+        print(f"Prediction: {logits[i]}")
+        print(f"Sofmax probabilities", softmax(logits[i]))
+        print(f"Prediction: {batch_predictions[i]}")
+        print(f"True label: {label_ids[i]}")
+
+    # Store raw predictions, predicted classes and true labels
+    raw_predictions.append(logits)
+    predicted_classes.append(batch_predictions)
+    true_labels.append(label_ids)</code></pre>
+
+    <h3 class="card-title">Evaluating using Matthews Correlation Coefficient</h3>
+    <ul>
+      <li>\( \text{MCC} = \dfrac{TP \times TN - FP \times FN}{\sqrt{(TP+FP)(TP+FN)(TN+FP)(TN+FN)}} \)</li>
+    </ul>
+
+<pre><code class="python"># Initialize an empty list to store Matthews correlation coefficient for each batch
+matthews_set = []
+
+# Iterate over each batch
+for i in range(len(true_labels)):
+    # Calculate the Matthews correlation coefficient for this batch
+
+    # true_labels[i] are the true labels for this batch
+    # predicted_classes[i] are the predicted classes for this batch
+    # We don't need to use np.argmax because predicted_classes already contains the predicted classes
+
+    matthews = matthews_corrcoef(true_labels[i], predicted_classes[i])
+
+    # Add the result to our list
+    matthews_set.append(matthews)
+
+# Flatten the true_labels and predicted_classes list of lists into single lists
+true_labels_flattened = [label for batch in true_labels for label in batch]
+predicted_classes_flattened = [pred for batch in predicted_classes for pred in batch]
+
+# Calculate the MCC for the entire set of predictions
+mcc = matthews_corrcoef(true_labels_flattened, predicted_classes_flattened)</code></pre>
+
+    <h3 class="card-title">Save the model</h3>
+    <ul>
+      <li>The saved <code>/content/model</code> director contains</li>
+      <ul>
+        <li><code>tokenizer_config.json</code> - configuration details specific to the tokenizer</li>
+        <li><code>special_tokens_map.json</code> - mappings for any special tokens</li>
+        <li><code>vocab.txt</code> - vocabulary of tokens that the tokenizer can recognize</li>
+        <li><code>added_tokens.json</code> - any tokens that were added to the tokenizer after its initial creation</li>
+      </ul>
+    </ul>
+
+<pre><code class="python"># Specify a directory to save your model and tokenizer
+save_directory = "/content/model"
+
+# If model is wrapped in DataParallel, access the original model using .module and then save
+if isinstance(model, torch.nn.DataParallel):
+    model.module.save_pretrained(save_directory)
+else:
+    model.save_pretrained(save_directory)
+
+# Save the tokenizer
+tokenizer.save_pretrained(save_directory)</code></pre>
+
+    <h3 class="card-title">Predict</h3>
+
+<pre><code class="python">def predict(sentence, model, tokenizer):
+
+    # Add [CLS] and [SEP] tokens
+    sentence = "[CLS] " + sentence + " [SEP]"
+
+    # Tokenize the sentence
+    tokenized_text = tokenizer.tokenize(sentence)
+
+    # Convert token to vocabulary indices
+    indexed_tokens = tokenizer.convert_tokens_to_ids(tokenized_text)
+
+    # Define a segment id (0 for all tokens; we don't have a second sequence)
+    segments_ids = [0] * len(tokenized_text)
+
+    # Convert inputs to PyTorch tensors
+    tokens_tensor = torch.tensor([indexed_tokens])
+    segments_tensors = torch.tensor([segments_ids])
+
+    # Make prediction
+    with torch.no_grad():
+        outputs = model(tokens_tensor, token_type_ids=segments_tensors)
+        logits = outputs.logits
+        predicted_label = torch.argmax(logits, dim=1).item()
+
+    return predicted_label</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Transformers for Natural Language Processing, Denis Rothman
   </div>
 </div>
 
@@ -2703,7 +4194,7 @@ fill_mask = pipeline(
       <li>Train Transformers on raw data instead of labeled data</li>
       <li>Decoder only stacks</li>
       <ul>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning/image/machine-learning-1/gpt-3-1.png" style="width: 500px; height: 700px" alt="Card image cap">
+        <img class="img-fluid" class="card-img-top" src="/machine-learning/image/ml-0/gpt-1.png" style="width: 500px; height: 700px" alt="Card image cap">
       </ul>
       <li>Four milestones</li>
       <ul>
