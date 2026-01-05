@@ -110,52 +110,51 @@
   <div class="card-body">
     <h2 class="card-title">Kth Largest Element in an Array (150)</h2>
 
-<pre><code class="python">class Solution:
-    def findKthLargest(self, nums: List[int], k: int) -> int:
+<pre><code class="python">from heapq import heappush, heappop
+
+class Solution:
+    def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+
+        # nums = [1,2,3,2,1,1] k = 2 ? [1,2]
+        # nums = [1,2,3,2,1,1] k = 1 ? [1]
+        # nums = [1,2,3,2,1,1] k = 3 ? [1,2,3]
+
+        # Compute frequency of each num
+        # Insert frequency into max heap of size k
+        # Return elements from the heap
+        # Time O(n+nlogk) n = len(nums)
+        # Space O(n+k)
 
         # Quickselect
-        # Partition array such that
-        #   Chooese pivot nums[p] (index p) 
-        #   Nums larger than nums[p] comes left side
-        #   Nums less than nums[p] comes right side
-        # If k > p, search on right
-        # If k < p, search on left
-        # If k == p, retur nums[p]
-        # k should be k - 1
+        # Store mapping between frequency and number
+        # Retrieve top k frequency by 
+        #   Parition freq array by random pivot
+        #   Nums greater than pivot comes left
+        #   Nums less than pivot go to right
+        # If k < p, search on right
+        # If k > p, search on left
+        # If k == p, return
+        # Time O(n) 
+        # Space O(n) for calculating frequency, O(1) for quickselect
 
-        n = len(nums)
+        min_heap, freq = [], defaultdict(int)
 
-        def partition(left, right):
+        for num in nums:
+            freq[num] += 1
 
-            p = random.randint(left, right)
-            p = (left+right) // 2
+        for key, val in freq.items():
+            heappush(min_heap, (val,key))
+            if len(min_heap) > k:
+                heappop(min_heap)
             
-            for i in range(left, right+1):
-                if i < p and nums[i] > nums[p]:
-                    nums[i], nums[p] = nums[p], nums[i]
-                if i > p and nums[i] < nums[p]:
-                    nums[i], nums[p] = nums[p], nums[i]
-                p = i
+        result = []
+        while min_heap:
+            result.append(heappop(min_heap)[1])
 
-            return p
-
-        def quickselect(left, right):
-
-            p = len(nums)
-            while True:
-                p = partition(left, right)
-                
-                if n - k > p:
-                    left = p + 1
-                elif n - k < p:
-                    right = p - 1
-                else:
-                    return nums[p]
-
-        return quickselect(0, n-1)</code></pre>
+        return result</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/merge-sorted-array">215. Kth Largest Element in an Array</a> | <a href="https://neetcode.io/problems/kth-largest-element-in-an-array">Kth Largest Element in an Array</a>
+    Reference: <a href="https://leetcode.com/problems/top-k-frequent-elements">215. Kth Largest Element in an Array</a> | <a href="https://neetcode.io/problems/kth-largest-element-in-an-array">Kth Largest Element in an Array</a>
   </div>
 </div>
 
