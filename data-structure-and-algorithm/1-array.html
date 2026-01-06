@@ -215,38 +215,34 @@
 <pre><code class="python">class Solution:
     def productExceptSelf(self, nums: List[int]) -> List[int]:
 
-        # If there is no zero in array, product is
-        # total product divided by itself
-        # If there is one zero in array, product is 
-        # zero except at the zero element
-        # If there is more than one zero in array,
-        # product is always zero
+        # [1,2,3,4] ? [24,12,8,6]
+        # [1,0,2,3] ? [0,6,0,0]
+        # [1,0,0,4] ? [0,0,0,0]
 
-        num_zeros, prod, prod_except_zero = 0, 1, 1
-        for num in nums:
-            if num == 0:
-                num_zeros += 1
-            else:
-                prod_except_zero *= num
-            prod *= num
-
-        result = []
-
+        # More than one zero ? return array of 0
+        # Exactly one zero? ? array has zero except one element
+        # No zero? Find total product and divide it by each element
+        # But this solution requires division
         # Time O(n)
-        # Space O(1)
-        #.  Ignoring space for result
-        if num_zeros == 0:
-            for num in nums:
-                result.append(prod//num)
-        elif num_zeros == 1:
-            for num in nums:
-                if num != 0:
-                    result.append(0)
-                else:
-                    result.append(prod_except_zero)
-        else:
-            for num in nums:
-                result.append(0)
+        # Space O(1) ignoring space for result
+        
+        # For each index, find product from left and right side
+        # Ex. [1,2,3,4] => Left product [1,1,2,6] right product [24,12,4,1] 
+        # Time O(n) n = len(nums)
+        # Space O(n)
+
+        n = len(nums)
+        left_product, right_product = [1] * n, [1] * n
+
+        for i in range(1, n):
+            left_product[i] = left_product[i-1] * nums[i-1]
+        
+        for i in range(n-2, -1, -1):
+            right_product[i] = right_product[i+1] * nums[i+1]
+        
+        result = []
+        for i in range(n):
+            result.append(left_product[i]*right_product[i])
 
         return result</code></pre>
   </div>
