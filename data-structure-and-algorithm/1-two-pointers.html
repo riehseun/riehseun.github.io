@@ -113,24 +113,29 @@
     <h2 class="card-title">Container With Most Water (75/150)</h2>
 
 <pre><code class="python">class Solution:
-    def maxArea(self, height: List[int]) -> int:
-        
-        # Water that can be stored between i and j
-        # min(heights[i], heights[j]) * (j-i)
-        # if heights[i] > heights[j], try moving j
+    def maxArea(self, heights: List[int]) -> int:
 
-        start, end, max_water = 0, len(height) - 1, 0
+        # [1,1,1] ? 2 (2 times 1)
+        # [2,1,2] ? 4 (2 times 2)
 
-        # Time O(n)
-        #   n = len(height)
+        # Water = min(heights[i], heights[j]) * (j-i)
+        # Iterate at both ends
+        # If heights[i] > heights[j], keep i by decreasing j
+        # Else, vice versa
+        # Time O(n) n = len(heights)
         # Space O(1)
-        while start < end:
-            water = min(height[start], height[end]) * (end-start)
+
+        i, j = 0, len(heights) - 1
+        max_water = 0
+
+        while i < j:
+            water = min(heights[i], heights[j]) * (j-i)
             max_water = max(max_water, water)
-            if height[start] > height[end]:
-                end -= 1
+
+            if heights[i] > heights[j]:
+                j -= 1
             else:
-                start += 1
+                i += 1
 
         return max_water</code></pre>
   </div>
