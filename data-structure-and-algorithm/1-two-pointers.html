@@ -145,33 +145,34 @@
 
 <pre><code class="python">class Solution:
     def threeSum(self, nums: List[int]) -> List[List[int]]:
-        
-        # Sort input nums
-        # Fix a number 
-        # Run two pointers between the next index and last index
 
+        # [-1,0,1,2,3] ? [[-1,0,1]]
+
+        # Sort array
+        # Fix a value
+        # Check from both ends to see value + nums[i] + nums[j] == 0
+        # Time O(nlogn+n**2) n = len(nums)
+        # Space O(1)
+        
         nums.sort()
         result = set()
 
-        # Time O(n**2)
-        #   n = len(nums)
-        # Space O(1)
-        #   Ignoring space for result 
-        for i, num in enumerate(nums):
-
-            start, end = i + 1, len(nums) - 1
-
-            while start < end:
-                sum = num + nums[start] + nums[end]
-                if sum > 0: 
-                    end -= 1
-                elif sum < 0:
-                    start += 1
+        for i in range(len(nums)):
+            # Skip duplicate check
+            if i != 0 and nums[i] == nums[i-1]:
+                continue
+            
+            j, k = i + 1, len(nums) - 1
+            while j < k:
+                three_sum = nums[j] + nums[i] + nums[k]
+                if three_sum < 0:
+                    j += 1
+                elif three_sum > 0:
+                    k -= 1
                 else:
-                    triplet = (nums[i], nums[start], nums[end])
-                    result.add(triplet)
-                    start += 1
-                    end -= 1
+                    result.add((nums[i], nums[j], nums[k]))
+                    j += 1
+                    k -= 1
 
         return list(result)</code></pre>
   </div>
