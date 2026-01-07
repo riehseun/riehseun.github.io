@@ -48,7 +48,7 @@
       <li><a href="#designing-machine-learning-systems-2">Introduction to machine learning system design</a></li>
       <li><a href="#designing-machine-learning-systems-3">Data engineering fundamentals</a></li>
       <li><a href="#designing-machine-learning-systems-4">Training data</a></li>
-      <li><a href="#designing-machine-learning-systems-">Feature engineering</a></li>
+      <li><a href="#designing-machine-learning-systems-5">Feature engineering</a></li>
       <li><a href="#designing-machine-learning-systems-">Model development and offline evaluation</a></li>
       <li><a href="#designing-machine-learning-systems-">Model deployment and prediction service</a></li>
       <li><a href="#designing-machine-learning-systems-">Data distribution shifts and monitoring</a></li>
@@ -402,7 +402,7 @@
   </div>
 </div>
 
-<div class="card mb-4" id="designing-machine-learning-systems-">
+<div class="card mb-4" id="designing-machine-learning-systems-5">
   <div class="card-body">
     <h2 class="card-title">Feature engineering</h2>
     <ul>
@@ -429,18 +429,19 @@
         <ul>
           <li>Delete - data quantity is reduced</li>
           <ul>
-            <li>Delete row to remove a data point - only small portion, for example less than 0.1%, should be removed</li>
-            <li>Delete column to remove a feature - important information may be removed, reducing model accuracy</li>
+            <li>Delete column - important feature may be removed, reducing model accuracy</li>
+            <li>Delete row - only values missing completely at random, and small portion such as less than 0.1% should be removed</li>
           </ul>
-          <li>Imputation - dataset gets noisy</li>
+          <li>Impute - dataset gets noisy</li>
           <ul>
-            <li>Fill with default value, mean, median, mode</li>
+            <li>Fill with default values like mean, median, mode</li>
           </ul>
         </ul>
       </ul>
       <li>Feature scaling</li>
       <ul>
-        <li>Models struggle with features that has skewed distribution</li>
+        <li>Normalize such as they have zero mean and unit variance</li>
+        <li>ML models struggle with features that has skewed distribution</li>
         <li>Log transformation - apply log function to features</li>
         <!-- <li>Feature scaling is not needed if using XGBoost</li>
         <li>Helps gradient descent to find the optimum faster</li>
@@ -483,8 +484,14 @@
       </ul>
       <li>Encoding</li>
       <ul>
+        <li>In practice, categories change</li>
         <li>Use hash function to generate hashed value of each category</li>
-        <li>Locality-sensitive hashing - similar categories are hashed into values close to each other</li>
+        <li>Hash value becomes index of category</li>
+        <li>Collisions can occur where two categories are assigned the same index</li>
+        <ul>
+          <li>Option 1. Very large hash space</li>
+          <li>Option 2. locality-sensitive hashing - similar categories are hashed into values close to each other</li>
+        </ul>
         <!-- <li>Convert categorical features to numerical feature</li>
         <li>Ex. integer encoding</li>
         <ul>
@@ -508,7 +515,14 @@
           </ul>
         </ul> -->
       </ul>
-      <li>Watch for data leakage</li>
+      <li>Feature crossing</li>
+      <ul>
+        <li>Combine features to generate new features</li>
+        <li>Useful to model non-linear relationship between features</li>
+        <li>Essential for models that can't learn or bad at learning non-linear relationships like linear regression, logistic regression</li>
+        <li>Can make feature space blow up</li>
+      </ul>
+      <li>Data leakage</li>
       <ul>
         <li>Splitting time-correlated data randomly instead of by time</li>
         <ul>
