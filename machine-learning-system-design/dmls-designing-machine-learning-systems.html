@@ -587,7 +587,7 @@
       <ul>
         <li>Bagging</li>
         <ul>
-          <li>Create datasets (via sample with replacement)</li>
+          <li>Create different datasets (via sample with replacement)</li>
           <li>Train model on each of these datasets</li>
           <li>If classification, final prediction is majority vote of all models</li>
           <li>If regression, final prediction is average of all model predictions</li>
@@ -597,16 +597,59 @@
         <ul>
           <li>Train first classifier on original dataset</li>
           <li>Misclassified samples are given higher weights</li>
-          <li>Train second classifier, and repeat</li>
-          <li>Final classifer is weighted combo of all classifiers (better classifer gets higher weight)</li>
+          <li>Train second classifier on reweighted dataset. Ensemble now consists of first and second classifier</li>
+          <li>Misclassified samples are given higher weights</li>
+          <li>Repeat</li>
+          <li>Final classifer is weighted combo of all classifiers (classifers with smaller training error gets higher weight)</li>
           <li>Ex. gradient boosting machine (GBM), XGBoost, LightGBM</li>
         </ul>
       </ul>
       <li>Versioning</li>
+      <ul>
+        <li>Code versioning keeps copies of all old files. Dataset might be too large for this</li>
+        <li>COde versioning duplicates codebase on each local machine. Dataset may not fit into local machine</li>
+        <li>What does diff mean?</li>
+        <ul>
+          <li>Change to contents of any file?</li>
+          <li>When files are added or removed?</li>
+          <li>When checksum of whole repository has changed?</li>
+        </ul>
+        <li>Merge conflict</li>
+        <ul>
+          <li>Dataset A is used to train model A</li>
+          <li>Dataset B is used to train model B</li>
+          <li>Dataset A and B is merged to C, but there is no model that can correspond to C</li>
+        </ul>
+        <li>Regulation may mandate that data is permanatly removed upon user request</li>
+      </ul>
       <li>Distributed training</li>
       <ul>
+        <li>When data does not fit into memory</li>
+        <ul>
+          <li>Preprocessing, shuffling, batching must run on multiple machines</li>
+        </ul>
         <li>Data parallelism</li>
+        <ul>
+          <li>Synchronous stochastic gradient update</li>
+          <ul>
+            <li>Wait for all machines to finish</li>
+            <li>Can take very long time</li>
+          </ul>
+          <li>Asynchronous stochastic gradient update</li>
+          <ul>
+            <li>Gradient from one machine can update weights before gradients from other machines come in</li>
+            <li>With large number of weights, graident updates are sparse</li>
+            <li>Most gradients only modify small fraction of parameters</li>
+            <li>It is unlikely that gradients from different machine will update the same weight</li>
+          </ul>
+        </ul>
         <li>Model parallelism</li>
+        <ul>
+          <li>Assume there are 4 machines</li>
+          <li>Each mini-batch is broken into 4 micro-batches</li>
+          <li>Machine 1 computes first layer on first micro-batch</li>
+          <li>Machine 2 computes second layer on first micro-batch while machine 1 computes first layer on second micro-batch</li>
+        </ul>
       </ul>
       <li>AutoML</li>
       <ul>
