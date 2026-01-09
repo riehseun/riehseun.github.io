@@ -95,48 +95,52 @@
 <pre><code class="python">class Solution:
     def minWindow(self, s: str, t: str) -> str:
 
-        # Sliding window
-        # Increse end pointer until substring is valid
-        # Then, increase start pointer while substring is valid
-        # How to check validity?
-        #   Keep frequency map of chars for t
-        #   Increment count of new char in window
-        #   Decrement count of old char in window
-        #   Remember number of mismatches
+        # s = "ABCDE" t = "BCE" ? "BCDE"
 
-        start, end, n = 0, 0, len(s) 
-        min_length, min_string = n, ""
-        counts, num_mismatch = defaultdict(int), 0
+        # Iterate i and j from beginning
+        # Increment j when not all chars in t are in substring
+        # Increment i when all chars in t are in substring
+        # For each char in t, compare its count in t vs count in substring
+        # Time O(n+m) n = len(s), m = len(t)
+        # Space O(n+m) = O(52) only upper and lower english chars
+
+        i, j, n, m = 0, 0, len(s), len(t)
+        freq_s, freq_t = defaultdict(int), defaultdict(int)
+        num_chars_satisfied = 0
+        min_len, min_substring = math.inf, ""
         
         for c in t:
-            counts[c] += 1
-        num_mismatch = len(counts)
+            freq_t[c] += 1
 
-        # Time O(n)
-        #   n = len(s)
-        # Space O(m)
-        #   m = len(t)
-        while start <= end and end < n:
-    
-            if num_mismatch != 0:
-                if s[end] in counts:
-                    if counts[s[end]] == 1:
-                        num_mismatch -= 1 
-                    counts[s[end]] -= 1
-                end += 1
+        while i <= j and j < n:
 
-            while num_mismatch == 0:
-                substr = s[start:end]
-                if len(substr) <= min_length:
-                    min_length = len(substr)
-                    min_string = substr
-                if s[start] in counts:
-                    if counts[s[start]] == 0:
-                        num_mismatch += 1
-                    counts[s[start]] += 1
-                start += 1
-            
-        return min_string</code></pre>
+            if num_chars_satisfied < len(freq_t):
+                freq_s[s[j]] += 1
+                if s[j] in freq_t and freq_s[s[j]] == freq_t[s[j]]:
+                    num_chars_satisfied += 1
+                j += 1
+            else:
+                freq_s[s[i]] -= 1
+                if s[i] in freq_t and freq_s[s[i]] < freq_t[s[i]]:
+                    num_chars_satisfied -= 1
+                i += 1
+            if j - i < min_len \
+                and num_chars_satisfied == len(freq_t):
+                min_len = min(min_len, j-i)
+                min_substring = s[i:j]
+                
+        # Move i pointer forwards after j reached n
+        while num_chars_satisfied == len(freq_t):
+            freq_s[s[i]] -= 1
+            if s[i] in freq_t and freq_s[s[i]] < freq_t[s[i]]:
+                num_chars_satisfied -= 1
+            i += 1
+            if j - i < min_len \
+                and num_chars_satisfied == len(freq_t):
+                min_len = min(min_len, j-i)
+                min_substring = s[i:j]
+
+        return min_substring</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/minimum-window-substring">76. Minimum Window Substring</a> | <a href="https://neetcode.io/problems/minimum-window-with-characters">Minimum Window Substring</a>
@@ -170,15 +174,15 @@
                 total_count += 1
                 freq[s[j]] += 1
                 max_count = max(max_count, freq[s[j]])
-                if total_count - max_count <= k:
-                    max_len = max(max_len, j-i+1)
                 j += 1
             else:
                 total_count -= 1
                 freq[s[i]] -= 1
                 i += 1
+            if total_count - max_count <= k:
+                max_len = max(max_len, j-i+1)
             
-        return max_len</code></pre>
+        return max_len - 1</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/longest-repeating-character-replacement">424. Longest Repeating Character Replacement</a> | <a href="https://neetcode.io/problems/longest-repeating-substring-with-replacement">Longest Repeating Character Replacement</a>
