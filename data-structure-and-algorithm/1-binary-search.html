@@ -292,40 +292,39 @@
 
 <pre><code class="python">class Solution:
     def findMin(self, nums: List[int]) -> int:
+        
+        # [1,2,3,4,5] ? 1
+        # [2,3,4,5,1] ? 1
+        # [4,5,1,2,3] ? 1
+        # [5,1,2,3,4] ? 1
 
-        # Ex. [1,2,3,4,5,6]
-        # Ex. [6,1,2,3,4,5]
-        # Ex. [5,6,1,2,3,4]
-        # Ex. [4,5,6,1,2,3]
-        # Ex. [3,4,5,6,1,2]
-        # Ex. [2,3,4,5,6,1]
-
-        # If left < right
-        #   Array is in perfect order, return nums[0]
-        # If nums[i] < nums[i-1], min is nums[i]
-        # Pick mid element
-        #   If left < mid, min in on right
-        #   If left < mid, min is on left
-
-        # Time O(logn)
-        #   n = len(nums)
+        # If mid < right most, right side is sorted
+        #   Min is on left side   
+        #   right = mid - 1
+        # If mid > right most, left side is sorted
+        #   Min is on right side
+        #   left = mid + 1
+        # If mid < mid - 1, mid is the min
+        # If mid + 1 < mid, mid + 1 is the min
+        # If nums is already in sorted order, return left most
+        # Time O(logn) n = len(nums)
         # Space O(1)
+
         left, right = 0, len(nums) - 1
+
         if nums[left] <= nums[right]:
             return nums[left]
 
         while left <= right:
             mid = (left+right) // 2
-
             if nums[mid] < nums[mid-1]:
                 return nums[mid]
             if nums[mid+1] < nums[mid]:
                 return nums[mid+1]
-
-            if nums[left] < nums[mid]:
-                left = mid + 1
+            if nums[mid] < nums[right]:
+                right = mid
             else:
-                right = mid - 1
+                left = mid
 
         return nums[left]</code></pre>
   </div>
