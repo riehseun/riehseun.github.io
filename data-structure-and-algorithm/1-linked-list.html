@@ -424,45 +424,43 @@ class Solution:
 #     def __init__(self, val=0, next=None):
 #         self.val = val
 #         self.next = next
+
 class Solution:
     def reorderList(self, head: Optional[ListNode]) -> None:
-        """
-        Do not return anything, modify head in-place instead.
-        """
 
-        # Find middle of LL
-        # Reverse second half of LL
-        # Take nodes from first and second half one by one
-        # Ex. [0,1,2,3,4,5,6] => 
-        #     [0,1,2,3], [6,5,4] => 
-        #     [0,6,1,5,2,4,3]
+        # N(1)->N(2)->N(3)->N(4)->N(5) ? N(1)->N(5)->N(2)->N(4)->N(3)
 
+        # First node points to last
+        # Last node points to first.next
+        # First.next points to last.prev
+        # Repeat
+        # Revese second half of LL
+        # Ex. N(1)->N(2)->N(3)<-N(4)<-N(5)
+        # Time O(n) n = number of nodes in LL
+        # Space O(1)
+
+        # Find middle node
         slow, fast = head, head
-
-        # Middle node will be "slow" pointer
-        while fast and fast.next:
+        while slow and fast and fast.next:
             slow = slow.next
             fast = fast.next.next
 
         # Reverse second half
         prev, node = None, slow
         while node:
-            next_node = node.next
+            node_next = node.next
             node.next = prev
             prev = node
-            node = next_node
+            node = node_next
 
-        # Time O(n)
-        #   n = length of LL
-        # Space O(1)
+        # Reorder
         while prev.next:
-            
             head_next = head.next
             head.next = prev
             head = head_next
 
             prev_next = prev.next
-            prev.next = head
+            prev.next = head_next
             prev = prev_next</code></pre>
   </div>
   <div class="card-footer text-muted">
