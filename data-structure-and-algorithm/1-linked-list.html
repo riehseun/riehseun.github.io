@@ -207,17 +207,33 @@ class Solution:
 #     def __init__(self, val=0, next=None):
 #         self.val = val
 #         self.next = next
-class Solution:
+
+class Solution:    
     def mergeKLists(self, lists: List[Optional[ListNode]]) -> Optional[ListNode]:
+        
+        # [1,3,5] [2,6] [4,7] ? [1,2,3,4,5,6,7]
 
-        # Merge two LL at a time
-        # Repeat until there is only one LL
+        # Merge two LLs at once
+        # Repeat until only a single LL remains
+        # Time O(nlogm) 
+        # n = total number of nodes in all LL 
+        # m = number of LLs
+        # Space O(1)
 
-        def merge(l1, l2):
-            
-            head = dummy_head = ListNode()
+        def merge_two_ll(l1, l2):
 
-            while l1 and l2:
+            head = ListNode() 
+            dummy_head = ListNode()
+            dummy_head.next = head
+            while l1 or l2:
+
+                if not l1:
+                    head.next = l2
+                    break
+                if not l2:
+                    head.next = l1
+                    break
+
                 if l1.val < l2.val:
                     head.next = l1
                     l1 = l1.next
@@ -226,26 +242,19 @@ class Solution:
                     l2 = l2.next
                 head = head.next
 
-            if l1:
-                head.next = l1
-            if l2:
-                head.next = l2
+            return dummy_head.next.next
 
-            return dummy_head.next
-            
-        # Time O(nlogk)
-        #   n = total number of nodes in all linked lists
-        #   k = number of linked lists
-        # Space O(1)
-        i, n = 1, len(lists)
-        while i < n:
-            for j in range(0, n-i, i*2):
-                lists[j] = merge(lists[j], lists[j+i])
-            i *= 2
+        n, i, interval = len(lists), 0, 1
+        while interval < n:
+            while i < n:
+                if i + interval < n:
+                    lists[i] = merge_two_ll(lists[i], lists[i+interval])
+                i += (interval * 2)
+            i = 0
+            interval *= 2
 
         if n <= 0:
             return None
-
         return lists[0]</code></pre>
   </div>
   <div class="card-footer text-muted">
