@@ -130,8 +130,6 @@ class Solution:
         # Time O(n) n = number of nodes in tree
         # Space O(n) recursion stack worst case h = n
 
-        self.result = True
-
         def pre_order(p, q, result=True):
 
             if p and q:
@@ -143,6 +141,7 @@ class Solution:
                 or (q and not p):
                 self.result = False
 
+        self.result = True
         pre_order(p, q)
         return self.result</code></pre>
   </div>
@@ -635,35 +634,34 @@ class Solution:
 #         self.val = val
 #         self.left = left
 #         self.right = right
-class Solution:
+
+class Solution:   
     def isSubtree(self, root: Optional[TreeNode], subRoot: Optional[TreeNode]) -> bool:
+        
+        # [1,2,3,4,5,6,7] [2,4,5] ? True
+        # [1,2,3,4,5,6,7] [2,4] ? False
 
-        # Pre-order traversal with null node
+        # Pre-order traverse - root, left, right
+        # Serialize tree in a unique way
+        # Compare if substring is in string
+        # Time O(n+m) n,m  = number of nodes in trees
+        # Space O(n+m) recursion stack worst case h = n, m
 
-        # Time O(n)
-        #   n = number of nodes in tree
-        # Space O(n)
-        def pre_order(node):
-            
+        def pre_order(node, array):
+
             if node:
-                self.nodes.append("*")
-                self.nodes.append(str(node.val))
-                pre_order(node.left)
-                pre_order(node.right)
+                array.append("*")
+                array.append(str(node.val))
+                pre_order(node.left, array)
+                pre_order(node.right, array)
             else:
-                self.nodes.append("#")
-        
-        self.nodes = []
-        pre_order(root)
-        string = "".join(self.nodes)
-        
-        self.nodes = []
-        pre_order(subRoot)
-        substring = "".join(self.nodes)
-        
-        if substring in string:
-            return True
-        return False</code></pre>
+                array.append("#")
+
+        tree, subtree = [], []
+        pre_order(root, tree)
+        pre_order(subRoot, subtree)
+        tree_str, subtree_str = "".join(tree), "".join(subtree)
+        return subtree_str in tree_str</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/subtree-of-another-tree">572. Subtree of Another Tree</a> | <a href="https://neetcode.io/problems/subtree-of-a-binary-tree">Subtree of Another Tree</a>
