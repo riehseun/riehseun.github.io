@@ -44,12 +44,12 @@
   <div class="card-body">
     <h2 class="card-title">Ad click prediction on social platform</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#ad-click-prediction-on-social-platform-1">Requirement</a></li>
-      <li><a href="#ad-click-prediction-on-social-platform-2">Problem</a></li>
-      <li><a href="#ad-click-prediction-on-social-platform-3">Data preparation</a></li>
-      <li><a href="#ad-click-prediction-on-social-platform-4">Model development</a></li>
+      <li><a href="#ad-click-prediction-on-social-platform-1">Clarifying Requirements</a></li>
+      <li><a href="#ad-click-prediction-on-social-platform-2">Frame the Problem as an ML Task</a></li>
+      <li><a href="#ad-click-prediction-on-social-platform-3">Data Preparation</a></li>
+      <li><a href="#ad-click-prediction-on-social-platform-4">Model Development</a></li>
       <li><a href="#ad-click-prediction-on-social-platform-5">Evaluation</a></li>
-      <li><a href="#ad-click-prediction-on-social-platform-6">serving</a></li>
+      <li><a href="#ad-click-prediction-on-social-platform-6">Serving</a></li>
       <li><a href="#ad-click-prediction-on-social-platform-7">Follow up</a></li>
     </ul>
   </div>
@@ -59,29 +59,15 @@
   <div class="card-body">
     <h2 class="card-title">Requirement</h2>
     <ul>
-      <li>Business objective</li>
-      <ul>
-        <li>What is the business objective? Maximize revenue</li>
-        <li>Where are the Ads placed? (pop up, timeline, etc?) Timeline only</li>
-        <li>Does every Ad generate the same revenue? Yes</li>
-        <li>Can the same Ad be shown to the same user more than once? Yes</li>
-      </ul>
-      <li>System features</li>
-      <ul>
-        <li>Can users report or hide the Ads? Yes</li>
-        <li>Can the system access user's current location? Yes</li>
-      </ul>
-      <li>Data</li>
-      <ul>
-        <li>Do we have training data available? No, data is from user-ad interaction only</li>
-        <li>Can we assume impression without clicks, hide, report as negative examples? Yes</li>
-      </ul>
-      <li>Constraints</li>
-      <ul>
-        <li>Should the model be trained continuously? Yes</li>
-      </ul>
-      <li>Scale</li>
-      <li>Performance</li>
+      <li>What is the business objective? Maximize revenue</li>
+      <li>Where are the Ads placed? (pop up, timeline, etc?) Timeline only</li>
+      <li>Does every Ad generate the same revenue? Yes</li>
+      <li>Can the same Ad be shown to the same user more than once? Yes</li>
+      <li>Can users report or hide the Ads? Yes</li>
+      <li>Can the system access user's current location? Yes</li>
+      <li>Do we have training data available? No, data is from user-ad interaction only</li>
+      <li>Can we assume impression without clicks, hide, report as negative examples? Yes</li>
+      <li>Should the model be trained continuously? Yes</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -92,25 +78,22 @@
 <div class="card mb-4" id="ad-click-prediction-on-social-platform-2">
   <div class="card-body">
     <h2 class="card-title">Problem</h2>
-
-    <h3 class="card-title">ML problem</h3>
     <ul>
-      <li>Predict if an Ad will be clicked</li>
-      <li>Input</li>
+      <li>Define ML objective</li>
       <ul>
-        <li>A user</li>
+        <li>Predict if an Ad will be clicked</li>
       </ul>
-      <li>Output</li>
+      <li>Specify system input and output</li>
       <ul>
-        <li>Ranked list of ADs</li>
+        <li>Input - user</li>
+        <li>Output - ranked list of ADs</li>
       </ul>
-    </ul>
-
-    <h3 class="card-title">ML category</h3>
-    <ul>
-      <li>Ranking problem</li>
+      <li>Choose right ML category</li>
       <ul>
-        <li>Pointwise LTR with binary classification</li>
+        <li>Ranking problem</li>
+        <ul>
+          <li>Pointwise LTR with binary classification</li>
+        </ul>
       </ul>
     </ul>
   </div>
@@ -121,16 +104,9 @@
 
 <div class="card mb-4" id="ad-click-prediction-on-social-platform-3">
   <div class="card-body">
-    <h2 class="card-title">Data preparation</h2>
-
-    <h3 class="card-title">Data engineering</h3>
+    <h2 class="card-title">Data Preparation</h2>
     <ul>
-      <li>Training data</li>
-      <ul>
-        <li>Positive - if user clicks the Ad in less than \( t \) seconds after Ad is shown</li>
-        <li>Negative - otherwise</li>
-      </ul>
-      <li>Database</li>
+      <li>Data engineering</li>
       <ul>
         <li>Ad</li>
         <ul>
@@ -159,36 +135,35 @@
           <li>timestamp</li>
         </ul>
       </ul>
-    </ul>
-
-    <h3 class="card-title">Feature engineering</h3>
-    <ul>
-      <li>Ad</li>
+      <li>Feature engineering</li>
       <ul>
-        <li>Advertiser id - embedding</li>
-        <li>Image and video - SimCLR</li>
-        <li>Category - CBOW</li>
-        <li>Total impressions or clicks on the Ad</li>
-        <li>Total impressions or clicks on the Ad supplied by an advertiser</li>
-      </ul>
-      <li>User</li>
-      <ul>
-        <li>Demographics</li>
+        <li>Ad</li>
         <ul>
-          <li>Age</li>
-          <li>Gender</li>
-          <li>City</li>
-          <li>Country</li>
+          <li>Advertiser id - embedding</li>
+          <li>Image and video - SimCLR</li>
+          <li>Category - CBOW</li>
+          <li>Total impressions or clicks on the Ad</li>
+          <li>Total impressions or clicks on the Ad supplied by an advertiser</li>
         </ul>
-        <li>Context</li>
+        <li>User</li>
         <ul>
-          <li>Device</li>
-          <li>Time of day</li>
-        </ul>
-        <li>Interaction</li>
-        <ul>
-          <li>Cliked Ads - embedding</li>
-          <li>User's historical engagement statistics - scale</li>
+          <li>Demographics</li>
+          <ul>
+            <li>Age</li>
+            <li>Gender</li>
+            <li>City</li>
+            <li>Country</li>
+          </ul>
+          <li>Context</li>
+          <ul>
+            <li>Device</li>
+            <li>Time of day</li>
+          </ul>
+          <li>Interaction</li>
+          <ul>
+            <li>Cliked Ads - embedding</li>
+            <li>User's historical engagement statistics - scale</li>
+          </ul>
         </ul>
       </ul>
     </ul>
@@ -200,112 +175,116 @@
 
 <div class="card mb-4" id="ad-click-prediction-on-social-platform-4">
   <div class="card-body">
-    <h2 class="card-title">Model development</h2>
-
-    <h3 class="card-title">Model selection</h3>
+    <h2 class="card-title">Model Development</h2>
     <ul>
-      <li>Option 1. logistic regression</li>
+      <li>Model selection</li>
       <ul>
-        <li>Cons</li>
+        <li>Option 1. logistic regression</li>
         <ul>
-          <li>Non-linear problems can't be solved</li>
-          <li>Cannot capture feature interactions</li>
+          <li>Cons</li>
+          <ul>
+            <li>Non-linear problems can't be solved</li>
+            <li>Cannot capture feature interactions</li>
+          </ul>
+        </ul>
+        <li>Option 2. Feature crossing + LR</li>
+        <ul>
+          <li>Create new feature by combining existing features</li>
+          <li>This way, non-linear relationship can be captured</li>
+          <li>Cons</li>
+          <ul>
+            <li>Manual process to choose features to be crossed</li>
+            <li>Requires domain knowledge</li>
+            <li>Cannot still capture complex interactions</li>
+            <li>When original features are sparse, cardinality of crossed features become very sparse</li>
+          </ul>
+        </ul>
+        <li>Option 3. GBDT</li>
+        <ul>
+          <li>Cons</li>
+          <ul>
+            <li>Not suitable for continual learning</li>
+            <li>Cannot train embedding layers</li>
+          </ul>
+        </ul>
+        <li>Option 4. GBDT + LR</li>
+        <ul>
+          <li>Use GBDT to select features based on their importance</li>
+          <li>Use GBDT to extract features (reduce number of features by creating new features from existing ones)</li>
+          <li>Cons</li>
+          <ul>
+            <li>Cannot still capture complex interactions</li>
+            <li>Continual learning is slow</li>
+          </ul>
+        </ul>
+        <li>Option 5. neural network</li>
+        <ul>
+          <li>Single NN - NN takes original features as input and outputs the click probability</li>
+          <li>Two-tower NN - user encoder and Ad encoder are used. Similarity between user and Ad embeddings is used to determine relevance</li>
+          <li>Cons</li>
+          <ul>
+            <li>Because feature space is usually sparse, most features are filled with zeros</li>
+            <li>Difficult to capture all pairwise feature interactions due to large number of features</li>
+          </ul>
+        </ul>
+        <li>Option 6. deep & cross network (DCN)</li>
+        <ul>
+          <li>Deep network - use DNN to learn complex features</li>
+          <li>Cross network - automatically captures feature interactions and learns good feature crosses</li>
+          <li>Outputs of deep and cross network are concatenated to make final predictions</li>
+          <li>More effective than NN because it implicitly learns feature crosses</li>
+          <li>Cons</li>
+          <ul>
+            <li>Cross network only models certain feature interactions</li>
+          </ul>
+          <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/ref-mlsd-1/ad-click-prediction-on-social-media-platform-1.png" alt="Card image cap">
+        </ul>
+        <li>Option 7. factorization machines (FM)</li>
+        <ul>
+          <li>Learn embedding vector for each feature to find all pairwise feature interactions</li>
+          <li>\( \hat{y}(x) = \underbrace{w_{0} + \displaystyle\sum_{i} w_{i}x_{i}}_{\text{logistic regression}} + \underbrace{\displaystyle\sum_{i}\displaystyle\sum_{j} &lt;v_{i}, v_{j}&gt; x_{i}x_{j}}_{\text{pairwise interactions}} \)</li>
+          <ul>
+            <li>\( x_{i} \) - \( i \)th feature</li>
+            <li>\( w_{i} \) - learned weight</li>
+            <li>\( v_{i} \) - embedding of \( i \)th feature</li>
+            <li>\( &lt;v_{i}, v_{j}&gt; \) - dot product between two embeddings</li>
+          </ul>
+          <li>Captures pairwise feature interactions</li>
+          <li>Cons</li>
+          <ul>
+            <li>Unlike neural networks, cannot learn sophisticated higher-order feature interactions</li>
+          </ul>
+          <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/ref-mlsd-1/ad-click-prediction-on-social-media-platform-2.png" alt="Card image cap">
+        </ul>
+        <li>Option 8. deep factorization machines (DeepFM)</li>
+        <ul>
+          <li>DNN captures sophisticated higher-order features</li>
+          <li>FM captures low-level pairwise feature interactions</li>
+          <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/ref-mlsd-1/ad-click-prediction-on-social-media-platform-3.png" alt="Card image cap">
+        </ul>
+        <li>Option 9. GBDT + DeepFM</li>
+        <ul>
+          <li>Use GBDT to select arnd extract features</li>
+          <li>Use those features for DeepFM</li>
+          <li>Cons</li>
+          <ul>
+            <li>Slow training and inference</li>
+            <li>Continual learning is slow</li>
+          </ul>
         </ul>
       </ul>
-      <li>Option 2. Feature crossing + LR</li>
+      <li>Model training</li>
       <ul>
-        <li>Create new feature by combining existing features</li>
-        <li>This way, non-linear relationship can be captured</li>
-        <li>Cons</li>
+        <li>Constructing dataset</li>
         <ul>
-          <li>Manual process to choose features to be crossed</li>
-          <li>Requires domain knowledge</li>
-          <li>Cannot still capture complex interactions</li>
-          <li>When original features are sparse, cardinality of crossed features become very sparse</li>
+          <li>Positive - if user clicks the Ad in less than \( t \) seconds after Ad is shown</li>
+          <li>Negative - otherwise</li>
+        </ul>
+        <li>Choosing loss function</li>
+        <ul>
+          <li>Binary classification, thus use cross-entropy</li>
         </ul>
       </ul>
-      <li>Option 3. GBDT</li>
-      <ul>
-        <li>Cons</li>
-        <ul>
-          <li>Not suitable for continual learning</li>
-          <li>Cannot train embedding layers</li>
-        </ul>
-      </ul>
-      <li>Option 4. GBDT + LR</li>
-      <ul>
-        <li>Use GBDT to select features based on their importance</li>
-        <li>Use GBDT to extract features (reduce number of features by creating new features from existing ones)</li>
-        <li>Cons</li>
-        <ul>
-          <li>Cannot still capture complex interactions</li>
-          <li>Continual learning is slow</li>
-        </ul>
-      </ul>
-      <li>Option 5. neural network</li>
-      <ul>
-        <li>Single NN - NN takes original features as input and outputs the click probability</li>
-        <li>Two-tower NN - user encoder and Ad encoder are used. Similarity between user and Ad embeddings is used to determine relevance</li>
-        <li>Cons</li>
-        <ul>
-          <li>Because feature space is usually sparse, most features are filled with zeros</li>
-          <li>Difficult to capture all pairwise feature interactions due to large number of features</li>
-        </ul>
-      </ul>
-      <li>Option 6. deep & cross network (DCN)</li>
-      <ul>
-        <li>Deep network - use DNN to learn complex features</li>
-        <li>Cross network - automatically captures feature interactions and learns good feature crosses</li>
-        <li>Outputs of deep and cross network are concatenated to make final predictions</li>
-        <li>More effective than NN because it implicitly learns feature crosses</li>
-        <li>Cons</li>
-        <ul>
-          <li>Cross network only models certain feature interactions</li>
-        </ul>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/ref-mlsd-1/ad-click-prediction-on-social-platform-1.png" alt="Card image cap">
-      </ul>
-      <li>Option 7. factorization machines (FM)</li>
-      <ul>
-        <li>Learn embedding vector for each feature to find all pairwise feature interactions</li>
-        <li>\( \hat{y}(x) = \underbrace{w_{0} + \displaystyle\sum_{i} w_{i}x_{i}}_{\text{logistic regression}} + \underbrace{\displaystyle\sum_{i}\displaystyle\sum_{j} &lt;v_{i}, v_{j}&gt; x_{i}x_{j}}_{\text{pairwise interactions}} \)</li>
-        <ul>
-          <li>\( x_{i} \) - \( i \)th feature</li>
-          <li>\( w_{i} \) - learned weight</li>
-          <li>\( v_{i} \) - embedding of \( i \)th feature</li>
-          <li>\( &lt;v_{i}, v_{j}&gt; \) - dot product between two embeddings</li>
-        </ul>
-        <li>Captures pairwise feature interactions</li>
-        <li>Cons</li>
-        <ul>
-          <li>Unlike neural networks, cannot learn sophisticated higher-order feature interactions</li>
-        </ul>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/ref-mlsd-1/ad-click-prediction-on-social-platform-2.png" alt="Card image cap">
-      </ul>
-      <li>Option 8. deep factorization machines (DeepFM)</li>
-      <ul>
-        <li>DNN captures sophisticated higher-order features</li>
-        <li>FM captures low-level pairwise feature interactions</li>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/ref-mlsd-1/ad-click-prediction-on-social-platform-3.png" alt="Card image cap">
-      </ul>
-      <li>Option 9. GBDT + DeepFM</li>
-      <ul>
-        <li>Use GBDT to select arnd extract features</li>
-        <li>Use those features for DeepFM</li>
-        <li>Cons</li>
-        <ul>
-          <li>Slow training and inference</li>
-          <li>Continual learning is slow</li>
-        </ul>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Model training</h3>
-    <ul>
-      <li>Loss function</li>
-      <ul>
-        <li>Binary classification, thus use cross-entropy</li>
-      </ul>
-      <li>Hyperparameters</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -316,61 +295,61 @@
 <div class="card mb-4" id="ad-click-prediction-on-social-platform-5">
   <div class="card-body">
     <h2 class="card-title">Evaluation</h2>
-
-    <h3 class="card-title">Offline</h3>
     <ul>
-      <li>Cross-entropy</li>
+      <li>Offline</li>
       <ul>
-        <li>Ground truth</li>
-        <ul>
-          <li>Ad1 - \( 1 \) (clicked)</li>
-          <li>Ad2 - \( 0 \) (not clicked)</li>
-          <li>Ad3 - \( 1 \) (clicked)</li>
-        </ul>
-        <li>Model A</li>
-        <ul>
-          <li>Ad1 - p(click) = \( 0.8 \)</li>
-          <li>Ad2 - p(click) = \( 0.3 \)</li>
-          <li>Ad3 - p(click) = \( 0.95 \)</li>
-        </ul>
-        <li>Model B</li>
-        <ul>
-          <li>Ad1 - p(click) = \( 0.2 \)</li>
-          <li>Ad2 - p(click) = \( 0.6 \)</li>
-          <li>Ad3 - p(click) = \( 0.6 \)</li>
-        </ul>
         <li>Cross-entropy</li>
         <ul>
-          <li>\( \text{CE} = -\displaystyle\sum_{i} y_{i}log\hat{y_{i}} + (1-y_{i})log(1-\hat{y_{i}}) \)</li>
-          <li>\( \text{CE_A} = -(1log0.8 + (1-0)log(1-0.3) +1log0.95) = 0.273 \)</li>
-          <li>\( \text{CE_B} = -(1log0.2 + (1-0)log(1-0.6) +1log0.6) = 1.319 \)</li>
+          <li>Ground truth</li>
+          <ul>
+            <li>Ad1 - \( 1 \) (clicked)</li>
+            <li>Ad2 - \( 0 \) (not clicked)</li>
+            <li>Ad3 - \( 1 \) (clicked)</li>
+          </ul>
+          <li>Model A</li>
+          <ul>
+            <li>Ad1 - p(click) = \( 0.8 \)</li>
+            <li>Ad2 - p(click) = \( 0.3 \)</li>
+            <li>Ad3 - p(click) = \( 0.95 \)</li>
+          </ul>
+          <li>Model B</li>
+          <ul>
+            <li>Ad1 - p(click) = \( 0.2 \)</li>
+            <li>Ad2 - p(click) = \( 0.6 \)</li>
+            <li>Ad3 - p(click) = \( 0.6 \)</li>
+          </ul>
+          <li>Cross-entropy</li>
+          <ul>
+            <li>\( \text{CE} = -\displaystyle\sum_{i} y_{i}log\hat{y_{i}} + (1-y_{i})log(1-\hat{y_{i}}) \)</li>
+            <li>\( \text{CE_A} = -(1log0.8 + (1-0)log(1-0.3) +1log0.95) = 0.273 \)</li>
+            <li>\( \text{CE_B} = -(1log0.2 + (1-0)log(1-0.6) +1log0.6) = 1.319 \)</li>
+          </ul>
+        </ul>
+        <li>Normalized cross-entropy</li>
+        <ul>
+          <li>Compares the model with a baseline that always predicts background CTR</li>
+          <li>Assume CTR is the training data is \( 0.6 \)</li>
+          <li>\( \text{CE_baseline} = -(1log0.6 + (1-0)log(1-0.6) +1log0.6) = 0.842 \)</li>
+          <li>NCE = CE_A / CE_baseline = \( \dfrac{0.273}{0.842} = 0.324 \)</li>
+          <li>\( 0.324 \) is less than \( 1 \), thus model A outperforms the baseline</li>
         </ul>
       </ul>
-      <li>Normalized cross-entropy</li>
+      <li>Online</li>
       <ul>
-        <li>Compares the model with a baseline that always predicts background CTR</li>
-        <li>Assume CTR is the training data is \( 0.6 \)</li>
-        <li>\( \text{CE_baseline} = -(1log0.6 + (1-0)log(1-0.6) +1log0.6) = 0.842 \)</li>
-        <li>NCE = CE_A / CE_baseline = \( \dfrac{0.273}{0.842} = 0.324 \)</li>
-        <li>\( 0.324 \) is less than \( 1 \), thus model A outperforms the baseline</li>
+        <li>Click-through rate</li>
+        <ul>
+          <li>\( \dfrac{\text{Total number of clicked Ads}}{\text{Total number of shown Ads}} \)</li>
+        </ul>
+        <li>Conversion rate</li>
+        <ul>
+          <li>\( \dfrac{\text{Total number of conversions}}{\text{Total number of impressions}} \)</li>
+        </ul>
+        <li>Hide rate</li>
+        <ul>
+          <li>\( \dfrac{\text{Number of Ads hidden by users}}{\text{Number of shown Ads}} \)</li>
+        </ul>
+        <li>Revenue lift</li>
       </ul>
-    </ul>
-
-    <h3 class="card-title">Online</h3>
-    <ul>
-      <li>Click-through rate</li>
-      <ul>
-        <li>\( \dfrac{\text{Total number of clicked Ads}}{\text{Total number of shown Ads}} \)</li>
-      </ul>
-      <li>Conversion rate</li>
-      <ul>
-        <li>\( \dfrac{\text{Total number of conversions}}{\text{Total number of impressions}} \)</li>
-      </ul>
-      <li>Hide rate</li>
-      <ul>
-        <li>\( \dfrac{\text{Number of Ads hidden by users}}{\text{Number of shown Ads}} \)</li>
-      </ul>
-      <li>Revenue lift</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
