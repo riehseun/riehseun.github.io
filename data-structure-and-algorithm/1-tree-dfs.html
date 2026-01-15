@@ -450,69 +450,60 @@ class Solution:
     <h2 class="card-title">Serialize and Deserialize Binary Tree (75/150)</h2>
 
 <pre><code class="python"># Definition for a binary tree node.
-# class TreeNode(object):
-#     def __init__(self, x):
-#         self.val = x
-#         self.left = None
-#         self.right = None
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
 
 class Codec:
 
-    # Time O(n)
-    #   n = number of nodes
-    # Space O(h)
-    #   h = n if worst case
-    #   h = log(n) if best case
+    # [1,2,3,N,N,4,5] ? *1*2*#*#*3*4*#*#*5*#*#
 
-    def serialize(self, root):
-        """Encodes a tree to a single string.
+    # Pre-order traverse - root, left, right
+    # Insert * before node val
+    # Insert # for null node
+    # Time O(n) n = number of nodes in tree
+    # Space O(n) recursion stack worst case h = n
 
-        :type root: TreeNode
-        :rtype: str
-        """
-
-        # Pre-order traversal
-
-        self.array = []
+    # Split by *
+    # Pop the first element
+    # If element != #, create root node with first element
+    # Recurse on left and right child with remaining array  
+    
+    # Encodes a tree to a single string.
+    def serialize(self, root: Optional[TreeNode]) -> str:
 
         def pre_order(node):
 
             if node:
+                self.array.append("*")
                 self.array.append(str(node.val))
-                self.array.append(",")
                 pre_order(node.left)
                 pre_order(node.right)
             else:
+                self.array.append("*")
                 self.array.append("#")
-                self.array.append(",")
 
+        self.array = []
         pre_order(root)
         return "".join(self.array)
-
-    def deserialize(self, data):
-        """Decodes your encoded data to tree.
-
-        :type data: str
-        :rtype: TreeNode
-        """
-
+        
+    # Decodes your encoded data to tree.
+    def deserialize(self, data: str) -> Optional[TreeNode]:
+        
         def pre_order(array):
-
-            val = array.pop(0)
-            if val != "#":
-                node = TreeNode(int(val))
+            
+            value = array.pop(0)
+            if value != "#":
+                node = TreeNode(int(value))
                 node.left = pre_order(array)
                 node.right = pre_order(array)
                 return node
 
-        data = data.split(",")
-        return pre_order(data)
-
-
-# Your Codec object will be instantiated and called as such:
-# ser = Codec()
-# deser = Codec()
-# ans = deser.deserialize(ser.serialize(root))</code></pre>
+        array = data.split("*")
+        array.pop(0)  # Remove first *
+        return pre_order(array)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/serialize-and-deserialize-binary-tree">297. Serialize and Deserialize Binary Tree</a> | <a href="hhttps://neetcode.io/problems/serialize-and-deserialize-binary-tree">Serialize and Deserialize Binary Tree</a>
