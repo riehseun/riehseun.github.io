@@ -400,27 +400,25 @@ class Solution:
 
 <pre><code class="python"># Definition for a binary tree node.
 # class TreeNode:
-#     def __init__(self, x):
-#         self.val = x
-#         self.left = None
-#         self.right = None
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
 
 class Solution:
-    def lowestCommonAncestor(self, root: 'TreeNode', p: 'TreeNode', q: 'TreeNode') -> 'TreeNode':
+    def lowestCommonAncestor(self, root: TreeNode, p: TreeNode, q: TreeNode) -> TreeNode:
+        
+        # [1,2,3,4,5,6,7] p = 2 q = 3 ? 1
+        # [1,2,3,4,5,6,7] p = 2 q = 4 ? 2
 
-        # Post-order traverse
-        # If leaf node, return 0
-        # If p or q is found, return 1
-        # If node.val + left child + right child == 2
-        #   Current node is lca    
+        # Post-order traverse - left, right, root
+        # If node == p or q, return 1
+        # If left child + right child + root == 2, return root
+        # Time O(n) n = number of nodes in tree
+        # Space O(n) recursion stack worst case h = n
 
         self.lca = None
 
-        # Time O(n)
-        #   n = number of nodes in tree
-        # Space O(h)
-        #   h = height of tree
-        #   Recursion stack
         def post_order(node):
 
             if node:
@@ -431,19 +429,19 @@ class Solution:
                 if node.val == p.val or node.val == q.val:
                     parent = 1
 
-                if parent + left + right == 2 \
+                if left + right + parent == 2 \
                     and not self.lca:
                     self.lca = node
                     
-                return parent + left + right
+                return left + right + parent
             else:
                 return 0
-            
+
         post_order(root)
         return self.lca</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree">236. Lowest Common Ancestor of a Binary Tree</a> | <a href="https://neetcode.io/problems/lowest-common-ancestor-in-binary-search-tree">Lowest Common Ancestor of a Binary Search Tree</a>
+    Reference: <a href="https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree">236. Lowest Common Ancestor of a Binary Tree</a> | <a href="https://neetcode.io/problems/lowest-common-ancestor-in-binary-search-tree">Lowest Common Ancestor in Binary Search Tree</a>
   </div>
 </div>
 
