@@ -44,10 +44,10 @@
   <div class="card-body">
     <h2 class="card-title">Personalized news feed</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#personalized-news-feed-1">Requirements</a></li>
-      <li><a href="#personalized-news-feed-2">Problem</a></li>
-      <li><a href="#personalized-news-feed-3">Data preparation</a></li>
-      <li><a href="#personalized-news-feed-4">Model development</a></li>
+      <li><a href="#personalized-news-feed-1">Clarifying Requirements</a></li>
+      <li><a href="#personalized-news-feed-2">Frame the Problem as an ML Task</a></li>
+      <li><a href="#personalized-news-feed-3">Data Preparation</a></li>
+      <li><a href="#personalized-news-feed-4">Model Development</a></li>
       <li><a href="#personalized-news-feed-5">Evaluation</a></li>
       <li><a href="#personalized-news-feed-6">Serving</a></li>
       <li><a href="#personalized-news-feed-7">Follow up</a></li>
@@ -57,32 +57,17 @@
 
 <div class="card mb-4" id="personalized-news-feed-1">
   <div class="card-body">
-    <h2 class="card-title">Requirements</h2>
+    <h2 class="card-title">Clarifying Requirements</h2>
     <ul>
-      <li>Business objective</li>
-      <ul>
-        <li>What is the business objective? Make users engaged</li>
-        <li>What kinds of posts should users see? unseen posts and posts with unseen comments</li>
-        <li>What does a post consist of? Text, image, video</li>
-        <li>What type of user engagement are we looking for? click, like, share, comment, etc</li>
-      </ul>
-      <li>System features</li>
-      <ul>
-        <li>Can users make friends with each other? Yes</li>
-        <li>Can users block other users? Yes</li>
-        <li>Can users hide posts? Yes</li>
-      </ul>
-      <li>Data</li>
-      <li>Constraints</li>
-      <li>Scale</li>
-      <ul>
-        <li>How many users are there in the platform? 3M</li>
-        <li>How many daily active users are there in the platform? 2M and each user checks posts twice a day</li>
-      </ul>
-      <li>Performance</li>
-      <ul>
-        <li>How fast should the system work? Posts should show up under 200ms</li>
-      </ul>
+      <li>What is the business objective? Make users engaged</li>
+      <li>What kinds of posts should users see? unseen posts and posts with unseen comments</li>
+      <li>What does a post consist of? Text, image, video</li>
+      <li>What type of user engagement are we looking for? click, like, share, comment, etc</li>
+      <li>Can users block other users? Yes</li>
+      <li>Can users hide posts? Yes</li>
+      <li>How fast should the system work? Posts should show up under 200ms</li>
+      <li>How many users are there in the platform? 3M</li>
+      <li>How many daily active users are there in the platform? 2M and each user checks posts twice a day</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -92,43 +77,40 @@
 
 <div class="card mb-4" id="personalized-news-feed-2">
   <div class="card-body">
-    <h2 class="card-title">Problem</h2>
-
-    <h3 class="card-title">ML problem</h3>
+    <h2 class="card-title">Frame the Problem as an ML Task</h2>
     <ul>
-      <li>Maximize both implicit (dewll time or user clicks) and explict (likes or shares) reactions</li>
+      <li>Define ML objective</li>
       <ul>
-        <li>Implicit reactions often do not reflect user's true opinion about a post</li>
-        <li>Explicit reactions offen do not occur because not many users actually press like buttons or share posts</li>
-        <li>Assign weight to each reaction and consider weighted score of reactions</li>
+        <li>Maximize both implicit (dewll time or user clicks) and explict (likes or shares) reactions</li>
         <ul>
-          <li>Click: 1</li>
-          <li>Like: 5</li>
-          <li>Comment: 10</li>
-          <li>Share: 20</li>
-          <li>Friendship request: 30</li>
-          <li>Hide: -20</li>
-          <li>Block: -50</li>
+          <li>Implicit reactions often do not reflect user's true opinion about a post</li>
+          <li>Explicit reactions offen do not occur because not many users actually press like buttons or share posts</li>
+          <li>Assign weight to each reaction and consider weighted score of reactions</li>
+          <ul>
+            <li>Click: 1</li>
+            <li>Like: 5</li>
+            <li>Comment: 10</li>
+            <li>Share: 20</li>
+            <li>Friendship request: 30</li>
+            <li>Hide: -20</li>
+            <li>Block: -50</li>
+          </ul>
         </ul>
       </ul>
-      <li>Input</li>
+      <li>Specify system input and output</li>
       <ul>
-        <li>User</li>
+        <li>Input - user</li>
+        <li>Output - ranked list of unseen posts or posts with unseen comments</li>
       </ul>
-      <li>Output</li>
+      <li>Choose right ML category</li>
       <ul>
-        <li>A ranked list of unseen posts or posts with unseen comments</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">ML category</h3>
-    <ul>
-      <li>Ranking problem</li>
-      <ul>
-        <li>Pointwise LTR</li>
+        <li>Ranking problem</li>
         <ul>
-          <li>Use binary classifier for each category (click clasifier, like classifier, etc)</li>
-          <li>Compute linear combination of probabilties from classifiers and weights assigned for each category, which gives a final score</li>
+          <li>Pointwise LTR</li>
+          <ul>
+            <li>Use binary classifier for each category (click clasifier, like classifier, etc)</li>
+            <li>Compute linear combination of probabilties from classifiers and weights assigned for each category, which gives a final score</li>
+          </ul>
         </ul>
       </ul>
     </ul>
@@ -140,15 +122,9 @@
 
 <div class="card mb-4" id="personalized-news-feed-3">
   <div class="card-body">
-    <h2 class="card-title">Data preparation</h2>
-
-    <h3 class="card-title">Data engineering</h3>
+    <h2 class="card-title">Data Preparation</h2>
     <ul>
-      <li>Training data</li>
-      <ul>
-        <li>Upsample negative data points for each reaction type</li>
-      </ul>
-      <li>Database</li>
+      <li>Data engineering</li>
       <ul>
         <li>Post</li>
         <ul>
@@ -184,37 +160,46 @@
           <li>timstamp</li>
         </ul>
       </ul>
+      <li>Feature engineering</li>
+      <ul>
+        <li>Post</li>
+        <ul>
+          <li>text - BERT</li>
+          <li>image/video - ResNet, CLIP</li>
+          <li>like/share/replies - scale them to similar range</li>
+          <li>tags</li>
+          <ul>
+            <li>Use Viterbi to tokenzie hashtags into different words</li>
+            <li>Use feature hashing to convert words to Ids</li>
+            <li>Use TF-IDF or word2vec to vectorize tags</li>
+          </ul>
+          <li>post's age - bucketize + one-hot</li>
+        </ul>
+        <li>User</li>
+        <ul>
+          <li>Demographics - age, gender, country, etc</li>
+          <li>Contextual - device, time of the day, etc</li>
+          <li>User-post interactions - extract features from each post that user interacted with</li>
+          <li>Mentioned in a post - binary value 0 or 1</li>
+        </ul>
+        <li>User-author</li>
+        <ul>
+          <li>like/click/comment/share rate</li>
+          <li>length of friendship</li>
+          <li>close friends and family - binary value 0 or 1</li>
+        </ul>
+      </ul>
     </ul>
 
-    <h3 class="card-title">Feature engineering</h3>
+    <h3 class="card-title"></h3>
     <ul>
-      <li>Post</li>
+      <li>Training data</li>
       <ul>
-        <li>text - BERT</li>
-        <li>image/video - ResNet, CLIP</li>
-        <li>like/share/replies - scale them to similar range</li>
-        <li>tags</li>
-        <ul>
-          <li>Use Viterbi to tokenzie hashtags into different words</li>
-          <li>Use feature hashing to convert words to Ids</li>
-          <li>Use TF-IDF or word2vec to vectorize tags</li>
-        </ul>
-        <li>post's age - bucketize + one-hot</li>
+        <li>Upsample negative data points for each reaction type</li>
       </ul>
-      <li>User</li>
-      <ul>
-        <li>Demographics - age, gender, country, etc</li>
-        <li>Contextual - device, time of the day, etc</li>
-        <li>User-post interactions - extract features from each post that user interacted with</li>
-        <li>Mentioned in a post - binary value 0 or 1</li>
-      </ul>
-      <li>User-author</li>
-      <ul>
-        <li>like/click/comment/share rate</li>
-        <li>length of friendship</li>
-        <li>close friends and family - binary value 0 or 1</li>
-      </ul>
-    </ul>
+      <li>Database</li>
+    
+    
   </div>
   <div class="card-footer text-muted">
     Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
@@ -223,41 +208,41 @@
 
 <div class="card mb-4" id="personalized-news-feed-4">
   <div class="card-body">
-    <h2 class="card-title">Model development</h2>
-
-    <h3 class="card-title">Model selection</h3>
+    <h2 class="card-title">Model Development</h2>
     <ul>
-      <li>Neural network</li>
+      <li>Model selection</li>
       <ul>
-        <li>To fine-tune pre-trained models</li>
-        <li>To use embeddings to represent categorical features</li>
-        <li>To deal with text/image/video data</li>
-      </ul>
-      <li>Option 1. n independent DNNs</li>
-      <ul>
-        <li>Expenseive to train</li>
-        <li>For less frequent reactions, there may not be enough data</li>
-      </ul>
-      <li>Option 2. multi-task DNNs</li>
-      <ul>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/ref-mlsd-1/personalized-newsfeed-1.png" alt="Card image cap">
-        <li>For passive users, extract the following features</li>
+        <li>Neural network</li>
         <ul>
-          <li>Dwell time</li>
-          <li>Skip - if user spends less than t seconds, then post is assumed to be skipped</li>
+          <li>To fine-tune pre-trained models</li>
+          <li>To use embeddings to represent categorical features</li>
+          <li>To deal with text/image/video data</li>
+        </ul>
+        <li>Option 1. n independent DNNs</li>
+        <ul>
+          <li>Expenseive to train</li>
+          <li>For less frequent reactions, there may not be enough data</li>
+        </ul>
+        <li>Option 2. multi-task DNNs</li>
+        <ul>
+          <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/ref-mlsd-1/personalized-newsfeed-1.png" alt="Card image cap">
+          <li>For passive users, extract the following features</li>
+          <ul>
+            <li>Dwell time</li>
+            <li>Skip - if user spends less than t seconds, then post is assumed to be skipped</li>
+          </ul>
         </ul>
       </ul>
-    </ul>
-
-    <h3 class="card-title">Model training</h3>
-    <ul>
-      <li>Loss function</li>
+      <li>Model training</li>
       <ul>
-        <li>Use MAE or MSE for regression task for dwell time prediction</li>
-        <li>Use cross-entropy for other binary classification predictions</li>
-        <li>\( \text{loss} = \lambda L_{\text{dwell}} + L_{\text{skip}} + L_{\text{like}} + \dots + L_{\text{share}} \)</li>
+        <li>Loss function</li>
+        <ul>
+          <li>Use MAE or MSE for regression task for dwell time prediction</li>
+          <li>Use cross-entropy for other binary classification predictions</li>
+          <li>\( \text{loss} = \lambda L_{\text{dwell}} + L_{\text{skip}} + L_{\text{like}} + \dots + L_{\text{share}} \)</li>
+        </ul>
+        <li>Hyperparameter</li>
       </ul>
-      <li>Hyperparameter</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -268,16 +253,16 @@
 <div class="card mb-4" id="personalized-news-feed-5">
   <div class="card-body">
     <h2 class="card-title">Evaluation</h2>
-
-    <h3 class="card-title">Offline</h3>
     <ul>
-      <li>ROC-AUC</li>
-    </ul>
-
-    <h3 class="card-title">Online</h3>
-    <ul>
-      <li>Click-through rate = \( \dfrac{\text{total number of clicked posts}}{\text{total number of impressions}} \)</li>
-      <li>Reaction rate = \( \dfrac{\text{number of liked/shared/commented/hidden/blocked/skipped posts}}{\text{total number of impressions}} \)</li>
+      <li>Offline</li>
+      <ul>
+        <li>ROC-AUC</li>
+      </ul>
+      <li>Online</li>
+      <ul>
+        <li>Click-through rate = \( \dfrac{\text{total number of clicked posts}}{\text{total number of impressions}} \)</li>
+        <li>Reaction rate = \( \dfrac{\text{number of liked/shared/commented/hidden/blocked/skipped posts}}{\text{total number of impressions}} \)</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
