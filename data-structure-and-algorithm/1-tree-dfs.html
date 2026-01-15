@@ -241,33 +241,32 @@ class Solution:
 #         self.val = val
 #         self.left = left
 #         self.right = right
+
 class Solution:
     def maxPathSum(self, root: Optional[TreeNode]) -> int:
 
-        # Max path sum at a specific node is max of
-        # node.val, node.val + left, node.val + right
-        # Post-order traversal
+        # [1,2,3] ? 6
+        # [1,-2,3] ? 3
 
-        self.max_path_sum = -math.inf
+        # Post-order traverse - left, right, root
+        # At each node, take max of left and right
+        # If left and right has path sum < 0, take 0
+        # Time O(n) n - number of nodes in tree
+        # Space O(n) recursion stack worst case h = n
 
-        # Time O(n)
-        #   n = number of nodes in tree
-        # Space O(n)
-        #   Recursion stack - O(h), h = height of tree
-        #   Worst case - height of tree can be n
         def post_order(node):
 
             if node:
                 left = post_order(node.left)
                 right = post_order(node.right)
-                
-                path_sum = max(node.val, node.val+left, node.val+right)
-                self.max_path_sum = max(self.max_path_sum, 
-                    path_sum, node.val+left+right)
-                return path_sum
+
+                path_sum = max(left, 0) + max(right, 0) + node.val
+                self.max_path_sum = max(self.max_path_sum, path_sum)
+                return max(node.val, node.val+left, node.val+right)
             else:
                 return 0
-        
+
+        self.max_path_sum = -math.inf
         post_order(root)
         return self.max_path_sum</code></pre>
   </div>
