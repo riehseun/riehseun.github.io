@@ -63,47 +63,38 @@
 
 <pre><code class="python">class MedianFinder:
 
-    # Use min/max heaps
-    # Store larger half in min, smaller half in max
-    # If len(min_heap) == len(max_heap)
-    #   Median is (min_heap[0]+max_heap[0]) // 2
-    #   Put into min_heap
-    # If len(min_heap) > len(max_heap)
-    #   Median is min_heap[0]
-    #   Put into max_heap
-    # If min_heap[0] > max_heap[0]
-    #   Good
-    # If min_heap[0] < max_heap[0]
-    #   swap until min_heap[0] > max_heap[0]
-     
+    # [1,2,3] ? 2
+    # [1,2] ? 1.5
+
+    # Use two heaps
+    # Max heap to store lower half (root can be median)
+    # Min heap to store upper half (root can be median)
+    # Balance heaps so that len(min_heap) >= len(max_heap) by 1
+    # Time O(logn) n = number of elements in stream
+    # Space O(n) 
+
     def __init__(self):
         self.min_heap = []
         self.max_heap = []
-        
+
     def addNum(self, num: int) -> None:
         if len(self.min_heap) == len(self.max_heap):
             heappush(self.min_heap, num)
-        elif len(self.min_heap) > len(self.max_heap):
+        else:
             heappush(self.max_heap, -num)
         while self.min_heap \
             and self.max_heap \
-            and self.min_heap[0] < -self.max_heap[0]:
-            a = -heappop(self.max_heap) 
-            heappush(self.min_heap, a)
-            b = heappop(self.min_heap) 
-            heappush(self.max_heap, -b)
+            and self.min_heap[0] < -self.max_heap[0]: 
+            a = heappop(self.min_heap)
+            b = heappop(self.max_heap)
+            heappush(self.min_heap, -b)
+            heappush(self.max_heap, -a)
 
     def findMedian(self) -> float:
         if len(self.min_heap) == len(self.max_heap):
             return (self.min_heap[0]-self.max_heap[0]) / 2
-        elif len(self.min_heap) > len(self.max_heap):
-            return self.min_heap[0]
-        
-
-# Your MedianFinder object will be instantiated and called as such:
-# obj = MedianFinder()
-# obj.addNum(num)
-# param_2 = obj.findMedian()</code></pre>
+        else:
+            return self.min_heap[0]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/find-median-from-data-stream">295. Find Median from Data Stream</a> | <a href="https://neetcode.io/problems/find-median-in-a-data-stream">Find Median From Data Stream</a>
