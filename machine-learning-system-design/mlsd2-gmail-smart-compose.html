@@ -39,15 +39,15 @@
 <div class="col-md-12">
 <h1 class="my-4">Machine Learning</h1>
 
-<!-- Gmail smart compose BEGIN -->
+<!-- Gmail Smart Compose BEGIN -->
 <div class="card mb-4" id="gmail-smart-compose">
   <div class="card-body">
-    <h2 class="card-title">Gmail smart compose</h2>
+    <h2 class="card-title">Gmail Smart Compose</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#gmail-smart-compose-1">Requirement</a></li>
-      <li><a href="#gmail-smart-compose-2">Problem</a></li>
-      <li><a href="#gmail-smart-compose-3">Data preparation</a></li>
-      <li><a href="#gmail-smart-compose-4">Model development</a></li>
+      <li><a href="#gmail-smart-compose-1">Clarifying Requirements</a></li>
+      <li><a href="#gmail-smart-compose-2">Frame the Problem as an ML Task</a></li>
+      <li><a href="#gmail-smart-compose-3">Data Preparation</a></li>
+      <li><a href="#gmail-smart-compose-4">Model Development</a></li>
       <li><a href="#gmail-smart-compose-5">Evaluation</a></li>
       <li><a href="#gmail-smart-compose-6">Serving</a></li>
       <li><a href="#gmail-smart-compose-7">Follow up</a></li>
@@ -57,35 +57,19 @@
 
 <div class="card mb-4" id="gmail-smart-compose-1">
   <div class="card-body">
-    <h2 class="card-title">Requirement</h2>
+    <h2 class="card-title">Clarifying Requirements</h2>
     <ul>
-      <li>Business objective</li>
-      <ul>
-        <li>Should suggestions be personalized? No</li>
-        <li>Should suggestions be made only when the model is confident in prediction? Yes</li>
-        <li>Should the model use just email body or other apsects of email? Email body only</li>
-        <li>What language should the model support? English only</li>
-        <li>Should the model handle bias in its prediction? Yes</li>
-      </ul>
-      <li>System features</li>
-      <li>Data</li>
-      <ul>
-        <li>Do we have training data available? Yes</li>
-        <li>How large is dataset? 1B email messages</li>
-      </ul>
-      <li>Constraints</li>
-      <ul>
-        <li>Is there a limitation on computing cost for training and inference? No</li>
-      </ul>
-      <li>Scale</li>
-      <ul>
-        <li>How many users are there? 1.8B users</li>
-        <li>How many emails can a user send? Up to 500 emails per day</li>
-      </ul>
-      <li>Performance</li>
-      <ul>
-        <li>How fast should the suggestions be? Under 100ms</li>
-      </ul>
+      <li>Should suggestions be personalized? No</li>
+      <li>Should suggestions be made only when the model is confident in prediction? Yes</li>
+      <li>Should the model use just email body or other apsects of email? Email body only</li>
+      <li>What language should the model support? English only</li>
+      <li>Should the model handle bias in its prediction? Yes</li>
+      <li>Do we have training data available? Yes</li>
+      <li>How large is dataset? 1B email messages</li>
+      <li>Is there a limitation on computing cost for training and inference? No</li>
+      <li>How many users are there? 1.8B users</li>
+      <li>How many emails can a user send? Up to 500 emails per day</li>
+      <li>How fast should the suggestions be? Under 100ms</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -95,24 +79,14 @@
 
 <div class="card mb-4" id="gmail-smart-compose-2">
   <div class="card-body">
-    <h2 class="card-title">Problem</h2>
-
-    <h3 class="card-title">ML problem</h3>
+    <h2 class="card-title">Frame the Problem as an ML Task</h2>
     <ul>
-      <li>Suggest appropriate next words (several of them) based on what user already typed</li>
-      <li>Input</li>
+      <li>Specify system input and output</li>
       <ul>
-        <li>Words typed by user</li>
+        <li>Input - words typed by user</li>
+        <li>Output - words that user will likely type next</li>
       </ul>
-      <li>Output</li>
-      <ul>
-        <li>Words that user will likely type next</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">ML category</h3>
-    <ul>
-      <li>Generative</li>
+      <li>Choose suitable ML approach</li>
       <ul>
         <li>Transformer</li>
       </ul>
@@ -125,16 +99,9 @@
 
 <div class="card mb-4" id="gmail-smart-compose-3">
   <div class="card-body">
-    <h2 class="card-title">Data preparation</h2>
-
-    <h3 class="card-title">Data engineering</h3>
+    <h2 class="card-title">Data Preparation</h2>
     <ul>
-      <li>Training data</li>
-      <ul>
-        <li>General data like books, websites, social media</li>
-        <li>Email data</li>
-      </ul>
-      <li>Database</li>
+      <li>Data engineering</li>
       <ul>
         <li>Email</li>
         <ul>
@@ -145,43 +112,52 @@
           <li>body</li>
         </ul>
       </ul>
+      <li>Feature engineering</li>
+      <ul>
+        <li>Text cleaning</li>
+        <ul>
+          <li>Remove non-english</li>
+          <li>Remove confidential info by masking them</li>
+          <li>Remove irrelevant chars</li>
+          <li>Remove duplicate data</li>
+        </ul>
+        <li>Text normalization</li>
+        <ul>
+          <li>Convert texts to consistent format</li>
+        </ul>
+        <li>Text tokenization</li>
+        <ul>
+          <li>Char-level</li>
+          <ul>
+            <li>Simple to implement</li>
+            <li>Difficult for model to understand meaning of each token</li>
+          </ul>
+          <li>Word level</li>
+          <ul>
+            <li>Easier for model to understand meaning of each token</li>
+            <li>Very large vocabulary size</li>
+          </ul>
+          <li>Subword-level</li>
+          <ul>
+            <li>Break uncommon words into known subwords, resulting in medium vocab size</li>
+            <li>Algorithm can be complex (Ex. Byte-Pair Encoding (BPE), SentencePiece)</li>
+          </ul>
+        </ul>
+        <li>Token indexing</li>
+        <ul>
+          <li>Convert texts to numbers</li>
+        </ul>
+      </ul>
     </ul>
 
-    <h3 class="card-title">Feature engineering</h3>
+    <h3 class="card-title"></h3>
     <ul>
-      <li>Text cleaning</li>
+      <li>Training data</li>
       <ul>
-        <li>Remove non-english</li>
-        <li>Remove confidential info by masking them</li>
-        <li>Remove irrelevant chars</li>
-        <li>Remove duplicate data</li>
+        <li>General data like books, websites, social media</li>
+        <li>Email data</li>
       </ul>
-      <li>Text normalization</li>
-      <ul>
-        <li>Convert texts to consistent format</li>
-      </ul>
-      <li>Text tokenization</li>
-      <ul>
-        <li>Char-level</li>
-        <ul>
-          <li>Simple to implement</li>
-          <li>Difficult for model to understand meaning of each token</li>
-        </ul>
-        <li>Word level</li>
-        <ul>
-          <li>Easier for model to understand meaning of each token</li>
-          <li>Very large vocabulary size</li>
-        </ul>
-        <li>Subword-level</li>
-        <ul>
-          <li>Break uncommon words into known subwords, resulting in medium vocab size</li>
-          <li>Algorithm can be complex (Ex. Byte-Pair Encoding (BPE), SentencePiece)</li>
-        </ul>
-      </ul>
-      <li>Token indexing</li>
-      <ul>
-        <li>Convert texts to numbers</li>
-      </ul>
+      <li>Database</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -191,129 +167,129 @@
 
 <div class="card mb-4" id="gmail-smart-compose-4">
   <div class="card-body">
-    <h2 class="card-title">Model development</h2>
-
-    <h3 class="card-title">Model selection</h3>
+    <h2 class="card-title">Model Development</h2>
     <ul>
-      <li>Encoder-decoder</li>
+      <li>Model selection</li>
       <ul>
-        <li>Useful where output is transformation of input (Ex. language transation)</li>
-      </ul>
-      <li>Encoder-only</li>
-      <ul>
-        <li>Process input sequences and makes a prediction about it (Ex. sentiment analysis)</li>
-      </ul>
-      <li>Decoder-only</li>
-      <ul>
-        <li>Process input sequences and generates a new sequence (Ex. text generation)</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Model training</h3>
-    <ul>
-      <li>Architecture</li>
-      <ul>
-        <li>Text embedding</li>
+        <li>Encoder-decoder</li>
         <ul>
-          <li>Convert token ID to embedding vector</li>
-          <li>Representing tokens by ID via one-hot encoding results in very sparse vector</li>
-          <li>IDs do not capture any semantic relationships between words</li>
+          <li>Useful where output is transformation of input (Ex. language transation)</li>
         </ul>
-        <li>Positional encoding</li>
+        <li>Encoder-only</li>
         <ul>
-          <li>Fixed encoding</li>
+          <li>Process input sequences and makes a prediction about it (Ex. sentiment analysis)</li>
+        </ul>
+        <li>Decoder-only</li>
+        <ul>
+          <li>Process input sequences and generates a new sequence (Ex. text generation)</li>
+        </ul>
+      </ul>
+      <li>Model training</li>
+      <ul>
+        <li>Architecture</li>
+        <ul>
+          <li>Text embedding</li>
           <ul>
-            <li>Without this, model treats input sequence as bag of words</li>
+            <li>Convert token ID to embedding vector</li>
+            <li>Representing tokens by ID via one-hot encoding results in very sparse vector</li>
+            <li>IDs do not capture any semantic relationships between words</li>
+          </ul>
+          <li>Positional encoding</li>
+          <ul>
+            <li>Fixed encoding</li>
+            <ul>
+              <li>Without this, model treats input sequence as bag of words</li>
+              <li>Pros</li>
+              <ul>
+                <li>No extra parameters</li>
+                <li>Supports very long sequence</li>
+              </ul>
+              <li>Cons</li>
+              <ul>
+                <li>Requires a pre-defined limit and training data longer than the limit is typically discarded</li>
+                <li>Lower performance</li>
+              </ul>
+            </ul>
+            <li>Learned encoding</li>
+            <ul>
+              <li>Pros</li>
+              <ul>
+                <li>Higher performance</li>
+              </ul>
+              <li>Cons</li>
+              <ul>
+                <li>Additional parameters are needed</li>
+                <li>May overfit specific sequence length</li>
+              </ul>
+            </ul>
+          </ul>
+          <li>Multi-head attention</li>
+          <ul>
+            <li>Also known as self-attention</li>
+          </ul>
+          <li>Feed forward</li>
+          <ul>
+            <li>Two linear transformations with ReLu activations in between</li>
+          </ul>
+          <li>Prediction head</li>
+          <ul>
+            <li>Convert model output into probabilities of each word</li>
+          </ul>
+        </ul>
+        <li>Loss function</li>
+        <ul>
+          <li>Direct training</li>
+          <ul>
+            <li>Lack of large training data</li>
+            <li>Risk of overfitting</li>
+          </ul>
+          <li>Pre-training</li>
+          <ul>
+            <li>Train on general data</li>
+            <li>Objective is to predict the next token</li>
+            <li>Cross-entropy loss to measure difference between predicted vs actual next token</li>
+          </ul>
+          <li>Fine-tuning</li>  
+          <ul>
+            <li>Very similar to pre-training but loss is calculated based on email data</li>
+          </ul>
+        </ul>
+        <li>Hyperparameters</li>
+        <li>Sampling</li>
+        <ul>
+          <li>Deterministic</li>
+          <ul>
+            <li>Generated result is always the same for the same input</li>
             <li>Pros</li>
             <ul>
-              <li>No extra parameters</li>
-              <li>Supports very long sequence</li>
+              <li>Predictable output</li>
             </ul>
             <li>Cons</li>
             <ul>
-              <li>Requires a pre-defined limit and training data longer than the limit is typically discarded</li>
-              <li>Lower performance</li>
+              <li>Lack of diversity</li>
+            </ul>
+            <li>Greedy search</li>
+            <ul>
+              <li>Select token with highest probability</li>
+            </ul>
+            <li>Beam search</li>
+            <ul>
+              <li>Initialization - select top k most probable tokens</li>
+              <li>Expansion - obtain probabilities of next token</li>
+              <li>Pruning - select top k sequences based on their cumulative probabilities</li>
             </ul>
           </ul>
-          <li>Learned encoding</li>
+          <li>Stochastic</li>
           <ul>
+            <li>Samples result from distribution based on probability assigned to each token</li>
             <li>Pros</li>
             <ul>
-              <li>Higher performance</li>
+              <li>Diversity and novelty</li>
             </ul>
             <li>Cons</li>
             <ul>
-              <li>Additional parameters are needed</li>
-              <li>May overfit specific sequence length</li>
+              <li>Inconsistency and unexpected output</li>
             </ul>
-          </ul>
-        </ul>
-        <li>Multi-head attention</li>
-        <ul>
-          <li>Also known as self-attention</li>
-        </ul>
-        <li>Feed forward</li>
-        <ul>
-          <li>Two linear transformations with ReLu activations in between</li>
-        </ul>
-        <li>Prediction head</li>
-        <ul>
-          <li>Convert model output into probabilities of each word</li>
-        </ul>
-      </ul>
-      <li>Loss function</li>
-      <ul>
-        <li>Direct training</li>
-        <ul>
-          <li>Lack of large training data</li>
-          <li>Risk of overfitting</li>
-        </ul>
-        <li>Pre-training</li>
-        <ul>
-          <li>Train on general data</li>
-          <li>Objective is to predict the next token</li>
-          <li>Cross-entropy loss to measure difference between predicted vs actual next token</li>
-        </ul>
-        <li>Fine-tuning</li>  
-        <ul>
-          <li>Very similar to pre-training but loss is calculated based on email data</li>
-        </ul>
-      </ul>
-      <li>Hyperparameters</li>
-      <li>Sampling</li>
-      <ul>
-        <li>Deterministic</li>
-        <ul>
-          <li>Generated result is always the same for the same input</li>
-          <li>Pros</li>
-          <ul>
-            <li>Predictable output</li>
-          </ul>
-          <li>Cons</li>
-          <ul>
-            <li>Lack of diversity</li>
-          </ul>
-          <li>Greedy search</li>
-          <ul>
-            <li>Select token with highest probability</li>
-          </ul>
-          <li>Beam search</li>
-          <ul>
-            <li>Initialization - select top k most probable tokens</li>
-            <li>Expansion - obtain probabilities of next token</li>
-            <li>Pruning - select top k sequences based on their cumulative probabilities</li>
-          </ul>
-        </ul>
-        <li>Stochastic</li>
-        <ul>
-          <li>Samples result from distribution based on probability assigned to each token</li>
-          <li>Pros</li>
-          <ul>
-            <li>Diversity and novelty</li>
-          </ul>
-          <li>Cons</li>
-          <ul>
-            <li>Inconsistency and unexpected output</li>
           </ul>
         </ul>
       </ul>
@@ -327,46 +303,46 @@
 <div class="card mb-4" id="gmail-smart-compose-5">
   <div class="card-body">
     <h2 class="card-title">Evaluation</h2>
-
-    <h3 class="card-title">Offline</h3>
     <ul>
-      <li>Option 1. perplexity</li>
+      <li>Offline</li>
       <ul>
-        <li>Given input sequence, Evaluate if model can accurately predict next words in text data</li>
-        <li>\( \text{Perplexity}(X) = \text{exp}\left(-\dfrac{1}{N}\displaystyle\sum_{i=1}^{N}\text{log}P(x_{i}|x_{1:i-1})\right) \)</li>
+        <li>Option 1. perplexity</li>
         <ul>
-          <li>\( X \) - tokenized sequence \( x_{1} \dots x_{N} \) in text data</li>
-          <li>\( N \) - number of tokens in sequence</li>
-          <li>\( P(x_{i}|x_{1:i-1}) \) - conditional probability of ith token given preceeding tokens</li>
+          <li>Given input sequence, Evaluate if model can accurately predict next words in text data</li>
+          <li>\( \text{Perplexity}(X) = \text{exp}\left(-\dfrac{1}{N}\displaystyle\sum_{i=1}^{N}\text{log}P(x_{i}|x_{1:i-1})\right) \)</li>
+          <ul>
+            <li>\( X \) - tokenized sequence \( x_{1} \dots x_{N} \) in text data</li>
+            <li>\( N \) - number of tokens in sequence</li>
+            <li>\( P(x_{i}|x_{1:i-1}) \) - conditional probability of ith token given preceeding tokens</li>
+          </ul>
+        </ul>
+        <li>Option 2. ExactMatch@N</li>
+        <ul>
+          <li>Evaluate if predicted words and ground truth words exactly match up to N words</li>
         </ul>
       </ul>
-      <li>Option 2. ExactMatch@N</li>
+      <li>Online</li>
       <ul>
-        <li>Evaluate if predicted words and ground truth words exactly match up to N words</li>
+        <li>User engagement</li>
+        <ul>
+          <li>Acceptance rate - rate of suggestions that are accepted by users</li>
+          <li>Usage rate - rate of emails that are used by users</li>
+        </ul>
+        <li>Effectiveness</li>
+        <ul>
+          <li>Average completion time - average time taken by users to compose emails</li>
+        </ul>
+        <li>Latency</li>
+        <ul>
+          <li>System response time - time for suggestions to appear after user begins typing</li>
+        </ul>
+        <li>Quality</li>
+        <ul>
+          <li>Feedback rate</li>
+          <li>Human evaludation</li>
+        </ul>
       </ul>
-    </ul>
-
-    <h3 class="card-title">Online</h3>
-    <ul>
-      <li>User engagement</li>
-      <ul>
-        <li>Acceptance rate - rate of suggestions that are accepted by users</li>
-        <li>Usage rate - rate of emails that are used by users</li>
-      </ul>
-      <li>Effectiveness</li>
-      <ul>
-        <li>Average completion time - average time taken by users to compose emails</li>
-      </ul>
-      <li>Latency</li>
-      <ul>
-        <li>System response time - time for suggestions to appear after user begins typing</li>
-      </ul>
-      <li>Quality</li>
-      <ul>
-        <li>Feedback rate</li>
-        <li>Human evaludation</li>
-      </ul>
-    </ul>
+    </ul>    
   </div>
   <div class="card-footer text-muted">
     Reference: Generative AI System Design Interview, Ali Aminian & Hao Sheng
@@ -418,7 +394,7 @@
     Reference: Generative AI System Design Interview, Ali Aminian & Hao Sheng
   </div>
 </div>
-<!-- Gmail smart compose END -->
+<!-- Gmail Smart Compose END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->
