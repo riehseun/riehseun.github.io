@@ -175,16 +175,16 @@
             if target < 0:
                 return
             if target == 0:
-                self.result.append(array[:])
+                result.append(array[:])
 
             for j in range(index, len(nums)):
                 array.append(nums[j])
                 backtrack(j, target-nums[j], array)
                 array.pop()
 
-        self.result = []
+        result = []
         backtrack(0, target, [])
-        return self.result</code></pre>
+        return result</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/combination-sum">39. Combination Sum</a> | <a href="https://neetcode.io/problems/combination-target-sum">Combination Sum</a>
@@ -326,40 +326,49 @@
   <div class="card-body">
     <h2 class="card-title">Word Search (75/150)</h2>
 
-<pre><code class="python">cclass Solution:
+<pre><code class="python">class Solution:
     def exist(self, board: List[List[str]], word: str) -> bool:
 
+        # [[A, B], [C, D]] word = "AD" ? False
+        # [[A, B], [C, D]] word = "AC" ? True
+
         # Backtracking
+        # Choose a path amongst 4 neighboring cell
+        # Move to that cell and recurse
+        # Backtrack
+        # Terminate when length == len(word)
+        # Time O(4**m) m = len(word)
+        # Space O(m) recursion stack
 
-        n, m = len(board), len(board[0])
+        def backtrack(array, i, j, index):
 
-        def backtrack(i, j, k):
-            
-            if k == len(word) - 1:
-                print(f"{k},{word[k]}")
-                result.append(True)
+            if index == len(word):
+                self.result.append(array[:])
                 return
-
-            c = board[i][j]
-            dirs = [(-1,0),(1,0),(0,-1),(0,1)]
-            board[i][j] = "#"
             
+            curr_char = board[i][j]
+            board[i][j] = "#" 
             for x, y in dirs:
                 if 0 <= i + x < n \
                     and 0 <= j + y < m \
-                    and board[i+x][j+y] == word[k+1]:
-                    backtrack(i+x, j+y, k+1)
-            board[i][j] = c
+                    and board[i+x][j+y] == word[index]:
+                    array.append(word[index])
+                    result = backtrack(array, i+x, j+y, index+1)
+                    array.pop()
+            board[i][j] = curr_char
+        
+        n, m = len(board), len(board[0])
+        dirs = [(-1,0), (1,0), (0,-1), (0,1)]
+        self.result = []
 
-        result = []
         for i in range(n):
-            for j in range(m):
+            for j in range(m):        
                 if board[i][j] == word[0]:
-                    print(f"start: {word[0]}")
-                    backtrack(i, j, 0)
+                    backtrack([word[0]], i, j, 1)
 
-        if True in result:
-            return True
+        for arr in self.result:
+            if "".join(arr) == word:
+                return True
         return False</code></pre>
   </div>
   <div class="card-footer text-muted">
