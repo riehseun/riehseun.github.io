@@ -155,14 +155,21 @@
     <h2 class="card-title">Word Search II (75/150)</h2>
 
 <pre><code class="python">class Solution:
-    def findWords(self, board: List[List[str]], words: List[str]) -> List[str]: 
-
-        # Use Trie
-        # Insert all words in words into Trie
-
-        n, m = len(board), len(board[0])
-        result = []
+    def findWords(self, board: List[List[str]], words: List[str]) -> List[str]:
         
+        # [[a,b],[c,d]] words = [abc, abd, cd] ? [abd, cd]
+
+        # Construct a trie and backtrack
+        # Insert all words into trie
+        # Move to next char if it can be searched in trie
+        # Backtrack
+        # Time O(k) + O(nm(4**l)) 
+        #   k = all chars in words
+        #   l = number of chars in word
+        #   n = number of rows
+        #   m = number of cols
+        # Space O(k) = O(1) Up to 26 chars in alphabet
+
         trie = {}
         for word in words:
             node = trie
@@ -171,30 +178,32 @@
                     node[c] = {}
                 node = node[c]
             node["word"] = word
-        
-        def backtrack(node, i, j):
-    
-            c = board[i][j]
-            node = node[c]
-            if "word" in node:
-                if node["word"] not in result:
-                    result.append(node["word"])
+            
+        def backtrack(i, j, node):
 
-            dirs = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+            node = node[board[i][j]]
+            if "word" in node:
+                result.add(node["word"])
+                
+            c = board[i][j]
             board[i][j] = "#"
             for x, y in dirs:
                 if 0 <= i + x < n \
                     and 0 <= j + y < m \
                     and board[i+x][j+y] in node:
-                    backtrack(node, i+x, j+y)
+                    backtrack(i+x, j+y, node)
             board[i][j] = c
+
+        result = set()
+        dirs = [(-1,0), (1,0), (0,-1), (0,1)]
+        n, m = len(board), len(board[0])
 
         for i in range(n):
             for j in range(m):
                 if board[i][j] in trie:
-                    backtrack(trie, i, j)
-                          
-        return result</code></pre>
+                    backtrack(i, j, trie)
+
+        return list(result)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/word-search-ii">212. Word Search II</a> | <a href="https://neetcode.io/problems/search-for-word-ii">Word Search II</a>
