@@ -105,47 +105,45 @@
 
 <pre><code class="python">class WordDictionary:
 
+    # Insert "abc" ? a -> b -> c
+    # Search "a.c" ? True
+
+    # Construct trie
+    # Use adjacency list
+    # If dot, search all chars at next level via recursive search
+    # Insert Time O(n) n = length of string
+    # Insert Space O(n)
+    # Search Time O(26**n) worst case "........"
+    # Search Space O(1)
+
     def __init__(self):
         self.trie = {}
 
-    # Time O(n)
-    #   n = len(word)
-    # Space O(n)
     def addWord(self, word: str) -> None:
         node = self.trie
         for c in word:
             if c not in node:
                 node[c] = {}
-            node = node[c] 
-        node["word"] = True
+            node = node[c]
+        node["end"] = True
 
-    # Time O(26**n)
-    #   n = len(word)
-    # Space O(n)
-    #   Recursion stack
     def search(self, word: str) -> bool:
 
         def recursive_search(word, node):
             for i, c in enumerate(word):
                 if c not in node:
                     if c == ".":
-                        for child in node:
-                            if child != "word" \
-                                and recursive_search(word[i+1:], node[child]):
+                        for next_node in node:
+                            if next_node != "end" \
+                                and recursive_search(word[i+1:], node[next_node]):
                                 return True
                     return False
                 else:
                     node = node[c]
 
-            return "word" in node
+            return "end" in node
 
-        return recursive_search(word, self.trie)
-
-
-# Your WordDictionary object will be instantiated and called as such:
-# obj = WordDictionary()
-# obj.addWord(word)
-# param_2 = obj.search(word)</code></pre>
+        return recursive_search(word, self.trie)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/design-add-and-search-words-data-structure">211. Design Add and Search Words Data Structure</a> | <a href="https://neetcode.io/problems/design-word-search-data-structure">Design Add and Search Word Data Structure</a>
