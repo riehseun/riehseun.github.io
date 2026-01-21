@@ -66,48 +66,38 @@ class Node:
 class Solution:
     def cloneGraph(self, node: Optional['Node']) -> Optional['Node']:
 
-        # Should return the root node?
-        # Does graph have cycle?
-        
-        # node = [] => return None
-        # node = Node(1, [Node(2,[])]) => Exactly the same object
-
-        # Brute?
+        # 1->2->3 ? 1->2->3 (copy)
 
         # DFS
-        # Put root node into stack
-        # pop from stack
-        # Iterate neighbors and insert them into stack
-        # Create graph of adjacency list while DFSing
+        # Create a new graph to return as copy of original
+        # New graph should be mapping between original and new node 
         # Time O(n+m) n = number of nodes, m = number of edges
         # Space O(n)
-        
-        def dfs(start):
-
-            explored = set()
-            explored.add(start)
-
-            stack = []
-            stack.append(start)
-
-            graph[start] = Node(start.val)
-                
-            while stack:
-                node = stack.pop()
-                
-                for next_node in node.neighbors:
-                    if next_node not in explored:
-                        explored.add(next_node)
-                        stack.append(next_node)
-                        graph[next_node] = Node(next_node.val)
-                    graph[node].neighbors.append(graph[next_node])
 
         if not node:
             return None
+        
+        stack = []
+        stack.append(node)
 
-        graph = {}
-        dfs(node)
-        return graph[node]</code></pre>
+        visited = set()
+        visited.add(node)
+
+        graph = defaultdict(Node)
+        graph[node] = Node(node.val)
+        start = node
+        
+        while stack:
+            node = stack.pop()
+            
+            for next_node in node.neighbors:
+                if next_node not in visited:
+                    visited.add(next_node)
+                    stack.append(next_node)
+                    graph[next_node] = Node(next_node.val)
+                graph[node].neighbors.append(graph[next_node])
+
+        return graph[start]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/clone-graph">133. Clone Graph</a> | <a href="https://neetcode.io/problems/clone-graph">Clone Graph</a>
