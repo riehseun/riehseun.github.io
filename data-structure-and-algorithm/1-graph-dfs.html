@@ -47,6 +47,7 @@
       <li><a href="#graph-dfs-">Clone Graph</a></li>  
       <li><a href="#graph-dfs-">Word Break</a></li>
       <li><a href="#graph-dfs-">Number of Connected Components in an Undirected Graph</a></li>
+      <li><a href="#graph-dfs-">Pacific Atlantic Water Flow</a></li>
     </ul>
   </div>
 </div>
@@ -152,6 +153,60 @@ class Solution:
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/number-of-connected-components-in-an-undirected-graph">323. Number of Connected Components in an Undirected Graph</a> | <a href="https://neetcode.io/problems/count-connected-components">Number of Connected Components in an Undirected Graph</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-dfs-">
+  <div class="card-body">
+    <h2 class="card-title">Pacific Atlantic Water Flow (75/150)</h2>
+
+<pre><code class="python">class Solution:
+    def pacificAtlantic(self, heights: List[List[int]]) -> List[List[int]]:
+        
+        # [[0,0,0],[0,0,0],[0,0,0]] ? [1,1] and 4 corners
+
+        # Find cells that flows to Pacific
+        #   Start DFS from top and left cells
+        #   Skip visited cell
+        # Find cells that flows to Atlantic
+        #   Start DFS from right and bottom cells
+        #   Skip visited cell
+        # Find intersection from above two
+        # Time O(n+m) = O(n) n = number of nodes, m = number of edges
+        # Space O(n)
+
+        def dfs(start, visited):
+
+            visited.add(start)
+
+            stack = []
+            stack.append(start)
+
+            while stack:
+                i, j = stack.pop()
+                for x, y in dirs:
+                    if 0 <= i + x < n \
+                        and 0 <= j + y < m \
+                        and heights[i+x][j+y] >= heights[i][j] \
+                        and (i+x, j+y) not in visited:
+                        visited.add((i+x, j+y))
+                        stack.append((i+x, j+y))
+                        
+        dirs = [(-1,0), (1,0), (0,1), (0,-1)]
+        n, m = len(heights), len(heights[0])
+        v_p, v_a = set(), set()
+
+        for i in range(n):
+            for j in range(m):
+                if i == 0 or j == 0:
+                    dfs((i,j), v_p)
+                if i == n - 1 or j == m - 1:
+                    dfs((i,j), v_a)
+                  
+        return list(v_p.intersection(v_a))</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/pacific-atlantic-water-flow">417. Pacific Atlantic Water Flow</a> | <a href="https://neetcode.io/problems/pacific-atlantic-water-flow">Pacific Atlantic Water Flow</a>
   </div>
 </div>
 <!-- Graph DFS END -->
