@@ -112,41 +112,32 @@ class Solution:
 <pre><code class="python">class Solution:
     def countComponents(self, n: int, edges: List[List[int]]) -> int:
         
-        # Is graph directed or undirected?
+        # [0,1],[1,2],[3,4], n = 5 ? 2
+        # [], n = 2 ? 2
 
-        # edges = [], n = 3  => 3
-        # edges = [[0,1]], n = 3 => 2
+        # BFS
+        # Time O(n+m) n = number of nodes, m = number of edges
+        # Space O(n)
 
-        # DFS at each node
-        #   Increment count by 1
-        # Skip already explored nodes
-        # Time O(n+m) n = number of nodes, m = numder of edges
-        # Space O(m)
-
-        def dfs(start):
-
-            stack = []
-            stack.append(start)
-
-            while stack:
-                node = stack.pop()
-
+        def bfs(start, visited):
+            visited.add(start)
+            queue = deque()
+            queue.append(start)
+            while queue:
+                node = queue.popleft()
                 for next_node in graph[node]:
-                    if next_node not in explored:
-                        explored.add(next_node)
-                        stack.append(next_node)
+                    if next_node not in visited:
+                        visited.add(next_node)
+                        queue.append(next_node)
 
-        explored, graph = set(), defaultdict(list)
-        count = 0
-
+        graph, visited, count = defaultdict(set), set(), 0
         for a, b in edges:
-            graph[b].append(a)
-            graph[a].append(b)
+            graph[a].add(b)
+            graph[b].add(a)
 
         for i in range(n):
-            if i not in explored:
-                explored.add(i)
-                dfs(i)
+            if i not in visited:
+                bfs(i, visited)
                 count += 1
 
         return count</code></pre>
