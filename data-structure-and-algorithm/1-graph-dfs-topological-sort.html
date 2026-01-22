@@ -91,7 +91,6 @@
                 if indegree[next_node] == 0:
                     queue.append(next_node)
 
-        print(indegree)
         for key, val in indegree.items():
             if val > 0:
                 return False
@@ -161,38 +160,31 @@
 
 <pre><code class="python">class Solution:
     def validTree(self, n: int, edges: List[List[int]]) -> bool:
-        
-        # What is valid tree? Each node having max two children?
-        # There is no cycle
-        # Nodes are fully connected
-        
-        # [[0,1],[1,0]] => False
-        # [] => True
 
-        # DFS at any node
-        # Search must discover all nodes 
-        # There should be no cycle
-        # Time O(n+m) n = number of nodes, m = number of edges
-        # Space O(n)
+        # 0->(1,2,3->4) ? True
+        # [] ? True if n == 1 False o/w
+        # Cannot have cycles
+        # All nodes are connected
 
-        graph, indegree = defaultdict(list), defaultdict(int)
-        queue = deque()
-        stack = [0]
-        explored = set()
+        # Topological sort to detect cycle
+        # Check if number of explored nodes = n
+
+        graph, indegree = defaultdict(set), defaultdict(int)
+        visited, queue, stack = set(), deque(), [0]
         
         for a, b in edges:
-            graph[b].append(a)
-            graph[a].append(b)
+            graph[b].add(a)
+            graph[a].add(b)
             indegree[a] += 1
             indegree[b] += 1
 
-        for i in range(1, len(edges)+1):
+        for i in range(n):
             if indegree[i] == 1:
                 queue.append(i)
 
         while queue:
             node = queue.popleft()
-        
+            
             for next_node in graph[node]:
                 indegree[next_node] -= 1
                 indegree[node] -= 1
@@ -203,18 +195,18 @@
             node = stack.pop()
 
             for next_node in graph[node]:
-                if next_node not in explored:
-                    explored.add(next_node)
+                if next_node not in visited:
+                    visited.add(next_node)
                     stack.append(next_node)
 
+        if not edges:
+            if n == 1:
+                return True
+            return False
         for a, b in edges:
             if indegree[a] >= 2 and indegree[b] >= 2:
                 return False
-
-        if n == 1:
-            return True
-
-        return n == len(explored)</code></pre>
+        return len(visited) == n</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/graph-valid-tree">261. Graph Valid Tree</a> | <a href="https://neetcode.io/problems/valid-tree">Graph Valid Tree</a>
