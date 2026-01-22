@@ -61,45 +61,41 @@
 <pre><code class="python">class Solution:
     def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
         
-        # Is there case like [[0,1],[1,0]]
+        # [[0,1],[1,2]] ? True (2->1->0)
+        # [[0,1],[1,0]] ? False
 
-        # 3, [[0,1],[1,2]] => 2->1->0 True
-        # 3, [[0,1]] => 1->0, 2 True
-        # 3, [[0,1],[0,2]] => 2,1->0 True
-        
-        # Create graph with adjancency list
-        # At each node, check if cycle
-        # Time O(n*(n+m)) n = numCourses, m = len(prerequisites)
+        # Detect cycle
+        # Use topological ordering
+        # Find indegree of each node
+        # Reduce indegree of each node by 1
+        # Iterate until no nodes left
+        # Time O(n+m) n = number of nodes, m = number of edges
         # Space O(n)
 
-        # Topological sort
-        # Calculate indegree (incoming nodes) for each node
-        # Start from nodes with indegree = 0
-        # Time O(n+m) visiting nodes only once
-        # Space O(n)
-    
-        graph, indegree = defaultdict(list), defaultdict(int)
+        graph, indegree = defaultdict(set), defaultdict(int)
         queue = deque()
-        
+
         for a, b in prerequisites:
-            graph[b].append(a)
+            graph[b].add(a)
             indegree[a] += 1
 
         for i in range(numCourses):
             if indegree[i] == 0:
                 queue.append(i)
 
-        num_explored_nodes = 0
         while queue:
             node = queue.popleft()
-            num_explored_nodes += 1
 
             for next_node in graph[node]:
                 indegree[next_node] -= 1
                 if indegree[next_node] == 0:
                     queue.append(next_node)
 
-        return num_explored_nodes == numCourses</code></pre>
+        print(indegree)
+        for key, val in indegree.items():
+            if val > 0:
+                return False
+        return True</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/course-schedule">207. Course Schedule</a> | <a href="https://neetcode.io/problems/course-schedule">Course Schedule</a>
