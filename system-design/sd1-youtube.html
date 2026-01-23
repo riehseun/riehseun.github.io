@@ -95,124 +95,116 @@
 
 <div class="card mb-4" id="youtube-3">
   <div class="card-body">
-    <h2 class="card-title">Propose high-level design and get buy-i</h2>
-
-    <h3 class="card-title">Components</h3>
-
-    <h4 class="card-title">Video upload</h4>
-
-    <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-1/youtube-1.png" alt="Card image cap">
-
+    <h2 class="card-title">Propose high-level design and get buy-in</h2>
     <ul>
-      <li>User</li>
-      <li>Load balancer</li>
-      <li>API servers</li>
+      <li>Video upload</li>
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-1/youtube-1.png" alt="Card image cap">
       <ul>
-        <li>All requests go through API server except video streaming</li>
+        <li>User</li>
+        <li>Load balancer</li>
+        <li>API servers</li>
+        <ul>
+          <li>All requests go through API server except video streaming</li>
+        </ul>
+        <li>Medatada DB</li>
+        <ul>
+          <li>Stores video metadata</li>
+        </ul>
+        <li>Medatada cache</li>
+        <ul>
+          <li>Caches video metadata</li>
+        </ul>
+        <li>Original storage</li>
+        <ul>
+          <li>Blob storage that stores original videos</li>
+        </ul>
+        <li>Encoding servers</li>
+        <ul>
+          <li>Converts videos into formats that is easier to stream</li>
+        </ul>
+        <li>Encoded storage</li>
+        <ul>
+          <li>Blob storage that stores encoded videos</li>
+        </ul>
+        <li>CDN</li>
+        <ul>
+          <li>Caches videos</li>
+        </ul>
+        <li>Completion queue</li>
+        <ul>
+          <li>Stores video encoding completion events</li>
+        </ul>
+        <li>Completion handler</li>
+        <ul>
+          <li>Dequeues events and updates metadata DB</li>
+        </ul>
       </ul>
-      <li>Medatada DB</li>
+      <li>Video stream</li>
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-1/youtube-2.png" alt="Card image cap">
       <ul>
-        <li>Stores video metadata</li>
+        <li>Videos are streamed from CDN directly</li>
+        <li>Edge server closest to users will deliver the video</li>
       </ul>
-      <li>Medatada cache</li>
+      <li>API</li>
       <ul>
-        <li>Caches video metadata</li>
+        <li><code>upload_video(user_id, video_file, title, description, tags, default_language)</code></li>
+        <ul>
+          <li>POST api/v1/video/upload</li>
+        </ul>
+        <li><code>stream_video(user_id, video_id, resolution)</code></li>
+        <ul>
+          <li>GET api/v1/video/stream</li>
+        </ul>
+        <li><code>search_video(user_id, query, user_location, length, max_videos_to_return)</code></li>
+        <ul>
+          <li>GET api/v1/video/search</li>
+        </ul>
+        <li><code>view_thunbnail(user_id, video_id)</code></li>
+        <ul>
+          <li>GET api/v1/video/thumbnail</li>
+        </ul>
+        <li><code>like_or_dislike_video(user_id, video_id, like)</code></li>
+        <ul>
+          <li>POST api/v1/video/like</li>
+        </ul>
+        <li><code>comment_video(user_id, video_id, text)</code></li>
+        <ul>
+          <li>POST api/v1/video/comment</li>
+        </ul>
       </ul>
-      <li>Original storage</li>
+      <li>Database</li>
       <ul>
-        <li>Blob storage that stores original videos</li>
-      </ul>
-      <li>Encoding servers</li>
-      <ul>
-        <li>Converts videos into formats that is easier to stream</li>
-      </ul>
-      <li>Encoded storage</li>
-      <ul>
-        <li>Blob storage that stores encoded videos</li>
-      </ul>
-      <li>CDN</li>
-      <ul>
-        <li>Caches videos</li>
-      </ul>
-      <li>Completion queue</li>
-      <ul>
-        <li>Stores video encoding completion events</li>
-      </ul>
-      <li>Completion handler</li>
-      <ul>
-        <li>Dequeues events and updates metadata DB</li>
-      </ul>
-    </ul>
-
-    <h4 class="card-title">Video stream</h4>
-
-    <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-1/youtube-2.png" alt="Card image cap">
-
-    <ul>
-      <li>Videos are streamed from CDN directly</li>
-      <li>Edge server closest to users will deliver the video</li>
-    </ul>
-
-    <h3 class="card-title">API</h3>
-    <ul>
-      <li><code>upload_video(user_id, video_file, title, description, tags, default_language)</code></li>
-      <ul>
-        <li>POST api/v1/video/upload</li>
-      </ul>
-      <li><code>stream_video(user_id, video_id, resolution)</code></li>
-      <ul>
-        <li>GET api/v1/video/stream</li>
-      </ul>
-      <li><code>search_video(user_id, query, user_location, length, max_videos_to_return)</code></li>
-      <ul>
-        <li>GET api/v1/video/search</li>
-      </ul>
-      <li><code>view_thunbnail(user_id, video_id)</code></li>
-      <ul>
-        <li>GET api/v1/video/thumbnail</li>
-      </ul>
-      <li><code>like_or_dislike_video(user_id, video_id, like)</code></li>
-      <ul>
-        <li>POST api/v1/video/like</li>
-      </ul>
-      <li><code>comment_video(user_id, video_id, text)</code></li>
-      <ul>
-        <li>POST api/v1/video/comment</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Database</h3>
-    <ul>
-      <li>Choose relational DB</li>
-      <li>User</li>
-      <ul>
-        <li>id (int, pk)</li>
-        <li>name (varchar)</li>
-        <li>email (varchar)</li>
-        <li>password (varchar)</li>
-      </ul>
-      <li>Video</li>
-      <ul>
-        <li>id (int, pk)</li>
-        <li>title (varchar)</li>
-        <li>description (varchar)</li>
-        <li>date (datetime)</li>
-        <li>uploader (int)</li>
-        <li>size (longint)</li>
-        <li>thumbnail (varchar)</li>
-        <li>likes (int)</li>
-        <li>dislikes (int)</li>
-        <li>views (int)</li>
-      </ul>
-      <li>Comment</li>
-      <ul>
-        <li>id (int, pk)</li>
-        <li>video_id (int)</li>
-        <li>user_id (int)</li>
-        <li>comment (varchar)</li>
-        <li>date (datetime)</li>
-        <li>likes (int)</li>
-        <li>dislikes (int)</li>
+        <li>Choose relational DB</li>
+        <li>User</li>
+        <ul>
+          <li>id (int, pk)</li>
+          <li>name (varchar)</li>
+          <li>email (varchar)</li>
+          <li>password (varchar)</li>
+        </ul>
+        <li>Video</li>
+        <ul>
+          <li>id (int, pk)</li>
+          <li>title (varchar)</li>
+          <li>description (varchar)</li>
+          <li>date (datetime)</li>
+          <li>uploader (int)</li>
+          <li>size (longint)</li>
+          <li>thumbnail (varchar)</li>
+          <li>likes (int)</li>
+          <li>dislikes (int)</li>
+          <li>views (int)</li>
+        </ul>
+        <li>Comment</li>
+        <ul>
+          <li>id (int, pk)</li>
+          <li>video_id (int)</li>
+          <li>user_id (int)</li>
+          <li>comment (varchar)</li>
+          <li>date (datetime)</li>
+          <li>likes (int)</li>
+          <li>dislikes (int)</li>
+        </ul>
       </ul>
     </ul>
   </div>
@@ -224,95 +216,91 @@
 <div class="card mb-4" id="youtube-3">
   <div class="card-body">
     <h2 class="card-title">Design deep dive</h2>
-
-    <h3 class="card-title">Video encoding</h3>
     <ul>
-      <li>Raw video consume a lot of space</li>
-      <li>Many devices supports only certain type of formats</li>
-      <li>Deliver high resolution video to users who use high bandwidth and low resolution video to users who use low bandwidth</li>
-      <li>Switch video quality based on network condition</li>
-    </ul>
-
-    <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-1/youtube-3.png" alt="Card image cap">
-
-    <ul>
-      <li>Inspection</li>
-      <ul>
-        <li>Check if video is not malformed</li>
-      </ul>
       <li>Video encoding</li>
       <ul>
-        <li>Convert videos into different resolutions and formats</li>
+        <li>Raw video consume a lot of space</li>
+        <li>Many devices supports only certain type of formats</li>
+        <li>Deliver high resolution video to users who use high bandwidth and low resolution video to users who use low bandwidth</li>
+        <li>Switch video quality based on network condition</li>
       </ul>
-      <li>Thumbnail</li>
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-1/youtube-3.png" alt="Card image cap">
       <ul>
-        <li>Either uploaded by user or auto-generated by the system</li>
+        <li>Inspection</li>
+        <ul>
+          <li>Check if video is not malformed</li>
+        </ul>
+        <li>Video encoding</li>
+        <ul>
+          <li>Convert videos into different resolutions and formats</li>
+        </ul>
+        <li>Thumbnail</li>
+        <ul>
+          <li>Either uploaded by user or auto-generated by the system</li>
+        </ul>
+        <li>Watermark</li>
+        <ul>
+          <li>Image overlay on top of video</li>
+        </ul>
       </ul>
-      <li>Watermark</li>
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-1/youtube-4.png" alt="Card image cap">
       <ul>
-        <li>Image overlay on top of video</li>
+        <li>Preprocessor</li>
+        <ul>
+          <li>Split videos to chunk of frames</li>
+          <li>Generates DAG</li>
+          <li>Cache segmented videos</li>
+        </ul>
+        <li>DAG scheduler</li>
+        <ul>
+          <li>Split DAG into tasks and put them into queue</li>
+        </ul>
+        <li>Resource manager</li>
+        <ul>
+          <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-1/youtube-5.png" alt="Card image cap">
+          <li>Task scheduler - picks optimal task/worker</li>
+          <li>Task queue - contains tasks to be executed</li>
+          <li>Worker queue - contains worker utilization info</li>
+          <li>Running queue - contains running tasks and workers info</li>
+        </ul>
+        <li>Task workers</li>
+        <ul>
+          <li>Run tasks defined in DAG</li>
+        </ul>
+        <li>Temp storage</li>
+        <ul>
+          <li>Cache is used for metadata</li>
+          <li>Blob storage is used for video or audio</li>
+          <li>Temp storage is freed up once the corresponding video processing is complete</li>
+        </ul>
+        <li>Encoded video</li>
+        <ul>
+          <li>Final output of encoding pipeline</li>
+        </ul>
       </ul>
-    </ul>
-
-    <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-1/youtube-4.png" alt="Card image cap">
-
-    <ul>
-      <li>Preprocessor</li>
+      <li>Optimization</li>
       <ul>
-        <li>Split videos to chunk of frames</li>
-        <li>Generates DAG</li>
-        <li>Cache segmented videos</li>
-      </ul>
-      <li>DAG scheduler</li>
-      <ul>
-        <li>Split DAG into tasks and put them into queue</li>
-      </ul>
-      <li>Resource manager</li>
-      <ul>
-        <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-1/youtube-5.png" alt="Card image cap">
-        <li>Task scheduler - picks optimal task/worker</li>
-        <li>Task queue - contains tasks to be executed</li>
-        <li>Worker queue - contains worker utilization info</li>
-        <li>Running queue - contains running tasks and workers info</li>
-      </ul>
-      <li>Task workers</li>
-      <ul>
-        <li>Run tasks defined in DAG</li>
-      </ul>
-      <li>Temp storage</li>
-      <ul>
-        <li>Cache is used for metadata</li>
-        <li>Blob storage is used for video or audio</li>
-        <li>Temp storage is freed up once the corresponding video processing is complete</li>
-      </ul>
-      <li>Encoded video</li>
-      <ul>
-        <li>Final output of encoding pipeline</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Optimization</h3>
-    <ul>
-      <li>Split videos into small chunks and perform parallel upload</li>
-      <li>Place upload centers close to users</li>
-      <li>Between orignal storage, encoding servers, encoded stroage, place message queues</li>
-      <ul>
-        <li>Encoding module does not need to wait for the download module to finish</li>
-        <li>Encoding module can execute jobs in parallel</li>
-      </ul>
-      <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-1/youtube-6.png" alt="Card image cap">
-      <li>Use pre-signed URL / Shared Access Signiture</li>
-      <ul>
-        <li>User makes HTTP request to API server to obtain pre-signed URL</li>
-        <li>User uploads videos using pre-signed URL</li>
-      </ul>
-      <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-1/youtube-7.png" alt="Card image cap">
-      <li>Optimize CDN usage</li>
-      <ul>
-        <li>Only serve popular videos from CDN</li>
-        <li>For less popular videos, no need to store them in CDN</li>
-        <li>Short videos can be encoded on demand</li>
-        <li>Some videos are only popular in certain regions and they don't need to be replicated in other regions</li>
+        <li>Split videos into small chunks and perform parallel upload</li>
+        <li>Place upload centers close to users</li>
+        <li>Between orignal storage, encoding servers, encoded stroage, place message queues</li>
+        <ul>
+          <li>Encoding module does not need to wait for the download module to finish</li>
+          <li>Encoding module can execute jobs in parallel</li>
+        </ul>
+        <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-1/youtube-6.png" alt="Card image cap">
+        <li>Use pre-signed URL / Shared Access Signiture</li>
+        <ul>
+          <li>User makes HTTP request to API server to obtain pre-signed URL</li>
+          <li>User uploads videos using pre-signed URL</li>
+        </ul>
+        <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-1/youtube-7.png" alt="Card image cap">
+        <li>Optimize CDN usage</li>
+        <ul>
+          <li>Only serve popular videos from CDN</li>
+          <li>For less popular videos, no need to store them in CDN</li>
+          <li>Short videos can be encoded on demand</li>
+          <li>Some videos are only popular in certain regions and they don't need to be replicated in other regions</li>
+        </ul>
       </ul>
     </ul>
   </div>
