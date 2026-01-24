@@ -39,27 +39,22 @@
 <div class="col-md-12">
 <h1 class="my-4">Software Engineering</h1>
 
-<!-- Real-time gaming leaderboard BEGIN -->
+<!-- Real-time Gaming Leaderboard BEGIN -->
 <div class="card mb-4" id="real-time-gaming-leaderboard">
   <div class="card-body">
-    <h2 class="card-title">Real-time gaming leaderboard</h2>
+    <h2 class="card-title">Real-time Gaming Leaderboard</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#real-time-gaming-leaderboard-1">Requirement</a></li>
-      <li><a href="#real-time-gaming-leaderboard-2">Estimation</a></li>
-      <li><a href="#real-time-gaming-leaderboard-3">High level design</a></li>
-      <li><a href="#real-time-gaming-leaderboard-4">API</a></li>
-      <li><a href="#real-time-gaming-leaderboard-5">Storage schema</a></li>
-      <li><a href="#real-time-gaming-leaderboard-6">Detailed design</a></li>
-      <li><a href="#real-time-gaming-leaderboard-7">Evaluation</a></li>
+      <li><a href="#real-time-gaming-leaderboard-1">Understand the Problem and Establish Design Scope</a></li>
+      <li><a href="#real-time-gaming-leaderboard-2">Propose High-level Diagram and Get Buy-in</a></li>
+      <li><a href="#real-time-gaming-leaderboard-3">Design Deep Dive</a></li>
+      <li><a href="#real-time-gaming-leaderboard-4">Wrap Up</a></li>
     </ul>
   </div>
 </div>
 
 <div class="card mb-4" id="real-time-gaming-leaderboard-1">
   <div class="card-body">
-    <h2 class="card-title">Requirement</h2>
-
-    <h3 class="card-title">Functional</h3>
+    <h2 class="card-title">Understand the Problem and Establish Design Scope</h2>
     <ul>
       <li>How is score calculated? Users get points when they win matches</li>
       <li>Is everyone included in the leaderboard? Yes</li>
@@ -67,28 +62,6 @@
       <li>How many users are there? 5M daily active users and 25M monthly active users</li>
       <li>How many matches are played on average? Each user plays 10 matches per day on average</li>
     </ul>
-
-    <h3 class="card-title">Non-functional</h3>
-    <ul>
-      <li>Availability</li>
-      <li>Reliability</li>
-      <li>Scalability</li>
-      <li>Performance</li>
-      <li>Consistency</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="real-time-gaming-leaderboard-2">
-  <div class="card-body">
-    <h2 class="card-title">Estimation</h2>
-
-    <h3 class="card-title">Server</h3>
-
-    <h3 class="card-title">Storage</h3>
 
     <h3 class="card-title">Bandwidth</h3>
     <ul>
@@ -102,18 +75,89 @@
   </div>
 </div>
 
-<div class="card mb-4" id="real-time-gaming-leaderboard-3">
+<div class="card mb-4" id="real-time-gaming-leaderboard-2">
   <div class="card-body">
-    <h2 class="card-title">High level design</h2>
-
-    <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/real-time-gaming-leaderboard-1.png" alt="Card image cap">
-
+    <h2 class="card-title">Propose High-level Diagram and Get Buy-in</h2>
     <ul>
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/real-time-gaming-leaderboard-1.png" alt="Card image cap">
       <li>When a player wins a game, user sends a request to game service</li>
       <li>Game service ensures the win is valid and calls leaderboard service to update the score</li>
       <li>Leaderboard service updates user's score in leaderboard store</li>
       <li>User calls leaderboard service directly to fetch leaderboard data</li>
+      <li>API</li>
+      <ul>
+        <li>Update user's position on leaderboard when a user wins a game</li>
+        <ul>
+          <li><code>POST /v1/scores</code></li>
+          <li>Request</li>
+          <ul>
+            <li><code>user_id</code> - user who wins the game</li>
+            <li><code>points</code> - points that user gained by winning a game</li>
+          </ul>
+          <li>Response</li>
+          <ul>
+            <li><code>200 OK</code></li>
+            <li><code>400 Bad Request</code></li>
+          </ul>
+        </ul>
+        <li>Get top 10 plays from leaderboard</li>
+        <ul>
+          <li><code>GET /v1/scores</code></li>
+        </ul>
+        <li>Find the rank of a specific user</li>
+        <ul>
+          <li><code>GET /v1/scores/{:user_id}</code></li>
+        </ul>
+      </ul>
+      <li>Storage schema</li>
+      <ul>
+        <li>Relational DB</li>
+        <ul>
+          <li>Not performant when processing large amount of continuously changing information</li>
+          <li>Not suitable very high load of read queries</li>
+        </ul>
+        <li>Redis</li>
+        <ul>
+          <li>Sorted sets data type works well with leaderboard problem</li>
+          <li>Redis supports persistence</li>
+          <li>When main replica fails, read replica is promoted and a new read replica is attached</li>
+          <li>ZADD - insert user if not exist O(logn)</li>
+          <li>ZINCBY - increase the score of a user by specified amount O(logn)</li>
+          <li>ZRANGE/ZREVRANGE - fetch a range of users sorted by the score O(logn+m)</li>
+          <li>ZRANK/ZREVRANK - fetch the position of any user</li>
+        </ul>
+      </ul>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
+  </div>
+</div>
+
+<div class="card mb-4" id="real-time-gaming-leaderboard-3">
+  <div class="card-body">
+    <h2 class="card-title">Design Deep Dive</h2>
+    <ul>
+      <li>Serverless</li>
+      <ul>
+        <li>Allows auto-scaling as needed with DAU growth</li>
+      </ul>
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/real-time-gaming-leaderboard-2.png" alt="Card image cap">
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/real-time-gaming-leaderboard-3.png" alt="Card image cap">
+      <li>Data sharding</li>
+      <ul>
+        <li>Fixed partition</li>
+        <ul>
+          <li>Looks at overall range of scores and distribute data into different shards based on the score</li>
+          <li>Adjust the score range in each shard to make sure that data is relatively evenly distributed between shards</li>
+          <li>Return top 10 users from the shard with the highest scores</li>
+        </ul>
+        <li>Hash partition</li>
+        <ul>
+          <li>Returning top 10 users requires gathering data from different shards, which will be slow</li>
+        </ul>
+      </ul>
+    </ul>    
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
@@ -122,143 +166,13 @@
 
 <div class="card mb-4" id="real-time-gaming-leaderboard-4">
   <div class="card-body">
-    <h2 class="card-title">API</h2>
-
-    <h3 class="card-title">Hotel related API</h3>
-    <ul>
-      <li>Update user's position on leaderboard when a user wins a game</li>
-      <ul>
-        <li><code>POST /v1/scores</code></li>
-        <li>Request</li>
-        <ul>
-          <li><code>user_id</code> - user who wins the game</li>
-          <li><code>points</code> - points that user gained by winning a game</li>
-        </ul>
-        <li>Response</li>
-        <ul>
-          <li><code>200 OK</code></li>
-          <li><code>400 Bad Request</code></li>
-        </ul>
-      </ul>
-      <li>Get top 10 plays from leaderboard</li>
-      <ul>
-        <li><code>GET /v1/scores</code></li>
-      </ul>
-      <li>Find the rank of a specific user</li>
-      <ul>
-        <li><code>GET /v1/scores/{:user_id}</code></li>
-      </ul>
-    </ul>
+    <h2 class="card-title">Wrap Up</h2>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
   </div>
 </div>
-
-<div class="card mb-4" id="real-time-gaming-leaderboard-5">
-  <div class="card-body">
-    <h2 class="card-title">Storage schema</h2>
-    <ul>
-      <li>Relational DB</li>
-      <ul>
-        <li>Not performant when processing large amount of continuously changing information</li>
-        <li>Not suitable very high load of read queries</li>
-      </ul>
-      <li>Redis</li>
-      <ul>
-        <li>Sorted sets data type works well with leaderboard problem</li>
-        <li>Redis supports persistence</li>
-        <li>When main replica fails, read replica is promoted and a new read replica is attached</li>
-        <li>ZADD - insert user if not exist O(logn)</li>
-        <li>ZINCBY - increase the score of a user by specified amount O(logn)</li>
-        <li>ZRANGE/ZREVRANGE - fetch a range of users sorted by the score O(logn+m)</li>
-        <li>ZRANK/ZREVRANK - fetch the position of any user</li>
-      </ul>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="real-time-gaming-leaderboard-6">
-  <div class="card-body">
-    <h2 class="card-title">Detailed design</h2>
-
-    <h3 class="card-title">Serverless</h3>
-    <ul>
-      <li>Allows auto-scaling as needed with DAU growth</li>
-    </ul>
-
-    <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/real-time-gaming-leaderboard-2.png" alt="Card image cap">
-
-    <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/real-time-gaming-leaderboard-3.png" alt="Card image cap">
-
-    <h3 class="card-title">Data sharding</h3>
-    <ul>
-      <li>Fixed partition</li>
-      <ul>
-        <li>Looks at overall range of scores and distribute data into different shards based on the score</li>
-        <li>Adjust the score range in each shard to make sure that data is relatively evenly distributed between shards</li>
-        <li>Return top 10 users from the shard with the highest scores</li>
-      </ul>
-      <li>Hash partition</li>
-      <ul>
-        <li>Returning top 10 users requires gathering data from different shards, which will be slow</li>
-      </ul>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="real-time-gaming-leaderboard-7">
-  <div class="card-body">
-    <h2 class="card-title">Evaluation</h2>
-
-    <h3 class="card-title">Availability</h3>
-    <ul>
-      <li>Replication</li>
-      <ul>
-        <li>Replicate each server and DB</li>
-        <li>Replicate entire components to different zone or geographical region</li>
-      </ul>
-      <li>Fail over</li>
-      <ul>
-        <li></li>
-        <li></li>
-      </ul>
-    </ul>
-
-    <h4 class="card-title">Reliability</h4>
-    <ul>
-      <li>Data loss</li>
-    </ul>
-
-    <h3 class="card-title">Scalability</h3>
-    <ul>
-      <li>Horizontal scaling</li>
-      <li>Data partitioning</li>
-    </ul>
-
-    <h4 class="card-title">Performance</h4>
-    <ul>
-      <li></li>
-      <li></li>
-    </ul>
-    </ul>
-
-    <h3 class="card-title">Consistency</h3>
-    <ul>
-      <li></li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-<!-- Real-time gaming leaderboard END -->
+<!-- Real-time Gaming Leaderboard END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->
