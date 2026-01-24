@@ -39,55 +39,28 @@
 <div class="col-md-12">
 <h1 class="my-4">Software Engineering</h1>
 
-<!-- Distributed email service BEGIN -->
+<!-- Distributed Email Service BEGIN -->
 <div class="card mb-4" id="distributed-email-service">
   <div class="card-body">
-    <h2 class="card-title">Distributed email service</h2>
+    <h2 class="card-title">Distributed Email Service</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#distributed-email-service-1">Requirement</a></li>
-      <li><a href="#distributed-email-service-2">Estimation</a></li>
-      <li><a href="#distributed-email-service-3">High level design</a></li>
-      <li><a href="#distributed-email-service-4">API</a></li>
-      <li><a href="#distributed-email-service-5">Storage schema</a></li>
-      <li><a href="#distributed-email-service-6">Detailed design</a></li>
-      <li><a href="#distributed-email-service-7">Evaluation</a></li>
+      <li><a href="#distributed-email-service-1">Understand the Problem and Establish Design Scope</a></li>
+      <li><a href="#distributed-email-service-2">Propose High-level Diagram and Get Buy-in</a></li>
+      <li><a href="#distributed-email-service-3">Design Deep Dive</a></li>
+      <li><a href="#distributed-email-service-4">Wrap Up</a></li>
     </ul>
   </div>
 </div>
 
 <div class="card mb-4" id="distributed-email-service-1">
   <div class="card-body">
-    <h2 class="card-title">Requirement</h2>
-
-    <h3 class="card-title">Functional</h3>
+    <h2 class="card-title">Understand the Problem and Establish Design Scope</h2>
     <ul>
       <li>How many users are there? 1B</li>
       <li>What kind of features should the system support? Send email, search emails, spam filtering</li>
       <li>Should the system suport email attachment? Yes</li>
       <li>How do users connect with mail servers? HTTP</li>
     </ul>
-
-    <h3 class="card-title">Non-functional</h3>
-    <ul>
-      <li>Availability</li>
-      <li>Reliability</li>
-      <li>Scalability</li>
-      <li>Performance</li>
-      <li>Consistency</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="distributed-email-service-2">
-  <div class="card-body">
-    <h2 class="card-title">Estimation</h2>
-
-    <h3 class="card-title">Server</h3>
-
-    <h3 class="card-title">Storage</h3>
 
     <h3 class="card-title">Bandwidth</h3>
     <ul>
@@ -101,12 +74,11 @@
   </div>
 </div>
 
-<div class="card mb-4" id="distributed-email-service-3">
+<div class="card mb-4" id="distributed-email-service-2">
   <div class="card-body">
-    <h2 class="card-title">High level design</h2>
-
-    <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/distributed-email-service-1.png" alt="Card image cap">
+    <h2 class="card-title">Propose High-level Diagram and Get Buy-in</h2>
     <ul>
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/distributed-email-service-1.png" alt="Card image cap">
       <li>Webmail</li>
       <ul>
         <li>Users use web browsers to send and receive emails</li>
@@ -134,29 +106,132 @@
       <ul>
         <li>Distributed document store that uses inverted index</li>
       </ul>
+      <li>Email sending flow</li>
+      <ul>
+        <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/distributed-email-service-2.png" alt="Card image cap">
+        <li>User sneds an email. Request is sent to load balancer</li>
+        <li>Load balancer performs rate limiting and routes request to web servers</li>
+        <li>Web servers performs email validation</li>
+        <li>If validation succeeds, email is sent to outgoing queue</li>
+        <li>If validation fails, email is sent to error queue</li>
+        <li>SMPT outgoing workers pull messages and check for spam and virus</li>
+        <li>Outgoing email is stored in "Sent" folder in storage</li>
+        <li>SMPT outgoing workers sends email to recipient mail server</li>
+      </ul>
+      <li>Email receiving flow</li>
+      <ul>
+        <img class="img-fluid" class="card-img-top" src="/software-engineering/image/system-design-2/distributed-email-service-3.png" alt="Card image cap">
+        <li>Load balancer distributes emails across SMTP servers</li>
+        <li>Mail processing workers checks spam and virus</li>
+        <li>Email is stored in email storage, cache, and object storage</li>
+        <li>If receiver is currently online, email is pushed to real-time servers</li>
+        <li>If receiver is offline, webmail client calls web servers and web servers pull new emails from storage layer</li>
+      </ul>
+      <li>Storage schema</li>
+      <ul>
+        <li>A sinlge column can be MBs</li>
+        <li>Strong consistency needed</li>
+        <li>Disk I/O should be small</li>
+        <li>Highly available and fault tolerant</li>
+        <li>Should be easy to create incremental backup</li>
+        <li>folders_by_user</li>
+        <ul>
+          <li>user_id - uuid, partition key</li>
+          <li>folder_id - uuid</li>
+          <li>folder_name - text</li>
+        </ul>
+        <li>emails_by_folder</li>
+        <ul>
+          <li>user_id - uuid, partition key</li>
+          <li>folder_id - uuid, partition key</li>
+          <li>email_id - timeuuid, clustering key</li>
+          <li>from - text</li>
+          <li>subject - text</li>
+          <li>preview - text</li>
+          <li>is_read - boolean</li>
+        </ul>
+        <li>emails_by_user</li>
+        <ul>
+          <li>user_id - uuid, partition key</li>
+          <li>email_id - timeuuid, clustering key</li>
+          <li>from - text</li>
+          <li>to - list&lt;text&gt;</li>
+          <li>subject - text</li>
+          <li>body - text</li>
+          <li>attachments - list&lt;filename|size&gt;</li>
+        </ul>
+        <li>attachments</li>
+        <ul>
+          <li>email_id - timeuuid, clustering key</li>
+          <li>filename - uuid, partition key</li>
+          <li>url - text</li>
+        </ul>
+        <li>read_emails</li>
+        <ul>
+          <li>user_id - uuid, partition key</li>
+          <li>folder_id - uuid, partition key</li>
+          <li>email_id - timeuuid, clustering key</li>
+          <li>from - text</li>
+          <li>subject - text</li>
+          <li>preview - text</li>
+        </ul>
+        <li>unread_emails</li>
+        <ul>
+          <li>user_id - uuid, partition key</li>
+          <li>folder_id - uuid, partition key</li>
+          <li>email_id - timeuuid, clustering key</li>
+          <li>from - text</li>
+          <li>subject - text</li>
+          <li>preview - text</li>
+        </ul>
+      </ul>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
+  </div>
+</div>
 
-    <h3 class="card-title">Email sending flow</h3>
-    <ul>
-      <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/distributed-email-service-2.png" alt="Card image cap">
-      <li>User sneds an email. Request is sent to load balancer</li>
-      <li>Load balancer performs rate limiting and routes request to web servers</li>
-      <li>Web servers performs email validation</li>
-      <li>If validation succeeds, email is sent to outgoing queue</li>
-      <li>If validation fails, email is sent to error queue</li>
-      <li>SMPT outgoing workers pull messages and check for spam and virus</li>
-      <li>Outgoing email is stored in "Sent" folder in storage</li>
-      <li>SMPT outgoing workers sends email to recipient mail server</li>
-    </ul>
 
-    <h3 class="card-title">Email receiving flow</h3>
+<div class="card mb-4" id="distributed-email-service-3">
+  <div class="card-body">
+    <h2 class="card-title">Design Deep Dive</h2>
     <ul>
-      <img class="img-fluid" class="card-img-top" src="/software-engineering/image/system-design-2/distributed-email-service-3.png" alt="Card image cap">
-      <li>Load balancer distributes emails across SMTP servers</li>
-      <li>Mail processing workers checks spam and virus</li>
-      <li>Email is stored in email storage, cache, and object storage</li>
-      <li>If receiver is currently online, email is pushed to real-time servers</li>
-      <li>If receiver is offline, webmail client calls web servers and web servers pull new emails from storage layer</li>
+      <li>Email deliverability</li>
+      <ul>
+        <li>Use dedicated IP addresses for sending emails</li>
+        <li>Send different categories of emails from different IP addresses</li>
+        <li>Warm up new email server IP addresses slowly to build reputation</li>
+        <li>Ban spammers quickly</li>
+      </ul>
+      <li>Search</li>
+      <ul>
+        <li>Option 1. Elasticsearch</li>
+        <ul>
+          <li>Pros</li>
+          <ul>
+            <li>Scalable to some extent</li>
+            <li>Easy to integrate</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Need to maintain two different systems</li>
+            <li>Data consistency is hard to maintain</li>
+          </ul>
+        </ul>
+        <li>Option 2. custom search solution</li>
+        <ul>
+          <li>Pros</li>
+          <ul>
+            <li>Easy to scale</li>
+            <li>There is only one system and no need to worry about data consistency</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Significant engineering needed</li>
+          </ul>
+        </ul>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -166,197 +241,13 @@
 
 <div class="card mb-4" id="distributed-email-service-4">
   <div class="card-body">
-    <h2 class="card-title">API</h2>
-
-    <h3 class="card-title">Hotel related API</h3>
-    <ul>
-      <li>Send a message to receipients</li>
-      <ul>
-        <li><code>POST /v1/messages</code></li>
-      </ul>
-      <li>Returns all folders of an email accont</li>
-      <ul>
-        <li><code>GET /v1/folders</code></li>
-      </ul>
-      <li>Returns all messages under a folder</li>
-      <ul>
-        <li><code>GET /v1/folders/{:folder_id}/messages</code></li>
-      </ul>
-      <li>Get all information about a specific message</li>
-      <ul>
-        <li><code>GET /v1/message/{:message_id}</code></li>
-      </ul>
-    </ul>
+    <h2 class="card-title">Wrap Up</h2>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
   </div>
 </div>
-
-<div class="card mb-4" id="distributed-email-service-5">
-  <div class="card-body">
-    <h2 class="card-title">Storage schema</h2>
-    <ul>
-      <li>A sinlge column can be MBs</li>
-      <li>Strong consistency needed</li>
-      <li>Disk I/O should be small</li>
-      <li>Highly available and fault tolerant</li>
-      <li>Should be easy to create incremental backup</li>
-    </ul>
-
-    <h3 class="card-title">folders_by_user</h3>
-    <ul>
-      <li>user_id - uuid, partition key</li>
-      <li>folder_id - uuid</li>
-      <li>folder_name - text</li>
-    </ul>
-
-    <h3 class="card-title">emails_by_folder</h3>
-    <ul>
-      <li>user_id - uuid, partition key</li>
-      <li>folder_id - uuid, partition key</li>
-      <li>email_id - timeuuid, clustering key</li>
-      <li>from - text</li>
-      <li>subject - text</li>
-      <li>preview - text</li>
-      <li>is_read - boolean</li>
-    </ul>
-
-    <h3 class="card-title">emails_by_user</h3>
-    <ul>
-      <li>user_id - uuid, partition key</li>
-      <li>email_id - timeuuid, clustering key</li>
-      <li>from - text</li>
-      <li>to - list&lt;text&gt;</li>
-      <li>subject - text</li>
-      <li>body - text</li>
-      <li>attachments - list&lt;filename|size&gt;</li>
-    </ul>
-
-    <h3 class="card-title">attachments</h3>
-    <ul>
-      <li>email_id - timeuuid, clustering key</li>
-      <li>filename - uuid, partition key</li>
-      <li>url - text</li>
-    </ul>
-
-    <h3 class="card-title">read_emails</h3>
-    <ul>
-      <li>user_id - uuid, partition key</li>
-      <li>folder_id - uuid, partition key</li>
-      <li>email_id - timeuuid, clustering key</li>
-      <li>from - text</li>
-      <li>subject - text</li>
-      <li>preview - text</li>
-    </ul>
-
-    <h3 class="card-title">unread_emails</h3>
-    <ul>
-      <li>user_id - uuid, partition key</li>
-      <li>folder_id - uuid, partition key</li>
-      <li>email_id - timeuuid, clustering key</li>
-      <li>from - text</li>
-      <li>subject - text</li>
-      <li>preview - text</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="distributed-email-service-6">
-  <div class="card-body">
-    <h2 class="card-title">Detailed design</h2>
-
-    <h3 class="card-title">Email deliverability</h3>
-    <ul>
-      <li>Use dedicated IP addresses for sending emails</li>
-      <li>Send different categories of emails from different IP addresses</li>
-      <li>Warm up new email server IP addresses slowly to build reputation</li>
-      <li>Ban spammers quickly</li>
-    </ul>
-
-    <h3 class="card-title">Search</h3>
-    <ul>
-      <li>Option 1. Elasticsearch</li>
-      <ul>
-        <li>Pros</li>
-        <ul>
-          <li>Scalable to some extent</li>
-          <li>Easy to integrate</li>
-        </ul>
-        <li>Cons</li>
-        <ul>
-          <li>Need to maintain two different systems</li>
-          <li>Data consistency is hard to maintain</li>
-        </ul>
-      </ul>
-      <li>Option 2. custom search solution</li>
-      <ul>
-        <li>Pros</li>
-        <ul>
-          <li>Easy to scale</li>
-          <li>There is only one system and no need to worry about data consistency</li>
-        </ul>
-        <li>Cons</li>
-        <ul>
-          <li>Significant engineering needed</li>
-        </ul>
-      </ul>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="distributed-email-service-7">
-  <div class="card-body">
-    <h2 class="card-title">Evaluation</h2>
-
-    <h3 class="card-title">Availability</h3>
-    <ul>
-      <li>Replication</li>
-      <ul>
-        <li>Replicate each server and DB</li>
-        <li>Replicate entire components to different zone or geographical region</li>
-      </ul>
-      <li>Fail over</li>
-      <ul>
-        <li></li>
-        <li></li>
-      </ul>
-    </ul>
-
-    <h4 class="card-title">Reliability</h4>
-    <ul>
-      <li>Data loss</li>
-    </ul>
-
-    <h3 class="card-title">Scalability</h3>
-    <ul>
-      <li>Horizontal scaling</li>
-      <li>Data partitioning</li>
-    </ul>
-
-    <h4 class="card-title">Performance</h4>
-    <ul>
-      <li></li>
-      <li></li>
-    </ul>
-    </ul>
-
-    <h3 class="card-title">Consistency</h3>
-    <ul>
-      <li></li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-<!-- Distributed email service END -->
+<!-- Distributed Email Service END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->
