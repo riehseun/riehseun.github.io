@@ -39,27 +39,22 @@
 <div class="col-md-12">
 <h1 class="my-4">Software Engineering</h1>
 
-<!-- Nearby friends BEGIN -->
+<!-- Nearby Friends BEGIN -->
 <div class="card mb-4" id="nearby-friends">
   <div class="card-body">
-    <h2 class="card-title">Nearby friends</h2>
+    <h2 class="card-title">Nearby Friends</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#nearby-friends-1">Requirement</a></li>
-      <li><a href="#nearby-friends-2">Estimation</a></li>
-      <li><a href="#nearby-friends-3">High level design</a></li>
-      <li><a href="#nearby-friends-4">API</a></li>
-      <li><a href="#nearby-friends-5">Storage schema</a></li>
-      <li><a href="#nearby-friends-6">Detailed design</a></li>
-      <li><a href="#nearby-friends-7">Evaluation</a></li>
+      <li><a href="#nearby-friends-1">Understand the Problem and Establish Design Scope</a></li>
+      <li><a href="#nearby-friends-2">Propose High-level Diagram and Get Buy-in</a></li>
+      <li><a href="#nearby-friends-3">Design Deep Dive</a></li>
+      <li><a href="#nearby-friends-4">Wrap Up</a></li>
     </ul>
   </div>
 </div>
 
 <div class="card mb-4" id="nearby-friends-1">
   <div class="card-body">
-    <h2 class="card-title">Requirement</h2>
-
-    <h3 class="card-title">Functional</h3>
+    <h2 class="card-title">Understand the Problem and Establish Design Scope</h2>
     <ul>
       <li>How close do users need to be in order be considered as nearby? The number should be configurable</li>
       <li>Is distance between users calculated based on the straight line between them? Yes</li>
@@ -68,28 +63,6 @@
       <li>Should the system how inactive users? No</li>
       <li>Should the system consider privacy laws? No</li>
     </ul>
-
-    <h3 class="card-title">Non-functional</h3>
-    <ul>
-      <li>Availability</li>
-      <li>Reliability</li>
-      <li>Scalability</li>
-      <li>Performance</li>
-      <li>Consistency</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="nearby-friends-2">
-  <div class="card-body">
-    <h2 class="card-title">Estimation</h2>
-
-    <h3 class="card-title">Server</h3>
-
-    <h3 class="card-title">Storage</h3>
 
     <h3 class="card-title">Bandwidth</h3>
     <ul>
@@ -103,59 +76,162 @@
   </div>
 </div>
 
+<div class="card mb-4" id="nearby-friends-2">
+  <div class="card-body">
+    <h2 class="card-title">Propose High-level Diagram and Get Buy-in</h2>
+    <ul>
+      <li>Design</li>
+      <ul>
+        <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/nearby-friends-1.png" alt="Card image cap">
+        <li>API servers</li>
+        <ul>
+          <li>Add/remove/update users</li>
+        </ul>
+        <li>WebSocket servers</li>
+        <ul>
+          <li>Real-time update of friends' location</li>
+          <li>Each client maintains one persistent WebSocket connection to one WebSocket server</li>
+        </ul>
+        <li>Location cache</li>
+        <ul>
+          <li>Key-value store is used to cache the most recent location for each active user</li>
+          <li>When TTL expires, location data is deleted from cache</li>
+        </ul>
+      </ul>
+      <li>User DB</li>
+      <ul>
+        <li>Stores user and user friendship data</li>
+        <li>Relational DB or NoSQL can be used</li>
+      </ul>
+      <li>Location history DB</li>
+      <ul>
+        <li>Stores location history data</li>
+      </ul>
+      <li>Redis Pub/Sub</li>
+      <ul>
+        <li>Very light message bus</li>
+        <li>Channels are very cheap to create</li>
+        <li>A user's WebSocket server publishes to that user's channel in Redis Pub/Sub</li>
+        <li>Each channel of a user in Redis Pub/Sub is subscribed by WebSocket servers of that user's friends</li>
+      </ul>
+      <li>Workflow</li>
+      <ul>
+        <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/nearby-friends-2.png" alt="Card image cap">
+        <li>User sends location update to load balancer</li>
+        <li>Load balancer forwards update to WebSocket server</li>
+        <li>WebSocket server updates new location in location cache. The update refreshes TTL</li>
+        <li>WebSocket server publishes new location to user's channel in Redis Pub/Sub</li>
+        <li>Update is broadcasted to all subscribers who are user's friends</li>
+        <li>WebSocket server of friends compute the distance from the user</li>
+        <li>If distance is within search radius, new location is sent to friends. Otherwise, update is dropped</li>
+      </ul>
+      <li>API</li>
+      <ul>
+        <li>Periodic location update</li>
+        <ul>
+          <li>Request - latitude, longigude, timestamp</li>
+          <li>Response - none</li>
+        </ul>
+        <li>Client receives location updates</li>
+        <li>WebScoket initialization</li>
+        <ul>
+          <li>Request - latitude, longigude, timestamp</li>
+          <li>Response - friends' location data</li>
+        </ul>
+        <li>Subscribe to a new friend</li>
+        <ul>
+          <li>Request - friend ID</li>
+          <li>Response - friend's latest latitude, longigude, timestamp</li>
+        </ul>
+        <li>Unsubscribe a friend</li>
+        <ul>
+          <li>Request - friend ID</li>
+          <li>Response - none</li>
+        </ul>
+      </ul>
+      <li>Storage schema</li>
+      <ul>
+        <li>Location cache</li>
+        <ul>
+          <li>Redis is good choice due to fast read and write as well as TTL support</li>
+          <li>Shard based on user_id and replicate each shard to improve availability</li>
+          <li>Key - user_id</li>
+          <li>Value - {latitude, longigude, timestamp}</li>
+        </ul>
+        <li>Location history DB</li>
+        <ul>
+          <li>Cassandra is good choice due to heavy write workload</li>
+          <li>If using relational DB, sharding based on user ID is needed</li>
+          <li>user_id</li>
+          <li>latitude</li>
+          <li>longigude</li>
+          <li>timestamp</li>
+        </ul>
+        <li>User DB</li>
+        <ul>
+          <li>Relational DB with sharding based on user_id</li>
+        </ul>
+      </ul>
+    </ul>    
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
+  </div>
+</div>
+
 <div class="card mb-4" id="nearby-friends-3">
   <div class="card-body">
-    <h2 class="card-title">High level design</h2>
-
-    <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/nearby-friends-1.png" alt="Card image cap">
-
-    <h3 class="card-title">API servers</h3>
+    <h2 class="card-title">Design Deep Dive</h2>
     <ul>
-      <li>Add/remove/update users</li>
-    </ul>
-
-    <h3 class="card-title">WebSocket servers</h3>
-    <ul>
-      <li>Real-time update of friends' location</li>
-      <li>Each client maintains one persistent WebSocket connection to one WebSocket server</li>
-    </ul>
-
-    <h3 class="card-title">Location cache</h3>
-    <ul>
-      <li>Key-value store is used to cache the most recent location for each active user</li>
-      <li>When TTL expires, location data is deleted from cache</li>
-    </ul>
-
-    <h3 class="card-title">User DB</h3>
-    <ul>
-      <li>Stores user and user friendship data</li>
-      <li>Relational DB or NoSQL can be used</li>
-    </ul>
-
-    <h3 class="card-title">Location history DB</h3>
-    <ul>
-      <li>Stores location history data</li>
-    </ul>
-
-    <h3 class="card-title">Redis Pub/Sub</h3>
-    <ul>
-      <li>Very light message bus</li>
-      <li>Channels are very cheap to create</li>
-      <li>A user's WebSocket server publishes to that user's channel in Redis Pub/Sub</li>
-      <li>Each channel of a user in Redis Pub/Sub is subscribed by WebSocket servers of that user's friends</li>
-    </ul>
-
-    <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/nearby-friends-2.png" alt="Card image cap">
-
-    <h3 class="card-title">Workflow</h3>
-    <ul>
-      <li>User sends location update to load balancer</li>
-      <li>Load balancer forwards update to WebSocket server</li>
-      <li>WebSocket server updates new location in location cache. The update refreshes TTL</li>
-      <li>WebSocket server publishes new location to user's channel in Redis Pub/Sub</li>
-      <li>Update is broadcasted to all subscribers who are user's friends</li>
-      <li>WebSocket server of friends compute the distance from the user</li>
-      <li>If distance is within search radius, new location is sent to friends. Otherwise, update is dropped</li>
+      <li>Scaling servers</li>
+      <ul>
+        <li>API servers</li>
+        <ul>
+          <li>Stateless, thus autoscale based on loads</li>
+        </ul>
+        <li>WebSocket servers</li>
+        <ul>
+          <li>Stateful, the load balancers need to gracefully open/close connections when adding/removing servers</li>
+        </ul>
+      </ul>
+      <li>Client initialization</li>
+      <ul>
+        <li>User sends it's initial location</li>
+        <li>Server loads all user's friends from user DB</li>
+        <li>Server makes batched requests to cache to fetch locations of all friends</li>
+        <li>Server computes distance between user and all friends</li>
+        <li>For each friend within the search radius, server subscribes to friend's channel in Redis PubSub</li>
+        <li>Server sends user's current location to user's channel in Redis PubSub</li>
+      </ul>
+      <li>Redis PubSub</li>
+      <ul>
+        <li>Design</li>
+        <ul>
+          <li>Uses a hash table and linked list to track the subscribers</li>
+          <li>A user subscribes to each friend's channel whether the friend is online or not</li>
+        </ul>
+        <li>Memory</li>
+        <ul>
+          <li>Assume a channel is allocated for each user who uses nearby friend</li>
+          <li>Then, we need 100M channels</li>
+          <li>Assume each user have 100 active friends</li>
+          <li>Assume 20 bytes is need to track each subscriber</li>
+          <li>100M * 20 bytes * 100 = 200GB</li>
+          <li>For a server with 100GB memory, 2 PubSub servers can hold all channels</li>
+        </ul>
+        <li>CPU</li>
+        <ul>
+          <li>Assume Redis PubSub sends 14 million updates per second to subscribers</li>
+          <li>Assume each server can handle 100k pushes per seconds</li>
+          <li>Then, 14M / 100K = 140 Redis PubSub servers are needed</li>
+        </ul>
+        <li>Distributed Redis PubSub</li>
+        <ul>
+          <li>Similar to consistent hashing, place Redis PubSub servers in a hash ring</li>
+          <li>Compute hash of channels to determine which PubSub servers that those channels should go to</li>
+          <li>The hash ring can be stored in service discovery like ZooKeeper and cached in WebSocket servers</li>
+        </ul>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -165,175 +241,13 @@
 
 <div class="card mb-4" id="nearby-friends-4">
   <div class="card-body">
-    <h2 class="card-title">API</h2>
-    <ul>
-      <li>Periodic location update</li>
-      <ul>
-        <li>Request - latitude, longigude, timestamp</li>
-        <li>Response - none</li>
-      </ul>
-      <li>Client receives location updates</li>
-      <li>WebScoket initialization</li>
-      <ul>
-        <li>Request - latitude, longigude, timestamp</li>
-        <li>Response - friends' location data</li>
-      </ul>
-      <li>Subscribe to a new friend</li>
-      <ul>
-        <li>Request - friend ID</li>
-        <li>Response - friend's latest latitude, longigude, timestamp</li>
-      </ul>
-      <li>Unsubscribe a friend</li>
-      <ul>
-        <li>Request - friend ID</li>
-        <li>Response - none</li>
-      </ul>
-    </ul>
+    <h2 class="card-title">Wrap Up</h2>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
   </div>
 </div>
-
-<div class="card mb-4" id="nearby-friends-5">
-  <div class="card-body">
-    <h2 class="card-title">Storage schema</h2>
-
-    <h3 class="card-title">Location cache</h3>
-    <ul>
-      <li>Redis is good choice due to fast read and write as well as TTL support</li>
-      <li>Shard based on user_id and replicate each shard to improve availability</li>
-      <li>Key - user_id</li>
-      <li>Value - {latitude, longigude, timestamp}</li>
-    </ul>
-
-    <h3 class="card-title">Location history DB</h3>
-    <ul>
-      <li>Cassandra is good choice due to heavy write workload</li>
-      <li>If using relational DB, sharding based on user ID is needed</li>
-      <li>user_id</li>
-      <li>latitude</li>
-      <li>longigude</li>
-      <li>timestamp</li>
-    </ul>
-
-    <h3 class="card-title">User DB</h3>
-    <ul>
-      <li>Relational DB with sharding based on user_id</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="nearby-friends-6">
-  <div class="card-body">
-    <h2 class="card-title">Detailed design</h2>
-
-    <h3 class="card-title">Scaling servers</h3>
-    <ul>
-      <li>API servers</li>
-      <ul>
-        <li>Stateless, thus autoscale based on loads</li>
-      </ul>
-      <li>WebSocket servers</li>
-      <ul>
-        <li>Stateful, the load balancers need to gracefully open/close connections when adding/removing servers</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Client initialization</h3>
-    <ul>
-      <li>User sends it's initial location</li>
-      <li>Server loads all user's friends from user DB</li>
-      <li>Server makes batched requests to cache to fetch locations of all friends</li>
-      <li>Server computes distance between user and all friends</li>
-      <li>For each friend within the search radius, server subscribes to friend's channel in Redis PubSub</li>
-      <li>Server sends user's current location to user's channel in Redis PubSub</li>
-    </ul>
-
-    <h3 class="card-title">Redis PubSub</h3>
-    <ul>
-      <li>Design</li>
-      <ul>
-        <li>Uses a hash table and linked list to track the subscribers</li>
-        <li>A user subscribes to each friend's channel whether the friend is online or not</li>
-      </ul>
-      <li>Memory</li>
-      <ul>
-        <li>Assume a channel is allocated for each user who uses nearby friend</li>
-        <li>Then, we need 100M channels</li>
-        <li>Assume each user have 100 active friends</li>
-        <li>Assume 20 bytes is need to track each subscriber</li>
-        <li>100M * 20 bytes * 100 = 200GB</li>
-        <li>For a server with 100GB memory, 2 PubSub servers can hold all channels</li>
-      </ul>
-      <li>CPU</li>
-      <ul>
-        <li>Assume Redis PubSub sends 14 million updates per second to subscribers</li>
-        <li>Assume each server can handle 100k pushes per seconds</li>
-        <li>Then, 14M / 100K = 140 Redis PubSub servers are needed</li>
-      </ul>
-      <li>Distributed Redis PubSub</li>
-      <ul>
-        <li>Similar to consistent hashing, place Redis PubSub servers in a hash ring</li>
-        <li>Compute hash of channels to determine which PubSub servers that those channels should go to</li>
-        <li>The hash ring can be stored in service discovery like ZooKeeper and cached in WebSocket servers</li>
-      </ul>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="nearby-friends-7">
-  <div class="card-body">
-    <h2 class="card-title">Evaluation</h2>
-
-    <h3 class="card-title">Availability</h3>
-    <ul>
-      <li>Replication</li>
-      <ul>
-        <li>Replicate each server and DB</li>
-        <li>Replicate entire components to different zone or geographical region</li>
-      </ul>
-      <li>Fail over</li>
-      <ul>
-        <li></li>
-        <li></li>
-      </ul>
-    </ul>
-
-    <h4 class="card-title">Reliability</h4>
-    <ul>
-      <li>Data loss</li>
-    </ul>
-
-    <h3 class="card-title">Scalability</h3>
-    <ul>
-      <li>Horizontal scaling</li>
-      <li>Data partitioning</li>
-    </ul>
-
-    <h4 class="card-title">Performance</h4>
-    <ul>
-      <li></li>
-      <li></li>
-    </ul>
-    </ul>
-
-    <h3 class="card-title">Consistency</h3>
-    <ul>
-      <li></li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-<!-- Nearby friends END -->
+<!-- Nearby Friends END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->

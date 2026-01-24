@@ -39,27 +39,22 @@
 <div class="col-md-12">
 <h1 class="my-4">Software Engineering</h1>
 
-<!-- Proximity service BEGIN -->
+<!-- Proximity Service BEGIN -->
 <div class="card mb-4" id="proximity-service">
   <div class="card-body">
-    <h2 class="card-title">Proximity service</h2>
+    <h2 class="card-title">Proximity Service</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#proximity-service-1">Requirement</a></li>
-      <li><a href="#proximity-service-2">Estimation</a></li>
-      <li><a href="#proximity-service-3">High level design</a></li>
-      <li><a href="#proximity-service-4">API</a></li>
-      <li><a href="#proximity-service-5">Storage schema</a></li>
-      <li><a href="#proximity-service-6">Detailed design</a></li>
-      <li><a href="#proximity-service-7">Evaluation</a></li>
+      <li><a href="#proximity-service-1">Understand the Problem and Establish Design Scope</a></li>
+      <li><a href="#proximity-service-2">Propose High-level Diagram and Get Buy-in</a></li>
+      <li><a href="#proximity-service-3">Design Deep Dive</a></li>
+      <li><a href="#proximity-service-4">Wrap Up</a></li>
     </ul>
   </div>
 </div>
 
 <div class="card mb-4" id="proximity-service-1">
   <div class="card-body">
-    <h2 class="card-title">Requirement</h2>
-
-    <h3 class="card-title">Functional</h3>
+    <h2 class="card-title">Understand the Problem and Establish Design Scope</h2>
     <ul>
       <li>What is the radius of search? User can specify the radius and We can only care about businesses within that radius</li>
       <li>What is the maxium radius allowed? 20km</li>
@@ -67,28 +62,6 @@
       <li>How is business information get added or updated? Business owners can add or udpate business info</li>
       <li>Should the system update or refresh search result as users are moving and the location is being updated? No</li>
     </ul>
-
-    <h3 class="card-title">Non-functional</h3>
-    <ul>
-      <li>Availability</li>
-      <li>Reliability</li>
-      <li>Scalability</li>
-      <li>Performance</li>
-      <li>Consistency</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="proximity-service-2">
-  <div class="card-body">
-    <h2 class="card-title">Estimation</h2>
-
-    <h3 class="card-title">Server</h3>
-
-    <h3 class="card-title">Storage</h3>
 
     <h3 class="card-title">Bandwidth</h3>
     <ul>
@@ -102,95 +75,85 @@
   </div>
 </div>
 
-<div class="card mb-4" id="proximity-service-3">
+<div class="card mb-4" id="proximity-service-2">
   <div class="card-body">
-    <h2 class="card-title">High level design</h2>
-
-    <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/proximity-service-1.png" alt="Card image cap">
-
-    <h3 class="card-title">Location based service</h3>
+    <h2 class="card-title">Propose High-level Diagram and Get Buy-in</h2>
     <ul>
-      <li>Read heavy service with no write requests</li>
-      <li>High QPS</li>
-      <li>Stateless, thus can easily scale horizontally</li>
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/proximity-service-1.png" alt="Card image cap">
+      <li>Location based service</li>
+      <ul>
+        <li>Read heavy service with no write requests</li>
+        <li>High QPS</li>
+        <li>Stateless, thus can easily scale horizontally</li>
+      </ul>
+      <li>Business service</li>
+      <ul>
+        <li>Write QPS is not high</li>
+        <li>Viewing businesses (read QPS) can be high during peak hours</li>
+      </ul>
+      <li>Database cluster</li>
+      <ul>
+        <li>Write operation is written to primary and propagated to replicas</li>
+        <li>Consistency is not a concern since businesses don't need to be udpated real time</li>
+      </ul>
+      <li>Algorithm</li>
+      <ul>
+        <li>Two dimensional search</li>
+        <ul>
+          <li>Draw a circle in pre-defined radius</li>
+          <li>Need to scan the whole DB, thus long search time </li>
+          <li>Building indices on latitude and longitude does not help because indexing works on one dimension only</li>
+        </ul>
+        <li>Evenly divided grid</li>
+        <ul>
+          <li>Divided the world into small grids</li>
+          <li>Not efficient because businesses are not evenly distributed</li>
+        </ul>
+        <li>Geohash</li>
+        <ul>
+          <li>Divided the world into small grids</li>
+          <li>Each grid is represented by alternating latitude bit and longitude bit</li>
+          <ul>
+            <li>latitude between -90 and 0 is represented by 0</li>
+            <li>latitude between 0 and 90 is represented by 1</li>
+            <li>longitude between -180 and 0 is represented by 0</li>
+            <li>longitude between 0 and 180 is represented by 1</li>
+          </ul>
+          <li>Example</li>
+          <ul>
+            <li>1001 10110 01001 11011 11010 (binary) = 9q9hvu (base32)</li>
+          </ul>
+          <li>Geohash longer than 6 is too small and less than 4 is too big</li>
+          <li>Boundary issue</li>
+          <ul>
+            <li>Geohashes sharing long common prefix is close location-wise. But two close locations may have completely different geohashes</li>
+          </ul>
+          <li>Not enough businesses</li>
+          <ul>
+            <li>Remove last digit of geohahs and use new geohash to fetch nearby businesses</li>
+          </ul>
+        </ul>
+        <li>Quadtree</li>
+        <ul>
+          <li>The root node represents the world map</li>
+          <li>Each node gets 4 children and this process repeats until no nodes have more than a certain number of businesses</li>
+          <li>Quadtree is stored in memory</li>
+          <li>Quadtree does not require much memory and can fit into a single server (But still multiple servers are needed to serve all read requests)</li>
+          <li>How to get neayby businesses</li>
+          <ul>
+            <li>Build Quadtree in memory</li>
+            <li>Start from the root until finding the node where the search origin is</li>
+            <li>Either return the businesses in that node or add businesses from its neighbors until enough businesses are returned</li>
+          </ul>
+        </ul>
+        <li>Google S2</li>
+        <ul>
+          <li>Maps a sphere into 1D index based on Hilbert curve</li>
+        </ul>
+      </ul>
     </ul>
 
-    <h3 class="card-title">Business service</h3>
-    <ul>
-      <li>Write QPS is not high</li>
-      <li>Viewing businesses (read QPS) can be high during peak hours</li>
-    </ul>
-
-    <h3 class="card-title">Database cluster</h3>
-    <ul>
-      <li>Write operation is written to primary and propagated to replicas</li>
-      <li>Consistency is not a concern since businesses don't need to be udpated real time</li>
-    </ul>
-
-    <h3 class="card-title">Algorithm</h3>
-    <ul>
-      <li>Two dimensional search</li>
-      <ul>
-        <li>Draw a circle in pre-defined radius</li>
-        <li>Need to scan the whole DB, thus long search time </li>
-        <li>Building indices on latitude and longitude does not help because indexing works on one dimension only</li>
-      </ul>
-      <li>Evenly divided grid</li>
-      <ul>
-        <li>Divided the world into small grids</li>
-        <li>Not efficient because businesses are not evenly distributed</li>
-      </ul>
-      <li>Geohash</li>
-      <ul>
-        <li>Divided the world into small grids</li>
-        <li>Each grid is represented by alternating latitude bit and longitude bit</li>
-        <ul>
-          <li>latitude between -90 and 0 is represented by 0</li>
-          <li>latitude between 0 and 90 is represented by 1</li>
-          <li>longitude between -180 and 0 is represented by 0</li>
-          <li>longitude between 0 and 180 is represented by 1</li>
-        </ul>
-        <li>Example</li>
-        <ul>
-          <li>1001 10110 01001 11011 11010 (binary) = 9q9hvu (base32)</li>
-        </ul>
-        <li>Geohash longer than 6 is too small and less than 4 is too big</li>
-        <li>Boundary issue</li>
-        <ul>
-          <li>Geohashes sharing long common prefix is close location-wise. But two close locations may have completely different geohashes</li>
-        </ul>
-        <li>Not enough businesses</li>
-        <ul>
-          <li>Remove last digit of geohahs and use new geohash to fetch nearby businesses</li>
-        </ul>
-      </ul>
-      <li>Quadtree</li>
-      <ul>
-        <li>The root node represents the world map</li>
-        <li>Each node gets 4 children and this process repeats until no nodes have more than a certain number of businesses</li>
-        <li>Quadtree is stored in memory</li>
-        <li>Quadtree does not require much memory and can fit into a single server (But still multiple servers are needed to serve all read requests)</li>
-        <li>How to get neayby businesses</li>
-        <ul>
-          <li>Build Quadtree in memory</li>
-          <li>Start from the root until finding the node where the search origin is</li>
-          <li>Either return the businesses in that node or add businesses from its neighbors until enough businesses are returned</li>
-        </ul>
-      </ul>
-      <li>Google S2</li>
-      <ul>
-        <li>Maps a sphere into 1D index based on Hilbert curve</li>
-      </ul>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="proximity-service-4">
-  <div class="card-body">
-    <h2 class="card-title">API</h2>
+    <h3 class="card-title">API</h3>
     <ul>
       <li>GET /v1/search/nearby - return businesses</li>
       <li>GET /v1/businesses/id - return detailed info about a business</li>
@@ -198,36 +161,27 @@
       <li>PUT /v1/businesses/id - update a business</li>
       <li>DELETE /v1/businesses/id - delete a business</li>
     </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
 
-<div class="card mb-4" id="proximity-service-5">
-  <div class="card-body">
-    <h2 class="card-title">Storage schema</h2>
+    <h3 class="card-title">Storage schema</h3>
     <ul>
       <li>Read is heavy due to seaching businesses and viewing business information</li>
       <li>Write is low</li>
       <li>Choose MySQL</li>
-    </ul>
-
-    <h3 class="card-title">Business</h3>
-    <ul>
-      <li>business_id (int, pk)</li>
-      <li>address</li>
-      <li>city</li>
-      <li>state</li>
-      <li>country</li>
-      <li>latitude</li>
-      <li>longitude</li>
-    </ul>
-
-    <h3 class="card-title">Geo index</h3>
-    <ul>
-      <li>Geohash</li>
-      <li>business_id</li>
+      <li>Business</li>
+      <ul>
+        <li>business_id (int, pk)</li>
+        <li>address</li>
+        <li>city</li>
+        <li>state</li>
+        <li>country</li>
+        <li>latitude</li>
+        <li>longitude</li>
+      </ul>
+      <li>Geo index</li>
+      <ul>
+        <li>Geohash</li>
+        <li>business_id</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -235,39 +189,33 @@
   </div>
 </div>
 
-<div class="card mb-4" id="proximity-service-6">
+<div class="card mb-4" id="proximity-service-3">
   <div class="card-body">
-    <h2 class="card-title">Detailed design</h2>
-
-    <h3 class="card-title">Scaling DB</h3>
+    <h2 class="card-title">Design Deep Dive</h2>
     <ul>
-      <li>Business table</li>
+      <li>Scaling DB</li>
       <ul>
-        <li>Shard based on business ID</li>
+        <li>Business table</li>
+        <ul>
+          <li>Shard based on business ID</li>
+        </ul>
+        <li>Geospatial index table (Geohash)</li>
+        <ul>
+          <li>The table is not large, thus have multiple read replicas instead of sharding</li>
+        </ul>
       </ul>
-      <li>Geospatial index table (Geohash)</li>
+      <li>Caching</li>
       <ul>
-        <li>The table is not large, thus have multiple read replicas instead of sharding</li>
+        <li>Pre-compute list of business IDs for a given geohash and store it in key-value store like Redis</li>
+        <li>Cache data on Redis on different geohash precisions (Ex. 4, 5, 6)</li>
       </ul>
-    </ul>
-
-    <h3 class="card-title">Caching</h3>
-    <ul>
-      <li>Pre-compute list of business IDs for a given geohash and store it in key-value store like Redis</li>
-      <li>Cache data on Redis on different geohash precisions (Ex. 4, 5, 6)</li>
-    </ul>
-
-    <h3 class="card-title">Region and availability zones</h3>
-    <ul>
-      <li>For example, users from US West should be connected to data centers in US West</li>
-      <li>High density regions (Ex. Japan, Korea) should be in separate regions</li>
-      <li>For some regions, employing DNS routing to limit requests only in those regions is needed to respect privacy laws</li>
-    </ul>
-
-    <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/proximity-service-2.png" alt="Card image cap">
-
-    <h3 class="card-title">Workflow</h3>
-    <ul>
+      <li>Region and availability zones</li>
+      <ul>
+        <li>For example, users from US West should be connected to data centers in US West</li>
+        <li>High density regions (Ex. Japan, Korea) should be in separate regions</li>
+        <li>For some regions, employing DNS routing to limit requests only in those regions is needed to respect privacy laws</li>
+      </ul>
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/proximity-service-2.png" alt="Card image cap">
       <li>Get nearby business</li>
       <ul>
         <li>Client sends latitude, longitude, radius to load balancer, which in turn gets sent to location based service</li>
@@ -288,52 +236,15 @@
   </div>
 </div>
 
-<div class="card mb-4" id="proximity-service-7">
+<div class="card mb-4" id="proximity-service-4">
   <div class="card-body">
-    <h2 class="card-title">Evaluation</h2>
-
-    <h3 class="card-title">Availability</h3>
-    <ul>
-      <li>Replication</li>
-      <ul>
-        <li>Replicate each server and DB</li>
-        <li>Replicate entire components to different zone or geographical region</li>
-      </ul>
-      <li>Fail over</li>
-      <ul>
-        <li></li>
-        <li></li>
-      </ul>
-    </ul>
-
-    <h4 class="card-title">Reliability</h4>
-    <ul>
-      <li>Data loss</li>
-    </ul>
-
-    <h3 class="card-title">Scalability</h3>
-    <ul>
-      <li>Horizontal scaling</li>
-      <li>Data partitioning</li>
-    </ul>
-
-    <h4 class="card-title">Performance</h4>
-    <ul>
-      <li></li>
-      <li></li>
-    </ul>
-    </ul>
-
-    <h3 class="card-title">Consistency</h3>
-    <ul>
-      <li></li>
-    </ul>
+    <h2 class="card-title">Wrap Up</h2>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
   </div>
 </div>
-<!-- Proximity service END -->
+<!-- Proximity Service END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->
