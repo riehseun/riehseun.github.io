@@ -39,27 +39,22 @@
 <div class="col-md-12">
 <h1 class="my-4">Software Engineering</h1>
 
-<!-- Stock exchange BEGIN -->
+<!-- Stock Exchange BEGIN -->
 <div class="card mb-4" id="stock-exchange">
   <div class="card-body">
-    <h2 class="card-title">Stock exchange</h2>
+    <h2 class="card-title">Stock Exchange</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#stock-exchange-1">Requirement</a></li>
-      <li><a href="#stock-exchange-2">Estimation</a></li>
-      <li><a href="#stock-exchange-3">High level design</a></li>
-      <li><a href="#stock-exchange-4">API</a></li>
-      <li><a href="#stock-exchange-5">Storage schema</a></li>
-      <li><a href="#stock-exchange-6">Detailed design</a></li>
-      <li><a href="#stock-exchange-7">Evaluation</a></li>
+      <li><a href="#stock-exchange-1">Understand the Problem and Establish Design Scope</a></li>
+      <li><a href="#stock-exchange-2">Propose High-level Diagram and Get Buy-in</a></li>
+      <li><a href="#stock-exchange-3">Design Deep Dive</a></li>
+      <li><a href="#stock-exchange-4">Wrap Up</a></li>
     </ul>
   </div>
 </div>
 
 <div class="card mb-4" id="stock-exchange-1">
   <div class="card-body">
-    <h2 class="card-title">Requirement</h2>
-
-    <h3 class="card-title">Functional</h3>
+    <h2 class="card-title">Understand the Problem and Establish Design Scope</h2>
     <ul>
       <li>What kind of goods are we trading? stocks only</li>
       <li>What kind of operations should the system support? placing an order, canceling an order. Only limit order is in scope</li>
@@ -67,28 +62,6 @@
       <li>What are the scale of the system? 10K users trading at the same time, 100 symbols, 1M orders per day</li>
       <li>What are some regulartions that the system need to concern? Users can trade maximum of 1M shares of particular stock</li>
     </ul>
-
-    <h3 class="card-title">Non-functional</h3>
-    <ul>
-      <li>Availability</li>
-      <li>Reliability</li>
-      <li>Scalability</li>
-      <li>Performance</li>
-      <li>Consistency</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="stock-exchange-2">
-  <div class="card-body">
-    <h2 class="card-title">Estimation</h2>
-
-    <h3 class="card-title">Server</h3>
-
-    <h3 class="card-title">Storage</h3>
 
     <h3 class="card-title">Bandwidth</h3>
     <ul>
@@ -104,56 +77,181 @@
   </div>
 </div>
 
+<div class="card mb-4" id="stock-exchange-2">
+  <div class="card-body">
+    <h2 class="card-title">Propose High-level Diagram and Get Buy-in</h2>
+    <ul>
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/stock-exchange-1.png" alt="Card image cap">
+      <ul>
+        <li>Matching engine</li>
+        <ul>
+          <li>Maintain order book for each symbol</li>
+          <li>Match buy and sell orders</li>
+          <li>Distribute the execution stream as market data</li>
+        </ul>
+        <li>Sequencer</li>
+        <ul>
+          <li>Stamps every incoming order and pair of executions completed by matching engine with a sequence ID</li>
+          <li>Stamping is for fast recovery, exactly-once guarantee</li>
+          <li>Serves as a message queue as well</li>
+        </ul>
+        <li>Order manager</li>
+        <ul>
+          <li>Performs risk checks</li>
+          <li>Verifies that wallet has enough funds</li>
+          <li>Sends the order to sequencer</li>
+        </ul>
+        <li>Client gateway</li>
+        <ul>
+          <li>Should be lightweight and complicated functions should be done by risk check adn matching engine</li>
+      </ul>
+      <li>Workflow</li>
+      <ul>
+        <li>Trading flow</li>
+        <ul>
+          <li>Client places a new order</li>
+          <li>Broker sends the order to the exchange</li>
+          <li>Client gateway performs input validation, rate limiting, authentication, etc</li>
+          <li>Order manager performs risk checks and verifies that there are sufficient funds in the wallet</li>
+          <li>Matching engine executes two transactions (buy and sell)</li>
+        </ul>
+        <li>Market data flow</li>
+        <ul>
+          <li>Matching engine generates a stream of executions as matches are made</li>
+          <li>Market data publisher constructs candlestick charts and order books</li>
+          <li>Market data is saved to specialized storage for real-time analysis</li>
+          <li>Brokers connect to data service to obtain timely market data</li>
+        </ul>
+        <li>Reporting flow</li>
+        <ul>
+          <li>Report collects information from orders and executions, then write them to DB</li>
+        </ul>
+      </ul>
+      <li>API</li>
+      <ul>
+        <li>Place an order</li>
+        <ul>
+          <li><code>POST /v1/order</code></li>
+          <ul>
+            <li><code>symbol</code> - stock symbol (string)</li>
+            <li><code>side</code> - buy or sell (string)</li>
+            <li><code>price</code> - price of limit order (long)</li>
+            <li><code>orderType</code> - limit or market (string)</li>
+            <li><code>quantity</code> - quanitiy of order (long)</li>
+          </ul>
+        </ul>
+        <li>Get execution info</li>
+        <ul>
+          <li><code>GET /v1/execution?symbol={:symbol}&orderId={:orderId}&startTime={:startTime}&endTime/{:endTime}</code></li>
+          <ul>
+            <li><code>symbol</code> - stock symbol (string)</li>
+            <li><code>orderId</code> - ID of order (string)</li>
+            <li><code>startTime</code> - query start time in epoch (long)</li>
+            <li><code>endTime</code> - query end time in epoch (long)</li>
+          </ul>
+        </ul>
+        <li>Get order book info</li>
+        <ul>
+          <li><code>GET /v1/marketdata/orderBook/L2?symbol={:symbol}&depth={:depth}</code></li>
+          <ul>
+            <li><code>symbol</code> - stock symbol (string)</li>
+            <li><code>depth</code> - order book depth per side (int)</li>
+            <li><code>startTime</code> - query start time in epoch (long)</li>
+            <li><code>endTime</code> - query end time in epoch (long)</li>
+          </ul>
+        </ul>
+        <li>Get candlestick chart data</li>
+        <ul>
+          <li><code>GET /v1/marketdata/candles?symbol={:symbol}&resolution={:resolution}&startTime={:startTime}&endTime/{:endTime}</code></li>
+          <ul>
+            <li><code>symbol</code> - stock symbol (string)</li>
+            <li><code>resolution</code> - window length of candlestick chart in seconds (long)</li>
+            <li><code>startTime</code> - query start time in epoch (long)</li>
+            <li><code>endTime</code> - query end time in epoch (long)</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>Storage schema</li>
+      <ul>
+        <li>Order</li>
+        <ul>
+          <li>order_id (uuid)</li>
+          <li>product_id (int)</li>
+          <li>price (long)</li>
+          <li>quantity (long)</li>
+          <li>side (Side)</li>
+          <li>order_status (OrderStatus)</li>
+          <li>order_type (OrderType)</li>
+        </ul>
+        <li>Execution</li>
+        <ul>
+          <li>execution_id (uuid)</li>
+          <li>order_id (uuid)</li>
+          <li>price (long)</li>
+          <li>quantity (long)</li>
+          <li>side (Side)</li>
+          <li>order_status (OrderStatus)</li>
+          <li>order_type (OrderType)</li>
+        </ul>
+        <li>Product</li>
+        <ul>
+          <li>product_id (int)</li>
+          <li>symbol (long)</li>
+          <li>description (string)</li>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
+  </div>
+</div>
+
 <div class="card mb-4" id="stock-exchange-3">
   <div class="card-body">
-    <h2 class="card-title">High level design</h2>
-
-    <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/stock-exchange-1.png" alt="Card image cap">
-
+    <h2 class="card-title">Design Deep Dive</h2>
     <ul>
-      <li>Matching engine</li>
+      <li>Performance</li>
       <ul>
-        <li>Maintain order book for each symbol</li>
-        <li>Match buy and sell orders</li>
-        <li>Distribute the execution stream as market data</li>
+        <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/stock-exchange-1.png" alt="Card image cap">
+        <li>Put everything on the same server to eliminate network hops</li>
+        <li>Components, in this case processes on the server, communicate via mmap</li>
+        <li>Application loop polls for tasks to execute in a while loop</li>
+        <li>Each application loop is single-threaded, and the thread is pinned to a fixed CPU core</li>
+        <ul>
+          <li>No context switch because CPU is fully allocated to application loop</li>
+          <li>No locks, thus no lock contention</li>
+        </ul>
+        <li>mmap communication has no network or disk access</li>
       </ul>
-      <li>Sequencer</li>
+      <li>Availability</li>
       <ul>
-        <li>Stamps every incoming order and pair of executions completed by matching engine with a sequence ID</li>
-        <li>Stamping is for fast recovery, exactly-once guarantee</li>
-        <li>Serves as a message queue as well</li>
-      </ul>
-      <li>Order manager</li>
-      <ul>
-        <li>Performs risk checks</li>
-        <li>Verifies that wallet has enough funds</li>
-        <li>Sends the order to sequencer</li>
-      </ul>
-      <li>Client gateway</li>
-      <ul>
-        <li>Should be lightweight and complicated functions should be done by risk check adn matching engine</li>
-    </ul>
-
-    <h3 class="card-title">Workflow</h3>
-    <ul>
-      <li>Trading flow</li>
-      <ul>
-        <li>Client places a new order</li>
-        <li>Broker sends the order to the exchange</li>
-        <li>Client gateway performs input validation, rate limiting, authentication, etc</li>
-        <li>Order manager performs risk checks and verifies that there are sufficient funds in the wallet</li>
-        <li>Matching engine executes two transactions (buy and sell)</li>
-      </ul>
-      <li>Market data flow</li>
-      <ul>
-        <li>Matching engine generates a stream of executions as matches are made</li>
-        <li>Market data publisher constructs candlestick charts and order books</li>
-        <li>Market data is saved to specialized storage for real-time analysis</li>
-        <li>Brokers connect to data service to obtain timely market data</li>
-      </ul>
-      <li>Reporting flow</li>
-      <ul>
-        <li>Report collects information from orders and executions, then write them to DB</li>
+        <li>Client gateway is stateless, thus can easily be horizontally scaled</li>
+        <li>Order manager and matching engine are stateful, thus state data must be copied across replicas</li>
+        <ul>
+          <li>If primary goes down, how to decide which backup instance to fail over?</li>
+          <ul>
+            <li>Ex. Raft cluster with \( 5 \) servers</li>
+            <li>Current leader sends data to all other instances (followers)</li>
+            <li>Minimum number of votes required to perform operation \( \frac{n}{2}+1 = 3 \)</li>
+          </ul>
+          <li>How to choose leader among backup instances?</li>
+          <ul>
+            <li>Leader sends heartbeats to followers</li>
+            <li>If followers don't receive heartbeat for some time, it triggers an election timeout</li>
+            <li>First follower that reaches election timeout become a candidate</li>
+            <li>If first follower receives a majority of votes, it becomes a new leader</li>
+          </ul>
+          <li>What is recovery time objective?</li>
+          <ul>
+            <li>Categorize services based on priority and define a degradation strategy to maintain a minimum service level</li>
+          </ul>
+          <li>What is recovery point objective?</li>
+          <ul>
+            <li>With Raft, we have many copies of data</li>
+            <li>If current leader crashes, new leader can function immediately</li>
+          </ul>
+        </ul>
       </ul>
     </ul>
   </div>
@@ -164,193 +262,13 @@
 
 <div class="card mb-4" id="stock-exchange-4">
   <div class="card-body">
-    <h2 class="card-title">API</h2>
-    <ul>
-      <li>Place an order</li>
-      <ul>
-        <li><code>POST /v1/order</code></li>
-        <ul>
-          <li><code>symbol</code> - stock symbol (string)</li>
-          <li><code>side</code> - buy or sell (string)</li>
-          <li><code>price</code> - price of limit order (long)</li>
-          <li><code>orderType</code> - limit or market (string)</li>
-          <li><code>quantity</code> - quanitiy of order (long)</li>
-        </ul>
-      </ul>
-      <li>Get execution info</li>
-      <ul>
-        <li><code>GET /v1/execution?symbol={:symbol}&orderId={:orderId}&startTime={:startTime}&endTime/{:endTime}</code></li>
-        <ul>
-          <li><code>symbol</code> - stock symbol (string)</li>
-          <li><code>orderId</code> - ID of order (string)</li>
-          <li><code>startTime</code> - query start time in epoch (long)</li>
-          <li><code>endTime</code> - query end time in epoch (long)</li>
-        </ul>
-      </ul>
-      <li>Get order book info</li>
-      <ul>
-        <li><code>GET /v1/marketdata/orderBook/L2?symbol={:symbol}&depth={:depth}</code></li>
-        <ul>
-          <li><code>symbol</code> - stock symbol (string)</li>
-          <li><code>depth</code> - order book depth per side (int)</li>
-          <li><code>startTime</code> - query start time in epoch (long)</li>
-          <li><code>endTime</code> - query end time in epoch (long)</li>
-        </ul>
-      </ul>
-      <li>Get candlestick chart data</li>
-      <ul>
-        <li><code>GET /v1/marketdata/candles?symbol={:symbol}&resolution={:resolution}&startTime={:startTime}&endTime/{:endTime}</code></li>
-        <ul>
-          <li><code>symbol</code> - stock symbol (string)</li>
-          <li><code>resolution</code> - window length of candlestick chart in seconds (long)</li>
-          <li><code>startTime</code> - query start time in epoch (long)</li>
-          <li><code>endTime</code> - query end time in epoch (long)</li>
-        </ul>
-      </ul>
-    </ul>
+    <h2 class="card-title">Wrap Up</h2>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
   </div>
 </div>
-
-<div class="card mb-4" id="stock-exchange-5">
-  <div class="card-body">
-    <h2 class="card-title">Storage schema</h2>
-
-    <h3 class="card-title">Order</h3>
-    <ul>
-      <li>order_id (uuid)</li>
-      <li>product_id (int)</li>
-      <li>price (long)</li>
-      <li>quantity (long)</li>
-      <li>side (Side)</li>
-      <li>order_status (OrderStatus)</li>
-      <li>order_type (OrderType)</li>
-    </ul>
-
-    <h3 class="card-title">Execution</h3>
-    <ul>
-      <li>execution_id (uuid)</li>
-      <li>order_id (uuid)</li>
-      <li>price (long)</li>
-      <li>quantity (long)</li>
-      <li>side (Side)</li>
-      <li>order_status (OrderStatus)</li>
-      <li>order_type (OrderType)</li>
-    </ul>
-
-    <h3 class="card-title">Product</h3>
-    <ul>
-      <li>product_id (int)</li>
-      <li>symbol (long)</li>
-      <li>description (string)</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="stock-exchange-6">
-  <div class="card-body">
-    <h2 class="card-title">Detailed design</h2>
-
-    <h3 class="card-title">Performance</h3>
-    <ul>
-      <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/stock-exchange-1.png" alt="Card image cap">
-      <li>Put everything on the same server to eliminate network hops</li>
-      <li>Components, in this case processes on the server, communicate via mmap</li>
-      <li>Application loop polls for tasks to execute in a while loop</li>
-      <li>Each application loop is single-threaded, and the thread is pinned to a fixed CPU core</li>
-      <ul>
-        <li>No context switch because CPU is fully allocated to application loop</li>
-        <li>No locks, thus no lock contention</li>
-      </ul>
-      <li>mmap communication has no network or disk access</li>
-    </ul>
-
-    <h3 class="card-title">Availability</h3>
-    <ul>
-      <li>Client gateway is stateless, thus can easily be horizontally scaled</li>
-      <li>Order manager and matching engine are stateful, thus state data must be copied across replicas</li>
-      <ul>
-        <li>If primary goes down, how to decide which backup instance to fail over?</li>
-        <ul>
-          <li>Ex. Raft cluster with \( 5 \) servers</li>
-          <li>Current leader sends data to all other instances (followers)</li>
-          <li>Minimum number of votes required to perform operation \( \frac{n}{2}+1 = 3 \)</li>
-        </ul>
-        <li>How to choose leader among backup instances?</li>
-        <ul>
-          <li>Leader sends heartbeats to followers</li>
-          <li>If followers don't receive heartbeat for some time, it triggers an election timeout</li>
-          <li>First follower that reaches election timeout become a candidate</li>
-          <li>If first follower receives a majority of votes, it becomes a new leader</li>
-        </ul>
-        <li>What is recovery time objective?</li>
-        <ul>
-          <li>Categorize services based on priority and define a degradation strategy to maintain a minimum service level</li>
-        </ul>
-        <li>What is recovery point objective?</li>
-        <ul>
-          <li>With Raft, we have many copies of data</li>
-          <li>If current leader crashes, new leader can function immediately</li>
-        </ul>
-      </ul>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="stock-exchange-7">
-  <div class="card-body">
-    <h2 class="card-title">Evaluation</h2>
-
-    <h3 class="card-title">Availability</h3>
-    <ul>
-      <li>Replication</li>
-      <ul>
-        <li>Replicate each server and DB</li>
-        <li>Replicate entire components to different zone or geographical region</li>
-      </ul>
-      <li>Fail over</li>
-      <ul>
-        <li></li>
-        <li></li>
-      </ul>
-    </ul>
-
-    <h4 class="card-title">Reliability</h4>
-    <ul>
-      <li>Data loss</li>
-    </ul>
-
-    <h3 class="card-title">Scalability</h3>
-    <ul>
-      <li>Horizontal scaling</li>
-      <li>Data partitioning</li>
-    </ul>
-
-    <h4 class="card-title">Performance</h4>
-    <ul>
-      <li></li>
-      <li></li>
-    </ul>
-    </ul>
-
-    <h3 class="card-title">Consistency</h3>
-    <ul>
-      <li></li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-<!-- Stock exchange END -->
+<!-- Stock Exchange END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->
