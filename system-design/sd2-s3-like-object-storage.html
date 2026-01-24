@@ -39,53 +39,26 @@
 <div class="col-md-12">
 <h1 class="my-4">Software Engineering</h1>
 
-<!-- Simple storage service BEGIN -->
-<div class="card mb-4" id="simple-storage-service">
+<!-- S3-like Object Storage BEGIN -->
+<div class="card mb-4" id="s3-like-object-storage">
   <div class="card-body">
-    <h2 class="card-title">Simple storage service</h2>
+    <h2 class="card-title">S3-like Object Storage</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#simple-storage-service-1">Requirement</a></li>
-      <li><a href="#simple-storage-service-2">Estimation</a></li>
-      <li><a href="#simple-storage-service-3">High level design</a></li>
-      <li><a href="#simple-storage-service-4">API</a></li>
-      <li><a href="#simple-storage-service-5">Storage schema</a></li>
-      <li><a href="#simple-storage-service-6">Detailed design</a></li>
-      <li><a href="#simple-storage-service-7">Evaluation</a></li>
+      <li><a href="#s3-like-object-storage-1">Understand the Problem and Establish Design Scope</a></li>
+      <li><a href="#s3-like-object-storage-2">Propose High-level Diagram and Get Buy-in</a></li>
+      <li><a href="#s3-like-object-storage-3">Design Deep Dive</a></li>
+      <li><a href="#s3-like-object-storage-4">Wrap Up</a></li>
     </ul>
   </div>
 </div>
 
-<div class="card mb-4" id="simple-storage-service-1">
+<div class="card mb-4" id="s3-like-object-storage-1">
   <div class="card-body">
-    <h2 class="card-title">Requirement</h2>
-
-    <h3 class="card-title">Functional</h3>
+    <h2 class="card-title">Understand the Problem and Establish Design Scope</h2>
     <ul>
       <li>What is typical data size? massive objects (GBs) and large number of small objects (KBs)</li>
       <li>How much data should the system store per year? 100PB</li>
     </ul>
-
-    <h3 class="card-title">Non-functional</h3>
-    <ul>
-      <li>Availability</li>
-      <li>Reliability</li>
-      <li>Scalability</li>
-      <li>Performance</li>
-      <li>Consistency</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="simple-storage-service-2">
-  <div class="card-body">
-    <h2 class="card-title">Estimation</h2>
-
-    <h3 class="card-title">Server</h3>
-
-    <h3 class="card-title">Storage</h3>
 
     <h3 class="card-title">Bandwidth</h3>
     <ul>
@@ -101,222 +74,160 @@
   </div>
 </div>
 
-<div class="card mb-4" id="simple-storage-service-3">
+<div class="card mb-4" id="s3-like-object-storage-2">
   <div class="card-body">
-    <h2 class="card-title">High level design</h2>
-
-    <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/simple-storage-service-1.png" alt="Card image cap">
-
+    <h2 class="card-title">Propose High-level Diagram and Get Buy-in</h2>
     <ul>
-      <li>IAM</li>
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/s3-like-object-storage-1.png" alt="Card image cap">
       <ul>
-        <li>Authentication and authorization</li>
+        <li>IAM</li>
+        <ul>
+          <li>Authentication and authorization</li>
+        </ul>
+        <li>Data store</li>
+        <ul>
+          <li>Stores actual data</li>
+        </ul>
       </ul>
+      <li>Workflow (uploading an object)</li>
+      <ul>
+        <li>Client sends HTTP PUT request to API service to create a bucket</li>
+        <li>API service calls IAM to ensure user has write permission</li>
+        <li>API service calls metadata store to create an entry</li>
+        <li>Client sends HTTP PUT request to API service to create an object</li>
+        <li>API service calls IAM to ensure user has write permission</li>
+        <li>API service calls data store ti persist the payload as object</li>
+        <li>API service calls metadata store to create an entry</li>
+      </ul>
+      <li>Workflow (downloading an object)</li>
+      <ul>
+        <li>Client sends HTTP GET request to API service</li>
+        <li>API service calls IAM to ensure user has read permission</li>
+        <li>API service fetches corresponding object's UUID from metadata store</li>
+        <li>API service fetches object data from data store by UUID</li>
+        <li>API service returns object data to client</li>
+      </ul>
+      <li>Storage schema</li>
+      <ul>
+        <li>Bucket</li>
+        <ul>
+          <li>bucket_name</li>
+          <li>bucket_id</li>
+          <li>owner_id</li>
+          <li>enable_versioning</li>
+        </ul>
+        <li>Object</li>
+        <ul>
+          <li>bucket_name</li>
+          <li>object_name</li>
+          <li>object_version</li>
+          <li>object_id</li>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
+  </div>
+</div>
+
+<div class="card mb-4" id="s3-like-object-storage-3">
+  <div class="card-body">
+    <h2 class="card-title">Design Deep Dive</h2>
+    <ul>
       <li>Data store</li>
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/s3-like-object-storage-2.png" alt="Card image cap">
       <ul>
-        <li>Stores actual data</li>
+        <li>Data routing service</li>
+        <ul>
+          <li>Query the placement service to get the best data node to store data</li>
+          <li>Read data from data nodes and return it to API service</li>
+          <li>Write data to data nodes</li>
+        </ul>
+        <li>Placement service</li>
+        <ul>
+          <li>Monitors all data nodes via heartbeats</li>
+        </ul>
+        <li>Data nodes</li>
+        <ul>
+          <li>Stores actual data object</li>
+          <li>Data service daemon sends heartbeats to placement service</li>
+        </ul>
       </ul>
-    </ul>
-
-    <h3 class="card-title">Workflow (uploading an object)</h3>
-    <ul>
-      <li>Client sends HTTP PUT request to API service to create a bucket</li>
-      <li>API service calls IAM to ensure user has write permission</li>
-      <li>API service calls metadata store to create an entry</li>
-      <li>Client sends HTTP PUT request to API service to create an object</li>
-      <li>API service calls IAM to ensure user has write permission</li>
-      <li>API service calls data store ti persist the payload as object</li>
-      <li>API service calls metadata store to create an entry</li>
-    </ul>
-
-    <h3 class="card-title">Workflow (downloading an object)</h3>
-    <ul>
-      <li>Client sends HTTP GET request to API service</li>
-      <li>API service calls IAM to ensure user has read permission</li>
-      <li>API service fetches corresponding object's UUID from metadata store</li>
-      <li>API service fetches object data from data store by UUID</li>
-      <li>API service returns object data to client</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="simple-storage-service-4">
-  <div class="card-body">
-    <h2 class="card-title">API</h2>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="simple-storage-service-5">
-  <div class="card-body">
-    <h2 class="card-title">Storage schema</h2>
-
-    <h3 class="card-title">Bucket</h3>
-    <ul>
-      <li>bucket_name</li>
-      <li>bucket_id</li>
-      <li>owner_id</li>
-      <li>enable_versioning</li>
-    </ul>
-
-    <h3 class="card-title">Object</h3>
-    <ul>
-      <li>bucket_name</li>
-      <li>object_name</li>
-      <li>object_version</li>
-      <li>object_id</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="simple-storage-service-6">
-  <div class="card-body">
-    <h2 class="card-title">Detailed design</h2>
-
-    <h3 class="card-title">Data store</h3>
-
-    <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/simple-storage-service-2.png" alt="Card image cap">
-
-    <ul>
-      <li>Data routing service</li>
-      <ul>
-        <li>Query the placement service to get the best data node to store data</li>
-        <li>Read data from data nodes and return it to API service</li>
-        <li>Write data to data nodes</li>
-      </ul>
-      <li>Placement service</li>
-      <ul>
-        <li>Monitors all data nodes via heartbeats</li>
-      </ul>
-      <li>Data nodes</li>
-      <ul>
-        <li>Stores actual data object</li>
-        <li>Data service daemon sends heartbeats to placement service</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Workflow</h3>
-    <ul>
-      <li>API service forwards object data to data store</li>
-      <li>Data routing service generates UUID for this object and queries the placement service for the data node to store this object</li>
-      <li>Placement service checks the virtual cluster map and returns the primary node</li>
-      <li>Data routing service sends data directly to primary data node</li>
-      <li>Primary data node saves data locally and replicates it to two secondary data nodes</li>
-      <li>Primary node responds to data routing service, then UUID of object is returned to API service</li>
-    </ul>
-
-    <h3 class="card-title">Durability</h3>
-    <ul>
-      <li>Replication</li>
-      <ul>
-        <li>6 nines (data is copied 3 times)</li>
-        <li>200% storage overhead</li>
-        <li>No computation</li>
-        <li>No write operation needed</li>
-        <li>Reads are served from the same replica</li>
-      </ul>
-      <li>Erasure coding</li>
-      <ul>
-        <li>11 nines (8+4 erasure coding)</li>
-        <li>50% storage overhead</li>
-        <li>Computation needed to calculate parities</li>
-        <li>Write latency having to calculate parities before data is written to disk</li>
-        <li>Every read must come from multiple nodes</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Scalability</h3>
-    <ul>
-      <li>Size of bucket table will be small</li>
-      <li>Size of object table will be large, thus sharding is needed</li>
-      <ul>
-        <li>Sharding by bucket_id can create hotspots</li>
-        <li>Sharding by object_id makes queries that are based on object names inefficient</li>
-        <li>Thus, shard by a combination of bucket_name and object_name (use the hash of &lt;bucket_name, object_name&gt;)</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Versioning</h3>
-    <ul>
-      <li>A new record is inserted with the same bucket_id and object name but with a new object_id and object_version</li>
-    </ul>
-
-    <h3 class="card-title">Uploading large files</h3>
-    <ul>
       <li>Workflow</li>
       <ul>
-        <li>Client calls the object storage to initial a multipart upload</li>
-        <li>Data store returns an upload_id</li>
-        <li>Client splits the large files into smaller objects and start uploading them with upload_id</li>
-        <li>When a part is uploaded, data store returns a ETag, which is md5 checksum of that part, which then is used to verify multipart upload</li>
-        <li>After all parts are uploaded, client sends a complete multipart upload request, which includes upload_id, part numbers, ETags</li>
-        <li>Data store reassembles the object from its parts pased on part number</li>
+        <li>API service forwards object data to data store</li>
+        <li>Data routing service generates UUID for this object and queries the placement service for the data node to store this object</li>
+        <li>Placement service checks the virtual cluster map and returns the primary node</li>
+        <li>Data routing service sends data directly to primary data node</li>
+        <li>Primary data node saves data locally and replicates it to two secondary data nodes</li>
+        <li>Primary node responds to data routing service, then UUID of object is returned to API service</li>
       </ul>
-      <li>Garbage collection</li>
+      <li>Durability</li>
       <ul>
-        <li>Old parts are no longer useful after the object has been reassembled from them</li>
+        <li>Replication</li>
+        <ul>
+          <li>6 nines (data is copied 3 times)</li>
+          <li>200% storage overhead</li>
+          <li>No computation</li>
+          <li>No write operation needed</li>
+          <li>Reads are served from the same replica</li>
+        </ul>
+        <li>Erasure coding</li>
+        <ul>
+          <li>11 nines (8+4 erasure coding)</li>
+          <li>50% storage overhead</li>
+          <li>Computation needed to calculate parities</li>
+          <li>Write latency having to calculate parities before data is written to disk</li>
+          <li>Every read must come from multiple nodes</li>
+        </ul>
       </ul>
-    </ul>
+      <li>Scalability</li>
+      <ul>
+        <li>Size of bucket table will be small</li>
+        <li>Size of object table will be large, thus sharding is needed</li>
+        <ul>
+          <li>Sharding by bucket_id can create hotspots</li>
+          <li>Sharding by object_id makes queries that are based on object names inefficient</li>
+          <li>Thus, shard by a combination of bucket_name and object_name (use the hash of &lt;bucket_name, object_name&gt;)</li>
+        </ul>
+      </ul>
+      <li>Versioning</li>
+      <ul>
+        <li>A new record is inserted with the same bucket_id and object name but with a new object_id and object_version</li>
+      </ul>
+      <li>Uploading large files</li>
+      <ul>
+        <li>Workflow</li>
+        <ul>
+          <li>Client calls the object storage to initial a multipart upload</li>
+          <li>Data store returns an upload_id</li>
+          <li>Client splits the large files into smaller objects and start uploading them with upload_id</li>
+          <li>When a part is uploaded, data store returns a ETag, which is md5 checksum of that part, which then is used to verify multipart upload</li>
+          <li>After all parts are uploaded, client sends a complete multipart upload request, which includes upload_id, part numbers, ETags</li>
+          <li>Data store reassembles the object from its parts pased on part number</li>
+        </ul>
+        <li>Garbage collection</li>
+        <ul>
+          <li>Old parts are no longer useful after the object has been reassembled from them</li>
+        </ul>
+      </ul>
+    </ul>    
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
   </div>
 </div>
 
-<div class="card mb-4" id="simple-storage-service-7">
+<div class="card mb-4" id="s3-like-object-storage-4">
   <div class="card-body">
-    <h2 class="card-title">Evaluation</h2>
-
-    <h3 class="card-title">Availability</h3>
-    <ul>
-      <li>Replication</li>
-      <ul>
-        <li>Replicate each server and DB</li>
-        <li>Replicate entire components to different zone or geographical region</li>
-      </ul>
-      <li>Fail over</li>
-      <ul>
-        <li></li>
-        <li></li>
-      </ul>
-    </ul>
-
-    <h4 class="card-title">Reliability</h4>
-    <ul>
-      <li>Data loss</li>
-    </ul>
-
-    <h3 class="card-title">Scalability</h3>
-    <ul>
-      <li>Horizontal scaling</li>
-      <li>Data partitioning</li>
-    </ul>
-
-    <h4 class="card-title">Performance</h4>
-    <ul>
-      <li></li>
-      <li></li>
-    </ul>
-    </ul>
-
-    <h3 class="card-title">Consistency</h3>
-    <ul>
-      <li></li>
-    </ul>
+    <h2 class="card-title">Wrap Up</h2>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
   </div>
 </div>
-<!-- Simple storage service END -->
+<!-- S3-like Object Storage END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->
