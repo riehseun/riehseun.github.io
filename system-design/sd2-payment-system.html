@@ -39,27 +39,22 @@
 <div class="col-md-12">
 <h1 class="my-4">Software Engineering</h1>
 
-<!-- Payment system BEGIN -->
+<!-- Payment System BEGIN -->
 <div class="card mb-4" id="payment-system">
   <div class="card-body">
-    <h2 class="card-title">Payment system</h2>
+    <h2 class="card-title">Payment System</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#payment-system-1">Requirement</a></li>
-      <li><a href="#payment-system-2">Estimation</a></li>
-      <li><a href="#payment-system-3">High level design</a></li>
-      <li><a href="#payment-system-4">API</a></li>
-      <li><a href="#payment-system-5">Storage schema</a></li>
-      <li><a href="#payment-system-6">Detailed design</a></li>
-      <li><a href="#payment-system-7">Evaluation</a></li>
+      <li><a href="#payment-system-1">Understand the Problem and Establish Design Scope</a></li>
+      <li><a href="#payment-system-2">Propose High-level Diagram and Get Buy-in</a></li>
+      <li><a href="#payment-system-3">Design Deep Dive</a></li>
+      <li><a href="#payment-system-4">Wrap Up</a></li>
     </ul>
   </div>
 </div>
 
 <div class="card mb-4" id="payment-system-1">
   <div class="card-body">
-    <h2 class="card-title">Requirement</h2>
-
-    <h3 class="card-title">Functional</h3>
+    <h2 class="card-title">Understand the Problem and Establish Design Scope</h2>
     <ul>
       <li>What kind of payment system? E-commerce</li>
       <li>What payment options should the system support? Credit card, debit card, PayPal</li>
@@ -69,28 +64,6 @@
       <li>How many transactions per day? 1M</li>
       <li>Should the system pay the sellers based on some cadence? Yes</li>
     </ul>
-
-    <h3 class="card-title">Non-functional</h3>
-    <ul>
-      <li>Availability</li>
-      <li>Reliability</li>
-      <li>Scalability</li>
-      <li>Performance</li>
-      <li>Consistency</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="payment-system-2">
-  <div class="card-body">
-    <h2 class="card-title">Estimation</h2>
-
-    <h3 class="card-title">Server</h3>
-
-    <h3 class="card-title">Storage</h3>
 
     <h3 class="card-title">Bandwidth</h3>
     <ul>
@@ -102,13 +75,11 @@
   </div>
 </div>
 
-<div class="card mb-4" id="payment-system-3">
+<div class="card mb-4" id="payment-system-2">
   <div class="card-body">
-    <h2 class="card-title">High level design</h2>
-
-    <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/payment-system-1.png" alt="Card image cap">
-
+    <h2 class="card-title">Propose High-level Diagram and Get Buy-in</h2>
     <ul>
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/payment-system-1.png" alt="Card image cap">
       <li>Payment service</li>
       <ul>
         <li>Accepts payment events from users</li>
@@ -135,19 +106,133 @@
       <ul>
         <li>Keeps account balance of the merchants</li>
       </ul>
+      <li>Workflow</li>
+      <ul>
+        <li>When user clicks order button, payment event is generated and sent to payment service</li>
+        <li>Payment service stores payment event in DB</li>
+        <li>Payment service calls payment executor for each payment order</li>
+        <li>Payment executor stores payment order in DB</li>
+        <li>Payment executor calls PSP to process credit card payment</li>
+        <li>Payment service updates wallet</li>
+        <li>Wallet stores updated balance in DB</li>
+        <li>Payment service updates ledger</li>
+        <li>Ledgers stores new transaction information in DB</li>
+      </ul>
+      <li>API</li>
+      <ul>
+        <li>Executes a payment event</li>
+        <ul>
+          <li><code>POST /v1/payments</code></li>
+          <ul>
+            <li><code>buyer_info</code> - information of buyer (JSON)</li>
+            <li><code>checkout_id</code> - globally unique ID of this checkout (string)</li>
+            <li><code>credit_card_info</code> - encrypted credit card information, which is PSP specific (JSON)</li>
+            <li><code>payment_orders</code> - list of payment orders (list)</li>
+            <ul>
+              <li><code>seller_account</code> - which seller will receive the monry (string)</li>
+              <li><code>amount</code> - transaction amount of the order (string)</li>
+              <ul>
+                <li>Double is not a good choice because the number could be extremely big or small</li>
+              </ul>
+              <li><code>currency</code> - currency of the order (string)</li>
+              <li><code>payment_order_id</code> - globally unique ID of this payment (string)</li>
+              <ul>
+                <li>This ID is used by PSP as idempotency key, thus must be globally unique</li>
+              </ul>
+            </ul>
+          </ul>
+        </ul>
+        <li>Returns the execution status of a single payment order</li>
+        <ul>
+          <li><code>GET /v1/payments/{:id}</code></li>
+        </ul>
+      </ul>
+      <li>Storage schema</li>
+      <ul>
+        <li>Performance is not the most important factor for payment service</li>
+        <li>Choose relational DB for ACID property</li>
+        <li>Payment event</li>
+        <ul>
+          <li>checkout_id (string, pk)</li>
+          <li>buyer_info (string)</li>
+          <li>seller_info (string)</li>
+          <li>credit_card_info (depends on PSP)</li>
+          <li>is_payment_done (bool)</li>
+        </ul>
+        <li>Payment order</li>
+        <ul>
+          <li>payment_order_id (string, pk)</li>
+          <li>buyer_account (string)</li>
+          <li>amount (string)</li>
+          <li>currency (string)</li>
+          <li>checkout_id (string, FK)</li>
+          <li>payment_order_status (string)</li>
+          <li>ledger_updated (bool)</li>
+          <li>wallet_updated (bool)</li>
+        </ul>
+      </ul>
     </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
+  </div>
+</div>
 
-    <h3 class="card-title">Workflow</h3>
+<div class="card mb-4" id="payment-system-3">
+  <div class="card-body">
+    <h2 class="card-title">Design Deep Dive</h2>
     <ul>
-      <li>When user clicks order button, payment event is generated and sent to payment service</li>
-      <li>Payment service stores payment event in DB</li>
-      <li>Payment service calls payment executor for each payment order</li>
-      <li>Payment executor stores payment order in DB</li>
-      <li>Payment executor calls PSP to process credit card payment</li>
-      <li>Payment service updates wallet</li>
-      <li>Wallet stores updated balance in DB</li>
-      <li>Payment service updates ledger</li>
-      <li>Ledgers stores new transaction information in DB</li>
+      <li>PSP integration</li>
+      <ul>
+        <li>Choose not to store sensitive payment information due to complex regulations</li>
+        <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/payment-system-2.png" alt="Card image cap">
+        <ul>
+          <li>User clicks checkout button and client calls payment service with payment order information</li>
+          <li>Payment service calls PSP with amount, currency, expiration date, redirect URL</li>
+          <li>PSP returns a token (UUID) to payment service</li>
+          <li>Payment service stores token in DB</li>
+          <li>Client displays PSP-hosted payment page</li>
+          <li>User fills PSP-hosted payment page and PSP starts payment processing</li>
+          <li>PSP returns payment status</li>
+          <li>Web page is directed to the redirect URL</li>
+          <li>PSP calls payment service with payment status</li>
+        </ul>
+      </ul>
+      <li>Reconciliation</li>
+      <ul>
+        <li>Every night, PSP or bank sends a settlement file to clients</li>
+        <li>Reconciliation system compares settlement file with ledger</li>
+        <li>Finance team can manually adjust mismatches</li>
+      </ul>
+      <li>Communication among internal services</li>
+      <ul>
+        <li>Message queue - a message can only be consumed by one subscriber</li>
+        <li>Kafka - a message can be consumed by multiple subscribers</li>
+        <li>Payment events are published to Kafka and consumed by payment system, analytics, billing</li>
+      </ul>
+      <li>Handling failed payments</li>
+      <ul>
+        <li>Retry queue - transient errors are routed here</li>
+        <li>Dead letter queue - when messages fail repeatedly, they end up here</li>
+      </ul>
+      <li>Exactly-once delivery</li>
+      <ul>
+        <li>Use both at-least-once and at-most-once</li>
+        <li>At-least-once - retrying failed payment guarantees this</li>
+        <li>At-most-once - idempotency check using UUID</li>
+        <ul>
+          <li>Subsequent requests with the UUID that is already seen will result in 429 too many request</li>
+        </ul>
+      </ul>
+      <li>Security</li>
+      <ul>
+        <li>Request/response eavesdropping - use HTTPS</li>
+        <li>Data tampering - use encryption</li>
+        <li>Man-in-the-middle-attack - use SSL</li>
+        <li>Data loss - DB replication across multiple zones/regions</li>
+        <li>DDoS - rate limiting and firewall</li>
+        <li>Card theft - tokenization of credit card number</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -157,187 +242,13 @@
 
 <div class="card mb-4" id="payment-system-4">
   <div class="card-body">
-    <h2 class="card-title">API</h2>
-    <ul>
-      <li>Executes a payment event</li>
-      <ul>
-        <li><code>POST /v1/payments</code></li>
-        <ul>
-          <li><code>buyer_info</code> - information of buyer (JSON)</li>
-          <li><code>checkout_id</code> - globally unique ID of this checkout (string)</li>
-          <li><code>credit_card_info</code> - encrypted credit card information, which is PSP specific (JSON)</li>
-          <li><code>payment_orders</code> - list of payment orders (list)</li>
-          <ul>
-            <li><code>seller_account</code> - which seller will receive the monry (string)</li>
-            <li><code>amount</code> - transaction amount of the order (string)</li>
-            <ul>
-              <li>Double is not a good choice because the number could be extremely big or small</li>
-            </ul>
-            <li><code>currency</code> - currency of the order (string)</li>
-            <li><code>payment_order_id</code> - globally unique ID of this payment (string)</li>
-            <ul>
-              <li>This ID is used by PSP as idempotency key, thus must be globally unique</li>
-            </ul>
-          </ul>
-        </ul>
-      </ul>
-      <li>Returns the execution status of a single payment order</li>
-      <ul>
-        <li><code>GET /v1/payments/{:id}</code></li>
-      </ul>
-    </ul>
+    <h2 class="card-title">Wrap Up</h2>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
   </div>
 </div>
-
-<div class="card mb-4" id="payment-system-5">
-  <div class="card-body">
-    <h2 class="card-title">Storage schema</h2>
-    <ul>
-      <li>Performance is not the most important factor for payment service</li>
-      <li>Choose relational DB for ACID property</li>
-    </ul>
-
-    <h3 class="card-title">Payment event</h3>
-    <ul>
-      <li>checkout_id (string, pk)</li>
-      <li>buyer_info (string)</li>
-      <li>seller_info (string)</li>
-      <li>credit_card_info (depends on PSP)</li>
-      <li>is_payment_done (bool)</li>
-    </ul>
-
-    <h3 class="card-title">Payment order</h3>
-    <ul>
-      <li>payment_order_id (string, pk)</li>
-      <li>buyer_account (string)</li>
-      <li>amount (string)</li>
-      <li>currency (string)</li>
-      <li>checkout_id (string, FK)</li>
-      <li>payment_order_status (string)</li>
-      <li>ledger_updated (bool)</li>
-      <li>wallet_updated (bool)</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="payment-system-6">
-  <div class="card-body">
-    <h2 class="card-title">Detailed design</h2>
-
-    <h3 class="card-title">PSP integration</h3>
-    <ul>
-      <li>Choose not to store sensitive payment information due to complex regulations</li>
-      <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/payment-system-2.png" alt="Card image cap">
-      <ul>
-        <li>User clicks checkout button and client calls payment service with payment order information</li>
-        <li>Payment service calls PSP with amount, currency, expiration date, redirect URL</li>
-        <li>PSP returns a token (UUID) to payment service</li>
-        <li>Payment service stores token in DB</li>
-        <li>Client displays PSP-hosted payment page</li>
-        <li>User fills PSP-hosted payment page and PSP starts payment processing</li>
-        <li>PSP returns payment status</li>
-        <li>Web page is directed to the redirect URL</li>
-        <li>PSP calls payment service with payment status</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Reconciliation</h3>
-    <ul>
-      <li>Every night, PSP or bank sends a settlement file to clients</li>
-      <li>Reconciliation system compares settlement file with ledger</li>
-      <li>Finance team can manually adjust mismatches</li>
-    </ul>
-
-    <h3 class="card-title">Communication among internal services</h3>
-    <ul>
-      <li>Message queue - a message can only be consumed by one subscriber</li>
-      <li>Kafka - a message can be consumed by multiple subscribers</li>
-      <li>Payment events are published to Kafka and consumed by payment system, analytics, billing</li>
-    </ul>
-
-    <h3 class="card-title">Handling failed payments</h3>
-    <ul>
-      <li>Retry queue - transient errors are routed here</li>
-      <li>Dead letter queue - when messages fail repeatedly, they end up here</li>
-    </ul>
-
-    <h3 class="card-title">Exactly-once delivery</h3>
-    <ul>
-      <li>Use both at-least-once and at-most-once</li>
-      <li>At-least-once - retrying failed payment guarantees this</li>
-      <li>At-most-once - idempotency check using UUID</li>
-      <ul>
-        <li>Subsequent requests with the UUID that is already seen will result in 429 too many request</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Security</h3>
-    <ul>
-      <li>Request/response eavesdropping - use HTTPS</li>
-      <li>Data tampering - use encryption</li>
-      <li>Man-in-the-middle-attack - use SSL</li>
-      <li>Data loss - DB replication across multiple zones/regions</li>
-      <li>DDoS - rate limiting and firewall</li>
-      <li>Card theft - tokenization of credit card number</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="payment-system-7">
-  <div class="card-body">
-    <h2 class="card-title">Evaluation</h2>
-
-    <h3 class="card-title">Availability</h3>
-    <ul>
-      <li>Replication</li>
-      <ul>
-        <li>Replicate each server and DB</li>
-        <li>Replicate entire components to different zone or geographical region</li>
-      </ul>
-      <li>Fail over</li>
-      <ul>
-        <li></li>
-        <li></li>
-      </ul>
-    </ul>
-
-    <h4 class="card-title">Reliability</h4>
-    <ul>
-      <li>Data loss</li>
-    </ul>
-
-    <h3 class="card-title">Scalability</h3>
-    <ul>
-      <li>Horizontal scaling</li>
-      <li>Data partitioning</li>
-    </ul>
-
-    <h4 class="card-title">Performance</h4>
-    <ul>
-      <li></li>
-      <li></li>
-    </ul>
-    </ul>
-
-    <h3 class="card-title">Consistency</h3>
-    <ul>
-      <li></li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-<!-- Payment system END -->
+<!-- Payment System END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->
