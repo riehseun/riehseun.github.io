@@ -39,27 +39,22 @@
 <div class="col-md-12">
 <h1 class="my-4">Software Engineering</h1>
 
-<!-- Ad click event aggregation BEGIN -->
+<!-- Ad Click Event Aggregation BEGIN -->
 <div class="card mb-4" id="ad-click-event-aggregation">
   <div class="card-body">
-    <h2 class="card-title">Ad click event aggregation</h2>
+    <h2 class="card-title">Ad Click Event Aggregation</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#ad-click-event-aggregation-1">Requirement</a></li>
-      <li><a href="#ad-click-event-aggregation-2">Estimation</a></li>
-      <li><a href="#ad-click-event-aggregation-3">High level design</a></li>
-      <li><a href="#ad-click-event-aggregation-4">API</a></li>
-      <li><a href="#ad-click-event-aggregation-5">Storage schema</a></li>
-      <li><a href="#ad-click-event-aggregation-6">Detailed design</a></li>
-      <li><a href="#ad-click-event-aggregation-7">Evaluation</a></li>
+      <li><a href="#ad-click-event-aggregation-1">Understand the Problem and Establish Design Scope</a></li>
+      <li><a href="#ad-click-event-aggregation-2">Propose High-level Diagram and Get Buy-in</a></li>
+      <li><a href="#ad-click-event-aggregation-3">Design Deep Dive</a></li>
+      <li><a href="#ad-click-event-aggregation-4">Wrap Up</a></li>
     </ul>
   </div>
 </div>
 
 <div class="card mb-4" id="ad-click-event-aggregation-1">
   <div class="card-body">
-    <h2 class="card-title">Requirement</h2>
-
-    <h3 class="card-title">Functional</h3>
+    <h2 class="card-title">Understand the Problem and Establish Design Scope</h2>
     <ul>
       <li>How does input data look like? Log files where latest click events are appended to them</li>
       <li>How does event look like in terms of data attribute? ad_id, click_timestamp, user_id, ip, country</li>
@@ -78,26 +73,6 @@
       <li>Should the system have low latency? Less than 1s for real-time bidding, few minutes for ad click event aggregation</li>
     </ul>
 
-    <h3 class="card-title">Non-functional</h3>
-    <ul>
-      <li>Availability</li>
-      <li>Reliability</li>
-      <li>Scalability</li>
-      <li>Performance</li>
-      <li>Consistency</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="ad-click-event-aggregation-2">
-  <div class="card-body">
-    <h2 class="card-title">Estimation</h2>
-
-    <h3 class="card-title">Server</h3>
-
     <h3 class="card-title">Storage</h3>
     <ul>
       <li>Assume single click requires 0.1KB storage</li>
@@ -115,45 +90,229 @@
   </div>
 </div>
 
+<div class="card mb-4" id="ad-click-event-aggregation-2">
+  <div class="card-body">
+    <h2 class="card-title">Propose High-level Diagram and Get Buy-in</h2>
+    <ul>
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/ad-click-event-aggregation-1.png" alt="Card image cap">
+      <li>Message queues</li>
+      <ul>
+        <li>First message queue</li>
+        <ul>
+          <li>ad_id, click_timestamp, user_id, ip, country</li>
+        </ul>
+        <li>Second message queue</li>
+        <ul>
+          <li>ad_id, click_minute, count</li>
+          <li>update_time_minute, most_clicked_ads</li>
+        </ul>
+        <li>Delivery guarantee</li>
+        <ul>
+          <li>At-least once is not good enough because difference of few percent data can result in huge discrepancies</li>
+          <li>Exactly-once is needed</li>
+        </ul>
+      </ul>
+      <li>Data aggregation service</li>
+      <ul>
+        <li>MapReduce</li>
+        <ul>
+          <li>Map node</li>
+          <ul>
+            <li>Read data from data source and transform it (clean and normalize data)</li>
+          </ul>
+          <li>Aggregate node</li>
+          <ul>
+            <li>Counts ad click events by ad_id every minute</li>
+          </ul>
+          <li>Reduce node</li>
+          <ul>
+            <li>Combines aggregated results from all Aggregate nodes to produce the final result</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>API</li>
+      <ul>
+        <li>Return aggregated event count for a given <code>ad_id</code></li>
+        <ul>
+          <li><code>GET /v1/ads/{:ad_id}/aggregated_count</code></li>
+          <li>Request</li>
+          <ul>
+            <li><code>from</code> - start minute</li>
+            <li><code>to</code> - end minute</li>
+            <li><code>filter</code> - identifier for different filtering strategies</li>
+          </ul>
+          <li>Response</li>
+          <ul>
+            <li><code>ad_id</code></li>
+            <li><code>count</code> - aggregated count between start and end minutes</li>
+          </ul>
+        </ul>
+        <li>Return top N most clicked ads in last M minutes</li>
+        <ul>
+          <li><code>GET /v1/ads/popular_ads</code></li>
+          <li>Request</li>
+          <ul>
+            <li><code>count</code> - specifies N</li>
+            <li><code>window</code> - specifies M</li>
+            <li><code>filter</code> - identifier for different filtering strategies</li>
+          </ul>
+          <li>Response</li>
+          <ul>
+            <li><code>ad_ids</code></li>
+          </ul>
+        </ul>
+      </ul>
+      <li>Storage schema</li>
+      <ul>
+        <li>Raw data serves as backup data in case aggregated data is corrupted</li>
+        <li>Aggregated data makes queries fast</li>
+        <li>Raw data</li>
+        <ul>
+          <li>Little read and heavy write</li>
+          <li>Use Cassandra or InfluxDB because these are good for writes and time-range queries</li>
+          <ul>
+            <li>ad_id</li>
+            <li>click_timestamp</li>
+            <li>user_id</li>
+            <li>ip</li>
+            <li>country</li>
+          </ul>
+        </ul>
+        <li>Aggregated data</li>
+        <ul>
+          <li>Heavy read and write</li>
+          <li>Use Cassandra or InfluxDB here as well</li>
+        </ul>
+        <ul>
+          <li>Aggregated data with filters</li>
+          <ul>
+            <li>ad_id</li>
+            <li>click_minute</li>
+            <li>filter_id</li>
+            <li>count</li>
+          </ul>
+          <li>Filter table</li>
+          <ul>
+            <li>filter_id</li>
+            <li>region</li>
+            <li>ip</li>
+            <li>user_id</li>
+          </ul>
+          <li>Most clicked_ads</li>
+          <ul>
+            <li>window_size - integer</li>
+            <li>update_time_minute - timestamp</li>
+            <li>most_clicked_ads - array</li>
+          </ul>
+        </ul>
+      </ul>
+    </ul>    
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
+  </div>
+</div>
+
 <div class="card mb-4" id="ad-click-event-aggregation-3">
   <div class="card-body">
-    <h2 class="card-title">High level design</h2>
-
-    <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/ad-click-event-aggregation-1.png" alt="Card image cap">
-
-    <h3 class="card-title">Message queues</h3>
+    <h2 class="card-title">Design Deep Dive<</h2>
     <ul>
-      <li>First message queue</li>
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/ad-click-event-aggregation-2.png" alt="Card image cap">
+      <li>Streaming vs batching</li>
       <ul>
-        <li>ad_id, click_timestamp, user_id, ip, country</li>
-      </ul>
-      <li>Second message queue</li>
-      <ul>
-        <li>ad_id, click_minute, count</li>
-        <li>update_time_minute, most_clicked_ads</li>
-      </ul>
-      <li>Delivery guarantee</li>
-      <ul>
-        <li>At-least once is not good enough because difference of few percent data can result in huge discrepancies</li>
-        <li>Exactly-once is needed</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Data aggregation service</h3>
-    <ul>
-      <li>MapReduce</li>
-      <ul>
-        <li>Map node</li>
+        <li>Use streaming to process data as it arrives and generate aggregated result in real-time</li>
+        <li>Use batch for historical data backup</li>
+        <li>Lambda</li>
         <ul>
-          <li>Read data from data source and transform it (clean and normalize data)</li>
+          <li>Contains batch and streaming simultaneously</li>
+          <li>Need to maintain two codebases</li>
         </ul>
-        <li>Aggregate node</li>
+        <li>Kappa</li>
         <ul>
-          <li>Counts ad click events by ad_id every minute</li>
+          <li>Combines batch and streaming in one processing path</li>
+          <li>Handle both real-time data processing and continuous data reprocessing using a single stream processing engine</li>
         </ul>
-        <li>Reduce node</li>
+        <li>Data recalculation</li>
         <ul>
-          <li>Combines aggregated results from all Aggregate nodes to produce the final result</li>
+          <li>Recalculation service retrieves data from raw data storage, which is done by batch job</li>
+          <li>Data is sent to a dedicated aggregation service (Real-time processing is not impacted)</li>
+          <li>Aggregated results are sent to second message queue, then updated in aggregation DB</li>
+        </ul>
+        <li>Time</li>
+        <ul>
+          <li>Event time</li>
+          <ul>
+            <li>When an Ad click happens</li>
+            <li>Pros - aggregation results are more accurate</li>
+            <li>Cons - depends on timestamp generated on client side</li>
+            <li>Watermark</li>
+            <ul>
+              <li>Extend aggregation window</li>
+              <li>Long watermark increases accuracy but adds more latency to the system</li>
+              <li>Alternative is to use reconcilation</li>
+              <ul>
+                <li>Sort Ad click events by event time in every partition at the end of each day (using a batch job and reconciling with real-time aggregation result)</li>
+                <li>Result from batch job might not match with real-time aggregation result, since some event might arrive late</li>
+              </ul>
+            </ul>
+          </ul>
+          <li>Processing time</li>
+          <ul>
+            <li>System time of aggregation server that processes the click event</li>
+            <li>Pros - server timestamps are more reliable</li>
+            <li>Cons - timestamp is not accurate if event reaches the system at much later time</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>Aggregation window</li>
+      <ul>
+        <li>Tumbling window</li>
+        <ul>
+          <li>Time is partitioned into same-length and non-overlapping chunks</li>
+          <li>Good for aggregating ad click events every minute</li>
+        </ul>
+        <li>Sliding window</li>
+        <ul>
+          <li>Events are grouped within a window that slides across the data stream</li>
+          <li>Good for getting top N most clicked Ads during last M minutes</li>
+        </ul>
+      </ul>
+      <li>Scaling</li>
+      <ul>
+        <li>Message queues</li>
+        <ul>
+          <li>Producers</li>
+          <ul>
+            <li>There is no limit on number of producers</li>
+          </ul>
+          <li>Consumers</li>
+          <ul>
+            <li>Rebalancing</li>
+          </ul>
+          <li>Brokers</li>
+          <ul>
+            <li>Use ad_id as hashing key for Kafka partition</li>
+            <li>Then, aggregation service can subscribe to all events of an ad_id from one single partition</li>
+            <li>Pre-allocate enough partitions to avoid increasing the number of partitions</li>
+          </ul>
+        </ul>
+        <li>Data aggregation service</li>
+        <ul>
+          <li>Option 1. allocate events with different ad_ids to different thread</li>
+          <li>Option 2. Deploy aggregation service nodes on resource providers like Apache Hadoop YARN</li>
+          <li>Handling hotspot</li>
+          <ul>
+            <li>Assume each node can handle only 100 events</li>
+            <li>Assume there are 300 events in a node</li>
+            <li>Node applies for extra resources to resource manager</li>
+            <li>Resource manager allocates more resources</li>
+            <li>Node split event into 3 groups and each node handles 100 events</li>
+            <li>Result is written back to original node</li>
+          </ul>
+        </ul>
+        <li>DB</li>
+        <ul>
+          <li>Cassandra natively supports horizontal scaling</li>
         </ul>
       </ul>
     </ul>
@@ -165,257 +324,13 @@
 
 <div class="card mb-4" id="ad-click-event-aggregation-4">
   <div class="card-body">
-    <h2 class="card-title">API</h2>
-    <ul>
-      <li>Return aggregated event count for a given <code>ad_id</code></li>
-      <ul>
-        <li><code>GET /v1/ads/{:ad_id}/aggregated_count</code></li>
-        <li>Request</li>
-        <ul>
-          <li><code>from</code> - start minute</li>
-          <li><code>to</code> - end minute</li>
-          <li><code>filter</code> - identifier for different filtering strategies</li>
-        </ul>
-        <li>Response</li>
-        <ul>
-          <li><code>ad_id</code></li>
-          <li><code>count</code> - aggregated count between start and end minutes</li>
-        </ul>
-      </ul>
-      <li>Return top N most clicked ads in last M minutes</li>
-      <ul>
-        <li><code>GET /v1/ads/popular_ads</code></li>
-        <li>Request</li>
-        <ul>
-          <li><code>count</code> - specifies N</li>
-          <li><code>window</code> - specifies M</li>
-          <li><code>filter</code> - identifier for different filtering strategies</li>
-        </ul>
-        <li>Response</li>
-        <ul>
-          <li><code>ad_ids</code></li>
-        </ul>
-      </ul>
-    </ul>
+    <h2 class="card-title">Wrap Up</h2>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
   </div>
 </div>
-
-<div class="card mb-4" id="ad-click-event-aggregation-5">
-  <div class="card-body">
-    <h2 class="card-title">Storage schema</h2>
-    <ul>
-      <li>Raw data serves as backup data in case aggregated data is corrupted</li>
-      <li>Aggregated data makes queries fast</li>
-      <li>Raw data</li>
-      <ul>
-        <li>Little read and heavy write</li>
-        <li>Use Cassandra or InfluxDB because these are good for writes and time-range queries</li>
-      </ul>
-      <li>Aggregated data</li>
-      <ul>
-        <li>Heavy read and write</li>
-        <li>Use Cassandra or InfluxDB here as well</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Raw data</h3>
-    <ul>
-      <li>ad_id</li>
-      <li>click_timestamp</li>
-      <li>user_id</li>
-      <li>ip</li>
-      <li>country</li>
-    </ul>
-
-    <h3 class="card-title">Aggregated data</h3>
-    <ul>
-      <li>Aggregated data with filters</li>
-      <ul>
-        <li>ad_id</li>
-        <li>click_minute</li>
-        <li>filter_id</li>
-        <li>count</li>
-      </ul>
-      <li>Filter table</li>
-      <ul>
-        <li>filter_id</li>
-        <li>region</li>
-        <li>ip</li>
-        <li>user_id</li>
-      </ul>
-      <li>Most clicked_ads</li>
-      <ul>
-        <li>window_size - integer</li>
-        <li>update_time_minute - timestamp</li>
-        <li>most_clicked_ads - array</li>
-      </ul>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="ad-click-event-aggregation-6">
-  <div class="card-body">
-    <h2 class="card-title">Detailed design</h2>
-
-    <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/ad-click-event-aggregation-2.png" alt="Card image cap">
-
-    <h3 class="card-title">Streaming Vs batching</h3>
-    <ul>
-      <li>Use streaming to process data as it arrives and generate aggregated result in real-time</li>
-      <li>Use batch for historical data backup</li>
-      <li>Lambda</li>
-      <ul>
-        <li>Contains batch and streaming simultaneously</li>
-        <li>Need to maintain two codebases</li>
-      </ul>
-      <li>Kappa</li>
-      <ul>
-        <li>Combines batch and streaming in one processing path</li>
-        <li>Handle both real-time data processing and continuous data reprocessing using a single stream processing engine</li>
-      </ul>
-      <li>Data recalculation</li>
-      <ul>
-        <li>Recalculation service retrieves data from raw data storage, which is done by batch job</li>
-        <li>Data is sent to a dedicated aggregation service (Real-time processing is not impacted)</li>
-        <li>Aggregated results are sent to second message queue, then updated in aggregation DB</li>
-      </ul>
-      <li>Time</li>
-      <ul>
-        <li>Event time</li>
-        <ul>
-          <li>When an Ad click happens</li>
-          <li>Pros - aggregation results are more accurate</li>
-          <li>Cons - depends on timestamp generated on client side</li>
-          <li>Watermark</li>
-          <ul>
-            <li>Extend aggregation window</li>
-            <li>Long watermark increases accuracy but adds more latency to the system</li>
-            <li>Alternative is to use reconcilation</li>
-            <ul>
-              <li>Sort Ad click events by event time in every partition at the end of each day (using a batch job and reconciling with real-time aggregation result)</li>
-              <li>Result from batch job might not match with real-time aggregation result, since some event might arrive late</li>
-            </ul>
-          </ul>
-        </ul>
-        <li>Processing time</li>
-        <ul>
-          <li>System time of aggregation server that processes the click event</li>
-          <li>Pros - server timestamps are more reliable</li>
-          <li>Cons - timestamp is not accurate if event reaches the system at much later time</li>
-        </ul>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Aggregation window</h3>
-    <ul>
-      <li>Tumbling window</li>
-      <ul>
-        <li>Time is partitioned into same-length and non-overlapping chunks</li>
-        <li>Good for aggregating ad click events every minute</li>
-      </ul>
-      <li>Sliding window</li>
-      <ul>
-        <li>Events are grouped within a window that slides across the data stream</li>
-        <li>Good for getting top N most clicked Ads during last M minutes</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Scaling</h3>
-    <ul>
-      <li>Message queues</li>
-      <ul>
-        <li>Producers</li>
-        <ul>
-          <li>There is no limit on number of producers</li>
-        </ul>
-        <li>Consumers</li>
-        <ul>
-          <li>Rebalancing</li>
-        </ul>
-        <li>Brokers</li>
-        <ul>
-          <li>Use ad_id as hashing key for Kafka partition</li>
-          <li>Then, aggregation service can subscribe to all events of an ad_id from one single partition</li>
-          <li>Pre-allocate enough partitions to avoid increasing the number of partitions</li>
-        </ul>
-      </ul>
-      <li>Data aggregation service</li>
-      <ul>
-        <li>Option 1. allocate events with different ad_ids to different thread</li>
-        <li>Option 2. Deploy aggregation service nodes on resource providers like Apache Hadoop YARN</li>
-        <li>Handling hotspot</li>
-        <ul>
-          <li>Assume each node can handle only 100 events</li>
-          <li>Assume there are 300 events in a node</li>
-          <li>Node applies for extra resources to resource manager</li>
-          <li>Resource manager allocates more resources</li>
-          <li>Node split event into 3 groups and each node handles 100 events</li>
-          <li>Result is written back to original node</li>
-        </ul>
-      </ul>
-      <li>DB</li>
-      <ul>
-        <li>Cassandra natively supports horizontal scaling</li>
-      </ul>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="ad-click-event-aggregation-7">
-  <div class="card-body">
-    <h2 class="card-title">Evaluation</h2>
-
-    <h3 class="card-title">Availability</h3>
-    <ul>
-      <li>Replication</li>
-      <ul>
-        <li>Replicate each server and DB</li>
-        <li>Replicate entire components to different zone or geographical region</li>
-      </ul>
-      <li>Fail over</li>
-      <ul>
-        <li></li>
-        <li></li>
-      </ul>
-    </ul>
-
-    <h4 class="card-title">Reliability</h4>
-    <ul>
-      <li>Data loss</li>
-    </ul>
-
-    <h3 class="card-title">Scalability</h3>
-    <ul>
-      <li>Horizontal scaling</li>
-      <li>Data partitioning</li>
-    </ul>
-
-    <h4 class="card-title">Performance</h4>
-    <ul>
-      <li></li>
-      <li></li>
-    </ul>
-    </ul>
-
-    <h3 class="card-title">Consistency</h3>
-    <ul>
-      <li></li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-<!-- Ad click event aggregation END -->
+<!-- Ad Click Event Aggregation END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->

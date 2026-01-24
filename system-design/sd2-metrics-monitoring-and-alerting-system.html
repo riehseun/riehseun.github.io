@@ -39,27 +39,22 @@
 <div class="col-md-12">
 <h1 class="my-4">Software Engineering</h1>
 
-<!-- Metrics monitoring and alerting system BEGIN -->
+<!-- Metrics Monitoring and Alerting System BEGIN -->
 <div class="card mb-4" id="metrics-monitoring-and-alerting-system">
   <div class="card-body">
-    <h2 class="card-title">Metrics monitoring and alerting system</h2>
+    <h2 class="card-title">Metrics Monitoring and Alerting System</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#metrics-monitoring-and-alerting-system-1">Requirement</a></li>
-      <!-- <li><a href="#metrics-monitoring-and-alerting-system-2">Estimation</a></li> -->
-      <li><a href="#metrics-monitoring-and-alerting-system-3">High level design</a></li>
-      <!-- <li><a href="#metrics-monitoring-and-alerting-system-4">API</a></li> -->
-      <li><a href="#metrics-monitoring-and-alerting-system-5">Storage schema</a></li>
-      <li><a href="#metrics-monitoring-and-alerting-system-6">Detailed design</a></li>
-      <li><a href="#metrics-monitoring-and-alerting-system-7">Evaluation</a></li>
+      <li><a href="#metrics-monitoring-and-alerting-system-1">Understand the Problem and Establish Design Scope</a></li>
+      <li><a href="#metrics-monitoring-and-alerting-system-2">Propose High-level Diagram and Get Buy-in</a></li>
+      <li><a href="#metrics-monitoring-and-alerting-system-3">Design Deep Dive</a></li>
+      <li><a href="#metrics-monitoring-and-alerting-system-4">Wrap Up</a></li>
     </ul>
   </div>
 </div>
 
 <div class="card mb-4" id="metrics-monitoring-and-alerting-system-1">
   <div class="card-body">
-    <h2 class="card-title">Requirement</h2>
-
-    <h3 class="card-title">Functional</h3>
+    <h2 class="card-title">Understand the Problem and Establish Design Scope</h2>
     <ul>
       <li>What metrics should the system collect? CPU load, memory usage, disk space comsumption, request per second of a service, running server count of web pool</li>
       <li>How many servers are there? 1000 server pools, 100 machines per pool. Also 100M daily active users</li>
@@ -68,44 +63,17 @@
       <li>Should the system collect logs? No</li>
       <li>Should the system support distributed system tracing? No</li>
     </ul>
-
-    <h3 class="card-title">Non-functional</h3>
-    <ul>
-      <li>Availability</li>
-      <li>Reliability</li>
-      <li>Scalability</li>
-      <li>Performance</li>
-      <li>Consistency</li>
-    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
   </div>
 </div>
 
-<!-- <div class="card mb-4" id="metrics-monitoring-and-alerting-system-2">
+<div class="card mb-4" id="metrics-monitoring-and-alerting-system-2">
   <div class="card-body">
-    <h2 class="card-title">Estimation</h2>
-
-    <h3 class="card-title">Server</h3>
-
-    <h3 class="card-title">Storage</h3>
-
-    <h3 class="card-title">Bandwidth</h3>
-
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div> -->
-
-<div class="card mb-4" id="metrics-monitoring-and-alerting-system-3">
-  <div class="card-body">
-    <h2 class="card-title">High level design</h2>
-
-    <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/metrics-monitoring-and-alerting-system-1.png" alt="Card image cap">
-
+    <h2 class="card-title">Propose High-level Diagram and Get Buy-in</h2>
     <ul>
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/metrics-monitoring-and-alerting-system-1.png" alt="Card image cap">
       <li>Metrics source</li>
       <ul>
         <li>Ex. application servers, SQL databases, message queues, etc</li>
@@ -127,13 +95,19 @@
       <ul>
         <li>Shows metrics in graphs/charts</li>
       </ul>
-    </ul>
-
-    <h3 class="card-title">Data storage</h3>
-    <ul>
-      <li>Need time-series DB</li>
+      <li>Data storage</li>
       <ul>
-        <li>Ex. MetricsDB, Timestream, InfluxDB, Prometheus</li>
+        <li>Need time-series DB</li>
+        <ul>
+          <li>Ex. MetricsDB, Timestream, InfluxDB, Prometheus</li>
+        </ul>
+      </ul>
+      <li>Storage schema</li>
+      <ul>
+        <li>Constant heavy write load and spiky read load</li>
+        <li>A metric name - string</li>
+        <li>A set of tags/labels - list of &lt;key:value&gt; pairs</li>
+        <li>An array of values and their timestamps - an array of &lt;value:timestamp&gt; pairs</li>
       </ul>
     </ul>
   </div>
@@ -142,106 +116,76 @@
   </div>
 </div>
 
-<!-- <div class="card mb-4" id="metrics-monitoring-and-alerting-system-4">
+<div class="card mb-4" id="metrics-monitoring-and-alerting-system-3">
   <div class="card-body">
-    <h2 class="card-title">API</h2>
-
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div> -->
-
-<div class="card mb-4" id="metrics-monitoring-and-alerting-system-5">
-  <div class="card-body">
-    <h2 class="card-title">Storage schema</h2>
+    <h2 class="card-title">Design Deep Dive</h2>
     <ul>
-      <li>Constant heavy write load and spiky read load</li>
-      <li>A metric name - string</li>
-      <li>A set of tags/labels - list of &lt;key:value&gt; pairs</li>
-      <li>An array of values and their timestamps - an array of &lt;value:timestamp&gt; pairs</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="metrics-monitoring-and-alerting-system-6">
-  <div class="card-body">
-    <h2 class="card-title">Detailed design</h2>
-
-    <h3 class="card-title">Metrics collections</h3>
-    <ul>
-      <li>Pull</li>
+      <li>Metrics collections</li>
       <ul>
-        <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/metrics-monitoring-and-alerting-system-2.png" alt="Card image cap">
-        <li>Metrics collector fetches configuration metadata of service endpoints (such as pulling interval, IP addresses, timeout, etc) from service discovery</li>
-        <li>Metrics collector pulls metrics data via pre-defined HTTP endpoints</li>
-        <li>Distribute metrics source to a scalable set of metrics collectors via consistent hashing</li>
-        <li>Ex. Prometheus</li>
-        <li>Pros</li>
+        <li>Pull</li>
         <ul>
-          <li>Easy debugging - HTTPS endpoint can be used to view metrics at any time</li>
-          <li>Health check - if application server doesn't respond, it's down</li>
+          <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/metrics-monitoring-and-alerting-system-2.png" alt="Card image cap">
+          <li>Metrics collector fetches configuration metadata of service endpoints (such as pulling interval, IP addresses, timeout, etc) from service discovery</li>
+          <li>Metrics collector pulls metrics data via pre-defined HTTP endpoints</li>
+          <li>Distribute metrics source to a scalable set of metrics collectors via consistent hashing</li>
+          <li>Ex. Prometheus</li>
+          <li>Pros</li>
+          <ul>
+            <li>Easy debugging - HTTPS endpoint can be used to view metrics at any time</li>
+            <li>Health check - if application server doesn't respond, it's down</li>
+          </ul>
+        </ul>
+        <li>Push</li>
+        <ul>
+          <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/metrics-monitoring-and-alerting-system-3.png" alt="Card image cap">
+          <li>Collection agent is installed on every server being monitored</li>
+          <li>Collection agent periodically pushes metrics to metrics collectors</li>
+          <li>Ex. Amazon CloudWatch, Graphite</li>
+          <li>Pros</li>
+          <ul>
+            <li>Networking - load balancer allows receiving data from anywhere</li>
+          </ul>
         </ul>
       </ul>
-      <li>Push</li>
+      <li>Scaling metrics transmission pipeline</li>
       <ul>
-        <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/metrics-monitoring-and-alerting-system-3.png" alt="Card image cap">
-        <li>Collection agent is installed on every server being monitored</li>
-        <li>Collection agent periodically pushes metrics to metrics collectors</li>
-        <li>Ex. Amazon CloudWatch, Graphite</li>
-        <li>Pros</li>
+        <li>Place Kafka between metrics collector and time-series DB</li>
+        <li>Decouples data collection and data processing</li>
+        <li>Prevents data loss when DB is unavailable by retaining data in Kafka</li>
+      </ul>
+      <li>Query service</li>
+      <ul>
+        <li>Add a cache layer to query service</li>
+        <li>Prometheus and InfluxDB have their own query language</li>
+      </ul>
+      <li>Storage layer</li>
+      <ul>
+        <li>Data encoding</li>
         <ul>
-          <li>Networking - load balancer allows receiving data from anywhere</li>
+          <li>Instead of storing full timestamp, store only the delta</li>
+        </ul>
+        <li>Downsampling</li>
+        <ul>
+          <li>Up to 7 days old data - no downsampling</li>
+          <li>Between 7 days and 30 days - downsample to 1 minute resolution</li>
+          <li>Between 30 days and 1 year - downsample to 1 hour resolution</li>
         </ul>
       </ul>
-    </ul>
-
-    <h3 class="card-title">Scaling metrics transmission pipeline</h3>
-    <ul>
-      <li>Place Kafka between metrics collector and time-series DB</li>
-      <li>Decouples data collection and data processing</li>
-      <li>Prevents data loss when DB is unavailable by retaining data in Kafka</li>
-    </ul>
-
-    <h3 class="card-title">Query service</h3>
-    <ul>
-      <li>Add a cache layer to query service</li>
-      <li>Prometheus and InfluxDB have their own query language</li>
-    </ul>
-
-    <h3 class="card-title">Storage layer</h3>
-    <ul>
-      <li>Data encoding</li>
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/metrics-monitoring-and-alerting-system-4.png" alt="Card image cap">
+      <li>Alerting system</li>
       <ul>
-        <li>Instead of storing full timestamp, store only the delta</li>
+        <li>Load config file (which has alert rules) to cache server</li>
+        <li>Alert manager fetches alert configs from the cache</li>
+        <li>Alert manager calls query service at pre-defined interval</li>
+        <li>Alert store is a key-value DB (Ex. Cassandra) that keeps state of all alerts</li>
+        <li>Eligible alerts are inserted into Kafka</li>
+        <li>Alert consumers pull alert events from Kafka</li>
       </ul>
-      <li>Downsampling</li>
+      <li>Visualization system</li>
       <ul>
-        <li>Up to 7 days old data - no downsampling</li>
-        <li>Between 7 days and 30 days - downsample to 1 minute resolution</li>
-        <li>Between 30 days and 1 year - downsample to 1 hour resolution</li>
+        <li>A high-quality visualization system is hard to build</li>
+        <li>Use product like Grafana</li>
       </ul>
-    </ul>
-
-    <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/metrics-monitoring-and-alerting-system-4.png" alt="Card image cap">
-
-    <h3 class="card-title">Alerting system</h3>
-    <ul>
-      <li>Load config file (which has alert rules) to cache server</li>
-      <li>Alert manager fetches alert configs from the cache</li>
-      <li>Alert manager calls query service at pre-defined interval</li>
-      <li>Alert store is a key-value DB (Ex. Cassandra) that keeps state of all alerts</li>
-      <li>Eligible alerts are inserted into Kafka</li>
-      <li>Alert consumers pull alert events from Kafka</li>
-    </ul>
-
-    <h3 class="card-title">Visualization system</h3>
-    <ul>
-      <li>A high-quality visualization system is hard to build</li>
-      <li>Use product like Grafana</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
@@ -249,52 +193,15 @@
   </divr>
 </div>
 
-<div class="card mb-4" id="metrics-monitoring-and-alerting-system-7">
+<div class="card mb-4" id="metrics-monitoring-and-alerting-system-4">
   <div class="card-body">
-    <h2 class="card-title">Evaluation</h2>
-
-    <h3 class="card-title">Availability</h3>
-    <ul>
-      <li>Replication</li>
-      <ul>
-        <li>Replicate each server and DB</li>
-        <li>Replicate entire components to different zone or geographical region</li>
-      </ul>
-      <li>Fail over</li>
-      <ul>
-        <li></li>
-        <li></li>
-      </ul>
-    </ul>
-
-    <h4 class="card-title">Reliability</h4>
-    <ul>
-      <li>Data loss</li>
-    </ul>
-
-    <h3 class="card-title">Scalability</h3>
-    <ul>
-      <li>Horizontal scaling</li>
-      <li>Data partitioning</li>
-    </ul>
-
-    <h4 class="card-title">Performance</h4>
-    <ul>
-      <li></li>
-      <li></li>
-    </ul>
-    </ul>
-
-    <h3 class="card-title">Consistency</h3>
-    <ul>
-      <li></li>
-    </ul>
+    <h2 class="card-title">Wrap Up</h2>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
   </div>
 </div>
-<!-- Metrics monitoring and alerting system END -->
+<!-- Metrics Monitoring and Alerting System END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->
