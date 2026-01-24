@@ -39,27 +39,22 @@
 <div class="col-md-12">
 <h1 class="my-4">Software Engineering</h1>
 
-<!-- Google maps BEGIN -->
-<div class="card mb-4" id="heap">
+<!-- Google Maps BEGIN -->
+<div class="card mb-4" id="google-maps">
   <div class="card-body">
-    <h2 class="card-title">Google maps</h2>
+    <h2 class="card-title">Google Maps</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#google-maps-1">Requirement</a></li>
-      <li><a href="#google-maps-2">Estimation</a></li>
-      <li><a href="#google-maps-3">High level design</a></li>
-      <li><a href="#google-maps-4">API</a></li>
-      <li><a href="#google-maps-5">Storage schema</a></li>
-      <li><a href="#google-maps-6">Detailed design</a></li>
-      <li><a href="#google-maps-7">Evaluation</a></li>
+      <li><a href="#google-maps-1">Understand the Problem and Establish Design Scope</a></li>
+      <li><a href="#google-maps-2">Propose High-level Diagram and Get Buy-in</a></li>
+      <li><a href="#google-maps-3">Design Deep Dive</a></li>
+      <li><a href="#google-maps-4">Wrap Up</a></li>
     </ul>
   </div>
 </div>
 
 <div class="card mb-4" id="google-maps-1">
   <div class="card-body">
-    <h2 class="card-title">Requirement</h2>
-
-    <h3 class="card-title">Functional</h3>
+    <h2 class="card-title">Understand the Problem and Establish Design Scope</h2>
     <ul>
       <li>How many total users in the system? 1B</li>
       <li>How many daily users in the system? 100M</li>
@@ -72,24 +67,6 @@
       <li>Should the system show the route as user moves? Yes</li>
       <li>Should the system show new route when user deviates from the path? Yes</li>
     </ul>
-
-    <h3 class="card-title">Non-functional</h3>
-    <ul>
-      <li>Availability</li>
-      <li>Reliability</li>
-      <li>Scalability</li>
-      <li>Performance</li>
-      <li>Consistency</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="google-maps-2">
-  <div class="card-body">
-    <h2 class="card-title">Estimation</h2>
 
     <h3 class="card-title">Storage</h3>
     <ul>
@@ -140,187 +117,101 @@
   </div>
 </div>
 
-<div class="card mb-4" id="google-maps-3">
+<div class="card mb-4" id="google-maps-2">
   <div class="card-body">
-    <h2 class="card-title">High level design</h2>
-
-    <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/google-map-1.png" alt="Card image cap">
-
-    <h3 class="card-title">Location service</h3>
+    <h2 class="card-title">Propose High-level Diagram and Get Buy-in</h2>
     <ul>
-      <li>Client sends its location every second</li>
-      <li>Location updates can be buffered on the client and send to the server as a batch every 10-15 seconds</li>
-    </ul>
-
-    <h3 class="card-title">Navigation service</h3>
-    <ul>
-      <li>Find route between two points</li>
-      <li>Runs shortest path algorithm</li>
-      <li>Shows the path on the map for the user</li>
-      <li>Sends updated directions when user deviates from the path</li>
-    </ul>
-
-    <h3 class="card-title">Map rendering</h3>
-    <ul>
-      <li>User fetches new map tile from the server when</li>
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/google-maps-1.png" alt="Card image cap">
+      <li>Location service</li>
       <ul>
-        <li>User is zooming on the map</li>
-        <li>During navigation when user moves out from current tile and moves to nearby tile</li>
+        <li>Client sends its location every second</li>
+        <li>Location updates can be buffered on the client and send to the server as a batch every 10-15 seconds</li>
       </ul>
-      <li>Map tiles are pre-computed at various zoom level</li>
+      <li>Navigation service</li>
       <ul>
-        <li>Each map tile is represented by its geohash</li>
+        <li>Find route between two points</li>
+        <li>Runs shortest path algorithm</li>
+        <li>Shows the path on the map for the user</li>
+        <li>Sends updated directions when user deviates from the path</li>
       </ul>
-      <li>CDN serves as a cache of map tiles</li>
-      <li>Map tile service takes user location and zoom level as inputs and return 9 URLs of tiles</li>
+      <li>Map rendering</li>
       <ul>
-        <li>Return value includes the tile to render and 8 surrounding tiles</li>
-      </ul>
-      <li>User downloads the tiles from CDN</li>
-    </ul>
-
-    <!--
-    <h3 class="card-title">Kafka</h3>
-    <ul>
-      <li>Listens to events and triggers services accordingly</li>
-      <ul>
-        <li>For example, when user deviates from the path, it calls area search service to compute new optimal path</li>
-      </ul>
-      <li>Collections streams of location data for different users</li>
-      <ul>
-        <li>This data is used to understand traffic patterns</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Workflow</h3>
-    <ul>
-      <li>User enters start and end point</li>
-      <li>Current location of user is found by location finder and this can be the start point</li>
-      <li>User request is forwarded to route finder service</li>
-      <li>Route finder forwards requests to area search service</li>
-      <li>Area search service finds the latitude/longitude of start and end location from distributed search</li>
-      <li>Area search service computes the area spanning the two points</li>
-      <li>Graph processing service finds the shortest path and return it to route finder</li>
-      <li>Route finder displays the optimal path to user</li>
-      <li>Nagivator updates user location on the map as user is moving. It also provides directions to user</li>
-      <li>When user deviates from the path, Kafka alerts area search service to recalculate the optimal path</li>
-    </ul> -->
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="google-maps-4">
-  <div class="card-body">
-    <h2 class="card-title">API</h2>
-    <ul>
-      <li><code>curr_location(location)</code></li>
-      <ul>
-        <li>Display current location of user on the map</li>
-        <li><code>location</code></li>
+        <li>User fetches new map tile from the server when</li>
         <ul>
-          <li>Boolean to indicate if user location is turned on or off</li>
-          <li>If off, the service will ask user to turn on the location</li>
+          <li>User is zooming on the map</li>
+          <li>During navigation when user moves out from current tile and moves to nearby tile</li>
+        </ul>
+        <li>Map tiles are pre-computed at various zoom level</li>
+        <ul>
+          <li>Each map tile is represented by its geohash</li>
+        </ul>
+        <li>CDN serves as a cache of map tiles</li>
+        <li>Map tile service takes user location and zoom level as inputs and return 9 URLs of tiles</li>
+        <ul>
+          <li>Return value includes the tile to render and 8 surrounding tiles</li>
+        </ul>
+        <li>User downloads the tiles from CDN</li>
+      </ul>
+      <li>API</li>
+      <ul>
+        <li><code>curr_location(location)</code></li>
+        <ul>
+          <li>Display current location of user on the map</li>
+          <li><code>location</code></li>
+          <ul>
+            <li>Boolean to indicate if user location is turned on or off</li>
+            <li>If off, the service will ask user to turn on the location</li>
+          </ul>
+        </ul>
+        <li><code>find_route(start, end, transport_type)</code></li>
+        <ul>
+          <li>Computes optimal route between two points</li>
+          <li><code>start</code></li>
+          <ul>
+            <li>Start point in text format</li>
+          </ul>
+          <li><code>end</code></li>
+          <ul>
+            <li>Start point in text format</li>
+          </ul>
+        </ul>
+        <li><code>directions(curr_location, steps)</code></li>
+        <ul>
+          <li>Provides alerts of when and where to make turns</li>
         </ul>
       </ul>
-      <li><code>find_route(start, end, transport_type)</code></li>
+      <li>Database</li>
       <ul>
-        <li>Computes optimal route between two points</li>
-        <li><code>start</code></li>
+        <li>Road info</li>
         <ul>
-          <li>Start point in text format</li>
+          <li>Graph data is represented as adjacency list</li>
+          <li>Serialize adjacency lists into binary files</li>
+          <li>Use S3 to store data and cache it on the servers</li>
         </ul>
-        <li><code>end</code></li>
+        <li>User location data</li>
         <ul>
-          <li>Start point in text format</li>
+          <li>Use Cassandra for write-heavy workload and availability over consistency</li>
+          <ul>Schema</ul>
+          <ul>
+            <li>Key - (user_id, timestamp)</li>
+            <li>Value - (latitude, longitude)</li>
+          </ul>
+        </ul>
+        <li>Geocoding DB</li>
+        <ul>
+          <li>Use Redis for read-heavy workload</li>
+          <ul>Schema</ul>
+          <ul>
+            <li>place_id</li>
+            <li>location</li>
+          </ul>
+        </ul>
+        <li>World map</li>
+        <ul>
+          <li>Use S3 and cache it on CDN</li>
         </ul>
       </ul>
-      <li><code>directions(curr_location, steps)</code></li>
-      <ul>
-        <li>Provides alerts of when and where to make turns</li>
-      </ul>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
-  </div>
-</div>
-
-<div class="card mb-4" id="google-maps-5">
-  <div class="card-body">
-    <h2 class="card-title">Storage schema</h2>
-
-    <h3 class="card-title">Road info</h3>
-    <ul>
-      <li>Graph data is represented as adjacency list</li>
-      <li>Serialize adjacency lists into binary files</li>
-      <li>Use S3 to store data and cache it on the servers</li>
-    </ul>
-
-    <h3 class="card-title">User location data</h3>
-    <ul>
-      <li>Use Cassandra for write-heavy workload and availability over consistency</li>
-      <ul>Schema</ul>
-      <ul>
-        <li>Key - (user_id, timestamp)</li>
-        <li>Value - (latitude, longitude)</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Geocoding DB</h3>
-    <ul>
-      <li>Use Redis for read-heavy workload</li>
-      <ul>Schema</ul>
-      <ul>
-        <li>place_id</li>
-        <li>location</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">World map</h3>
-    <ul>
-      <li>Use S3 and cache it on CDN</li>
-    </ul>
-
-    <!-- <h3 class="card-title">Key-value store</h3>
-    <ul>
-      <li>Segment to server</li>
-      <ul>
-        <li>segment_id (int)</li>
-        <li>server_id (int)</li>
-      </ul>
-      <li>Belongs to segment</li>
-      <ul>
-        <li>segment_id (int)</li>
-        <li>coordinates (list) - stores latitude and longitude</li>
-      </ul>
-      <li>Neighbors</li>
-      <ul>
-        <li>segment_id (int)</li>
-        <li>neighbors (list) - stores a list of segment IDs</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Graph DB</h3>
-    <ul>
-      <li>Graph data</li>
-      <ul>
-        <li>segment_id (int)</li>
-        <li>road_network (graph)</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Relational DB</h3>
-    <ul>
-      <li>Rush hour</li>
-      <ul>
-        <li>segment_id (int)</li>
-        <li>edge_id (int)</li>
-        <li>hour_range (tuple)</li>
-        <li>rush_hour (bool) - where there is congestion or not</li>
-      </ul>
-    </ul> -->
+    </ul>    
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
@@ -329,93 +220,46 @@
 
 <div class="card mb-4" id="google-maps-6">
   <div class="card-body">
-    <h2 class="card-title">Detailed design</h2>
-
-    <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/google-map-2.png" alt="Card image cap">
-
-    <h3 class="card-title">Location service</h3>
+    <h2 class="card-title">Design Deep Dive</h2>
     <ul>
-      <li>Other services consume location data from Kafka</li>
-    </ul>
-
-    <h3 class="card-title">Map rendering</h3>
-    <ul>
-      <li>WebGL - instead of sending images over network, send vectors (paths and polygons)</li>
-      <li>Compressed vector data is much smaller than compressed images</li>
-      <li>Zooming experience is much better with vectors</li>
-    </ul>
-
-    <img class="img-fluid" class="card-img-top" src="/system-design/image/ref-sd-2/google-map-3.png" alt="Card image cap">
-
-    <h3 class="card-title">Navigation service</h3>
-    <ul>
-      <li>Geocoding service</li>
+      <li>Location service</li>
       <ul>
-        <li>Converts location name to lat/long pair</li>
+        <li>Other services consume location data from Kafka</li>
       </ul>
-      <li>Routing planner service</li>
+      <li>Map rendering</li>
       <ul>
-        <li>Computes suggested routes using other services</li>
+        <li>WebGL - instead of sending images over network, send vectors (paths and polygons)</li>
+        <li>Compressed vector data is much smaller than compressed images</li>
+        <li>Zooming experience is much better with vectors</li>
       </ul>
-      <li>Shortest path service</li>
+      <li>Navigation service</li>
       <ul>
-        <li>Returns top k shortest paths without considering traffic or current conditions</li>
-      </ul>
-      <li>ETA service</li>
-      <ul>
-        <li>Computes ETA for each route using ML from current traffic and historical data</li>
-      </ul>
-      <li>Ranker</li>
-      <ul>
-        <li>Applies filters defined by user like avoid tolls or highways</li>
-      </ul>
-      <li>Traffic update service</li>
-      <ul>
-        <li>Updates traffic DB so that ETA service can compute accurate estimates</li>
+        <li>Geocoding service</li>
+        <ul>
+          <li>Converts location name to lat/long pair</li>
+        </ul>
+        <li>Routing planner service</li>
+        <ul>
+          <li>Computes suggested routes using other services</li>
+        </ul>
+        <li>Shortest path service</li>
+        <ul>
+          <li>Returns top k shortest paths without considering traffic or current conditions</li>
+        </ul>
+        <li>ETA service</li>
+        <ul>
+          <li>Computes ETA for each route using ML from current traffic and historical data</li>
+        </ul>
+        <li>Ranker</li>
+        <ul>
+          <li>Applies filters defined by user like avoid tolls or highways</li>
+        </ul>
+        <li>Traffic update service</li>
+        <ul>
+          <li>Updates traffic DB so that ETA service can compute accurate estimates</li>
+        </ul>
       </ul>
     </ul>
-
-    <!-- <h3 class="card-title">Add segment</h3>
-    <ul>
-      <li>Each segment has its lat/long boundary coordinates and the graph of road network</li>
-      <li>Segment adder assigns unique ID to each segment</li>
-      <li>Segment adder forwards segment information to server allocator</li>
-      <li>Server allocator maps segment to server, hosts the graph on the server, and returns server ID</li>
-      <li>Segment adder stores segment to server mapping in key-value store. It also stores segment's lat/long boundary coordinates</li>
-    </ul>
-
-    <h3 class="card-title">Handle user request</h3>
-    <ul>
-      <li>User provides source and destination</li>
-      <li>Distributed search finds lat/long coordicates of source and destination</li>
-      <li>Graph processing service finds the segment from lat/long coordicates</li>
-      <li>Graph processing service finds the server hosting the graph using segment ID</li>
-      <li>Graph processing service runs shortest path algorithm</li>
-    </ul> -->
-
-    <!-- <h3 class="card-title">Improve estimations using live data</h3>
-    <ul>
-      <li>Websocker provides persistent connection between user devices and the servers</li>
-      <li>Load balancer balances the connection load</li>
-      <li>Kafka collects location data from all servers</li>
-      <li>Data analytics engine uses ML to improve ETA. Then, it publishes result to pub-sub topic</li>
-      <li>Map update service listens for updates and updates segment graph</li>
-      <li>Graph preprocessing service recalculates the new paths on the updated segment graph</li>
-    </ul>
-
-    <h3 class="card-title">Sub-graphs (Segment)</h3>
-    <ul>
-      <li>Computing distances between two points on the entire graph is super expensive</li>
-      <li>Precalculate the shortest distance between two points in sub-graphs. Also, cache most requested routes</li>
-      <li>Connect sub-graphs and run the shortest distance algorithm</li>
-    </ul>
-
-    <h3 class="card-title">Segment adder</h3>
-    <ul>
-      <li>Segment adder assigns unique ID to each segment</li>
-      <li>Segment is assigned to a server and segment adder gets the server_id</li>
-      <li>Key-value store keeps the segment to server mapping</li>
-    </ul> -->
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
@@ -424,51 +268,13 @@
 
 <div class="card mb-4" id="google-maps-7">
   <div class="card-body">
-    <h2 class="card-title">Evaluation</h2>
-
-    <h3 class="card-title">Availability</h3>
-    <ul>
-      <li>Replication</li>
-      <ul>
-        <li>Replicate each server and DB</li>
-      </ul>
-      <li>Fail over</li>
-      <ul>
-        <li>Active sends heartbeat to passive periodically</li>
-        <li>When heartbeat stops, passive takes over active's IP</li>
-      </ul>
-    </ul>
-
-    <h4 class="card-title">Reliability</h4>
-    <ul>
-      <li>Data loss</li>
-      <ul>
-        <li>Replicate entire components to different zone or geographical region</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Scalability</h3>
-    <ul>
-      <li>Horizontal scaling</li>
-      <li>Data partitioning</li>
-    </ul>
-
-    <h4 class="card-title">Performance</h4>
-    <ul>
-      <li>Use of sub-graphs make computation faster than using entire graph</li>
-      <li>Cache processed sub-graphs</li>
-    </ul>
-
-    <h3 class="card-title">Consistency</h3>
-    <ul>
-      <li></li>
-    </ul>
+    <h2 class="card-title">Wrap Up</h2>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
   </div>
 </div>
-<!-- Google maps END -->
+<!-- Google Maps END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->
