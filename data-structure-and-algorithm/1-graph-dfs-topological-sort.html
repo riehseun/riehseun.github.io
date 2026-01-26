@@ -217,59 +217,60 @@
   <div class="card-body">
     <h2 class="card-title">Alien Dictionary (75/150)</h2>
 
-<pre><code class="python"># Compare two adjacent words at a time
-        # Only the first difference in char tells the ordering
-        #   If second word is prefix of first word, return ""
-        # Construct a graph based on the ordering
-        #   Letters than don't appear in the graph are not subject to
-        #   ordering, thus can go anywhere in the output
-        #   If there is cycle, return ""
-        # Then, topological sort
-        # Time O(c), c = all character in words
-        # Space O(1)
+<pre><code class="python">class Solution:
+    def foreignDictionary(self, words: List[str]) -> str:
 
-        all_chars = set()
-        for word in words:
-            for char in word:
-                all_chars.add(char)
+        # [a, b] ? ab
+        # [ab, ac] ? bc
+
+        # Construct graph based on ordering
+        # Time O(c) c = total number of chars in words 
+        # Topological sort  
+        # Time O(n+m) n = number of nodes, m = number of edges
+        # Space O(n) = O(1) 26 chars in alphabet
+
+        graph, indegree, nodes = defaultdict(set), defaultdict(int), set()
         
-        graph, indegree = defaultdict(set), defaultdict(int)
-
-        # Time O(c)
-        # Space O(c) 
         for i in range(len(words)-1):
-            # If second word is prefix of first word, 
-            # it is not valid ordering
-            if words[i].startswith(words[i+1]) and len(words[i]) > len(words[i+1]):
-                return "" 
-            for c1, c2 in zip(words[i], words[i+1]):
-                if c1 != c2:
-                    graph[c1].add(c2)
-                    break
+            # If next word is prefix of current word, False
+            if words[i].startswith(words[i+1]) \
+                and len(words[i]) > len(words[i+1]):
+                return ""
+            j = 0
+            while j < len(words[i]) and j < len(words[i+1]):
+                if words[i][j] == words[i+1][j]:
+                    j += 1
+                    continue
+                graph[words[i][j]].add(words[i+1][j])
+                break
 
         for key, val in graph.items():
             for c in val:
                 indegree[c] += 1
 
-        queue, order = deque(), ""
-        for c in all_chars:
+        for i in range(len(words)):
+            for c in words[i]:
+                nodes.add(c)
+
+        queue = deque()
+        for c in nodes:
             if indegree[c] == 0:
                 queue.append(c)
-
+        
+        result = []
         while queue:
             node = queue.popleft()
-            order += node
-
+            result.append(node)
             for next_node in graph[node]:
                 indegree[next_node] -= 1
                 if indegree[next_node] == 0:
                     queue.append(next_node)
-
+        
+        # If cycle, False
         for key, val in indegree.items():
             if val > 0:
                 return ""
-
-        return order</code></pre>
+        return "".join(result)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/alien-dictionary">269. Alien Dictionary</a> | <a href="https://neetcode.io/problems/foreign-dictionary">Alien Dictionary</a>
