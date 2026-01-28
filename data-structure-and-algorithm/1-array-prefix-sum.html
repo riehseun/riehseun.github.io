@@ -124,34 +124,32 @@
 <pre><code class="python">class Solution:
     def maxProduct(self, nums: List[int]) -> int:
 
-        # nums = [] => Invalid
-        # nums = [1] => 1
-        # nums = [2,0,3] => 3
-        # nums = [-1,0,-2] => 0
+        # [1,2,3,4] ? 24 [1,2,3,4]
+        # [1,2,-3,4] ? 4 [4]
+        # [-1,-2] ? 2 [2]
 
-        # Interate nums and compute product
+        # Prefix product
+        # Remember lastest product
         # Reset product to 1 when seeing 0
-        # Do this twice - forward and backward
+        # Do this both in forward and backward
         # Time O(n) n = len(nums)
         # Space O(1)
 
-        n = len(nums)
-        largest, product = -math.inf, 1
+        largest_prod, prefix_prod, n = -math.inf, 1, len(nums)
+        for i in range(n):
+            prefix_prod *= nums[i]
+            largest_prod = max(largest_prod, prefix_prod)
+            if prefix_prod == 0:
+                prefix_prod = 1
 
-        for num in nums:
-            product *= num
-            largest = max(largest, product)
-            if product == 0:
-                product = 1
-
-        product = 1
+        prefix_prod = 1
         for i in range(n-1, -1, -1):
-            product *= nums[i]
-            largest = max(largest, product)
-            if product == 0:
-                product = 1
+            prefix_prod *= nums[i]
+            largest_prod = max(largest_prod, prefix_prod)
+            if prefix_prod == 0:
+                prefix_prod = 1
 
-        return largest</code></pre>
+        return largest_prod</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/maximum-product-subarray">152. Maximum Product Subarray</a> | <a href="https://neetcode.io/problems/maximum-product-subarray">Maximum Product Subarray</a>
