@@ -311,32 +311,27 @@
 <pre><code class="python">class Solution:
     def coinChange(self, coins: List[int], amount: int) -> int:
 
-        # coins = [], amount = 1 => Invalid
-        # coins = [1], amount = 2 => 2 (1+1)
-        # coins = [2], amount = 3 => -1
+        # [1,2], 3 ? 2 ([1,2])
+        # [1,2], 4 ? 2 ([2,2])
 
-        # DP
-        # dp[i] = fewest number of coins to create i
+        # dp[i] = min number of coins to make up amount i
+        # dp[i] = min(dp[i-c1]+1, dp[i-c2]+1, ...) for all c in coins
         # dp[0] = 0
-        # dp[1] = min(dp[1-j]+1) for j in coins 
-        # dp[2] = min(dp[2-j]+1) for j in coins
-        # Time O(n) n = amount
+        # Time O(nm) n = amount, m = len(coins)
         # Space O(n)
 
-        n = amount
+        n, m = amount, len(coins)
         dp = [0 for _ in range(n+1)]
-        dp[0] = 0
 
         for i in range(1, n+1):
-            min_num = math.inf
+            cnt = math.inf
             for j in coins:
                 if i - j >= 0:
-                    min_num = min(min_num, dp[i-j]+1)
-            dp[i] = min_num
+                    cnt = min(cnt, dp[i-j])
+            dp[i] = cnt + 1
 
         if dp[n] == math.inf:
             return -1
-            
         return dp[n]</code></pre>
   </div>
   <div class="card-footer text-muted">
