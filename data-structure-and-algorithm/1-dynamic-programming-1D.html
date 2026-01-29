@@ -134,14 +134,15 @@
 
 <pre><code class="python">class Solution:
     def wordBreak(self, s: str, wordDict: List[str]) -> bool:
-
-        # s = ["ab"], wordDict = ["a", "b"] => True
-        # s = [], wordDict = [] => Invalid
-        # s = ["a"], wordDict = [] => Invalid
-        # s = ["abc"], wordDict = ["a", "b"] => False
+        
+        # applepie, [apple, pie] ? True
+        # applepie, [app, pie] ? False
+        # piepie, [app, pie] ? True
 
         # DP
-        # dp[i] = whether s[i] can be constructed by wordDict
+        # dp[i] = whether s[i] can be constructed from wordDict
+        # dp[i] = True if dp[i-len(w)] == True for all w in wordDict 
+        # dp[0] = True
         # Time O(nm) n = len(s), m = len(wordDict)
         # Space O(n)
 
@@ -149,13 +150,9 @@
         dp = [False for _ in range(n+1)]
         dp[0] = True
 
-        for i in range(1, n+1):
-            for word in wordDict:
-                m = len(word)
-
-                if i - m >= 0 \
-                    and s[i-m:i] == word \
-                    and dp[i-m]: 
+        for i in range(1,n+1):
+            for w in wordDict:
+                if i - len(w) >= 0 and dp[i-len(w)] and s[i-len(w):i] == w:
                     dp[i] = True
 
         return dp[n]</code></pre>
