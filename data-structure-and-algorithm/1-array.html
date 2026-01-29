@@ -345,36 +345,32 @@
 
 <pre><code class="python">class Solution:
     def lengthOfLIS(self, nums: List[int]) -> int:
+        
+        # [1,2,4,3,5] ? 4 (1,2,3,5)
+        # [1,2,4,7,2,3,5] ? 4 (1,2,4,7), (1,2,3,5)
+        # [1,7,8,9,2,3,4,5] ? 5 (1,2,3,4,5)
 
-        # nums = [5,1,2,4,3] => 3
-        # nums = [1] => 1
-        # nums = [] => Invalid
-
-        # nums = [5,1,2,4,3]
-        # Take 5? yes => [5]
-        # Take 1? Replace 5 with 1 => [1]
-        # Take 2? yes => [1,2]
-        # Take 4? yes => [1,2,4]
-        # Take 3? Repalce 4 with 3 => [1,2,3]
-
-        # If incoming num > seq[-1], append
-        # Else find first num >= incoming num, then replace
+        # Start appending nums into result
+        # If incoming num > last num in result, append
+        # Else, find first num from beginning that is >= incoming num
+        #   and replace
+        # Always remember max size of result
         # Time O(n**2) n = len(nums)
         # Space O(n)
 
-        seq, longest = [], 0
+        max_len, result = 0, []
 
         for num in nums:
-            if not seq or num > seq[-1]:
-                seq.append(num)
-                longest = max(longest, len(seq))
+            if not result or result[-1] < num:
+                result.append(num)
             else:
-                for i in range(len(seq)):
-                    if seq[i] >= num:
-                        seq[i] = num
+                for i in range(len(result)):
+                    if result[i] >= num:
+                        result[i] = num
                         break
+            max_len = max(max_len, len(result))
 
-        return longest</code></pre>
+        return max_len</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/longest-increasing-subsequence">300. Longest Increasing Subsequence</a> | <a href="https://neetcode.io/problems/longest-increasing-subsequence">Longest Increasing Subsequence</a>
