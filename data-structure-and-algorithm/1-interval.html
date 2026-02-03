@@ -132,31 +132,40 @@
   <div class="card-body">
     <h2 class="card-title">Meeting Rooms (75/150)</h2>
 
-<pre><code class="python">class Solution:
-    def canAttendMeetings(self, intervals: List[List[int]]) -> bool:
-        
-        # intervals = [(0,1),(1,2)] => True
-        # intervals = [] => True
+<pre><code class="python">"""
+Definition of Interval:
+class Interval(object):
+    def __init__(self, start, end):
+        self.start = start
+        self.end = end
+"""
 
-        # Soft by start time
-        # Check if there is overlap
+class Solution:
+    def canAttendMeetings(self, intervals: List[Interval]) -> bool:
+
+        # (1,2), (2,3) ? True
+        # (1,2), (1,3) ? False
+
+        # Find overlapping interval
+        # Sort by start time
         # Time O(nlogn) n = len(intervals)
         # Space O(1)
 
         if not intervals:
             return True
 
+        # intervals_array = []
+        # for interval in intervals:
+            # intervals_array.append([interval.start, interval.end])
+        # intervals = intervals_array
         intervals.sort(key=lambda x: x[0])
-        result = []
-        result.append(intervals[0])
+        last_interval = intervals[0]
 
-        for c, d in intervals[1:]:
-            a, b = result[-1]
-            if b > c:
+        for a, b in intervals[1:]:
+            c, d = last_interval
+            if a < d:
                 return False
-            else:
-                result.pop()
-                result.append([c,d])
+            last_interval = [a, b]
 
         return True</code></pre>
   </div>
@@ -211,7 +220,7 @@
         # Find number of overlapping intervals
         # Sort intervals by start time
         # Remove intervals with bigger end time
-        # Time O(n) n = len(intervals)
+        # Time O(nlogn) n = len(intervals)
         # Space O(1)
 
         intervals.sort(key=lambda x: x[0])
