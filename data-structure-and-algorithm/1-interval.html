@@ -178,29 +178,45 @@ class Solution:
   <div class="card-body">
     <h2 class="card-title">Meeting Rooms II (75/150)</h2>
 
-<pre><code class="python">class Solution:
-    def minMeetingRooms(self, intervals: List[List[int]]) -> int:
+<pre><code class="python">"""
+Definition of Interval:
+class Interval(object):
+    def __init__(self, start, end):
+        self.start = start
+        self.end = end
+"""
 
-        # intervals = [(0,1),(1,2)] => 1
-        # intervals = [] => 0
+class Solution:
+    def minMeetingRooms(self, intervals: List[Interval]) -> int:
 
-        # Soft by start time
-        # Insert first meeting (only ending time) into min heap
-        # If next meeting starts after first meeting, replace first meeting
-        # with second meeting in min heap
-        # Else, insert second meeting into min heap
+        # (1,2), (2,3), (2,4) ? 2
+
+        # Sort by start time
+        # Insert first meeting into heap
+        # If a meeting does not conflict with top of heap, 
+        # Replace first meeting with second
+        # Else, Insert second meeting into heap
+        # Keep meeting that end earlest at top of heap
         # Time O(nlogn) n = len(intervals)
         # Space O(n)
 
+        if not intervals:
+            return 0
+
+        # intervals_array = []
+        # for interval in intervals:
+            # intervals_array.append([interval.start, interval.end])
+        # intervals = intervals_array
+
         intervals.sort(key=lambda x: x[0])
-        min_heap = []
-        heappush(min_heap, intervals[0][1])
-
-        for interval in intervals[1:]:
-            if min_heap[0] <= interval[0]:
-                heappop(min_heap)
-            heappush(min_heap, interval[1])
-
+        min_heap = [[intervals[0][1], intervals[0][0]]]
+        
+        for a, b in intervals[1:]:
+            d, c = min_heap[0]
+            if a >= d:
+                heappop(min_heap)    
+            heappush(min_heap, [b, a])
+                
         return len(min_heap)</code></pre>
   </div>
   <div class="card-footer text-muted">
