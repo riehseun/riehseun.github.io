@@ -205,26 +205,28 @@
 
 <pre><code class="python">class Solution:
     def eraseOverlapIntervals(self, intervals: List[List[int]]) -> int:
-        
-        # intervals = [[1,2], [3,4]] => 0
-        
-        # Sort by start time
-        # Find overlaps, remove interval with larger end time
-        # Time O(nlogn) n = len(intervals)
+
+        # [1,2],[2,3],[3,4] ? 2
+
+        # Find number of overlapping intervals
+        # Sort intervals by start time
+        # Remove intervals with bigger end time
+        # Time O(n) n = len(intervals)
         # Space O(1)
 
         intervals.sort(key=lambda x: x[0])
-        count = 0
-        end = intervals[0][1]
+        last_interval = intervals[0]
+        cnt = 0
 
-        for c, d in intervals[1:]:
-            if c < end:
-                end = min(end, d)
-                count += 1
+        for a, b in intervals[1:]:
+            c, d = last_interval
+            if a < d:
+                last_interval = [min(a,c), min(b,d)]
+                cnt += 1
             else:
-                end = d
+                last_interval = [a, b]
             
-        return count</code></pre>
+        return cnt</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/non-overlapping-intervals">435. Non-overlapping Intervals</a> | <a href="https://neetcode.io/problems/non-overlapping-intervals">Non overlapping Intervals</a>
