@@ -53,6 +53,10 @@
   <div class="card-body">
     <h2 class="card-title">Feed Recommendation</h2>
 
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/1-1-1.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/1-1-2.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/1-1-3.png" alt="Card image cap">
+
 <pre><code class="markdown">
 # Requirement and Problem
 
@@ -80,15 +84,16 @@ Problem - supervised ranking
 
 # Data and Feature Engineering
 
-Data model
+## Data Model
 User, Post, UserPostInteraction, Comment, UserFollower, Image, Video
 View - how to determine if users viewed the post? If user spent more than 2 seconds 
 
-Features
+## Features
 User direct interaction with post - like, share, comment, view
 Post features - number of likes, shares, comments, view, text, text language, image, video
 Author features - historical popularity of posts uploaded by the author, whether author is followed by the user
 
+## Feature Engineering
 Numerical (number of likes, shares, comments, etc) - Standardize (mean 0, variance 1)
 Categorical Dense (Age, Gender) - one-hot
 Categorical Sparse (User ID, Post ID) - Embedding to learn
@@ -98,18 +103,18 @@ Video - video encoder like CLIP
   
 # Model Development
 
-Baseline
+## Baseline
 Heuristics - rank posts by total number of direct interaction (like, share, comment)
 Logistic regression - binary classification on whether users will like/share/comment/view post or not
 
-Architecture
+## Architecture
 Collaborative filtering - user-post historical interaction only
 Content-based filtering - uses post features
 First generate 10k candidates using collaborative filtering
 If user-post interaction is missing, use popular posts for start
 Then, generate 1k candidates using content-based filtering (model)
  
-Training
+## Training
 Ground truth
 Positive if user performs direct interaction (like, share, comment, etc)
 Positive if user spends more than 2 seconds to view the post 
@@ -122,24 +127,20 @@ How to define relevance? Weighted score of probabilities of view, like, share, c
 
 # Inference and Evaluation
 
-Candidate generation can happen offline just using user’s batch features
+Candidate generation can happen offline just using user's and post's batch features, user-user and post-post simiarity is computed along with user-post historical interactions to generate candidates 
 Scoring service sends pre-generated candidates to model, to get scores
 
-Offline eval
+## Offline eval
 Candidate generation - recall to measure percentage of actual relevant posts that it could retrieve
 Scoring - recall
 Ranking - precision to measure percentage of relevant posts in the feed shown to user 
 Overall - NDCG
 
-Online eval
+## Online eval
 Click-through rate
 Average amount of time that users spend in the app
 Amount of user’s direct engagement (like, share, etc)
 </code></pre>
-
-    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/1-1-1.png" alt="Card image cap">
-    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/1-1-2.png" alt="Card image cap">
-    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/1-1-3.png" alt="Card image cap">
   </div>
   <div class="card-footer text-muted">
     Reference: 
