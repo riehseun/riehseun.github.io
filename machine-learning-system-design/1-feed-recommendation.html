@@ -51,95 +51,95 @@
 
 <div class="card mb-4" id="feed-recommendation-">
   <div class="card-body">
-    <h2 class="card-title">Feed recommendation</h2>
+    <h2 class="card-title">Feed Recommendation</h2>
 
 <pre><code class="markdown">
-Requirement and problem
+# Requirement and Problem
 
-Business
-  What is the purpose of system? Display a list of videos to user
-  Should videos be personalized for each user? Yes - #1
-  Should the system support multiple language? No
-Data
-  Is labeled data available? No
-  Can user interaction data be used for training? Yes - #2
-Contraint
-  How many users are there? 1B
-  How many daily active users are there? 100M
-  How many videos are there? 10B
-  Should model be continously trained? Yes - #3 (if time)
-  How fast should the inference be? Under 200ms - #4 (if time)
-Problem - ranking problem
-Input - a user
-Output - ranked list of video by probability of user clicking it
+What kind of feed is this? Instagram Feed
+What is the goal of the system? Increasing user engagement? Yes
+How is user engagement measured? User likes, shares, views, comments? Yes
+What does a feed consist of? Text, Image, Video
+Can users follow each other? Yes
+Should videos be personalized for each user? Yes
+Should the system support multiple language? No
 
-High-level design
+Should the system generate training data from user interaction? Yes
+How many users are there? 1B total, 100M daily
+How many posts do each user upload on average? 1 per day
+How many posts do each user view on average? 100 per day
 
-Data and feature engineering
+How fast should the feed be generated? Under 200ms
+Should the model be deployed to mobile devices? Up to you
 
-Data
-  User
-  Video
-  User-video interaction
-Feature
-  User geo location - people in different language and culture are interested in different videos
-  User age/gender/ethnicity - people under different groups... (Can't be used if bias/fairness is problem)
-  Video duration - length of videos are related to video quality
-  Video number of likes/shares/comments - popular videos might be better in quality
-  Whether current user liked/shared/commented video - if current user directly interacted with video, likely that user is very interested in it
-Engineering
-  Numerical such as geo location, duration, number of likes, etc - standardize (scale and normalize)
-  Categorical (low-cardinality) such as age, gender - one-hot encoding
-  Categorical (high-cardinality) such as ethnicity - learnable embedding
-  Text such as comments - BERT embedding
-  Video such as video itself - CLIP video encoder embedding  
+Input - user
+Output - list of posts ranked by relevance to user
+Problem - supervised ranking
 
-Model development
+# High-Level Design
+
+# Data and Feature Engineering
+
+Data model
+User, Post, UserPostInteraction, Comment, UserFollower, Image, Video
+View - how to determine if users viewed the post? If user spent more than 2 seconds 
+
+Features
+User direct interaction with post - like, share, comment, view
+Post features - number of likes, shares, comments, view, text, text language, image, video
+Author features - historical popularity of posts uploaded by the author, whether author is followed by the user
+
+Numerical (number of likes, shares, comments, etc) - Standardize (mean 0, variance 1)
+Categorical Dense (Age, Gender) - one-hot
+Categorical Sparse (User ID, Post ID) - Embedding to learn
+Text - encoder only model like BERT
+Image - image encoder like CLIP
+Video - video encoder like CLIP
+  
+# Model Development
 
 Baseline
-  Heuristics - show vidoes by number of total likes
-  Logistic regression to determine if user will click a video or not (Binary classification)
-Model
-  Ensembles
-    Classification to determine whether user will click video or not
-    Difficult to deal with text, video feature
-  Matrix factorization
-    Learn both user and video embedding based on historical user-video interaction
-    Does not utilize user and video features, thus performance is low
-  Neural network
-    Learn both user and video embedding
-    Uses both user and video features
-    Constrct cost function such that dot product between user and video embedding is close 1 if there is interaction and 0 otherwise
+Heuristics - rank posts by total number of direct interaction (like, share, comment)
+Logistic regression - binary classification on whether users will like/share/comment/view post or not
+
+Architecture
+Collaborative filtering - user-post historical interaction only
+Content-based filtering - uses post features
+First generate 10k candidates using collaborative filtering
+If user-post interaction is missing, use popular posts for start
+Then, generate 1k candidates using content-based filtering (model)
+ 
+Training
 Ground truth
-  Explict interaction - like/comment/share
-  Implicit interaction - watch time greater than x%
-Data split
-  Training set - 56% of data before date x, use implicit interaction as much as possible
-  Validation set - 24 % of data before date x, use implicit interaction as much as possible
-  Test set - 20% of data after date x, use direct interaction as much as possible
-Data imbalance
-  Undersample negative examples  
+Positive if user performs direct interaction (like, share, comment, etc)
+Positive if user spends more than 2 seconds to view the post 
+Negative o/w
 
-Inference and evaluation
+Binary classification
+Loss - cross-entropy (log-loss) - 1 if post is relevant to user, 0 o/w
+Take dot product between post and user embedding
+How to define relevance? Weighted score of probabilities of view, like, share, comment
 
-Sampling
-  Out of 100 videos, sample from the top in the ranking
-  Skip similar video (videos are similar if their embedding distance is lower than some value)
-  Skip videos that were previously recommended to user (Give penality to videos if recommended previous to current user)
-Offline metric
-  Candidate generation - recall
-  Ranking - recall
-  Re-ranking - precision
-  Overall - NDCG
-Online metric
-  Number of clicks over number of impressions
-  Total video watch time
+# Inference and Evaluation
+
+Candidate generation can happen offline just using user’s batch features
+Scoring service sends pre-generated candidates to model, to get scores
+
+Offline eval
+Candidate generation - recall to measure percentage of actual relevant posts that it could retrieve
+Scoring - recall
+Ranking - precision to measure percentage of relevant posts in the feed shown to user 
+Overall - NDCG
+
+Online eval
+Click-through rate
+Average amount of time that users spend in the app
+Amount of user’s direct engagement (like, share, etc)
 </code></pre>
 
-    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/feed-recommendation-1.png" alt="Card image cap">
-
-    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/feed-recommendation-2.png" alt="Card image cap">
-
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/1-1-1.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/1-1-2.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/1-1-3.png" alt="Card image cap">
   </div>
   <div class="card-footer text-muted">
     Reference: 
