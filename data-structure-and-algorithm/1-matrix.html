@@ -103,24 +103,24 @@
 
 <pre><code class="python">class Solution:
     def rotate(self, matrix: List[List[int]]) -> None:
-        """
-        Do not return anything, modify matrix in-place instead.
-        """
-
-        # First, reverse up and down
-        # Second, swap i and j
+        
+        # [1,2],[3,4] ? [3,1],[4,2]
+        
+        # (0,0) (0,1)    (1,0) (0,0)
+        # (1,0) (1,1) => (1,1),(0,1)
+        # [1,2],[3,4] => [3,4],[1,2] 
+        # Flip matrix horizontally
+        # Then, swap row and col coordinate
         # Time O(nm) n = number of rows, m = number of cols
         # Space O(1)
 
-        i, j = 0, len(matrix) - 1
-        
-        while i < j:
-            matrix[i], matrix[j] = matrix[j], matrix[i]
-            i += 1
-            j -= 1
+        n, m = len(matrix), len(matrix[0])
 
-        for i in range(len(matrix)):
-            for j in range(i+1, len(matrix[0])):
+        for i in range(n//2):
+            matrix[i], matrix[n-1-i] = matrix[n-1-i], matrix[i]
+
+        for i in range(n):
+            for j in range(i+1, m):
                 matrix[i][j], matrix[j][i] = matrix[j][i], matrix[i][j]</code></pre>
   </div>
   <div class="card-footer text-muted">
@@ -135,40 +135,33 @@
 <pre><code class="python">class Solution:
     def spiralOrder(self, matrix: List[List[int]]) -> List[int]:
 
-        # Remove rows and columns from the matrix while moving spiral
-        # The order is
-        #   Remove first row
-        #   Remove last col
-        #   Remove last row
-        #   Remove first col
-        # Repeat
-        # Time O(nm) n = number of rows, m = number of columns
-        # Space O(1) Ignoring space for result
+        # [1,2],[3,4] ? 1 2 4 3
+
+        # First row, last col, last row, first col
+        # Second row, second last col, second last row,...
+        # Time O(nm) n = number of rows, m = number of cols
+        # Space O(1) ignoring space for result
 
         result = []
 
         while matrix:
-            nums = matrix.pop(0)  # Remove first row
-            result += nums
-
-            if matrix and matrix[0]:
-                for row in matrix:
-                    num = row.pop()  # Remove last col
-                    result += [num]
+            
+            row = matrix.pop(0)
+            for num in row:
+                result.append(num)
+            
+            for i in range(len(matrix)):
+                if matrix[i]:
+                    result.append(matrix[i].pop())
 
             if matrix:
-                nums = matrix.pop()  # Remove last row
-                # Ensure the order that numbers are appended to the result
-                nums.reverse()
-                result += nums
+                row = matrix.pop()
+                for j in range(len(row)-1, -1, -1):
+                    result.append(row[j])
 
-            if matrix and matrix[0]:
-                # Ensure the order that numbers are appended to the result
-                matrix_copy = matrix.copy()
-                matrix_copy.reverse()
-                for row in matrix_copy:
-                    num = row.pop(0)  # Remove first col
-                    result += [num]
+            for i in range(len(matrix)-1, -1, -1):
+                if matrix[i]:
+                    result.append(matrix[i].pop(0))
 
         return result</code></pre>
   </div>
