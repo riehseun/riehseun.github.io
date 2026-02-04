@@ -49,86 +49,76 @@
   </div>
 </div>
 
-<div class="card mb-4" id="product-search-">
+<div class="card mb-4" id="harmful-content-detection-">
   <div class="card-body">
-    <h2 class="card-title">Product search</h2>
+    <h2 class="card-title">Harmful Content Detection</h2>
+
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/2-1-1.png" alt="Card image cap">
 
     <pre><code class="markdown">
-Requirement and problem
+# Requirement and Problem
 
-Business
-  What is purpose of the system?
-  Where do potentially harmful content exist?
-  How do harmful content get created?
-  Should the system remove harmful content in the existing feed? yes - #1
-  What does feed consist of?
-  Should the system support multiple languages?
-  What is defintion of harmful content? Violence, nude, hate, etc - #2
-Data
-  Is labeled dataset available? No
-  Should the system use user reports on harmful content? yes - #2
-Constraint
-  Should the model be deployed to mobile device?
-  Should the model be continuously trained? yes - #3 (if time)
-  How fast should the inference be? under 200ms - #4 (if time)
-Problem
-Input
-Output
+Where does potentially harmful content exist? Instagram feed
+What is considered as harmful post? Posts with violent or hate text, nude images and videos
+Should the system tell author why content was removed? Yes
+Can users report post as harmful? Yes
+Should the system support multiple languages? No
 
-High-level design
+How many posts does each user create? 1 per day
+Is there training data available? Yes, 100M pairs of posts and 1/0 indicating violence/hate/nude or not
+How fast should harmful contents be removed? As soon as possible
+Should model be deployed to user device? No
 
-Data and feature engineering
+Input - post
+Output - whether post is harmful or not
+Problem - binary classification 
 
-Data
-  User
-  Feed
-  Image
-  Video
-Feature
-  User - history of posting harmful contents, number of reports received
-  Text - hate speech, promoting violence, inappropriate words
-  Image - inappropriate visuals
-  Video - inappropriate visuals
-Engineering
-  Numerical - standarize (scale and normalize)
-  Text - BERT
-  Image - CLIP
-  Video - CLIP
+# High-Level Design
 
-Model development
+# Data and Feature Engineering
 
-Baseline
-  Logistic regression - binary classification to determine whether a post in harmful or not
-Model
-  Ensemble - cannot handle text, image, video well
-  Neural network - blackbox, lots of dataprep, but best choice
-    Loss - cross-entropy (binary classification)
-Training data
-  Human label - expensive but accurate
-  User reports - inexpensive but noisy
-Data spilt
-  Splitting by time makes sence because languages associated with violence, hate changes with time
-  56% - training set
-  24% - dev set
-  20% - test set
-Imbalanced dataset
-  Most examples will be negative, thus undersample
+## Data model
+Post
+UserPostInteraction
 
-Inference and evaluation
+## Features
+Text
+Image
+Video
+Number of reports, likes, comment, share, etc
+Comments
+Author’s violation history
+Date of author’s account creation
 
-Sampling
-  N/A
-Offline metrics
-  Recall - how many actual harmful content can the model retrieve?
-  Precision - how accurate are the identified harmful contents
-  PR curve - precision vs recall
-Online metric
-  Number of user reports
+## Feature engineering
+Text - BERT
+Image/Video - CLIP
+Numerical - Standardize (Mean 0, Var 1)
+Date - convert to numerical (For example, number of days since a fixed date) 
+
+# Model Development
+
+## Baseline
+Heuristics - just use number of reports
+Logistic regression - binary classification to determine whether a post in harmful or not
+
+## Architecture
+Separate model for violence/hate/nude - lots of training data needed, training cost
+Create one model but with different classification heads for violence/hate/nude
+
+## Training
+Data - use human labelling and user reports
+Loss - compute individual loss for violence/hate/nude, then create weighted sum of those losses
+Binary classification  - use cross-entropy (log-loss)  
+
+# Inference and Evaluation
+
+## Offline
+Recall - percentage of actual harmful content that the model was able to retrieve
+
+## Online
+Decrease in number of user reports  
 </code></pre>
-
-    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/harmful-content-detection-1.png" alt="Card image cap">
-
-    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/harmful-content-detection-2.png" alt="Card image cap">
   </div>
   <div class="card-footer text-muted">
     Reference: 
