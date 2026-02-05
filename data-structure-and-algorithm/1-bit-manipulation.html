@@ -210,23 +210,29 @@
 
 <pre><code class="python">class Solution:
     def getSum(self, a: int, b: int) -> int:
-        
-        # a = 2, b = 3 => 10, 11 => 101
-        # Time O(1)
+
+        #  1101
+        #  1001
+        # 10110
+
+        # Consider a ^ b and a & b (shifted left by 1)
+        # 1101 1101     0100   
+        # 1001 1001 -> 1001
+        # 0100 1001    10110
+        # Time O(1) integer is represented by 32 bits
         # Space O(1)
 
-        digit, mask = 0, 0xFFFFFFFF
-        
-        while b != 0:
-            digit = (a^b) & mask 
+        mask = 0xFFFFFFFF
+
+        while b:
+            digit = (a^b) & mask
             carry = ((a&b)<<1) & mask
             a = digit
             b = carry
-        
-        if a < 0x7FFFFFFF:
-            return a
-        else:
-            return ~(a^mask)</code></pre>
+
+        if a >= 0x7FFFFFFF:  # Overflow
+            return ~(a^mask)
+        return a</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/sum-of-two-integers">371. Sum of Two Integers</a> | <a href="https://neetcode.io/problems/sum-of-two-integers">Sum of Two Integers</a>
