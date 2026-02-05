@@ -53,19 +53,72 @@
   <div class="card-body">
     <h2 class="card-title">Product search</h2>
 
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/3-1-1.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/3-1-2.png" alt="Card image cap">
+
     <pre><code class="markdown">
-Requirement and problem
+# Requirement and Problem
 
-High-level design
+What do users search? Products in commercial website, like Amazon
+What does a product consist of? Text description, image, video, reviews
+Should the system support multiple languages? No, English only
+Does each product have category? Yes
+Can each product have more than one category? Yes
+Can users search product within certain category? Yes
+Should search result be personalized to user? Yes
 
-Data and feature engineering
+Is there training data available? No, user-product interaction data only
+How fast should the system show search results? Under 200ms
+How many products are there in system? 1B
 
-Model development
+Input - search text
+Output - ranked list of product
+Problem - supervised ranking
 
-Inference and evaluation
+# High-Level Design
+
+# Data and Feature Engineering
+
+## Data model
+User, Product, UserProductInteraction
+
+## Feature
+Gender, age
+Reviews, price, text description, number of comments, comments, number of views, image, video, number of purchase, total $ amount of purchase
+
+## Feature engineering
+Numerical (number of comments, number of purchase) - standardize (Mean 0, Var 1)
+Categorical dense (gender, age, price, review) - one-hot 
+Categorical sparse (user_id, product_id) - embedding to learn
+Text (search term, comment, description) - BERT
+Image/video - CLIP
+
+# Model Development
+
+## Baseline
+
+## Architecture
+Find similarity between embedding of search term and product
+
+## Training
+Ground truth
+Positive - user bought the product and did not leave negative review, user clicked product, user spend more than 10 seconds viewing the product 
+Negative - users left negative review, user did not click product
+
+Loss - binary classification to determine if user finds the product relevant (cross-entropy or log-loss)
+
+# Inference and Evaluation
+
+Compute ranked list of product for each search term offline 
+Continuously train the model using dynamic features (reviews, comments, views, purchases)
+
+## Offline
+Search service - recall
+Ranking service - NDCG
+
+## Online
+Increase in revenue
 </code></pre>
-
-    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/.png" alt="Card image cap">
   </div>
   <div class="card-footer text-muted">
     Reference: 
