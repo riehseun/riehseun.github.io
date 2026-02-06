@@ -51,69 +51,74 @@
 
 <div class="card mb-4" id="fraud-detection-">
   <div class="card-body">
+
+    <h2 class="card-title">Fraud Detection</h2>
+
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/4-1-1.png" alt="Card image cap">
     
 <pre><code class="markdown">
-Requirement and problem
+# Requirement and Problem
 
-Business
-  What kind of fraud are we talking about? Fradulent financial transaction - #1
-Data
-  How does dataset look like? Structured - #2
-  Do we have labeled dataset? Yes
-Constraint
-  Should we continously train the model? No
-  Should model be deployed to mobile devices? No
-  How fast should inference be? Under 200ms
-  Should inference be batch or real-time? Real-time - #3
-Problem - given transaction, determine whether it is fradulent or not
-Input - transaction record
-Output - 0 or 1 indicating fraud or not
+What kind of fraud is this? Fraudulent financial transactions 
+How does fraud occur? Use stolen debit or credit card to make purchases
+Where does fraud occur? In website or app, purchases are made
+Should model explain why transaction is deemed fraud? Yes
 
-High-level design
+Do we have training data available? Yes, 1M fraud transactions and 100M non-fraud transactions
+Should inference be immediate? Yes
+Should model be continuously trained? Yes
+Should model be deployed to mobile devices? No
 
-Data and feature engineering
+Input - person and transaction
+Output - whether transaction is fraud or not
+Problem - binary classification
 
-Data
-  Customer
-  Account
-  Transaction
-Feature
-  Age/gender/ethnicity - can't use due to bias and fairness concern
-  Account balance - fraud people are not likely to have very high account balance
-  Duration of account - fraud people are likely to have newly created account
-  Number of transactions - fraud people are likely to have only recent transactions
-  Total amount of transactions - fraud people are likely to have little dollar amount of transactions
-Engineering
-  No need to scale or nomalize if using Ensemble model
-  Ensemble models are expensive to re-train, thus need extra feature engineering to guard against distribution drift
-  Compute "averge metrics" like averge account balance for the past 12 months, as these values are less impacted by distribution drift
-  Create "other" columns for data points that are outside 99% of values and put it in
-  Convert date field to integer
+# High-Level Design
 
-Model development
+# Data and Feature Engineering
 
-Baseline
-  Logistic regression - binary classification to determine whether transaction is fraud or not
-  If dataprep is too much overhead, may skip to Ensemble model directly
-Model
-  Ensemble - explanable, works well with structured data, no need for data engineering, no need to worry about missing values
-  Neural network - lots of dataprep, not explanable
+## Data model
+User, Account, Transaction
+
+## Feature
+User’s age, account’s age, account balance
+Transaction $ amount
+Debit/Credit card’s limit, transaction limit, age, 
+Number of transactions in past X hours
+Average number of transactions per month
+
+## Feature engineering 
+Numerical
+Categorical dense (age - bucketize) - one-hot
+No need to scale or nomalize if using Ensemble model
+Compute "averge metrics" like averge account balance for the past 12 months, as these values are less impacted by distribution drift
+Create "other" columns for data points that are outside 99% of values and put it in
+Convert date field to integer
+  
+# Model Development
+
+## Baseline
+Logistic regression 
+
+## Architecture
+NN models are not explainable
+Use XGBoost - no standardization needed but is expensive to re-train
+
+## Training
 Data split
-  Split labeled data by time - 80% training set, 20% test set
-  Further split 80% training set into - 70% training set, 30% dev set
-  Run 5 bins cross-validation
-  Make sure each customer Id exist in exactly one of the bins and validation set, to avoid data leakage
+Split labeled data by time - 80% training set, 20% test set
+Further split 80% training set into - 70% training set, 30% dev set
+Run 5 bins cross-validation
+Make sure each customer Id exist in exactly one of the bins and validation set, to avoid data leakage
 
-Inference and evaluation
+# Inference and Evaluation
 
-Sampling
-  N/A
-Offline metric
-  Recall - need to get actual fraud as much as possible
-  Precision - predicted fraud better be actual fraud
-  PR curve
-Online metric
-  Number of fraud found in transactions
+## Offline
+Recall - catching actual fraud is very important
+Precision - accuracy of prediction is important not to reject valid transaction to annoy users
+
+## Online
+Decrease in average number of fraud per month
 </code></pre>
 
     <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/fraud-detection-1.png" alt="Card image cap">
