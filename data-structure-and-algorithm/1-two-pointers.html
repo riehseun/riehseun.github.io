@@ -251,35 +251,32 @@
   <div class="card-body">
     <h2 class="card-title">Trapping Rain Water (150)</h2>
 
-<pre><code class="python"># Water that height[i] can hold
-        # is the minimun of
-        #   Highest bar to the right
-        #   Highest bar to the left
-        # that is greater than height[i]
-        # Two pointers
-        # Remember the max height from left and right
-        # If max_height_left < max_height_right, 
-        # try moving left 
+<pre><code class="python">class Solution:
+    def trap(self, height: List[int]) -> int:
 
-        start, end = 0, len(height) - 1
-        water, max_height_left, max_height_right = 0, 0, 0
-
-        # Time O(n)
-        #   n = len(height)
+        # For each index, what is the water it can keep?
+        # min(highest height from left, highest height from right)
+        # - height at index
+        # Use two pointers
+        # Remember highest height from left and right while iterating
+        # Time O(n) n = len(heights)
         # Space O(1)
-        while start <= end:
-            if max_height_left < max_height_right:
-                max_height_left = max(max_height_left, height[start])
-                h = min(max_height_left, max_height_right)
-                water += max(h-height[start], 0)
-                start += 1
+        
+        i, j = 0, len(height) - 1
+        max_left, max_right, area = 0, 0, 0
+
+        while i <= j:
+            
+            if max_left < max_right:
+                max_left = max(max_left, height[i])
+                area += max(min(max_left, max_right)-height[i], 0)
+                i += 1
             else:
-                max_height_right = max(max_height_right, height[end])
-                h = min(max_height_left, max_height_right)
-                water += max(h-height[end], 0)
-                end -= 1
-                
-        return water</code></pre>
+                max_right = max(max_right, height[j])
+                area += max(min(max_left, max_right)-height[j], 0)
+                j -= 1
+
+        return area</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/trapping-rain-water">42. Trapping Rain Water</a> | <a href="https://neetcode.io/problems/trapping-rain-water">Trapping Rain Water</a>
@@ -416,27 +413,27 @@
 
 <pre><code class="python">class Solution:
     def twoSum(self, numbers: List[int], target: int) -> List[int]:
-        
-        # Array is sorted
-        # Two pointers
-        #   If sum > target, decrease end pointer
-        #   If sum < target, increase start pointer
 
-        start, end = 0, len(numbers) - 1
+        # [1,2,3,4], 3 ? [1,2]
 
-        # Time O(n)
-        #   n = len(numbers)
+        # Use two pointers at the end
+        # If sum > target, decrese end
+        # If sum < target, increase start
+        # Time O(n) n = len(target)
         # Space O(1)
-        while start < end:
-            sum = numbers[start] + numbers[end]
-            if sum > target:
-                end -= 1
-            elif sum < target:
-                start += 1
-            else:
-                return [start+1, end+1]
 
-        return None</code></pre>
+        i, j = 0, len(numbers) - 1
+
+        while i < j:
+            if numbers[i] + numbers[j] == target:
+                return [i+1, j+1]
+
+            if numbers[i] + numbers[j] > target:
+                j -= 1
+            else:
+                i += 1
+
+        return []</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/two-sum-ii-input-array-is-sorted">167. Two Sum II - Input Array Is Sorted</a> | <a href="https://neetcode.io/problems/two-integer-sum-ii">Two Integer Sum II</a>
