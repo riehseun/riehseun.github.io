@@ -46,6 +46,7 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#sliding-window-">Longest Substring Without Repeating Characters</a></li>
       <li><a href="#sliding-window-">Minimum Window Substring</a></li>
+      <li><a href="#sliding-window-">Sliding Window Maximum</a></li>
       <li><a href="#sliding-window-">Longest Repeating Character Replacement</a></li>
       <li><a href="#sliding-window-">Permutation in String</a></li>
       <li><a href="#sliding-window-">Max Consecutive Ones III</a></li>
@@ -144,6 +145,54 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/minimum-window-substring">76. Minimum Window Substring</a> | <a href="https://neetcode.io/problems/minimum-window-with-characters">Minimum Window Substring</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="sliding-window-">
+  <div class="card-body">
+    <h2 class="card-title">Sliding Window Maximum (150)</h2>
+
+<pre><code class="python">class Solution:
+    def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
+        
+        # Use a queue of size k
+        # Enqueue incoming number in queue
+        # Deque outgoing number in queue if size is exceeded
+        #   Keep maximum number in front by
+        #   removing all numbers smaller than incoming number
+        #   from the end
+        
+        # Ex. [1,2,1,-1,4,2,6]
+        # [1,2,1] => [2,1]
+        # [2,1,-1]  
+        # [2,1,-1,4] => [4]
+        # [4,2] 
+        # [4,2,6] => [6]
+
+        queue, result = deque(), []
+
+        for i in range(k):
+            while queue and nums[queue[-1]] < nums[i]:
+                queue.pop()
+            queue.append(i)
+        result.append(nums[queue[0]])
+        
+        # Time O(n)
+        #   n = len(nums)
+        # Space O(k)
+        for i in range(k, len(nums)):
+            while queue and nums[queue[-1]] < nums[i]:
+                queue.pop()
+            queue.append(i)
+            
+            while queue and queue[0] <= i - k:
+                queue.popleft()
+            result.append(nums[queue[0]])
+
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/sliding-window-maximum">239. Sliding Window Maximum</a> | <a href="https://neetcode.io/problems/sliding-window-maximum">Sliding Window Maximum</a>
   </div>
 </div>
 
