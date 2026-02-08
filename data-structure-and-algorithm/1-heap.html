@@ -44,6 +44,7 @@
   <div class="card-body">
     <h2 class="card-title">Heap</h2>
     <ul class="list-unstyled mb-0">
+      <li><a href="#heap-">Kth Largest Element in an Array</a></li>  
       <li><a href="#heap-">Find Median from Data Stream</a></li>
       <li><a href="#heap-">Top K Frequent Elements</a></li>
       <li><a href="#heap-">Design Twitter</a></li>
@@ -51,9 +52,62 @@
       <li><a href="#heap-">Task Scheduler</a></li>
       <li><a href="#heap-">Kth Largest Element in a Stream</a></li>
       <li><a href="#heap-">Max Stack</a></li>
+      <li><a href="#heap-">K Closest Points to Origin</a></li>
       <li><a href="#heap-">Last Stone Weight</a></li>
       <li><a href="#heap-">Stock Price Fluctuation</a></li>
     </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="heap-">
+  <div class="card-body">
+    <h2 class="card-title">Kth Largest Element in an Array (150)</h2>
+
+<pre><code class="python">from heapq import heappush, heappop
+
+class Solution:
+    def topKFrequent(self, nums: List[int], k: int) -> List[int]:
+
+        # nums = [1,2,3,2,1,1] k = 2 ? [1,2]
+        # nums = [1,2,3,2,1,1] k = 1 ? [1]
+        # nums = [1,2,3,2,1,1] k = 3 ? [1,2,3]
+
+        # Compute frequency of each num
+        # Insert frequency into max heap of size k
+        # Return elements from the heap
+        # Time O(n+nlogk) n = len(nums)
+        # Space O(n+k)
+
+        # Quickselect
+        # Store mapping between frequency and number
+        # Retrieve top k frequency by 
+        #   Parition freq array by random pivot
+        #   Nums greater than pivot comes left
+        #   Nums less than pivot go to right
+        # If k < p, search on right
+        # If k > p, search on left
+        # If k == p, return
+        # Time O(n) 
+        # Space O(n) for calculating frequency, O(1) for quickselect
+
+        min_heap, freq = [], defaultdict(int)
+
+        for num in nums:
+            freq[num] += 1
+
+        for key, val in freq.items():
+            heappush(min_heap, (val,key))
+            if len(min_heap) > k:
+                heappop(min_heap)
+            
+        result = []
+        while min_heap:
+            result.append(heappop(min_heap)[1])
+
+        return result</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/top-k-frequent-elements">215. Kth Largest Element in an Array</a> | <a href="https://neetcode.io/problems/kth-largest-element-in-an-array">Kth Largest Element in an Array</a>
   </div>
 </div>
 
@@ -377,6 +431,62 @@ class Twitter:
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/max-stack">716. Max Stack</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="heap-">
+  <div class="card-body">
+    <h2 class="card-title">K Closest Points to Origin (150)</h2>
+
+<pre><code class="python">cclass Solution:
+    def kClosest(self, points: List[List[int]], k: int) -> List[List[int]]:
+
+        # Find k smallest distance
+        # Find all distances
+        # Partition 
+        #   Pick a random pivot
+        #   Distances less than pivot are on left
+        #   Distances greater than pivot are on right
+        # If index of pivot < k
+        #   Search on right
+        # If index of pivot > k
+        #   Search on left
+
+        # Time O(n)
+        #   n = len(points)
+        # Space O(1)
+        def partition(left, right):
+
+            p = random.randint(left, right)
+            
+            for i in range(left, right+1):
+                dist_p = points[p][0]**2 + points[p][1]**2
+                dist_i = points[i][0]**2 + points[i][1]**2
+                if i < p and dist_i > dist_p:
+                    points[i], points[p] = points[p], points[i]
+                if i > p and dist_i < dist_p:
+                    points[i], points[p] = points[p], points[i]
+                p = i
+
+            return p 
+
+        def quickselect(left, right):
+
+            while True:
+                p = partition(left, right)
+
+                if k - 1 > p:
+                    left = p + 1
+                elif k - 1 < p:
+                    right = p - 1
+                else:
+                    return points[:p+1]
+
+        n = len(points)
+        return quickselect(0, n-1)</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/k-closest-points-to-origin">973. K Closest Points to Origin</a> | <a href="https://neetcode.io/problems/k-closest-points-to-origin">K Closest Points to Origin</a>
   </div>
 </div>
 
