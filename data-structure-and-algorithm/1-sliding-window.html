@@ -196,55 +196,39 @@
 <pre><code class="python">class Solution:
     def checkInclusion(self, s1: str, s2: str) -> bool:
 
-        # Create frequency map for s1
-        # Slide s2 where window size is len(s1)
-        #   If new char exists in s1 decrement count
-        #   If old char exists in s1 increment count
-        # Keep track of number of mismatches
+        # "abc", "kabmc" ? False
+        # "abc", "kbacm" ? True
 
-        n, m = len(s1), len(s2)
-        counts, num_mismatch = defaultdict(int), 0
+        # Create dictionary to frequency for s1
+        # Move window of size s1 in s2
+        # Check is char count match
+        # Time O(nm) n = len(s2)
+        # Space O(m) m = len(s1)
 
-        # Time O(n)
-        #   n = len(s1)
-        # Space O(1)
-        #   There are only 26 chars in alphabet
+        cnts_1, cnts_2 = defaultdict(int), defaultdict(int)
+        n, m = len(s2), len(s1)
+
         for c in s1:
-            counts[c] += 1
-            
-        for c in s2[:n]:
-            if c in counts:
-                counts[c] -= 1
-        
-        for k,v in counts.items():
-            num_mismatch += abs(v)
+            cnts_1[c] += 1
 
-        if num_mismatch == 0:
+        for c in s2[:m]:
+            if c in cnts_1:
+                cnts_2[c] += 1
+        
+        if cnts_2 == cnts_1:
             return True
 
-        # Time O(m)
-        #   m = len(s2)
-        # Space O(1)
-        #   There are only 26 chars in alphabet
-        for i in range(n, m):
-            new_c = s2[i]
-            old_c = s2[i-n]
+        for i in range(n-m):
+            old_c = s2[i]
+            new_c = s2[i+m]
+            if old_c in cnts_1:
+                cnts_2[old_c] -= 1
+            if cnts_2[old_c] == 0:
+                del cnts_2[old_c]
+            if new_c in cnts_1:
+                cnts_2[new_c] += 1
 
-            if new_c in counts:
-                if counts[new_c] > 0:
-                    num_mismatch -= 1
-                else:
-                    num_mismatch += 1
-                counts[new_c] -= 1
-
-            if old_c in counts:
-                if counts[old_c] < 0:
-                    num_mismatch -= 1
-                else:
-                    num_mismatch += 1
-                counts[old_c] += 1
-
-            if num_mismatch == 0:
+            if cnts_2 == cnts_1:
                 return True
 
         return False</code></pre>
