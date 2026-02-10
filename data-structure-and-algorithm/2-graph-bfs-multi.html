@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="/img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/monokai-sublime.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="/js/jquery.min.js" type="text/javascript"></script>
+<script src="/js/bootstrap.bundle.min.js" type="text/javascript"></script>
+<script src="/js/highlight.pack.js" type="text/javascript"></script>
+<script src="/js/include_html.js" type="text/javascript"></script>
+<script src="/js/mathjax/tex-chtml.js" type="text/javascript"></script>
+<script src="/js/site.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<include src="/header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Software Engineering</h1>
+
+<!-- Graph BFS Multi BEGIN -->
+<div class="card mb-4" id="graph-bfs-multi">
+  <div class="card-body">
+    <h2 class="card-title">Graph BFS multi</h2>
+    <ul class="list-unstyled mb-0">  
+      <li><a href="#graph-bfs-multi-">Rotting Oranges</a></li>
+      <li><a href="#graph-bfs-multi-">Islands and Treasure</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-bfs-multi-">
+  <div class="card-body">
+    <h2 class="card-title">Rotting Oranges (150/250)</h2>
+
+<pre><code class="python"># Is 0,1,2 integer?
+
+        # grid = [] => -1
+        # grid = [0,0,0] => -1
+        # grid = [2,2,2] => 0
+        # grid = [2,1,2] => 1
+
+        # From each fresh fruit, find max distance to rot fruit
+        # Update max distance for each fresh fruit, by DFSing
+        # at each fresh fruit
+        # Time O((nm)**2)
+
+        # From all rot fruit, do BFS
+        # If meet 2, skip
+        # If meet 1, convert to 2
+        # If meet 0, skip
+
+        n, m = len(grid), len(grid[0])
+        queue = deque()
+        explored = set()
+        depth = 0
+
+        for i in range(n):
+            for j in range(m):
+                if grid[i][j] == 2:
+                    queue.append((i,j,depth))
+
+        while queue:
+            i, j, depth = queue.popleft()            
+            dirs = [(-1,0), (1,0), (0,-1), (0,1)]
+            for x, y in dirs:
+                if 0 <= i + x < n \
+                    and 0 <= j + y < m \
+                    and grid[i+x][j+y] == 1 \
+                    and (i+x, j+y) not in explored:
+                        grid[i+x][j+y] = 2
+                        explored.add((i+x, j+y))
+                        queue.append((i+x, j+y, depth+1)) 
+                    
+        for i in range(n):
+            for j in range(m):
+                if grid[i][j] == 1:
+                    return -1
+                    
+        return depth</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/rotting-oranges">994. Rotting Oranges</a> | <a href="https://neetcode.io/problems/rotting-fruit">Rotting Fruit</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="graph-bfs-multi-">
+  <div class="card-body">
+    <h2 class="card-title">Islands and Treasure (M)</h2>
+
+<pre><code class="python">class Solution:
+    def islandsAndTreasure(self, grid: List[List[int]]) -> None:
+        
+        # Replace grid value with positive integer
+        # representing the distance to 0?
+        
+        # grid = [0] => [0]
+        # grid = [-1] => [1]
+        # grid = [inf, -1, 0, inf] -=> [inf, -1, 0, 1]
+
+        # At each inf, BFS till finding 0
+        # Time O((nm)**2)
+
+        # From all 0's, start BFS
+        # If meet -1, skip
+        # If meet inf, convert it to depth 
+        # If meet positive integer, put min(depth, pos int)
+        # Time O(nm)
+        # Space O(nm)
+
+        n, m = len(grid), len(grid[0])
+        queue = deque()
+        explored = set()
+
+        for i in range(n):
+            for j in range(m):
+                if grid[i][j] == 0:
+                    queue.append((i,j,0))
+
+        while queue:
+            i, j, depth = queue.popleft()            
+            dirs = [(-1,0), (1,0), (0,-1), (0,1)]
+            for x, y in dirs:
+                if 0 <= i + x < n \
+                    and 0 <= j + y < m \
+                    and (i+x, j+y) not in explored:
+                    if grid[i+x][j+y] == -1:
+                        continue
+                    elif grid[i+x][j+y] == math.inf:
+                        grid[i+x][j+y] = depth + 1
+                    else:
+                        grid[i+x][j+y] = min(grid[i+x][j+y], depth+1)
+                    explored.add((i+x, j+y))
+                    queue.append((i+x, j+y, depth+1))</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://neetcode.io/problems/islands-and-treasure">Islands and Treasure</a>
+  </div>
+</div>
+<!-- Graph BFS Multi END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+</html>
