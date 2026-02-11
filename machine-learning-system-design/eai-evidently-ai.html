@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="/img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/monokai-sublime.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="/js/jquery.min.js" type="text/javascript"></script>
+<script src="/js/bootstrap.bundle.min.js" type="text/javascript"></script>
+<script src="/js/highlight.pack.js" type="text/javascript"></script>
+<script src="/js/include_html.js" type="text/javascript"></script>
+<script src="/js/mathjax/tex-chtml.js" type="text/javascript"></script>
+<script src="/js/site.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<include src="/header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Machine Learning</h1>
+
+<!-- Evidently AI BEGIN -->
+<div class="card mb-4" id="evidently-ai">
+  <div class="card-body">
+    <h2 class="card-title">Evidently AI</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#designing-machine-learning-systems-1">Overview of Machine Learnign Systems</a></li>
+      <li><a href="#designing-machine-learning-systems-2">Introduction to Machine Learning System Design</a></li>
+      <li><a href="#designing-machine-learning-systems-3">Data Engineering Fundamentals</a></li>
+      <li><a href="#designing-machine-learning-systems-4">Training Data</a></li>
+      <li><a href="#designing-machine-learning-systems-5">Feature Engineering</a></li>
+      <li><a href="#designing-machine-learning-systems-6">Model Development and Offline Evaluation</a></li>
+      <li><a href="#designing-machine-learning-systems-7">Model Deployment and Prediction Service</a></li>
+      <li><a href="#designing-machine-learning-systems-8">Data Distribution Shifts and Monitoring</a></li>
+      <li><a href="#designing-machine-learning-systems-9">Continual Learning and Test in Production</a></li>
+      <li><a href="#designing-machine-learning-systems-10">Infrastructure and Tooling for MLOps</a></li>
+      <li><a href="#designing-machine-learning-systems-11">The Human Side of Machine Learning</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="designing-machine-learning-systems-1">
+  <div class="card-body">
+    <h2 class="card-title">Overview of Machine Learnign Systems</h2>
+    <ul>
+      <li>ML use cases</li>
+      <ul>
+        <li>Search enginer or recommender system</li>
+        <li>Predictive typing</li>
+        <li>Machine translation</li>
+        <li>Smart personal assistant</li>
+        <li>Resource allocation system for Enterprises</li>
+        <li>Fraud detection</li>
+        <li>Price optimization</li>
+        <li>Churn prediction</li>
+        <li>Automated support ticket classification</li>
+        <li>Brand monitoring (sentiment analysis)</li>
+      </ul>
+      <li>Computation in production</li>
+      <ul>
+        <li>Processing query one at a time - higher latency means lower throughput</li>
+        <li>Processing queries in batch - higher latency means also higher throughput</li>
+        <li>Latency is a distribution rather than an individual number</li>
+      </ul>
+      <li>Data in production</li>
+      <ul>
+        <li>Noisey and biased</li>
+        <li>Labels are sparse, imbalanced, and incorrect</li>
+        <li>Privacy and regulatory concerns</li>
+      </ul>
+      <li>Interpretability</li>
+      <li>Large data</li>
+      <ul>
+        <li>How to version them</li>
+      </ul>
+      <li>Large model</li>
+      <ul>
+        <li>How to load them into memory</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Designing Machine Learning Systems, Chip Huyen
+  </div>
+</div>
+
+<div class="card mb-4" id="designing-machine-learning-systems-2">
+  <div class="card-body">
+    <h2 class="card-title">Introduction to Machine Learning System Design</h2>
+    <ul>
+      <li>ML tasks</li>
+      <ul>
+        <li>Regression</li>
+        <ul>
+          <li>Loss - RMSE, MAE</li>
+        </ul>
+        <li>Binary classification</li>
+        <ul>
+          <li>Loss - log loss</li>
+        </ul>
+        <li>Multi-class classification</li>
+        <ul>
+          <li>Loss - cross entropy</li>
+        </ul>
+        <li>Multi-label classification</li>
+        <ul>
+          <li>Example can belong to multiple classes</li>
+          <li>Label annotation can be difficult</li>
+          <li>Hard to extract predictions from raw probability</li>
+        </ul>
+      </ul>
+      <li>Objective function</li>
+      <ul>
+        <li>Assume there are multiple objectives (Ex. maximize user engagement but filter out extreme content</li>
+        <li>Option 1. create combined loss and train the model</li>
+        <ul>
+          <li>Loss = \( \alpha\text{lossA} + \beta\text{lossB} \)</li>
+          <li>Each time we tune \( \alpha \) and \( \beta \), model must be re-trained</li>
+        </ul>
+        <li>Option 1. train two different models with single loss and combine model output</li>
+        <ul>
+          <li>Total score = \( \alpha\text{scoreA} + \beta\text{scireB} \)</li>
+          <li>\( \alpha \) and \( \beta \) can be tweaked without re-training the model</li>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Designing Machine Learning Systems, Chip Huyen
+  </div>
+</div>
+
+<div class="card mb-4" id="designing-machine-learning-systems-3">
+  <div class="card-body">
+    <h2 class="card-title">Data Engineering Fundamentals</h2>
+    <ul>
+      <li>Data sources</li>
+      <ul>
+        <li>User-generated</li>
+        <li>System-generated</li>
+        <li>Internal databases</li>
+        <li>Third-party data</li>
+      </ul>
+      <li>Data formats</li>
+      <ul>
+        <li>JSON (Javascript object notation)</li>
+        <ul>
+          <li>Human readable, thus takes a lot of space</li>
+          <li>Painful to change the schema</li>
+        </ul>
+        <li>CSV (comma separated values)</li>
+        <ul>
+          <li>Human readable, thus takes a lot of space</li>
+          <li>Row major, elements in a row are stored next to each other in memory</li>
+          <li>Reading data is fast</li>
+          <li>Writing data is fast</li>
+        </ul>
+        <li>Parquet</li>
+        <ul>
+          <li>Binary, thus not human readable, but compact in size</li>
+          <li>Column major, elements in a column are stored next to each other in memory</li>
+          <li>Reading features is fast</li>
+        </ul>
+        <li>Numpy</li>
+        <ul>
+          <li>Row-major by default but order can be changed</li>
+        </ul>
+        <li>Pandas</li>
+        <ul>
+          <li>Built around DataFrame (2D tables with rows and columns) that is column-major</li>
+        </ul>
+      </ul>
+      <li>Data models</li>
+      <ul>
+        <li>Relational</li>
+        <ul>
+          <li>SQL is popular query language</li>
+        </ul>
+        <li>NoSQL</li>
+        <ul>
+          <li>Document</li>
+          <ul>
+            <li>Documents are equivalent to row, collection of documents are equivalent to table</li>
+            <li>Each document has unique key</li>
+            <li>Read operation still needs to know some structure of the document</li>
+            <li>Joins are harder and inefficient</li>
+          </ul>
+          <li>Graph</li>
+        </ul>
+        <li>It is common to use both relational and NoSQL models for different tasks in same DB system</li>
+        <li>Structured data</li>
+        <ul>
+          <li>Data is stord in data warehouse</li>
+          <li>Schema changes require updating all existing data</li>
+        </ul>
+        <li>Unstructured data</li>
+        <ul>
+          <li>Data is stord in data lake</li>
+        </ul>
+        <li>It is common pattern to de-couple storage from compute</li>
+      </ul>
+      <li>ETL</li>
+      <ul>
+        <li>Extract</li>
+        <ul>
+          <li>Extract data from different data sources</li>
+          <li>Validate and reject data</li>
+        </ul>
+        <li>Transform</li>
+        <ul>
+          <li>Data is cleansed and transformed into specific format</li>
+          <li>Data may be joined</li>
+          <li>De-dup, standardize, sort, aggregate, create new features</li>
+        </ul>
+        <li>Load</li>
+        <ul>
+          <li>Decide how often to load data into target destination</li>
+        </ul>
+      </ul>
+      <li>Data flow</li>
+      <ul>
+        <li>Data passing through databases</li>
+        <ul>
+          <li>A writes to DB and B reads from DB</li>
+          <li>Both A and B need access to DB</li>
+          <li>DB cannot be fast for both read and write</li>
+        </ul>
+        <li>Data passing through services</li>
+        <ul>
+          <li>A requests data from B and B responds with data</li>
+          <li>Ex. REST, RPC</li>
+        </ul>
+        <li>Data passing through real-time transport (event bus)</li>
+        <ul>
+          <li>Pubsub</li>
+          <ul>
+            <li>Don't care about consumers</li>
+            <li>Often has retention policy</li>
+            <li>Ex. Kafka, Kinesis</li>
+          </ul>
+          <li>Message queue</li>
+          <ul>
+            <li>Has intended consumers</li>
+            <li>Event with intended consumers is called message</li>
+            <li>Ex. RocketMQ, RabbitMQ</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>Data processing</li>
+      <ul>
+        <li>Batch data</li>
+        <ul>
+          <li>Compute features that do not change often (static features)</li>
+          <li>Need batch compute engine like Spark</li>
+        </ul>
+        <li>Streaming data</li>
+        <ul>
+          <li>Compute features that change frequently (dynamic features)</li>
+          <li>Data in real-time transport like Kafka, Kinesis</li>
+          <li>Need streaming compute engine like Flink, KSQL</li>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Designing Machine Learning Systems, Chip Huyen
+  </div>
+</div>
+
+<div class="card mb-4" id="designing-machine-learning-systems-4">
+  <div class="card-body">
+    <h2 class="card-title">Training Data</h2>
+    <ul>
+      <!-- <li>Sampling</li>
+      <ul>
+        <li>Non-probability sampling</li>
+        <ul>
+          <li>Convenience sampling - samples are selected based on their availability</li>
+          <li>Snowball sampling - samples are selected based on existing samples</li>
+        </ul>
+        <li>Stratified sampling</li>
+        <ul>
+          <li>Divide population into groups and sample from each group separately</li>
+          <li>Each group is called stratum</li>
+          <li>Problem is when one sample belongs to multiple groups (Ex. multilabel tasks)</li>
+        </ul>
+        <li>Weighted sampling</li>
+        <ul>
+          <li>Ex. when there are three samples and want them to be selected with probabilties 50%, 30%, 20%, give them weights \( 0.5, 0.3, 0.2 \)</li>
+        </ul>
+        <li>Reservior sampling</li>
+        <ul>
+          <li>Useful for streaming data</li>
+          <li>Put the first k elements into the reservior</li>
+          <li>For each incoming \( n^{\text{th}} \) element, generate a random number \( i \) such that \( 1 \le i \le n \)</li>
+          <ul>
+            <li>If \( 1 \le i \le k \), replace \( i^{\text{th}} \) element in the reservoir with \( n^{\text{th}} \) element</li>
+            <li>Else, do nothing</li>
+          </ul>
+          <li>Then, each incoming \( n^{\text{th}} \) element has \( \frac{k}{n} \) probability of being in the reservoir</li>
+        </ul>
+        <li>Importance sampling</li>
+        <ul>
+          <li>Assume we want to sample from \( P(x) \) but \( P(x) \) is really expensive to sample from</li>
+          <li>The, sample from \( Q(x) \) instead and weigh this sample by \( \frac{P(x)}{Q(x)} \)</li>
+        </ul>
+      </ul>
+      <li>Labeling</li>
+      <ul>
+        <li>Hand labeling</li>
+        <ul>
+          <li>Expensive, slow, data privary issue, introduce bias, require domain knowledge</li>
+        </ul>
+        <li>Natural labeling</li>
+        <ul>
+          <li>Ground truth labels are inferred</li>
+          <li>Widely used for recommendation system</li>
+          <li>Can have long feedback loop (Ex. fraud detection)</li>
+        </ul>
+        <li>Handling insufficient lables</li>
+        <ul>
+          <li>Weak supervision</li>
+          <ul>
+            <li>Use heuristics (or labeling function) to label data</li>
+            <li>Labeled data is noisy</li>
+            <li>Useful when data has strict privacy requirement</li>
+          </ul>
+          <li>Semi-supervision</li>
+          <ul>
+            <li>Ex. self-training - traing a model using small data and use it to predict label on other data</li>
+            <li>Purturbation-based method</li>
+            <ul>
+              <li>Assumption is that small purturbations to a sample should not change its label</li>
+              <li>Ex. adding white noise to images, adding small random values to embeddings of words</li>
+              <li>Purturbed samples have the same label as unperturbed samples</li>
+            </ul>
+          </ul>
+          <li>Transfer learning</li>
+          <ul>
+            <li>Ex. language model</li>
+            <ul>
+              <li>Does not require labeled data and can be trained on any text</li>
+              <li>Given a sequence of tokens, predict the next token</li>
+              <ul>
+                <li>Ex. "I bought NVIDIA shares because I believe in the importance of"</li>
+                <li>Language model might output "hardware" or "GPU" as the next token</li>
+              </ul>
+              <li>The trained model can be used for downstream tasks</li>
+              <ul>
+                <li>Ex. sentiment analysis, intent detection, question answering</li>
+              </ul>
+            </ul>
+          </ul>
+        </ul>
+      </ul> -->
+      <li>Class imbalance</li>
+      <ul>
+        <li>Insufficient signal for model to detect minority class</li>
+        <li>Model tends to leanr simple heuristics instead of learning underlying pattern of data</li>
+        <li>Cost of wronge prediction on sample from minority class is much higher than cost of wrong prediction on sample from majority class</li>
+        <li>Option 1. evaluation metric</li>
+        <ul>
+          <li>Accuracy treat all class equally, thus performance of majority class will dominate the metric</li>
+          <li>F1, precision, recall measure model performance w.r.t. positive class</li>
+          <li>Still does not solve any problems</li>
+        </ul>
+        <li>Option 2. resampling</li>
+        <ul>
+          <li>Oversampling - add more instances from minority class</li>
+          <li>Undersampling - remove instances from majority class</li>
+          <li>Never evaluate model on resampled data</li>
+          <li>Oversample has risk of overfitting on training data while underfitting has risk of losing important data</li>
+        </ul>
+        <li>Option 3. cost function</li>
+        <ul>
+          <li>Class-balanced loss - punish model from making wrong prediction on minority class</li>
+          <li>Focal loss - give higher weights to sample that has lower probability of being right</li>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Designing Machine Learning Systems, Chip Huyen
+  </div>
+</div>
+
+<div class="card mb-4" id="designing-machine-learning-systems-5">
+  <div class="card-body">
+    <h2 class="card-title">Feature Engineering</h2>
+    <ul>
+      <li>Missing values</li>
+      <ul>
+        <li>Types</li>
+        <ul>
+          <li>Missing not at random</li>
+          <ul>
+            <li>Missing due to true value itself</li>
+            <li>Ex. respondants not disclosing their income and it turns out that those who don't disclose tend to have higher income</li>
+          </ul>
+          <li>Missing at random</li>
+          <ul>
+            <li>Missing due to another observed variable</li>
+            <li>Ex. age value of centain gender is missing because that gender tend not to disclose their age</li>
+          </ul>
+          <li>Missing completely at random</li>
+          <ul>
+            <li>There is no pattern in which the value is missing</li>
+          </ul>
+        </ul>
+        <li>Handle missing values</li>
+        <ul>
+          <li>Delete - data quantity is reduced</li>
+          <ul>
+            <li>Delete column - important feature may be removed, reducing model accuracy</li>
+            <li>Delete row - only values missing completely at random, and small portion such as less than 0.1% should be removed</li>
+          </ul>
+          <li>Impute - dataset gets noisy</li>
+          <ul>
+            <li>Fill with default values like mean, median, mode</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>Feature scaling</li>
+      <ul>
+        <li>Normalize such as they have zero mean and unit variance</li>
+        <li>ML models struggle with features that has skewed distribution</li>
+        <li>Log transformation - apply log function to features</li>
+        <!-- <li>Feature scaling is not needed if using XGBoost</li>
+        <li>Helps gradient descent to find the optimum faster</li>
+        <li>Scale inputs to [-1,1]</li>
+        <ul>
+          <li>Make error function more spherical, thus gradient descent converges faster</li>
+          <li>Not scaling inputs impacts regularization</li>
+          <li>Outliers are also valid inputs. Do not throw them away</li>
+        </ul>
+        <li>Normalization (min-max scaling)</li>
+        <ul>
+          <li>Does not change distribution</li>
+          <li>All values are \( [0,1] \)</li>
+          <li>\( z = \dfrac{x-x_{min}}{x_{max}-x_{min}} \)</li>
+          <li>Outliers can make real data shrunk in very narrow range</li>
+        </ul>
+        <li>Clipping</li>
+        <ul>
+          <li>Treat outliers as -1 or 1</li>
+          <li>Numerical values are linearly scaled</li>
+          <li>Works for uniformly distributed data</li>
+        </ul>
+        <li>Standardization (z-score normalization)</li>
+        <ul>
+          <li>Mean is \( 0 \) and standard deviation is \( 1 \)</li>
+          <li>\( z = \dfrac{x-\mu}{\sigma} \)</li>
+          <li>Works for normally distributed data</li>
+        </ul>
+        <li>Log scaling</li>
+        <ul>
+          <li>Mitigate skewness of a feature, so that gradient descent converges faster</li>
+          <li>\( z = log(x) \)</li>
+          <li>Used when data is neither uniformly or normally distributed</li>
+        </ul> -->
+      </ul>
+      <li>Bucketing</li>
+      <ul>
+        <li>Convert numerical feature to categorical feature</li>
+        <li>Rarely helps in production</li>
+      </ul>
+      <li>Encoding</li>
+      <ul>
+        <li>In practice, categories change</li>
+        <li>Use hash function to generate hashed value of each category</li>
+        <li>Hash value becomes index of category</li>
+        <li>Collisions can occur where two categories are assigned the same index</li>
+        <ul>
+          <li>Option 1. Very large hash space</li>
+          <li>Option 2. locality-sensitive hashing - similar categories are hashed into values close to each other</li>
+        </ul>
+        <!-- <li>Convert categorical features to numerical feature</li>
+        <li>Ex. integer encoding</li>
+        <ul>
+          <li>Integer value is assigned to each category</li>
+          <li>Cannot be used for nominal features</li>
+        </ul>
+        <li>Ex. one-hot encoding</li>
+        <ul>
+          <li>Binary value is assigned to each category</li>
+          <li>Not suitable for features with high cardinality</li>
+          <li>Not suitable when features values are not independent</li>
+        </ul>
+        <li>Ex. embedding</li>
+        <ul>
+          <li>Learn N-D vector for each categorial value</li>
+          <li>Just another hidden layer in neural network</li>
+          <li>When determining embedding dimension, hyperparameter tune between these two variables</li>
+          <ul>
+            <li>Fourth root of the total number of unique categorical elements</li>
+            <li>1.6 times the square root of the number of unique elements in the category, no less than 600</li>
+          </ul>
+        </ul> -->
+      </ul>
+      <li>Feature crossing</li>
+      <ul>
+        <li>Combine features to generate new features</li>
+        <li>Useful to model non-linear relationship between features</li>
+        <li>Essential for models that can't learn or bad at learning non-linear relationships like linear regression, logistic regression</li>
+        <li>Can make feature space blow up</li>
+      </ul>
+      <li>Data leakage</li>
+      <ul>
+        <li>Splitting time-correlated data randomly instead of by time</li>
+        <ul>
+          <li>Should always train on data from \( 0 \) to time \( t \) and evaluate it on \( t+1 \)</li>
+          <li>If random split, information from future is leaked into training process</li>
+        </ul>
+        <li>Scaling before splitting</li>
+        <ul>
+          <li>Do not use entire training data to generate global statistics before splitting into bins</li>
+          <li>If not, it leaks the mean and variance of test set into training process</li>
+          <li>Always split data first, then apply scaling</li>
+        </ul>
+        <li>Filling in missing data with statistics from the test split</li>
+        <ul>
+          <li>Leaking occurs when mean or median is calculated using entire data instead of just the train split</li>
+        </ul>
+        <li>Poor handling of data duplication before splitting</li>
+        <ul>
+          <li>Same samples might appear in both train and validation/test set</li>
+          <li>If oversampling data, do it after splitting</li>
+        </ul>
+        <li>Group leakage</li>
+        <ul>
+          <li>Ex. CT scans that are a week apart with the same lables, one in train set and the other in test set</li>
+        </ul>
+      </ul>
+      <li>Detect data leakage</li>
+      <ul>
+        <li>Measure the predictive power of each feature (or a set of features) on target variable</li>
+        <li>If a feature has high correlation, investigate</li>
+      </ul>
+      <li>Too many features</li>
+      <ul>
+        <li>Increased risk of data leakage</li>
+        <li>Can cause overfitting</li>
+        <li>Increases memory requirement</li>
+        <li>Increases inference latency, especially if prediction requires extracting features</li>
+        <li>Useless features become techinical debt</li>
+        <ul>
+          <li>When data pipeline changes, all affected features need to adjust</li>
+          <li>In theory, regularization should reduce weight of useless features to 0. However, model learns faster without useless features</li>
+        </ul>
+      </ul>
+      <li>Feature importance</li>
+      <ul>
+        <li>SHAP</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Designing Machine Learning Systems, Chip Huyen
+  </div>
+</div>
+
+<div class="card mb-4" id="designing-machine-learning-systems-6">
+  <div class="card-body">
+    <h2 class="card-title">Model Development and Offline Evaluation</h2>
+    <ul>
+      <li>Ensemble</li>
+      <ul>
+        <li>Bagging</li>
+        <ul>
+          <li>Create different datasets (via sample with replacement)</li>
+          <li>Train model on each of these datasets</li>
+          <li>If classification, final prediction is majority vote of all models</li>
+          <li>If regression, final prediction is average of all model predictions</li>
+          <li>Ex. random forest</li>
+        </ul>
+        <li>Boosting</li>
+        <ul>
+          <li>Train first classifier on original dataset</li>
+          <li>Misclassified samples are given higher weights</li>
+          <li>Train second classifier on reweighted dataset. Ensemble now consists of first and second classifier</li>
+          <li>Misclassified samples are given higher weights</li>
+          <li>Repeat</li>
+          <li>Final classifer is weighted combo of all classifiers (classifers with smaller training error gets higher weight)</li>
+          <li>Ex. gradient boosting machine (GBM), XGBoost, LightGBM</li>
+        </ul>
+      </ul>
+      <li>Versioning</li>
+      <ul>
+        <li>Code versioning keeps copies of all old files. Dataset might be too large for this</li>
+        <li>Code versioning duplicates codebase on each local machine. Dataset may not fit into local machine</li>
+        <li>What does diff mean?</li>
+        <ul>
+          <li>Change to contents of any file?</li>
+          <li>When files are added or removed?</li>
+          <li>When checksum of whole repository has changed?</li>
+        </ul>
+        <li>Merge conflict</li>
+        <ul>
+          <li>Dataset A is used to train model A</li>
+          <li>Dataset B is used to train model B</li>
+          <li>Dataset A and B is merged to C, but there is no model that can correspond to C</li>
+        </ul>
+        <li>Regulation may mandate that data is permanatly removed upon user request</li>
+      </ul>
+      <li>Distributed training</li>
+      <ul>
+        <li>When data does not fit into memory</li>
+        <ul>
+          <li>Preprocessing, shuffling, batching must run on multiple machines</li>
+        </ul>
+        <li>Data parallelism</li>
+        <ul>
+          <li>Synchronous stochastic gradient update</li>
+          <ul>
+            <li>Wait for all machines to finish</li>
+            <li>Can take very long time</li>
+          </ul>
+          <li>Asynchronous stochastic gradient update</li>
+          <ul>
+            <li>Gradient from one machine can update weights before gradients from other machines come in</li>
+            <li>With large number of weights, graident updates are sparse</li>
+            <li>Most gradients only modify small fraction of parameters</li>
+            <li>It is unlikely that gradients from different machine will update the same weight</li>
+          </ul>
+        </ul>
+        <li>Model parallelism</li>
+        <ul>
+          <li>Assume there are 4 machines</li>
+          <li>Each mini-batch is broken into 4 micro-batches</li>
+          <li>Machine 1 computes first layer on first micro-batch</li>
+          <li>Machine 2 computes second layer on first micro-batch while machine 1 computes first layer on second micro-batch</li>
+        </ul>
+      </ul>
+      <li>AutoML</li>
+      <ul>
+        <li>Hyperparameter tuning</li>
+        <li>Architecture search and learned optimizer</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Designing Machine Learning Systems, Chip Huyen
+  </div>
+</div>
+
+<div class="card mb-4" id="designing-machine-learning-systems-7">
+  <div class="card-body">
+    <h2 class="card-title">Model Deployment and Prediction Service</h2>
+    <ul>
+      <li>Prediction pipeline</li>
+      <ul>
+        <li>Batch prediction</li>
+        <ul>
+          <li>Only uses batch features</li>
+          <li>Less responsive to change in user preference</li>
+          <li>Need to know beforehand what needs to be pre-computed</li>
+          <li>Workaround for when online prediction isn't cheap or fast enough</li>
+        </ul>
+        <li>Online prediction</li>
+        <ul>
+          <li>May use batch features only or the combination of batch and streaming features</li>
+          <li>Model may take long to generate prediction</li>
+          <li>Requires real-time transport and stream computation engine</li>
+          <li>Requires model that can generate inference fast</li>
+          <!-- <li>Stateless serving function</li>
+          <ul>
+            <li>Should support millions of requests per second</li>
+            <li>Model should be packaged and deployed as stateless function</li>
+          </ul> -->
+        </ul>
+      </ul>
+      <li>Model compression</li>
+      <ul>
+        <li>How to make inference faster?</li>
+        <ul>
+          <li>Make model inference itself faster</li>
+          <li>Make model smaller (model compression)</li>
+          <li>Make hardware run faster</li>
+        </ul>
+        <li>Low-rank factorization</li>
+        <li>Knowledge distillation</li>
+        <ul>
+          <li>Requires teacher model</li>
+          <li>Not widely used in production</li>
+          <li>Ex. DistilBERT</li>
+        </ul>
+        <li>Pruning</li>
+        <ul>
+          <li>Find parameters least useful to prediction, and set them to 0</li>
+          <li>Architecture of neural network remains the same</li>
+          <li>Sparse architecture requires less storage</li>
+        </ul>
+        <li>Quantization</li>
+        <ul>
+          <li>Use fewer bits to represent parameters</li>
+          <li>By default, software uses 32 bits to represent a float number</li>
+          <li>Using 16 bits is called half precision</li>
+          <li>Can also train model in integers, which only takes 8 bits</li>
+          <li>Allows increasing batch size, speeds up training, reduces inference latency</li>
+          <li>Numbers outside range need to be rounded</li>
+          <li>Can be applied during training and/or inference</li>
+          <li>Most commonly used</li>
+        </ul>
+      </ul>
+      <li>Edge computing</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Designing Machine Learning Systems, Chip Huyen
+  </div>
+</div>
+
+<div class="card mb-4" id="designing-machine-learning-systems-8">
+  <div class="card-body">
+    <h2 class="card-title">Data Distribution Shifts and Monitoring</h2>
+    <ul>
+      <li>Edge cases</li>
+      <li>Degenerate feedback loops</li>
+      <li>Data distribution shift</li>
+      <ul>
+        <li>Types</li>
+        <ul>
+          <li>Covariance shift</li>
+          <ul>
+            <li>\( P(X) \) changes but \( P(Y|X) \) remains the same</li>
+            <li>Related to sample selection bias</li>
+          </ul>
+          <li>Label shift/li>
+          <ul>
+            <li>\( P(Y) \) changes but \( P(X|Y) \) remains the same</li>
+            <li>Related to covariance shift</li>
+          </ul>
+          <li>Concept drift</li>
+          <ul>
+            <li>\( P(Y|X) \) changes but \( P(X) \) remains the same</li>
+            <li>Same input, different output</li>
+            <li>Cyclic or seasonal</li>
+          </ul>
+        </ul>
+        <li>Detecting</li>
+        <li>Solution</li>
+        <ul>
+          <li>Train on large dataset</li>
+          <li>Retrain regularly</li>
+        </ul>
+      </ul>
+      <!-- <li>Monitoring</li>
+      <ul>
+        <li>Accuracy</li>
+        <ul>
+          <li>Model performance</li>
+          <li>Ex. accuracy, precision, recall, F1 score</li>
+        </ul>
+        <li>Predictions</li>
+        <ul>
+          <li>Distribution drift of prediction</li>
+          <li>Ex. prediction PSI</li>
+        </ul>
+        <li>Features</li>
+        <ul>
+          <li>Distribution drift of features</li>
+          <li>Ex. feature PSI</li>
+        </ul>
+        <li>Raw inputs</li>
+      </ul> -->
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Designing Machine Learning Systems, Chip Huyen
+  </div>
+</div>
+
+<div class="card mb-4" id="designing-machine-learning-systems-9">
+  <div class="card-body">
+    <h2 class="card-title">Continual Learning and Test in Production</h2>
+    <ul>
+      <li>Pre-training</li>
+      <ul>
+        <li>New feature is added</li>
+        <li>Model architecture changes</li>
+        <li>New data is added</li>
+      </ul>
+      <li>Fine-tuning</li>
+      <ul>
+        <li>New data is added</li>
+        <li>We could avoid storing data</li>
+      </ul>
+      <li>Continual learning</li>
+      <ul>
+        <li>Stage 1 - manual, training from scratch</li>
+        <li>Stage 2 - automated, training from scratch</li>
+        <ul>
+          <li>Scheduler - Airflow, Argo</li>
+          <li>Model store - SageMaker, MLflow</li>
+        </ul>
+        <li>Stage 3 - automated, incremental learning</li>
+        <li>Stage 4 - continual learning</li>
+        <ul>
+          <li>Data distribution shift</li>
+          <li>Model performance degradation</li>
+        </ul>
+      </ul>
+      <li>Deployment</li>
+      <ul>
+        <li>Shadow deployment</li>
+        <ul>
+          <li>Deploy candidate model</li>
+          <li>For each input, make two sets of predictions using existing and candidate model</li>
+          <li>Safe but computationally expensive</li>
+        </ul>
+        <li>A/B testing</li>
+        <ul>
+          <li>Deploy candidate model</li>
+          <li>Send 50% of traffic to existing and 50% of traffic to candidate</li>
+          <li>Traffic routes to both models must be random</li>
+        </ul>
+        <li>Canary release</li>
+        <ul>
+          <li>Deploy candidate model</li>
+          <li>Increase traffic to candidate if it performs well (until all traffic is sent to candidate)</li>
+          <li>Stop traffic to candidate if it it performs poorly (and send traffic to existing)</li>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Designing Machine Learning Systems, Chip Huyen
+  </div>
+</div>
+
+<div class="card mb-4" id="designing-machine-learning-systems-10">
+  <div class="card-body">
+    <h2 class="card-title">Infrastructure and Tooling for MLOps</h2>
+    <ul>
+      <li>Storage and compute</li>
+      <li>Resource management</li>
+      <ul>
+        <li>Airflow</li>
+        <ul>
+          <li>Configuration as a code</li>
+          <li>Entire workflow is packaged into one container</li>
+          <li>Cannot pass in parameters into workflows</li>
+        </ul>
+        <li>Prefect</li>
+        <ul>
+          <li>Improved Airflow to allow parameters to be passed into workflows</li>
+        </ul>
+        <li>Argo</li>
+        <ul>
+          <li>Workflows are defined in YAML</li>
+          <li>Each step runs in its own container</li>
+          <li>Can only run on Kubernetes</li>
+        </ul>
+        <li>Kubeflow</li>
+        <ul>
+          <li>Kubeflow pipeline is built on top of Argo, which was meant to run on Kubernetes</li>
+          <li>Users still need to write Dockerfile and YAML file</li>
+        </ul>
+        <li>Metaflow</li>
+        <ul>
+          <li>No need to write Dockerfile and YAML file</li>
+        </ul>
+      </ul>
+      <li>ML platform</li>
+      <ul>
+        <li>Model deployment (Ex. SageMaker, Vertex AI, Azure ML)</li>
+        <li>Model store</li>
+        <ul>
+          <li>Model definition - loss function, number of hidden layers, how many parameters in each layer, etc</li>
+          <li>Model parameters</li>
+          <li>Featurize and predict functions</li>
+          <li>Dependencies - Python version, Python packages</li>
+          <li>Data location</li>
+          <li>Model implementation code</li>
+        </ul>
+        <li>Feature store</li>
+        <ul>
+          <li>Ensure same logics for both batch and streaming features</li>
+          <li>Ensure consistency between features during training and features during inference</li>
+        </ul>
+      </ul>
+      <li>Development environment</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Designing Machine Learning Systems, Chip Huyen
+  </div>
+</div>
+
+<div class="card mb-4" id="designing-machine-learning-systems-11">
+  <div class="card-body">
+    <h2 class="card-title">The Human Side of Machine Learning</h2>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: Designing Machine Learning Systems, Chip Huyen
+  </div>
+</div>
+<!-- Evidently AI END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+<!-- </html> -->
