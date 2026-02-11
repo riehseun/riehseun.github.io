@@ -458,41 +458,32 @@
 <pre><code class="python">class Solution:
     def minEatingSpeed(self, piles: List[int], h: int) -> int:
 
-        # Binary search
-        # Consider the minimum and maximun eating speed
-        # Min = 1, Max = max(piles)
-        # Try eat with mid speed
-        # If eat too fast (h' < h)
-        #   Decrease eating speed
-        # Elif eat too slow (h' > h)
-        #   Increase eating speed
-        # Else
-        #   Speed is good enough
-        #   Try further lowering eating speed
+        # [1,2,3,4], h = 7 ? 2
 
-        left, right = 1, max(piles)
-
-        # Time O(nlogm)
-        #   n = len(piles)
-        #   m = max(piles)
+        # Try k between 1 and max(piles)
+        # h_ = nubmer of hours took to eat with speek k
+        # If h_ < h, eating too fast, decrease k
+        # If h_ > h, eating too slow, increase k
+        # Time O(mlogn) m = len(piles), n = max(piles)
         # Space O(1)
-        while left <= right:
-            mid = (left+right) // 2
 
-            h_prime = 0
-            for p in piles:
-                h_prime += p // mid
-                if p % mid != 0:
-                    h_prime += 1 
+        i, j = 1, max(piles)
 
-            if h_prime < h:
-                right = mid - 1
-            elif h_prime > h:
-                left = mid + 1
+        while i <= j:
+            m = (i+j) // 2
+            h_ = 0
+            for num in piles:
+                h_ += num // m
+                if num % m != 0:
+                    h_ += 1
+            if h_ < h:
+                j = m - 1
+            elif h_ > h:
+                i = m + 1
             else:
-                right = mid - 1
+                j = m - 1
 
-        return left</code></pre>
+        return i</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/kth-missing-positive-number">875. Koko Eating Bananas</a>
