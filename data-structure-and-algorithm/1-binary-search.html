@@ -496,47 +496,40 @@
 
 <pre><code class="python">class TimeMap:
 
-    # Use dictionary where
-    #   key = key
-    #   value = [timestamp, value] 
+    # Use dictionary of list
+    # Later timestamp will be inserted later in list
+    # Binary search to find biggest timestamp that is <= current
+    # from the end of list
+    # Set
+    # Time O(1)
+    # Space O(n)
+    # Get
+    # Time O(logn)
+    # Space O(1)
 
     def __init__(self):
-        self.dic = defaultdict(list)
+        self.timemap = defaultdict(list)
 
     def set(self, key: str, value: str, timestamp: int) -> None:
-        self.dic[key].append([timestamp, value])
-        
+        self.timemap[key].append((value, timestamp))
+
     def get(self, key: str, timestamp: int) -> str:
+        if key not in self.timemap:
+            return ""
+        if timestamp < self.timemap[key][0][1]:
+            return ""
         
-        if key not in self.dic:
-            return ""
-
-        left, right = 0, len(self.dic[key]) - 1
-
-        # If given timestamp is bigger than biggest timestamp
-        if timestamp > self.dic[key][right][0]:
-            return self.dic[key][right][1]
-        # If given timestamp is smaller than smallest timestamp
-        if timestamp < self.dic[key][left][0]:
-            return ""
-
-        while left <= right:
-            mid = (left+right) // 2
-
-            if timestamp < self.dic[key][mid][0]:
-                right = mid - 1
-            elif timestamp > self.dic[key][mid][0]:
-                left = mid + 1
+        i, j = 0, len(self.timemap[key]) - 1
+        while i <= j:
+            m = (i+j) // 2
+            if self.timemap[key][m][1] < timestamp:
+                i = m + 1
+            elif self.timemap[key][m][1] > timestamp:
+                j = m - 1
             else:
-                return self.dic[key][mid][1]
-
-        return self.dic[key][right][1]
+                return self.timemap[key][m][0]
         
-
-# Your TimeMap object will be instantiated and called as such:
-# obj = TimeMap()
-# obj.set(key,value,timestamp)
-# param_2 = obj.get(key,timestamp)</code></pre>
+        return self.timemap[key][j][0]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/time-based-key-value-store">981. Time Based Key-Value Store</a> | <a href="https://neetcode.io/problems/time-based-key-value-store">Time Based Key-Value Store</a>
