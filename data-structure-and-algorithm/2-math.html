@@ -322,21 +322,23 @@
 
 <pre><code class="python">class Solution:
     def carFleet(self, target: int, position: List[int], speed: List[int]) -> int:
+        
+        # p = [1,2,3], s = [5,3,2], t = 6 ? [5, 5, 5] -> 1
 
-        # Consider arriving times for cars
-        # Sort cars by position
-        #   If times[i+1] < times[i], fleet at i+1 will never be caught
-        #   If times[i+1] > times[i], fleet at i+1 will be caught at some point
-
-        # Time O(nlogn)
-        #   n = len(position)
+        # Sort by position
+        # For each car, find time that it will pass the target
+        # If time[i+1] < time[i], car at i + 1 will not be caught
+        # Else, car at i + 1 will be caught before reaching target
+        # Time O(nlogn) n = len(position)
         # Space O(n)
+
         result, cars = 0, []
         for p, s in zip(position, speed):
             cars.append([p,s])
         cars.sort(key=lambda x: x[0])
 
         times = [(target-p)/s for p, s in cars]
+        print(times)
 
         while len(times) > 1:
             lead = times.pop()
@@ -347,7 +349,6 @@
 
         if times:
             result += 1
-
         return result</code></pre>
   </div>
   <div class="card-footer text-muted">
