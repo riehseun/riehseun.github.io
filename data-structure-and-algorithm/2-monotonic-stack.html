@@ -57,38 +57,30 @@
 <pre><code class="python">class Solution:
     def largestRectangleArea(self, heights: List[int]) -> int:
         
-        # For each i, find the largest rectangle
-        # Expand to left and right while its height >= heights[i]
-        # How to find right boundry
-        #   Push each element into stack
-        #   When decreasing in sequence, 
-        #   current element is the right boundry of 
-        #   previous element (which is in stack)
-        # How to find left boundry
-        #   previous previous is left boundry
-        #   as long as stack only keeps increasing sequence
+        # [1,2,3] ? 4
 
-        stack, max_area = [], 0
-        stack.append(-1)  # Left boundry of heights[0]
-
-        # Time O(n)
-        #   n = len(heights)
+        # At each index, expand left and right till hitting lower height
+        # Keep only increasing sequence to stack
+        # When sequene decreases, current num is right boundry of top of stack
+        # left boundry of top of stack is its previous element in stack
+        # Time O(n) n = len(heights)
         # Space O(n)
-        for i, h in enumerate(heights):
 
-            while stack[-1] != -1 and heights[stack[-1]] > h:
-                height = heights[stack.pop()]  # current height
+        stack, max_area = [-1], 0
+        for i, h in enumerate(heights):
+            
+            while stack[-1] != -1 and h < heights[stack[-1]]:
+                height = heights[stack.pop()]
                 right = i
                 left = stack[-1]
-                max_area = max(max_area, height*(right-left-1))
-                print(max_area)
+                max_area = max(max_area, (right-left-1)*height)
             stack.append(i)
 
         while stack[-1] != -1:
             height = heights[stack.pop()]
             right = len(heights)
             left = stack[-1]
-            max_area = max(max_area, height*(right-left-1))
+            max_area = max(max_area, (right-left-1)*height)
 
         return max_area</code></pre>
   </div>
