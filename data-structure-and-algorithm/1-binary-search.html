@@ -226,55 +226,38 @@
 
 <pre><code class="python">class Solution:
     def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
-
-        # Binary search to find the row that target belongs
-        # If target < first number in mid row
-        #   Search upper row
-        # Elif target > last number in mid row
-        #   Search lower row
-        # Else
-        #   Return current row
-        # Then, binary search on the row
-
-        left, right = 0, len(matrix) - 1
-
-        # Time O(log(mn))
-        #   n = number of rows
-        #   m = number of cols
-        # Space O(1)
-        def binary_search_row(left, right, matrix, target):
-
-            while left <= right:
-                mid = (left+right) // 2
-                print(f"{left},{mid},{right}")
-                if target < matrix[mid][0]:
-                    right = mid - 1
-                    continue
-                if target > matrix[mid][len(matrix[mid])-1]:
-                    left = mid + 1
-                    continue  
-                return mid
-
-            return -1
-
-        index = binary_search_row(left, right, matrix, target)
         
-        def binary_search(left, right, row, target):
+        # Consider middle row
+        # If target < first num, search in upper row
+        # If target > last num, search in lower row
+        # Else, search in middle row
+        # Time O(logn+logm) n = number of rows, m = number of cols
+        # Space O(1)
 
-            while left <= right:
-                mid = (left+right) // 2
+        def binary_search(nums, target):
 
-                if target < row[mid]:
-                    right = mid - 1
-                elif target > row[mid]:
-                    left = mid + 1
-                else:  
+            i, j = 0, len(nums)
+            while i <= j:
+                m = (i+j) // 2
+                if nums[m] < target:
+                    i = m + 1
+                elif nums[m] > target:
+                    j = m - 1
+                else:
                     return True
-
             return False
 
-        left, right = 0, len(matrix[index]) - 1
-        return binary_search(left, right, matrix[index], target)</code></pre>
+        i, j = 0, len(matrix) - 1
+        while i <= j:
+            m = (i+j) // 2
+            if matrix[m][-1] < target:
+                i = m + 1
+            elif matrix[m][0] > target:
+                j = m - 1
+            else:
+                return binary_search(matrix[m], target)
+            
+        return False</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/search-a-2d-matrix">74. Search a 2D Matrix</a> | <a href="https://neetcode.io/problems/search-2d-matrix">Search a 2D Matrix</a>
@@ -446,6 +429,9 @@
 
 <pre><code class="python">class Solution:
     def search(self, nums: List[int], target: int) -> int:
+
+        # Time O(logn) n = len(nums)
+        # Space O(1)
 
         i, j = 0, len(nums) - 1
 
