@@ -64,66 +64,73 @@
   <div class="card-body">
     <h2 class="card-title">Median of Two Sorted Arrays (150/250)</h2>
 
-<pre><code class="python">class Solution:
-    def findMedianSortedArrays(self, nums1: List[int], nums2: List[int]) -> float:
+<pre><code class="python"># [1,3,4], [2,5] ? 3
+        # [1,2,3,4,5]
 
-        # Compute mid of nums1 and nums2 (mid1, mid2)
-        # Assume mid1 < mid2
-        # Try splitting nums1
-        #   Let left num of split = max_left_1
-        #   Let right num of split = min_right_1
-        #.  Let split point = mid1  
-        # Try splitting nums2
-        #   max_left_2, min_right_2, mid2 = (n+m+1) // 2 - mid1
-        # If max_left_1 <= min_right_2 and max_left_2 <= min_right_1
-        #   Return 
-        # If max_left_1 > min_right_2
-        #   max_left_1 is too big, right = split point - 1
-        # If min_right_1 < max_left_2
-        #   min_right_1 is too small, left = split spoint + 1
-
-        if len(nums1) > len(nums2):
-            nums1, nums2 = nums2, nums1
-
-        n, m = len(nums1), len(nums2)
-        left, right = 0, n
-
-        # Time O(log(min(n,m)))
-        #   n = len(nums1)
-        #   m = len(nums2)
+        # Let n1 = len(nums1), n2 = len(nums2), n = n1 + n2
+        # Let m1, m2 be mid points of nums1, nums2, and nums = nums1 + nums2
+        # Consider that we want to find kth element in nums
+        #   If k < m1 + m2, then kth is on left half of nums
+        #     If nums1[m1] > nums2[m2], remove r1
+        #     If nums1[m1] < nums2[m2], remove r2
+        #   If k > m1 + m2, then kth is on right half of nums
+        #     If nums1[m1] < nums2[m2], remove l1
+        #     If nums1[m1] > nums2[m2], remove l2
+        # Time O(log(n1+n2))
         # Space O(1)
-        while left <= right:
-            mid1 = (left+right) // 2
-            mid2 = (n+m+1) // 2 - mid1
-
-            if mid1 == 0:
-                max_left_1 = -math.inf
-            else:
-                max_left_1 = nums1[mid1-1] 
-            if mid1 == n:
-                min_right_1 = math.inf
-            else:
-                min_right_1 = nums1[mid1] 
-            if mid2 == 0:
-                max_left_2 = -math.inf
-            else:
-                max_left_2 = nums2[mid2-1]
-            if mid2 == m:
-                min_right_2 = math.inf
-            else:
-                min_right_2 = nums2[mid2]
-
-            if max_left_1 > min_right_2:
-                right = mid1 - 1
-                continue
-            if min_right_1 < max_left_2:
-                left = mid1 + 1
-                continue
-            if max_left_1 <= min_right_2 and max_left_2 <= min_right_1:
-                if (m+n) % 2 == 0:
-                    return (max(max_left_1, max_left_2) + min(min_right_1, min_right_2)) / 2
+    
+        def binary_search(i1, j1, i2, j2, k):
+            while i1 <= j1 and i2 <= j2:
+                if k == 0:
+                    break
+                m1 = (i1+j1) // 2
+                m2 = (i2+j2) // 2
+                if k < m1 + m2:
+                    if nums1[m1] > nums2[m2]:
+                        if m1 < j1:
+                            j1 = m1
+                        else:
+                            j1 = m1 - 1
+                    else:
+                        if m2 < j2:
+                            j2 = m2
+                        else:
+                            j2 = m2 - 1
                 else:
-                    return max(max_left_1, max_left_2)  </code></pre>
+                    if nums1[m1] < nums2[m2]:
+                        if m1 > i1:
+                            k -= (m1-i1)
+                            i1 = m1
+                        else:
+                            k -= 1
+                            i1 = m1 + 1
+                    else:
+                        if m2 > i2:
+                            k -= (m2-i2)
+                            i2 = m2
+                        else:
+                            k -= 1
+                            i2 = m2 + 1
+                print(f"{nums1[i1:j1+1]},{nums2[i2:j2+1]},k={k}")
+            if i1 > j1:
+                return nums2[i2+k]
+            if i2 > j2:
+                return nums1[i1+k]
+            return min(nums1[i1], nums2[i2])
+            
+        n1, n2 = len(nums1), len(nums2)
+        n = n1 + n2
+        i1, i2, j1, j2 = 0, 0, n1 - 1, n2 - 1
+        if (n1+n2) % 2 != 0:
+            return binary_search(i1, j1, i2, j2, n//2)
+        else:
+            a = binary_search(i1, j1, i2, j2, n//2)
+            b = binary_search(i1, j1, i2, j2, n//2-1)
+            print(a)
+            print(b)
+            return (a+b) / 2
+        
+        return 0</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/median-of-two-sorted-arrays">4. Median of Two Sorted Arrays</a> | <a href="https://neetcode.io/problems/median-of-two-sorted-arrays">Median of Two Sorted Arrays</a>
