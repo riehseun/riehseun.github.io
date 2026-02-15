@@ -39,90 +39,241 @@
 <div class="col-md-12">
 <h1 class="my-4">Software Engineering</h1>
 
-<!-- Graph DFS Recursive BEGIN -->
-<div class="card mb-4" id="graph-dfs-recursive">
+<!-- Advanced Graph BEGIN -->
+<div class="card mb-4" id="advanced-graph">
   <div class="card-body">
-    <h2 class="card-title">Graph DFS Recursive</h2>
+    <h2 class="card-title">Advanced Graph</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#graph-dfs-recursive-">Nested List Weight Sum</a></li>
+      <li><a href="#advanced-graph-">Reconstruct Itinerary</a></li>
+      <li><a href="#advanced-graph-">Swim in Rising Water</a></li>
+      <li><a href="#advanced-graph-">Making A Large Island</a></li>
+      <li><a href="#advanced-graph-">Min Cost to Connect All Points</a></li>
     </ul>
   </div>
 </div>
 
-<div class="card mb-4" id="graph-dfs-recursive-">
+<div class="card mb-4" id="advanced-graph-">
   <div class="card-body">
-    <h2 class="card-title">Nested List Weight Sum (M)</h2>
+    <h2 class="card-title">Reconstruct Itinerary (150/250)</h2>
 
-<pre><code class="python"># """
-# This is the interface that allows for creating nested lists.
-# You should not implement it, or speculate about its implementation
-# """
-#class NestedInteger:
-#    def __init__(self, value=None):
-#        """
-#        If value is not specified, initializes an empty list.
-#        Otherwise initializes a single integer equal to value.
-#        """
-#
-#    def isInteger(self):
-#        """
-#        @return True if this NestedInteger holds a single integer, rather than a nested list.
-#        :rtype bool
-#        """
-#
-#    def add(self, elem):
-#        """
-#        Set this NestedInteger to hold a nested list and adds a nested integer elem to it.
-#        :rtype void
-#        """
-#
-#    def setInteger(self, value):
-#        """
-#        Set this NestedInteger to hold a single integer equal to value.
-#        :rtype void
-#        """
-#
-#    def getInteger(self):
-#        """
-#        @return the single integer that this NestedInteger holds, if it holds a single integer
-#        Return None if this NestedInteger holds a nested list
-#        :rtype int
-#        """
-#
-#    def getList(self):
-#        """
-#        @return the nested list that this NestedInteger holds, if it holds a nested list
-#        Return None if this NestedInteger holds a single integer
-#        :rtype List[NestedInteger]
-#        """
+<pre><code class="python">class Solution:
+    def findItinerary(self, tickets: List[List[str]]) -> List[str]:
 
-class Solution:
-    def depthSum(self, nestedList: List[NestedInteger]) -> int:
-
-        # DFS recursively
-
-        self.sum = 0
-
-        # Time O(n)
-        #   Number of recursive calls = number of nested lists
+        # DFS 
+        # Sort tickets by destination 
+        # Greedly traverse until no destination is left
+        # Time O(nlogn) n = len(tickets)
         # Space O(n)
-        #   Recursion stack 
-        def dfs(nestedList, depth):
 
-            for item in nestedList:
-                if item.isInteger():
-                    self.sum += (item.getInteger()*depth)
-                else:
-                    dfs(item.getList(), depth+1)
+        graph, result = defaultdict(list), []
+        tickets.sort(key=lambda x: x[1], reverse=True)
+        
+        for src, det in tickets:
+            graph[src].append(det)
 
-        dfs(nestedList, 1) 
-        return self.sum</code></pre>
+        stack = []
+        stack.append("JFK")
+        
+        while stack:
+            while graph[stack[-1]]:
+                stack.append(graph[stack[-1]].pop())
+            result.append(stack.pop())
+
+        return result[::-1]</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/nested-list-weight-sum">339. Nested List Weight Sum</a>
+    Reference: <a href="https://leetcode.com/problems/reconstruct-itinerary">332. Reconstruct Itinerary</a> | <a href="https://neetcode.io/problems/reconstruct-flight-path">Reconstruct Flight Path</a>
   </div>
 </div>
-<!-- Graph DFS Recursive END -->
+
+<div class="card mb-4" id="advanced-graph-">
+  <div class="card-body">
+    <h2 class="card-title">Swim in Rising Water (150/250)</h2>
+
+<pre><code class="python"># Minimum spanning tree
+        # Construct disjoint sets of a single node
+        # Greedly merge sets 
+        # Time O(n**2logn) n = number of cells in matrix
+        # Space O(n**2)
+
+        def find(a):
+            if parent[a] != a:
+                parent[a] = find(parent[a])
+            return parent[a]
+
+        def union(a, b):
+            parent[find(a)] = find(b)
+
+        n, m = len(grid), len(grid[0])
+        dirs = [(-1,0), (1,0), (0,-1), (0,1)]
+        edges = []
+
+        for i in range(n):
+            for j in range(m):
+                curr_num = i * n + j
+                up_num = (i-1) * n + j
+                left_num = i * n + (j-1)
+                if i > 0:
+                    edges.append((max(grid[i][j], grid[i-1][j]), up_num, curr_num))
+                if j > 0:
+                    edges.append((max(grid[i][j], grid[i][j-1]), left_num, curr_num))
+
+        edges.sort()
+        parent = [i for i in range(n*m)]
+
+        for cost, a, b in edges:
+            union(a, b)
+            if find(0) == find(n*m-1):
+                return cost
+
+        return grid[0][0]</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/swim-in-rising-water">778. Swim in Rising Water</a> | <a href="https://neetcode.io/problems/swim-in-rising-water">Swim in Rising Water</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="advanced-graph-">
+  <div class="card-body">
+    <h2 class="card-title">Making A Large Island (H)</h2>
+
+<pre><code class="python">class UnionFind:
+
+    def __init__(self):
+        self.parent = defaultdict(tuple)
+        self.size = defaultdict(int)
+
+    def union(self, node_1: tuple, node_2: tuple):
+
+        leader_1 = self.find(node_1)
+        leader_2 = self.find(node_2)
+
+        if leader_1 == leader_2:
+            return
+
+        if self.size[leader_1] > self.size[leader_2]:
+            self.parent[leader_2] = leader_1
+            self.size[leader_1] += self.size[leader_2]
+        else:
+            self.parent[leader_1] = leader_2
+            self.size[leader_2] += self.size[leader_1]
+
+    def find(self, node: tuple) -> int:
+
+        if self.parent[node] == node:
+            return node
+
+        return self.find(self.parent[node])
+
+class Solution:
+    def largestIsland(self, grid: List[List[int]]) -> int:
+
+        # UnionFind
+        # Initialize 
+        #   Parent of each node to be itself
+        #   Size of each node is 1
+        # For each node with value 1, 
+        # find neighbors with value 1, then union them
+        # Then, for each node with value 0, 
+        # find neighboring islands
+
+        unionfind = UnionFind()
+        directions = [
+            (-1, 0), 
+            (0, -1), 
+            (0, 1), 
+            (1, 0),
+        ]
+
+        is_zero = False
+        for i in range(len(grid)):
+            for j in range(len(grid[0])):
+                unionfind.parent[(i,j)] = (i,j)
+                unionfind.size[(i,j)] = 1
+                if grid[i][j] == 0:
+                    is_zero = True
+        
+        if not is_zero:
+            return len(grid) * len(grid[0])
+
+        for i in range(len(grid)):
+            for j in range(len(grid[0])):
+                if grid[i][j] == 1:
+                    for row, col in directions:
+                        if 0 <= row + i < len(grid) \
+                            and 0 <= col + j < len(grid) \
+                            and grid[row+i][col+j] == 1:
+                            unionfind.union((i,j),(row+i,col+j))
+
+        max_size = 0
+        unique_roots = set()
+        for i in range(len(grid)):
+            for j in range(len(grid[0])):
+                if grid[i][j] == 0:
+                    current_size = 1
+                    for row, col in directions:
+                        if 0 <= row + i < len(grid) \
+                            and 0 <= col + j < len(grid) \
+                            and grid[row+i][col+j] == 1:
+                            root = unionfind.find((row+i,col+j))
+                            unique_roots.add(root)
+                    for root in unique_roots:
+                        current_size += unionfind.size[root]
+                    unique_roots.clear()
+                    max_size = max(max_size, current_size)
+
+        print(unionfind.size)
+        return max_size</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/making-a-large-island">827. Making A Large Island</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="advanced-graph-">
+  <div class="card-body">
+    <h2 class="card-title">Min Cost to Connect All Points (150/250)</h2>
+
+<pre><code class="python">class Solution:
+    def minCostConnectPoints(self, points: List[List[int]]) -> int:
+
+        # Points are nodes
+        # Edges exists between any two points
+        # Minimum spanning tree
+        # Greedly explore nodes not in MST and pick lowest cost
+        # Time O(n**2) n = number of nodes
+        # Space O(n)
+
+        n, m, cost = len(points), 0, 0
+        min_dist = [math.inf] * n
+        min_dist[0] = 0
+        mst = [False] * n
+
+        while m < n:
+            min_node, min_edge = -1, math.inf
+
+            for node in range(n):
+                if not mst[node] and min_edge > min_dist[node]:
+                    min_edge = min_dist[node]
+                    min_node = node
+
+            cost += min_edge
+            m += 1
+            mst[min_node] = True
+
+            for next_node in range(n):
+                dist = abs(points[min_node][0]-points[next_node][0]) \
+                    + abs(points[min_node][1]-points[next_node][1])
+                if not mst[next_node] and min_dist[next_node] > dist:
+                    min_dist[next_node] = dist
+
+        return cost</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/min-cost-to-connect-all-points">1584. Min Cost to Connect All Points</a> | <a href="https://neetcode.io/problems/min-cost-to-connect-points">Min Cost to Connect Points</a>
+  </div>
+</div>
+<!-- Advanced Graph END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->
