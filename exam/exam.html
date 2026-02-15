@@ -132,9 +132,86 @@ return "".join(stack)
 <pre><code class="python">
 # DSA Q3
 
+# An underground railway system is keeping track of customer travel times between different stations. They are using this data to calculate the average time it takes to travel from one station to another.
+# Implement the UndergroundSystem class:
+# void checkIn(int id, string stationName, int t)
+# A customer with a card ID equal to id, checks in at the station stationName at time t.
+# A customer can only be checked into one place at a time.
+# void checkOut(int id, string stationName, int t)
+# A customer with a card ID equal to id, checks out from the station stationName at time t.
+# double getAverageTime(string startStation, string endStation)
+# Returns the average time it takes to travel from startStation to endStation.
+# The average time is computed from all the previous traveling times from startStation to endStation that happened directly, meaning a check in at startStation followed by a check out from endStation.
+# The time it takes to travel from startStation to endStation may be different from the time it takes to travel from endStation to startStation.
+# There will be at least one customer that has traveled from startStation to endStation before getAverageTime is called.
+# You may assume all calls to the checkIn and checkOut methods are consistent. If a customer checks in at time t1 then checks out at time t2, then t1 < t2. All events happen in chronological order.
+
+class UndergroundSystem:
+
+    # Keep a mapping between id: stationName: and t (checkIn and checkOut)
+    # Keep a mapping between id: lastCheckInStation
+    # AverageTime - whenever customer ends a trip, compute travel time, and store it in another mapping (startStation, endStation): time
+    # checkIn
+    # Time O(1)
+    # Space O(n) n = number of check-in
+    # checkOut
+    # Time O(1)
+    # Space O(n)
+    # getAverageTime
+    # Time O(n)
+    # Space O(1)
+
+    def __init__(self):
+        self.check_in = {}
+        self.last_check_in_station = defaultdict(str)
+        self.travel_time = defaultdict(list)
+
+    def checkIn(self, id, stationName, t):
+        if id not in self.check_in:
+            self.check_in[id] = {}
+        if stationName not in self.check_in[id]:
+            self.check_in[id][stationName] = []
+        self.check_in[id][stationName] = t
+        self.last_check_in_station[id] = stationName
+
+    def checkOut(self, id, stationName, t):
+        station = self.last_check_in_station[id]
+        start_time = self.check_in[id][station]
+        self.travel_time[(station, stationName)].append(t-start_time)
+
+    def getAverageTime(self, startStation, endStation):
+        return sum(self.travel_time[(startStation, endStation)]) / len(self.travel_time[(startStation, endStation)])
 </code></pre>
 
-<pre><code class="python"># DSA Q4</code></pre>
+<pre><code class="python">
+# DSA Q4
+
+# You are given a doubly linked list, which contains nodes that have a next pointer, a previous pointer, and an additional child pointer. This child pointer may or may not point to a separate doubly linked list, also containing these special nodes. These child lists may have one or more children of their own, and so on, to produce a multilevel data structure as shown in the example below.
+# Given the head of the first level of the list, flatten the list so that all the nodes appear in a single-level, doubly linked list. Let curr be a node with a child list. The nodes in the child list should appear after curr and before curr.next in the flattened list.
+# Return the head of the flattened list. The nodes in the list must have all of their child pointers set to null.
+
+# If child pointer is not null, store node.next in stack, then node.next = child
+# If node.next is null, node.next = stack.pop()
+# Time O(n) n = number of nodes in LL
+# Space O(1)
+
+stack, node = [], head
+dummy_head = Node()
+dummy_head.next = node
+
+while node:
+    
+    if not node.child:
+        if not node.next:
+            node.next = stack.pop()
+        else:
+            node = node.next
+    else:
+        stack.append(node.next)
+        node.next = child
+
+return dummy_head.next
+</code></pre>
 
 <pre><code class="python"># ML</code></pre>
 
