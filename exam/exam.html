@@ -211,13 +211,97 @@ while node:
 return dummy_head.next
 </code></pre>
 
-<pre><code class="python"># MLSD Q1</code></pre>
+<img class="img-fluid" class="card-img-top" src="/exam/2026-02-09-1.png" alt="Card image cap">
 
-<pre><code class="python"># MLSD Q2</code></pre>
+<img class="img-fluid" class="card-img-top" src="/exam/2026-02-09-2.png" alt="Card image cap">
 
-<pre><code class="python"># ML</code></pre>
+<pre><code class="markdown">
+# MLSD Q1
 
-<pre><code class="python"># BE</code></pre>
+# Design a system that sells AD space for customers to maximize revenue
+
+# Requirement and Problem
+
+Is the goal to recommend best spaces for place ADs to maximize revenue for each customer? Yes
+Should the system provide personalized recommendataion for each customer? Yes
+What does AD consist of? Text, image, video
+
+Are there training dataset available? 1M data points of AD space and revenue for each customer
+How fast should inference be? Under 200ms ! 
+How many customers are there? 100M
+How many AD spaces are there? Billions
+Should the model be continuously trained based on new data points of AD space and revenue? Yes !
+Should the model explain to users reasons for making recommendation? No !
+Should the model be deployed to customer's edge devices? No
+
+Input - customer
+Output - list of AD spaces ranked based on expected revenue
+Problem - supervised ranking problem
+
+# High-Level Design
+
+# Data and Feature Engineering
+
+## Data model 
+ADSpace, AD, Customer, ADSpace-AD
+
+## Features
+AD - text, image, video
+ADSpace - platform type, average number of visitors to platform, total revenue
+
+## Feature engineering
+average number of visitors, total revenue - standardize
+platform type - one-hot
+ADSpace ID, Customer ID - embedding (learnable)
+text - BERT
+image - CLIP
+video - CLIP's video encoder
+
+# Model Development
+
+## Baseline
+Simply suggest ADSpace that generated most profit in the past - same recommendation for all users
+
+## Architecture
+Matrix Factorization between AD and ADSpace historical interaction (1 if generated good revenue, 0 otherwise)
+Deep Learning with two tower
+
+## Training
+Ground truth - ranked list of ADSpace for each AD
+
+# Inference and Evaluation
+
+Store static features (AD - text, image, video, AD Space - platform type) in feature store
+Compute dynamic features during runtime - average number of visitors, total revenue
+Acquire ADs from the customers beforehand and compute candidate generation beforehand using collaborative filtering (only use AD and AD Space historical interaction, no AD or AD Space feature needed)
+Compute similar between AD and AD Space embedding amongst candidate AD Spaces that are pre-generated
+Ranking service (main model) focuses getting top k results
+Re-ranking service focuses getting the ordering right 
+
+## Offline
+Ranking - recall at K
+Re-ranking - precision at K
+Overall - NDCG
+
+## Online
+Revenue reported by customers
+
+# Detailed Design
+</code></pre>
+
+<pre><code class="markdown">
+# MLSD Q2
+
+# Design Model Serving that can handle millions of requests per second
+</code></pre>
+
+<pre><code class="python">
+# ML
+</code></pre>
+
+<pre><code class="python">
+# BE
+</code></pre>
 
   </div>
   <div class="card-footer text-muted">
