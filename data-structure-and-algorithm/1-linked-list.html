@@ -68,39 +68,39 @@
 #     def __init__(self, val=0, next=None):
 #         self.val = val
 #         self.next = next
+
 class Solution:
     def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:
         
-        # Add numbers while remembering the carry
-
-        carry, prev, dummy_head = 0, None, None
-        
-        # Time O(n)
-        #   n = max length of l1 and l2
+        # Iterate both LL, creating new node with their sum of node val
+        # Maintain a carry and apply it when adding each node
+        # Time O(n) n = len(max(l1, l2))
         # Space O(1)
+
+        l3, dummy_head, carry = None, None, 0
         while l1 or l2:
 
-            v3 = carry
+            sum = carry
             if l1:
-                v3 += l1.val
+                sum += l1.val
                 l1 = l1.next
             if l2:
-                v3 += l2.val
+                sum += l2.val
                 l2 = l2.next
-            
-            carry = 1 if v3 > 9 else 0
-
-            l3 = ListNode(v3%10)
-            if prev:
-                prev.next = l3
-                prev = l3
+            if sum > 9:
+                sum -= 10
+                carry = 1
             else:
-                prev = l3
-                dummy_head = prev
-                
-        if carry == 1:
-            prev.next = ListNode(1)
+                carry = 0
+            if not l3:
+                l3 = ListNode(sum)
+                dummy_head = l3
+            else:
+                l3.next = ListNode(sum)
+                l3 = l3.next
 
+        if carry == 1:
+            l3.next = ListNode(1)
         return dummy_head</code></pre>
   </div>
   <div class="card-footer text-muted">
