@@ -89,9 +89,7 @@
 
 <div class="card mb-4" id="data-structure-and-algorithm-">
   <div class="card-body">
-    <h2 class="card-title">Array</h2>
-
-    <h3 class="card-title">Hash table</h3>
+    <h2 class="card-title">Hash table</h2>
     <ul>
       <li>Representation</li>
 <pre><code class="python">my_dict = {}  # Dictionary
@@ -116,7 +114,7 @@ my_set = set()  # Set</code></pre>
       </ul>
     </ul>
 
-    <h3 class="card-title">Sequence</h3>
+<!--     <h3 class="card-title">Sequence</h3>
 
     <h3 class="card-title">Prefix sum</h3>
 
@@ -130,7 +128,7 @@ for i, num in enumerate(nums):
       <li>Uses a pointer and window size</li>
     </ul>
 
-    <h3 class="card-title">Two pointer</h3>
+    <h3 class="card-title">Two pointer</h3> -->
   </div>
   <div class="card-footer text-muted">
     Reference: <a href=""></a>
@@ -156,13 +154,11 @@ for i, num in enumerate(nums):
         </ul>
         <li>Delete</li>
         <ul>
-          <li>Remove elements from the beginning of a stack - <code>stack.pop(0)</code> - \( O(1) \)</li>
+          <li>Remove elements from the beginning of a stack - <code>stack.pop(0)</code> - \( O(n) \)</li>
           <li>Remove elements from the end of a stack - <code>stack.pop()</code> - \( O(1) \)</li>
         </ul>
       </ul>
     </ul>
-
-    <h3 class="card-title">Monotonic stack</h3>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href=""></a>
@@ -195,8 +191,6 @@ queue = deque()</code></pre>
         </ul>
       </ul>
     </ul>
-
-    <h3 class="card-title">Monotonic queue</h3>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href=""></a>
@@ -310,7 +304,7 @@ class Node:
         <ul>
           <li>\( n \) - number of nodes in tree</li>
         </ul>
-        <li>Space \( O(logn) \)</li>
+        <li>Space \( O(h) = O(n) \)</li>
         <ul>
           <li>Recursion stack</li>
         </ul>
@@ -397,19 +391,19 @@ print(-heappop(min_heap)) # 1</code></pre>
       <li>Runtime</li>
       <ul>
         <li>Heapify (n batched inserts) - \( O(n) \)</li>
-        <li>Extract (remove an element with minimum key) - \( O(?) \)</li>
+        <li>Extract (remove an element with minimum key) - \( O(logn) \)</li>
         <ul>
           <li>Delete root</li>
           <li>Move last node to new root</li>
           <li>Bubble-down k until k's parent <= k</li>
         </ul>
-        <li>Insert (add to heap) - \( O(?) \)</li>
+        <li>Insert (add to heap) - \( O(logn) \)</li>
         <ul>
           <li>Create a new node at the end of the heap</li>
           <li>Place the new key at that node</li>
           <li>Perculate (swap values if needed) up until reaching the root and the heap property is satisfied</li>
         </ul>
-        <li>Delete - \( O(?) \)</li>
+        <li>Delete - \( O(logn) \)</li>
         <ul>
           <li>Delete the root</li>
           <li>Move the key of the last child node to root</li>
@@ -472,6 +466,13 @@ print(-heappop(min_heap)) # 1</code></pre>
 <div class="card mb-4" id="data-structure-and-algorithm-">
   <div class="card-body">
     <h2 class="card-title">Backtracking</h2>
+    <ul>
+      <li>Runtime</li>
+      <ul>
+        <li>\( k \) - branching factor</li>
+        <li>\( n  \) - depth of recursion</li>
+      </ul>
+    </ul>
 
 <pre><code class="python">def backtrack():
 
@@ -533,41 +534,6 @@ graph = defaultdict(list)</code></pre>
             if next_node not in explored:
                 explored.add(next_node)
                 stack.append(next_node)</code></pre>
-      <li>Topological ordering (Khan's algorithm)</li>
-      <ul>
-        <li>Find indegree for each node where indegree is number of incoming nodes</li>
-        <li>Add nodes with indegree of 0 to a queue</li>
-        <li>For next nodes, remove incoming node</li>
-        <li>Repeat</li>
-      </ul>
-<pre><code class="python">from collections import deque
-
-def topological_sort(edges):
-
-    graph, indegree = defaultdict(list), defaultdict(int)
-
-    for a, b in edges:
-        graph[a] = b
-        indegree[b] += 1
-
-    queue = deque()
-
-    for key, val in graph.items():
-        if key not in indegree:
-            queue.append(key)
-
-    while queue:
-        node = queue.popleft()
-        
-        for next_node in graph[node]:
-            indegree[next_node] -= 1
-            if indegree[next_node] == 0:
-                queue.append(next_node)</code></pre>
-      <li>Detect cycle</li>
-      <ul>
-        <li>Do topological sort</li>
-        <li>If indegree of any node != 0, then there is cycle</li>
-      </ul>
       <li>Check if graph is tree</li>
       <ul>
         <li>Check if there is no cycle</li>
@@ -602,6 +568,7 @@ def bfs(graph, start):
             if next_node not in explored:
                 explored.add(next_node)
                 queue.append(next_node)</code></pre>
+
       <li>Shortest path</li>
       <ul>
         <li>Compute dist(v), the fewest number of edges on path from s to v</li>
@@ -641,6 +608,42 @@ def bfs(graph, start, end):
 for i in range(num_nodes):
     if i not in explored:
         bfs(i, graph, explored)</code></pre>
+    </ul>
+
+    <h3 class="card-title">Topological Sort (Khan's algorithm)</h3>
+    <ul>
+      <li>Find indegree for each node where indegree is number of incoming nodes</li>
+      <li>Add nodes with indegree of 0 to a queue</li>
+      <li>For next nodes, remove incoming node</li>
+      <li>Repeat</li>
+<pre><code class="python">from collections import deque
+
+def topological_sort(edges):
+
+    graph, indegree = defaultdict(list), defaultdict(int)
+
+    for a, b in edges:
+        graph[a] = b
+        indegree[b] += 1
+
+    queue = deque()
+
+    for key, val in graph.items():
+        if key not in indegree:
+            queue.append(key)
+
+    while queue:
+        node = queue.popleft()
+        
+        for next_node in graph[node]:
+            indegree[next_node] -= 1
+            if indegree[next_node] == 0:
+                queue.append(next_node)</code></pre>
+      <li>Detect cycle</li>
+      <ul>
+        <li>Do topological sort</li>
+        <li>If indegree of any node != 0, then there is cycle</li>
+      </ul>
     </ul>
 
     <h3 class="card-title">Union-Find</h3>
