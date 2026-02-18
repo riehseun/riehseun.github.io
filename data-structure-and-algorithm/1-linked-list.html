@@ -271,58 +271,43 @@ class Solution:
 #     def __init__(self, val=0, next=None):
 #         self.val = val
 #         self.next = next
+
 class Solution:
     def reverseKGroup(self, head: Optional[ListNode], k: int) -> Optional[ListNode]:
-
-        # Move k nodes and reverse
-
-        if k == 1:
-            return head
-
-        def reverse(node, current_node):
-
-            prev = start = end = None
-
-            while node:
-
-                if not prev:
-                    end = node
-
-                next_node = node.next
-                node.next = prev
-                prev = node
-                node = next_node
-
-                if node == current_node:
-                    start = prev
-                    break
-
-            return start, end
-
-        dummy_node = node = head
-        start1 = end1 = start2 = end2 = None
-        count = k
-
-        # Time O(kn)
-        #   n = length of LL
-        # Space O(1)
-        while node:
-            count -= 1
-            node = node.next
-
-            if count == 0:
-                start2, end2 = reverse(dummy_node, node)
-                if not start1 and not end1:
-                    start1 = start2
-                    end1 = end2
-                else:
-                    end1.next = start2
-                    end1 = end2
-                dummy_node = node
-                count = k
         
-        end2.next = dummy_node
-        return start1</code></pre>
+        # N(1)->N(2)->N(3)->N(4), k = 2 ? N(1)<-N(2) N(3)<-N(4)
+
+        # Reverse nodes if remaining number of nodes >= k
+        # Ending node of last group goes to start node of next group
+        # Time O(n) n = number of nodes in LL
+        # Space O(1)
+
+        node, first_node, last_end_node = head, None, None
+        while node:
+            cnt, prev, end_node = 0, None, None
+            temp, l = node, 0
+            while temp:
+                l += 1
+                temp = temp.next
+            if l >= k:
+                while cnt < k:
+                    if not prev:
+                        end_node = node
+                    node_next = node.next
+                    node.next = prev
+                    prev = node
+                    node = node_next
+                    cnt += 1
+                if last_end_node:
+                    last_end_node.next = prev
+                last_end_node = end_node
+                if not first_node:
+                    first_node = prev
+            else:
+                last_end_node.next = node
+                break
+            
+        return first_node</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/reverse-nodes-in-k-group">25. Reverse Nodes in k-Group</a> | <a href="https://neetcode.io/problems/reverse-nodes-in-k-group">Reverse Nodes in K-Group</a>
