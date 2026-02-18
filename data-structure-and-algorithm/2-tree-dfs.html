@@ -765,33 +765,28 @@ class Solution:
 #         self.val = val
 #         self.left = left
 #         self.right = right
+
 class Solution:
     def goodNodes(self, root: TreeNode) -> int:
-        
+
         # Pre-order traverse
-        # Remember max value 
-        #   If node val is greater than max value, its good
+        # Remember max value seen for each path
+        # If node.val > max, then node is good
+        # Time O(n) n = number of nodes in tree
+        # Space O(n) recursion stack
 
-        self.count = 0
-
-        # Time O(n)
-        #   n = number of nodes in tree
-        # Space O(h)
-        #   h = height of tree
-        #   Recursion stack
-        def pre_order(node, max_value):
+        def pre_order(node, max_val):
 
             if node:
-                if node.val >= max_value:
-                    self.count += 1
-                    print(node.val)
-                max_value = max(max_value, node.val)
+                if node.val >= max_val:
+                    self.num_good_nodes += 1
+                max_val = max(max_val, node.val)
+                pre_order(node.left, max_val)
+                pre_order(node.right, max_val)
 
-                pre_order(node.left, max_value)
-                pre_order(node.right, max_value)
-
+        self.num_good_nodes = 0
         pre_order(root, -math.inf)
-        return self.count</code></pre>
+        return self.num_good_nodes</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/count-good-nodes-in-binary-tree">1448. Count Good Nodes in Binary Tree</a> | <a href="https://neetcode.io/problems/count-good-nodes-in-binary-tree">Count Good Nodes in Binary Tree</a>
