@@ -575,38 +575,30 @@ class Solution:
 #         self.val = val
 #         self.left = left
 #         self.right = right
+
 class Solution:
     def diameterOfBinaryTree(self, root: Optional[TreeNode]) -> int:
-
-        # Diameter or longest path is sum of 
-        #   root + left subtree + right subtree
-        # Do post order traverse
-        #   If leaf node, return 1
-        #   Else, max path is
-        #     longest path of left + longest path of right + 1
-        #   Valid path can only have either left or right subtree 
-
-        self.max_path = 0
-
-        # Time O(n)
-        #   n = number of nodes in tree
-        # Space O(h)
-        #   h = height of tree
-        #   Recursion stack
-        self.max_path = 0
+        
+        # Diameter = root + left subtree + right subtree
+        # Post-order traverse
+        # At leaf node, return 0
+        # At root, take 1 + max(left ,right)
+        # Time O(n) n = number of nodes in tree
+        # Space O(n) recursion stack
 
         def post_order(node):
 
             if node:
-                max_right = post_order(node.right)
-                max_left = post_order(node.left)
-                self.max_path = max(self.max_path, max_right+max_left+1)
-                return max(max_right, max_left) + 1
+                left = post_order(node.left)
+                right = post_order(node.right)
+                self.max_d = max(self.max_d, 1+left+right)
+                return 1 + max(left, right)
             else:
                 return 0
 
+        self.max_d = 0
         post_order(root)
-        return self.max_path - 1</code></pre>
+        return self.max_d - 1</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/diameter-of-binary-tree">543. Diameter of Binary Tree</a> | <a href="https://neetcode.io/problems/binary-tree-diameter">Diameter of Binary Tree</a>
