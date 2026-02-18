@@ -45,16 +45,16 @@
     <h2 class="card-title">Machine Learning System Design</h2>
     <ul class="list-unstyled mb-0">
       <li><a href="#machine-learning-system-design-1">Introduction and Overview</a></li>
-      <li><a href="#machine-learning-system-design-2"></a></li>
-      <li><a href="#machine-learning-system-design-3"></a></li>
-      <li><a href="#machine-learning-system-design-4"></a></li>
-      <li><a href="#machine-learning-system-design-5"></a></li>
-      <li><a href="#machine-learning-system-design-6"></a></li>
-      <li><a href="#machine-learning-system-design-7"></a></li>
-      <li><a href="#machine-learning-system-design-8"></a></li>
-      <li><a href="#machine-learning-system-design-9"></a></li>
-      <li><a href="#machine-learning-system-design-10"></a></li>
-      <li><a href="#machine-learning-system-design-11"></a></li>
+      <li><a href="#machine-learning-system-design-2">Visual Search System</a></li>
+      <li><a href="#machine-learning-system-design-3">Google Street View Blurring System</a></li>
+      <li><a href="#machine-learning-system-design-4">Youtube Video Search</a></li>
+      <li><a href="#machine-learning-system-design-5">Harmful Content Detection</a></li>
+      <li><a href="#machine-learning-system-design-6">Video Recommendataion System</a></li>
+      <li><a href="#machine-learning-system-design-7">Event Recommendation System</a></li>
+      <li><a href="#machine-learning-system-design-8">Ad Click Prediction on Social Platform</a></li>
+      <li><a href="#machine-learning-system-design-9">Similar Listings on Vacation Rental Platform</a></li>
+      <li><a href="#machine-learning-system-design-10">Personalized News Feed</a></li>
+      <li><a href="#machine-learning-system-design-11">People You May Know</a></li>
     </ul>
   </div>
 </div>
@@ -305,7 +305,254 @@
 
 <div class="card mb-4" id="machine-learning-system-design-2">
   <div class="card-body">
-    
+    <h2 class="card-title">Visual Search System</h2>
+
+    <h3 class="card-title">Clarifying Requirements</h3>
+    <ul>
+      <li>Should the images be ranked from most similar to least similar? Yes</li>
+      <li>Should the system support videos? No</li>
+      <li>Can users crop images and use those to find similar images? Yes</li>
+      <li>Should the images be personalized to each user? No</li>
+      <li>Should the model use image metadata? No, only the pixels are used</li>
+      <li>Can users like, share, save images? No, only supported action is image clicks</li>
+      <li>Should the images be moderated? No</li>
+      <li>Should we label the data based on user interaction? Yes</li>
+      <li>How fast should the search be? There are 100-200B images and inference should be reasonably fast</li>
+    </ul>
+
+    <h3 class="card-title">Frame the Problem as an ML Task</h3>
+    <ul>
+      <li>Define ML objective</li>
+      <ul>
+        <li>Retrieve images that are similar to the image that user provided</li>
+      </ul>
+      <li>Specify system input and output</li>
+      <ul>
+        <li>Input - image provided by user</li>
+        <li>Output - images that are similar to input image ranked by similarity score</li>
+      </ul>
+      <li>Choose right ML category</li>
+      <ul>
+        <li>Ranking problem</li>
+        <ul>
+          <li>Learn embeddings of images such that</li>
+          <ul>
+            <li>Similar images are close</li>
+            <li>Dissimilar images are far</li>
+          </ul>
+          <li>Input images are transformed into embedding vector</li>
+          <li>Distance between input image and other images are computed to output similarity score</li>
+          <li>Images are then ranked by similarity score</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Data Preparation</h3>
+    <ul>
+      <li>Data engineering</li>
+      <ul>
+        <li>Images</li>
+        <ul>
+          <li>image_id</li>
+          <li>owner_id</li>
+          <li>upload_time</li>
+          <li>manual_tags</li>
+        </ul>
+        <li>Users</li>
+        <ul>
+          <li>user_id</li>
+          <li>username</li>
+          <li>age</li>
+          <li>gender</li>
+          <li>city</li>
+          <li>country</li>
+          <li>email</li>
+        </ul>
+        <li>User-image interactions</li>
+        <ul>
+          <li>user_id</li>
+          <li>input_image_id</li>
+          <li>displayed_image_id</li>
+          <li>rank_of_displayed_image</li>
+          <li>interaction - impression, click</li>
+          <li>location</li>
+          <li>timestamp</li>
+        </ul>
+      </ul>
+      <li>Feature engineering</li>
+      <ul>
+        <li>Resize - models require fixed-sized images</li>
+        <li>Scale - pixel values should be between 0 and 1</li>
+        <li>Normalize - pixel values should have mean 0 and variance 1</li>
+        <li>Color mode - pick either RGB or CMYK</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Model Development</h3>
+    <ul>
+      <li>Model selection</li>
+      <ul>
+        <li>Good at handling unstructured data like images</li>
+        <li>Can produce embeddings of images</li>
+      </ul>
+      <li>Model training</li>
+      <ul>
+        <li>Constructing dataset</li>
+        <li>Choosing loss function</li>
+        <ul>
+          <li>Use dot product or cosine similarity to compute distances between query embedding and all other embeddings</li>
+          <ul>
+            <li>Euclidean distance is not used due to curse of dimensionality</li>
+          </ul>
+          <li>Apply softmax to distances to make them sum to 1</li>
+          <li>Use cross-entropy to measure how close the probabilities are to the ground truth</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Evaluation</h3>
+    <ul>
+      <li>Offline</li>
+      <ul>
+        <li>1. mean reciprobal rank (MRR)</li>
+        <ul>
+          <li>\( MRR = \dfrac{1}{m} \displaystyle\sum_{i=1}^{m} \dfrac{1}{\text{rank}_{i}} \)</li>
+          <ul>
+            <li>\( {\text{rank}_{i}} \) is position on which the first relevant item appears in the output list</li>
+          </ul>
+          <li>Consider only the first relevant item in each output list, then average the reciprocal rank</li>
+          <li>Ignores other relevant items in the list other than the first one</li>
+        </ul>
+        <li>2. recall@k</li>
+        <ul>
+          <li>\( \dfrac{\text{Number of relevant items in the output list (contaning top k items)}}{\text{total relevant items in the dataset}} \)</li>
+          <li>Does not consider ranking quality</li>
+          <li>Denominator can be very big, which negatively impacts recall value</li>
+        </ul>
+        <li>3. precision@k</li>
+        <ul>
+          <li>\( \dfrac{\text{Number of relevant items in the output list (contaning top k items)}}{\text{k}} \)</li>
+          <li>Does not consider ranking quality</li>
+        </ul>
+        <li>4. mean average precision (mAP)</li>
+        <ul>
+          <li>AP</li>
+          <ul>
+            <li>\( AP = \dfrac{\displaystyle\sum_{i=1}^{k} \text{precision}@i}{n} \)</li>
+            <ul>
+              <li>\( n = \) total relevant items</li>
+            </ul>
+            <li>Averages precision@k at different values of k</li>
+            <li>AP is high if more relevant items are located at the top of list</li>
+          </ul>
+          <li>mAP</li>
+          <ul>
+            <li>Compute AP for each output list, then average them</li>
+          </ul>
+          <li>Works well when each item is either relevant or irrelevant, but does not work well for relevance scores</li>
+        </ul>
+        <li>5. normalized discounted cumulative gain (nDCG)</li>
+        <ul>
+          <li>\( DCG_{p} = \displaystyle\sum_{i=1}^{p} \dfrac{\text{rel}_{i}}{log_{2}(i+1)} \)</li>
+          <ul>
+            <li>\( \text{rel}_{i} \) is ground truth relevance score of image ranked at \( i \)</li>
+          </ul>
+          <li>\( nDCG_{p} = \dfrac{DCG_{p}}{IDCG_{p}} \)</li>
+          <ul>
+            <li>where \( {IDCG_{p}} \) is \( {DCG_{p}} \) of ideal ranking</li>
+          </ul>
+          <li>Example</li>
+          <ul>
+            <li>Assume visual search system return images \( I1, I2, I3, I4 \) in the order of relevance</li>
+            <li>Assume human rates the images on scale of \( 0 \) to \( 3 \) such that \( I1=3, I2=2, I3=3, I4=0 \) (\( 3 \) is highly relevant, \( 0 \) is merely relevant)</li>
+            <li>\( DCG_{p} = \frac{3}{log(1+1)} + \frac{2}{log(2+1)} + \frac{3}{log(3+1)} + \frac{0}{log(4+1)} = 3 + 1.262 + 1.5 + 0 = 5.762 \)</li>
+          </ul>
+          <li>Deriving ground truth is not always possible</li>
+        </ul>
+      </ul>
+      <li>Online</li>
+      <ul>
+        <li>Click-through rate (CTR)</li>
+        <ul>
+          <li>\( \dfrac{\text{number of clicked images}}{\text{total number of suggested images}} \)</li>
+        </ul>
+        <li>Average daily, weekly, monthly time spent on suggested images</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Serving</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-b/visual-search-system-1.png" alt="Card image cap">
+
+    <ul>
+      <li>Indexing pipeline</li>
+      <ul>
+        <li>Object storage</li>
+        <ul>
+          <li>Stores new images</li>
+        </ul>
+        <li>Indexing service</li>
+        <ul>
+          <li>Indexes the embeddings of new images so that NN search can easily find it</li>
+        </ul>
+        <li>Index table</li>
+        <ul>
+          <li>Stores images embeddings in sorted order</li>
+        </ul>
+      </ul>
+      <li>Prediction pipeline</li>
+      <ul>
+        <li>Embedding generation service</li>
+        <ul>
+          <li>Preprocess the input images and use trained model to determine its embedding</li>
+        </ul>
+        <li>Nearest neighbor service</li>
+        <ul>
+          <li>Retrieve similar images from embedding space</li>
+          <li>1. exact NN</li>
+          <ul>
+            <li>Time \( \text{O}(ND) \) where \( N \) is total number of points and \( D \) is dimension</li>
+            <li>\( N \) could be billions</li>
+          </ul>
+          <li>2. approximate NN</li>
+          <ul>
+            <li>Time \( \text{O}(\text{log}(N)D) \)</li>
+            <li>1. tree-based</li>
+            <ul>
+              <li>Similar to gradient boosted tree</li>
+              <li>Ex. R-trees, Kd-trees, Annoy (Approximate Nearest Neighbor Oh Yeah)</li>
+            </ul>
+            <li>2. locality sensitive hashing (LSH)</li>
+            <ul>
+              <li>Use hash function to reduce the dimensions of points and group them into buckets</li>
+              <li>Maps points in close proximity to same bucket</li>
+              <li>LSH searches only those points in the same bucket</li>
+            </ul>
+            <li>Option 3. clustering-based</li>
+            <ul>
+              <li>Group points based on simiarities</li>
+              <li>Algorithm only searches the subset of points in the cluster</li>
+            </ul>
+          </ul>
+          <li>Due to algorithm runtime, we choose ANN</li>
+        </ul>
+        <li>Re-ranking service</li>
+        <ul>
+          <li>Filters inappropriate results, removes duplicates, etc</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Follow Up</h3>
+    <ul>
+      <li>Explain how to moderate images</li>
+      <li>Explain how to handle bias? (Ex. positional bias)</li>
+      <li>Explain how to use metadata (Ex. tags) to improve search result</li>
+      <li>Explain smart crop using object detection</li>
+      <li>Explain how to use GNN to learn better representation</li>
+      <li>Explain how to search images using text</li>
+      <li>Explain how to use active learning or human-in-the-loop ML to annotate data more efficiently</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
@@ -314,7 +561,242 @@
 
 <div class="card mb-4" id="machine-learning-system-design-3">
   <div class="card-body">
-    
+    <h2 class="card-title">Google Street View Blurring System</h2>
+
+    <h3 class="card-title">Clarifying Requirements</h3>
+    <ul>
+      <li>What is the the purpose of the system? Blurring parts of images that are inappropriate</li>
+      <li>Should the detect human faces and license plates? Yes</li>
+      <li>Can users report images that are not correctly blurred? Yes</li>
+      <li>Do we have training data available? There are 1M images with human faces and license plates manually annotated</li>
+      <li>Should the system handle bias w.r.t. race, gender, age, etc? No</li>
+      <li>Can the inference be batch or does it need to be online? Images can be processed offline</li>
+    </ul>
+
+    <h3 class="card-title">Frame the Problem as an ML Task</h3>
+    <ul>
+      <li>Define ML objective</li>
+      <ul>
+        <li></li>
+      </ul>
+      <li>Specify system input and output</li>
+      <ul>
+        <li>Input - images with zero or more objects in it</li>
+        <li>Output - location of objects of interest</li>
+      </ul>
+      <li>Choose right ML category</li>
+      <ul>
+        <li>Predict location of object - regression problem</li>
+        <li>Predict class of object - multi-class classification</li>
+        <li>1. one stage network</li>
+        <ul>
+          <li>Bounding boxes and object classes are generated simultaneously</li>
+          <li>Ex. YOLO, SDD</li>
+        </ul>
+        <li>2. two stages networks</li>
+        <ul>
+          <li>Region proposal network (RPN) - proposes candidate regions that are likely objects</li>
+          <li>Classifier - classifies each proposed region into an object class</li>
+          <li>Usually slower but accurate</li>
+          <li>Ex. R-CNN, Fast R-CNN, Faster R-CNN</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Data Preparation</h3>
+    <ul>
+      <li>Data engineering</li>
+      <ul>
+        <li>Annotated dataset</li>
+        <ul>
+          <li>image_path</li>
+          <li>objects - human face, license plate</li>
+          <li>bounding_boxes - x coordinate, y coordinate, width, height</li>
+        </ul>
+        <li>Street view images</li>
+        <ul>
+          <li>image_path</li>
+          <li>location - latitude, longitude</li>
+          <li>pitch_yaw_roll</li>
+          <li>timestamp</li>
+        </ul>
+      </ul>
+      <li>Feature engineering</li>
+      <ul>
+        <li>Resize</li>
+        <li>Scale</li>
+        <li>Normalize</li>
+        <li>Color mode</li>
+        <li>Data augmentation</li>
+        <ul>
+          <li>Ex. random crop, random saturation, vertical/horizontal flip, rotation/translation, affline transformations, changing brightness/saturation/contrast</li>
+          <li>When rotating/flipping images, the ground truth bounding boxes must also be transformed</li>
+          <li>Option 1. offline</li>
+          <ul>
+            <li>Augment image before training</li>
+            <li>Training is faster but requires additional storage</li>
+          </ul>
+          <li>Option 2. online</li>
+          <ul>
+            <li>Augment image on the fly during training</li>
+            <li>Training is slower but requires no additional storage</li>
+          </ul>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Model Development</h3>
+    <ul>
+      <li>Model selection</li>
+      <ul>
+        <li>Two stages network</li>
+        <ul>
+          <li>Convolutional layers</li>
+          <ul>
+            <li>Takes input image and produces feature map</li>
+          </ul>
+          <li>Region proposal network (RPN)</li>
+          <ul>
+            <li>Regression task to detect objects</li>
+            <li>Based on neural network</li>
+            <li>Takes feature map and produces candidate regions in the image</li>
+          </ul>
+          <li>Classifier</li>
+          <ul>
+            <li>Classification task to assign objects to classes</li>
+            <li>Based on neural network</li>
+            <li>Takes feature map and candidate regions, and assigns an object class to each region</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>Model training</li>
+      <ul>
+        <li>Constructing dataset</li>
+        <ul>
+          <li>We are given annotated dataset</li>
+        </ul>
+        <li>Choosing loss function</li>
+        <ul>
+          <li>Regression loss</li>
+          <ul>
+            <li>Measures how aligned the predicted bounding boxes are with the ground truth bounding boxes</li>
+            <li>Use mean squared error (MSE)</li>
+            <li>\( L_{reg} = \dfrac{1}{M}\displaystyle\sum_{i=1}^{M} \left[ (x_{i}-\hat{x}_{i})^{2} + (y_{i}-\hat{y}_{i})^{2} + (w_{i}-\hat{w}_{i})^{2} + (h_{i}-\hat{h}_{i})^{2} \right] \)</li>
+            <ul>
+              <li>\( M \) - total number of predictions</li>
+              <li>\( x_{i} \) - ground truth top left \( x \) coordinate</li>
+              <li>\( \hat{x}_{i} \) - predicted top left \( x \) coordinate</li>
+              <li>\( y_{i} \) - ground truth top left \( y \) coordinate</li>
+              <li>\( \hat{y}_{i} \) - predicted top left \( y \) coordinate</li>
+              <li>\( w_{i} \) - ground truth width</li>
+              <li>\( \hat{w}_{i} \) - predicted width</li>
+              <li>\( h_{i} \) - ground truth height</li>
+              <li>\( \hat{h}_{i} \) - predicted height</li>
+            </ul>
+          </ul>
+          <li>Classification loss</li>
+          <ul>
+            <li>Measures how accurate the predicted probabilities are for each detected object</li>
+            <li>Use log loss (cross-entropy)</li>
+            <li>\( L_{cls} = -\dfrac{1}{M} \displaystyle\sum_{i=1}^{M} \displaystyle\sum_{c=1}^{C} y_{c}log\hat{y}_{c} \)</li>
+            <ul>
+              <li>\( M \) - total number of detected bounding boxes</li>
+              <li>\( C \) - total number of classes</li>
+              <li>\( y_{i} \) - ground truth label for detection \( i \)</li>
+              <li>\( \hat{y}_{i} \) - predicted class label for detection \( i \)</li>
+            </ul>
+          </ul>
+          <li>Total loss</li>
+          <ul>
+            <li>\( L = L_{reg} + \lambda L_{cls} \)</li>
+            <li>\( \lambda \) - balancing parameter</li>
+          </ul>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Evaluation</h3>
+    <ul>
+      <li>Offline</li>
+      <ul>
+        <li>1. Precision</li>
+        <ul>
+          <li>\( P(n) = \dfrac{\text{Correct detections}}{\text{total detections}} \)</li>
+          <li>Need to pick an IoU threshold</li>
+          <ul>
+            <li>Intersection over union (IoU) - measures overlap between detected and ground truth bounding boxes</li>
+          </ul>
+        </ul>
+        <li>2. Average precision (AP)</li>
+        <ul>
+          <li>Calculate precision at different IoU threshold and compute the average</li>
+          <li>If there are \( 11 \) IOU values, \( AP = \dfrac{1}{11} \displaystyle\sum_{n=10}^{n=0} P(n) \)</li>
+        </ul>
+        <li>3. Mean average precision (mAP)</li>
+        <ul>
+          <li>Average of average precision across all object classes</li>
+          <li>\( mAP = \dfrac{1}{C} \displaystyle\sum_{c=1}^{C} AP_{c} \)</li>
+        </ul>
+      </ul>
+      <li>Online</li>
+      <ul>
+        <li>Number of user reports and complaints</li>
+        <li>Human annotators to spot check the percentage of incorrectly blurred images</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Serving</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-b/google-street-view-blurring-system-1.png" alt="Card image cap">
+
+    <ul>
+      <li>Data pipeline</li>
+      <ul>
+        <li>Hard negative mining</li>
+        <ul>
+          <li>Negative examples created from incorrectly predicted examples</li>
+          <li>Model should perform better when trained with this dataset</li>
+        </ul>
+        <li>Preprocessing</li>
+        <ul>
+          <li>Resize, scale, normalize</li>
+        </ul>
+      </ul>
+      <li>Batch inference pipeline</li>
+      <ul>
+        <li>Non-max suppression (NMS)</li>
+        <ul>
+          <li>Keep one bounding box out of many overlapping bounding boxes</li>
+        </ul>
+        <li>Preprocessing</li>
+        <ul>
+          <li>CPU intensive task</li>
+          <li>Seperated from blurring service</li>
+          <ul>
+            <li>CPU and GPU intensive tasks can be scaled independently</li>
+            <li>Better utilization of CPU and GPU</li>
+          </ul>
+        </ul>
+        <li>Blurring service</li>
+        <ul>
+          <li>GPU intensive task</li>
+          <li>Identify all objects in the image</li>
+          <li>Resolve overlapping bounding boxes using NMS</li>
+          <li>Blur objects of interest</li>
+          <li>Store blurred images in object storage</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Follow Up</h3>
+    <ul>
+      <li>Explain how transformer based object detection differs from one-stage or two-stage models</li>
+      <li>Explain distributed training techniques to improve object detection at larger dataset</li>
+      <li>Explain the impact of generate data protection regulation (GDPR) on the design</li>
+      <li>Explain how to handle bias in face detection system</li>
+      <li>Explain how to continuously fine-tune the model</li>
+      <li>Explain how to use active learning or human-in-the-loop ML to select data points for training</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
@@ -323,7 +805,278 @@
 
 <div class="card mb-4" id="machine-learning-system-design-4">
   <div class="card-body">
-    
+    <h2 class="card-title">Youtube Video Search</h2>
+
+    <h3 class="card-title">Clarifying Requirements</h3>
+    <ul>
+      <li>Can users search with text, image, video? Text search only</li>
+      <li>Should the system support videos, images, audios? Video only</li>
+      <li>Should features come from video only, such as visual and textual (title and descritpion) content? Yes</li>
+      <li>Do we have training data available? There are 10M pairs of &lt;video, text query&gt;</li>
+      <li>Should the system support multiple languages? No, English only</li>
+      <li>How many videos are there on the platform? 1B videos</li>
+      <li>Should videos be personalized? No</li>
+    </ul>
+
+    <h3 class="card-title">Frame the Problem as an ML Task</h3>
+    <ul>
+      <li>Define ML objective</li>
+      <ul>
+        <li>Rank videos based on the relevance to the text query</li>
+      </ul>
+      <li>Specify system input and output</li>
+      <ul>
+        <li>Input - text query</li>
+        <li>Output - ranked list of videos</li>
+      </ul>
+      <li>Choose right ML category</li>
+      <ul>
+        <li>Ranking problem</li>
+        <ul>
+          <li>Learn embeddings of images and text such that</li>
+          <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-b/youtube-video-search-1.png" alt="Card image cap">
+          <ul>
+            <li>Dot product between a video and its relevant text is small</li>
+            <li>Dot product between a video and random text is large</li>
+          </ul>
+        </ul>
+        <li>Visual search</li>
+        <ul>
+          <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-b/youtube-video-search-2.png" alt="Card image cap">
+          <li>Text query and video are encoded separately using two encoders</li>
+          <li>Compute dot product between text query embedding and each video embedding, and rank videos based on the score</li>
+        </ul>
+        <li>Text search</li>
+        <ul>
+          <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-b/youtube-video-search-3.png" alt="Card image cap">
+          <li>Inverted index is used (This is not based on ML, thus there is no training cost)</li>
+          <li>Elasticsearch is popular choice for inverted index</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Data Preparation</h3>
+    <ul>
+      <li>Data engineering</li>
+      <ul>
+        <li>Annotated dataset</li>
+        <ul>
+          <li>video_name</li>
+          <li>text_query</li>
+          <li>split_type - train, validation, test</li>
+        </ul>
+      </ul>
+      <li>Feature engineering</li>
+      <ul>
+        <li>Text normalization (text cleanup)</li>
+        <ul>
+          <li>Lowercasing</li>
+          <li>Punctuation removal</li>
+          <li>Trim whitespaces</li>
+          <li>Normalization Form KD (NFKD)</li>
+          <li>Strip accents</li>
+          <li>Lemmatization and stemming - Ex. walking, walked, walks -> walk</li>
+          <li>Ex. "A person  is walking in Montreal!" -> "a person walk in montreal"</li>
+        </ul>
+        <li>Tokenization</li>
+        <ul>
+          <li>Character-level</li>
+          <li>Word-level</li>
+          <li>Subword-level</li>
+        </ul>
+        <li>Tokens to IDs</li>
+        <ul>
+          <li>Option 1. lookup table</li>
+          <ul>
+            <li>Each token is mapped to unique ID</li>
+            <li>Need to keep large table in memory</li>
+            <li>New words cannot be handled</li>
+          </ul>
+          <li>Option 2. hashing</li>
+          <ul>
+            <li>Hash function is used to compute ID for each token</li>
+            <li>Potential collision</li>
+            <li>Cannot convert IDs to tokens</li>
+          </ul>
+          <li>Ex. "["a", "person", "walk", "in", "montreal"]" -> [33,28,4,16,99]</li>
+        </ul>
+        <li>Prepare video data</li>
+        <ul>
+          <li>Decode frames</li>
+          <li>Sample frames</li>
+          <li>Resize</li>
+          <li>Scale</li>
+          <li>Normalize</li>
+          <li>Color mode</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Model Development</h3>
+    <ul>
+      <li>Model selection</li>
+      <ul>
+        <li>Text encoder</li>
+        <ul>
+          <li>Option 1. statistical method</li>
+          <ul>
+            <li>Does not consider the order of words in sentences</li>
+            <li>Does not capture semantic and contextual meaning</li>
+            <li>The representation vector is sparse</li>
+            <li>Option 1a. Bag of words</li>
+            <ul>
+              <li>Models sentence-word occurences in matrix</li>
+            </ul>
+            <li>Option 1b. Term frequency inverse document frequency (TF-IDF)</li>
+            <ul>
+              <li>Same sentence-word matrix as BoW but normalizes based on the frequency of words</li>
+            </ul>
+          </ul>
+          <li>Option 2. ML based method</li>
+          <ul>
+            <li>Option 2a. Embedding layer</li>
+            <ul>
+              <li>Map each token ID to embedding vector</li>
+            </ul>
+            <li>Option 2b. Word2vec</li>
+            <ul>
+              <li>Learns to predict a center word from its surrounding words during training</li>
+              <li>Ex. skip-gram, continuous bag of words (CBOW)</li>
+            </ul>
+            <li>Option 2c. Transformer-based models</li>
+            <ul>
+              <li>As opposed to word2vec, produces different embeddings for the same word depending on the context</li>
+              <li>Ex. BERT, GPT3, BLOOM</li>
+            </ul>
+          </ul>
+        </ul>
+        <li>Video encoder</li>
+        <ul>
+          <li>Option 1. video-level models</li>
+          <ul>
+            <li>Processes a whole video to produce an embedding</li>
+            <li>Based on 3D convolutions or transformers</li>
+            <li>Computationally expensive</li>
+          </ul>
+          <li>Option 2. frame-level models</li>
+          <ul>
+            <li>Processes a video and sample frames</li>
+            <li>Produces frame embeddings</li>
+            <li>Aggregate (for example, averge) frame embeddings to generate video embeddings</li>
+            <li>Computationally less expensive, but does not understand temporal aspects of videos such as actions and motions</li>
+            <li>Ex. ViT</li>
+          </ul>
+        </ul>
+        <li>Constrative learning</li>
+        <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-b/youtube-video-search-4.png" alt="Card image cap">
+      </ul>
+      <li>Model training</li>
+      <ul>
+        <li>Constructing dataset</li>
+        <li>Choosing loss function</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Evaluation</h3>
+    <ul>
+      <li>Offline</li>
+      <ul>
+        <li>1. precision@k</li>
+        <ul>
+          <li>\( \dfrac{\text{number of relevant items among the top k items in the ranked list}}{k} \)</li>
+          <li>In annotated dataset, text query is associated to just one video</li>
+          <ul>
+            <li>That means the numerator is either 1 or 0</li>
+            <li>Thus, this metric is not useful</li>
+          </ul>
+        </ul>
+        <li>2. recall@k</li>
+        <ul>
+          <li>\( \dfrac{\text{number of relevant items among the top k items in the ranked list}}{\text{total number of relevant videos}} \)</li>
+          <li>Total number of relevant videos is always 1</li>
+          <ul>
+            <li>Then, recall@k = 1 if relevant video is in the top k items, 0 otherwise</li>
+            <li>Picking k can be challenging</li>
+          </ul>
+          <li>Does not consider ranking quality</li>
+        </ul>
+        <li>3. mean reciprobal rank (MRR)</li>
+        <ul>
+          <li>\( MRR = \dfrac{1}{m} \displaystyle\sum_{i=1}^{m} \dfrac{1}{\text{rank}_{i}} \) where \( {\text{rank}_{i}} \) is the position on which the first relevant item appears in the output list</li>
+          <li>Consider only the first relevant item in each output list, then average the reciprocal rank</li>
+          <li>Since there is one-to-one mapping between video and text is training data, this is the best choice</li>
+        </ul>
+      </ul>
+      <li>Online</li>
+        <ul>
+        <li>Click-through rate</li>
+        <ul>
+          <li>How often users click on recommended videos</li>
+        </ul>
+        <li>Video completion rate</li>
+        <ul>
+          <li>How many videos are watched till the end</li>
+          <li>Users may see the video as relevant but not watch it till the end, thus not a good metric</li>
+        </ul>
+        <li>Total watch time</li>
+        <ul>
+          <li>Sum of watch times of all videos recommended to users</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Serving</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-b/youtube-video-search-5.png" alt="Card image cap">
+
+    <ul>
+      <li>Video indexing pipeline</li>
+      <ul>
+        <li>Video encoder computes video embeddings</li>
+        <li>Video index table stores video embeddings</li>
+      </ul>
+      <li>Text indexing pipeline</li>
+      <ul>
+        <li>Elasticsearch indexes titles, manual tags, and automated tags</li>
+        <li>Standalone model generates automated tag for when users don't provide tags for the videos</li>
+      </ul>
+      <li>Prediction pipeline</li>
+      <ul>
+        <li>Visual search</li>
+        <ul>
+          <li>Text encoder computes embeddings of text query</li>
+          <li>ANN finds the most similar video embeddings to the text embedding</li>
+        </ul>
+        <li>Text search</li>
+        <ul>
+          <li>Elasticsearch finds videos whose titles and tags overlap with text query</li>
+        </ul>
+        <li>Fusing</li>
+        <ul>
+          <li>Re-rank videos based on the weighted sum of their predicted relevance scores</li>
+          <li>Using additional model to re-rank the videos will be computationally expensive</li>
+        </ul>
+        <li>Re-ranking service</li>
+        <ul>
+          <li>Uses business logics to again re-rank the videos</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Follow Up</h3>
+    <ul>
+      <li>Explain how multi-stage design (candidate generation + ranking) can improve the system</li>
+      <li>Explain how to use more video features (video length, video popularity) to improve the model</li>
+      <li>Explain how to use interactions (clicks, likes) to label data instead of relying on annotated dataset</li>
+      <li>Explain how to use ML model to find titles and tags that are similar to text query</li>
+      <li>Explain how to build query understanding</li>
+      <li>Explain how to build multi-modal system that processes speech and audio to improve search result</li>
+      <li>Explain how to support other languages</li>
+      <li>Explain how to detect near-duplicate videos and remove them from search result</li>
+      <li>Explain how to divide text queries into head, torso, tail</li>
+      <li>Explain how to consider popularity and freshness when producing output list</li>
+      <li>Explain how real-world search system work</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
@@ -332,7 +1085,276 @@
 
 <div class="card mb-4" id="machine-learning-system-design-5">
   <div class="card-body">
-    
+    <h2 class="card-title">Harmful Content Detection</h2>
+
+    <h3 class="card-title">Clarifying Requirements</h3>
+    <ul>
+      <li>Should the system also detect bad users? No, harmful content only</li>
+      <li>What does a post contain? Texts, images, videos, and any combination of those</li>
+      <li>How many languages are supported? All languages. Assume we have a pre-trained multilingual model to embed textual context</li>
+      <li>What kind of posts are considered harmful? Violence, nudity, hate speeach</li>
+      <li>Do we have training data available? Humans annotate 10k posts per day</li>
+      <li>Can users report harmful posts? Yes</li>
+      <li>Should the system explain to the users why the post is considered harmful? Yes</li>
+      <li>How fast should the inference be? Violent contents should be removed immediately while others can be removed later</li>
+      <li>Should the system remove harmful contents immediately or can it do batch inference offline? Violent posts should be removed in real time while others can be removed after some time</li>
+    </ul>
+
+    <h3 class="card-title">Frame the Problem as an ML Task</h3>
+    <ul>
+      <li>Define ML objective</li>
+      <ul>
+        <li>Accurately predict harmful posts</li>
+      </ul>
+      <li>Specify system input and output</li>
+      <ul>
+        <li>Input - post</li>
+        <li>Output - probability that the post is harmful</li>
+      </ul>
+      <li>Choose right ML category</li>
+      <ul>
+        <li>Supervised, classification</li>
+        <li>Model approach</li>
+        <ul>
+          <li>1. Late fusion</li>
+          <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-b/harmful-content-detection-1.png" alt="Card image cap">
+          <ul>
+            <li>Train, evaluate, improve each model independently</li>
+            <li>Separate training data is needed for each model</li>
+            <li>Combination of modalities might be harmful even though each is benign</li>
+          </ul>
+          <li>2. Early fusion</li>
+          <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-b/harmful-content-detection-2.png" alt="Card image cap">
+          <ul>
+            <li>Single model to train, so there is no need to separate training dataset</li>
+            <li>Model considers all modalities together</li>
+            <ul>
+              <li>If each modality is benign but the combination is harmful, model can capture this in unified feature vector</li>
+            </ul>
+            <li>Model needs to learn complex relationship between modalities, requiring large set of data</li>
+          </ul>
+        </ul>
+        <li>Classifier</li>
+        <ul>
+          <li>1. Single binary classifier</li>
+          <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-b/harmful-content-detection-3.png" alt="Card image cap">
+          <ul>
+            <li>Difficult to tell users why the post is considered harmful</li>
+            <li>Difficult to determine what kind of harmful content the post contains</li>
+          </ul>
+          <li>2. One binary classifier per harmful class</li>
+          <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-b/harmful-content-detection-4.png" alt="Card image cap">
+          <ul>
+            <li>Multiple models must be trained separately</li>
+          </ul>
+          <li>3. Multi-label classifier</li>
+          <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-b/harmful-content-detection-5.png" alt="Card image cap">
+          <ul>
+            <li>Each input feature may need to be transformed differently</li>
+          </ul>
+          <li>4. Multi-task classifier</li>
+          <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-b/harmful-content-detection-6.png" alt="Card image cap">
+          <ul>
+            <li>Shared layers - transform input features into new ones</li>
+            <li>Task specific layers - each classification head transforms features in optiaml way to predict a specific harm probability</li>
+            <li>Single model is used, thus training is less expensive</li>
+            <li>Shared layers transform features so that they are beneficial for each task. This prevents redundant computations</li>
+            <li>Training data for each task contributes to learning other tasks</li>
+          </ul>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Data Preparation</h3>
+    <ul>
+      <li>Data engineering</li>
+      <ul>
+        <li>Users</li>
+        <ul>
+          <li>id</li>
+          <li>username</li>
+          <li>email</li>
+          <li>age</li>
+          <li>gender</li>
+          <li>city</li>
+          <li>country</li>
+        </ul>
+        <li>Posts</li>
+        <ul>
+          <li>post_id</li>
+          <li>author_id</li>
+          <li>textual_content</li>
+          <li>image_path</li>
+          <li>video_path</li>
+          <li>timestamp</li>
+        </ul>
+        <li>User-post interations</li>
+        <ul>
+          <li>user_id</li>
+          <li>post_id</li>
+          <li>interaction_type - impression, like, comment, share, report</li>
+          <li>timestamp</li>
+        </ul>
+      </ul>
+      <li>Feature engineering</li>
+      <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-b/harmful-content-detection-7.png" alt="Card image cap">
+      <ul>
+        <li>Textual content</li>
+        <ul>
+          <li>Text preprocessing</li>
+          <li>Vectorization</li>
+          <ul>
+            <li>Option 1. statistical methods like BoW and TF-IDF cannot capture semantics</li>
+            <li>Option 2. BERT takes long time to produce text embeddings and is for english only</li>
+            <li>Option 3. DistlimBERT can be used here</li>
+          </ul>
+        </ul>
+        <li>Image or video</li>
+        <ul>
+          <li>Preprocessing</li>
+          <ul>
+            <li>Resize</li>
+            <li>Scale</li>
+            <li>Normalize</li>
+          </ul>
+          <li>Feature extraction</li>
+          <ul>
+            <li>Convert unstructured data into feature vector</li>
+            <li>Image - CLIP's visual encoder, SimCLR</li>
+            <li>Video - VideoMoCo</li>
+          </ul>
+        </ul>
+        <li>User interation to the post</li>
+        <ul>
+          <li>Number of likes, shares, comments, reports - scale these values to speed up convergence during training</li>
+          <li>Comments - use pre-trained model to find embedding of each comment, then aggregate</li>
+        </ul>
+        <li>Author features</li>
+        <ul>
+          <li>Author's violation history</li>
+          <ul>
+            <li>Number of violations</li>
+            <li>Total user reports</li>
+            <li>Profane word rate</li>
+          </ul>
+          <li>Author's demographics</li>
+          <ul>
+            <li>Age</li>
+            <li>Gender - one-hot encoding</li>
+            <li>City and country - embedding</li>
+          </ul>
+          <li>Account information</li>
+          <ul>
+            <li>Number of followers and followings</li>
+            <li>Account age</li>
+          </ul>
+        </ul>
+        <li>Contextual information</li>
+        <ul>
+          <li>Time of day - bucketize + one-hot encoding</li>
+          <li>Device - use one-hot encoding</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Model Development</h3>
+    <ul>
+      <li>Model selection</li>
+      <ul>
+        <li>Neural network</li>
+      </ul>
+      <li>Model training</li>
+      <ul>
+        <li>Constructing dataset</li>
+        <li>Choosing loss function</li>
+        <ul>
+          <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-b/harmful-content-detection-8.png" alt="Card image cap">
+          <li>In multi-task training, each task is assigned a loss function based on its ML category</li>
+          <li>Since each task is binary classification, cross-entropy is used for each task</li>
+          <li>Overall loss is computed by combining task-specific losses</li>
+          <ul>
+            <li>\( \text{Loss} = L_{1} + L_{2} + \dots L_{n} \)</li>
+          </ul>
+          <li>In multimodal systems, overfitting is likely</li>
+          <ul>
+            <li>Gradient blending or focal loss is used to deal with overfitting</li>
+          </ul>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Evaluation</h3>
+    <ul>
+      <li>Offline</li>
+      <ul>
+        <li>PR curve</li>
+        <ul>
+          <li>Trade-off between precision and recall</li>
+          <li>PR-AUC calculates area beneath PR curve</li>
+          <li>High PR-AUC indicates more accurate model</li>
+        </ul>
+        <li>ROC curve</li>
+        <ul>
+          <li>Trade-off between true positive (recall) and false positive</li>
+          <li>ROC-AUC calculates area beneath POC curve</li>
+          <li>High ROC-AUC indicates more accurate model</li>
+        </ul>
+      </ul>
+      <li>Online</li>
+      <ul>
+      <li>Prevalence</li>
+        <ul>
+          <li>\( \dfrac{\text{number of harmful posts}}{\text{total number of posts}} \)</li>
+          <li>Treats all harmful posts equally</li>
+          <li>Does not capture number of people affected by harmful posts</li>
+        </ul>
+        <li>Harmful impressions</li>
+        <ul>
+          <li>Better metric than prevalence</li>
+        </ul>
+        <li>Valid appeals</li>
+        <ul>
+          <li>\( \dfrac{\text{number of reversed appeals}}{\text{number of harmful posts detected by system}} \)</li>
+        </ul>
+        <li>Proactive rate</li>
+        <ul>
+          <li>\( \dfrac{\text{number of harmful posts detected by system}}{\text{number of harmful posts detected by system} + \text{reported by users}} \)</li>
+        </ul>
+        <li>User reports per harmful class</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Serving</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-b/harmful-content-detection-9.png" alt="Card image cap">
+
+    <ul>
+      <li>Harmful content detection service</li>
+      <ul>
+        <li>Computes probability of posts being harmful</li>
+      </ul>
+      <li>Violation enforcement service</li>
+      <ul>
+        <li>Immediately takes down posts</li>
+        <li>Notifies users why the post is taken down</li>
+      </ul>
+      <li>Demotion service</li>
+      <ul>
+        <li>Temporarily demotes posts to be reviewd by human</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Follow Up</h3>
+    <ul>
+      <li>Explain how to handle bias introduced by human labeling</li>
+      <li>Explain how to handle trending harmful classes (Ex. covid-19, elections)</li>
+      <li>Explain how to leverage temporal information (Ex. user's sequence of actions)</li>
+      <li>Explain how to select post samples for human review</li>
+      <li>Explain how to detect authentic and fake accounts</li>
+      <li>Explain how to deal with borderline contents</li>
+      <li>Explain how to make the system efficient to deploy on devices</li>
+      <li>Explain how to use transformer based architectures with linear transformers</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
@@ -341,7 +1363,489 @@
 
 <div class="card mb-4" id="machine-learning-system-design-6">
   <div class="card-body">
-    
+    <h2 class="card-title">Video Recommendataion System</h2>
+
+    <h3 class="card-title">Clarifying Requirements</h3>
+    <ul>
+      <li>What is the the purpose of the system? Increase user engagement</li>
+      <li>What should the system show to users? Personalized list of videos</li>
+      <li>Should the system support multiple languages? Yes</li>
+      <li>Should the model use user-video interaction data? Yes</li>
+      <li>Should the model use Youtube playlist data? No, playlist is out of scope</li>
+      <li>How many videos are there on platform? 10B</li>
+      <li>How fast the recommendation service should be? under 200ms</li>
+    </ul>
+
+    <h3 class="card-title">Frame the Problem as an ML Task</h3>
+    <ul>
+      <li>Define ML objective</li>
+      <ul>
+        <li>Option 1. maximize the number of user clicks? No, system may recommend clickbaits</li>
+        <li>Option 2. maximize the number of completed videos? No, system may only recommend short vidoes</li>
+        <li>Option 3. maximize total watch time? No, system will be biased towards longer videos</li>
+        <li>Option 4. maximize the number of relevant videos? Yes, srelevant videos could be of user likes or user watching at least half of it</li>
+      </ul>
+      <li>Specify system input and output</li>
+      <ul>
+        <li>Input - user</li>
+        <li>Output - ranked list of videos</li>
+      </ul>
+      <li>Choose right ML category</li>
+      <ul>
+        <li>Ranking</li>
+        <ul>
+          <li>Option 1. content-based filtering</li>
+          <ul>
+            <li>Uses video features</li>
+            <li>Recommend new videos similar to videos that were relevant to user in the past</li>
+            <li>Pros</li>
+            <ul>
+              <li>No need to wait for user interaction data. Recommendation depends on video features only</li>
+              <li>Captures unique interest of users</li>
+            </ul>
+            <li>Cons</li>
+            <ul>
+              <li>Need to engineere video features</li>
+              <li>Hard to discover users' new interest</li>
+            </ul>
+          </ul>
+          <li>Option 2. collaborative filtering</li>
+          <ul>
+            <li>Assume similar users are interested in similar videos</li>
+            <li>Uses user-user or video-video similarities to recommend new videos</li>
+            <li>Uses users historical engagement only (No need to use video features)</li>
+            <li>Pros</li>
+            <ul>
+              <li>Can discover users new interest</li>
+              <li>Less compute intensive than content-based filtering because video features are not needed</li>
+            </ul>
+            <li>Cons</li>
+            <ul>
+              <li>Cold-start problem when lack of user interaction data</li>
+              <li>Hard to capture unique interest of users</li>
+            </ul>
+          </ul>
+          <li>Option 3. hybrid filtering</li>
+          <ul>
+            <li>Use collaborative filtering first, followed by content-based filtering</li>
+          </ul>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Data Preparation</h3>
+    <ul>
+      <li>Data engineering</li>
+      <ul>
+        <li>Video</li>
+        <ul>
+          <li>video_id</li>
+          <li>length</li>
+          <li>manual_tags</li>
+          <li>manual_title</li>
+          <li>likes</li>
+          <li>views</li>
+          <li>language</li>
+        </ul>
+        <li>User</li>
+        <ul>
+          <li>user_id</li>
+          <li>username</li>
+          <li>age</li>
+          <li>gender</li>
+          <li>city</li>
+          <li>country</li>
+          <li>language</li>
+        </ul>
+        <li>User-video interation</li>
+        <ul>
+          <li>user_id</li>
+          <li>video_id</li>
+          <li>interaction_type - like, impression, watch, search, comment</li>
+          <li>timestamp</li>
+        </ul>
+      </ul>
+      <li>Feature engineering</li>
+      <ul>
+        <li>Video feature</li>
+        <ul>
+          <li>video_id - categorical data, embedding</li>
+          <li>length</li>
+          <li>language - categorical data, embedding</li>
+          <li>manual_tags - CBOW for each tag and aggregate</li>
+          <li>title - BERT</li>
+        </ul>
+        <li>User feature</li>
+        <ul>
+          <li>User demographics</li>
+          <ul>
+            <li>user_id - embedding</li>
+            <li>age - bucketize + one-hot encoding</li>
+            <li>gender - one-hot encoding</li>
+            <li>language - embedding</li>
+            <li>city - embedding</li>
+            <li>country - embedding</li>
+          </ul>
+          <li>Contextual information</li>
+          <ul>
+            <li>day_of_week - embedding</li>
+            <li>time_of_day - bucketize + one-hot encoding</li>
+            <li>device - one-hot encoding</li>
+          </ul>
+          <li>User-historical interactions</li>
+          <ul>
+            <li>search_history - BERT to map each search query to embedding vector. Average the query embeddings to get a fixed-sized feature vector</li>
+            <li>liked_videos - embedding layer to map video_ids to embedding vector</li>
+            <li>watched_videos - embedding layer (Similar to liked_videos)</li>
+            <li>impressions - embedding layer (Similar to liked_videos)</li>
+          </ul>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Model Development</h3>
+    <ul>
+      <li>Model selection</li>
+      <ul>
+        <li>Option 1. matrix factorization</li>
+        <ul>
+          <li>Collaborative filtering method because only the user interaction data with video is used</li>
+        </ul>
+        <li>Option 2. two tower neural network</li>
+        <ul>
+          <li>Can utilize all of user features, video features, interaction data</li>
+          <li>Can be used as for both collaborative filtering and content-based filtering</li>
+        </ul>
+      </ul>
+      <li>Model training</li>
+      <ul>
+        <li>Constructing dataset</li>
+        <ul>
+          <li>User-video interaction</li>
+          <ul>
+            <li>For each pair of (user-related features represented by embedding, video-related features represented by embedding)</li>
+            <ul>
+              <li>Positive - if user likes video or watches at least half of it</li>
+              <li>Negative - if user dislikes video or just pick random videos</li>
+            </ul>
+          </ul>
+        </ul>
+        <li>Choosing loss function</li>
+        <ul>
+          <li>Option 1. matrix factorization</li>
+          <ul>
+            <li>Feedback matrix</li>
+            <ul>
+              <li>2D matrix mapping user and video where value of 1 means the user find the video relevant</li>
+              <li>Relevancy can be defined using both explicit and implicit feedback</li>
+              <li>Explicit feedback</li>
+              <ul>
+                <li>User likes or shares</li>
+                <li>Data is sparse</li>
+              </ul>
+              <li>Implicit feedback</li>
+              <ul>
+                <li>User clicks or watch time</li>
+                <li>Data might be noisy</li>
+              </ul>
+            </ul>
+            <li>Matrix factorization model</li>
+            <ul>
+              <li>An embedding model</li>
+              <li>Learns to map each user into embedding vector and each video into embedding vector such that their distance represents their relevance</li>
+              <li>Decomposes feedback matric into two lower dimensional matrices, where one represents the user embedding and the other represents video embedding</li>
+            </ul>
+            <li>Matrix factorization training</li>
+            <ul>
+              <li>Randomly initializes two embedding matrices</li>
+              <li>Mimimizes the loss between predicted scores matrix and feedback matrix</li>
+              <ul>
+                <li>Option 1. squared distance over observed user-video pairs</li>
+                <ul>
+                  <li>\( \text{loss} = \displaystyle\sum_{(i,j) \in \text{obs}} (A_{ij}-U_{i}V_{j})^{2} \)</li>
+                  <li>Loss function does not penalize for bad prediction on unobserved pairs</li>
+                </ul>
+                <li>Option 2. squared distance over observed and unobserved user-video pairs</li>
+                <ul>
+                  <li>\( \text{loss} = \displaystyle\sum_{(i,j)} (A_{ij}-U_{i}V_{j})^{2} \)</li>
+                  <li>Unobserved pairs dominate observed pairs during training because feedback matrix is sparce</li>
+                </ul>
+                <li>Option 3. weighted combination of squared distance over observed and unobserved user-video pairs</li>
+                <ul>
+                  <li>\( \text{loss} = \displaystyle\sum_{(i,j) \in \text{obs}} (A_{ij}-U_{i}V_{j})^{2} + w\displaystyle\sum_{(i,j) \notin \text{obs}} (A_{ij}-U_{i}V_{j})^{2} \)</li>
+                  <li>\( w \) is a hyperparameter</li>
+                </ul>
+              </ul>
+            </ul>
+            <li>Matrix factorization optimization</li>
+            <ul>
+              <li>Weighted alternating least squares (WALS) - specific to matrix factorization</li>
+              <ul>
+                <li>Fix one embedding matrix \( U \) and optimize the other embedding matrix \( V \)</li>
+                <li>Fix the other embedding matrix \( V \) and optimize the embedding matrix \( U \)</li>
+                <li>Repeat</li>
+              </ul>
+            </ul>
+            <li>Matrix factorization inference</li>
+            <ul>
+              <li>Take a dot product between user and video embeddings</li>
+            </ul>
+            <li>Pros</li>
+            <ul>
+              <li>Fast training because there are only two embedding matrices to learn</li>
+              <li>Fast serving because learned embeddings are static</li>
+            </ul>
+            <li>Cons</li>
+            <ul>
+              <li>Only relies on user-video interactions, not using other features such as user age, language, etc</li>
+              <li>Handling new users is difficult</li>
+              <li>Model performance is lower</li>
+            </ul>
+          </ul>
+          <li>Option 2. two tower neural network</li>
+          <ul>
+            <li>Loss function</li>
+            <ul>
+              <li>This is binary classification, thus use cross-entropy</li>
+            </ul>
+            <li>Inference</li>
+            <ul>
+              <li>Use ANN to find most relevant videos for a given user from their embeddings</li>
+            </ul>
+            <li>Pros</li>
+            <ul>
+              <li>Utilizes user features</li>
+              <li>Capable of handling new users</li>
+              <li>Model performance is higher</li>
+            </ul>
+            <li>Cons</li>
+            <ul>
+              <li>Slow serving having to compute user embeddings at query time</li>
+              <li>Slow inference if using content-based filtering because model needs to tranform video features to video embeddings</li>
+              <li>More learning paramaters, thus traning is more expensive</li>
+            </ul>
+          </ul>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Evaluation</h3>
+    <ul>
+      <li>Offline</li>
+      <ul>
+        <li>Precision@k</li>
+        <ul>
+          <li>\( \dfrac{\text{Number of relevant video in top k recommended videos}}{\text{top k recommended videos}} \)</li>
+        </ul>
+        <li>Mean average precision (mAP)</li>
+        <ul>
+          <li>Average of average precision across all object classes</li>
+        </ul>
+        <li>Diversity</li>
+        <ul>
+          <li>How dissimilar recommended videos are to each other</li>
+          <li>Calculate average pairwise similarity (Ex. cosine similarity or dot product) between videos outputed by the model</li>
+        </ul>
+      </ul>
+      <li>Online</li>
+      <ul>
+        <li>Click-through rate</li>
+        <li>The number of completed videos</li>
+        <li>Total watch time</li>
+        <li>Explicit user feedback - for example, user likes and dislikes</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Model Development</h3>
+    <ul>
+      <li>Model selection</li>
+      <ul>
+        <li>Option 1. matrix factorization</li>
+        <ul>
+          <li>Collaborative filtering method because only the user interaction data with video is used</li>
+        </ul>
+        <li>Option 2. two tower neural network</li>
+        <ul>
+          <li>Can utilize all of user features, video features, interaction data</li>
+          <li>Can be used as for both collaborative filtering and content-based filtering</li>
+        </ul>
+      </ul>
+      <li>Model training</li>
+      <ul>
+        <li>Constructing dataset</li>
+        <ul>
+          <li>User-video interaction</li>
+          <ul>
+            <li>For each pair of (user-related features represented by embedding, video-related features represented by embedding)</li>
+            <ul>
+              <li>Positive - if user likes video or watches at least half of it</li>
+              <li>Negative - if user dislikes video or just pick random videos</li>
+            </ul>
+          </ul>
+        </ul>
+        <li>Choosing loss function</li>
+        <ul>
+          <li>Option 1. matrix factorization</li>
+          <ul>
+            <li>Feedback matrix</li>
+            <ul>
+              <li>2D matrix mapping user and video where value of 1 means the user find the video relevant</li>
+              <li>Relevancy can be defined using both explicit and implicit feedback</li>
+              <li>Explicit feedback</li>
+              <ul>
+                <li>User likes or shares</li>
+                <li>Data is sparse</li>
+              </ul>
+              <li>Implicit feedback</li>
+              <ul>
+                <li>User clicks or watch time</li>
+                <li>Data might be noisy</li>
+              </ul>
+            </ul>
+            <li>Matrix factorization model</li>
+            <ul>
+              <li>An embedding model</li>
+              <li>Learns to map each user into embedding vector and each video into embedding vector such that their distance represents their relevance</li>
+              <li>Decomposes feedback matric into two lower dimensional matrices, where one represents the user embedding and the other represents video embedding</li>
+            </ul>
+            <li>Matrix factorization training</li>
+            <ul>
+              <li>Randomly initializes two embedding matrices</li>
+              <li>Mimimizes the loss between predicted scores matrix and feedback matrix</li>
+              <ul>
+                <li>Option 1. squared distance over observed user-video pairs</li>
+                <ul>
+                  <li>\( \text{loss} = \displaystyle\sum_{(i,j) \in \text{obs}} (A_{ij}-U_{i}V_{j})^{2} \)</li>
+                  <li>Loss function does not penalize for bad prediction on unobserved pairs</li>
+                </ul>
+                <li>Option 2. squared distance over observed and unobserved user-video pairs</li>
+                <ul>
+                  <li>\( \text{loss} = \displaystyle\sum_{(i,j)} (A_{ij}-U_{i}V_{j})^{2} \)</li>
+                  <li>Unobserved pairs dominate observed pairs during training because feedback matrix is sparce</li>
+                </ul>
+                <li>Option 3. weighted combination of squared distance over observed and unobserved user-video pairs</li>
+                <ul>
+                  <li>\( \text{loss} = \displaystyle\sum_{(i,j) \in \text{obs}} (A_{ij}-U_{i}V_{j})^{2} + w\displaystyle\sum_{(i,j) \notin \text{obs}} (A_{ij}-U_{i}V_{j})^{2} \)</li>
+                  <li>\( w \) is a hyperparameter</li>
+                </ul>
+              </ul>
+            </ul>
+            <li>Matrix factorization optimization</li>
+            <ul>
+              <li>Weighted alternating least squares (WALS) - specific to matrix factorization</li>
+              <ul>
+                <li>Fix one embedding matrix \( U \) and optimize the other embedding matrix \( V \)</li>
+                <li>Fix the other embedding matrix \( V \) and optimize the embedding matrix \( U \)</li>
+                <li>Repeat</li>
+              </ul>
+            </ul>
+            <li>Matrix factorization inference</li>
+            <ul>
+              <li>Take a dot product between user and video embeddings</li>
+            </ul>
+            <li>Pros</li>
+            <ul>
+              <li>Fast training because there are only two embedding matrices to learn</li>
+              <li>Fast serving because learned embeddings are static</li>
+            </ul>
+            <li>Cons</li>
+            <ul>
+              <li>Only relies on user-video interactions, not using other features such as user age, language, etc</li>
+              <li>Handling new users is difficult</li>
+              <li>Model performance is lower</li>
+            </ul>
+          </ul>
+          <li>Option 2. two tower neural network</li>
+          <ul>
+            <li>Loss function</li>
+            <ul>
+              <li>This is binary classification, thus use cross-entropy</li>
+            </ul>
+            <li>Inference</li>
+            <ul>
+              <li>Use ANN to find most relevant videos for a given user from their embeddings</li>
+            </ul>
+            <li>Pros</li>
+            <ul>
+              <li>Utilizes user features</li>
+              <li>Capable of handling new users</li>
+              <li>Model performance is higher</li>
+            </ul>
+            <li>Cons</li>
+            <ul>
+              <li>Slow serving having to compute user embeddings at query time</li>
+              <li>Slow inference if using content-based filtering because model needs to tranform video features to video embeddings</li>
+              <li>More learning paramaters, thus traning is more expensive</li>
+            </ul>
+          </ul>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Evaluation</h3>
+    <ul>
+      <li>Offline</li>
+      <ul>
+        <li>Precision@k</li>
+        <ul>
+          <li>\( \dfrac{\text{Number of relevant video in top k recommended videos}}{\text{top k recommended videos}} \)</li>
+        </ul>
+        <li>Mean average precision (mAP)</li>
+        <ul>
+          <li>Average of average precision across all object classes</li>
+        </ul>
+        <li>Diversity</li>
+        <ul>
+          <li>How dissimilar recommended videos are to each other</li>
+          <li>Calculate average pairwise similarity (Ex. cosine similarity or dot product) between videos outputed by the model</li>
+        </ul>
+      </ul>
+      <li>Online</li>
+      <ul>
+        <li>Click-through rate</li>
+        <li>The number of completed videos</li>
+        <li>Total watch time</li>
+        <li>Explicit user feedback - for example, user likes and dislikes</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Serving</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-b/video-recommendation-system-1.png" alt="Card image cap">
+
+    <ul>
+      <li>Candidate generation</li>
+      <ul>
+        <li>Narrow down videos from billions to thousands</li>
+        <li>Use model that does not rely on video feature for efficiency</li>
+        <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-b/video-recommendation-system-2.png" alt="Card image cap">
+        <li>Two-tower neural network without video features (collaborative filtering) can be used to capture relevant videos</li>
+        <li>Use additional candidate generations to capture popular and trending videos</li>
+        <li>Then use content-based filtering to further narrow down the videos</li>
+      </ul>
+      <li>Ranking</li>
+      <ul>
+        <li>Takes user and candidate videos as input, scores each video, and outputs a ranked list of videos</li>
+        <li>Accuracy is more important than efficiency</li>
+        <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-b/video-recommendation-system-3.png" alt="Card image cap">
+        <li>Two-tower neural network using both user and video features can be used</li>
+      </ul>
+      <li>Re-ranking</li>
+      <ul>
+        <li>Filter out certain videos like misinformation, clickbait, violence, nudity, hates</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Follow Up</h3>
+    <ul>
+      <li>Explain exploration-exploitation trade-off in recommendation system</li>
+      <li>Explain bias that may be present in recommendation system</li>
+      <li>Explain how to consider ethics in recommendation system</li>
+      <li>Explain the effect of seasonality (Ex. changes in user behavior during different seasons)</li>
+      <li>Explain how to optimize the system for multiple objectives, instead of a single objective</li>
+      <li>Explain how to benefit from negative feedback (Ex. dislikes)</li>
+      <li>Explain how to leverage the sequence of videos in user's search history or watch history</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
@@ -350,7 +1854,369 @@
 
 <div class="card mb-4" id="machine-learning-system-design-7">
   <div class="card-body">
-    <h2 class="card-title">Monitoring and Infrastructure</h2>
+    <h2 class="card-title">Event Recommendation System</h2>
+
+    <h3 class="card-title">Clarifying Requirements</h3>
+    <ul>
+      <li>What is the the purpose of the system? Increase event ticket sales</li>
+      <li>Can the inference be batch or does it need to be online? Events are short-lived, thus batch inference is not feasible</li>
+      <li>What features are available for an event? description, price, location, date and time, etc</li>
+      <li>Do we have training data available? No, but user-event interaction data is available</li>
+      <li>Can the system access user's current location? Yes</li>
+      <li>Can users become friends with one another? Yes</li>
+      <li>Can users invite other users to events? Yes</li>
+      <li>Can users RSVP to events? RSVP is out of scope</li>
+      <li>Is event free or paid? Both</li>
+      <li>How many events are there on platform? 1M per month</li>
+      <li>How many active users are there on platform? 1M per day</li>
+      <li>How should the system calculate ETA between two locations? Assume we have access to Google API to do that</li>
+    </ul>
+
+    <h3 class="card-title">Frame the Problem as an ML Task</h3>
+    <ul>
+      <li>Define ML objective</li>
+      <ul>
+        <li>Maximize the number of event registrations</li>
+      </ul>
+      <li>Specify system input and output</li>
+      <ul>
+        <li>Input - user</li>
+        <li>Output - ranked list of events</li>
+      </ul>
+      <li>Choose right ML category</li>
+      <ul>
+        <li>Ranking problem</li>
+        <ul>
+          <li>Option 1. pointwise LTR</li>
+          <ul>
+            <li>Predict relevance between query and each item</li>
+          </ul>
+          <li>Option 2. pairwise LTR</li>
+          <ul>
+            <li>Take two items, and predict which item is more relevant to the query</li>
+            <li>Ex. RankNet, LambdaRank, LambdaMART</li>
+          </ul>
+          <li>Option 3. listwise LTR</li>
+          <ul>
+            <li>Predict the optimal ordering of entire items given the query</li>
+            <li>Ex. SoftRank, ListNet, AdaRank</li>
+          </ul>
+          <li>Pairwise and listwise produce more accurate results but they are more expensive to train</li>
+          <li>Use pointwise with binary classification predicting whether user will register the event or not</li>
+        </ul>
+        <li>Events are short-lived, thus not many historical interaction are available</li>
+        <li>Intrinsically have cold-start and new-item problem</li>
+        <li>Focus on extracting as many features as possible</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Data Preparation</h3>
+    <ul>
+      <li>Data engineering</li>
+      <ul>
+        <li>Event</li>
+        <ul>
+          <li>event_id</li>
+          <li>host_id</li>
+          <li>category</li>
+          <li>description</li>
+          <li>price</li>
+          <li>location</li>
+          <li>date</li>
+        </ul>
+        <li>User</li>
+        <ul>
+          <li>user_id</li>
+          <li>username</li>
+          <li>age</li>
+          <li>gender</li>
+          <li>city</li>
+          <li>country</li>
+          <li>language</li>
+          <li>timezone</li>
+        </ul>
+        <li>Friend</li>
+        <ul>
+          <li>first_user_id</li>
+          <li>second_user</li>
+        </ul>
+        <li>User-video interation</li>
+        <ul>
+          <li>user_id</li>
+          <li>event_id</li>
+          <li>interaction_type - impression, register, invite</li>
+        </ul>
+      </ul>
+      <li>Feature engineering</li>
+      <ul>
+        <li>Location</li>
+        <ul>
+          <li>Walk score</li>
+          <ul>
+            <li>90 to 100 - No car needed</li>
+            <li>70 to 89 - Very walkable</li>
+            <li>50 to 69 - Somewhat walkable</li>
+            <li>25 to 49 - Car-dependent</li>
+            <li>0 to 24 - Requires a car</li>
+          </ul>
+          <li>Walk score similarity - difference between event's walk score and user's average walk score of previous events that user registered</li>
+          <li>Transit score</li>
+          <li>Tannsit score similarity</li>
+          <li>Bike score</li>
+          <li>Bike score similarity</li>
+          <li>Same country - 1 if user and events are in the same country, 0 otherwise</li>
+          <li>Same city - 1 if user and events are in the same city, 0 otherwise</li>
+          <li>Distance - distance between user and event location</li>
+          <ul>
+            <li>0 - less than a mile</li>
+            <li>1 - 1 to 5 miles</li>
+            <li>2 - 5 to 20 miles</li>
+            <li>3 - 20 to 50 miles</li>
+            <li>4 - 50 to 100 miles</li>
+            <li>5 - more than 100 miles</li>
+          </ul>
+          <li>Distance similarity - difference between distance to event and average distance to previous events that user registered</li>
+        </ul>
+        <li>Time</li>
+        <ul>
+          <li>Remaining time - time remaining until the event happens</li>
+          <ul>
+            <li>0 - less than 1 hour left</li>
+            <li>1 - 1 to 2 hours</li>
+            <li>2 - 2 to 4 hours</li>
+            <li>3 - 4 to 6 hours</li>
+            <li>4 - 6 to 12 hours</li>
+            <li>5 - 12 to 24 hours</li>
+            <li>6 - 1 to 3 days</li>
+            <li>7 - 3 to 7 days</li>
+            <li>8 - more than 7 days</li>
+          </ul>
+          <li>Remaining time similarity - difference between remaining time and average remaining time of previous events that user registered</li>
+          <li>ETA - ETA between user and event location</li>
+          <li>ETA similarity - difference between ETA and average ETA of previous events that user registered</li>
+          <li>Day similarity - difference between event day (Mon to Sun) and days of previous events that user registered</li>
+          <li>Hour similarity - difference between event hour (bucketized) and hours of previous events that user registered</li>
+        </ul>
+        <li>Social</li>
+        <ul>
+          <li>Number of users registered for the event</li>
+          <li>Ratio of total number of registered users and number of impressions</li>
+          <li>Registered user similarity - difference between number of registered users and average number of registration for all previous events</li>
+          <li>Number of friends who invited the user to the event</li>
+          <li>Number of users (who are not friend) who invited the user to the event</li>
+          <li>Is the event hosted by a friend (1 if yes, 0 otherwise)</li>
+          <li>How often the user registered for the event created by the host</li>
+        </ul>
+        <li>User</li>
+        <ul>
+          <li>Gender</li>
+          <li>Age</li>
+        </ul>
+        <li>Event</li>
+        <ul>
+          <li>Price</li>
+          <ul>
+            <li>0 - free</li>
+            <li>1 - 1 to 99</li>
+            <li>2 - 100 to 499</li>
+            <li>3 - 500 to 1999</li>
+            <li>4 - more than 2000</li>
+          </ul>
+          <li>Price similarity - difference between event price and average price of previous events that user registered</li>
+          <li>Similarity between event description and description of previous events that user registered</li>
+          <ul>
+            <li>Convert event description to numerical vector using TF-ID and compute similarity using cosine distance</li>
+          </ul>
+        </ul>
+        <li>Other points</li>
+        <ul>
+          <li>Batch features (those that don't change often like age, gender, event description) can be computed via batch processing and stored in feature store</li>
+          <li>Dynamic features (like number of users registered for an event) is expensive to compute in real-time</li>
+          <li>Use decay factor to give more weights on user's recent interactions</li>
+          <li>Convert each event and user into embedding vector</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Model Development</h3>
+    <ul>
+      <li>Model selection</li>
+      <ul>
+        <li>Option 1. logistic regression</li>
+        <ul>
+          <li>Pros</li>
+          <ul>
+            <li>Fast inference</li>
+            <li>Fast training</li>
+            <li>Interpretable</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Non-linear problems can't be solved</li>
+            <li>Cannot handle dependency between features</li>
+          </ul>
+        </ul>
+        <li>Option 2. decision tree</li>
+        <ul>
+          <li>Pros</li>
+          <ul>
+            <li>Fast inference</li>
+            <li>Fast training</li>
+            <li>Interpretable</li>
+            <li>Little dataprep required</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Non-optimal decision boundry</li>
+            <li>Overfitting due to model being sensitive to small variations in input data</li>
+          </ul>
+        </ul>
+        <li>Option 3. bagging</li>
+        <ul>
+          <li>Train models in parallel on subsets of training data, then combine predictions to make final prediction</li>
+          <li>Pros</li>
+          <ul>
+            <li>Reduce model sensitivity to change in data</li>
+            <li>Train in parallel, thus fast training</li>
+            <li>Inputs are processed in parallel, thus fast inference</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Does not solve underfitting</li>
+          </ul>
+          <li>Ex. random forest</li>
+        </ul>
+        <li>Option 4. boosting</li>
+        <ul>
+          <li>Train weak classifiers in sequence, that perform slightly better than random guess</li>
+          <li>Pros</li>
+          <ul>
+            <li>Reduce both bias and variance</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Slower traning and infernce</li>
+          </ul>
+          <li>Ex. Adaboost, Gradient boost</li>
+        </ul>
+        <li>Option 5. GBDT</li>
+        <ul>
+          <li>Use GradientBoost to improve decision trees</li>
+          <li>Pros</li>
+          <ul>
+            <li>Reduce both bias and variance</li>
+            <li>Little dataprep required</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Lots of hyperparameters to tune</li>
+            <li>Not suitable for continual learning from streaming data</li>
+          </ul>
+          <li>Ex. XGBoost</li>
+        </ul>
+        <li>Option 6. neural network</li>
+        <ul>
+          <li>Pros</li>
+          <ul>
+            <li>Continual learning</li>
+            <li>Can handle unstructured data</li>
+            <li>Can learn complex patterns and non-linear decision boundries</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Computationally expensive</li>
+            <li>Lots of dataprep needed to provide good outcome (normalization, log-scaling, one-hot encoding, etc)</li>
+            <li>Large training data is needed</li>
+            <li>Not interpretable</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>Model training</li>
+      <ul>
+        <li>Constructing dataset</li>
+        <ul>
+          <li>&lt;user, event&gt; pair from interaction data</li>
+          <ul>
+            <li>1 - if user registered for the event</li>
+            <li>0 - otherwise</li>
+          </ul>
+          <li>Data will highly be imbalanced, thus use undersampling</li>
+        </ul>
+        <li>Choosing loss function</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Evaluation</h3>
+    <ul>
+      <li>Offline</li>
+      <ul>
+        <li>Option 1. precision@k or recall@k</li>
+        <ul>
+          <li>Not good because these don't consider ranking quality</li>
+        </ul>
+        <li>Option 2. MRR</li>
+        <ul>
+          <li>Considers only the first item, thus not good</li>
+        </ul>
+        <li>Option 3. nDCG</li>
+        <ul>
+          <li>Works well when the score is non-binary, thus not good</li>
+        </ul>
+        <li>Option 4. mAP</li>
+        <ul>
+          <li>Works well when the score is binary, thus the best choice</li>
+        </ul>
+      </ul>
+      <li>Online</li>
+      <ul>
+        <li>Click-through rate</li>
+        <ul>
+          <li>\( \dfrac{\text{total number of clicked events}}{\text{total number of impressions}} \)</li>
+          <li>Some events may be click baits, thus CTR alone is not sufficient</li>
+        </ul>
+        <li>Conversion rate</li>
+        <ul>
+          <li>\( \dfrac{\text{total number of event registration}}{\text{total number of impressions}} \)</li>
+        </ul>
+        <li>Bookmark rate</li>
+        <li>Revenue lift</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Serving</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-b/event-recommendation-system-1.png" alt="Card image cap">
+
+    <ul>
+      <li>Online learning pipeline</li>
+      <ul>
+        <li>Continuously train new models with new data, evaluate trained model, and deploy them</li>
+      </ul>
+      <li>Prediction pipeline</li>
+      <ul>
+        <li>Event filtering</li>
+        <ul>
+          <li>Narrow down 1M events to a small subset</li>
+          <li>Simple rules can be used</li>
+        </ul>
+        <li>Ranking service</li>
+        <ul>
+          <li>Computes features for each &lt;user, event&gt; pair</li>
+          <li>Sorts events based on probabilities computed by the model</li>
+          <li>Ouputs top k most relevent events</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Follow Up</h3>
+    <ul>
+      <li>Explain how to utilize feature crossing to achieve more expressiveness</li>
+      <li>Explain how to ensure output list is diverse and fresh</li>
+      <li>Explain privacy issue regarding leveraging user's live location</li>
+      <li>Explain how to keep the platform fair for both hosts and users</li>
+      <li>Explain how to avoid data leakage when constructing dataset</li>
+      <li>Explain how to determine right frequency to update the model</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
@@ -359,7 +2225,314 @@
 
 <div class="card mb-4" id="machine-learning-system-design-8">
   <div class="card-body">
-    <h2 class="card-title"></h2>
+    <h2 class="card-title">Ad Click Prediction on Social Platform</h2>
+
+    <h3 class="card-title">Clarifying Requirements</h3>
+    <ul>
+      <li>What is the business objective? Maximize revenue</li>
+      <li>Where are the Ads placed? (pop up, timeline, etc?) Timeline only</li>
+      <li>Does every Ad generate the same revenue? Yes</li>
+      <li>Can the same Ad be shown to the same user more than once? Yes</li>
+      <li>Can users report or hide the Ads? Yes</li>
+      <li>Can the system access user's current location? Yes</li>
+      <li>Do we have training data available? No, data is from user-ad interaction only</li>
+      <li>Can we assume impression without clicks, hide, report as negative examples? Yes</li>
+      <li>Should the model be trained continuously? Yes</li>
+    </ul>
+
+    <h3 class="card-title">Frame the Problem as an ML Task</h3>
+    <ul>
+      <li>Define ML objective</li>
+      <ul>
+        <li>Predict if an Ad will be clicked</li>
+      </ul>
+      <li>Specify system input and output</li>
+      <ul>
+        <li>Input - user</li>
+        <li>Output - ranked list of ADs</li>
+      </ul>
+      <li>Choose right ML category</li>
+      <ul>
+        <li>Ranking problem</li>
+        <ul>
+          <li>Pointwise LTR with binary classification</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Data Preparation</h3>
+    <ul>
+      <li>Data engineering</li>
+      <ul>
+        <li>Ad</li>
+        <ul>
+          <li>ad_id</li>
+          <li>advertiser_id</li>
+          <li>category</li>
+          <li>image_path</li>
+          <li>video_path</li>
+        </ul>
+        <li>User</li>
+        <ul>
+          <li>user_id</li>
+          <li>username</li>
+          <li>email</li>
+          <li>age</li>
+          <li>gender</li>
+          <li>city</li>
+          <li>country</li>
+        </ul>
+        <li>User-ad interation</li>
+        <ul>
+          <li>user_id</li>
+          <li>ad_id</li>
+          <li>interaction_type - impression, click, conversion</li>
+          <li>dwell_time</li>
+          <li>timestamp</li>
+        </ul>
+      </ul>
+      <li>Feature engineering</li>
+      <ul>
+        <li>Ad</li>
+        <ul>
+          <li>Advertiser id - embedding</li>
+          <li>Image and video - SimCLR</li>
+          <li>Category - CBOW</li>
+          <li>Total impressions or clicks on the Ad</li>
+          <li>Total impressions or clicks on the Ad supplied by an advertiser</li>
+        </ul>
+        <li>User</li>
+        <ul>
+          <li>Demographics</li>
+          <ul>
+            <li>Age</li>
+            <li>Gender</li>
+            <li>City</li>
+            <li>Country</li>
+          </ul>
+          <li>Context</li>
+          <ul>
+            <li>Device</li>
+            <li>Time of day</li>
+          </ul>
+          <li>Interaction</li>
+          <ul>
+            <li>Cliked Ads - embedding</li>
+            <li>User's historical engagement statistics - scale</li>
+          </ul>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Model Development</h3>
+    <ul>
+      <li>Model selection</li>
+      <ul>
+        <li>Option 1. logistic regression</li>
+        <ul>
+          <li>Cons</li>
+          <ul>
+            <li>Non-linear problems can't be solved</li>
+            <li>Cannot capture feature interactions</li>
+          </ul>
+        </ul>
+        <li>Option 2. Feature crossing + LR</li>
+        <ul>
+          <li>Create new feature by combining existing features</li>
+          <li>This way, non-linear relationship can be captured</li>
+          <li>Cons</li>
+          <ul>
+            <li>Manual process to choose features to be crossed</li>
+            <li>Requires domain knowledge</li>
+            <li>Cannot still capture complex interactions</li>
+            <li>When original features are sparse, cardinality of crossed features become very sparse</li>
+          </ul>
+        </ul>
+        <li>Option 3. GBDT</li>
+        <ul>
+          <li>Cons</li>
+          <ul>
+            <li>Not suitable for continual learning</li>
+            <li>Cannot train embedding layers</li>
+          </ul>
+        </ul>
+        <li>Option 4. GBDT + LR</li>
+        <ul>
+          <li>Use GBDT to select features based on their importance</li>
+          <li>Use GBDT to extract features (reduce number of features by creating new features from existing ones)</li>
+          <li>Cons</li>
+          <ul>
+            <li>Cannot still capture complex interactions</li>
+            <li>Continual learning is slow</li>
+          </ul>
+        </ul>
+        <li>Option 5. neural network</li>
+        <ul>
+          <li>Single NN - NN takes original features as input and outputs the click probability</li>
+          <li>Two-tower NN - user encoder and Ad encoder are used. Similarity between user and Ad embeddings is used to determine relevance</li>
+          <li>Cons</li>
+          <ul>
+            <li>Because feature space is usually sparse, most features are filled with zeros</li>
+            <li>Difficult to capture all pairwise feature interactions due to large number of features</li>
+          </ul>
+        </ul>
+        <li>Option 6. deep & cross network (DCN)</li>
+        <ul>
+          <li>Deep network - use DNN to learn complex features</li>
+          <li>Cross network - automatically captures feature interactions and learns good feature crosses</li>
+          <li>Outputs of deep and cross network are concatenated to make final predictions</li>
+          <li>More effective than NN because it implicitly learns feature crosses</li>
+          <li>Cons</li>
+          <ul>
+            <li>Cross network only models certain feature interactions</li>
+          </ul>
+          <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-b/ad-click-prediction-on-social-media-platform-1.png" alt="Card image cap">
+        </ul>
+        <li>Option 7. factorization machines (FM)</li>
+        <ul>
+          <li>Learn embedding vector for each feature to find all pairwise feature interactions</li>
+          <li>\( \hat{y}(x) = \underbrace{w_{0} + \displaystyle\sum_{i} w_{i}x_{i}}_{\text{logistic regression}} + \underbrace{\displaystyle\sum_{i}\displaystyle\sum_{j} &lt;v_{i}, v_{j}&gt; x_{i}x_{j}}_{\text{pairwise interactions}} \)</li>
+          <ul>
+            <li>\( x_{i} \) - \( i \)th feature</li>
+            <li>\( w_{i} \) - learned weight</li>
+            <li>\( v_{i} \) - embedding of \( i \)th feature</li>
+            <li>\( &lt;v_{i}, v_{j}&gt; \) - dot product between two embeddings</li>
+          </ul>
+          <li>Captures pairwise feature interactions</li>
+          <li>Cons</li>
+          <ul>
+            <li>Unlike neural networks, cannot learn sophisticated higher-order feature interactions</li>
+          </ul>
+          <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-b/ad-click-prediction-on-social-media-platform-2.png" alt="Card image cap">
+        </ul>
+        <li>Option 8. deep factorization machines (DeepFM)</li>
+        <ul>
+          <li>DNN captures sophisticated higher-order features</li>
+          <li>FM captures low-level pairwise feature interactions</li>
+          <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-b/ad-click-prediction-on-social-media-platform-3.png" alt="Card image cap">
+        </ul>
+        <li>Option 9. GBDT + DeepFM</li>
+        <ul>
+          <li>Use GBDT to select arnd extract features</li>
+          <li>Use those features for DeepFM</li>
+          <li>Cons</li>
+          <ul>
+            <li>Slow training and inference</li>
+            <li>Continual learning is slow</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>Model training</li>
+      <ul>
+        <li>Constructing dataset</li>
+        <ul>
+          <li>Positive - if user clicks the Ad in less than \( t \) seconds after Ad is shown</li>
+          <li>Negative - otherwise</li>
+        </ul>
+        <li>Choosing loss function</li>
+        <ul>
+          <li>Binary classification, thus use cross-entropy</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Evaluation</h3>
+    <ul>
+      <li>Offline</li>
+      <ul>
+        <li>Cross-entropy</li>
+        <ul>
+          <li>Ground truth</li>
+          <ul>
+            <li>Ad1 - \( 1 \) (clicked)</li>
+            <li>Ad2 - \( 0 \) (not clicked)</li>
+            <li>Ad3 - \( 1 \) (clicked)</li>
+          </ul>
+          <li>Model A</li>
+          <ul>
+            <li>Ad1 - p(click) = \( 0.8 \)</li>
+            <li>Ad2 - p(click) = \( 0.3 \)</li>
+            <li>Ad3 - p(click) = \( 0.95 \)</li>
+          </ul>
+          <li>Model B</li>
+          <ul>
+            <li>Ad1 - p(click) = \( 0.2 \)</li>
+            <li>Ad2 - p(click) = \( 0.6 \)</li>
+            <li>Ad3 - p(click) = \( 0.6 \)</li>
+          </ul>
+          <li>Cross-entropy</li>
+          <ul>
+            <li>\( \text{CE} = -\displaystyle\sum_{i} y_{i}log\hat{y_{i}} + (1-y_{i})log(1-\hat{y_{i}}) \)</li>
+            <li>\( \text{CE_A} = -(1log0.8 + (1-0)log(1-0.3) +1log0.95) = 0.273 \)</li>
+            <li>\( \text{CE_B} = -(1log0.2 + (1-0)log(1-0.6) +1log0.6) = 1.319 \)</li>
+          </ul>
+        </ul>
+        <li>Normalized cross-entropy</li>
+        <ul>
+          <li>Compares the model with a baseline that always predicts background CTR</li>
+          <li>Assume CTR is the training data is \( 0.6 \)</li>
+          <li>\( \text{CE_baseline} = -(1log0.6 + (1-0)log(1-0.6) +1log0.6) = 0.842 \)</li>
+          <li>NCE = CE_A / CE_baseline = \( \dfrac{0.273}{0.842} = 0.324 \)</li>
+          <li>\( 0.324 \) is less than \( 1 \), thus model A outperforms the baseline</li>
+        </ul>
+      </ul>
+      <li>Online</li>
+      <ul>
+        <li>Click-through rate</li>
+        <ul>
+          <li>\( \dfrac{\text{Total number of clicked Ads}}{\text{Total number of shown Ads}} \)</li>
+        </ul>
+        <li>Conversion rate</li>
+        <ul>
+          <li>\( \dfrac{\text{Total number of conversions}}{\text{Total number of impressions}} \)</li>
+        </ul>
+        <li>Hide rate</li>
+        <ul>
+          <li>\( \dfrac{\text{Number of Ads hidden by users}}{\text{Number of shown Ads}} \)</li>
+        </ul>
+        <li>Revenue lift</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Serving</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-b/ad-click-prediction-on-social-media-platform-4.png" alt="Card image cap">
+
+    <ul>
+      <li>Data preparation pipeline</li>
+      <ul>
+        <li>Batch feature computation</li>
+        <ul>
+          <li>Ex. Ad's image and category are static features</li>
+          <li>Computes features periodically with batch jobs and stores them in a feature store</li>
+        </ul>
+        <li>Online feature computation</li>
+        <ul>
+          <li>Ex. number of Ads impressions and clicks are dynamiuc features</li>
+          <li>Computes features at query time</li>
+        </ul>
+      </ul>
+      <li>Continual learning pipeline</li>
+      <ul>
+        <li>Fine-tunes model on new training data</li>
+      </ul>
+      <li>Prediction pipeline</li>
+      <ul>
+        <li>Some features that model uses are dynamic, thus need to use online inference</li>
+        <li>Ranking service interacts with the same feature store and online feature computation</li>
+        <li>Once both static and dynamic features are obtained, ranking service outputs click probability for each candidate Ad</li>
+        <li>Re-ranking services modifies the ranked list based on additional rules</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Follow Up</h3>
+    <ul>
+      <li>Explain how to avoid data leakage</li>
+      <li>Explain how to calibrate the model</li>
+      <li>Explain difference between FM and FFM (field-aware factorization machine)</li>
+      <li>Explain difference between DeepFM and XDeepFM</li>
+      <li>Explain catastrophic forgetting and the solutions</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
@@ -368,7 +2541,186 @@
 
 <div class="card mb-4" id="machine-learning-system-design-9">
   <div class="card-body">
-    <h2 class="card-title"></h2>
+    <h2 class="card-title">Similar Listings on Vacation Rental Platform</h2>
+
+    <h3 class="card-title">Clarifying Requirements</h3>
+    <ul>
+      <li>What is the business objective? Increase number of bookings</li>
+      <li>What is definition of similarity? When two listings are in same neighborhood, city, price range, etc</li>
+      <li>Should the listing be personalized to users? No</li>
+      <li>Do we have training data available? No, only user-listing interaction data is available</li>
+      <li>How many listings are there in the platform? 5M</li>
+      <li>When does new listings appear in recommendation list? One day after being posted</li>
+    </ul>
+
+    <h3 class="card-title">Frame the Problem as an ML Task</h3>
+    <ul>
+      <li>Define ML objective</li>
+      <ul>
+        <li>Given currently viewed listing, predict which listing will be clicked next</li>
+      </ul>
+      <li>Specify system input and output</li>
+      <ul>
+        <li>Input - listing that user is currently viewing</li>
+        <li>Output - list of listings ranked by probability of being clicked</li>
+      </ul>
+      <li>Choose right ML category</li>
+      <ul>
+        <li>Option 1. recommendation system</li>
+        <ul>
+          <li>Relies on user's historical interaction</li>
+          <li>For this problem, recently viewed listings are more informative than those in the past</li>
+        </ul>
+        <li>Option 2. session-based recommendation system</li>
+        <ul>
+          <li>Map each listing into embedding vector</li>
+          <li>Embeddings are close when the two listings frequently co-occur in user's browsing history</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Data Preparation</h3>
+    <ul>
+      <li>Data engineering</li>
+      <ul>
+        <li>Listing</li>
+        <ul>
+          <li>listing_id</li>
+          <li>host_id</li>
+          <li>price</li>
+          <li>sqft</li>
+          <li>rating</li>
+          <li>type</li>
+          <li>city</li>
+          <li>country</li>
+        </ul>
+        <li>User</li>
+        <ul>
+          <li>user_id</li>
+          <li>username</li>
+          <li>age</li>
+          <li>gender</li>
+          <li>city</li>
+          <li>country</li>
+          <li>timezone</li>
+        </ul>
+        <li>User-listing interation</li>
+        <ul>
+          <li>user_id</li>
+          <li>listing_id</li>
+          <li>interaction_type - impression, click, conversion</li>
+          <li>timestamp</li>
+          <li>position_of_the_listing_in_the_displayed_list</li>
+        </ul>
+      </ul>
+      <li>Feature engineering</li>
+      <ul>
+        <li>Model only utilizes browsing history</li>
+        <li>Search session</li>
+        <ul>
+          <li>session_id</li>
+          <li>clicked_listing_ids</li>
+          <li>booked_listing_id</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Model Development</h3>
+    <ul>
+      <li>Model selection</li>
+      <ul>
+        <li>Shallow neural network to learn embeddings</li>
+        <li>Initialize embeddings to random vectors</li>
+        <li>As sliding window moves, embeddings of central listing become close to embedding of nearby listings and far from embeddings of listings outside the window</li>
+      </ul>
+      <li>Model training</li>
+      <ul>
+        <li>Constructing dataset</li>
+        <ul>
+          <li>Negative sampling</li>
+          <ul>
+            <li>Move a sliding window through search sessions</li>
+            <li>As the sliding window moves, use central listing and its nearby listings as positive pairs</li>
+            <li>As the sliding window moves, use central listing and randomly sampled listings as negative pairs</li>
+            <li>Positive pairs have ground truth label 1 and negative pairs have ground truth label 0</li>
+          </ul>
+        </ul>
+        <li>Choosing loss function</li>
+        <ul>
+          <li>\( \displaystyle\sum_{(c,p) \in D_{p}} \text{log} \dfrac{1}{1+e^{-E_{c}E_{p}}} + \displaystyle\sum_{(c,n) \in D_{n}} \text{log} \dfrac{1}{1+e^{E_{c}E_{n}}} + \displaystyle\sum_{(c,b) \in D_{booked}} \text{log} \dfrac{1}{1+e^{-E_{c}E_{b}}} + \displaystyle\sum_{(c,n) \in D_{hard}} \text{log} \dfrac{1}{1+e^{E_{c}E_{n}}} \)</li>
+          <li>First term computes loss over positive pairs</li>
+          <li>Second term computes loss over negative pairs</li>
+          <li>Third term helps push embeddings of central listing closer to embeddings of eventually booked listings</li>
+          <li>Fourth term helps push embeddings of central listing away from embeddings of random listings</li>
+          <li>\( c \) - central listing</li>
+          <li>\( p \) - positive listing (co-occured with \( c \))</li>
+          <li>\( n \) - negative listing (did not co-occur with \( c \))</li>
+          <li>\( b \) - eventually booked listing</li>
+          <li>\( D_{\text{booked}} \) - pair of contral and booked listng</li>
+          <li>\( D_{\text{hard}} \) - pair of contral and negative listng (that are from the same region as the central listing)</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Evaluation</h3>
+    <ul>
+      <li>Offline</li>
+      <ul>
+        <li>Average rank of eventually booked listing</li>
+        <ul>
+          <li>Model computes similarities between the first clicked listing and other listings in the embedding space</li>
+          <li>Once similarities are computed, listings are ranked</li>
+          <li>Average the rank of eventually booked listings across all sessions</li>
+        </ul>
+      </ul>
+      <li>Online</li>
+      <ul>
+        <li>Click-through rate = \( \dfrac{\text{total number of clicked listings}}{\text{Number of recommended listings}} \)</li>
+        <li>Session book rate = \( \dfrac{\text{Number of sessions turned into booking}}{\text{Total number of sessions}} \)</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Serving</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-b/similar-listings-on-vacation-rental-platform-1.png" alt="Card image cap">
+
+    <ul>
+      <li>Training pipeline</li>
+      <ul>
+        <li>Fine-tunes the model using new listings and user-listing interactions</li>
+      </ul>
+      <li>Indexing pipeline</li>
+      <ul>
+        <li>Pre-compute and store embeddings of all listings in index table</li>
+        <li>When model is re-trained, re-compute all embeddings using new model and updates index table</li>
+      </ul>
+      <li>Predidction pipeline</li>
+      <ul>
+        <li>Embedding fetcher service</li>
+        <ul>
+          <li>If input listing was seen during training, its embedding is already available in index table. Then, it just fetches embedding from index table</li>
+          <li>If input listing was not seen during training, use the embeddings of geographically nearby listings</li>
+        </ul>
+        <li>Nearest neighbor service</li>
+        <ul>
+          <li>With 5M listings on the platform, use ANN</li>
+        </ul>
+        <li>Re-ranking service</li>
+        <ul>
+          <li>Apply user filters (Ex. price, etc) to remove listings</li>
+          <li>Listings in cities other than currently viewed listing can also be removed</li>
+        </ul>
+      </ul>
+    </ul>
+    
+    <h3 class="card-title">Follow Up</h3>
+    <ul>
+      <li>Explain positional bias and how to avoid it</li>
+      <li>Explain difference between session-based approach and random walk</li>
+      <li>Explain how to use random walk with restart (RWR) to recommend similar listings</li>
+      <li>Explain how to personalize outputs considering user's longer-term interest (in-session personalization)</li>
+      <li>Explain how to incorporate seasonality</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
@@ -377,7 +2729,210 @@
 
 <div class="card mb-4" id="machine-learning-system-design-10">
   <div class="card-body">
-    <h2 class="card-title"></h2>
+    <h2 class="card-title">Personalized News Feed</h2>
+
+    <h3 class="card-title">Clarifying Requirements</h3>
+    <ul>
+      <li>What is the business objective? Make users engaged</li>
+      <li>What kinds of posts should users see? unseen posts and posts with unseen comments</li>
+      <li>What does a post consist of? Text, image, video</li>
+      <li>What type of user engagement are we looking for? click, like, share, comment, etc</li>
+      <li>Can users block other users? Yes</li>
+      <li>Can users hide posts? Yes</li>
+      <li>How fast should the system work? Posts should show up under 200ms</li>
+      <li>How many users are there in the platform? 3M</li>
+      <li>How many daily active users are there in the platform? 2M and each user checks posts twice a day</li>
+    </ul>
+
+    <h3 class="card-title">Frame the Problem as an ML Task</h3>
+    <ul>
+      <li>Define ML objective</li>
+      <ul>
+        <li>Maximize both implicit (dewll time or user clicks) and explict (likes or shares) reactions</li>
+        <ul>
+          <li>Implicit reactions often do not reflect user's true opinion about a post</li>
+          <li>Explicit reactions offen do not occur because not many users actually press like buttons or share posts</li>
+          <li>Assign weight to each reaction and consider weighted score of reactions</li>
+          <ul>
+            <li>Click: 1</li>
+            <li>Like: 5</li>
+            <li>Comment: 10</li>
+            <li>Share: 20</li>
+            <li>Friendship request: 30</li>
+            <li>Hide: -20</li>
+            <li>Block: -50</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>Specify system input and output</li>
+      <ul>
+        <li>Input - user</li>
+        <li>Output - ranked list of unseen posts or posts with unseen comments</li>
+      </ul>
+      <li>Choose right ML category</li>
+      <ul>
+        <li>Ranking problem</li>
+        <ul>
+          <li>Pointwise LTR</li>
+          <ul>
+            <li>Use binary classifier for each category (click clasifier, like classifier, etc)</li>
+            <li>Compute linear combination of probabilties from classifiers and weights assigned for each category, which gives a final score</li>
+          </ul>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Data Preparation</h3>
+    <ul>
+      <li>Data engineering</li>
+      <ul>
+        <li>Post</li>
+        <ul>
+          <li>post_id</li>
+          <li>author_id</li>
+          <li>text</li>
+          <li>tags</li>
+          <li>image</li>
+          <li>video</li>
+          <li>timestamp</li>
+        </ul>
+        <li>User</li>
+        <ul>
+          <li>user_id</li>
+          <li>username</li>
+          <li>email</li>
+          <li>age</li>
+          <li>gender</li>
+          <li>city</li>
+          <li>country</li>
+        </ul>
+        <li>User-post interation</li>
+        <ul>
+          <li>user_id</li>
+          <li>post_id</li>
+          <li>interaction_type - click, like, share, etc</li>
+          <li>timestamp</li>
+        </ul>
+        <li>Friendship</li>
+        <ul>
+          <li>user_id_1</li>
+          <li>user_id_2</li>
+          <li>timstamp</li>
+        </ul>
+      </ul>
+      <li>Feature engineering</li>
+      <ul>
+        <li>Post</li>
+        <ul>
+          <li>text - BERT</li>
+          <li>image/video - ResNet, CLIP</li>
+          <li>like/share/replies - scale them to similar range</li>
+          <li>tags</li>
+          <ul>
+            <li>Use Viterbi to tokenzie hashtags into different words</li>
+            <li>Use feature hashing to convert words to Ids</li>
+            <li>Use TF-IDF or word2vec to vectorize tags</li>
+          </ul>
+          <li>post's age - bucketize + one-hot</li>
+        </ul>
+        <li>User</li>
+        <ul>
+          <li>Demographics - age, gender, country, etc</li>
+          <li>Contextual - device, time of the day, etc</li>
+          <li>User-post interactions - extract features from each post that user interacted with</li>
+          <li>Mentioned in a post - binary value 0 or 1</li>
+        </ul>
+        <li>User-author</li>
+        <ul>
+          <li>like/click/comment/share rate</li>
+          <li>length of friendship</li>
+          <li>close friends and family - binary value 0 or 1</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Model Development</h3>
+    <ul>
+      <li>Model selection</li>
+      <ul>
+        <li>Neural network</li>
+        <ul>
+          <li>To fine-tune pre-trained models</li>
+          <li>To use embeddings to represent categorical features</li>
+          <li>To deal with text/image/video data</li>
+        </ul>
+        <li>Option 1. n independent DNNs</li>
+        <ul>
+          <li>Expenseive to train</li>
+          <li>For less frequent reactions, there may not be enough data</li>
+        </ul>
+        <li>Option 2. multi-task DNNs</li>
+        <ul>
+          <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-b/personalized-newsfeed-1.png" alt="Card image cap">
+          <li>For passive users, extract the following features</li>
+          <ul>
+            <li>Dwell time</li>
+            <li>Skip - if user spends less than t seconds, then post is assumed to be skipped</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>Model training</li>
+      <ul>
+        <li>Constructing dataset</li>
+        <ul>
+          <li>Upsample negative data points for each reaction type</li>
+        </ul>
+        <li>Loss function</li>
+        <ul>
+          <li>Use MAE or MSE for regression task for dwell time prediction</li>
+          <li>Use cross-entropy for other binary classification predictions</li>
+          <li>\( \text{loss} = \lambda L_{\text{dwell}} + L_{\text{skip}} + L_{\text{like}} + \dots + L_{\text{share}} \)</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Evaluation</h3>
+    <ul>
+      <li>Offline</li>
+      <ul>
+        <li>ROC-AUC</li>
+      </ul>
+      <li>Online</li>
+      <ul>
+        <li>Click-through rate = \( \dfrac{\text{total number of clicked posts}}{\text{total number of impressions}} \)</li>
+        <li>Reaction rate = \( \dfrac{\text{number of liked/shared/commented/hidden/blocked/skipped posts}}{\text{total number of impressions}} \)</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Serving</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-b/personalized-newsfeed-2.png" alt="Card image cap">
+
+    <ul>
+      <li>Predidction pipeline</li>
+      <ul>
+        <li>Retrieval service</li>
+        <ul>
+          <li>Retrieves unseen posts or posts with unseen comments</li>
+        </ul>
+        <li>Ranking service</li>
+        <ul>
+          <li>Rank posts by score</li>
+        </ul>
+        <li>Re-ranking service</li>
+        <ul>
+          <li>Apply user filters</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Follow Up</h3>
+    <ul>
+      <li>Explain how to handel posts that are going viral</li>
+      <li>Explain how to personalize newsfeed for new users</li>
+      <li>Explain how to mitigate positional bias</li>
+      <li>Explain how to determine re-training frequency</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
@@ -386,7 +2941,176 @@
 
 <div class="card mb-4" id="machine-learning-system-design-11">
   <div class="card-body">
-    <h2 class="card-title"></h2>
+    <h2 class="card-title">People You May Know</h2>
+
+    <h3 class="card-title">Clarifying Requirements</h3>
+    <ul>
+      <li>What is the business objective? Make users grow connections</li>
+      <li>What are the factors to be used to recommend new connections? educational background, work experience, social context</li>
+      <li>Does a connection require accpetance? Yes</li>
+      <li>How many users are there in the platform? 1B users and 300M daily active users</li>
+      <li>How many connections does each user have on average? 1000</li>
+      <li>Do connections change often? No, they are not that dynamic</li>
+    </ul>
+
+    <h3 class="card-title">Frame the Problem as an ML Task</h3>
+    <ul>
+      <li>Define ML objective</li>
+      <ul>
+        <li>Maximize the number of formed connections</li>
+      </ul>
+      <li>Specify system input and output</li>
+      <ul>
+        <li>Input - user</li>
+        <li>Output - ranked list of connections</li>
+      </ul>
+      <li>Choose right ML category</li>
+      <ul>
+        <li>Option 1. pointwise leanring to rank (LTR)</li>
+        <ul>
+          <li>Input is two users and output is probability of given users forming a connection</li>
+          <li>This approach does not incorporate social context</li>
+        </ul>
+        <li>Option 1. edge prediction</li>
+        <ul>
+          <li>Input is entire graph and output is probability of an edge existing between two specific nodes</li>
+          <li>Compute the edge probabilities between user A and other users</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Data Preparation</h3>
+    <ul>
+      <li>Data engineering</li>
+      <ul>
+        <li>User</li>
+        <ul>
+          <li>user_id</li>
+          <li>school</li>
+          <li>degree</li>
+          <li>major</li>
+          <li>start_date</li>
+          <li>end_date</li>
+        </ul>
+        <li>Connection</li>
+        <ul>
+          <li>user_id_1</li>
+          <li>user_id_2</li>
+          <li>timestamp</li>
+        </ul>
+        <li>Interation</li>
+        <ul>
+          <li>user_id</li>
+          <li>interaction_type - connection request / accepted request / comment / search / profile view</li>
+          <li>interaction_value</li>
+          <li>timestamp</li>
+        </ul>
+      </ul>
+      <li>Feature engineering</li>
+      <ul>
+        <li>User</li>
+        <ul>
+          <li>Demographics - age, gender, city, country</li>
+          <li>Number of connections, followers, followings, pending requests</li>
+          <li>Account's age - older accounts are more reliable</li>
+          <li>Number of received reactions such as likes, shared, comments over certain period of time</li>
+        </ul>
+        <li>User-user affinity</li>
+        <ul>
+          <li>Education and work</li>
+          <ul>
+            <li>Schools in common</li>
+            <li>Contemporaries at school</li>
+            <li>Same major</li>
+            <li>Number of companies in common</li>
+            <li>Same industry</li>
+          </ul>
+          <li>Social</li>
+          <ul>
+            <li>Profile visits</li>
+            <li>Number of mutual connections</li>
+            <li>Time discounted mutual connections</li>
+          </ul>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Model Development</h3>
+    <ul>
+      <li>Model selection</li>
+      <ul>
+        <li>Graph neural network</li>
+        <ul>
+          <li>Each node stores features</li>
+          <li>GNN produces embeddings for each node</li>
+          <li>Simlarity between nodes are computing using dot product</li>
+          <li>Ex. GCN, GraphSAGE, GAT, GIT</li>
+        </ul>
+      </ul>
+      <li>Model training</li>
+      <ul>
+        <li>Constructing dataset</li>
+        <ul>
+          <li>Create a snapshot of the graph at time \( t \)</li>
+          <li>Compute initial node features and edge features of the graph</li>
+          <li>Create labels using graph snapshot at time \( t + 1 \)</li>
+        </ul>
+        <li>Loss function</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Evaluation</h3>
+    <ul>
+      <li>Offline</li>
+      <ul>
+        <li>GNN - ROC-AUC</li>
+        <li>PYMK - mAP</li>
+      </ul>
+      <li>Online</li>
+      <ul>
+        <li>Total number of connection requests sent in the last X days - not good because users may send lots of request but not get accepted</li>
+        <li>Total number of connection requests accepted in the last X days - good metric</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Serving</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-b/people-you-may-know-1.png" alt="Card image cap">
+
+    <ul>
+      <li>FoF</li>
+      <ul>
+        <li>Total number of users on the platform is 1B</li>
+        <li>Each user has 1000 friends on average</li>
+        <li>Then, narrowing down search space to friends of friends (1000 by 1000 = 1M) reduces search space from 1B to 1M</li>
+      </ul>
+      <li>Pre-computed PYMK</li>
+      <ul>
+        <li>Online prediction - generating potential connection in real-time when user loads homepage causes long computation</li>
+        <li>Batch prediction - pre-compute potential connections for all users and store them in DB</li>
+        <li>However, making batch predictions for inactive users is waste of resources</li>
+        <li>Since social graph does not evolve quickly, use pre-computed prediction for 7 days and re-compute them</li>
+      </ul>
+      <li>Generation pipeline</li>
+      <ul>
+        <li>FoF narrows down search space</li>
+        <li>Scoring service scores each candidate connection using GNN model</li>
+        <li>When user request is made, PYMK list is pulled from DB</li>
+      </ul>
+      <li>Prediction pipeline</li>
+      <ul>
+        <li>If recommendation exists in pre-computed PYMK, it is fetched directly</li>
+        <li>Otherwise, one-time request is sent to generation pipeline</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Follow Up</h3>
+    <ul>
+      <li>Explain peronsalized random walk</li>
+      <li>Explain how to deal with frequent users being recommended at higher rate</li>
+      <li>Explain how to make sure ignored recommendations have lower ranking</li>
+      <li>Explain how to determine when to label a recommended connection as negative (or how to deal with delayed feedback in recommendation system)</li>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: Machine Learning System Design Interview, Ali Aminian & Alex Xu
