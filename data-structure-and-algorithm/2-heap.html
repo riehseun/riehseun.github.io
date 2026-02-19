@@ -63,20 +63,13 @@
   <div class="card-body">
     <h2 class="card-title">Kth Largest Element in an Array (150/250)</h2>
 
-<pre><code class="python">from heapq import heappush, heappop
+<pre><code class="python">class Solution:
+    def findKthLargest(self, nums: List[int], k: int) -> int:
 
-class Solution:
-    def topKFrequent(self, nums: List[int], k: int) -> List[int]:
-
-        # nums = [1,2,3,2,1,1] k = 2 ? [1,2]
-        # nums = [1,2,3,2,1,1] k = 1 ? [1]
-        # nums = [1,2,3,2,1,1] k = 3 ? [1,2,3]
-
-        # Compute frequency of each num
-        # Insert frequency into max heap of size k
-        # Return elements from the heap
-        # Time O(n+nlogk) n = len(nums)
-        # Space O(n+k)
+        # Use min_heap of size k
+        # If new num > root of min_heap, replace
+        # Time O(nlogk) n = len(nums)
+        # Space O(k) 
 
         # Quickselect
         # Store mapping between frequency and number
@@ -90,21 +83,17 @@ class Solution:
         # Time O(n) 
         # Space O(n) for calculating frequency, O(1) for quickselect
 
-        min_heap, freq = [], defaultdict(int)
+        min_heap = []
 
         for num in nums:
-            freq[num] += 1
+            if len(min_heap) < k:
+                heappush(min_heap, num)
+            else:
+                if num > min_heap[0]:
+                    heappop(min_heap)
+                    heappush(min_heap, num)
 
-        for key, val in freq.items():
-            heappush(min_heap, (val,key))
-            if len(min_heap) > k:
-                heappop(min_heap)
-            
-        result = []
-        while min_heap:
-            result.append(heappop(min_heap)[1])
-
-        return result</code></pre>
+        return min_heap[0]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/top-k-frequent-elements">215. Kth Largest Element in an Array</a> | <a href="https://neetcode.io/problems/kth-largest-element-in-an-array">Kth Largest Element in an Array</a>
