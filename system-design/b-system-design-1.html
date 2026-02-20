@@ -576,6 +576,820 @@
     Reference: System Design Interview, Alex Xu
   </div>
 </div>
+
+<div class="card mb-4" id="system-design-1-7">
+  <div class="card-body">
+    <h2 class="card-title">URL Shortener</h2>
+
+    <h3 class="card-title">Understand the problem and establish design scope</h3>
+    <ul>
+      <li>What is the purpose of the application? Given a URL, generate a short version. When users click short link, redirect them to original link</li>
+      <li>What should be the length of short URL? As short as possible</li>
+      <li>What chars can go in short URL? 0-9, A-Z, a-z</li>
+      <li>Can users delete or update short URLs? Yes</li>
+    </ul>
+
+    <h3 class="card-title">Estimation</h3>
+    <ul>
+      <li>How many users are there? 100M daily active users</li>
+      <li>How many request does each user make for URL shortening? 1 URL shortening per day</li>
+      <li>How many request does each user make for URL redirection? 10 URL redirection per day</li>
+      <li>What is the average size of short URL? 100 bytes</li>
+    </ul>
+
+    <h3 class="card-title">Storage</h3>
+    <ul>
+      <li>100M URLs per day * 100 bytes = 10GB per day</li>
+    </ul>
+
+    <h3 class="card-title">Bandwidth</h3>
+    <ul>
+      <li>Incoming</li>
+      <ul>
+        <li>Shortening - 100M URLs per day = 100M / (24 * 3600) = 1157 URLs per second</li>
+        <li>Redirection - 1B URLs per day = 1B / (24 * 3600) = 11570 URLs per second</li>
+      </ul>
+      <li>Outgoing</li>
+      <ul>
+        <li>Shortening - 1157 URLs per second (serving response back to user)</li>
+        <li>Redirection - 11570 URLs per second (serving response back to user)</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Propose high-level design and get buy-in</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/system-design/image/sd-b/url-shortener-2.png" alt="Card image cap">
+
+    <ul>
+      <li>User</li>
+      <li>Load balancer</li>
+      <li>Web server</li>
+      <li>Cache</li>
+      <li>DB</li>
+    </ul>
+
+    <ul>
+      <li>URL shortening</li>
+      <ul>
+        <li>Long URL is entered</li>
+        <li>Web server checks to see if long URL is in DB</li>
+        <ul>
+          <li>If yes, return short URL</li>
+          <li>If no, generate short URL</li>
+          <ul>
+            <li>Need a way to convert long URL to hash value</li>
+            <li>Need one-to-one mapping between long URL and hash value</li>
+            <li>Save short URL to DB and return short URL</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>URL redirecting</li>
+      <ul>
+        <li>User clicks short URL</li>
+        <li>Web server checks the cache to see if long URL exist</li>
+        <ul>
+          <li>If yes, long URL is fetched and returned from cache</li>
+          <li>If no, long URL is fetched and returned from DB</li>
+          <li>Need to determine the http status code to return</li>
+        </ul>
+      </ul>
+      <li>URL update/delete</li>
+      <ul>
+        <li>Short URL is entered</li>
+        <li>Web server checks to see if short URL is in DB</li>
+        <ul>
+          <li>If yes, update/delete short URL in DB and return updated/deleted short URL to user</li>
+          <li>If no, return error to user</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Design deep dive</h3>
+
+    <h3 class="card-title">Generate short URL</h3>
+    <ul>
+      <li>Length of short URL</li>
+      <ul>
+        <li>100M URLs generated per day</li>
+        <li>Assume we want to run service for 10 years</li>
+        <li>Then, 100M * 10 * 365 = 365B URLs are needed</li>
+        <li>0-9, A-Z, a-z have 10 + 26 + 26 = 62 chars</li>
+        <li>62^n >= 365B, n = 7 should be the length of short URL</li>
+      </ul>
+      <li>Option 1. hash function</li>
+      <ul>
+        <li>Ex. CRC32, MD5, SHA-1</li>
+        <li>URL length is fixed</li>
+        <li>These functions generate hash values that are too long for our purpose</li>
+      </ul>
+      <li>Option 2. base 62 conversion</li>
+      <ul>
+        <li>URL length goes up with ID</li>
+        <li>Requires unique ID generator</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Http status code</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/system-design/image/sd-b/url-shortener-1.png" alt="Card image cap">
+
+    <ul>
+      <li>Option 1. 301 redirect</li>
+      <ul>
+        <li>Permanently moved</li>
+        <li>Browser caches the response and subsequent requests for the same URL is redirected to website directly</li>
+        <li>Helps with server load</li>
+      </ul>
+      <li>Option 2. 302 redirect</li>
+      <ul>
+        <li>Temporarily moved</li>
+        <li>Subsequent requests for the same URL is sent to web server first</li>
+        <li>Helps with data analytics</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">User experience during failure</h3>
+    <ul>
+      <li>Load balancer</li>
+      <ul>
+        <li>Servers are marked offline</li>
+      </ul>
+      <li>Server</li>
+      <ul>
+        <li>API returns 503 service unavailable</li>
+      </ul>
+      <li>Cache</li>
+      <ul>
+        <li>For URL shortening, users are not impacted</li>
+        <li>For URL redirection, users can get slower response</li>
+      </ul>
+      <li>DB</li>
+      <ul>
+        <li>API returns error message</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Potential bottlenecks</h3>
+    <ul>
+      <li>Web server could be under high load</li>
+    </ul>
+
+    <h3 class="card-title">10x scale</h3>
+    <ul>
+      <li>The length of short URL should be increased</li>
+      <li>Base 62 conversion becomes better approach than hash function</li>
+      <li>Web servers</li>
+      <ul>
+        <li>Assess the cost of horizontal scaling and vertical scaling</li>
+        <li>Getting bigger machines, and then doing horizontal scaling could make sense in terms of cost</li>
+      </ul>
+      <li>Cache/DB</li>
+      <ul>
+        <li>Assess the cost of current infrastructure type given the new size of data</li>
+        <li>Replacing current NoSQL to different NoSQL could make sense in terms of cost</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">API</h3>
+    <ul>
+      <li><code>short_url(original_url)</code></li>
+      <ul>
+        <li>POST api/v1/data/shorten</li>
+        <li>Returns short URL</li>
+        <li><code>original_url</code> - original long URL</li>
+      </ul>
+      <li><code>redirect_url(short_url)</code></li>
+      <ul>
+        <li>GET api/v1/shortUrl</li>
+        <li>Returns long URL for HTTP redirection</li>
+        <li><code>shorten_url</code> - short URL</li>
+      </ul>
+      <li><code>update_url(short_url)</code></li>
+      <ul>
+        <li>PUT api/v1/updateUrl</li>
+        <li>Returns updated short URL for the given short URL</li>
+      </ul>
+      <li><code>delete_url(short_url)</code></li>
+      <ul>
+        <li>DELETE api/v1/deleteUrl</li>
+        <li>Deletes the short URL</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Database</h3>
+    <ul>
+      <li>Need to store users</li>
+      <li>Need to store mapping between original URL and short URL</li>
+      <li>NoSQL (Ex. MongoDB)</li>
+      <ul>
+        <li>No relationship between tables</li>
+        <li>System is read heavy</li>
+      </ul>
+      <li>URL</li>
+      <ul>
+        <li>shortened_url_hash (varchar, PK)</li>
+        <li>original_url (varchar)</li>
+        <li>user_id (int)</li>
+        <li>creation_date (datetime)</li>
+      </ul>
+      <li>User</li>
+      <ul>
+        <li>user_id (int, pk)</li>
+        <li>name (varchar)</li>
+        <li>email (varchar)</li>
+        <li>creation_date (datetime)</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Wrap up</h3>
+    <ul>
+      <li>Explain how to prevent malicious users send large amount of requests</li>
+      <ul>
+        <li>Use rate limiter in front of load balancer</li>
+      </ul>
+      <li>Explain how to integrate analytics solution URL shortening service</li>
+      <ul>
+        <li>Creating a table of &lt;short_url, interaction_type (click, etc), timestamp&gt; will allow tracking</li>
+        <ul>
+          <li>How many people click a particular link</li>
+          <li>At what time people click a particular link</li>
+        </ul>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="system-design-1-8">
+  <div class="card-body">
+    <h2 class="card-title">Web Crawler</h3>
+
+    <h3 class="card-title">Understand the problem and establish design scope</h2>
+    <ul>
+      <li>What is the purpose of the application? Search engine indexing</li>
+      <li>Should the system work with mutiple content types? No, HTML only</li>
+      <li>Should the system handle duplicate content? Duplicate content should be ignored</li>
+    </ul>
+
+    <h3 class="card-title">Estimation</h3>
+    <ul>
+      <li>How many web pages to crawl? 1B pages per month</li>
+      <li>What is the size of each HTML page? 100KB including metadata</li>
+      <li>How long does it take to traverse one page? 100ms</li>
+      <li>Do we need to store HTML page? Yes for 5 years</li>
+    </ul>
+
+    <h3 class="card-title">Storage</h3>
+    <ul>
+      <li>1B per month * 100KB = 100TB per month</li>
+      <li>100TB per month = 6PB for 5 years</li>
+    </ul>
+
+    <h3 class="card-title">Bandwidth</h3>
+    <ul>
+      <li>Incoming</li>
+      <ul>
+        <li>100TB * 8 / (86400 * 30) = 3Gbps</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Propose high-level design and get buy-in</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/system-design/image/sd-b/web-crawler-1.png" alt="Card image cap">
+
+    <ul>
+      <li>Seed URLs</li>
+      <ul>
+        <li>Base URLs</li>
+      </ul>
+      <li>URL frontier (priority queue)</li>
+      <ul>
+        <li>Contains all the remaining URLs to download</li>
+      </ul>
+      <li>Service host</li>
+      <ul>
+        <li>Each worker dequeues URL from the URL frontier</li>
+        <li>Each worker uses DNS resolver to acquire web page's IP address</li>
+      </ul>
+      <li>DNS resolver</li>
+      <ul>
+        <li>Custom DNS resolver is needed because DNS lookup is time consuming process</li>
+        <li>Cache frequently used IP addresses within their TTL</li>
+      </ul>
+      <li>Content parser</li>
+      <ul>
+        <li>HTML is parsed and validated</li>
+      </ul>
+      <li>Duplicate HTML eliminator</li>
+      <ul>
+        <li>Checks if document is duplicate by checking the hash values of two web pages</li>
+      </ul>
+      <li>URL extractor</li>
+      <ul>
+        <li>Extracts links from HTML pages</li>
+      </ul>
+      <li>URL filter</li>
+      <ul>
+        <li>Exclude certain content types, file extensions, and blacklisted sites</li>
+      </ul>
+      <li>Duplicate URL eliminator</li>
+      <ul>
+        <li>Bloom filter or hash table is used</li>
+      </ul>
+      <li>URL storage</li>
+      <ul>
+        <li>Stores already visited URLs</li>
+      </ul>
+    </ul>
+
+    <ul>
+      <li>Add seed URLs to URL frontier</li>
+      <li>Service host fetches URLs from URL frontier</li>
+      <li>Service host gets IP addresses of URLs from DNS resolver and starts downloading</li>
+      <li>Content parser validates HTML pages</li>
+      <li>Duplicate HTML eliminator checks if HTML is already in storage</li>
+      <li>Duplicate URL eliminator checks if URL is already in storage</li>
+      <ul>
+        <li>If URL is not duplicate, it is added to URL frontier</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Design deep dive</h3>
+
+    <ul>
+      <li>Algorithm</li>
+      <ul>
+        <li>Use BFS</li>
+        <li>DFS is not a good choice because depth can be very deep</li>
+      </ul>
+      <li>Priority</li>
+      <ul>
+        <li>Prioritizer computes priority of each URL</li>
+        <li>Each queue is assigned a priority</li>
+        <li>Queue selector has higher probability of picking queues with higher priority</li>
+      </ul>
+      <li>Politeness</li>
+      <ul>
+        <li>Download one page at a time from the same host</li>
+        <li>Each thread in service host has a queue and download URLs from that queue</li>
+        <li>Queue router ensures that each queue only contains URLs from the same host</li>
+        <li>Mapping table maps host (ex. wikipedia.com) to queue</li>
+        <li>Queue selector rotates worker threads that downloads webpages</li>
+      </ul>
+      <li>Freshness</li>
+      <ul>
+        <li>Recrawl is needed because webpages are constantly updated</li>
+        <li>Recrawl URLs with higher priority first</li>
+      </ul>
+      <li>Storage</li>
+      <ul>
+        <li>Due to huge size of URLs, need to store URLs into a disk</li>
+        <li>But, disk is slow, thus we need buffers in memory</li>
+        <ul>
+          <li>Enqueue buffer - once filled, written to disk</li>
+          <li>Dequeue buffer - keeps cache of URLs to be visited. It periodically reads from disk to fill the buffer</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Service host</h3>
+    <ul>
+      <li>Robots.txt</li>
+      <ul>
+        <li>Specifies pages that are not allowed to be downloaded</li>
+      </ul>
+      <li>Performance optimization</li>
+      <ul>
+        <li>Crawl jobs are distributed into multiple servers, and each server runs multiple threads</li>
+        <li>Response from DNS resolver is cached in Service host</li>
+        <li>Place crawl servers close to website hosts in terms of geographical region</li>
+        <li>Enforce maximum wait time from the host</li>
+      </ul>
+      <li>Robustness</li>
+      <ul>
+        <li>Use consistent hashing to distribute load among crawl jobs</li>
+        <li>Save crawl states into disk (When failure happens, can resume from the saved state)</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Wrap up</h3>
+    <ul>
+      <li>Explain how to handle dynamically generated links</li>
+      <li>Explain how to filter out unwanted pages</li>
+      <li>Explain how to perform data analytics</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="system-design-1-9">
+  <div class="card-body">
+    <h2 class="card-title">Notification System</h2>
+
+    <h3 class="card-title">Understand the problem and establish design scope</h3>
+    <ul>
+      <li>What is the purpose of the application? Send notifications to users</li>
+      <li>What type of notifications are in scope? Push notification, SMS, email</li>
+      <li>What triggers notification? Either by client application or by scheduling from server side</li>
+      <li>Should notification be sent in real-time? Yes, but little delay is acceptable</li>
+      <li>Can users opt-out from notification? Yes</li>
+    </ul>
+
+    <h3 class="card-title">Estimation</h3>
+    <ul>
+      <li>How many notifications per day? 10M push nofitication, 1M SMS, 5M email</li>
+      <li>What is the size of each type of notification? 100KB on average for all of them</li>
+    </ul>
+
+    <h3 class="card-title">Storage</h3>
+    <ul>
+      <li>Notification data will be minor</li>
+    </ul>
+
+    <h3 class="card-title">Bandwidth</h3>
+    <ul>
+      <li>Outgoing</li>
+      <ul>
+        <li>(10M + 1M + 5M) * 100KB = 1.6MB per day</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Propose high-level design and get buy-in</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/system-design/image/sd-b/notification-system-1.png" alt="Card image cap">
+    <ul>
+      <li>Services</li>
+      <ul>
+        <li>Triggers notification sending events</li>
+        <li>Ex. micro-service, cron job, etc</li>
+      </ul>
+      <li>Notification servers</li>
+      <ul>
+        <li>Validates email, phone number, etc</li>
+        <li>Queries cache or DB to fetch data to render a notification</li>
+      </ul>
+      <li>Cache</li>
+      <ul>
+        <li>Caches user info, device info, notification templates</li>
+      </ul>
+      <li>Message queues</li>
+      <ul>
+        <li>Remove dependency between notification servers and third party services</li>
+        <li>Serves as buffer when high volumn of notifications are sent out</li>
+      </ul>
+      <li>Workers</li>
+      <ul>
+        <li>Pull notification events from message queues and send them to corresponding third party services</li>
+      </ul>
+      <li>APNs</li>
+      <ul>
+        <li>Apple push notification service</li>
+      </ul>
+      <li>FCM</li>
+      <ul>
+        <li>Fire-base cloud messaging</li>
+        <li>Used for Android device</li>
+      </ul>
+      <li>SMS service</li>
+      <ul>
+        <li>Ex. Twilio, Nexmo</li>
+      </ul>
+      <li>Email service</li>
+      <ul>
+        <li>Ex. Sendgrid, Mailchimp</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Workflow</h3>
+    <ul>
+      <li>Service calls APIs to notification servers</li>
+      <li>Notification servers fetch metadata from cache or DB</li>
+      <li>A notification event is sent to corresponding queue</li>
+      <li>Workers pull nofitication events from message queues</li>
+      <li>Workers send notifications to third party services</li>
+      <li>Third party services send notifications to user devices</li>
+    </ul>
+
+    <h3 class="card-title">API</h3>
+    <ul>
+      <li><code>send_email_notification(user_id, email, subject, content)</code></li>
+      <ul>
+        <li>POST api/v1/sendNotification</li>
+        <li><code>user_id</code> - recepient of the email notification</li>
+        <li><code>email</code> - "from" email address of the email notification</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Database</h3>
+    <ul>
+      <li>Use relational database</li>
+      <li>User</li>
+      <ul>
+        <li>user_id (int, pk)</li>
+        <li>name (string)</li>
+        <li>email (string)</li>
+        <li>phone_number (int)</li>
+        <li>created_at (timestamp)</li>
+      </ul>
+      <li>Device</li>
+      <ul>
+        <li>device_id (int, pk)</li>
+        <li>device_token (string)</li>
+        <li>user_id (int)</li>
+        <li>last_logged_in_at (timestamp)</li>
+      </ul>
+      <li>Notification</li>
+      <ul>
+        <li>notification_id (int, pk)</li>
+        <li>user_id (int)</li>
+        <li>channel (string)</li>
+        <ul>
+          <li>Push notification, SMS, email</li>
+        </ul>
+        <li>opt-in (boolean)</li>
+        <ul>
+          <li>Whether user agreed to receive notification using the corresponding channel</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Design deep dive</h3>
+
+    <h3 class="card-title">Workers</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/system-design/image/sd-b/notification-system-2.png" alt="Card image cap">
+
+    <ul>
+      <li>Retry on error</li>
+      <ul>
+        <li>Workers store notification data in notification log DB</li>
+        <li>When third party fails to send notification, the notification is added to message queue for retrying</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Notification servers</h3>
+    <ul>
+      <li>De-duplication</li>
+      <ul>
+        <li>Distributed nature of the design cannot guarantee exactly-once delivery</li>
+        <li>When notification arrives, check event ID</li>
+        <ul>
+          <li>If event ID is seen before, discard it</li>
+        </ul>
+      </ul>
+      <li>Performs authentication</li>
+      <li>Serves as rate limiter</li>
+    </ul>
+
+    <h3 class="card-title">Analytics service</h3>
+    <ul>
+      <li>Implemented in various stages to capture statistics</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
+
+<div class="card mb-4" id="system-design-1-10">
+  <div class="card-body">
+    <h2 class="card-title">Newsfeed System</h2>
+
+    <h3 class="card-title">Requirement</h3>
+    <ul>
+      <li>What is the purpose of the application? Generate newsfeed for the users</li>
+      <li>What can a feed contain? Text, image, video</li>
+      <li>How is the ordering of feed determined? For simplicity, assume reverse chronogical order</li>
+      <li>How many friends a can user have? 1000</li>
+      <li>How many posts does each user see? 1000</li>
+    </ul>
+
+    <h3 class="card-title">Estimation</h3>
+    <ul>
+      <li>How many daily active users? 100M</li>
+      <li>How many total number of users? 1B</li>
+      <li>What is the size of user metadata? 100KB</li>
+      <li>What is the size of each post? 1MB on average (text, image, video combined)</li>
+      <li>How many posts does each user create per day? 1</li>
+      <li>How many feeds does each user view per day? 10</li>
+    </ul>
+
+    <h3 class="card-title">Storage</h3>
+    <ul>
+      <li>User metadata - 100KB * 1B = 100TB</li>
+      <li>Posts - 1000 * 100M * 1MB = 100PB per day</li>
+    </ul>
+
+    <h3 class="card-title">Bandwidth</h3>
+    <ul>
+      <li>Incoming</li>
+      <ul>
+        <li>100M * 1 per day * 1MB = 100TB * 8 / 86400 = 9.26Gbps</li>
+      </ul>
+      <li>Outgoing</li>
+      <ul>
+        <li>100M * 10 per day * 1MB = 1PB * 8 / 86400 = 92.6Gbps</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Propose high-level design and get buy-in</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/system-design/image/sd-b/newsfeed-system-1.png" alt="Card image cap">
+    <ul>
+      <li>Web server</li>
+      <ul>
+        <li>Authentication and rate limiting</li>
+      </ul>
+      <li>Post service</li>
+      <ul>
+        <li>Stores posts in cache and DB</li>
+      </ul>
+      <li>Fanout service</li>
+      <ul>
+        <li>Push new content to users' friends' newsfeed</li>
+        <li>Feed is stored in cache for fast retrieval</li>
+      </ul>
+      <li>Newsfeed service</li>
+      <ul>
+        <li>Fetches newsfeed from cache</li>
+      </ul>
+      <li>Notification service</li>
+      <ul>
+        <li>Informs friends about the new feeds via push notification</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Workflow</h3>
+    <ul>
+      <li>User creates a post</li>
+      <ul>
+        <li>Post service stores posts in cache and DB</li>
+      </ul>
+      <li>Feed is generated</li>
+      <ul>
+        <li>Feed is generated from posts stored in post cache and post DB</li>
+        <li>Generated feed is stored in newsfeed cache</li>
+        <ul>
+          <li>How to determine which feed is for which user?</li>
+        </ul>
+      </ul>
+      <li>User views posts</li>
+      <ul>
+        <li>Feed is returned to user from newsfeed cache</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">API</h3>
+    <ul>
+      <li><code>post_feed(user_id, content, auth_token)</code></li>
+      <ul>
+        <li>POST api/v1/me/feed</li>
+        <li><code>content</code> - text content of the feed</li>
+        <li><code>auth_token</code> - authenticate API requests</li>
+      </ul>
+      <li><code>get_feed(user_id, auth_token)</code></li>
+      <ul>
+        <li>GET api/v1/me/feed</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Database</h3>
+    <ul>
+      <li>Use relational database</li>
+      <li>Use a graph database only for the relationships between users</li>
+      <li>User</li>
+      <ul>
+        <li>user_id (int, pk)</li>
+        <li>name (string)</li>
+        <li>email (string)</li>
+        <li>created_at (timestamp)</li>
+      </ul>
+      <li>Feed</li>
+      <ul>
+        <li>feed_id (int, pk)</li>
+        <li>user_id (int)</li>
+        <li>content (string)</li>
+        <li>num_likes (int)</li>
+        <li>created_at (timestamp)</li>
+      </ul>
+      <li>Media</li>
+      <ul>
+        <li>media_id (int, pk)</li>
+        <li>description (string)</li>
+        <li>path (string)</li>
+        <li>created_at (timestamp)</li>
+      </ul>
+      <li>User (Vertex)</li>
+      <ul>
+        <li>user_id (int, pk)</li>
+        <li>properties (json)</li>
+      </ul>
+      <li>Relationship (Edge)</li>
+      <ul>
+        <li>relation_id (int, pk)</li>
+        <li>from (user_id)</li>
+        <li>to (user_id)</li>
+        <li>properties (json)</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Design deep dive</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/system-design/image/sd-b/newsfeed-system-2.png" alt="Card image cap">
+
+    <h4 class="card-title">Newsfeed generation</h4>
+    <ul>
+      <li>Fanout service fetches friend IDs from graph DB</li>
+      <li>Fanout service gets friends metadata from user cache</li>
+      <li>Fanout service sends the list of friends IDs and post ID to message queue</li>
+      <li>Fanout workers fetch data from message queue, generates newsfeed, and store &lt;post_id, user_id&gt; mapping in newsfeed cache</li>
+    </ul>
+
+    <h4 class="card-title">Newsfeed retrieval</h4>
+    <ul>
+      <li>Images and videos are fetched from CDN</li>
+      <li>Newsfeed service gets a list of post IDs from newsfeed cache</li>
+      <li>Newsfeed service retrieves post content from user cache/DB and post cache/DB</li>
+    </ul>
+
+    <h3 class="card-title">Fanout service</h3>
+    <ul>
+      <li>Option 1. push model</li>
+      <ul>
+        <li>Newsfeed is pre-computed during write time</li>
+        <li>Pros</li>
+        <ul>
+          <li>Newsfeed is generated and pushed to friends immediately</li>
+          <li>Fetching newsfeed is fast because newsfeed is already computed during write time</li>
+        </ul>
+        <li>Cons</li>
+        <ul>
+          <li>If user has many friends, generating newsfeed and pushing it to all of them take a long time</li>
+          <li>Generating newsfeed for friends who are inactive is wasting computing resource</li>
+        </ul>
+      </ul>
+      <li>Option 2. pull model</li>
+      <ul>
+        <li>Newsfeed is generated during read time</li>
+        <li>Pros</li>
+        <ul>
+          <li>More efficient for handling inactive user scenario</li>
+        </ul>
+        <li>Cons</li>
+        <ul>
+          <li>Fetching newsfeed is slow</li>
+        </ul>
+      </ul>
+      <li>Option 3. hybrid model</li>
+      <ul>
+        <li>For celebrities, use pull model</li>
+        <ul>
+          <li>Let followers pull new contents on-demand to avoid system overload</li>
+        </ul>
+        <li>For all other users, use push model</li>
+        <ul>
+          <li>Generating feed fast is critical</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Newsfeed cache</h3>
+    <ul>
+      <li>Newsfeed (tier 1) - stores newsfeed IDs</li>
+      <li>Content (tier 2) - stores every post data, which are divied into hot and normal</li>
+      <li>Social graph (tier 3) - stores user relationship data</li>
+      <li>Action (tier 4) - store info on whether user liked a post, replied to post, etc</li>
+      <li>Counters (tier 5) - number of likes, replies, followers, etc</li>
+    </ul>
+
+    <h3 class="card-title">User experience during failure</h3>
+    <ul>
+      <li>Post service - users cannot upload posts</li>
+      <li>Fanout service - newsfeed cannot be generated (Users will not see updated newsfeeds)</li>
+      <li>Newsfeed service - newsfeed cannot be fetched (Users will not see updated newsfeeds)</li>
+      <li>Notification service - users will not be notififed when new posts arrives in their newsfeed</li>
+    </ul>
+
+    <h3 class="card-title">Potential bottlenecks</h3>
+    <ul>
+      <li>As system scales, reach/write speed from/to Graph DB, Post DB, user DB may suffer</li>
+      <li>Newsfeed cache can get easily overloads with constant read/write</li>
+    </ul>
+
+    <h3 class="card-title">10x scale</h3>
+    <ul>
+      <li>Pay attention to the cost of graph DB, Post DB, User DB</li>
+      <li>May need to upgrade the cache type of newsfeed cache to serve increased demand</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview, Alex Xu
+  </div>
+</div>
 <!-- System Design 1 END -->
 
 </div> <!-- /.col-md-12 -->
