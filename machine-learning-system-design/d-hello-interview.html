@@ -46,6 +46,7 @@
     <ul class="list-unstyled mb-0">
       <li><a href="#hello-interview-1">Harmful Content</a></li>
       <li><a href="#hello-interview-2">Bot Detection</a></li>
+      <li><a href="#hello-interview-3">Video Recommendations</a></li>
     </ul>
   </div>
 </div>
@@ -338,6 +339,161 @@
       <li></li>
       <li></li>
       <li></li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.hellointerview.com">hello interview</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="hello-interview-3">
+  <div class="card-body">
+    <h2 class="card-title">Video Recommendations</h2>
+
+    <h3 class="card-title">Problem Framing</h3>
+    <ul>
+      <li>Clarify the problem</li>
+      <ul>
+        <li>What should the system recommend? "up next" while watching a video</li>
+        <li>How many videos are there? 1B</li>
+        <li>How many users are there? 1B daily active users</li>
+        <li>How many videos are shown to users at once? 5</li>
+        <li>How fast should recommendataion be? Under 250ms</li>
+      </ul>
+      <li>Establish a business objective</li>
+      <ul>
+        <li>Maximize long term satisfaction and engagement</li>
+      </ul>
+      <li>Decide on an ML objective</li>
+      <ul>
+        <li>Ranking problem where inputs are user's current session and video that the user is watching</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">High Level Design</h3>
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-d/video-recommendations-1.png" alt="Card image cap">
+
+    <h3 class="card-title">Data and Features</h3>
+    <ul>
+      <li>Training data</li>
+      <ul>
+        <li>Supervised data</li>
+        <ul>
+          <li>Do 50k labeled examples contain hard cases that are prone to false positive or false negative?</li>
+        </ul>
+        <li>Semi-supervised data</li>
+        <ul>
+          <li>Use user reports for label harmful posts</li>
+        </ul>
+        <li>Self-supervised data</li>
+        <ul>
+          <li>Use user comments as heuristic to label data</li>
+        </ul>
+        <li>Need to address class imbalance!</li>
+      </ul>
+      <li>Features</li>
+      <ul>
+        <li>Content features</li>
+        <ul>
+          <li>Concatenated texts from post body, hash tags, etc</li>
+          <li>Collection of images</li>
+        </ul>
+        <li>Behavioral Features</li>
+        <ul>
+          <li>Comments</li>
+          <li>Features should be normalized and correctly by time</li>
+          <li>Number of negative reactions (hide, angry, etc) per view</li>
+          <li>NUmver of shares per view</li>
+        </ul>
+        <li>Creator Features</li>
+        <ul>
+          <li>User embeddings - create embeddings of user profile</li>
+          <li>Age of user account</li>
+          <li>Number of harmful posts so far</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Modelling</h3>
+    <ul>
+      <li>Benchmark models</li>
+      <ul>
+        <li>Logistic regressiom with numerical and embedding features</li>
+      </ul>
+      <li>Model selection</li>
+      <ul>
+        <li>Train models for text and image separately, then combine prediction -  cannot capture interaction between image and text</li>
+        <li>Multi-modal transformer - high compute cost</li>
+      </ul>
+      <li>Model architecture</li>
+      <ul>
+        <li>Multi-modal encoder</li>
+        <ul>
+          <li>ViT for processing images</li>
+          <li>Text tokenizer and encoder for processing texts</li>
+          <li>Cross-attention to layer to combine modalities</li>
+          <li>Additional embedding layer for behavioral and creator features</li>
+        </ul>
+        <li>Lightweight update network</li>
+        <ul>
+          <li>Merge dense features with embeddings of modalities</li>
+        </ul>
+        <li>Classification heads</li>
+        <ul>
+          <li>Separate head for eash task</li>
+          <li>Shared layer to learn common patterns</li>
+          <li>Calibration layer</li>
+        </ul>
+      </ul>
+      <li>Loss function</li>
+      <ul>
+        <li>Train two separate heads</li>
+        <ul>
+          <li>\( \text{L_primary} = \text{BCE(y_true, y_pred)} * \text{min(log(1+views), c)} \)</li>
+          <li>\( \text{L_reports} = \text{MSE(report_rate, predicted_report_rate)} \)</li>
+        </ul>
+        <li>Total loss</li>
+        <ul>
+          <li>\( \text{L} = \alpha * \text{L_primary} + \beta * \text{L_reports} \)</li>
+        </ul>
+        <li>During prediction, ignore all heads except the primary</li>
+      </ul>
+      <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-d/video-recommendations-2.png" alt="Card image cap">
+    </ul>
+
+    <h3 class="card-title">Inference and Evaluation</h3>
+    <ul>
+      <li>Scaling</li>
+      <ul>
+        <li>Model quantization</li>
+        <li>Encoder cache - identical images and text will be served by cache, rather than going through encoder</li>
+        <li>Use distilled model with fewer features to filter out obvious non-harmful contents</li>
+      </ul>
+      <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-d/video-recommendations-3.png" alt="Card image cap">
+      <li>Triggering</li>
+      <ul>
+        <li>When dynamic features are updated, re-trigger the model</li>
+      </ul>
+      <li>Offline</li>
+      <ul>
+        <li>Run model against test set</li>
+        <li>PR-AUC</li>
+        <li>Recall@Precision95</li>
+      </ul>
+      <li>Online</li>
+      <ul>
+        <li>Use candidate and control, and make prediction using only one of them</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Deep Dives</h3>
+    <ul>
+      <li>Embedding models for users</li>
+      <ul>
+        <li>Model quantization</li>
+        <li>Encoder cache - identical images and text will be served by cache, rather than going through encoder</li>
+        <li>Use distilled model with fewer features to filter out obvious non-harmful contents</li>
+      </ul>
     </ul>
   </div>
   <div class="card-footer text-muted">
