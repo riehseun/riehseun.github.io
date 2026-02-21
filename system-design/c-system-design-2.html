@@ -50,12 +50,13 @@
       <li><a href="#system-design-2-4">Distributed Message Queue</a></li>
       <li><a href="#system-design-2-5">Metrics Monitoring and Alerting System</a></li>
       <li><a href="#system-design-2-6">Ad Click Event Aggregation</a></li>
-      <li><a href="#system-design-2-7"></a></li>
-      <li><a href="#system-design-2-8"></a></li>
-      <li><a href="#system-design-2-9"></a></li>
-      <li><a href="#system-design-2-10"></a></li>
-      <li><a href="#system-design-2-11"></a></li>
-      <li><a href="#system-design-2-12"></a></li>
+      <li><a href="#system-design-2-7">Hotel Reservation System</a></li>
+      <li><a href="#system-design-2-8">Distributed Email Service</a></li>
+      <li><a href="#system-design-2-9">S3-like Object Storage</a></li>
+      <li><a href="#system-design-2-10">Real-time Gaming Leaderboard</a></li>
+      <li><a href="#system-design-2-11">Payment System</a></li>
+      <li><a href="#system-design-2-12">Digital Wallet</a></li>
+      <li><a href="#system-design-2-13">Stock Exchange</a></li>
     </ul>
   </div>
 </div>
@@ -1187,7 +1188,210 @@
 
 <div class="card mb-4" id="system-design-2-7">
   <div class="card-body">
-    <h2 class="card-title"></h2>
+    <h2 class="card-title">Hotel Reservation System</h2>
+
+    <h3 class="card-title">Understand the Problem and Establish Design Scope</h3>
+    <ul>
+      <li>How many hotels? 5000 hotels and 1M rooms</li>
+      <li>When do customers pay? They pay full when they make reservation</li>
+      <li>Where do users book hotel? Hotel website or app</li>
+      <li>Can users cancel reservations? Yes</li>
+      <li>Should the system support overbooking? Yes, 10%</li>
+    </ul>
+
+    <h3 class="card-title">Bandwidth</h3>
+    <ul>
+      <li>Assume 70% of rooms are booked and stay duration is 3 days on average</li>
+      <li>(1M * 0.7) / (3 * 86400) = ? reservations per second</li>
+    </ul>
+
+    <h3 class="card-title">High level design</h3>
+    <ul>
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/sd-c/hotel-reservation-1.png" alt="Card image cap">
+      <li>Public API gateway - rate limiting, authentication</li>
+      <li>Internal API - available to staff and protected via VPN</li>
+      <li>Hotel service - hotel and room information</li>
+      <li>Rate service - provides room state for different future dates</li>
+      <li>Reservation service - makes reservations and tracks room inventory</li>
+      <li>Payment service - manages transactions</li>
+    </ul>
+    <li>API</li>
+    <ul>
+      <li>Hotel related API</li>
+      <ul>
+        <li>Get detailed information about a hotel</li>
+        <ul>
+          <li><code>GET /v1/hotels/ID</code></li>
+        </ul>
+        <li>Add a new hotel</li>
+        <ul>
+          <li><code>POST /v1/hotels</code></li>
+        </ul>
+        <li>Update hotel information</li>
+        <ul>
+          <li><code>PUT /v1/hotels/ID</code></li>
+        </ul>
+        <li>Delete a hotel</li>
+        <ul>
+          <li><code>DELETE /v1/hotels/ID</code></li>
+        </ul>
+      </ul>
+      <li>Room related API</li>
+      <ul>
+        <li>Get detailed information about a room</li>
+        <ul>
+          <li><code>GET /v1/hotels/ID/rooms/ID</code></li>
+        </ul>
+        <li>Add a new room</li>
+        <ul>
+          <li><code>POST /v1/hotels/ID/rooms</code></li>
+        </ul>
+        <li>Update room information</li>
+        <ul>
+          <li><code>PUT /v1/hotels/ID/rooms/ID</code></li>
+        </ul>
+        <li>Delete a room</li>
+        <ul>
+          <li><code>DELETE /v1/hotels/ID/rooms/ID</code></li>
+        </ul>
+      </ul>
+      <li>Reservation related API</li>
+      <ul>
+        <li>Get reservation history of logged-in user</li>
+        <ul>
+          <li><code>GET /v1/reservations</code></li>
+        </ul>
+        <li>Get detailed information about a reservation</li>
+        <ul>
+          <li><code>GET /v1/reservations/ID</code></li>
+        </ul>
+        <li>Make a new reservation</li>
+        <ul>
+          <li><code>POST /v1/reservations</code></li>
+        </ul>
+        <li>Cancel a reservation</li>
+        <ul>
+          <li><code>DELETE /v1/reservations/ID</code></li>
+        </ul>
+      </ul>
+    </ul>
+    <li>Storage schema</li>
+    <ul>
+      <li>Heavy read and little write</li>
+      <li>Thus, choose relational</li>
+      <li>ACID property prevents double charge, double booking, etc</li>
+      <li>Shard DB by hash(hotel_id) % number_of_servers</li>
+      <li>Hotel</li>
+      <ul>
+        <li>hotel_id (pk)</li>
+        <li>name</li>
+        <li>address</li>
+        <li>location</li>
+      </ul>
+      <li>Room</li>
+      <ul>
+        <li>room_id (pk)</li>
+        <li>room_type_id</li>
+        <li>floor</li>
+        <li>number</li>
+        <li>hotel_id</li>
+        <li>name</li>
+        <li>is_available</li>
+      </ul>
+      <li>room_type_rate</li>
+      <ul>
+        <li>hotel_id (pk)</li>
+        <li>date (pk)</li>
+        <li>rate</li>
+      </ul>
+      <li>guest</li>
+      <ul>
+        <li>guest_id (pk)</li>
+        <li>first_name</li>
+        <li>last_name</li>
+        <li>email</li>
+      </ul>
+      <li>room_type_inventory</li>
+      <ul>
+        <li>hotel_id (pk)</li>
+        <li>room_type_id (pk)</li>
+        <li>date (pk)</li>
+        <li>total_inventory - total number of rooms minus those that are temporarily taken off the inventory</li>
+        <li>total_reserved - total number of rooms booked for specific hotel_id, room_type_id, date</li>
+      </ul>
+      <li>reservation</li>
+      <ul>
+        <li>reservation_id (pk)</li>
+        <li>hotel_id</li>
+        <li>room_type_id</li>
+        <li>start_date</li>
+        <li>end_date</li>
+        <li>status</li>
+        <li>guest_id</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Detailed design</h3>
+    <ul>
+      <li>Concurrecny</li>
+      <ul>
+        <li>Same user clicks submit button multiple times</li>
+        <ul>
+          <li>Option 1. Gray out submit button once request is sent. Not reliable because users can disable JavaScript</li>
+          <li>Option 2. Idempotent API produces the same result no mater how many times it is called. Uses globally unique ID generator</li>
+        </ul>
+        <li>Mutiple users try the book the same room at the same time</li>
+        <ul>
+          <li>Option 1. persistent locking</li>
+          <ul>
+            <li>Place a lock on record as soon as one user starts to update it</li>
+            <li>Pros</li>
+            <ul>
+              <li>Useful when data contention is heavy</li>
+            </ul>
+            <li>Cons</li>
+            <ul>
+              <li>Deadlock may occur</li>
+              <li>Not scalable because when a transaction is locked for too long, other transactions cannot access the resouce</li>
+            </ul>
+          </ul>
+          <li>Option 2. optimistic locking</li>
+          <ul>
+            <li>Use either version number or timestamp to allow multiple users to update the same resource</li>
+            <li>Pros</li>
+            <ul>
+              <li>No need to lock the resouce</li>
+            </ul>
+            <li>Cons</li>
+            <ul>
+              <li>Poor performance when data contention is heavy</li>
+            </ul>
+          </ul>
+        </ul>
+      </ul>
+      <li>Scaling</li>
+      <ul>
+        <img class="img-fluid" class="card-img-top" src="/system-design/image/sd-c/hotel-reservation-2.png" alt="Card image cap">
+        <li>Reservation cache</li>
+        <ul>
+          <li>Query the number of available rooms for a given hotel, room type, date range</li>
+          <li>Reserve a room by executing total_reserved+1</li>
+          <li>Update inventory when a user cancels a reservation</li>
+        </ul>
+        <li>Inventory cache</li>
+        <ul>
+          <li>Most read operations are served by cache</li>
+        </ul>
+        <li>Inventory DB</li>
+        <ul>
+          <li>Stores inventory data as source of truth</li>
+        </ul>
+      </ul>
+      <li>Consistency</li>
+      <ul>
+        <li>Microservice architecture (where each service has their own DB) brings great challenge in data consistency</li>
+      </ul>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
@@ -1196,7 +1400,172 @@
 
 <div class="card mb-4" id="system-design-2-8">
   <div class="card-body">
-    <h2 class="card-title"></h2>
+    <h2 class="card-title">Distributed Email Service</h2>
+
+    <h3 class="card-title">Understand the Problem and Establish Design Scope</h3>
+    <ul>
+      <li>How many users are there? 1B</li>
+      <li>What kind of features should the system support? Send email, search emails, spam filtering</li>
+      <li>Should the system suport email attachment? Yes</li>
+      <li>How do users connect with mail servers? HTTP</li>
+    </ul>
+
+    <h3 class="card-title">Bandwidth</h3>
+    <ul>
+      <li>Assume each user sends 10 emails per day</li>
+      <li>Assume each user receives 50 emails per day, size of email is 10KB on average, size of attachment is 1MB on average, 20% of emails have attachment</li>
+      <li>Incoming - (1B * 50 * (10KB + 1MB * 0.2)) per day</li>
+    </ul>
+    
+    <h3 class="card-title">Propose High-level Diagram and Get Buy-in</h3>
+    <ul>
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/sd-c/distributed-email-service-1.png" alt="Card image cap">
+      <li>Webmail</li>
+      <ul>
+        <li>Users use web browsers to send and receive emails</li>
+      </ul>
+      <li>Real-time servers</li>
+      <ul>
+        <li>Push new email updates to clients in real-time</li>
+        <li>Stateful servers that maintain persistent connections</li>
+        <li>Use WebSocket whenever possible and fall back to long-polling in case WebSocket has browser compatibility issue</li>
+      </ul>
+      <li>Metadata DB</li>
+      <ul>
+        <li>Stores email metadata</li>
+      </ul>
+      <li>Attachment store</li>
+      <ul>
+        <li>Use object storage like S3</li>
+      </ul>
+      <li>Distributed cache</li>
+      <ul>
+        <li>Cache recent emails since they are loaded frequently</li>
+        <li>Use Redis</li>
+      </ul>
+      <li>Search store</li>
+      <ul>
+        <li>Distributed document store that uses inverted index</li>
+      </ul>
+      <li>Email sending flow</li>
+      <ul>
+        <img class="img-fluid" class="card-img-top" src="/system-design/image/sd-c/distributed-email-service-2.png" alt="Card image cap">
+        <li>User sneds an email. Request is sent to load balancer</li>
+        <li>Load balancer performs rate limiting and routes request to web servers</li>
+        <li>Web servers performs email validation</li>
+        <li>If validation succeeds, email is sent to outgoing queue</li>
+        <li>If validation fails, email is sent to error queue</li>
+        <li>SMPT outgoing workers pull messages and check for spam and virus</li>
+        <li>Outgoing email is stored in "Sent" folder in storage</li>
+        <li>SMPT outgoing workers sends email to recipient mail server</li>
+      </ul>
+      <li>Email receiving flow</li>
+      <ul>
+        <img class="img-fluid" class="card-img-top" src="/software-engineering/image/sd-c/distributed-email-service-3.png" alt="Card image cap">
+        <li>Load balancer distributes emails across SMTP servers</li>
+        <li>Mail processing workers checks spam and virus</li>
+        <li>Email is stored in email storage, cache, and object storage</li>
+        <li>If receiver is currently online, email is pushed to real-time servers</li>
+        <li>If receiver is offline, webmail client calls web servers and web servers pull new emails from storage layer</li>
+      </ul>
+      <li>Storage schema</li>
+      <ul>
+        <li>A sinlge column can be MBs</li>
+        <li>Strong consistency needed</li>
+        <li>Disk I/O should be small</li>
+        <li>Highly available and fault tolerant</li>
+        <li>Should be easy to create incremental backup</li>
+        <li>folders_by_user</li>
+        <ul>
+          <li>user_id - uuid, partition key</li>
+          <li>folder_id - uuid</li>
+          <li>folder_name - text</li>
+        </ul>
+        <li>emails_by_folder</li>
+        <ul>
+          <li>user_id - uuid, partition key</li>
+          <li>folder_id - uuid, partition key</li>
+          <li>email_id - timeuuid, clustering key</li>
+          <li>from - text</li>
+          <li>subject - text</li>
+          <li>preview - text</li>
+          <li>is_read - boolean</li>
+        </ul>
+        <li>emails_by_user</li>
+        <ul>
+          <li>user_id - uuid, partition key</li>
+          <li>email_id - timeuuid, clustering key</li>
+          <li>from - text</li>
+          <li>to - list&lt;text&gt;</li>
+          <li>subject - text</li>
+          <li>body - text</li>
+          <li>attachments - list&lt;filename|size&gt;</li>
+        </ul>
+        <li>attachments</li>
+        <ul>
+          <li>email_id - timeuuid, clustering key</li>
+          <li>filename - uuid, partition key</li>
+          <li>url - text</li>
+        </ul>
+        <li>read_emails</li>
+        <ul>
+          <li>user_id - uuid, partition key</li>
+          <li>folder_id - uuid, partition key</li>
+          <li>email_id - timeuuid, clustering key</li>
+          <li>from - text</li>
+          <li>subject - text</li>
+          <li>preview - text</li>
+        </ul>
+        <li>unread_emails</li>
+        <ul>
+          <li>user_id - uuid, partition key</li>
+          <li>folder_id - uuid, partition key</li>
+          <li>email_id - timeuuid, clustering key</li>
+          <li>from - text</li>
+          <li>subject - text</li>
+          <li>preview - text</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Design Deep Dive</h3>
+    <ul>
+      <li>Email deliverability</li>
+      <ul>
+        <li>Use dedicated IP addresses for sending emails</li>
+        <li>Send different categories of emails from different IP addresses</li>
+        <li>Warm up new email server IP addresses slowly to build reputation</li>
+        <li>Ban spammers quickly</li>
+      </ul>
+      <li>Search</li>
+      <ul>
+        <li>Option 1. Elasticsearch</li>
+        <ul>
+          <li>Pros</li>
+          <ul>
+            <li>Scalable to some extent</li>
+            <li>Easy to integrate</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Need to maintain two different systems</li>
+            <li>Data consistency is hard to maintain</li>
+          </ul>
+        </ul>
+        <li>Option 2. custom search solution</li>
+        <ul>
+          <li>Pros</li>
+          <ul>
+            <li>Easy to scale</li>
+            <li>There is only one system and no need to worry about data consistency</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Significant engineering needed</li>
+          </ul>
+        </ul>
+      </ul>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
@@ -1205,7 +1574,153 @@
 
 <div class="card mb-4" id="system-design-2-9">
   <div class="card-body">
-    <h2 class="card-title"></h2>
+    <h2 class="card-title">S3-like Object Storage</h2>
+
+    <h3 class="card-title">Understand the Problem and Establish Design Scope</h3>
+    <ul>
+      <li>What is typical data size? massive objects (GBs) and large number of small objects (KBs)</li>
+      <li>How much data should the system store per year? 100PB</li>
+    </ul>
+
+    <h3 class="card-title">Bandwidth</h3>
+    <ul>
+      <li>Assume 20% of objects are small (0.5MB)</li>
+      <li>Assume 60% of objects are medium (32MB)</li>
+      <li>Assume 20% of objects are large (200MB)</li>
+      <li>Assume we utilize 40% of 100PB</li>
+      <li>\( \dfrac{10\text{PB} \times 0.4}{0.2 \times 0.5\text{MB} + 0.6 \times 32\text{MB} + 0.2 \times 200\text{MB}} = 0.68B \) objects</li>
+    </ul>
+
+    <h3 class="card-title">Propose High-level Diagram and Get Buy-in</h3>
+    <ul>
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/sd-c/s3-like-object-storage-1.png" alt="Card image cap">
+      <ul>
+        <li>IAM</li>
+        <ul>
+          <li>Authentication and authorization</li>
+        </ul>
+        <li>Data store</li>
+        <ul>
+          <li>Stores actual data</li>
+        </ul>
+      </ul>
+      <li>Workflow (uploading an object)</li>
+      <ul>
+        <li>Client sends HTTP PUT request to API service to create a bucket</li>
+        <li>API service calls IAM to ensure user has write permission</li>
+        <li>API service calls metadata store to create an entry</li>
+        <li>Client sends HTTP PUT request to API service to create an object</li>
+        <li>API service calls IAM to ensure user has write permission</li>
+        <li>API service calls data store ti persist the payload as object</li>
+        <li>API service calls metadata store to create an entry</li>
+      </ul>
+      <li>Workflow (downloading an object)</li>
+      <ul>
+        <li>Client sends HTTP GET request to API service</li>
+        <li>API service calls IAM to ensure user has read permission</li>
+        <li>API service fetches corresponding object's UUID from metadata store</li>
+        <li>API service fetches object data from data store by UUID</li>
+        <li>API service returns object data to client</li>
+      </ul>
+      <li>Storage schema</li>
+      <ul>
+        <li>Bucket</li>
+        <ul>
+          <li>bucket_name</li>
+          <li>bucket_id</li>
+          <li>owner_id</li>
+          <li>enable_versioning</li>
+        </ul>
+        <li>Object</li>
+        <ul>
+          <li>bucket_name</li>
+          <li>object_name</li>
+          <li>object_version</li>
+          <li>object_id</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Design Deep Dive</h3>
+    <ul>
+      <li>Data store</li>
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/sd-c/s3-like-object-storage-2.png" alt="Card image cap">
+      <ul>
+        <li>Data routing service</li>
+        <ul>
+          <li>Query the placement service to get the best data node to store data</li>
+          <li>Read data from data nodes and return it to API service</li>
+          <li>Write data to data nodes</li>
+        </ul>
+        <li>Placement service</li>
+        <ul>
+          <li>Monitors all data nodes via heartbeats</li>
+        </ul>
+        <li>Data nodes</li>
+        <ul>
+          <li>Stores actual data object</li>
+          <li>Data service daemon sends heartbeats to placement service</li>
+        </ul>
+      </ul>
+      <li>Workflow</li>
+      <ul>
+        <li>API service forwards object data to data store</li>
+        <li>Data routing service generates UUID for this object and queries the placement service for the data node to store this object</li>
+        <li>Placement service checks the virtual cluster map and returns the primary node</li>
+        <li>Data routing service sends data directly to primary data node</li>
+        <li>Primary data node saves data locally and replicates it to two secondary data nodes</li>
+        <li>Primary node responds to data routing service, then UUID of object is returned to API service</li>
+      </ul>
+      <li>Durability</li>
+      <ul>
+        <li>Replication</li>
+        <ul>
+          <li>6 nines (data is copied 3 times)</li>
+          <li>200% storage overhead</li>
+          <li>No computation</li>
+          <li>No write operation needed</li>
+          <li>Reads are served from the same replica</li>
+        </ul>
+        <li>Erasure coding</li>
+        <ul>
+          <li>11 nines (8+4 erasure coding)</li>
+          <li>50% storage overhead</li>
+          <li>Computation needed to calculate parities</li>
+          <li>Write latency having to calculate parities before data is written to disk</li>
+          <li>Every read must come from multiple nodes</li>
+        </ul>
+      </ul>
+      <li>Scalability</li>
+      <ul>
+        <li>Size of bucket table will be small</li>
+        <li>Size of object table will be large, thus sharding is needed</li>
+        <ul>
+          <li>Sharding by bucket_id can create hotspots</li>
+          <li>Sharding by object_id makes queries that are based on object names inefficient</li>
+          <li>Thus, shard by a combination of bucket_name and object_name (use the hash of &lt;bucket_name, object_name&gt;)</li>
+        </ul>
+      </ul>
+      <li>Versioning</li>
+      <ul>
+        <li>A new record is inserted with the same bucket_id and object name but with a new object_id and object_version</li>
+      </ul>
+      <li>Uploading large files</li>
+      <ul>
+        <li>Workflow</li>
+        <ul>
+          <li>Client calls the object storage to initial a multipart upload</li>
+          <li>Data store returns an upload_id</li>
+          <li>Client splits the large files into smaller objects and start uploading them with upload_id</li>
+          <li>When a part is uploaded, data store returns a ETag, which is md5 checksum of that part, which then is used to verify multipart upload</li>
+          <li>After all parts are uploaded, client sends a complete multipart upload request, which includes upload_id, part numbers, ETags</li>
+          <li>Data store reassembles the object from its parts pased on part number</li>
+        </ul>
+        <li>Garbage collection</li>
+        <ul>
+          <li>Old parts are no longer useful after the object has been reassembled from them</li>
+        </ul>
+      </ul>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
@@ -1214,7 +1729,98 @@
 
 <div class="card mb-4" id="system-design-2-10">
   <div class="card-body">
-    <h2 class="card-title"></h2>
+    <h2 class="card-title">Real-time Gaming Leaderboard</h2>
+
+    <h3 class="card-title">Understand the Problem and Establish Design Scope</h3>
+    <ul>
+      <li>How is score calculated? Users get points when they win matches</li>
+      <li>Is everyone included in the leaderboard? Yes</li>
+      <li>Is there a time segment associated with leaderboard? A new tornament kicks off each month</li>
+      <li>How many users are there? 5M daily active users and 25M monthly active users</li>
+      <li>How many matches are played on average? Each user plays 10 matches per day on average</li>
+    </ul>
+
+    <h3 class="card-title">Bandwidth</h3>
+    <ul>
+      <li>(5M / 86400) users per second</li>
+      <li>Assume peak load is 5 times the above number</li>
+      <li>Multiple above number by 10 to get query per second</li>
+    </ul>
+
+    <h3 class="card-title">Propose High-level Diagram and Get Buy-in</h3>
+    <ul>
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/sd-c/real-time-gaming-leaderboard-1.png" alt="Card image cap">
+      <li>When a player wins a game, user sends a request to game service</li>
+      <li>Game service ensures the win is valid and calls leaderboard service to update the score</li>
+      <li>Leaderboard service updates user's score in leaderboard store</li>
+      <li>User calls leaderboard service directly to fetch leaderboard data</li>
+      <li>API</li>
+      <ul>
+        <li>Update user's position on leaderboard when a user wins a game</li>
+        <ul>
+          <li><code>POST /v1/scores</code></li>
+          <li>Request</li>
+          <ul>
+            <li><code>user_id</code> - user who wins the game</li>
+            <li><code>points</code> - points that user gained by winning a game</li>
+          </ul>
+          <li>Response</li>
+          <ul>
+            <li><code>200 OK</code></li>
+            <li><code>400 Bad Request</code></li>
+          </ul>
+        </ul>
+        <li>Get top 10 plays from leaderboard</li>
+        <ul>
+          <li><code>GET /v1/scores</code></li>
+        </ul>
+        <li>Find the rank of a specific user</li>
+        <ul>
+          <li><code>GET /v1/scores/{:user_id}</code></li>
+        </ul>
+      </ul>
+      <li>Storage schema</li>
+      <ul>
+        <li>Relational DB</li>
+        <ul>
+          <li>Not performant when processing large amount of continuously changing information</li>
+          <li>Not suitable very high load of read queries</li>
+        </ul>
+        <li>Redis</li>
+        <ul>
+          <li>Sorted sets data type works well with leaderboard problem</li>
+          <li>Redis supports persistence</li>
+          <li>When main replica fails, read replica is promoted and a new read replica is attached</li>
+          <li>ZADD - insert user if not exist O(logn)</li>
+          <li>ZINCBY - increase the score of a user by specified amount O(logn)</li>
+          <li>ZRANGE/ZREVRANGE - fetch a range of users sorted by the score O(logn+m)</li>
+          <li>ZRANK/ZREVRANK - fetch the position of any user</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Design Deep Dive</h3>
+    <ul>
+      <li>Serverless</li>
+      <ul>
+        <li>Allows auto-scaling as needed with DAU growth</li>
+      </ul>
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/sd-c/real-time-gaming-leaderboard-2.png" alt="Card image cap">
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/sd-c/real-time-gaming-leaderboard-3.png" alt="Card image cap">
+      <li>Data sharding</li>
+      <ul>
+        <li>Fixed partition</li>
+        <ul>
+          <li>Looks at overall range of scores and distribute data into different shards based on the score</li>
+          <li>Adjust the score range in each shard to make sure that data is relatively evenly distributed between shards</li>
+          <li>Return top 10 users from the shard with the highest scores</li>
+        </ul>
+        <li>Hash partition</li>
+        <ul>
+          <li>Returning top 10 users requires gathering data from different shards, which will be slow</li>
+        </ul>
+      </ul>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
@@ -1223,7 +1829,174 @@
 
 <div class="card mb-4" id="system-design-2-11">
   <div class="card-body">
-    <h2 class="card-title"></h2>
+    <h2 class="card-title">Payment System</h2>
+
+    <h3 class="card-title">Understand the Problem and Establish Design Scope</h3>
+    <ul>
+      <li>What kind of payment system? E-commerce</li>
+      <li>What payment options should the system support? Credit card, debit card, PayPal</li>
+      <li>Should the system handle credit card processing? No, the system can use Stripe, Square, etc</li>
+      <li>Should the system store credit card data in DB? No, the system should rely on third party</li>
+      <li>Should the system support multiple currencies? No</li>
+      <li>How many transactions per day? 1M</li>
+      <li>Should the system pay the sellers based on some cadence? Yes</li>
+    </ul>
+
+    <h3 class="card-title">Bandwidth</h3>
+    <ul>
+      <li>1M transactions per day = 10 transactions per second</li>
+    </ul>
+
+    <h3 class="card-title">Propose High-level Diagram and Get Buy-in</h3>
+    <ul>
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/sd-c/payment-system-1.png" alt="Card image cap">
+      <li>Payment service</li>
+      <ul>
+        <li>Accepts payment events from users</li>
+        <li>Performs risk checks using third party provider</li>
+      </ul>
+      <li>Payment executor</li>
+      <ul>
+        <li>Execute a single payment order using payment service provider (PSP)</li>
+        <li>A payment may contain several payment orders</li>
+      </ul>
+      <li>Payment service provider</li>
+      <ul>
+        <li>Ex. Stripe, Square</li>
+      </ul>
+      <li>Card schemes</li>
+      <ul>
+        <li>Ex. Visa, MasterCard</li>
+      </ul>
+      <li>Ledger</li>
+      <ul>
+        <li>Keeps transaction information for accouting and post-payment analysis</li>
+      </ul>
+      <li>Wallet</li>
+      <ul>
+        <li>Keeps account balance of the merchants</li>
+      </ul>
+      <li>Workflow</li>
+      <ul>
+        <li>When user clicks order button, payment event is generated and sent to payment service</li>
+        <li>Payment service stores payment event in DB</li>
+        <li>Payment service calls payment executor for each payment order</li>
+        <li>Payment executor stores payment order in DB</li>
+        <li>Payment executor calls PSP to process credit card payment</li>
+        <li>Payment service updates wallet</li>
+        <li>Wallet stores updated balance in DB</li>
+        <li>Payment service updates ledger</li>
+        <li>Ledgers stores new transaction information in DB</li>
+      </ul>
+      <li>API</li>
+      <ul>
+        <li>Executes a payment event</li>
+        <ul>
+          <li><code>POST /v1/payments</code></li>
+          <ul>
+            <li><code>buyer_info</code> - information of buyer (JSON)</li>
+            <li><code>checkout_id</code> - globally unique ID of this checkout (string)</li>
+            <li><code>credit_card_info</code> - encrypted credit card information, which is PSP specific (JSON)</li>
+            <li><code>payment_orders</code> - list of payment orders (list)</li>
+            <ul>
+              <li><code>seller_account</code> - which seller will receive the monry (string)</li>
+              <li><code>amount</code> - transaction amount of the order (string)</li>
+              <ul>
+                <li>Double is not a good choice because the number could be extremely big or small</li>
+              </ul>
+              <li><code>currency</code> - currency of the order (string)</li>
+              <li><code>payment_order_id</code> - globally unique ID of this payment (string)</li>
+              <ul>
+                <li>This ID is used by PSP as idempotency key, thus must be globally unique</li>
+              </ul>
+            </ul>
+          </ul>
+        </ul>
+        <li>Returns the execution status of a single payment order</li>
+        <ul>
+          <li><code>GET /v1/payments/{:id}</code></li>
+        </ul>
+      </ul>
+      <li>Storage schema</li>
+      <ul>
+        <li>Performance is not the most important factor for payment service</li>
+        <li>Choose relational DB for ACID property</li>
+        <li>Payment event</li>
+        <ul>
+          <li>checkout_id (string, pk)</li>
+          <li>buyer_info (string)</li>
+          <li>seller_info (string)</li>
+          <li>credit_card_info (depends on PSP)</li>
+          <li>is_payment_done (bool)</li>
+        </ul>
+        <li>Payment order</li>
+        <ul>
+          <li>payment_order_id (string, pk)</li>
+          <li>buyer_account (string)</li>
+          <li>amount (string)</li>
+          <li>currency (string)</li>
+          <li>checkout_id (string, FK)</li>
+          <li>payment_order_status (string)</li>
+          <li>ledger_updated (bool)</li>
+          <li>wallet_updated (bool)</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Design Deep Dive</h3>
+    <ul>
+      <li>PSP integration</li>
+      <ul>
+        <li>Choose not to store sensitive payment information due to complex regulations</li>
+        <img class="img-fluid" class="card-img-top" src="/system-design/image/sd-c/payment-system-2.png" alt="Card image cap">
+        <ul>
+          <li>User clicks checkout button and client calls payment service with payment order information</li>
+          <li>Payment service calls PSP with amount, currency, expiration date, redirect URL</li>
+          <li>PSP returns a token (UUID) to payment service</li>
+          <li>Payment service stores token in DB</li>
+          <li>Client displays PSP-hosted payment page</li>
+          <li>User fills PSP-hosted payment page and PSP starts payment processing</li>
+          <li>PSP returns payment status</li>
+          <li>Web page is directed to the redirect URL</li>
+          <li>PSP calls payment service with payment status</li>
+        </ul>
+      </ul>
+      <li>Reconciliation</li>
+      <ul>
+        <li>Every night, PSP or bank sends a settlement file to clients</li>
+        <li>Reconciliation system compares settlement file with ledger</li>
+        <li>Finance team can manually adjust mismatches</li>
+      </ul>
+      <li>Communication among internal services</li>
+      <ul>
+        <li>Message queue - a message can only be consumed by one subscriber</li>
+        <li>Kafka - a message can be consumed by multiple subscribers</li>
+        <li>Payment events are published to Kafka and consumed by payment system, analytics, billing</li>
+      </ul>
+      <li>Handling failed payments</li>
+      <ul>
+        <li>Retry queue - transient errors are routed here</li>
+        <li>Dead letter queue - when messages fail repeatedly, they end up here</li>
+      </ul>
+      <li>Exactly-once delivery</li>
+      <ul>
+        <li>Use both at-least-once and at-most-once</li>
+        <li>At-least-once - retrying failed payment guarantees this</li>
+        <li>At-most-once - idempotency check using UUID</li>
+        <ul>
+          <li>Subsequent requests with the UUID that is already seen will result in 429 too many request</li>
+        </ul>
+      </ul>
+      <li>Security</li>
+      <ul>
+        <li>Request/response eavesdropping - use HTTPS</li>
+        <li>Data tampering - use encryption</li>
+        <li>Man-in-the-middle-attack - use SSL</li>
+        <li>Data loss - DB replication across multiple zones/regions</li>
+        <li>DDoS - rate limiting and firewall</li>
+        <li>Card theft - tokenization of credit card number</li>
+      </ul>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
@@ -1232,7 +2005,355 @@
 
 <div class="card mb-4" id="system-design-2-12">
   <div class="card-body">
-    <h2 class="card-title"></h2>
+    <h2 class="card-title">Digital Wallet</h2>
+
+    <h3 class="card-title">Understand the Problem and Establish Design Scope</h3>
+    <ul>
+      <li>What is the purpose of the system? Balance transfer between two digital wallets</li>
+      <li>How many transactions should the system support? 1M per second</li>
+      <li>Should the system handle foreign currency exchange rate? No</li>
+    </ul>
+
+    <h3 class="card-title">Propose High-level Diagram and Get Buy-in</h3>
+    <ul>
+      <li>In-memory sharding</li>
+      <ul>
+        <li>A cluster of Redis nodes to support 1M transactions per second</li>
+        <li>Distribute user accounts across the cluster</li>
+        <li>Store &lt;user,balance&gt; relationship in a map</li>
+        <li>Use ZooKeeper to store the number of partitions and addresses of all Redis nodes</li>
+        <li>Problem - when wallet service updates two Redis nodes for each transaction, there is no guarantee that both update would succeed</li>
+      </ul>
+      <li>Two-phase commit</li>
+      <ul>
+        <li>In the first phase, wallet service asks both databases to be locked</li>
+        <li>In the second phase, wallet service collects replies from databases</li>
+        <ul>
+          <li>If reply is yes, wallet service asks databases to commit transaction</li>
+          <li>If reply is no, wallet service asks databases to abort transaction</li>
+        </ul>
+        <li>Problem - not performant because locks can be held for long time waiting for replies from other nodes</li>
+      </ul>
+      <li>Try-Confirm/Cancel</li>
+      <ul>
+        <li>Ex. in the first phase, -1 for account A and do nothing for account B (Try)</li>
+        <li>Ex. in the second phase</li>
+        <ul>
+          <li>If reply is yes, do nothing for account A and +1 for account B (Confirm)</li>
+          <li>If reply is no, +1 for account A and do nothing for account B (Cancel)</li>
+        </ul>
+        <li>Transactional DB can store status in case wallet service gets interrupted during transaction</li>
+        <ul>
+          <li>ID and content of distributed transaction</li>
+          <li>Status of Try phase for each DB (not sent yet, has been sent, response received)</li>
+          <li>Name of second phase</li>
+          <li>Status of second phase</li>
+          <li>Out-of-order flag</li>
+          <ul>
+            <li>Seen a Cancel but not a Try yet</li>
+            <li>Try returns failure if there is out-of-order flag</li>
+          </ul>
+        </ul>
+        <li>Problem - business logics need to be managed at application layer</li>
+      </ul>
+      <li>Saga</li>
+      <ul>
+        <li>All operations are ordered in a sequence</li>
+        <li>Each operation is independent transaction in its own DB</li>
+        <li>Operations are executed from first to last</li>
+        <li>When an operation fails, the entire process rolls back</li>
+        <li>Problem - not suitable for latency-sensitive system</li>
+      </ul>
+      <li>API</li>
+      <ul>
+        <li>Transfer balance from one wallet to another</li>
+        <ul>
+          <li><code>POST /v1/wallet/balance_transfer</code></li>
+          <ul>
+            <li><code>from_account</code> - debit account (string)</li>
+            <li><code>to_account</code> - credit account (string)</li>
+            <li><code>amount</code> - money (string)</li>
+            <li><code>currency</code> - currency type (string)</li>
+            <li><code>transaction_id</code> - ID used for deduplication (UUID)</li>
+          </ul>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Design Deep Dive</h3>
+    <ul>
+      <li>Event sourcing</li>
+      <ul>
+        <li>Command</li>
+        <ul>
+          <li>Ex. transfer 1 from account A to B</li>
+          <li>Commands are put into a queue (Ex. Kafka)</li>
+        </ul>
+        <li>Event</li>
+        <ul>
+          <li>One command may generate any number of events</li>
+          <li>Events are put into a queue</li>
+        </ul>
+        <li>State</li>
+        <ul>
+          <li>Ex. balance of accounts</li>
+        </ul>
+        <li>State machine</li>
+        <ul>
+          <li>Ex. if command is "transfer 1 from A to B", the events are "-1 to A" and "+1 to B"</li>
+          <li>Read commands from the command queue</li>
+          <li>Read balance state from DB</li>
+          <li>Validate the command. If valid, generate two events</li>
+          <li>Read the next event</li>
+          <li>Apply the event by updating the balance in DB</li>
+        </ul>
+      </ul>
+      <li>Questions</li>
+      <ul>
+        <li>Do we know account balance at any given time? We can reply events from the start up to a point</li>
+        <li>How do we know the historical and current account balance are correct? We can recalculate from event list</li>
+        <li>How do we prove the system logic is correct after a code change? We can run different versions of code against the events and check that results are the same</li>
+      </ul>
+      <li>Command-query responsibility segregation (CORS)</li>
+      <ul>
+        <li>One write state machine</li>
+        <li>Many read-only state machine</li>
+        <li>How do we prove the system logic is correct after a code change? We can run different versions of code against the events and check that results are the same</li>
+      </ul>
+      <li>Optimization</li>
+      <ul>
+        <li>Save commands and events to a local disk rather than Kafka</li>
+        <li>Cache recent commands and events in memory</li>
+        <li>Use RocksDB to store the state (balance information) and cache recent data</li>
+        <li>Periodically stop the state machine and save the current state into a snapshot for faster reproducibility. Store snapshots into HDFS</li>
+      </ul>
+      <li>Reliability</li>
+      <ul>
+        <li>State and snapshot can be reproduced from events</li>
+        <li>Commands may generate different events, but events are immutable. Thus, we need reliability for events</li>
+        <ul>
+          <li>Raft algorithm guarantees that, as long as there are more than half of the nodes online, append-only lists have the same data</li>
+        </ul>
+      </ul>
+      <li>Workflow (distributed event sourcing)</li>
+      <ul>
+        <li>User A sends a transaction to Saga coordinator (two operations, "-1 to A" and "+1 to B")</li>
+        <li>Saga coordinator creates a record in phase status table</li>
+        <li>Saga coordinator sends "-1 to A" as a command to partition 1</li>
+        <li>Partition 1's Raft leader recevies "-1 to A" command and stores it in command list</li>
+        <li>Partition 1's Raft leader validates the command, then converts it to an event</li>
+        <li>Raft algorithm synchronizes data across different nodes, then the event is executed</li>
+        <li>Event sourcing framework of partition 1 synchronizes the data to the read path using CORS</li>
+        <li>The read path of partition 1 pushes status back to Saga coordinator</li>
+        <li>Saga coordinator receives the success status from partition 1</li>
+        <li>Saga coordinator creates a record in phase status table</li>
+        <li>Saga coordinator sends "+1 to B" as a command to partition 2</li>
+        <li>Partition 2's Raft leader recevies "+1 to B" command and stores it in command list</li>
+        <li>Partition 2's Raft leader validates the command, then converts it to an event</li>
+        <li>Raft algorithm synchronizes data across different nodes, then the event is executed</li>
+        <li>Event sourcing framework of partition 2 synchronizes the data to the read path using CORS</li>
+        <li>The read path of partition 2 pushes status back to Saga coordinator</li>
+        <li>Saga coordinator receives the success status from partition 2</li>
+        <li>Saga coordinator creates a record in phase status table</li>
+        <li>Sage coordinator responds to its caller with the result</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
+  </div>
+</div>
+
+<div class="card mb-4" id="system-design-2-13">
+  <div class="card-body">
+    <h2 class="card-title">Stock Exchange</h2>
+
+    <h3 class="card-title">Understand the Problem and Establish Design Scope</h3>
+    <ul>
+      <li>What kind of goods are we trading? stocks only</li>
+      <li>What kind of operations should the system support? placing an order, canceling an order. Only limit order is in scope</li>
+      <li>What are the basic functions of stock exchange? Clients place new orders or cancel them, receive matched trades in real-time, view real-time order book</li>
+      <li>What are the scale of the system? 10K users trading at the same time, 100 symbols, 1M orders per day</li>
+      <li>What are some regulartions that the system need to concern? Users can trade maximum of 1M shares of particular stock</li>
+    </ul>
+
+    <h3 class="card-title">Bandwidth</h3>
+    <ul>
+      <li>1B orders per day</li>
+      <li>Assume stock exchange opens 8 hours per day</li>
+      <li>Assume peak is 10 times the average</li>
+      <li>Incoming - 1B / (8 * 3600) = 35K</li>
+      <li>Peak incoming - 350K</li>
+    </ul>
+
+    <h3 class="card-title">Propose High-level Diagram and Get Buy-in</h3>
+    <ul>
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/sd-c/stock-exchange-1.png" alt="Card image cap">
+      <ul>
+        <li>Matching engine</li>
+        <ul>
+          <li>Maintain order book for each symbol</li>
+          <li>Match buy and sell orders</li>
+          <li>Distribute the execution stream as market data</li>
+        </ul>
+        <li>Sequencer</li>
+        <ul>
+          <li>Stamps every incoming order and pair of executions completed by matching engine with a sequence ID</li>
+          <li>Stamping is for fast recovery, exactly-once guarantee</li>
+          <li>Serves as a message queue as well</li>
+        </ul>
+        <li>Order manager</li>
+        <ul>
+          <li>Performs risk checks</li>
+          <li>Verifies that wallet has enough funds</li>
+          <li>Sends the order to sequencer</li>
+        </ul>
+        <li>Client gateway</li>
+        <ul>
+          <li>Should be lightweight and complicated functions should be done by risk check adn matching engine</li>
+      </ul>
+      <li>Workflow</li>
+      <ul>
+        <li>Trading flow</li>
+        <ul>
+          <li>Client places a new order</li>
+          <li>Broker sends the order to the exchange</li>
+          <li>Client gateway performs input validation, rate limiting, authentication, etc</li>
+          <li>Order manager performs risk checks and verifies that there are sufficient funds in the wallet</li>
+          <li>Matching engine executes two transactions (buy and sell)</li>
+        </ul>
+        <li>Market data flow</li>
+        <ul>
+          <li>Matching engine generates a stream of executions as matches are made</li>
+          <li>Market data publisher constructs candlestick charts and order books</li>
+          <li>Market data is saved to specialized storage for real-time analysis</li>
+          <li>Brokers connect to data service to obtain timely market data</li>
+        </ul>
+        <li>Reporting flow</li>
+        <ul>
+          <li>Report collects information from orders and executions, then write them to DB</li>
+        </ul>
+      </ul>
+      <li>API</li>
+      <ul>
+        <li>Place an order</li>
+        <ul>
+          <li><code>POST /v1/order</code></li>
+          <ul>
+            <li><code>symbol</code> - stock symbol (string)</li>
+            <li><code>side</code> - buy or sell (string)</li>
+            <li><code>price</code> - price of limit order (long)</li>
+            <li><code>orderType</code> - limit or market (string)</li>
+            <li><code>quantity</code> - quanitiy of order (long)</li>
+          </ul>
+        </ul>
+        <li>Get execution info</li>
+        <ul>
+          <li><code>GET /v1/execution?symbol={:symbol}&orderId={:orderId}&startTime={:startTime}&endTime/{:endTime}</code></li>
+          <ul>
+            <li><code>symbol</code> - stock symbol (string)</li>
+            <li><code>orderId</code> - ID of order (string)</li>
+            <li><code>startTime</code> - query start time in epoch (long)</li>
+            <li><code>endTime</code> - query end time in epoch (long)</li>
+          </ul>
+        </ul>
+        <li>Get order book info</li>
+        <ul>
+          <li><code>GET /v1/marketdata/orderBook/L2?symbol={:symbol}&depth={:depth}</code></li>
+          <ul>
+            <li><code>symbol</code> - stock symbol (string)</li>
+            <li><code>depth</code> - order book depth per side (int)</li>
+            <li><code>startTime</code> - query start time in epoch (long)</li>
+            <li><code>endTime</code> - query end time in epoch (long)</li>
+          </ul>
+        </ul>
+        <li>Get candlestick chart data</li>
+        <ul>
+          <li><code>GET /v1/marketdata/candles?symbol={:symbol}&resolution={:resolution}&startTime={:startTime}&endTime/{:endTime}</code></li>
+          <ul>
+            <li><code>symbol</code> - stock symbol (string)</li>
+            <li><code>resolution</code> - window length of candlestick chart in seconds (long)</li>
+            <li><code>startTime</code> - query start time in epoch (long)</li>
+            <li><code>endTime</code> - query end time in epoch (long)</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>Storage schema</li>
+      <ul>
+        <li>Order</li>
+        <ul>
+          <li>order_id (uuid)</li>
+          <li>product_id (int)</li>
+          <li>price (long)</li>
+          <li>quantity (long)</li>
+          <li>side (Side)</li>
+          <li>order_status (OrderStatus)</li>
+          <li>order_type (OrderType)</li>
+        </ul>
+        <li>Execution</li>
+        <ul>
+          <li>execution_id (uuid)</li>
+          <li>order_id (uuid)</li>
+          <li>price (long)</li>
+          <li>quantity (long)</li>
+          <li>side (Side)</li>
+          <li>order_status (OrderStatus)</li>
+          <li>order_type (OrderType)</li>
+        </ul>
+        <li>Product</li>
+        <ul>
+          <li>product_id (int)</li>
+          <li>symbol (long)</li>
+          <li>description (string)</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Design Deep Dive</h3>
+    <ul>
+      <li>Performance</li>
+      <ul>
+        <img class="img-fluid" class="card-img-top" src="/system-design/image/sd-c/stock-exchange-1.png" alt="Card image cap">
+        <li>Put everything on the same server to eliminate network hops</li>
+        <li>Components, in this case processes on the server, communicate via mmap</li>
+        <li>Application loop polls for tasks to execute in a while loop</li>
+        <li>Each application loop is single-threaded, and the thread is pinned to a fixed CPU core</li>
+        <ul>
+          <li>No context switch because CPU is fully allocated to application loop</li>
+          <li>No locks, thus no lock contention</li>
+        </ul>
+        <li>mmap communication has no network or disk access</li>
+      </ul>
+      <li>Availability</li>
+      <ul>
+        <li>Client gateway is stateless, thus can easily be horizontally scaled</li>
+        <li>Order manager and matching engine are stateful, thus state data must be copied across replicas</li>
+        <ul>
+          <li>If primary goes down, how to decide which backup instance to fail over?</li>
+          <ul>
+            <li>Ex. Raft cluster with \( 5 \) servers</li>
+            <li>Current leader sends data to all other instances (followers)</li>
+            <li>Minimum number of votes required to perform operation \( \frac{n}{2}+1 = 3 \)</li>
+          </ul>
+          <li>How to choose leader among backup instances?</li>
+          <ul>
+            <li>Leader sends heartbeats to followers</li>
+            <li>If followers don't receive heartbeat for some time, it triggers an election timeout</li>
+            <li>First follower that reaches election timeout become a candidate</li>
+            <li>If first follower receives a majority of votes, it becomes a new leader</li>
+          </ul>
+          <li>What is recovery time objective?</li>
+          <ul>
+            <li>Categorize services based on priority and define a degradation strategy to maintain a minimum service level</li>
+          </ul>
+          <li>What is recovery point objective?</li>
+          <ul>
+            <li>With Raft, we have many copies of data</li>
+            <li>If current leader crashes, new leader can function immediately</li>
+          </ul>
+        </ul>
+      </ul>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: System Design Interview Volume 2, Alex Xu & Sahn Lam
