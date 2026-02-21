@@ -213,51 +213,56 @@
   <div class="card-body">
     <h2 class="card-title">Design Twitter (150/250)</h2>
 
-<pre><code class="python">from heapq import heappush, heappop
-class Twitter:
+<pre><code class="python">class Twitter:
 
-    # Each user gets a heap
-    # Follow/unfollow using graph (dictionary)
+    # postTweet
+    #   Dictionary tweetId:userId
+    #   Time O(1)
+    #   Space O(n) n = number of tweets
+    # getNewsFeed
+    #   Use count for tracking time
+    #   Insert [count, tweetId] into max_heap 
+    #   Retrive onces that matches userId or dic[followerId]
+    #   Time O(nlogn)
+    #   Space O(n)
+    # follow/unfollow
+    #   Dictionary followerId:followeeId  
+    #   Time O(1)
+    #   Space O(n)
 
     def __init__(self):
-        self.tweets = defaultdict(set)
+        self.tweets = defaultdict(int)
         self.follows = defaultdict(set)
+        self.max_heap = []
         self.time = 0
         
     def postTweet(self, userId: int, tweetId: int) -> None:
+        self.tweets[tweetId] = userId
+        heappush(self.max_heap, [-self.time, tweetId])
         self.time += 1
-        self.tweets[userId].add((self.time, tweetId))
 
     def getNewsFeed(self, userId: int) -> List[int]:
-        heap, result, i = [], [], 10
-        for time, tweet_id in self.tweets[userId]:
-            heappush(heap, (-time, tweet_id))
-        for followee in self.follows[userId]: 
-            for time, tweet_id in self.tweets[followee]:
-                heappush(heap, (-time, tweet_id))
-        while heap and i > 0:
-            time, tweet_id = heappop(heap)
-            result.append(tweet_id) 
-            i -= 1
+        result, count, temp = [], 0, []
+        while self.max_heap:
+            t, tweet_id = heappop(self.max_heap)
+            temp.append([t, tweet_id])
+            if self.tweets[tweet_id] == userId \
+                or self.tweets[tweet_id] in self.follows[userId]:
+                result.append(tweet_id)
+                count += 1
+            if count == 10:
+                break
+        while temp:
+            t, tweet_id = temp.pop()
+            heappush(self.max_heap, [t, tweet_id])
         return result
         
     def follow(self, followerId: int, followeeId: int) -> None:
-        if followerId != followeeId:
-            self.follows[followerId].add(followeeId)
+        self.follows[followerId].add(followeeId)
 
     def unfollow(self, followerId: int, followeeId: int) -> None:
-        if followerId != followeeId \
-            and followerId in self.follows \
-            and followeeId in self.follows[followerId]:
-            self.follows[followerId].remove(followeeId)
-        
-
-# Your Twitter object will be instantiated and called as such:
-# obj = Twitter()
-# obj.postTweet(userId,tweetId)
-# param_2 = obj.getNewsFeed(userId)
-# obj.follow(followerId,followeeId)
-# obj.unfollow(followerId,followeeId)</code></pre>
+        if followeeId in self.follows[followerId]:
+            self.follows[followerId].remove(followeeId)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/design-twitter">355. Design Twitter</a> | <a href="https://neetcode.io/problems/design-twitter-feed">Design Twitter</a>
@@ -281,43 +286,44 @@ class Twitter:
 
 <pre><code class="python">class Solution:
     def leastInterval(self, tasks: List[str], n: int) -> int:
-
-        # Create a heap
-        # Insert frequency of each char into heap
-        # Pop highest frequency item first
-        # Add idle time if necessary
-        # Each cycle should be n + 1
-
-        freq = defaultdict(int)
-        for task in tasks:
-            freq[task] += 1
-
-        heap = []
-        for k, v in freq.items():
-            heappush(heap, (-v, k))
         
-        schedule = []
-        idle = 0
+        # [A,A,B,B], n = 2 ? 5 (A -> B -> idle -> A -> B)
 
-        # Time O(n)
-        #   Only 26 chars in alphabet, thus insert/pop is O(1)
-        # Space O(1)
-        while heap:
-            cycle = n + 1
-            temp_storage = []  # Prevents popping same letter in same cycle
-            while cycle > 0 and heap:
-                count, task = heappop(heap)
-                schedule.append(task)
-                if -count > 1:
-                    temp_storage.append((count+1, task))
+        # Need to handle most frequent task first
+        # Use heap to keep track of most frequent task
+        # Remember the last position of each task
+        # Insert idle appropriately
+        # Instead of reducing frequency by 1 and immediately putting it
+        # back to heap, store it in temp array (this is to avoid using
+        # same tasks in a cycle)
+        # Time O(nlogn) n = len(tasks)
+        # Space O(n)
+
+        last, freq, max_heap = defaultdict(int), defaultdict(int), [] 
+        for t in tasks:
+            freq[t] += 1
+        
+        for key, val in freq.items():
+            heappush(max_heap, [-val, key])
+        
+        i = 0
+        while max_heap:
+            cycle, temp = n + 1, []
+            while cycle > 0 and max_heap:
+                val, key = heappop(max_heap)
+                if key in last:
+                    for _ in range(n-i+last[key]+1):
+                        i += 1
+                last[key] = i
+                i += 1
                 cycle -= 1
-            for count, task in temp_storage:
-                heappush(heap, (count, task))
-            while cycle > 0 and heap:
-                schedule.append("idle")
-                cycle -= 1
-            
-        return len(schedule)</code></pre>
+                if val != -1:
+                    temp.append([val+1, key])
+            while temp:
+                val, key = temp.pop()
+                heappush(max_heap, [val, key])
+
+        return i</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/task-scheduler">621. Task Scheduler</a> | <a href="https://neetcode.io/problems/task-scheduling">Task Scheduler</a>
