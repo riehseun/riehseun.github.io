@@ -195,26 +195,33 @@
   <div class="card-body">
     <h2 class="card-title">Combination Sum II (150/250)</h2>
 
-<pre><code class="python">class Solution:
+<pre><code class="python">cclass Solution:
     def combinationSum2(self, candidates: List[int], target: int) -> List[List[int]]:
         
+        # [1,1,2,2,3], target = 3 ? [[1,2], [3]]
+
         # Backtracking
+        # For each num in candidates, append to path if num <= target
+        # Update target in each iteration
+        # Sort candidates and skip if candidates[i-1] == candidates[i]
+        # Time O(2**n) n = len(candidates)
+        # Space O(n)
 
-        def backtrack(j, path, curr_num):
+        def backtrack(i, path, target):
 
-            if curr_num < 0:
-                return
-            if curr_num == 0:
-                result.append(path[:]) 
+            if target == 0:
+                result.append(path[:])
 
-            for i in range(j, len(candidates)):
-                if i > j and candidates[i] == candidates[i-1]:
+            for j in range(i, n):
+                num = candidates[j]
+                if j > i and candidates[j-1] == candidates[j]:
                     continue
-                path.append(candidates[i])
-                backtrack(i+1, path, curr_num-candidates[i])
-                path.pop()
+                if num <= target:
+                    path.append(num)
+                    backtrack(j+1, path, target-num)
+                    path.pop()
 
-        result = []
+        n, result = len(candidates), []
         candidates.sort()
         backtrack(0, [], target)
         return result</code></pre>
@@ -298,23 +305,24 @@
 <pre><code class="python">class Solution:
     def subsets(self, nums: List[int]) -> List[List[int]]:
 
-        # Backtracking
-        #   j is the index of first element to add to current combination
+        # [1,2] ? [[], [1], [2], [1,2]]
 
-        # Time O(n*(2**n))
-        #   n = len(nums)
+        # Backtracking
+        # For each num in nums, either put it in path or not
+        # Time O(2**n) n = len(nums)
         # Space O(n)
-        def backtrack(j, path):
+
+        def backtrack(path, i):
 
             result.append(path[:])
 
-            for i in range(j, len(nums)):
-                path.append(nums[i])
-                backtrack(i+1, path)
+            for j in range(i, n):
+                path.append(nums[j])
+                backtrack(path, j+1)
                 path.pop()
 
-        result = []
-        backtrack(0, [])
+        n, result = len(nums), []
+        backtrack([], 0)
         return result</code></pre>
   </div>
   <div class="card-footer text-muted">
