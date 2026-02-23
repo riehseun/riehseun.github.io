@@ -115,36 +115,31 @@
 <pre><code class="python">class Solution:
     def generateParenthesis(self, n: int) -> List[str]:
         
-        # Backtracking
-        # Number of ( cannot be greater than n
-        # Number of ) cannot excced number of ( at any point 
-        # Generate n * 2 length of string
+        # 1 ? ()
+        # 2 ? ()(), (())
 
-        # Time O(2n**n)
+        # Backtrack
+        # If num_opening < n, put ( into path
+        # If num_closing < num_opening, put ) into path
+        # Time O(2**n) 
         # Space O(n)
-        def backtrack(result, brackets, n, count):
 
-            for c in ["(", ")"]:
+        def backtrack(path, num_opening, num_closing):
 
-                if len(brackets) == n * 2:
-                    result.append("".join(brackets))
-                    return
+            if len(path) == 2 * n:
+                result.append("".join(path[:]))
 
-                if c == ")" and count["("] > count[")"]:
-                    count[")"] += 1
-                    brackets.append(")")
-                    backtrack(result, brackets, n, count)
-                    brackets.pop()  
-                    count[")"] -= 1  
-                if c == "(" and count["("] < n:
-                    count["("] += 1
-                    brackets.append("(")
-                    backtrack(result, brackets, n, count)
-                    brackets.pop()
-                    count["("] -= 1
-            
-        result, count = [], defaultdict(int)
-        backtrack(result, [], n, count)
+            if num_opening < n:
+                path.append("(")
+                backtrack(path, num_opening+1, num_closing)
+                path.pop()
+            if num_closing < num_opening:
+                path.append(")")
+                backtrack(path, num_opening, num_closing+1)
+                path.pop()
+
+        result = []
+        backtrack([], 0, 0)
         return result</code></pre>
   </div>
   <div class="card-footer text-muted">
