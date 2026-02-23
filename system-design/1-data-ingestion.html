@@ -78,17 +78,50 @@ Should the system guarantee exactly-once or at-least-once delivery? At-least-onc
 # Detailed Design
 
 ## Ingestion layer
-Kafka
-  Pros - Decoupling, high throughput
+Real-time
+  Kafka
+    Commit log, high throughput, decoupling ingestion from production
+  Kafka topics
+    Parition by high cardinality key (Ex. user_id) or hash of primary key 
+    Partition count - start with 24-48
+Batch
+  Upload files into object storage
+  Push metadata to Kafka
+  Trigger processing
 
 ## Processing layer
-Spark
+Spark (structured streaming)
+  Unified API for both batch and streaming
+  Micro-batch model is suitable for <1 SLA
+Responsibilities
+  Schema validation
+  Data cleaning
+  Data de-dep
+  Enrich data
+  Write to storage
+Event Id
+  Every record must have globally unique event id and timestamp
+De-dup
+  Retention with TTL based on event_id
+  Window should not be too large to save memory
+Exactly-once
+  Kafka offset tracking
+  Checkpointing
+  Atomic writes to storage
+  Idempotent sink operation
 
 ## Raw data
 Original format
+Partition by ingestion date
+Append only (data is never mutated!)
 
-## Curate data
+## Curated data
 Parquet format
+Partition by event_date and event_time
+
+## Real-time serving
+Option 1. query from streaming processor memory
+Option 2. push to low-latency store (Ex. Redis)
 
 # Data invalidation
 Employ rules that reject invalid data such as missing critical columns, value outside valid range, etc
