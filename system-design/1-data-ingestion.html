@@ -85,14 +85,15 @@ Real-time
     Parition by high cardinality key (Ex. user_id) or hash of primary key 
     Partition count - start with 24-48
 Batch
+  NAS upload, periodic DB exports, Bulk API dumps
   Upload files into object storage
   Push metadata to Kafka
-  Trigger processing
+  Trigger batch processing
 
 ## Processing layer
 Spark (structured streaming)
   Unified API for both batch and streaming
-  Micro-batch model is suitable for <1 SLA
+  Micro-batch model is suitable for less than 1 sec SLA
 Responsibilities
   Schema validation
   Data cleaning
@@ -109,6 +110,10 @@ Exactly-once
   Checkpointing
   Atomic writes to storage
   Idempotent sink operation
+Batch processing
+  Backfills
+  Heavy joins
+  Feature engineering
 
 ## Raw data
 Original format
@@ -119,7 +124,7 @@ Append only (data is never mutated!)
 Parquet format
 Partition by event_date and event_time
 
-## Real-time serving
+## Real-time serving (if ML models require dynamic features)
 Option 1. query from streaming processor memory
 Option 2. push to low-latency store (Ex. Redis)
 
