@@ -425,30 +425,28 @@
 <pre><code class="python">class Solution:
     def partition(self, s: str) -> List[List[str]]:
 
+        # ab ? [[a, b]]
+        # aab? [[aa, b], [a, a, b]]
+
         # Backtracking
-        #   For every possible substring, check palindrome
-
+        # At each index, check if string up that that index is palindrome
+        # If yes, append that substring to path
         # Time O(n*(2**n))
-        #   n = len(s)
-        #   O(n) to check if substring is palindrom
-        #   O(2**n) possible substrings
         # Space O(n)
-        #   Recursion stack
-        def backtrack(j, path):
 
-            if j == len(s):
+        def backtrack(path, i):
+
+            if i == len(s):
                 result.append(path[:])
 
-            for i in range(j, len(s)):
-                if s[j:i+1] == s[j:i+1][::-1]:
-                    path.append(s[j:i+1])
-                    # After appending substring s[i:j+1],
-                    # Start scannign from index j + 1
-                    backtrack(i+1, path)
+            for j in range(i, n):
+                if s[i:j+1] == s[i:j+1][::-1]:
+                    path.append(s[i:j+1])
+                    backtrack(path, j+1)
                     path.pop()
 
-        result = []
-        backtrack(0, [])
+        result, n = [], len(s)
+        backtrack([], 0)
         return result</code></pre>
   </div>
   <div class="card-footer text-muted">
