@@ -54,50 +54,41 @@
   <div class="card-body">
     <h2 class="card-title">Rotting Oranges (150/250)</h2>
 
-<pre><code class="python"># Is 0,1,2 integer?
-
-        # grid = [] => -1
-        # grid = [0,0,0] => -1
-        # grid = [2,2,2] => 0
-        # grid = [2,1,2] => 1
-
-        # From each fresh fruit, find max distance to rot fruit
-        # Update max distance for each fresh fruit, by DFSing
-        # at each fresh fruit
-        # Time O((nm)**2)
-
-        # From all rot fruit, do BFS
-        # If meet 2, skip
-        # If meet 1, convert to 2
-        # If meet 0, skip
+<pre><code class="python">class Solution:
+    def orangesRotting(self, grid: List[List[int]]) -> int:
+        
+        # Multi source BFS
+        # From all rotten node, expand at the same time
+        # If seen fresh node, convert it to rotten
+        # If seen empty cell, don't expand
+        # Time O(n) n = number of nodes
+        # Space O(n)
 
         n, m = len(grid), len(grid[0])
+        dirs = [(-1,0), (1,0), (0,1), (0,-1)]
         queue = deque()
-        explored = set()
         depth = 0
 
         for i in range(n):
             for j in range(m):
                 if grid[i][j] == 2:
-                    queue.append((i,j,depth))
+                    queue.append((i,j,0))
 
         while queue:
-            i, j, depth = queue.popleft()            
-            dirs = [(-1,0), (1,0), (0,-1), (0,1)]
+            i, j, d = queue.popleft()
+
             for x, y in dirs:
                 if 0 <= i + x < n \
                     and 0 <= j + y < m \
-                    and grid[i+x][j+y] == 1 \
-                    and (i+x, j+y) not in explored:
-                        grid[i+x][j+y] = 2
-                        explored.add((i+x, j+y))
-                        queue.append((i+x, j+y, depth+1)) 
-                    
+                    and grid[i+x][j+y] == 1:
+                    queue.append((i+x, j+y, d+1))
+                    grid[i+x][j+y] = 2
+            depth = d
+
         for i in range(n):
             for j in range(m):
                 if grid[i][j] == 1:
                     return -1
-                    
         return depth</code></pre>
   </div>
   <div class="card-footer text-muted">
@@ -112,26 +103,15 @@
 <pre><code class="python">class Solution:
     def islandsAndTreasure(self, grid: List[List[int]]) -> None:
         
-        # Replace grid value with positive integer
-        # representing the distance to 0?
-        
-        # grid = [0] => [0]
-        # grid = [-1] => [1]
-        # grid = [inf, -1, 0, inf] -=> [inf, -1, 0, 1]
-
-        # At each inf, BFS till finding 0
-        # Time O((nm)**2)
-
-        # From all 0's, start BFS
-        # If meet -1, skip
-        # If meet inf, convert it to depth 
-        # If meet positive integer, put min(depth, pos int)
-        # Time O(nm)
-        # Space O(nm)
+        # From each treasure chest, find distance to land
+        # Keep minimum distance in each cell
+        # Multi source BFS
+        # Time O(n) n = number of nodes
+        # Space O(n)
 
         n, m = len(grid), len(grid[0])
+        dirs = [(-1,0), (1,0), (0,-1), (0,1)]
         queue = deque()
-        explored = set()
 
         for i in range(n):
             for j in range(m):
@@ -139,20 +119,16 @@
                     queue.append((i,j,0))
 
         while queue:
-            i, j, depth = queue.popleft()            
-            dirs = [(-1,0), (1,0), (0,-1), (0,1)]
+            i, j, d = queue.popleft()
+
             for x, y in dirs:
                 if 0 <= i + x < n \
                     and 0 <= j + y < m \
-                    and (i+x, j+y) not in explored:
-                    if grid[i+x][j+y] == -1:
-                        continue
-                    elif grid[i+x][j+y] == math.inf:
-                        grid[i+x][j+y] = depth + 1
-                    else:
-                        grid[i+x][j+y] = min(grid[i+x][j+y], depth+1)
-                    explored.add((i+x, j+y))
-                    queue.append((i+x, j+y, depth+1))</code></pre>
+                    and grid[i+x][j+y] != -1 \
+                    and grid[i+x][j+y] != 0 \
+                    and grid[i+x][j+y] > d + 1:
+                    queue.append((i+x, j+y, d+1))
+                    grid[i+x][j+y] = d + 1</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://neetcode.io/problems/islands-and-treasure">Islands and Treasure</a>
