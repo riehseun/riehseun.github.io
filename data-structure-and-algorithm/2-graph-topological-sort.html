@@ -323,42 +323,35 @@
 <pre><code class="python">class Solution:
     def findRedundantConnection(self, edges: List[List[int]]) -> List[int]:
         
-        # Detect cycle in undirected graph?
-
-        # edges = [] => invalid input
-        # edges = [[0,1],[1,2],[2,0]], n = 3 => [2,0]
-
-        # Cycle detection? topological sort
-        # Time O(n+m) n = number of nodes, m = number of edges
+        # Topological sort
+        # Essential edges are removed and redundant edges remain
+        # Time O(n) n = number of nodes
         # Space O(n)
 
-        graph, indegree = defaultdict(list), defaultdict(int)
-        queue = deque()
-        
+        graph, indegree = defaultdict(set), defaultdict(int)
+
         for a, b in edges:
-            graph[b].append(a)
-            graph[a].append(b)
+            graph[a].add(b)
+            graph[b].add(a)
             indegree[a] += 1
             indegree[b] += 1
 
+        queue = deque()
         for i in range(1, len(edges)+1):
             if indegree[i] == 1:
                 queue.append(i)
 
         while queue:
             node = queue.popleft()
-        
             for next_node in graph[node]:
                 indegree[next_node] -= 1
-                indegree[node] -= 1
                 if indegree[next_node] == 1:
                     queue.append(next_node)
 
         edges.reverse()
         for a, b in edges:
-            if indegree[a] >= 2 and indegree[b] >= 2:
+            if indegree[a] == 2 and indegree[b] == 2:
                 return [a, b]
-
         return []</code></pre>
   </div>
   <div class="card-footer text-muted">
