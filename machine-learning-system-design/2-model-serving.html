@@ -53,9 +53,7 @@
   <div class="card-body">
     <h2 class="card-title">Model Serving</h2>
 
-    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-2/2-1-1.png" alt="Card image cap">
-
-    <pre><code class="markdown">
+<pre><code class="markdown">
 # Requirement and Problem
 
 How many models are there? Over 100
@@ -66,17 +64,44 @@ What should be latency for real-time inference? Under 200ms
 Are models continuously trained? Yes
 How many daily active users are there? 1B
 How many inference requests does each user make? depends on use case
+Should the system monitor model metrics? No
+Should the system perform model deployment like A/B testing? No
 
+Input - requests with static and dynamic features
+Output - prediction
 Problem - platform that serves huge number of API requests, compute/generate huge size of batch predictions
+Key points - latency under 200ms, throughtput 100M QPS
 
 # High-Level Design
+User -> Global load balancer -> Regional edge layer -> API gatwway -> Prediction
+Single region or Kubernetes autoscaling cannot support 100M QPS
 
 # Detailed Design
+
+## Multi-region deployment
+Deploy models into US East, US West, etc
+Avoid cross-regional latency and single point of failure
+
+## Multi-stage model inference
+Cache layer - serve frequent prediction, use Redis
+Candidate generation - leverage pre-computed embeddings, use ANN, focus on recall
+Model - dynamic batching (micro-batching per 5-10ms), focus on precision 
+
+## Model optimization
+Quantization
+Knowledge distillation (only if teacher model is available)
+
+## Auto-scaling
+Traffic forecast
+
+
 Horizontally scale API servers
 Pre-pull latest models from model registry rather than pulling it during runtime
 Before using the model to compute inference, check if user-inference data exists in pre-compute inference cache
 When user features are not available at all (users not signed in, anonymous users, users not sharing geo-location) recommend popular ADs
 </code></pre> 
+
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-2/model-serving-1.png" alt="Card image cap">
   </div>
   <div class="card-footer text-muted">
     Reference:
