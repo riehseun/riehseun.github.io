@@ -105,49 +105,41 @@
   <div class="card-body">
     <h2 class="card-title">Course Schedule II (150/250)</h2>
 
-<pre><code class="python"># Is there case like [[0,1],[1,0]]
-
-        # 3, [[0,1],[1,2]] => 2->1->0
-        # 3, [[0,1]] => 1->0->2
-        # 3, [[0,1],[0,2]] => 2->1->0
+<pre><code class="python">class Solution:
+    def findOrder(self, numCourses: int, prerequisites: List[List[int]]) -> List[int]:
         
-        # Create graph with adjancency list
-        # At each node, check if cycle
-        # Time O(n*(n+m)) n = numCourses, m = len(prerequisites)
-        # Space O(n)
-
         # Topological sort
-        # Calculate indegree (incoming nodes) for each node
-        # Start from nodes with indegree = 0
-        # Time O(n+m) visiting nodes only once
+        # Find indegree of each node
+        # Remove nodes with indegree == 0
+        # Update indegree of impacted nodes
+        # Repeat until no nodes left
+        # If nodes left, cycle
+        # Time O(n+m) n = number of nodes, m = number of edges
         # Space O(n)
-    
-        graph, indegree = defaultdict(list), defaultdict(int)
-        queue = deque()
-        
+
+        graph, indegree = defaultdict(set), defaultdict(int)
+
         for a, b in prerequisites:
-            graph[b].append(a)
+            graph[b].add(a)
             indegree[a] += 1
 
+        queue = deque()
         for i in range(numCourses):
             if indegree[i] == 0:
                 queue.append(i)
 
-        nodes, num_explored_nodes = [], 0
+        order = []
         while queue:
             node = queue.popleft()
-            nodes.append(node)
-            num_explored_nodes += 1
-
+            order.append(node)
             for next_node in graph[node]:
                 indegree[next_node] -= 1
                 if indegree[next_node] == 0:
                     queue.append(next_node)
 
-        if num_explored_nodes == numCourses:
-            return nodes
-        
-        return []</code></pre>
+        if len(order) != numCourses:
+            return []
+        return order</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/course-schedule-ii">210. Course Schedule II</a> | <a href="https://neetcode.io/problems/course-schedule-ii">Course Schedule II</a>
