@@ -118,63 +118,48 @@
 
 <pre><code class="python">class Solution:
     def solve(self, board: List[List[str]]) -> None:
-        """
-        Do not return anything, modify board in-place instead.
-        """
-
-        # How about 'O' at the edges?
-
-        # board = [] => invalid input
-        # board = ['O'] => ['O']
-        # board = ['X', 'O', 'X'] => ['X', 'O', 'X']
-
-        # At 'O' do BFS
-        # If can't each edge node, convert all explored nodes
-        # to 'X'
-        # Time O(nm) each node is visited once
-        # Space O(nm)
+        
+        # When finding "O", do BFS
+        # If BFS does not reach borders, convert all visited nodes
+        # to "X"
+        # Time O(n) n = number of nodes
+        # Space O(n)
 
         def bfs(start):
 
-            explored = set()
-            explored.add(start)
-
             queue = deque()
             queue.append(start)
+            visited = set()
+            visited.add(start)
+            convert = True
 
-            is_edge = False
-        
             while queue:
                 i, j = queue.popleft()
-                if i == 0 \
-                    or i == n - 1 \
-                    or j == 0 \
-                    or j == m - 1:
-                    is_edge = True
-                
-                dirs = [(-1,0), (1,0), (0,-1), (0,1)]
+                if i == 0 or i == n - 1 or j == 0 or j == m - 1:
+                    convert = False
                 for x, y in dirs:
                     if 0 <= i + x < n \
                         and 0 <= j + y < m \
-                        and (i+x, j+y) not in explored \
-                        and board[i+x][j+y] == 'O':
-                        explored.add((i+x, j+y))
+                        and board[i+x][j+y] == "O" \
+                        and (i+x, j+y) not in visited:
                         queue.append((i+x, j+y))
+                        visited.add((i+x,j+y))
 
-            if is_edge:
-                return []
+            if convert:
+                for i, j in visited:
+                    board[i][j] = "X"
 
-            return explored
+            return visited
 
         n, m = len(board), len(board[0])
-
+        dirs = [(-1,0), (1,0), (0,-1), (0,1)]
+        explored = set()
         for i in range(n):
             for j in range(m):
-                if board[i][j] == 'O':
-                    explored = bfs((i,j))
-                    if explored:
-                        for x, y in explored:
-                            board[x][y] = 'X'</code></pre>
+                if board[i][j] == "O" \
+                    and (i, j) not in explored:
+                    visited = bfs((i,j))
+                    explored.update(visited)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/surrounded-regions">130. Surrounded Regions</a> | <a href="https://neetcode.io/problems/surrounded-regions">Surrounded Regions</a>
