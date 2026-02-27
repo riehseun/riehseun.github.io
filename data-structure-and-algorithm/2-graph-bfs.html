@@ -65,45 +65,40 @@
 
 <pre><code class="python">class Solution:
     def ladderLength(self, beginWord: str, endWord: str, wordList: List[str]) -> int:
-
-        # b = [], end = [] => invalid input
-        # b = ["cat"], end = ["dog"] => 0
-        # b = ["cat"], end = ["tat"] => 1
-
-        # Create edge bewteen words with 1 chat diff
-        # Represent graph with adjacency list
-        # BFS to compute shortest distance
-        # Time O((n**2)*m) n = len(wordList), m = len(beginWord)
-
-        wordList.append(beginWord)
-        n, graph = len(wordList), defaultdict(list)
         
+        # If endWord is not in wordList, return 0
+        # Build graph (bidirectional) where words with one char diff
+        # are connected
+        # BFS shortest path
+        # Time O(n**2) n = number of nodes = len(wordList)
+        # Space O(n)
+
+        words = wordList[:]
+        words.append(beginWord)
+        graph = defaultdict(set)
+        n = len(words)
         for i in range(n):
             for j in range(i+1, n):
-                diff_count = 0
-                for a, b in zip(wordList[i], wordList[j]):
+                cnt = 0
+                for a, b in zip(words[i], words[j]):
                     if a != b:
-                        diff_count += 1
-                        if diff_count > 1:
-                            break
-                if diff_count <= 1:
-                    graph[wordList[i]].append(wordList[j])
-                    graph[wordList[j]].append(wordList[i])
+                        cnt += 1
+                if cnt == 1:
+                    graph[words[i]].add(words[j])
+                    graph[words[j]].add(words[i])
 
-        print(graph)
-
-        queue, explored = deque(), set()
-        queue.append((beginWord,0))
-        explored.add(endWord)
+        queue, visited = deque(), set()
+        queue.append((beginWord, 0))
+        visited.add(beginWord)
 
         while queue:
-            node, dist = queue.popleft()
+            node, depth = queue.popleft() 
             for next_node in graph[node]:
                 if next_node == endWord:
-                    return dist+2
-                if next_node not in explored:
-                    explored.add(next_node)
-                    queue.append((next_node,dist+1))
+                    return depth + 2
+                if next_node not in visited:
+                    queue.append((next_node, depth+1))
+                    visited.add(next_node)
 
         return 0</code></pre>
   </div>
