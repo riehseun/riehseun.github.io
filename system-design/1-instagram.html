@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="/img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/monokai-sublime.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="/js/jquery.min.js" type="text/javascript"></script>
+<script src="/js/bootstrap.bundle.min.js" type="text/javascript"></script>
+<script src="/js/highlight.pack.js" type="text/javascript"></script>
+<script src="/js/include_html.js" type="text/javascript"></script>
+<script src="/js/mathjax/tex-chtml.js" type="text/javascript"></script>
+<script src="/js/site.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<include src="/header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">Software Engineering</h1>
+
+<!-- Instagram BEGIN -->
+<div class="card mb-4" id="instagram">
+  <div class="card-body">
+    <h2 class="card-title">Instagram</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#instagram-1">Requirement</a></li>
+      <li><a href="#instagram-2">High level design</a></li>
+      <li><a href="#instagram-3">Detailed design</a></li>
+      <li><a href="#instagram-4">Follow up</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="instagram-1">
+  <div class="card-body">
+    <h2 class="card-title">Requirement</h2>
+
+    <h3 class="card-title">Functional</h3>
+    <ul>
+      <li>What is the purpose of the application? Design social platform like Instagram</li>
+      <li>Should the system generate feeds? Yes</li>
+      <ul>
+        <li>What does a feed consist of? Posts with text, image, video</li>
+        <li>What user actions are supported on posts? Like, share, comment, hide, report</li>
+        <li>How should posts be ranked? Assume chronological order</li>
+        <li>Should feeds be personalized for each user? No</li>
+        <li>Should feeds contains ADs? No</li>
+        <li>Can users follow each other? Yes</li>
+      </ul>
+      <li>Should the system support notification? Yes</li>
+      <ul>
+        <li>What triggers notification? Someone reacts (like, comment, etc) to your post, someone follows you</li>
+        <li>What devices should notifications be sent to? iOS, Andriod, email</li>
+        <li>Should the system allow users to opt-out from notification? Yes</li>
+      </ul>
+      <li>Should the system support messaging? Yes</li>
+      <ul>
+        <li>Should the system show user status? Yes</li>
+        <li>Should the system support group chat? Yes</li>
+        <li>Should the system persist messages? Yes</li>
+      </ul>
+      <li>Should the system support search? No</li>
+    </ul>
+
+    <h3 class="card-title">Non-functional</h3>
+    <ul>
+      <li>Availability</li>
+      <li>Reliability</li>
+      <li>Scalability</li>
+      <li>Performance</li>
+      <li>Consistency</li>
+    </ul>
+
+    <h3 class="card-title">Estimation</h3>
+    <ul>
+      <li>How many users are there? 1B total users and 100M daily active users</li>
+      <li>How many posts does each user create each day? 1 per day on average</li>
+      <li>How many posts does each user view per day? 100 on average</li>
+      <li>What is the size of each post? 1MB on average</li>
+    </ul>
+
+    <h3 class="card-title">Storage</h3>
+    <ul>
+      <li>Posts</li>
+      <ul>
+        <li>1 * 100M * 1MB = 100TB per day</li>
+        <li>Image and video can be compressed before they are sent to server for storage</li>
+        <li>Assuming each post whose size is 1MB can be compressed into 100KB, incoming data is 10TB per day</li>
+      </ul>
+      <li>User metadata</li>
+      <ul>
+        <li>Assume metadata size is 1KB</li>
+        <li>1B * 1KB = 1TB</li>
+      </ul>
+      <li>Chat message</li>
+      <ul>
+        <li>Assume each user generates 10 messages per day</li>
+        <li>Assume each chat message is 100 bytes</li>
+        <li>100M * 10 * 100 = 100GB per day</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Bandwidth</h3>
+    <ul>
+      <li>Incoming</li>
+      <ul>
+        <li>100TB per day = 9.26Gbps</li>
+      </ul>
+      <li>Outgoing</li>
+      <ul>
+        <li>100 * 100 * 1MB = 10PB per day = 926Gbps</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference:
+  </div>
+</div>
+
+<div class="card mb-4" id="instagram-2">
+  <div class="card-body">
+    <h2 class="card-title">High level design</h2>
+
+    <img class="img-fluid" class="card-img-top" src="/system-design/image/sd-1/instagram-1.png" alt="Card image cap">
+
+    <ul>
+      <li>User sign up</li>
+      <ul>
+        <li>Load balancer forwards request to user handling server</li>
+        <li>User information is stored in user DB (SQL)</li>
+      </ul>
+      <li>User login</li>
+      <ul>
+        <li>User handling server checks user info from user DB</li>
+      </ul>
+      <li>User uploads posts</li>
+      <ul>
+        <li>Load balancer forwards requests to post processing server</li>
+        <li>Post processing server splits post into image, video, text, metadata</li>
+        <li>Different type of data is stored in different storage</li>
+      </ul>
+      <li>User views feeds of posts</li>
+      <ul>
+        <li>Post generation server generates posts by reading data from DB</li>
+        <li>Posts are sent to the server</li>
+        <li>Images and videos of the posts are served directly to users</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference:
+  </div>
+</div>
+
+<div class="card mb-4" id="instagram-3">
+  <div class="card-body">
+    <h2 class="card-title">Detailed design</h2>
+
+    <h3 class="card-title">API gateway</h3>
+    <ul>
+      <li>Rate limiting</li>
+
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/sd-1/instagram-10.png" alt="Card image cap">
+
+      <ul>
+        <li>Counter is stored in cache</li>
+        <ul>
+          <li>If there are multiple API gateways, they must use the same cache to avoid synchronization issue</li>
+        </ul>
+        <li>Policy needs to be persisted and stored in DB</li>
+        <li>Use write-back cache for fast read and write</li>
+        <ul>
+          <li>API gateway writes policy in cache and worker asynchronuously stores in DB</li>
+        </ul>
+        <li>Returns 429 too many request when rate limiting</li>
+      </ul>
+      <li>Authentication</li>
+      <li>Authorization</li>
+      <li>Load balance</li>
+      <ul>
+        <li>Policy can determine load distribution rule</li>
+        <li>Option 1. round robin</li>
+        <ul>
+          <li>Traffic is evenly distributed</li>
+          <li>Use for stateless application</li>
+        </ul>
+        <li>Option 2. session based</li>
+        <ul>
+          <li>Traffic will be unevenly distributed</li>
+          <li>Use for stateful application</li>
+        </ul>
+      </ul>
+      <li>Reverse proxy</li>
+      <ul>
+        <li>Policy can filer out clients</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Data scaling</h3>
+    <ul>
+      <li>Option 1. hashing</li>
+      <ul>
+        <li>Mod image_id, video_id, post_id by number of servers to compute server_id where data goes to</li>
+        <li>When servers are added/removed, server_ids change and data needs to be re-distributed</li>
+      </ul>
+      <li>Option 2. consistent hashing</li>
+      <ul>
+        <li>Use hash function to generate hash values and put them in conceptual ring</li>
+        <ul>
+          <li>Ex. SHA-1 generates values \( 0 \dots 2^{160}-1 \)</li>
+        </ul>
+        <li>Use the same hash function to compute hash value for each server_id</li>
+        <li>Use the same hash function to compute hash value for image_id, video,_id, post_id</li>
+        <li>The data is served by the next server in the conceptual ring</li>
+        <li>When servers are added/removed, only a fraction of data will see its "next server" is changed</li>
+        <li>Data can be ununiformly distributed as servers are added/removed</li>
+      </ul>
+      <li>Option 3. consistent hashing with virtual nodes</li>
+      <ul>
+        <li>Each server is represented by many points (100-200) in the ring</li>
+        <li>Data can be more evenly spread out</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Data replication</h3>
+    <ul>
+      <li>Use ideas from consistent hashing</li>
+      <li>Rather than storing data in next server in the ring, store data in first \( N \) physical servers</li>
+      <ul>
+        <li>The first \( N \) servers must be located different zone/region</li>
+      </ul>
+      <li>Consistency</li>
+      <ul>
+        <li>Write data to nodes reponsible for write operations and read data from all nodes</li>
+        <li>R = 1 or W = 1 means that coordinator need at least 1 node acknowledging read/write</li>
+        <li>Option 1. W + R > N</li>
+        <ul>
+          <li>Strong consistency (Quorum is achieved) since at least one node has latest data</li>
+        </ul>
+        <li>Option 2. W = N and R = 1</li>
+        <ul>
+          <li>Fast read</li>
+        </ul>
+        <li>Option 3. W = 1 and R = N</li>
+        <ul>
+          <li>Fast write</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">ID genearation of DB</h3>
+    <ul>
+      <li>Need unique value for user_id and post_id</li>
+      <li>Option 1. twitter snowflake using 64 bit number as unique ID</li>
+      <ul>
+        <li>1 bit - 0</li>
+        <li>41 bits - timestamp</li>
+        <ul>
+          <li>Miliseconds since the epoch or custom epoch</li>
+        </ul>
+        <li>5 bits - datacenter Id</li>
+        <ul>
+          <li>2^5 = 32 data centers</li>
+          <li>Chosen at start up time and is fixed</li>
+        </ul>
+        <li>5 bits - machine Id</li>
+        <ul>
+          <li>2^5 = 32 machines per data center</li>
+          <li>Chosen at start up time and is fixed</li>
+        </ul>
+        <li>12 bits - sequence number</li>
+        <ul>
+          <li>Every machine increments sequence number by 1 for each Id generated on that machine</li>
+          <li>The number is reset to 0 every milisecond</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Feed serving</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/system-design/image/sd-1/instagram-12.png" alt="Card image cap">
+
+    <ul>
+      <li>Generation</li>
+      <ul>
+        <li>Generation server gets friend IDs from graph DB</li>
+        <li>Generation server gets friends metadata from user cache</li>
+        <li>Generation server sends friend IDs and metadata to message queue</li>
+        <li>Workers generate feeds and store &lt;post_id, user_id&gt; mapping to feed cache</li>
+      </ul>
+      <li>Retrieval</li>
+      <ul>
+        <li>Image and videos are directly served via CDN</li>
+        <li>Retrieval server gets post IDs from feed cache</li>
+        <li>Retrieval server gets post contents from user cache and post cache</li>
+      </ul>
+      <li>Generation server</li>
+      <ul>
+        <li>Option 1. push</li>
+        <ul>
+          <li>Feed is pre-computed during write time</li>
+          <li>Pros</li>
+          <ul>
+            <li>Feed can be propagated to friends immediately because fetching feed is fast</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>If user has many friends, generating feed for all the friends can be compute intensive</li>
+            <li>Generating feed for inactive friends can be wasteful</li>
+          </ul>
+        </ul>
+        <li>Option 2. pull model</li>
+        <ul>
+          <li>Feed is generated during read time</li>
+          <li>Pros</li>
+          <ul>
+            <li>More efficient for handling inactive users</li>
+          </ul>
+          <li>Cons</li>
+          <ul>
+            <li>Fetching feed is slow</li>
+          </ul>
+        </ul>
+        <li>Option 3. hybrid model</li>
+        <ul>
+          <li>For celebrities, use pull model</li>
+          <ul>
+            <li>Let followers pull new contents on-demand to avoid system overload</li>
+          </ul>
+          <li>For all other users, use push model</li>
+          <ul>
+            <li>Generating feed fast is critical</li>
+          </ul>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Notification</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/system-design/image/sd-1/instagram-11.png" alt="Card image cap">
+
+    <ul>
+      <li>Notification server fetches template and user info, then sent requests to message queue</li>
+      <li>Workers store notification data in notification log DB</li>
+      <li>When third party fails to send notification, notification is added to message queue for retrying</li>
+    </ul>
+
+    <h3 class="card-title">Direct messaging</h3>
+    <ul>
+      <li>1-on-1 chat</li>
+
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/sd-1/instagram-13.png" alt="Card image cap">
+      
+      <ul>
+        <li>User 1 and 2 maintains web socket connection to chat server 1 and 2 respectively</li>
+        <li>User 1 sends message to chat server 1</li>
+        <li>Chat server 1 obtains message ID from ID generator</li>
+        <li>Chat server 1 sends message to message queue 2</li>
+        <li>Message is stored in key-value store</li>
+        <li>If user 2 is online, notification servers sends message to user 2</li>
+        <li>If user 2 is offline, user 2 retrieves message from queue when it becomes online</li>
+      </ul>
+      <li>Group chat</li>
+      <ul>
+        <li>Each user has their own chat server and message queue</li>
+        <li>Each user is connected to its chat server with web socket for persistent connection</li>
+        <li>Message from user 1 is sent to message queues for user 2, 3, 4, and so on</li>
+      </ul>
+      <li>Sync messages</li>
+      <ul>
+        <li>User may be connected to different devices</li>
+        <li>Each device can keep the latest message ID it has seen</li>
+        <li>Each device can lookup key-value store periodically and pull messages whose ID is later than latest message ID it has seen</li>
+      </ul>
+      <li>User status</li>
+
+      <img class="img-fluid" class="card-img-top" src="/system-design/image/sd-1/instagram-14.png" alt="Card image cap">
+
+      <ul>
+        <li>Create user status server for each user</li>
+        <li>Create one process or thread for every user that the user is connected to via chat</li>
+        <li>All users send heartbeats periodically</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Video</h3>
+    <ul>
+      <li>Upload</li>
+      <ul>
+        <li><img class="img-fluid" class="card-img-top" src="/system-design/image/sd-1/instagram-15.png" alt="Card image cap"></li>
+        <li>Generate different resolutions of same video to serve users with different bandwidth</li>
+        <li>For each resolution of a video, split it into chunks and encode in parallel</li>
+        <li>Split audio from video, and generate audio encoding</li>
+        <li>Extract metadata from video</li>
+        <li>Encoded chunks are uploaded in parallel along with audio and metadata</li>
+      </ul>
+      <li>Streaming</li>
+      <ul>
+        <li>Videos are streamed directly from CDN</li>
+        <li>Only popular vidoes are stored in CDN</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Recap</h3>
+
+    <img class="img-fluid" class="card-img-top" src="/system-design/image/sd-1/instagram-21.png" alt="Card image cap">
+
+    <ul>
+      <li>User experience during failure</li>
+      <ul>
+        <li>DNS, load balancer, API gateway - users can't use feed related service</li>
+        <li>CDN - users can't watch image and videos in the posts</li>
+        <li>Feed service - users can't create new post, can't see up-to-date feed</li>
+        <li>Video service - users can't create new post, cat't see posts that contain new videos</li>
+        <li>Messaging service - users can't chat with people</li>
+        <li>Notification service - users can't receive notification</li>
+      </ul>
+      <li>Potential bottlenecks</li>
+      <ul>
+        <li>Load balancer, API gateway - must have enough number of works to handle all incoming traffic</li>
+        <li>CND - enough resources to stream videos to users in each geographical region</li>
+      </ul>
+      <li>10x scale</li>
+      <ul>
+        <li>Compute - consider vertical scaling as well as horizontal scaling</li>
+        <li>DB - consider migrating DB to highly scalable types</li>
+        <li>CDN - consider private CDN for public ones can cost a lot as number of users increases</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">API</h3>
+    <ul>
+      <li>General</li>
+      <ul>
+        <li><code>sign_up(email, password, first_name, last_name, date_of_birth)</code></li>
+        <ul>
+          <li>POST api/v1/signup</li>
+          <li>Returns a user_id</li>
+          <li>Creates a user in DB</li>
+        </ul>
+        <li><code>log_in(email, password)</code></li>
+        <ul>
+          <li>GET api/v1/login</li>
+          <li>Authenticate a user in DB</li>
+        </ul>
+      </ul>
+      <li>Post</li>
+      <ul>
+        <li><code>upload_post(user_id, post_text, image_path, video_path)</code></li>
+        <ul>
+          <li>POST api/v1/post</li>
+        </ul>
+        <li><code>update_post(user_id, post_id, post_text, image_path, video_path)</code></li>
+        <ul>
+          <li>PUT api/v1/post</li>
+        </ul>
+        <li><code>delete_post(user_id, post_id)</code></li>
+        <ul>
+          <li>DELETE api/v1/post</li>
+        </ul>
+        <li><code>like_or_dislike_post(user_id, post_id, like)</code></li>
+        <ul>
+          <li>POST api/v1/like</li>
+        </ul>
+        <li><code>create_comment(user_id, post_id, comment_text)</code></li>
+        <ul>
+          <li>POST api/v1/comment</li>
+        </ul>
+        <li><code>update_comment(user_id, post_id, comment_id, comment_text)</code></li>
+        <ul>
+          <li>PUT api/v1/comment</li>
+        </ul>
+        <li><code>delete_comment(user_id, post_id, comment_id)</code></li>
+        <ul>
+          <li>DELETE api/v1/comment</li>
+        </ul>
+        <li><code>view_feed(user_id)</code></li>
+        <ul>
+          <li>GET api/v1/feed</li>
+        </ul>
+      </ul>
+      <li>Notification</li>
+      <ul>
+        <li><code>send_notification(user_id, subject, content)</code></li>
+        <ul>
+          <li>POST api/v1/notification</li>
+          <li><code>user_id</code> - recepient of notification</li>
+          <li><code>subject</code></li>
+          <li><code>content</code></li>
+        </ul>
+      </ul>
+      <li>Messaging</li>
+      <ul>
+        <li><code>send_msessage(sender_id, reciever_id, text)</code></li>
+        <ul>
+          <li>POST api/v1/message</li>
+        </ul>
+        <li><code>get_message(user_id)</code></li>
+        <ul>
+          <li>GET api/v1/message</li>
+        </ul>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Database</h3>
+    <ul>
+      <li>Relational DB suffice for user and post metadata</li>
+      <li>For storing texts, key-value store can be used</li>
+      <li>User</li>
+      <ul>
+        <li>user_id (int, pk)</li>
+        <li>email (varchar)</li>
+        <li>first_name (varchar)</li>
+        <li>first_name (varchar)</li>
+        <li>timestamp (datetime)</li>
+      </ul>
+      <li>Post</li>
+      <ul>
+        <li>post_id (int, pk)</li>
+        <li>image_path (varchar)</li>
+        <li>video_path (varchar)</li>
+        <li>timestamp(datetime)</li>
+        <li>text (varchar)</li>
+      </ul>
+      <li>User_post_interaction</li>
+      <ul>
+        <li>user_id (int)</li>
+        <li>post_id (int)</li>
+        <li>interaction_type (varchar) - like, share, comment, hide, report</li>
+        <li>timestamp (datetime)</li>
+      </ul>
+      <li>Comment</li>
+      <ul>
+        <li>user_id (int)</li>
+        <li>post_id (int)</li>
+        <li>comment (varchar)</li>
+        <li>timestamp (datetime)</li>
+      </ul>
+      <li>Following</li>
+      <ul>
+        <li>user_id_1 (int)</li>
+        <li>user_id_2 (int)</li>
+      </ul>
+      <li>Notification</li>
+      <ul>
+        <li>notification_id (int)</li>
+        <li>user_id (int) - receipient of notification</li>
+        <li>timestamp (datetime)</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Evaluation</h3>
+    <ul>
+      <li>Availability</li>
+      <ul>
+        <li>Replication</li>
+        <ul>
+          <li>Replicate each web server, cache, DB</li>
+          <ul>
+            <li>DBs are mostly write-heavy, go for leaderless replication</li>
+          </ul>
+          <li>Replicate entire system to different zone or geographical region</li>
+          <ul>
+            <li>Consider the cost of replicating compute components</li>
+            <li>Data replication could be cheaper than compute</li>
+          </ul>
+        </ul>
+        <li>Fail over</li>
+        <ul>
+          <li>Option 1. active-active</li>
+          <ul>
+            <li>Both actives manage traffic, spreading load between them</li>
+          </ul>
+          <li>Option 2. active-passive</li>
+          <ul>
+            <li>Active web servers, cache send heartbearts to passives</li>
+            <li>If heartbeats stop, passives take over actives' IP and resume service</li>
+          </ul>
+        </ul>
+      </ul>
+      <li>Reliability</li>
+      <ul>
+        <li>Data loss</li>
+        <ul>
+          <li>Periodically take snapshot of data and store snapshots in multi zone or region to prevent data loss</li>
+          <li>Each snapshot can store only the incremental difference from previous one</li>
+        </ul>
+        <li>Handling failure</li>
+        <ul>
+          <li>Implementing retry mechanism</li>
+          <li>Load balancer - active-passive, when heartbeat fails, the secondary takes the IP</li>
+          <li>Object storage - replicated to multiple regions. Data can be fetched from different region if one region fails</li>
+          <li>Servers (stateless like API servers) - traffic is redirected to other API servers via load balancer</li>
+          <li>Servers (stateful like notification servers) - all clients reconnect to different server (This can be slow)</li>
+          <li>Cache - other cache servers serve the cache</li>
+          <li>Relational DB</li>
+          <ul>
+            <li>Master - promote one slave to master</li>
+            <li>Slave - use another slave for read operation</li>
+          </ul>
+          <li>Queue - other queue can be subscribed by consumers</li>
+        </ul>
+      </ul>
+      <li>Scalability</li>
+      <ul>
+        <li>Horizontal scaling</li>
+        <ul>
+          <li>All compute components like web servers, cache</li>
+        </ul>
+        <li>Data partitioning</li>
+        <ul>
+          <li>Horizontal partitioning or sharding since the system is less concerned about atomic operation</li>
+          <li>Using ID generator, create ID for each data point</li>
+          <li>Using that ID, use consistent hashing to spread notification different data nodes</li>
+        </ul>
+      </ul>
+      <li>Performance</li>
+      <ul>
+        <li>Peak load</li>
+        <ul>
+          <li>Load balancer should distribute load amongst horizontally scaled servers and caches</li>
+          <li>DB is paritioned to scale to handle the load</li>
+          <li>Horizontal scaling of compute conponents</li>
+        </ul>
+        <li>Cache</li>
+      </ul>
+      <li>Consistency</li>
+      <ul>
+        <li>Inconsistency can happen when write is not synced to all data nodes</li>
+        <li>Not seeing latest posts is okay, so eventual consistency is okay</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference:
+  </div>
+</div>
+
+<div class="card mb-4" id="instagram-4">
+  <div class="card-body">
+    <h2 class="card-title">Follow up</h2>
+    <ul>
+      <li>Messaging</li>
+      <ul>
+        <li>Explain how to enable end-to-end encryption</li>
+        <li>Explain if caching messages on client-side can help</li>
+        <li>Explain how to optimize the load time of messages</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference:
+  </div>
+</div>
+<!-- Instagram END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+</html>
