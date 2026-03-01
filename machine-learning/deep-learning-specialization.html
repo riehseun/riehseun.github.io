@@ -45,29 +45,6 @@
     <h2 class="card-title">Deep Learning Specialization</h2>
     <!-- <ul class="list-unstyled mb-0"> -->
     <ul>
-      <li>Binary Classification</li>
-      <li>Decision Tree</li>
-      <li>Random Forest</li>
-      <li>Gradient Boosting</li>
-      <li>XGBoost</li>
-      <li>Activation</li>
-      <li>Initialization</li>
-      <li>Learning Rate</li>
-      <li>Normalization</li>
-      <li>Optimization</li>
-      <li>Normalization</li>
-      <li>Regularization</li>
-      <li>Neural Network</li>
-      <li>Multi-head Neural Network</li>
-      <li>Word Embedding</li>
-      <li>Transformer</li>
-      <li>BERT</li>
-      <li>Machine Translation</li>
-      <li>RoBERTa</li>
-      <li>CLIP</li>
-      <li>GPT</li>
-    </ul>
-    <ul>
       <li><a href="#deep-learning-specialization-">Neural Networks and Deep Learning</a></li>
       <li><a href="#deep-learning-specialization-">Improving Deep Neural Networks: Hyperparameter Tuning, Regularization, and Optimization</a></li>
       <li><a href="#deep-learning-specialization-">Structuring Machine Learning Projects</a></li>
@@ -80,50 +57,7 @@
 <div class="card mb-4" id="deep-learning-specialization-">
   <div class="card-body">
     <h2 class="card-title">Neural Networks and Deep Learning</h2>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="">Deep Learning Specialization</a>
-  </div>
-</div>
 
-<div class="card mb-4" id="deep-learning-specialization-">
-  <div class="card-body">
-    <h2 class="card-title">Improving Deep Neural Networks: Hyperparameter Tuning, Regularization, and Optimization</h2>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="">Deep Learning Specialization</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="deep-learning-specialization-">
-  <div class="card-body">
-    <h2 class="card-title">Structuring Machine Learning Projects</h2>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="">Deep Learning Specialization</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="deep-learning-specialization-">
-  <div class="card-body">
-    <h2 class="card-title">Convolutional Neural Betwork</h2>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="">Deep Learning Specialization</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="deep-learning-specialization-">
-  <div class="card-body">
-    <h2 class="card-title">Sequence Model</h2>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="">Deep Learning Specialization</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="deep-learning-specialization-">
-  <div class="card-body">
     <h2 class="card-title">Binary Classification</h2>
     <ul>
       <li>\( m \) training examples</li>
@@ -335,1503 +269,7 @@ d = model(train_set_x, train_set_y, test_set_x, test_set_y, num_iterations = 200
     s = 1 / (1 + np.exp(-z))
 
     return s</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.coursera.org/specializations/deep-learning">Deep Learning Specialization</a>
-  </div>
-</div>
 
-<div class="card mb-4" id="deep-learning-specialization-">
-  <div class="card-body">
-    <h2 class="card-title">Decision Tree</h2>
-    <ul>
-      <li>Most commonly used XGBoost base learner</li>
-      <li>Splits data by asking questions about columns</li>
-      <li>Training set can technically have 100% accuracy but such will have overfitting problem</li>
-    </ul>
-
-    <h3 class="card-title">Gini index</h3>
-    <ul>
-      <li>Represents error</li>
-      <li>\( \text{gini} = 1 - \displaystyle\sum_{i=1}^{c} (p_{i})^{2} \)</li>
-      <ul>
-        <li>\( p_{i} \) is probability that split results in the correct value</li>
-        <li>\( c \) is total number of classes</li>
-      </ul>
-      <li>1 means all errors</li>
-      <li>0 means no errors</li>
-      <li>0.5 means prediction is no better than random guessing</li>
-    </ul>
-
-<pre><code class="python">import pandas as pd
-import numpy as np
-import warnings
-warnings.filterwarnings('ignore')
-from sklearn.model_selection import train_test_split
-
-df_census = pd.read_csv('census_cleaned.csv')
-X = df_census.iloc[:,:-1]
-y = df_census.iloc[:,-1]
-X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=2)</code></pre>
-
-<pre><code class="python">from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import accuracy_score
-
-# Initialize classification model
-clf = DecisionTreeClassifier(random_state=2)
-
-# Fit model on training data
-clf.fit(X_train, y_train)
-
-# Make predictions for test data
-y_pred = clf.predict(X_test)
-
-# Calculate accuracy
-accuracy_score(y_pred, y_test)</code></pre>
-
-    <h3 class="card-title">Hyperparameters</h3>
-    <ul>
-      <li>GridSearchCV</li>
-      <ul>
-        <li>Search hyperparameters using cross-validation</li>
-        <li><pre><code class="python">from sklearn.model_selection import GridSearchCV
-
-def grid_search(params, reg=DecisionTreeRegressor(random_state=2)):
-
-    # Instantiate GridSearchCV as grid_reg
-    grid_reg = GridSearchCV(reg, params, scoring='neg_mean_squared_error', cv=5, n_jobs=-1)
-
-    # Fit grid_reg on X_train and y_train
-    grid_reg.fit(X_train, y_train)
-
-    # Extract best params
-    best_params = grid_reg.best_params_
-
-    # Print best params
-    print("Best params:", best_params)
-
-    # Compute best score
-    best_score = np.sqrt(-grid_reg.best_score_)
-
-    # Print best score
-    print("Training score: {:.3f}".format(best_score))
-
-    # Predict test set labels
-    y_pred = grid_reg.predict(X_test)
-
-    # Compute rmse_test
-    rmse_test = mean_squared_error(y_test, y_pred)**0.5
-
-    # Print rmse_test
-    print('Test score: {:.3f}'.format(rmse_test))</code></pre></li>
-      </ul>
-      <li><code>max_depth</code></li>
-      <ul>
-        <li>Depth of tree, determined by the number of splits</li>
-        <li><pre><code class="python">grid_search(params={'max_depth':[None,2,3,4,6,8,10,20]})
-# Best params: {'max_depth': 6}
-# Training score: 951.398
-# Test score: 864.670</code></pre></li>
-      </ul>
-      <li><code>min_samples_leaf</code></li>
-      <ul>
-        <li>Minimum number of samples that a leaf must have</li>
-        <li><pre><code class="python">grid_search(params={'min_samples_leaf':[1,2,4,6,8,10,20,30]})
-# Best params: {'min_samples_leaf': 8}
-# Training score: 896.083
-# Test score: 855.620</code></pre></li>
-        <li>Combine <code>max_depth</code> and <code>min_samples_leaf</code></li>
-        <li><pre><code class="python">grid_search(params={'max_depth':[None,2,3,4,6,8,10,20],'min_samples_leaf':[1,2,4,6,8,10,20,30]})
-# Best params: {'max_depth': 6, 'min_samples_leaf': 2}
-# Training score: 870.396
-# Test score: 913.000</code></pre></li>
-        <li>Test score has increased. Try limiting <code>max_depth</code> to values greater than 3</li>
-        <li><pre><code class="python">grid_search(params={'max_depth':[None,2,3,4,6,8,10,20],'min_samples_leaf':[1,2,4,6,8,10,20,30]})
-# Best params: {'max_depth': 9, 'min_samples_leaf': 7}
-# Training score: 888.905
-# Test score: 878.538</code></pre></li>
-      </ul>
-      <li><code>max_leaf_nodes</code></li>
-      <ul>
-        <li>Maximum total number of leaves</li>
-      </ul>
-      <li><code>max_features</code></li>
-      <ul>
-        <li>Instead of considering every possible feature for a split, chooese from a set of features each round</li>
-        <li><code>auto</code> - no limitation (default option)</li>
-        <li><code>sqrt</code> - square root of total number of features</li>
-        <li><code>log2</code> - for example, 32 columns resolve to 5 (2^5 = 32)</li>
-      </ul>
-      <li><code>min_samples_split</code></li>
-      <ul>
-        <li>Number of samples need to be present before a split can be made</li>
-        <li>2 by default</li>
-      </ul>
-      <li><code>splitter</code></li>
-      <ul>
-        <li>How to select feature to split each branch</li>
-        <li><code>best</code> - selects feature that result in greatest gain of information</li>
-        <li><code>random</code> - recommended choice for preventing overfitting</li>
-      </ul>
-      <li><code>criterion</code></li>
-      <ul>
-        <li>For each possible split, calculates a number for a possible split and compares it to other options</li>
-        <li>Split with the best score wins</li>
-        <li>Regression</li>
-        <ul>
-          <li><code>mse</code> - default option</li>
-          <li><code>friedman_mse</code></li>
-          <li><code>mae</code></li>
-        </ul>
-        <li>Classification</li>
-        <ul>
-          <li><code>gini</code></li>
-          <li><code>entropy</code></li>
-        </ul>
-      </ul>
-      <li><code>min_impurity_decrease</code></li>
-      <ul>
-        <li>Split is made when impurity is >= min_impurity_decreas</li>
-        <li>Tree with 100% accuracy has impurity 0.0. Tree with 80% accuracy has impurity 0.2</li>
-        <li>Throughout tree building, impurity decreases</li>
-        <li>Split that results in greatest decrease of impurity is chosen for each node</li>
-        <li>0.0 by default</li>
-      </ul>
-      <li><code>min_weight_fraction_leaf</code></li>
-      <li><code>ccp_alpha</code></li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: Hands-On Gradient Boosting with XGBoost and scikit-learn, Corey Wade
-  </div>
-</div>
-
-<div class="card mb-4" id="deep-learning-specialization-">
-  <div class="card-body">
-    <h2 class="card-title">Decision Tree - Heart Disease</h2>
-
-<pre><code class="python">df_heart = pd.read_csv('heart_disease.csv')
-X = df_heart.iloc[:,:-1]
-y = df_heart.iloc[:,-1]
-X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=2)</code></pre>
-
-    <h3 class="card-title">Baseline model</h3>
-
-<pre><code class="python"># Initialize Decision Tree Classifier
-model = DecisionTreeClassifier(random_state=2)
-
-# Obtain scores of cross-validation
-scores = cross_val_score(model, X, y, cv=5)
-
-# Display accuracy
-print('Accuracy:', np.round(scores, 2))
-
-# Display mean accuracy
-print('Accuracy mean: %0.2f' % (scores.mean()))
-
-# Accuracy: [0.74 0.85 0.77 0.73 0.7 ]
-# Accuracy mean: 0.76</code></pre>
-
-    <h3 class="card-title">RandomizedSearchCV</h3>
-    <ul>
-      <li>Instead of trying all hyperparameters (GridSearchCV), try random number of combinations</li>
-    </ul>
-
-<pre><code class="python">from sklearn.model_selection import RandomizedSearchCV
-
-def randomized_search_clf(params, runs=20, clf=DecisionTreeClassifier(random_state=2)):
-
-    # Instantiate GridSearchCV as grid_reg
-    rand_clf = RandomizedSearchCV(clf, params, n_iter=runs,
-                                  cv=5, n_jobs=-1, random_state=2)
-
-    # Fit grid_reg on X_train and y_train
-    rand_clf.fit(X_train, y_train)
-
-    # Extract best estimator
-    best_model = rand_clf.best_estimator_
-
-    # Extract best score
-    best_score = rand_clf.best_score_
-
-    # Print best score
-    print("Training score: {:.3f}".format(best_score))
-
-    # Predict test set labels
-    y_pred = best_model.predict(X_test)
-
-    # Compute accuracy
-    accuracy = accuracy_score(y_test, y_pred)
-
-    # Print accuracy
-    print('Test score: {:.3f}'.format(accuracy))
-
-    # Return best model
-    return best_model</code></pre>
-
-    <h3 class="card-title">Initial search</h3>
-
-<pre><code class="python">randomized_search_clf(params={'criterion':['entropy', 'gini'],
-    'splitter':['random', 'best'],
-    'min_weight_fraction_leaf':[0.0, 0.0025, 0.005, 0.0075, 0.01],
-    'min_samples_split':[2, 3, 4, 5, 6, 8, 10],
-    'min_samples_leaf':[1, 0.01, 0.02, 0.03, 0.04],
-    'min_impurity_decrease':[0.0, 0.0005, 0.005, 0.05, 0.10, 0.15, 0.2],
-    'max_leaf_nodes':[10, 15, 20, 25, 30, 35, 40, 45, 50, None],
-    'max_features':['auto', 0.95, 0.90, 0.85, 0.80, 0.75, 0.70],
-    'max_depth':[None, 2,4,6,8],
-    'min_weight_fraction_leaf':[0.0, 0.0025, 0.005, 0.0075, 0.01, 0.05]
-})
-
-# Training score: 0.798
-# Test score: 0.855
-# DecisionTreeClassifier(criterion='entropy', max_depth=8, max_features=0.8,
-#                        max_leaf_nodes=45, min_samples_leaf=0.04,
-#                        min_samples_split=10, min_weight_fraction_leaf=0.05,
-#                        random_state=2)</code></pre>
-
-    <h3 class="card-title">Narrowed search</h3>
-
-<pre><code class="python">randomized_search_clf(params={'max_depth':[None, 6, 7],
-    'max_features':['auto', 0.78],
-    'max_leaf_nodes':[45, None],
-    'min_samples_leaf':[1, 0.035, 0.04, 0.045, 0.05],
-    'min_samples_split':[2, 9, 10],
-    'min_weight_fraction_leaf': [0.0, 0.05, 0.06, 0.07],
-},
-runs=100)
-
-# Training score: 0.802
-# Test score: 0.868
-# DecisionTreeClassifier(max_depth=7, max_features=0.78, max_leaf_nodes=45,
-#                        min_samples_leaf=0.045, min_samples_split=9,
-#                        min_weight_fraction_leaf=0.06, random_state=2)</code></pre>
-
-    <h3 class="card-title">Check against baseline model</h3>
-
-<pre><code class="python"># Initialize Decision Tree Classifier
-model = DecisionTreeClassifier(class_weight=None, criterion='gini', max_depth=7,
-    max_features=0.78, max_leaf_nodes=45,
-    min_impurity_decrease=0.0, min_impurity_split=None,
-    min_samples_leaf=0.045, min_samples_split=9,
-    min_weight_fraction_leaf=0.06, presort=False, random_state=2,
-    splitter='best')
-
-# Obtain scores of cross-validation
-scores = cross_val_score(model, X, y, cv=5)
-
-# Display accuracy
-print('Accuracy:', np.round(scores, 2))
-
-# Display mean accuracy
-print('Accuracy mean: %0.2f' % (scores.mean()))
-
-# Accuracy: [0.82 0.9  0.8  0.8  0.78]
-# Accuracy mean: 0.82</code></pre>
-
-    <h3 class="card-title">Feature importance</h3>
-
-<pre><code class="python">import operator
-
-best_clf = DecisionTreeClassifier(class_weight=None, criterion='gini', max_depth=7,
-    max_features=0.78, max_leaf_nodes=45,
-    min_impurity_decrease=0.0, min_impurity_split=None,
-    min_samples_leaf=0.045, min_samples_split=9,
-    min_weight_fraction_leaf=0.06, presort=False,
-    random_state=2, splitter='best')
-best_clf.fit(X, y)
-
-# Zip columns and feature_importances_ into dict
-feature_dict = dict(zip(X.columns, best_clf.feature_importances_))
-
-# Sort dict by values (as list of tuples)
-sorted(feature_dict.items(), key=operator.itemgetter(1), reverse=True)[0:3]
-
-# [('cp', 0.4840958610240171),
-# ('thal', 0.20494445570568706),
-# ('ca', 0.18069065321397942)]</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: Hands-On Gradient Boosting with XGBoost and scikit-learn, Corey Wade
-  </div>
-</div>
-
-<div class="card mb-4" id="deep-learning-specialization-">
-  <div class="card-body">
-    <h2 class="card-title">Random Forest</h2>
-    <ul>
-      <li>Bagging - aggregate predictions of bootstrapped decision trees</li>
-      <li>Limitation - if all individual trees make the same mistake, random forest makes the mistake</li>
-    </ul>
-
-<pre><code class="python">import pandas as pd
-import numpy as np
-import warnings
-warnings.filterwarnings('ignore')
-
-df_census = pd.read_csv('census_cleaned.csv')
-X_census = df_census.iloc[:,:-1]
-y_census = df_census.iloc[:,-1]</code></pre>
-
-<pre><code class="python">from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import cross_val_score
-
-# Initialize the classifier
-rf = RandomForestClassifier(n_estimators=10, random_state=2, n_jobs=-1)
-
-# Obtain scores of cross-validation
-scores = cross_val_score(rf, X_census, y_census, cv=5)</code></pre>
-
-    <h3 class="card-title">Hyperparameters</h3>
-    <ul>
-      <li>Decision tree parameters are not as significant because random forest cut down on variance by design</li>
-      <li><code>oob_score</code></li>
-      <ul>
-        <li>Use samples that are not chosen during bagging as test set</li>
-        <li>True by default</li>
-        <li><pre><code class="python">rf = RandomForestClassifier(oob_score=True, n_estimators=10, random_state=2, n_jobs=-1)
-rf.fit(X_census, y_census)
-rf.oob_score_  # Ouputs test score</code></pre></li>
-      </ul>
-      <li><code>n_estimators</code></li>
-      <ul>
-        <li>Number of trees</li>
-        <li>100 by default</li>
-      </ul>
-      <li><code>warm_start</code></li>
-      <ul>
-        <li>Adding more trees does not require starting from scratch</li>
-        <li>Could be used to plot various score with a range of <code>n_estimators</code></li>
-        <li><pre><code class="python">import matplotlib.pyplot as plt
-import seaborn as sns
-
-sns.set()
-oob_scores = []
-
-rf = RandomForestClassifier(n_estimators=50, warm_start=True, oob_score=True, n_jobs=-1, random_state=2)
-rf.fit(X_census, y_census)
-oob_scores.append(rf.oob_score_)
-est = 50
-estimators=[est]
-
-for i in range(9):
-    est += 50
-    estimators.append(est)
-    rf.set_params(n_estimators=est)
-    rf.fit(X_census, y_census)
-    oob_scores.append(rf.oob_score_)
-
-plt.figure(figsize=(15,7))
-plt.plot(estimators, oob_scores)
-plt.xlabel('Number of Trees')
-plt.ylabel('oob_score_')
-plt.title('Random Forest Warm Start', fontsize=15)
-plt.savefig('Random_Forest_Warm_Start', dpi=325)
-plt.show()</code></pre></li>
-      </ul>
-      <li><code>bootstrap</code></li>
-      <li><code>verbose</code></li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: Hands-On Gradient Boosting with XGBoost and scikit-learn, Corey Wade
-  </div>
-</div>
-
-<div class="card mb-4" id="deep-learning-specialization-">
-  <div class="card-body">
-    <h2 class="card-title">Random Forest - Bike Rental</h2>
-
-<pre><code class="python">from sklearn.model_selection import train_test_split
-
-X_train, X_test, y_train, y_test = train_test_split(X_bikes, y_bikes, random_state=2)</code></pre>
-
-<pre><code class="python"># Initalize Random Forest as rf with 50 estimators, warm_start=True, and oob_score=True
-rf = RandomForestRegressor(n_estimators=50, warm_start=True, n_jobs=-1, random_state=2)
-
-# Obtain scores of cross-validation using num_splits and mean squared error
-scores = cross_val_score(rf, X_bikes, y_bikes, scoring='neg_mean_squared_error', cv=10)
-
-# Take square root of the scores
-rmse = np.sqrt(-scores)
-
-# Display accuracy
-print('RMSE:', np.round(rmse, 3))
-
-# Display mean score
-print('RMSE mean: %0.3f' % (rmse.mean()))
-
-# RMSE: [ 836.482  541.898  533.086  812.782  894.877  881.117  794.103  828.968  772.517  2128.148]
-# RMSE mean: 902.398</code></pre>
-
-    <h3 class="card-title">RandomizedSearchCV</h3>
-
-<pre><code class="python">from sklearn.model_selection import RandomizedSearchCV
-
-def randomized_search_reg(params, runs=16, reg=RandomForestRegressor(random_state=2, n_jobs=-1)):
-
-    # Instantiate RandomizedSearchCV as grid_reg
-    rand_reg = RandomizedSearchCV(reg, params, n_iter=runs, scoring='neg_mean_squared_error',
-                                  cv=10, n_jobs=-1, random_state=2)
-
-    # Fit grid_reg on X_train and y_train
-    rand_reg.fit(X_train, y_train)
-
-    # Extract best estimator
-    best_model = rand_reg.best_estimator_
-
-    # Extract best params
-    best_params = rand_reg.best_params_
-
-    # Print best params
-    print("Best params:", best_params)
-
-    # Compute best score
-    best_score = np.sqrt(-rand_reg.best_score_)
-
-    # Print best score
-    print("Training score: {:.3f}".format(best_score))
-
-    # Predict test set labels
-    y_pred = best_model.predict(X_test)
-
-    # Import mean_squared_error from sklearn.metrics as MSE
-    from sklearn.metrics import mean_squared_error as MSE
-
-    # Compute rmse_test
-    rmse_test = MSE(y_test, y_pred)**0.5
-
-    # Print rmse_test
-    print('Test set score: {:.3f}'.format(rmse_test))</code></pre>
-
-<pre><code class="python"></code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: Hands-On Gradient Boosting with XGBoost and scikit-learn, Corey Wade
-  </div>
-</div>
-
-<div class="card mb-4" id="deep-learning-specialization-">
-  <div class="card-body">
-    <h2 class="card-title">Gradient Boosting</h2>
-    <ul>
-      <li>AdaBoost</li>
-      <ul>
-        <li>Each new tree adjusts its weights based on errors from the previous trees</li>
-      </ul>
-      <li>Gradient boosting</li>
-      <ul>
-        <li>Fits each new tree entirely based on errors from the previous trees</li>
-        <li>Computes the residuals of each tree's predictions and sums all the residuals to score the model</li>
-      </ul>
-    </ul>
-
-<pre><code class="python">import pandas as pd
-import numpy as np
-import warnings
-warnings.filterwarnings('ignore')
-from sklearn.model_selection import train_test_split
-
-df_bikes = pd.read_csv('bike_rentals_cleaned.csv')
-X_bikes = df_bikes.iloc[:,:-1]
-y_bikes = df_bikes.iloc[:,-1]
-X_train, X_test, y_train, y_test = train_test_split(X_bikes, y_bikes, random_state=2)</code></pre>
-
-    <h3 class="card-title">Hyperparameters</h3>
-    <ul>
-      <li><code>learning_rate</code></li>
-      <ul>
-        <li><pre><code class="python">n_estimators = [30, 300, 3000]
-learning_rates = [0.001, 0.01, 0.05, 0.1, 0.15, 0.2, 0.3, 0.5, 1.0]
-for i in n_estimators:
-    for j in learning_rates:
-        gbr = GradientBoostingRegressor(max_depth=2, n_estimators=i, random_state=2, learning_rate=i)
-        gbr.fit(X_train, Y_train)
-        y_pred = gbr.predict(X_test)
-        rmse = MSE(y_test, y_pred) ** 0.5</code></pre></li>
-      </ul>
-      <li><code>max_depth</code></li>
-      <li><code>subsample</code></li>
-      <ul>
-        <li>Each tree only select certain percentages of samples</li>
-        <li>When subsample is not 1.0, it is considered as stochastic gradient descent</li>
-      </ul>
-      <li>RandomizedSearchCV</li>
-      <ul>
-        <li><pre><code class="python">from sklearn.model_selection import RandomizedSearchCV
-params = {'subsample': [0.65, 0.7, 0.75], 'n_estimators': [300, 500, 1000], 'learning_rate': [0.05, 0.075, 0.1]}
-gbr = GradientBoostingRegressor(max_depth=3, random_state=2)
-rand_reg = RandomizedSearchCV(gbr, params, n_iter=10, scoring='neg_mean_squared_error', cv=5, n_jobs=1, random_state=2)
-rand_reg.fit(X_train, Y_train)
-best_model = rand_reg.best_estimator_
-best_params = rand_reg.best_params_
-best_score = np.sqrt(-rand_reg.best_score_)
-y_pred = best_model.predict(X_test)
-rmse_test = MSE(y_test, y_pred) ** 0.5</code></pre></li>
-      </ul>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: Hands-On Gradient Boosting with XGBoost and scikit-learn, Corey Wade
-  </div>
-</div>
-
-<div class="card mb-4" id="deep-learning-specialization-">
-  <div class="card-body">
-    <h2 class="card-title">XGBoost</h2>
-    <ul>
-      <li>When given a missing data point, XGBoost scores different split options and chooses the one with the best result</li>
-      <li>Includes regularization as part of learning objective (As opposed to gradient boosting and random forest)</li>
-    </ul>
-
-    <h3 class="card-title">XGBoost features</h3>
-    <ul>
-      <li>Approximate split-finding algorithm</li>
-      <ul>
-        <li></li>
-      </ul>
-      <li>Sparsity aware split-finding</li>
-      <ul>
-        <li></li>
-      </ul>
-      <li>Parallel computing</li>
-      <ul>
-        <li></li>
-      </ul>
-      <li>Cache-aware access</li>
-      <ul>
-        <li></li>
-      </ul>
-      <li>Block compression and sharding</li>
-      <ul>
-        <li></li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Cost function</h3>
-    <ul>
-      <li>\( J = \displaystyle\sum_{i=1}^{n} (y_{i} - \hat{y}_{i})^{2} + \text{regularization} \)</li>
-      <li>Prediction of ith tree = sum of the predictions of all previous trees + prediction for the new tree</li>
-      <ul>
-        <li>\( \hat{y}_{i}^{t} = \hat{y}_{i}^{t-1} + f_{t}(x_{i}) \)</li>
-      </ul>
-      <li>\( J = \displaystyle\sum_{i=1}^{n} \left(y_{i} - (\hat{y}_{i}^{t-1} + f_{t}(x_{i}))\right)^{2} + \text{regularization} \)</li>
-      <li>\( J = \displaystyle\sum_{i=1}^{n} \left(y_{i} - \hat{y}_{i}^{t-1} - f_{t}(x_{i})\right)^{2} + \text{regularization} \)</li>
-      <li>\( J = \displaystyle\sum_{i=1}^{n} (y_{i} - \hat{y}_{i}^{t-1})^{2} -2(y_{i}-\hat{y}_{i}^{t-1})f_{t}(x_{i}) + f_{t}(x_{i})^{2} + \text{regularization} \)</li>
-      <li>Regularization</li>
-      <ul>
-        <li>\( \gamma T + \dfrac{1}{2} \lambda \displaystyle\sum_{i=1}^{T} w_{j}^{2} \)</li>
-        <ul>
-          <li>\( w \) - vector space of leaves</li>
-        </ul>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Hyperparameter</h3>
-    <ul>
-      <li><code>gamma</code></li>
-      <ul>
-        <li>Threshold that nodes must surpass before making further splits</li>
-        <li>Increasing gamma results in more conservative model</li>
-        <li>0 by default</li>
-      </ul>
-      <li><code>min_child_weight</code></li>
-      <ul>
-        <li>Minimum sum of weights required for a node to split into a child</li>
-        <li>Reduces overfitting</li>
-      </ul>
-      <li><code>subsample</code></li>
-      <ul>
-        <li>Limits the percentage of training instances (rows) for each boosting round</li>
-      </ul>
-      <li><code>colsample_bytree</code></li>
-      <ul>
-        <li>Randomly selects particular columns according to given percentage</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">gblinear</h3>
-    <ul>
-      <li>XGBoost uses gbtree as base leanrer, which is optimal for non-linear data</li>
-      <li>gblinear should be used as based learner for linear data</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: Hands-On Gradient Boosting with XGBoost and scikit-learn, Corey Wade
-  </div>
-</div>
-
-<div class="card mb-4" id="deep-learning-specialization-">
-  <div class="card-body">
-    <h2 class="card-title">Activation</h2>
-    <ul>
-      <li>Non-linear functions that determine outputs of neurons</li>
-      <li>If activation is linear, \( \hat{y} \) is just linear function of \( x \)</li>
-      <ul>
-        <li>Then, this is just linear regression</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Sigmoid</h3>
-    <ul>
-      <li>Used for binary classification</li>
-      <li>\( \sigma(z) = \dfrac{1}{1+e^{-z}} \)</li>
-      <ul>
-        <li>If \( z \) is large positive, \( \sigma(z) \approx 1 \)</li>
-        <li>If \( z \) is large negative, \( \sigma(z) \approx 0 \)</li>
-      </ul>
-      <li>Normalizes the output between 0 and 1</li>
-      <li>Function flattens at the edges where gradients are close to 0</li>
-      <ul>
-        <li>Lead to vanishing gradient</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Tanh</h3>
-    <ul>
-      <li>\( \text{tanh}(z) \)</li>
-      <li>Similar to sigmoid but ranges between -1 and 1</li>
-    </ul>
-
-    <h3 class="card-title">ReLU</h3>
-    <ul>
-      <li>\( \text{max}(0,z) \)</li>
-      <li>Computationally efficient</li>
-      <li>For all negative inputs, neuron will not activate, and the weights will not update</li>
-      <li>Addresses problem of vanishing gradient</li>
-    </ul>
-
-    <h3 class="card-title">Leaky ReLU</h3>
-    <ul>
-      <li>\( \text{max}(0.01z,z) \)</li>
-      <li>Multiply all negative inputs with a small number</li>
-    </ul>
-
-    <h3 class="card-title">Softmax</h3>
-    <ul>
-      <li>A different type of activation used for multi-class classification</li>
-      <li>Assigns a probability to each class with all of them sum to 1</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.educative.io/path/become-a-deep-learning-professional">Become a Deep Learning Professional</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="deep-learning-specialization-">
-  <div class="card-body">
-    <h2 class="card-title">Initialization</h2>
-
-    <h3 class="card-title">Zero initialization</h3>
-    <ul>
-      <li>If all weights are initalized to 0, all hidden units compute the same function due to symmetry</li>
-      <ul>
-        <li>Every neuron in each layer learns the same function</li>
-        <li>Effectively the same thing as setting the number of neurons in each layer to 1</li>
-        <li>As a result, network is no better than logistic regression</li>
-        <li>Bias vectors can be initialized to zero</li>
-      </ul>
-      <li>The weight matrices - \( \textbf{W}^{[1]}, \textbf{W}^{[2]}, \textbf{W}^{[3]} \dots \textbf{W}^{[L-1]}, \textbf{W}^{[L]} \)</li>
-      <li>The bias vectors - \( \textbf{b}^{[1]}, \textbf{b}^{[2]}, \textbf{b}^{[3]} \dots \textbf{b}^{[L-1]}, \textbf{b}^{[L]} \)</li>
-    </ul>
-
-<pre><code class="python">def initialize_parameters_zeros(layers_dims):
-
-    parameters = {}
-    L = len(layers_dims)
-
-    for l in range(1, L):
-        parameters['W' + str(l)] = np.zeros((layers_dims[l], layers_dims[l-1]))
-        parameters['b' + str(l)] = np.zeros((layers_dims[l], 1))
-
-    return parameters</code></pre>
-
-    <h3 class="card-title">Random initialization</h3>
-    <ul>
-      <li>Breaks symmetry by randomly initalizing weights</li>
-      <li>Poor initialization, for exampling randomly initializing weights to large numbers, leads to vanishing/exploding gradient</li>
-    </ul>
-
-<pre><code class="python">def initialize_parameters_random(layers_dims):
-
-    np.random.seed(3)
-    parameters = {}
-    L = len(layers_dims)
-
-    for l in range(1, L):
-        parameters['W' + str(l)] = np.random.randn(layers_dims[l], layers_dims[l-1]) * 10
-        parameters['b' + str(l)] = np.zeros((layers_dims[l], 1))
-
-    return parameters</code></pre>
-
-    <h3 class="card-title">He initialization</h3>
-    <ul>
-      <li>Xavier initialization</li>
-      <ul>
-        <li>\( W \sim U\left[-\dfrac{\sqrt{6}}{\sqrt{n_{j}+n_{j+1}}}, \dfrac{\sqrt{6}}{\sqrt{n_{j}+n_{j+1}}}\right] \)</li>
-        <li>Assume activation function is linear</li>
-        <li>All layers have equal variance</li>
-      </ul>
-      <li>He  initialization</li>
-      <ul>
-        <li>\( W \sim N\left(0, \dfrac{2}{n^{l}}\right) \)</li>
-        <li>Works well with ReLU activation</li>
-        <li>Partially overcomes vanishing/exploding gradient</li>
-      </ul>
-    </ul>
-
-<pre><code class="python">def initialize_parameters_he(layers_dims):
-
-    np.random.seed(3)
-    parameters = {}
-    L = len(layers_dims) - 1
-
-    for l in range(1, L + 1):
-        parameters['W' + str(l)] = np.random.randn(layers_dims[l], layers_dims[l-1]) * np.sqrt(2 / layers_dims[l-1])
-        parameters['b' + str(l)] = np.zeros((layers_dims[l], 1))
-
-    return parameters</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="deep-learning-specialization-">
-  <div class="card-body">
-    <h2 class="card-title">Learning Rate Decay</h2>
-    <ul>
-      <li>An example of adaptive learning rate</li>
-      <li>Helps gradient descent converge by taking smaller steps as it approaches the minimum</li>
-      <li>We want bigger \( \alpha \) in the beginning but smaller \( \alpha \) near the optimum</li>
-      <li>Let <code>decay_rate</code> \( = dr \)</li>
-      <li>Let <code>num_epocs</code> \( = ne \)</li>
-      <li>\( \alpha = \dfrac{1}{dr * ne}\alpha_{0} \)</li>
-    </ul>
-
-    <h3 class="card-title">Learning rate scheduler</h3>
-    <ul>
-      <li>Adjusts the learning rate between epochs or iterations</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="deep-learning-specialization-">
-  <div class="card-body">
-    <h2 class="card-title">Normalization</h2>
-    <ul>
-      <li>Normalize input features</li>
-      <li>Apply the same normalization to train and test set</li>
-      <li>If features have very different scale, the cost function will look very elongated. The gradient descent will oscilate a lot before converging</li>
-      <li>If normalize, the contour will look more symmetric. The gradient descent will oscilate less before converging</li>
-      <li>Standarization</li>
-      <ul>
-        <li>\( \mu = \dfrac{1}{m}\displaystyle\sum_{i=1}^{m} x_{i} \)</li>
-        <li>\( \sigma^{2} = \dfrac{1}{m}\displaystyle\sum_{i=1}^{m} x_{i}^{2} \)</li>
-        <li>\( x = \dfrac{x-\mu}{\sigma} \)</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Batch normalization vs layer normalization</h3>
-    <ul>
-      <li>Batch normalization - normalizes each feature within a batch of samples</li>
-      <li>Layer normalization - normalizes all features within each sample</li>
-    </ul>
-
-    <h3 class="card-title">Batch normalization</h3>
-    <ul>
-      <li>Normalize activations in neural network in order to train parameters</li>
-      <li>Normalizing \( \textbf{z} \) is more common than normalizing \( \textbf{a} \)</li>
-      <li>Given some intermediate values \( \textbf{z}_{i} \dots \textbf{z}_{n} \) in layer \( l \)</li>
-      <ul>
-        <li>\( \mu = \dfrac{1}{m}\displaystyle\sum_{i} \textbf{z}_{i} \)</li>
-        <li>\( \sigma^{2} = \dfrac{1}{m}\displaystyle\sum_{i} (\textbf{z}_{i}-\mu)^{2} \)</li>
-        <li>\( \textbf{z}^{norm}_{i} = \dfrac{\textbf{z}_{i}-\mu}{\sqrt{\sigma^{2}+\epsilon}} \)</li>
-        <li>\( \tilde{\textbf{z}}_{i} = \gamma \textbf{z}^{norm}_{i} + \beta \)</li>
-        <ul>
-          <li>Unlike inputs, we do not want activation to have mean \( 0 \) and variance \( 1 \)</li>
-          <li>\( \gamma \) and \( \beta \) are learnable parameters</li>
-        </ul>
-        <li>\( \textbf{X} \xrightarrow{\textbf{W}^{[1]}, \textbf{b}^{[1]}} \textbf{Z}^{[1]} \xrightarrow{\beta^{[1]}, \gamma^{[1]}} \tilde{\textbf{Z}}^{[1]} \rightarrow \textbf{A}^{[1]} = g^{[1]}(\tilde{\textbf{Z}}^{[1]}) \xrightarrow{\textbf{W}^{[2]}, \textbf{b}^{[2]}} \textbf{Z}^{[2]} \xrightarrow{\beta^{[2]}, \gamma^{[2]}} \tilde{\textbf{Z}}^{[2]} \rightarrow \textbf{A}^{[2]} \rightarrow \dots \)</li>
-      </ul>
-      <li>Neural network has additional paramters \( \gamma^{1}, \beta^{1} \dots \gamma^{l}, \beta^{l} \) to train</li>
-      <li>\( \gamma \) and \( \beta \) updated the same way via gradient descent like \( \textbf{W} \) and \( \textbf{b} \)</li>
-      <li>If using batch normalization, \( \textbf{Z}^{[l]} =  \textbf{W}^{[l]}\textbf{A}^{[l-1]} + \textbf{b}^{[l]} =  \textbf{W}^{[l]}\textbf{A}^{[l-1]} \) (We can drop \( \textbf{b} \) from neural network)</li>
-    </ul>
-
-    <h3 class="card-title">Working with min batches</h3>
-    <ul>
-      <li>For \( t = 1 \dots \) num_mini_batches</li>
-      <ul>
-        <li>Compute forward prop on \( \textbf{X}^{\{t\}} \)</li>
-        <ul>
-          <li>In each layer, use batch normalization to replace \( \textbf{z}^{[l]} \) with \( \tilde{\textbf{z}}^{[l]} \)</li>
-        </ul>
-        <li>Use backprop to compute \( \textbf{dW}^{[l]}, d\beta^{[l]}, d\gamma^{[l]} \) (no need for \( db^{[l]} \))</li>
-        <li>Update \( \textbf{W}^{[l]} = \textbf{W}^{[l]} - \alpha \textbf{dW}^{[l]}, \beta^{[l]} = \beta^{[l]} - \alpha d\beta^{[l]}, \gamma^{[l]} = \gamma^{[l]} - \alpha d\gamma^{[l]} \)</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Why batch norm works</h3>
-    <ul>
-      <li>During training, distribution of hidden units changes</li>
-      <li>Batch norm limits the distribution changes</li>
-    </ul>
-
-    <h3 class="card-title">Batch norm at test time</h3>
-    <ul>
-      <li>Unlike during training where a batch of sample is given, there is only one sample at test time</li>
-      <li>For each layer \( l \), remember \( \mu, \sigma \) for each batch. Then, take the exponentially weighted average over all batches for each layer</li>
-    </ul>
-
-    <h3 class="card-title">Batch norm as regularization</h3>
-    <ul>
-      <li>Each mini-batch is scaled by mean/variance computed on just that mini-batch</li>
-      <li>This has slight regularization effect</li>
-      <li>Do not use batch norm as regularization. Use dropout</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="deep-learning-specialization-">
-  <div class="card-body">
-    <h2 class="card-title">Optimization</h2>
-
-    <h3 class="card-title">Vanishing/exploding gradients</h3>
-    <ul>
-      <li>Happens in deep neural network</li>
-      <li>If \( \textbf{W}^{[l]} \) is slighly bigger than identity matrix \( \textbf{I} \), gradients will blow up as the number of layers increases</li>
-      <ul>
-        <li>For example, \( 1.1^{L} \)</li>
-      </ul>
-      <li>If \( \textbf{W}^{[l]} \) is slighly smaller than identity matrix \( \textbf{I} \), gradients will diminish as the number of layers increases</li>
-      <ul>
-        <li>For example, \( 0.9^{L} \)</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Gradient checking</h3>
-    <ul>
-      <li>Take \( \textbf{W}^{[1]}, \textbf{b}^{[1]} \dots \textbf{W}^{[L]}, \textbf{b}^{[L]} \) and reshape into a big vector \( \theta \)</li>
-      <li>Take \( \textbf{dW}^{[1]}, \textbf{db}^{[1]} \dots \textbf{dW}^{[L]}, \textbf{db}^{[L]} \) and reshape into a big vector \( d\theta \)</li>
-      <li>For each \( i \)</li>
-      <ul>
-        <li>\( d\theta_{approx} = \dfrac{J(\theta_{1} \dots \theta_{i} + \epsilon) - J(\theta_{1} \dots \theta_{i} - \epsilon)}{2\theta} \approx \dfrac{\partial J}{\partial \theta_{i}} \) where \( \epsilon = 10^{-7} \) and compare it against \( d\theta_{i} \)</li>
-        <li>\( \dfrac{||d\theta_{approx}-d\theta||_{2}}{||d\theta_{approx}||_{2} + ||d\theta||_{2}} \approx 10^{-7} \) is good</li>
-        <li>Bigger than \( 10^{-3} \) means something wrong</li>
-      </ul>
-      <li>Do not use gradient checking during training, only use it when debugging</li>
-      <li>Include regularization term in \( d\theta \) calculation</li>
-      <li>Gradient checking does not work with dropout</li>
-      <ul>
-        <li>Can do gradient checking with <code>keep_prop=1.0</code>, then later turn on dropout</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Gradient clipping</h3>
-    <ul>
-      <li>If gradient is more than a threshold value, set it to the threshold value</li>
-      <li>Prevents the exploding gradient</li>
-    </ul>
-
-    <h3 class="card-title">Gradient descent</h3>
-    <ul>
-      <li>Find values of parameters of function that minimize a cost function</li>
-      <li>Used when parameters cannot be calculated analytically</li>
-      <li>Take negative of gradients of a function at a point</li>
-      <li>Repeatedly update that point until reaching an optimal point</li>
-      <li>Error</li>
-      <ul>
-        <li>Difference between actual and predicted</li>
-      </ul>
-      <li>Loss</li>
-      <ul>
-        <li>Some aggregation of errors</li>
-      </ul>
-      <li>Learning rate </li>
-      <ul>
-        <li>Size of steps you want to take in particular direction</li>
-        <li>Updated location = previous location + step size * number of steps</li>
-        <li>Updated value = previous value - learning rate * gradient</li>
-        <li>Learning rate is critical to prevent overfitting</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Batch</h3>
-    <ul>
-      <li>Run through all samples to do single update of parameters</li>
-      <li>Used when training set is small (Less than 2,000)</li>
-    </ul>
-
-<pre><code class="python">for t in range(steps):
-    dw = gradient(loss, data, w)
-    w = w - learning_rate * dw</code></pre>
-
-    <h3 class="card-title">Min-batch</h3>
-    <ul>
-      <li>Run through subset of samples to do single update of parameters</li>
-      <li>Subsets of both inputs and labelled outputs</li>
-      <li>Typically, min-batch size is 64, 128, 256, 512</li>
-      <ul>
-        <li>Smaller batch size may lead to faster convergence because weights are updated more frequently</li>
-        <li>However, updates could be noisy</li>
-        <li>Some hardwares have better performance with larger batch size due to parallel processing capabilities</li>
-      </ul>
-      <li>Make sure each mini-batch \( \textbf{X}^{[t]}, \textbf{y}^{[t]} \) fits in CPU/GPU memory</li>
-    </ul>
-
-    <h4 class="card-title">How to get min-batches</h4>
-    <ul>
-      <li>Shuffle the training set \( \textbf{X} \) and \( \textbf{y} \)</li>
-      <li>Partition the shuffled set into min-batches</li>
-    </ul>
-
-<pre><code class="python">def random_mini_batches(X, Y, mini_batch_size = 64, seed = 0):
-
-    np.random.seed(seed)
-    m = X.shape[1]  # Number of training examples
-    mini_batches = []
-
-    # Shuffle
-    permutation = list(np.random.permutation(m))
-    shuffled_X = X[:, permutation]
-    shuffled_Y = Y[:, permutation].reshape((1,m))
-
-    # Partition (Minus the end case)
-    num_complete_minibatches = math.floor(m/mini_batch_size)
-    for k in range(0, num_complete_minibatches):
-        mini_batch_X = shuffled_X[:, k*mini_batch_size:(k+1)*mini_batch_size]
-        mini_batch_Y = shuffled_Y[:, k*mini_batch_size:(k+1)*mini_batch_size]
-        mini_batch = (mini_batch_X, mini_batch_Y)
-        mini_batches.append(mini_batch)
-
-    # Handling the end case
-    if m % mini_batch_size != 0:
-        mini_batch_X = shuffled_X[:, num_complete_minibatches*mini_batch_size:m]
-        mini_batch_Y = shuffled_Y[:, num_complete_minibatches*mini_batch_size:m]
-        mini_batch = (mini_batch_X, mini_batch_Y)
-        mini_batches.append(mini_batch)
-
-    return mini_batches</code></pre>
-
-    <h4 class="card-title">Implementation</h4>
-    <ul>
-      <li>In one epoc, min-batch gradient descent take \( nb \) gradient descents rather than 1 </li>
-      <li>Let <code>num_epocs</code> \( = ne \)</li>
-      <li>Let <code>batch_size</code> \( = bs \)</li>
-      <li>Let <code>num_batches</code> \( = nb \)</li>
-      <li>for \( t = 1 \dots ne \)</li>
-      <ul>
-        <li>for \( t = 1 \dots nb \)</li>
-        <ul>
-          <li>Forward prop on \( \textbf{X}^{\{t\}} \)</li>
-          <ul>
-            <li>\( \textbf{Z}^{[1]} = \textbf{W}^{[1]}\textbf{X}^{\{t\}} + \textbf{b}^{[1]} \)</li>
-            <li>\( \textbf{A}^{[1]} = g^{[1]}(\textbf{Z}^{[1]}) \)</li>
-            <li>\( \vdots \)</li>
-            <li>\( \textbf{A}^{[L]} = g^{[L]}(\textbf{Z}^{[L]}) \)</li>
-          </ul>
-          <li>Compute cost</li>
-          <ul>
-            <li>\( J^{\{t\}} = \dfrac{1}{bs}\displaystyle\sum_{i=1}^{l}L(\hat{y}^{(i)}, y^{(i)}) + \dfrac{\lambda}{2bs}\displaystyle\sum_{l}||\textbf{W}^{[l]}||_{F}^{2} \)</li>
-          </ul>
-          <li>Backward prop</li>
-          <ul>
-            <li>Use \( J^{\{t\}}, \textbf{X}^{\{t\}}, \textbf{y}^{\{t\}} \)</li>
-          </ul>
-          <li>Update parameter</li>
-          <ul>
-            <li>\( \textbf{W}^{[l]} = \textbf{W}^{[l]} - \alpha \textbf{dW}^{[l]} \)</li>
-            <li>\( \textbf{b}^{[l]} = \textbf{b}^{[l]} - \alpha \textbf{db}^{[l]} \)</li>
-          </ul>
-        </ul>
-      </ul>
-    </ul>
-
-<pre><code class="python">for t in range(steps):
-    for mini_batch in get_batches(data, batch_size):
-        dw = gradient(loss, mini_batch, w)
-        w = w - learning_rate * dw</code></pre>
-
-    <h3 class="card-title">Stochastic</h3>
-    <ul>
-      <li>Run through one sample to do single update of parameters</li>
-    </ul>
-
-<pre><code class="python">for t in range(steps):
-    for example in data:
-        dw = gradient(loss, example, w)
-        w = w - learning_rate * dw</code></pre>
-
-    <h3 class="card-title">Local optima</h3>
-    <ul>
-      <li>In high dimensions, when gradient is 0, it is almost always saddle points rather than local optima (So it is unlikely for the optimization algorithm to stuck at bad local optima)</li>
-      <li>Plateaus (where derivatives are close to 0) can slow down the learning</li>
-    </ul>
-
-<pre><code class="python">import torch
-import torch.nn as nn
-
-def train():
-
-    model = nn.Linear(4,2)
-
-    criterion = torch.nn.MSELoss()
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
-
-    for epoch in range(10):
-        # Convert inputs and labels to variable.
-        inputs = torch.Tensor([0.8,0.4,0.4,0.2])
-        labels = torch.Tensor([1,0])
-
-        # Clear gradient buffers because we don't want any gradient from previous epoch to carry forward.
-        optimizer.zero_grad()
-
-        # Get output from the model from the inputs.
-        outputs = model(inputs)
-
-        # Get loss for the predicted output.
-        loss = criterion(outputs, labels)
-        print(loss)
-
-        # Get gradients w.r.t to parameters.
-        loss.backward()
-
-        # Update parameters.
-        optimizer.step()
-
-        print('epoch {}, loss {}'.format(epoch, loss.item()))
-
-if __name__ == "__main__":
-    train()</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a> | <a href="https://www.educative.io/path/become-a-deep-learning-professional">Become a Deep Learning Professional</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="deep-learning-specialization-">
-  <div class="card-body">
-    <h2 class="card-title">Gradient Optimization</h2>
-
-    <h3 class="card-title">Exponentially weighted averages (Moving average)</h3>
-    <ul>
-      <li>\( v_{t} = \beta v_{t-1} + (1-\beta) \theta_{t-1} \)</li>
-      <li>\( v_{t} \) is approximately averaging over \( \frac{1}{\beta-1} \) data points.</li>
-      <li>To improve initial phase of estimates, use \( \frac{v_{t}}{1-\beta} \). However, in ML, we don't usually bother with bias in the initial phase</li>
-    </ul>
-
-    <h3 class="card-title">Momentum</h3>
-    <ul>
-      <li>On vertical axis, we want slower learning & reduce oscilation ( \( \textbf{b} \) direction )</li>
-      <li>On horizontal axis, we want faster learning ( \( \textbf{W} \) direction )</li>
-      <li>Initialize \( \textbf{V}_{dW} = \textbf{V}_{db} = 0 \)</li>
-      <li>On each iteration \( t \)</li>
-      <ul>
-        <li>Compute \( \textbf{dW} \) and \( \textbf{db} \)</li>
-        <li>\( \textbf{V}_{dW} = \beta \textbf{V}_{dW} + (1-\beta) \textbf{dW} \)</li>
-        <li>\( \textbf{V}_{db} = \beta \textbf{V}_{db} + (1-\beta) \textbf{db} \)</li>
-        <li>\( \textbf{W} = \textbf{W} - \alpha \textbf{V}_{dW} \)</li>
-        <li>\( \textbf{b} = \textbf{b} - \alpha \textbf{V}_{db} \)</li>
-        <li>\( \beta \) is commonly chosen to be \( 0.9 \)</li>
-      </ul>
-      <li>On vertical direction, the derivates will average out to zero</li>
-      <li>Velocity is the running mean of gradients including the direction</li>
-      <li>At every step, update velocity, then update weights with the velocity</li>
-    </ul>
-
-<pre><code class="python">def initialize_velocity(parameters):
-
-    L = len(parameters) // 2  # Number of layers in the neural networks
-    v = {}
-
-    # Initialize velocity
-    for l in range(L):
-        v["dW" + str(l+1)] = np.zeros((parameters["W" + str(l+1)].shape[0], parameters["W" + str(l+1)].shape[1]))
-        v["db" + str(l+1)] = np.zeros((parameters["b" + str(l+1)].shape[0], parameters["b" + str(l+1)].shape[1]))
-
-    return v</code></pre>
-
-<pre><code class="python">def update_parameters_with_momentum(parameters, grads, v, beta, learning_rate):
-
-    L = len(parameters) // 2  # Number of layers in the neural networks
-
-    for l in range(L):
-        v["dW" + str(l+1)] = beta * v["dW" + str(l+1)] + (1- beta) * grads["dW" + str(l+1)]
-        v["db" + str(l+1)] = beta * v["db" + str(l+1)] + (1- beta) * grads["db" + str(l+1)]
-        parameters["W" + str(l+1)] = parameters["W" + str(l+1)] - learning_rate * v["dW" + str(l+1)]
-        parameters["b" + str(l+1)] = parameters["b" + str(l+1)] - learning_rate * v["db" + str(l+1)]
-
-    return parameters, v</code></pre>
-
-<pre><code class="python">for t in range(steps):
-    dw = gradient(loss, w)
-    v = beta * v + (1-beta) * dw
-    w = w - learning_rate * v</code></pre>
-
-    <h3 class="card-title">RMSprop</h3>
-    <ul>
-      <li>RMSprop has the same motivation as momentum</li>
-      <li>Initialize \( \textbf{S}_{dW} = \textbf{S}_{db} = 0 \)</li>
-      <li>On each iteration \( t \)</li>
-      <ul>
-        <li>Compute \( \textbf{dW} \) and \( \textbf{db} \)</li>
-        <li>\( \textbf{S}_{dW} = \beta \textbf{S}_{dW} + (1-\beta) \textbf{dW}^{2} \) (Square is applied to element-wise)</li>
-        <li>\( \textbf{S}_{db} = \beta \textbf{S}_{db} + (1-\beta) \textbf{db}^{2} \) (Square is applied to element-wise)</li>
-        <li>\( \textbf{W} = \textbf{W} - \alpha \frac{\textbf{dW}}{\sqrt{\textbf{S}_{dW}}+\epsilon} \)</li>
-        <li>\( \textbf{b} = \textbf{b} - \alpha \frac{\textbf{db}}{\sqrt{\textbf{S}_{db}}+\epsilon} \)</li>
-        <li>\( \epsilon \) is in order not to divide by zero</li>
-      </ul>
-      <li>We want small \( \textbf{S}_{dW} \) and large \( \textbf{S}_{db} \)</li>
-    </ul>
-
-<pre><code class="python">for t in range(steps):
-    dw = gradient(loss, w)
-    squared_gradients = beta * squared_gradients + (1-beta) * dw * dw
-    w = w - learning_rate * (dw/(squared_gradients.sqrt()+e)</code></pre>
-
-    <h3 class="card-title">Adam (Adaptive moment estimation)</h3>
-    <ul>
-      <li>Initialize \( \textbf{V}_{dW} = \textbf{V}_{db} = \textbf{S}_{dW} = \textbf{S}_{db} = 0 \)</li>
-      <li>On each iteration \( t \)</li>
-      <ul>
-        <li>Compute \( \textbf{dW} \) and \( \textbf{db} \)</li>
-        <li>\( \textbf{V}_{dW} = \beta_{1} \textbf{V}_{dW} + (1-\beta_{1}) \textbf{dW} \)</li>
-        <li>\( \textbf{V}_{db} = \beta_{1} \textbf{V}_{db} + (1-\beta_{1}) \textbf{db} \)</li>
-        <li>\( \textbf{S}_{dW} = \beta_{2} \textbf{S}_{dW} + (1-\beta_{2}) \textbf{dW}^{2} \)</li>
-        <li>\( \textbf{S}_{db} = \beta_{2} \textbf{S}_{db} + (1-\beta_{2}) \textbf{db}^{2} \)</li>
-        <li>\( \textbf{V}_{dW, corrected} = \dfrac{\textbf{V}_{dW}}{1-\beta_{1}^{t}} \)</li>
-        <li>\( \textbf{V}_{db, corrected} = \dfrac{\textbf{V}_{db}}{1-\beta_{1}^{t}} \)</li>
-        <li>\( \textbf{S}_{dW, corrected} = \dfrac{\textbf{S}_{dW}}{1-\beta_{2}^{t}} \)</li>
-        <li>\( \textbf{S}_{db, corrected} = \dfrac{\textbf{S}_{db}}{1-\beta_{2}^{t}} \)</li>
-        <li>\( \textbf{W} = \textbf{W} - \alpha \dfrac{\textbf{V}_{dW, corrected}}{\sqrt{\textbf{S}_{dW, corrected}}+\epsilon} \)</li>
-        <li>\( \textbf{b} = \textbf{b} - \alpha \dfrac{\textbf{V}_{db, corrected}}{\sqrt{\textbf{S}_{db, corrected}}+\epsilon} \)</li>
-        <li>\( \beta_{1} \) is commonly chosen to be \( 0.9 \)</li>
-        <li>\( \beta_{2} \) is commonly chosen to be \( 0.999 \)</li>
-      </ul>
-    </ul>
-
-<pre><code class="python">def initialize_adam(parameters):
-
-    L = len(parameters) // 2  # Number of layers in the neural networks
-    v = {}
-    s = {}
-
-    for l in range(L):
-        v["dW" + str(l+1)] = np.zeros((parameters["W" + str(l+1)].shape[0], parameters["W" + str(l+1)].shape[1]))
-        v["db" + str(l+1)] = np.zeros((parameters["b" + str(l+1)].shape[0], parameters["b" + str(l+1)].shape[1]))
-        s["dW" + str(l+1)] = np.zeros((parameters["W" + str(l+1)].shape[0], parameters["W" + str(l+1)].shape[1]))
-        s["db" + str(l+1)] = np.zeros((parameters["b" + str(l+1)].shape[0], parameters["b" + str(l+1)].shape[1]))
-
-    return v, s</code></pre>
-
-<pre><code class="python">def update_parameters_with_adam(parameters, grads, v, s, t, learning_rate = 0.01, beta1 = 0.9, beta2 = 0.999,  epsilon = 1e-8):
-
-    L = len(parameters) // 2  # Number of layers in the neural networks
-    v_corrected = {}
-    s_corrected = {}
-
-    for l in range(L):
-        v["dW" + str(l+1)] = beta1 * v["dW" + str(l+1)] + (1-beta1) * grads["dW" + str(l+1)]
-        v["db" + str(l+1)] = beta1 * v["db" + str(l+1)] + (1-beta1) * grads["db" + str(l+1)]
-        v_corrected["dW" + str(l+1)] = v["dW" + str(l+1)] / (1 - np.square(beta1))
-        v_corrected["db" + str(l+1)] = v["db" + str(l+1)] / (1 - np.square(beta1))
-        s["dW" + str(l+1)] = beta2 * s["dW" + str(l+1)] + (1-beta2) * np.square(grads["dW" + str(l+1)])
-        s["db" + str(l+1)] = beta2 * s["db" + str(l+1)] + (1-beta2) * np.square(grads["db" + str(l+1)])
-        s_corrected["dW" + str(l+1)] = s["dW" + str(l+1)] / (1 - np.square(beta2))
-        s_corrected["db" + str(l+1)] = s["db" + str(l+1)] / (1 - np.square(beta2))
-        parameters["W" + str(l+1)] = parameters["W" + str(l+1)] - learning_rate * v_corrected["dW" + str(l+1)] / ( np.sqrt(s_corrected["dW" + str(l+1)]) + epsilon)
-        parameters["b" + str(l+1)] = parameters["b" + str(l+1)] - learning_rate * v_corrected["db" + str(l+1)] / ( np.sqrt(s_corrected["db" + str(l+1)]) + epsilon)
-
-    return parameters, v, s</code></pre>
-
-<pre><code class="python">for t in range(steps):
-    dw = gradient(loss, w)
-    moment1 = beta1 * moment1 + (1-beta1) * dw
-    moment2 = beta2 * moment2 + (1-beta2) * dw * dw
-    moment1_unbiased = moment1 / (1-beta1**t)
-    moment2_unbiased = moment2 / (1-beta2**t)
-    w = w - learning_rate * moment1_unbiased / (moment2_unbiased.sqrt()+e)</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a> | <a href="https://www.educative.io/path/become-a-deep-learning-professional">Become a Deep Learning Professional</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="deep-learning-specialization-">
-  <div class="card-body">
-    <h2 class="card-title">Normalization</h2>
-
-    <h3 class="card-title">L1 norm</h3>
-    <ul>
-      <li>Used in logistic regression</li>
-      <li>Performs well on sparse data</li>
-      <li>Does not have analytical solution</li>
-      <li>\( J = \dfrac{1}{m}\displaystyle\sum_{i=1}^{m} L(\hat{y}_{i},y_{i}) + \dfrac{\lambda}{2m}||\textbf{W}||_{1} \)</li>
-    </ul>
-
-    <h3 class="card-title">L2 norm</h3>
-    <ul>
-      <li>Used in logistic regression</li>
-      <li>Performs better than L1 in practice</li>
-      <li>Useful when features are correlated</li>
-      <li>Has analytical solution</li>
-      <li>\( J = \dfrac{1}{m}\displaystyle\sum_{i=1}^{m} L(\hat{y}_{i},y_{i}) + \dfrac{\lambda}{2m}||\textbf{W}||_{2}^{2} \)</li>
-      <li>\( ||\textbf{W}||^{2} = \displaystyle\sum_{j=1}^{n_{x}}\textbf{W}_{j}^{2} = \textbf{W}^{T}\textbf{W} \)</li>
-    </ul>
-
-    <h3 class="card-title">Frobenius norm</h3>
-    <ul>
-      <li>Used in neural network</li>
-      <li>\( J = \dfrac{1}{m}\displaystyle\sum_{i=1}^{m} L(\hat{y}_{i},y_{i}) + \dfrac{\lambda}{2m}\displaystyle\sum_{l=1}^{m}||\textbf{W}^{[l]}||_{F}^{2} \)</li>
-      <li>\( ||\textbf{W}^{[l]}||_{F}^{2} = \displaystyle\sum_{i=1}^{n^{[l-1]}}\displaystyle\sum_{j=1}^{n^{[l]}}(\textbf{W}_{ij}^{[l]})^{2} \)</li>
-      <li>Add \( \dfrac{\lambda}{m}\textbf{W}^{[l]} \) to \( \textbf{dW}^{[l]} \)</li>
-      <li>\( \textbf{W}^{[l]} = \textbf{W}^{[l]} - \alpha \textbf{dW}^{[l]} \) remains the same</li>
-    </ul>
-
-    <h3 class="card-title">Forward prop</h3>
-
-<pre><code class="python">def forward_propagation(X, parameters):
-
-    W1 = parameters["W1"]
-    b1 = parameters["b1"]
-    W2 = parameters["W2"]
-    b2 = parameters["b2"]
-    W3 = parameters["W3"]
-    b3 = parameters["b3"]
-
-    # LINEAR -> RELU -> LINEAR -> RELU -> LINEAR -> SIGMOID
-    Z1 = np.dot(W1, X) + b1
-    A1 = relu(Z1)
-    Z2 = np.dot(W2, A1) + b2
-    A2 = relu(Z2)
-    Z3 = np.dot(W3, A2) + b3
-    A3 = sigmoid(Z3)
-
-    cache = (Z1, A1, W1, b1, Z2, A2, W2, b2, Z3, A3, W3, b3)
-
-    return A3, cache</code></pre>
-
-    <h3 class="card-title">Cost function</h3>
-    <ul>
-      <li>\( J_{regularized} = \underbrace{-\dfrac{1}{m} \displaystyle\sum_{i = 1}^{m}  \left(y^{(i)}\log\left(\textbf{a}^{[L](i)}\right) + (1-y^{(i)})\log\left(1-\textbf{a}^{[L](i)}\right)\right)}_\text{cross-entropy cost} + \underbrace{\dfrac{1}{m} \dfrac{\lambda}{2} \displaystyle\sum_{l}\displaystyle\sum_{k}\displaystyle\sum_{j} {\textbf{W}_{k,j}^{[l]}}^{2} }_\text{L2 regularization cost} \)</li>
-    </ul>
-
-<pre><code class="python">def compute_cost_with_regularization(A3, Y, parameters, lambd):
-
-    m = Y.shape[1]
-    W1 = parameters["W1"]
-    W2 = parameters["W2"]
-    W3 = parameters["W3"]
-
-    cross_entropy_cost = compute_cost(A3, Y)
-
-    L2_regularization_cost = lambd * ( np.sum(np.square(W1)) + np.sum(np.square(W2)) + np.sum(np.square(W3)) ) / (2 * m)
-
-    cost = cross_entropy_cost + L2_regularization_cost
-
-    return cost</code></pre>
-
-    <h3 class="card-title">Backward prop</h3>
-
-<pre><code class="python">def backward_propagation_with_regularization(X, Y, cache, lambd):
-
-    m = X.shape[1]
-    (Z1, A1, W1, b1, Z2, A2, W2, b2, Z3, A3, W3, b3) = cache
-
-    dZ3 = A3 - Y
-
-    dW3 = 1./m * np.dot(dZ3, A2.T) + (lambd * W3 / m)
-    db3 = 1./m * np.sum(dZ3, axis=1, keepdims = True)
-
-    dA2 = np.dot(W3.T, dZ3)
-    dZ2 = np.multiply(dA2, np.int64(A2 > 0))
-    dW2 = 1./m * np.dot(dZ2, A1.T) + (lambd * W2 / m)
-    db2 = 1./m * np.sum(dZ2, axis=1, keepdims = True)
-
-    dA1 = np.dot(W2.T, dZ2)
-    dZ1 = np.multiply(dA1, np.int64(A1 > 0))
-    dW1 = 1./m * np.dot(dZ1, X.T) + (lambd * W1 / m)
-    db1 = 1./m * np.sum(dZ1, axis=1, keepdims = True)
-
-    gradients = {"dZ3": dZ3, "dW3": dW3, "db3": db3,"dA2": dA2,
-                 "dZ2": dZ2, "dW2": dW2, "db2": db2, "dA1": dA1,
-                 "dZ1": dZ1, "dW1": dW1, "db1": db1}
-
-    return gradients</code></pre>
-
-<pre><code class="python">def model(X, Y, learning_rate = 0.3, num_iterations = 30000, lambd = 0):
-
-    grads = {}
-    costs = []
-    m = X.shape[1]
-    layers_dims = [X.shape[0], 20, 3, 1]
-
-    parameters = initialize_parameters(layers_dims)
-
-    for i in range(0, num_iterations):
-
-        a3, cache = forward_propagation(X, parameters)
-
-        cost = compute_cost_with_regularization(a3, Y, parameters, lambd)
-
-        grads = backward_propagation_with_regularization(X, Y, cache, lambd)
-
-        parameters = update_parameters(parameters, grads, learning_rate)
-
-    return parameters</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="deep-learning-specialization-">
-  <div class="card-body">
-    <h2 class="card-title">Regularization</h2>
-
-    <h3 class="card-title">Dropout</h3>
-    <ul>
-      <li>Most effective regularization in neural network</li>
-      <li>Nodes in each layer in randomly deactivated in forward pass</li>
-      <li>In each iteration, only \( 1-\rho \) trained (Neurons are deactivated with probability \( \rho \))</li>
-      <li>Why dropout works</li>
-      <ul>
-        <li>For a particular neuron, its inputs can get eliminiated</li>
-        <li>Thus, the neuron become reluctant to put too much weight on one input feature</li>
-        <li>Rather, it wants to spread out weights, leading to smaller weights</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Inverted dropout</h3>
-    <ul>
-      <li>During training time</li>
-      <ul>
-        <li><code>keep_prob = 0.8</code> (20% chance that units will be shutdown)</li>
-        <li><code>d = np.random.rand(a.shape[0], a.shape[1]) < keep_prob</code></li>
-        <li><code>a = np.multiply(a,d)</code></li>
-        <li><code>a /= keep_prod</code></li>
-      </ul>
-      <li>Each layer in the network could have different <code>keep_prob</code>, but it will increase the number of hyperparameters to tune</li>
-      <li>Dropout is not to be used during test time</li>
-      <li>Cost function is no longer well-defined</li>
-    </ul>
-
-    <h3 class="card-title">Forward prop</h3>
-
-<pre><code class="python">def forward_propagation_with_dropout(X, parameters, keep_prob = 0.5):
-
-    np.random.seed(1)
-
-    # retrieve parameters
-    W1 = parameters["W1"]
-    b1 = parameters["b1"]
-    W2 = parameters["W2"]
-    b2 = parameters["b2"]
-    W3 = parameters["W3"]
-    b3 = parameters["b3"]
-
-    Z1 = np.dot(W1, X) + b1
-    A1 = relu(Z1)
-
-    D1 = np.random.rand(A1.shape[0], A1.shape[1])
-    D1 = (D1 < keep_prob).astype(int)
-    A1 = A1 * D1
-    A1 = A1 / keep_prob
-
-    Z2 = np.dot(W2, A1) + b2
-    A2 = relu(Z2)
-
-    D2 = np.random.rand(A2.shape[0], A2.shape[1])
-    D2 = (D2 < keep_prob).astype(int)
-    A2 = A2 * D2
-    A2 = A2 / keep_prob
-    Z3 = np.dot(W3, A2) + b3
-    A3 = sigmoid(Z3)
-
-    cache = (Z1, D1, A1, W1, b1, Z2, D2, A2, W2, b2, Z3, A3, W3, b3)
-
-    return A3, cache</code></pre>
-
-    <h3 class="card-title">Cost function</h3>
-
-<pre><code class="python">def compute_cost(A, Y):
-
-    m = Y.shape[1]
-
-    logprobs = np.multiply(-np.log(A),Y) + np.multiply(-np.log(1 - A), 1 - Y)
-    cost = 1./m * np.nansum(logprobs)
-
-    return cost</code></pre>
-
-   <h3 class="card-title">Backward prop</h3>
-
-<pre><code class="python">def backward_propagation_with_dropout(X, Y, cache, keep_prob):
-
-    m = X.shape[1]
-    (Z1, D1, A1, W1, b1, Z2, D2, A2, W2, b2, Z3, A3, W3, b3) = cache
-
-    dZ3 = A3 - Y
-    dW3 = 1./m * np.dot(dZ3, A2.T)
-    db3 = 1./m * np.sum(dZ3, axis=1, keepdims = True)
-    dA2 = np.dot(W3.T, dZ3)
-
-    dA2 = dA2 * D2
-    dA2 = dA2 / keep_prob
-
-    dZ2 = np.multiply(dA2, np.int64(A2 > 0))
-    dW2 = 1./m * np.dot(dZ2, A1.T)
-    db2 = 1./m * np.sum(dZ2, axis=1, keepdims = True)
-
-    dA1 = np.dot(W2.T, dZ2)
-
-    dA1 = dA1 * D1
-    dA1 = dA1 / keep_prob
-
-    dZ1 = np.multiply(dA1, np.int64(A1 > 0))
-    dW1 = 1./m * np.dot(dZ1, X.T)
-    db1 = 1./m * np.sum(dZ1, axis=1, keepdims = True)
-
-    gradients = {"dZ3": dZ3, "dW3": dW3, "db3": db3,"dA2": dA2,
-                 "dZ2": dZ2, "dW2": dW2, "db2": db2, "dA1": dA1,
-                 "dZ1": dZ1, "dW1": dW1, "db1": db1}
-
-    return gradients</code></pre>
-
-<pre><code class="python">def model(X, Y, learning_rate = 0.3, num_iterations = 30000, print_cost = True, lambd = 0, keep_prob = 1):
-
-    grads = {}
-    costs = []
-    m = X.shape[1]
-    layers_dims = [X.shape[0], 20, 3, 1]
-
-    parameters = initialize_parameters(layers_dims)
-
-    for i in range(0, num_iterations):
-
-        a3, cache = forward_propagation_with_dropout(X, parameters, keep_prob)
-
-        cost = compute_cost(a3, Y)
-
-        grads = backward_propagation_with_dropout(X, Y, cache, keep_prob)
-
-        parameters = update_parameters(parameters, grads, learning_rate)
-
-    return parameters</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a>
-  </div>
-</div>
-
-<div class="card mb-4" id="deep-learning-specialization-">
-  <div class="card-body">
     <h2 class="card-title">2 Layer Network with Python</h2>
     <ul>
       <li>Input layer \( \textbf{X} = \textbf{A}^{[0]} \) (We do not count the input layer)</li>
@@ -2027,14 +465,7 @@ predictions = predict(parameters, X)</code></pre>
     s = 1 / (1 + np.exp(-z))
 
     return s</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://www.coursera.org/specializations/deep-learning?">Deep Learning Specialization</a>
-  </div>
-</div>
 
-<div class="card mb-4" id="deep-learning-specialization-">
-  <div class="card-body">
     <h2 class="card-title">N Layer Network with Python</h2>
     <ul>
       <li>\( L \) is the number of layers</li>
@@ -2298,35 +729,839 @@ pred_test = predict(test_x, test_y, parameters)</code></pre>
     return dZ</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
+    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a>
   </div>
 </div>
 
 <div class="card mb-4" id="deep-learning-specialization-">
   <div class="card-body">
-    <h2 class="card-title">Multi-head Neural Network</h2>
+    <h2 class="card-title">Improving Deep Neural Networks: Hyperparameter Tuning, Regularization, and Optimization</h2>
+
+    <h2 class="card-title">Initialization</h2>
+
+    <h3 class="card-title">Zero initialization</h3>
     <ul>
-      <li>Backbone - generates feature map</li>
-      <li>Head - solve specific tasks</li>
-      <li>Features are shared between different heads</li>
-      <img class="img-fluid" class="card-img-top" src="/machine-learning/image/ml-0/multi-head-neural-network-1.png" style="width: 500px; height: 200px" alt="Card image cap">
-      <li>For example, backbone can learn embeddings (In this case, feature map would be embeddings)</li>
+      <li>If all weights are initalized to 0, all hidden units compute the same function due to symmetry</li>
       <ul>
-        <li>Alternatively, backbone can be fixed (Ex. BERT)</li>
+        <li>Every neuron in each layer learns the same function</li>
+        <li>Effectively the same thing as setting the number of neurons in each layer to 1</li>
+        <li>As a result, network is no better than logistic regression</li>
+        <li>Bias vectors can be initialized to zero</li>
       </ul>
-      <li>Then, each head can perform spam detection, sentiment analysis, etc using the embedding generated by backbone</li>
-      <li>Each head computes losses from their own tasks, which are summed to generate the total loss</li>
+      <li>The weight matrices - \( \textbf{W}^{[1]}, \textbf{W}^{[2]}, \textbf{W}^{[3]} \dots \textbf{W}^{[L-1]}, \textbf{W}^{[L]} \)</li>
+      <li>The bias vectors - \( \textbf{b}^{[1]}, \textbf{b}^{[2]}, \textbf{b}^{[3]} \dots \textbf{b}^{[L-1]}, \textbf{b}^{[L]} \)</li>
     </ul>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">def initialize_parameters_zeros(layers_dims):
+
+    parameters = {}
+    L = len(layers_dims)
+
+    for l in range(1, L):
+        parameters['W' + str(l)] = np.zeros((layers_dims[l], layers_dims[l-1]))
+        parameters['b' + str(l)] = np.zeros((layers_dims[l], 1))
+
+    return parameters</code></pre>
+
+    <h3 class="card-title">Random initialization</h3>
+    <ul>
+      <li>Breaks symmetry by randomly initalizing weights</li>
+      <li>Poor initialization, for exampling randomly initializing weights to large numbers, leads to vanishing/exploding gradient</li>
+    </ul>
+
+<pre><code class="python">def initialize_parameters_random(layers_dims):
+
+    np.random.seed(3)
+    parameters = {}
+    L = len(layers_dims)
+
+    for l in range(1, L):
+        parameters['W' + str(l)] = np.random.randn(layers_dims[l], layers_dims[l-1]) * 10
+        parameters['b' + str(l)] = np.zeros((layers_dims[l], 1))
+
+    return parameters</code></pre>
+
+    <h3 class="card-title">He initialization</h3>
+    <ul>
+      <li>Xavier initialization</li>
+      <ul>
+        <li>\( W \sim U\left[-\dfrac{\sqrt{6}}{\sqrt{n_{j}+n_{j+1}}}, \dfrac{\sqrt{6}}{\sqrt{n_{j}+n_{j+1}}}\right] \)</li>
+        <li>Assume activation function is linear</li>
+        <li>All layers have equal variance</li>
+      </ul>
+      <li>He  initialization</li>
+      <ul>
+        <li>\( W \sim N\left(0, \dfrac{2}{n^{l}}\right) \)</li>
+        <li>Works well with ReLU activation</li>
+        <li>Partially overcomes vanishing/exploding gradient</li>
+      </ul>
+    </ul>
+
+<pre><code class="python">def initialize_parameters_he(layers_dims):
+
+    np.random.seed(3)
+    parameters = {}
+    L = len(layers_dims) - 1
+
+    for l in range(1, L + 1):
+        parameters['W' + str(l)] = np.random.randn(layers_dims[l], layers_dims[l-1]) * np.sqrt(2 / layers_dims[l-1])
+        parameters['b' + str(l)] = np.zeros((layers_dims[l], 1))
+
+    return parameters</code></pre>
+
+    <h2 class="card-title">Activation</h2>
+    <ul>
+      <li>Non-linear functions that determine outputs of neurons</li>
+      <li>If activation is linear, \( \hat{y} \) is just linear function of \( x \)</li>
+      <ul>
+        <li>Then, this is just linear regression</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Sigmoid</h3>
+    <ul>
+      <li>Used for binary classification</li>
+      <li>\( \sigma(z) = \dfrac{1}{1+e^{-z}} \)</li>
+      <ul>
+        <li>If \( z \) is large positive, \( \sigma(z) \approx 1 \)</li>
+        <li>If \( z \) is large negative, \( \sigma(z) \approx 0 \)</li>
+      </ul>
+      <li>Normalizes the output between 0 and 1</li>
+      <li>Function flattens at the edges where gradients are close to 0</li>
+      <ul>
+        <li>Lead to vanishing gradient</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Tanh</h3>
+    <ul>
+      <li>\( \text{tanh}(z) \)</li>
+      <li>Similar to sigmoid but ranges between -1 and 1</li>
+    </ul>
+
+    <h3 class="card-title">ReLU</h3>
+    <ul>
+      <li>\( \text{max}(0,z) \)</li>
+      <li>Computationally efficient</li>
+      <li>For all negative inputs, neuron will not activate, and the weights will not update</li>
+      <li>Addresses problem of vanishing gradient</li>
+    </ul>
+
+    <h3 class="card-title">Leaky ReLU</h3>
+    <ul>
+      <li>\( \text{max}(0.01z,z) \)</li>
+      <li>Multiply all negative inputs with a small number</li>
+    </ul>
+
+    <h3 class="card-title">Softmax</h3>
+    <ul>
+      <li>A different type of activation used for multi-class classification</li>
+      <li>Assigns a probability to each class with all of them sum to 1</li>
+    </ul>
+
+    <h2 class="card-title">Normalization</h2>
+    <ul>
+      <li>Normalize input features</li>
+      <li>Apply the same normalization to train and test set</li>
+      <li>If features have very different scale, the cost function will look very elongated. The gradient descent will oscilate a lot before converging</li>
+      <li>If normalize, the contour will look more symmetric. The gradient descent will oscilate less before converging</li>
+      <li>Standarization</li>
+      <ul>
+        <li>\( \mu = \dfrac{1}{m}\displaystyle\sum_{i=1}^{m} x_{i} \)</li>
+        <li>\( \sigma^{2} = \dfrac{1}{m}\displaystyle\sum_{i=1}^{m} x_{i}^{2} \)</li>
+        <li>\( x = \dfrac{x-\mu}{\sigma} \)</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Batch normalization vs layer normalization</h3>
+    <ul>
+      <li>Batch normalization - normalizes each feature within a batch of samples</li>
+      <li>Layer normalization - normalizes all features within each sample</li>
+    </ul>
+
+    <h3 class="card-title">Batch normalization</h3>
+    <ul>
+      <li>Normalize activations in neural network in order to train parameters</li>
+      <li>Normalizing \( \textbf{z} \) is more common than normalizing \( \textbf{a} \)</li>
+      <li>Given some intermediate values \( \textbf{z}_{i} \dots \textbf{z}_{n} \) in layer \( l \)</li>
+      <ul>
+        <li>\( \mu = \dfrac{1}{m}\displaystyle\sum_{i} \textbf{z}_{i} \)</li>
+        <li>\( \sigma^{2} = \dfrac{1}{m}\displaystyle\sum_{i} (\textbf{z}_{i}-\mu)^{2} \)</li>
+        <li>\( \textbf{z}^{norm}_{i} = \dfrac{\textbf{z}_{i}-\mu}{\sqrt{\sigma^{2}+\epsilon}} \)</li>
+        <li>\( \tilde{\textbf{z}}_{i} = \gamma \textbf{z}^{norm}_{i} + \beta \)</li>
+        <ul>
+          <li>Unlike inputs, we do not want activation to have mean \( 0 \) and variance \( 1 \)</li>
+          <li>\( \gamma \) and \( \beta \) are learnable parameters</li>
+        </ul>
+        <li>\( \textbf{X} \xrightarrow{\textbf{W}^{[1]}, \textbf{b}^{[1]}} \textbf{Z}^{[1]} \xrightarrow{\beta^{[1]}, \gamma^{[1]}} \tilde{\textbf{Z}}^{[1]} \rightarrow \textbf{A}^{[1]} = g^{[1]}(\tilde{\textbf{Z}}^{[1]}) \xrightarrow{\textbf{W}^{[2]}, \textbf{b}^{[2]}} \textbf{Z}^{[2]} \xrightarrow{\beta^{[2]}, \gamma^{[2]}} \tilde{\textbf{Z}}^{[2]} \rightarrow \textbf{A}^{[2]} \rightarrow \dots \)</li>
+      </ul>
+      <li>Neural network has additional paramters \( \gamma^{1}, \beta^{1} \dots \gamma^{l}, \beta^{l} \) to train</li>
+      <li>\( \gamma \) and \( \beta \) updated the same way via gradient descent like \( \textbf{W} \) and \( \textbf{b} \)</li>
+      <li>If using batch normalization, \( \textbf{Z}^{[l]} =  \textbf{W}^{[l]}\textbf{A}^{[l-1]} + \textbf{b}^{[l]} =  \textbf{W}^{[l]}\textbf{A}^{[l-1]} \) (We can drop \( \textbf{b} \) from neural network)</li>
+    </ul>
+
+    <h3 class="card-title">Working with min batches</h3>
+    <ul>
+      <li>For \( t = 1 \dots \) num_mini_batches</li>
+      <ul>
+        <li>Compute forward prop on \( \textbf{X}^{\{t\}} \)</li>
+        <ul>
+          <li>In each layer, use batch normalization to replace \( \textbf{z}^{[l]} \) with \( \tilde{\textbf{z}}^{[l]} \)</li>
+        </ul>
+        <li>Use backprop to compute \( \textbf{dW}^{[l]}, d\beta^{[l]}, d\gamma^{[l]} \) (no need for \( db^{[l]} \))</li>
+        <li>Update \( \textbf{W}^{[l]} = \textbf{W}^{[l]} - \alpha \textbf{dW}^{[l]}, \beta^{[l]} = \beta^{[l]} - \alpha d\beta^{[l]}, \gamma^{[l]} = \gamma^{[l]} - \alpha d\gamma^{[l]} \)</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Why batch norm works</h3>
+    <ul>
+      <li>During training, distribution of hidden units changes</li>
+      <li>Batch norm limits the distribution changes</li>
+    </ul>
+
+    <h3 class="card-title">Batch norm at test time</h3>
+    <ul>
+      <li>Unlike during training where a batch of sample is given, there is only one sample at test time</li>
+      <li>For each layer \( l \), remember \( \mu, \sigma \) for each batch. Then, take the exponentially weighted average over all batches for each layer</li>
+    </ul>
+
+    <h3 class="card-title">Batch norm as regularization</h3>
+    <ul>
+      <li>Each mini-batch is scaled by mean/variance computed on just that mini-batch</li>
+      <li>This has slight regularization effect</li>
+      <li>Do not use batch norm as regularization. Use dropout</li>
+    </ul>
+
+    <h2 class="card-title">Optimization</h2>
+
+    <h3 class="card-title">Vanishing/exploding gradients</h3>
+    <ul>
+      <li>Happens in deep neural network</li>
+      <li>If \( \textbf{W}^{[l]} \) is slighly bigger than identity matrix \( \textbf{I} \), gradients will blow up as the number of layers increases</li>
+      <ul>
+        <li>For example, \( 1.1^{L} \)</li>
+      </ul>
+      <li>If \( \textbf{W}^{[l]} \) is slighly smaller than identity matrix \( \textbf{I} \), gradients will diminish as the number of layers increases</li>
+      <ul>
+        <li>For example, \( 0.9^{L} \)</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Gradient checking</h3>
+    <ul>
+      <li>Take \( \textbf{W}^{[1]}, \textbf{b}^{[1]} \dots \textbf{W}^{[L]}, \textbf{b}^{[L]} \) and reshape into a big vector \( \theta \)</li>
+      <li>Take \( \textbf{dW}^{[1]}, \textbf{db}^{[1]} \dots \textbf{dW}^{[L]}, \textbf{db}^{[L]} \) and reshape into a big vector \( d\theta \)</li>
+      <li>For each \( i \)</li>
+      <ul>
+        <li>\( d\theta_{approx} = \dfrac{J(\theta_{1} \dots \theta_{i} + \epsilon) - J(\theta_{1} \dots \theta_{i} - \epsilon)}{2\theta} \approx \dfrac{\partial J}{\partial \theta_{i}} \) where \( \epsilon = 10^{-7} \) and compare it against \( d\theta_{i} \)</li>
+        <li>\( \dfrac{||d\theta_{approx}-d\theta||_{2}}{||d\theta_{approx}||_{2} + ||d\theta||_{2}} \approx 10^{-7} \) is good</li>
+        <li>Bigger than \( 10^{-3} \) means something wrong</li>
+      </ul>
+      <li>Do not use gradient checking during training, only use it when debugging</li>
+      <li>Include regularization term in \( d\theta \) calculation</li>
+      <li>Gradient checking does not work with dropout</li>
+      <ul>
+        <li>Can do gradient checking with <code>keep_prop=1.0</code>, then later turn on dropout</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Gradient clipping</h3>
+    <ul>
+      <li>If gradient is more than a threshold value, set it to the threshold value</li>
+      <li>Prevents the exploding gradient</li>
+    </ul>
+
+    <h3 class="card-title">Gradient descent</h3>
+    <ul>
+      <li>Find values of parameters of function that minimize a cost function</li>
+      <li>Used when parameters cannot be calculated analytically</li>
+      <li>Take negative of gradients of a function at a point</li>
+      <li>Repeatedly update that point until reaching an optimal point</li>
+      <li>Error</li>
+      <ul>
+        <li>Difference between actual and predicted</li>
+      </ul>
+      <li>Loss</li>
+      <ul>
+        <li>Some aggregation of errors</li>
+      </ul>
+      <li>Learning rate </li>
+      <ul>
+        <li>Size of steps you want to take in particular direction</li>
+        <li>Updated location = previous location + step size * number of steps</li>
+        <li>Updated value = previous value - learning rate * gradient</li>
+        <li>Learning rate is critical to prevent overfitting</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Batch</h3>
+    <ul>
+      <li>Run through all samples to do single update of parameters</li>
+      <li>Used when training set is small (Less than 2,000)</li>
+    </ul>
+
+<pre><code class="python">for t in range(steps):
+    dw = gradient(loss, data, w)
+    w = w - learning_rate * dw</code></pre>
+
+    <h3 class="card-title">Min-batch</h3>
+    <ul>
+      <li>Run through subset of samples to do single update of parameters</li>
+      <li>Subsets of both inputs and labelled outputs</li>
+      <li>Typically, min-batch size is 64, 128, 256, 512</li>
+      <ul>
+        <li>Smaller batch size may lead to faster convergence because weights are updated more frequently</li>
+        <li>However, updates could be noisy</li>
+        <li>Some hardwares have better performance with larger batch size due to parallel processing capabilities</li>
+      </ul>
+      <li>Make sure each mini-batch \( \textbf{X}^{[t]}, \textbf{y}^{[t]} \) fits in CPU/GPU memory</li>
+    </ul>
+
+    <h4 class="card-title">How to get min-batches</h4>
+    <ul>
+      <li>Shuffle the training set \( \textbf{X} \) and \( \textbf{y} \)</li>
+      <li>Partition the shuffled set into min-batches</li>
+    </ul>
+
+<pre><code class="python">def random_mini_batches(X, Y, mini_batch_size = 64, seed = 0):
+
+    np.random.seed(seed)
+    m = X.shape[1]  # Number of training examples
+    mini_batches = []
+
+    # Shuffle
+    permutation = list(np.random.permutation(m))
+    shuffled_X = X[:, permutation]
+    shuffled_Y = Y[:, permutation].reshape((1,m))
+
+    # Partition (Minus the end case)
+    num_complete_minibatches = math.floor(m/mini_batch_size)
+    for k in range(0, num_complete_minibatches):
+        mini_batch_X = shuffled_X[:, k*mini_batch_size:(k+1)*mini_batch_size]
+        mini_batch_Y = shuffled_Y[:, k*mini_batch_size:(k+1)*mini_batch_size]
+        mini_batch = (mini_batch_X, mini_batch_Y)
+        mini_batches.append(mini_batch)
+
+    # Handling the end case
+    if m % mini_batch_size != 0:
+        mini_batch_X = shuffled_X[:, num_complete_minibatches*mini_batch_size:m]
+        mini_batch_Y = shuffled_Y[:, num_complete_minibatches*mini_batch_size:m]
+        mini_batch = (mini_batch_X, mini_batch_Y)
+        mini_batches.append(mini_batch)
+
+    return mini_batches</code></pre>
+
+    <h4 class="card-title">Implementation</h4>
+    <ul>
+      <li>In one epoc, min-batch gradient descent take \( nb \) gradient descents rather than 1 </li>
+      <li>Let <code>num_epocs</code> \( = ne \)</li>
+      <li>Let <code>batch_size</code> \( = bs \)</li>
+      <li>Let <code>num_batches</code> \( = nb \)</li>
+      <li>for \( t = 1 \dots ne \)</li>
+      <ul>
+        <li>for \( t = 1 \dots nb \)</li>
+        <ul>
+          <li>Forward prop on \( \textbf{X}^{\{t\}} \)</li>
+          <ul>
+            <li>\( \textbf{Z}^{[1]} = \textbf{W}^{[1]}\textbf{X}^{\{t\}} + \textbf{b}^{[1]} \)</li>
+            <li>\( \textbf{A}^{[1]} = g^{[1]}(\textbf{Z}^{[1]}) \)</li>
+            <li>\( \vdots \)</li>
+            <li>\( \textbf{A}^{[L]} = g^{[L]}(\textbf{Z}^{[L]}) \)</li>
+          </ul>
+          <li>Compute cost</li>
+          <ul>
+            <li>\( J^{\{t\}} = \dfrac{1}{bs}\displaystyle\sum_{i=1}^{l}L(\hat{y}^{(i)}, y^{(i)}) + \dfrac{\lambda}{2bs}\displaystyle\sum_{l}||\textbf{W}^{[l]}||_{F}^{2} \)</li>
+          </ul>
+          <li>Backward prop</li>
+          <ul>
+            <li>Use \( J^{\{t\}}, \textbf{X}^{\{t\}}, \textbf{y}^{\{t\}} \)</li>
+          </ul>
+          <li>Update parameter</li>
+          <ul>
+            <li>\( \textbf{W}^{[l]} = \textbf{W}^{[l]} - \alpha \textbf{dW}^{[l]} \)</li>
+            <li>\( \textbf{b}^{[l]} = \textbf{b}^{[l]} - \alpha \textbf{db}^{[l]} \)</li>
+          </ul>
+        </ul>
+      </ul>
+    </ul>
+
+<pre><code class="python">for t in range(steps):
+    for mini_batch in get_batches(data, batch_size):
+        dw = gradient(loss, mini_batch, w)
+        w = w - learning_rate * dw</code></pre>
+
+    <h3 class="card-title">Stochastic</h3>
+    <ul>
+      <li>Run through one sample to do single update of parameters</li>
+    </ul>
+
+<pre><code class="python">for t in range(steps):
+    for example in data:
+        dw = gradient(loss, example, w)
+        w = w - learning_rate * dw</code></pre>
+
+    <h3 class="card-title">Local optima</h3>
+    <ul>
+      <li>In high dimensions, when gradient is 0, it is almost always saddle points rather than local optima (So it is unlikely for the optimization algorithm to stuck at bad local optima)</li>
+      <li>Plateaus (where derivatives are close to 0) can slow down the learning</li>
+    </ul>
+
+<pre><code class="python">import torch
+import torch.nn as nn
+
+def train():
+
+    model = nn.Linear(4,2)
+
+    criterion = torch.nn.MSELoss()
+    optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
+
+    for epoch in range(10):
+        # Convert inputs and labels to variable.
+        inputs = torch.Tensor([0.8,0.4,0.4,0.2])
+        labels = torch.Tensor([1,0])
+
+        # Clear gradient buffers because we don't want any gradient from previous epoch to carry forward.
+        optimizer.zero_grad()
+
+        # Get output from the model from the inputs.
+        outputs = model(inputs)
+
+        # Get loss for the predicted output.
+        loss = criterion(outputs, labels)
+        print(loss)
+
+        # Get gradients w.r.t to parameters.
+        loss.backward()
+
+        # Update parameters.
+        optimizer.step()
+
+        print('epoch {}, loss {}'.format(epoch, loss.item()))
+
+if __name__ == "__main__":
+    train()</code></pre>
+
+    <h2 class="card-title">Gradient Optimization</h2>
+
+    <h3 class="card-title">Exponentially weighted averages (Moving average)</h3>
+    <ul>
+      <li>\( v_{t} = \beta v_{t-1} + (1-\beta) \theta_{t-1} \)</li>
+      <li>\( v_{t} \) is approximately averaging over \( \frac{1}{\beta-1} \) data points.</li>
+      <li>To improve initial phase of estimates, use \( \frac{v_{t}}{1-\beta} \). However, in ML, we don't usually bother with bias in the initial phase</li>
+    </ul>
+
+    <h3 class="card-title">Momentum</h3>
+    <ul>
+      <li>On vertical axis, we want slower learning & reduce oscilation ( \( \textbf{b} \) direction )</li>
+      <li>On horizontal axis, we want faster learning ( \( \textbf{W} \) direction )</li>
+      <li>Initialize \( \textbf{V}_{dW} = \textbf{V}_{db} = 0 \)</li>
+      <li>On each iteration \( t \)</li>
+      <ul>
+        <li>Compute \( \textbf{dW} \) and \( \textbf{db} \)</li>
+        <li>\( \textbf{V}_{dW} = \beta \textbf{V}_{dW} + (1-\beta) \textbf{dW} \)</li>
+        <li>\( \textbf{V}_{db} = \beta \textbf{V}_{db} + (1-\beta) \textbf{db} \)</li>
+        <li>\( \textbf{W} = \textbf{W} - \alpha \textbf{V}_{dW} \)</li>
+        <li>\( \textbf{b} = \textbf{b} - \alpha \textbf{V}_{db} \)</li>
+        <li>\( \beta \) is commonly chosen to be \( 0.9 \)</li>
+      </ul>
+      <li>On vertical direction, the derivates will average out to zero</li>
+      <li>Velocity is the running mean of gradients including the direction</li>
+      <li>At every step, update velocity, then update weights with the velocity</li>
+    </ul>
+
+<pre><code class="python">def initialize_velocity(parameters):
+
+    L = len(parameters) // 2  # Number of layers in the neural networks
+    v = {}
+
+    # Initialize velocity
+    for l in range(L):
+        v["dW" + str(l+1)] = np.zeros((parameters["W" + str(l+1)].shape[0], parameters["W" + str(l+1)].shape[1]))
+        v["db" + str(l+1)] = np.zeros((parameters["b" + str(l+1)].shape[0], parameters["b" + str(l+1)].shape[1]))
+
+    return v</code></pre>
+
+<pre><code class="python">def update_parameters_with_momentum(parameters, grads, v, beta, learning_rate):
+
+    L = len(parameters) // 2  # Number of layers in the neural networks
+
+    for l in range(L):
+        v["dW" + str(l+1)] = beta * v["dW" + str(l+1)] + (1- beta) * grads["dW" + str(l+1)]
+        v["db" + str(l+1)] = beta * v["db" + str(l+1)] + (1- beta) * grads["db" + str(l+1)]
+        parameters["W" + str(l+1)] = parameters["W" + str(l+1)] - learning_rate * v["dW" + str(l+1)]
+        parameters["b" + str(l+1)] = parameters["b" + str(l+1)] - learning_rate * v["db" + str(l+1)]
+
+    return parameters, v</code></pre>
+
+<pre><code class="python">for t in range(steps):
+    dw = gradient(loss, w)
+    v = beta * v + (1-beta) * dw
+    w = w - learning_rate * v</code></pre>
+
+    <h3 class="card-title">RMSprop</h3>
+    <ul>
+      <li>RMSprop has the same motivation as momentum</li>
+      <li>Initialize \( \textbf{S}_{dW} = \textbf{S}_{db} = 0 \)</li>
+      <li>On each iteration \( t \)</li>
+      <ul>
+        <li>Compute \( \textbf{dW} \) and \( \textbf{db} \)</li>
+        <li>\( \textbf{S}_{dW} = \beta \textbf{S}_{dW} + (1-\beta) \textbf{dW}^{2} \) (Square is applied to element-wise)</li>
+        <li>\( \textbf{S}_{db} = \beta \textbf{S}_{db} + (1-\beta) \textbf{db}^{2} \) (Square is applied to element-wise)</li>
+        <li>\( \textbf{W} = \textbf{W} - \alpha \frac{\textbf{dW}}{\sqrt{\textbf{S}_{dW}}+\epsilon} \)</li>
+        <li>\( \textbf{b} = \textbf{b} - \alpha \frac{\textbf{db}}{\sqrt{\textbf{S}_{db}}+\epsilon} \)</li>
+        <li>\( \epsilon \) is in order not to divide by zero</li>
+      </ul>
+      <li>We want small \( \textbf{S}_{dW} \) and large \( \textbf{S}_{db} \)</li>
+    </ul>
+
+<pre><code class="python">for t in range(steps):
+    dw = gradient(loss, w)
+    squared_gradients = beta * squared_gradients + (1-beta) * dw * dw
+    w = w - learning_rate * (dw/(squared_gradients.sqrt()+e)</code></pre>
+
+    <h3 class="card-title">Adam (Adaptive moment estimation)</h3>
+    <ul>
+      <li>Initialize \( \textbf{V}_{dW} = \textbf{V}_{db} = \textbf{S}_{dW} = \textbf{S}_{db} = 0 \)</li>
+      <li>On each iteration \( t \)</li>
+      <ul>
+        <li>Compute \( \textbf{dW} \) and \( \textbf{db} \)</li>
+        <li>\( \textbf{V}_{dW} = \beta_{1} \textbf{V}_{dW} + (1-\beta_{1}) \textbf{dW} \)</li>
+        <li>\( \textbf{V}_{db} = \beta_{1} \textbf{V}_{db} + (1-\beta_{1}) \textbf{db} \)</li>
+        <li>\( \textbf{S}_{dW} = \beta_{2} \textbf{S}_{dW} + (1-\beta_{2}) \textbf{dW}^{2} \)</li>
+        <li>\( \textbf{S}_{db} = \beta_{2} \textbf{S}_{db} + (1-\beta_{2}) \textbf{db}^{2} \)</li>
+        <li>\( \textbf{V}_{dW, corrected} = \dfrac{\textbf{V}_{dW}}{1-\beta_{1}^{t}} \)</li>
+        <li>\( \textbf{V}_{db, corrected} = \dfrac{\textbf{V}_{db}}{1-\beta_{1}^{t}} \)</li>
+        <li>\( \textbf{S}_{dW, corrected} = \dfrac{\textbf{S}_{dW}}{1-\beta_{2}^{t}} \)</li>
+        <li>\( \textbf{S}_{db, corrected} = \dfrac{\textbf{S}_{db}}{1-\beta_{2}^{t}} \)</li>
+        <li>\( \textbf{W} = \textbf{W} - \alpha \dfrac{\textbf{V}_{dW, corrected}}{\sqrt{\textbf{S}_{dW, corrected}}+\epsilon} \)</li>
+        <li>\( \textbf{b} = \textbf{b} - \alpha \dfrac{\textbf{V}_{db, corrected}}{\sqrt{\textbf{S}_{db, corrected}}+\epsilon} \)</li>
+        <li>\( \beta_{1} \) is commonly chosen to be \( 0.9 \)</li>
+        <li>\( \beta_{2} \) is commonly chosen to be \( 0.999 \)</li>
+      </ul>
+    </ul>
+
+<pre><code class="python">def initialize_adam(parameters):
+
+    L = len(parameters) // 2  # Number of layers in the neural networks
+    v = {}
+    s = {}
+
+    for l in range(L):
+        v["dW" + str(l+1)] = np.zeros((parameters["W" + str(l+1)].shape[0], parameters["W" + str(l+1)].shape[1]))
+        v["db" + str(l+1)] = np.zeros((parameters["b" + str(l+1)].shape[0], parameters["b" + str(l+1)].shape[1]))
+        s["dW" + str(l+1)] = np.zeros((parameters["W" + str(l+1)].shape[0], parameters["W" + str(l+1)].shape[1]))
+        s["db" + str(l+1)] = np.zeros((parameters["b" + str(l+1)].shape[0], parameters["b" + str(l+1)].shape[1]))
+
+    return v, s</code></pre>
+
+<pre><code class="python">def update_parameters_with_adam(parameters, grads, v, s, t, learning_rate = 0.01, beta1 = 0.9, beta2 = 0.999,  epsilon = 1e-8):
+
+    L = len(parameters) // 2  # Number of layers in the neural networks
+    v_corrected = {}
+    s_corrected = {}
+
+    for l in range(L):
+        v["dW" + str(l+1)] = beta1 * v["dW" + str(l+1)] + (1-beta1) * grads["dW" + str(l+1)]
+        v["db" + str(l+1)] = beta1 * v["db" + str(l+1)] + (1-beta1) * grads["db" + str(l+1)]
+        v_corrected["dW" + str(l+1)] = v["dW" + str(l+1)] / (1 - np.square(beta1))
+        v_corrected["db" + str(l+1)] = v["db" + str(l+1)] / (1 - np.square(beta1))
+        s["dW" + str(l+1)] = beta2 * s["dW" + str(l+1)] + (1-beta2) * np.square(grads["dW" + str(l+1)])
+        s["db" + str(l+1)] = beta2 * s["db" + str(l+1)] + (1-beta2) * np.square(grads["db" + str(l+1)])
+        s_corrected["dW" + str(l+1)] = s["dW" + str(l+1)] / (1 - np.square(beta2))
+        s_corrected["db" + str(l+1)] = s["db" + str(l+1)] / (1 - np.square(beta2))
+        parameters["W" + str(l+1)] = parameters["W" + str(l+1)] - learning_rate * v_corrected["dW" + str(l+1)] / ( np.sqrt(s_corrected["dW" + str(l+1)]) + epsilon)
+        parameters["b" + str(l+1)] = parameters["b" + str(l+1)] - learning_rate * v_corrected["db" + str(l+1)] / ( np.sqrt(s_corrected["db" + str(l+1)]) + epsilon)
+
+    return parameters, v, s</code></pre>
+
+<pre><code class="python">for t in range(steps):
+    dw = gradient(loss, w)
+    moment1 = beta1 * moment1 + (1-beta1) * dw
+    moment2 = beta2 * moment2 + (1-beta2) * dw * dw
+    moment1_unbiased = moment1 / (1-beta1**t)
+    moment2_unbiased = moment2 / (1-beta2**t)
+    w = w - learning_rate * moment1_unbiased / (moment2_unbiased.sqrt()+e)</code></pre>
+
+    <h2 class="card-title">Normalization</h2>
+
+    <h3 class="card-title">L1 norm</h3>
+    <ul>
+      <li>Used in logistic regression</li>
+      <li>Performs well on sparse data</li>
+      <li>Does not have analytical solution</li>
+      <li>\( J = \dfrac{1}{m}\displaystyle\sum_{i=1}^{m} L(\hat{y}_{i},y_{i}) + \dfrac{\lambda}{2m}||\textbf{W}||_{1} \)</li>
+    </ul>
+
+    <h3 class="card-title">L2 norm</h3>
+    <ul>
+      <li>Used in logistic regression</li>
+      <li>Performs better than L1 in practice</li>
+      <li>Useful when features are correlated</li>
+      <li>Has analytical solution</li>
+      <li>\( J = \dfrac{1}{m}\displaystyle\sum_{i=1}^{m} L(\hat{y}_{i},y_{i}) + \dfrac{\lambda}{2m}||\textbf{W}||_{2}^{2} \)</li>
+      <li>\( ||\textbf{W}||^{2} = \displaystyle\sum_{j=1}^{n_{x}}\textbf{W}_{j}^{2} = \textbf{W}^{T}\textbf{W} \)</li>
+    </ul>
+
+    <h3 class="card-title">Frobenius norm</h3>
+    <ul>
+      <li>Used in neural network</li>
+      <li>\( J = \dfrac{1}{m}\displaystyle\sum_{i=1}^{m} L(\hat{y}_{i},y_{i}) + \dfrac{\lambda}{2m}\displaystyle\sum_{l=1}^{m}||\textbf{W}^{[l]}||_{F}^{2} \)</li>
+      <li>\( ||\textbf{W}^{[l]}||_{F}^{2} = \displaystyle\sum_{i=1}^{n^{[l-1]}}\displaystyle\sum_{j=1}^{n^{[l]}}(\textbf{W}_{ij}^{[l]})^{2} \)</li>
+      <li>Add \( \dfrac{\lambda}{m}\textbf{W}^{[l]} \) to \( \textbf{dW}^{[l]} \)</li>
+      <li>\( \textbf{W}^{[l]} = \textbf{W}^{[l]} - \alpha \textbf{dW}^{[l]} \) remains the same</li>
+    </ul>
+
+    <h3 class="card-title">Forward prop</h3>
+
+<pre><code class="python">def forward_propagation(X, parameters):
+
+    W1 = parameters["W1"]
+    b1 = parameters["b1"]
+    W2 = parameters["W2"]
+    b2 = parameters["b2"]
+    W3 = parameters["W3"]
+    b3 = parameters["b3"]
+
+    # LINEAR -> RELU -> LINEAR -> RELU -> LINEAR -> SIGMOID
+    Z1 = np.dot(W1, X) + b1
+    A1 = relu(Z1)
+    Z2 = np.dot(W2, A1) + b2
+    A2 = relu(Z2)
+    Z3 = np.dot(W3, A2) + b3
+    A3 = sigmoid(Z3)
+
+    cache = (Z1, A1, W1, b1, Z2, A2, W2, b2, Z3, A3, W3, b3)
+
+    return A3, cache</code></pre>
+
+    <h3 class="card-title">Cost function</h3>
+    <ul>
+      <li>\( J_{regularized} = \underbrace{-\dfrac{1}{m} \displaystyle\sum_{i = 1}^{m}  \left(y^{(i)}\log\left(\textbf{a}^{[L](i)}\right) + (1-y^{(i)})\log\left(1-\textbf{a}^{[L](i)}\right)\right)}_\text{cross-entropy cost} + \underbrace{\dfrac{1}{m} \dfrac{\lambda}{2} \displaystyle\sum_{l}\displaystyle\sum_{k}\displaystyle\sum_{j} {\textbf{W}_{k,j}^{[l]}}^{2} }_\text{L2 regularization cost} \)</li>
+    </ul>
+
+<pre><code class="python">def compute_cost_with_regularization(A3, Y, parameters, lambd):
+
+    m = Y.shape[1]
+    W1 = parameters["W1"]
+    W2 = parameters["W2"]
+    W3 = parameters["W3"]
+
+    cross_entropy_cost = compute_cost(A3, Y)
+
+    L2_regularization_cost = lambd * ( np.sum(np.square(W1)) + np.sum(np.square(W2)) + np.sum(np.square(W3)) ) / (2 * m)
+
+    cost = cross_entropy_cost + L2_regularization_cost
+
+    return cost</code></pre>
+
+    <h3 class="card-title">Backward prop</h3>
+
+<pre><code class="python">def backward_propagation_with_regularization(X, Y, cache, lambd):
+
+    m = X.shape[1]
+    (Z1, A1, W1, b1, Z2, A2, W2, b2, Z3, A3, W3, b3) = cache
+
+    dZ3 = A3 - Y
+
+    dW3 = 1./m * np.dot(dZ3, A2.T) + (lambd * W3 / m)
+    db3 = 1./m * np.sum(dZ3, axis=1, keepdims = True)
+
+    dA2 = np.dot(W3.T, dZ3)
+    dZ2 = np.multiply(dA2, np.int64(A2 > 0))
+    dW2 = 1./m * np.dot(dZ2, A1.T) + (lambd * W2 / m)
+    db2 = 1./m * np.sum(dZ2, axis=1, keepdims = True)
+
+    dA1 = np.dot(W2.T, dZ2)
+    dZ1 = np.multiply(dA1, np.int64(A1 > 0))
+    dW1 = 1./m * np.dot(dZ1, X.T) + (lambd * W1 / m)
+    db1 = 1./m * np.sum(dZ1, axis=1, keepdims = True)
+
+    gradients = {"dZ3": dZ3, "dW3": dW3, "db3": db3,"dA2": dA2,
+                 "dZ2": dZ2, "dW2": dW2, "db2": db2, "dA1": dA1,
+                 "dZ1": dZ1, "dW1": dW1, "db1": db1}
+
+    return gradients</code></pre>
+
+<pre><code class="python">def model(X, Y, learning_rate = 0.3, num_iterations = 30000, lambd = 0):
+
+    grads = {}
+    costs = []
+    m = X.shape[1]
+    layers_dims = [X.shape[0], 20, 3, 1]
+
+    parameters = initialize_parameters(layers_dims)
+
+    for i in range(0, num_iterations):
+
+        a3, cache = forward_propagation(X, parameters)
+
+        cost = compute_cost_with_regularization(a3, Y, parameters, lambd)
+
+        grads = backward_propagation_with_regularization(X, Y, cache, lambd)
+
+        parameters = update_parameters(parameters, grads, learning_rate)
+
+    return parameters</code></pre>
+
+    <h2 class="card-title">Regularization</h2>
+
+    <h3 class="card-title">Dropout</h3>
+    <ul>
+      <li>Most effective regularization in neural network</li>
+      <li>Nodes in each layer in randomly deactivated in forward pass</li>
+      <li>In each iteration, only \( 1-\rho \) trained (Neurons are deactivated with probability \( \rho \))</li>
+      <li>Why dropout works</li>
+      <ul>
+        <li>For a particular neuron, its inputs can get eliminiated</li>
+        <li>Thus, the neuron become reluctant to put too much weight on one input feature</li>
+        <li>Rather, it wants to spread out weights, leading to smaller weights</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Inverted dropout</h3>
+    <ul>
+      <li>During training time</li>
+      <ul>
+        <li><code>keep_prob = 0.8</code> (20% chance that units will be shutdown)</li>
+        <li><code>d = np.random.rand(a.shape[0], a.shape[1]) < keep_prob</code></li>
+        <li><code>a = np.multiply(a,d)</code></li>
+        <li><code>a /= keep_prod</code></li>
+      </ul>
+      <li>Each layer in the network could have different <code>keep_prob</code>, but it will increase the number of hyperparameters to tune</li>
+      <li>Dropout is not to be used during test time</li>
+      <li>Cost function is no longer well-defined</li>
+    </ul>
+
+    <h3 class="card-title">Forward prop</h3>
+
+<pre><code class="python">def forward_propagation_with_dropout(X, parameters, keep_prob = 0.5):
+
+    np.random.seed(1)
+
+    # retrieve parameters
+    W1 = parameters["W1"]
+    b1 = parameters["b1"]
+    W2 = parameters["W2"]
+    b2 = parameters["b2"]
+    W3 = parameters["W3"]
+    b3 = parameters["b3"]
+
+    Z1 = np.dot(W1, X) + b1
+    A1 = relu(Z1)
+
+    D1 = np.random.rand(A1.shape[0], A1.shape[1])
+    D1 = (D1 < keep_prob).astype(int)
+    A1 = A1 * D1
+    A1 = A1 / keep_prob
+
+    Z2 = np.dot(W2, A1) + b2
+    A2 = relu(Z2)
+
+    D2 = np.random.rand(A2.shape[0], A2.shape[1])
+    D2 = (D2 < keep_prob).astype(int)
+    A2 = A2 * D2
+    A2 = A2 / keep_prob
+    Z3 = np.dot(W3, A2) + b3
+    A3 = sigmoid(Z3)
+
+    cache = (Z1, D1, A1, W1, b1, Z2, D2, A2, W2, b2, Z3, A3, W3, b3)
+
+    return A3, cache</code></pre>
+
+    <h3 class="card-title">Cost function</h3>
+
+<pre><code class="python">def compute_cost(A, Y):
+
+    m = Y.shape[1]
+
+    logprobs = np.multiply(-np.log(A),Y) + np.multiply(-np.log(1 - A), 1 - Y)
+    cost = 1./m * np.nansum(logprobs)
+
+    return cost</code></pre>
+
+   <h3 class="card-title">Backward prop</h3>
+
+<pre><code class="python">def backward_propagation_with_dropout(X, Y, cache, keep_prob):
+
+    m = X.shape[1]
+    (Z1, D1, A1, W1, b1, Z2, D2, A2, W2, b2, Z3, A3, W3, b3) = cache
+
+    dZ3 = A3 - Y
+    dW3 = 1./m * np.dot(dZ3, A2.T)
+    db3 = 1./m * np.sum(dZ3, axis=1, keepdims = True)
+    dA2 = np.dot(W3.T, dZ3)
+
+    dA2 = dA2 * D2
+    dA2 = dA2 / keep_prob
+
+    dZ2 = np.multiply(dA2, np.int64(A2 > 0))
+    dW2 = 1./m * np.dot(dZ2, A1.T)
+    db2 = 1./m * np.sum(dZ2, axis=1, keepdims = True)
+
+    dA1 = np.dot(W2.T, dZ2)
+
+    dA1 = dA1 * D1
+    dA1 = dA1 / keep_prob
+
+    dZ1 = np.multiply(dA1, np.int64(A1 > 0))
+    dW1 = 1./m * np.dot(dZ1, X.T)
+    db1 = 1./m * np.sum(dZ1, axis=1, keepdims = True)
+
+    gradients = {"dZ3": dZ3, "dW3": dW3, "db3": db3,"dA2": dA2,
+                 "dZ2": dZ2, "dW2": dW2, "db2": db2, "dA1": dA1,
+                 "dZ1": dZ1, "dW1": dW1, "db1": db1}
+
+    return gradients</code></pre>
+
+<pre><code class="python">def model(X, Y, learning_rate = 0.3, num_iterations = 30000, print_cost = True, lambd = 0, keep_prob = 1):
+
+    grads = {}
+    costs = []
+    m = X.shape[1]
+    layers_dims = [X.shape[0], 20, 3, 1]
+
+    parameters = initialize_parameters(layers_dims)
+
+    for i in range(0, num_iterations):
+
+        a3, cache = forward_propagation_with_dropout(X, parameters, keep_prob)
+
+        cost = compute_cost(a3, Y)
+
+        grads = backward_propagation_with_dropout(X, Y, cache, keep_prob)
+
+        parameters = update_parameters(parameters, grads, learning_rate)
+
+    return parameters</code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href=""></a>
+    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a>
   </div>
 </div>
 
 <div class="card mb-4" id="deep-learning-specialization-">
   <div class="card-body">
+    <h2 class="card-title">Structuring Machine Learning Projects</h2>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="deep-learning-specialization-">
+  <div class="card-body">
+    <h2 class="card-title">Convolutional Neural Betwork</h2>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="deep-learning-specialization-">
+  <div class="card-body">
+    <h2 class="card-title">Sequence Model</h2>
+
     <h2 class="card-title">Word Embedding</h2>
 
     <h3 class="card-title">One-hot vector</h3>
@@ -2427,1855 +1662,53 @@ pred_test = predict(test_x, test_y, parameters)</code></pre>
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization/">Deep Learning Specialization</a>
+    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a>
   </div>
 </div>
 
-<div class="card mb-4" id="transformer-">
+<!-- <div class="card mb-4" id="deep-learning-specialization-">
   <div class="card-body">
-    <h2 class="card-title">Transformer</h2>
+    <h2 class="card-title">Learning Rate Decay</h2>
     <ul>
-      <li>Original transformer was used for machine translation</li>
-      <li>Training data consisted of 4.5M English-German sentence pairs and 3.6M English-French sentence pairs</li>
-      <li>Training base model took 12 hours for 100k steps on a machine with 8 NVIDIA P100 GPUs</li>
-      <li>Training big model took 3.5 days for 300k steps</li>
-      <li>Adam optimizer was used with varying learning rates (linear during start, then decresing going forward)</li>
+      <li>An example of adaptive learning rate</li>
+      <li>Helps gradient descent converge by taking smaller steps as it approaches the minimum</li>
+      <li>We want bigger \( \alpha \) in the beginning but smaller \( \alpha \) near the optimum</li>
+      <li>Let <code>decay_rate</code> \( = dr \)</li>
+      <li>Let <code>num_epocs</code> \( = ne \)</li>
+      <li>\( \alpha = \dfrac{1}{dr * ne}\alpha_{0} \)</li>
     </ul>
 
-    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/ml-0/transformer-1.png" style="width: 500px; height: 700px" alt="Card image cap">
-
+    <h3 class="card-title">Learning rate scheduler</h3>
     <ul>
-      <li>Output of layer \( l \) is becomes the input of layer \( l+1 \) until prediction is reached</li>
-      <li>There is no RNN or LSTM</li>
-      <li>There are 6 layers of encoder stack and 6 layers of decoder stack</li>
-      <li>Multi-head attention runs \( 8 \) attentions in parallel</li>
-    </ul>
-
-    <h3 class="card-title">Encoder stack</h3>
-
-    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/ml-0/transformer-2.png" style="width: 300px; height: 500px" alt="Card image cap">
-
-    <ul>
-      <li>Structure</li>
-      <ul>
-        <li>Two sublayers</li>
-        <ul>
-          <li>Multi-head attention</li>
-          <li>Fully connected position-wise feed forward</li>
-        </ul>
-        <li>Each sublayer has residual connection</li>
-        <ul>
-          <li>Transmit unprocessed input X of sublayer to layer normalization function</li>
-          <li>Ensure key information like positional encoding is not lost on the way</li>
-          <li>\( \text{LayerNormalization}(x+\text{sublayer}(x)) \)</li>
-        </ul>
-        <li>Output of every sublayer \( d_{\text{model}} \) remain constant</li>
-        <ul>
-          <li>All key operations in transformer is dot product</li>
-          <li>Reduces computation</li>
-        </ul>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Decoder stack</h3>
-
-    <img class="img-fluid" class="card-img-top" src="/machine-learning/image/ml-0/transformer-3.png" style="width: 300px; height: 700px" alt="Card image cap">
-
-    <ul>
-      <li>Masked multi-head attention</li>
-      <ul>
-        <li>Model must not see future words</li>
-        <li>In the output, at a given position, all subsequent words are masked (values are replaced with \( -\infty \))</li>
-        <li>Only lets attention apply to positions up to and including current position</li>
-      </ul>
-      <li>Multi-head attention</li>
-      <ul>
-        <li>Only attends to positions up to current position</li>
-        <li>This avoid seeing the sequence it must predict</li>
-        <li>Draws \( K, V \) from encoder and \( Q \) from decoder (masted multi-head attention) to compute attention</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Use case</h3>
-    <ul>
-      <li>Translation</li>
-      <ul>
-        <li>Input is English sentence, which goes through encoder layer</li>
-        <li>Output is French sentence, which goes through decoder layer</li>
-      </ul>
+      <li>Adjusts the learning rate between epochs or iterations</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
-    Reference: Transformers for Natural Language Processing, Denis Rothman
+    Reference: <a href="https://www.deeplearning.ai/deep-learning-specialization">Deep Learning Specialization</a>
   </div>
-</div>
+</div> -->
 
-<div class="card mb-4" id="transformer-">
+<!-- <div class="card mb-4" id="deep-learning-specialization-">
   <div class="card-body">
-    <h2 class="card-title">Input Embedding</h2>
+    <h2 class="card-title">Multi-head Neural Network</h2>
     <ul>
-      <li>Converts input tokens to vector of \( d_{\text{model}} = 512 \) dimension using learned embeddings</li>
-      <li>Tokenizer transforms a sentence into tokens (input_ids)</li>
-      <li>Same word is represented by the same token (input_id)</li>
+      <li>Backbone - generates feature map</li>
+      <li>Head - solve specific tasks</li>
+      <li>Features are shared between different heads</li>
+      <img class="img-fluid" class="card-img-top" src="/machine-learning/image/ml-0/multi-head-neural-network-1.png" style="width: 500px; height: 200px" alt="Card image cap">
+      <li>For example, backbone can learn embeddings (In this case, feature map would be embeddings)</li>
       <ul>
-        <li>Ex. text = "The cat slept on the couch.It was too tired to get up."</li>
-        <li>Ex. input_ids = [1996, 4937, 7771, 2006, 1996, 6411, 1012, 2009, 2001, 2205, 5458, 2000, 2131, 2039, 1012]</li>
+        <li>Alternatively, backbone can be fixed (Ex. BERT)</li>
       </ul>
-      <li>An embedding method (Ex. skip gram) is used to convert each word to a vector of \( 512 \) numbers</li>
-      <ul>
-        <li>Ex. black = [[-0.01206071 ... -0.04273562]]</li>
-        <li>Ex. brown = [[0.00135794589 ... -0.0490022525]]</li>
-      </ul>
+      <li>Then, each head can perform spam detection, sentiment analysis, etc using the embedding generated by backbone</li>
+      <li>Each head computes losses from their own tasks, which are summed to generate the total loss</li>
     </ul>
-  <div class="card-footer text-muted">
-    Reference: Transformers for Natural Language Processing, Denis Rothman
-  </div>
-</div>
-
-<div class="card mb-4" id="transformer-">
-  <div class="card-body">
-    <h2 class="card-title">Positional Encoding</h2>
-    <ul>
-      <li>Considers position of a word in a sentence</li>
-      <li>For each word, create a vector of \( d_{\text{model}} = 512 \) dimension</li>
-      <ul>
-        <li>\( PE_{pos 2i} = \sin\left(\dfrac{pos}{10000^{\frac{2i}{d_{\text{model}}}}}\right) \)</li>
-        <ul>
-          <li>Applied to even position in the vector of \( d_{\text{model}} = 512 \)</li>
-        </ul>
-        <li>\( PE_{pos 2i+1} = \cos\left(\dfrac{pos}{10000^{\frac{2i}{d_{\text{model}}}}}\right) \)</li>
-        <ul>
-          <li>Applied to odd position in the vector of \( d_{\text{model}} = 512 \)</li>
-        </ul>
-      </ul>
-      <li>Original authors added positional encoding to input embedding to produce final encoding</li>
-      <li>To minimize loss of information of word embedding, we can multiply word embedding by \( \sqrt{d_{\text{model}}} \)</li>
-      <li>Positional encoding is computed once and re-used throughout the training</li>
-<pre><code class="python">def encoding(pos, positional_vector)
-  for i in range(0, 512,2):
-      val =  pos / (10000**((2*i)/d_model))
-      positional_vector[0][i] = math.sin(val)
-      positional_vector[0][i+1] = math.cos(val)
-      positional_encoding[0][i] = (embedding_vector[0][i]*math.sqrt(d_model)) + positional_vector[0][i]
-      positional_encoding[0][i+1] = (embedding_vector[0][i+1]*math.sqrt(d_model)) + positional_vector[0][i+1]</code></pre>
-    </ul>
-  <div class="card-footer text-muted">
-    Reference: Transformers for Natural Language Processing, Denis Rothman
-  </div>
-</div>
-
-<div class="card mb-4" id="transformer-">
-  <div class="card-body">
-    <h2 class="card-title">Attention</h2>
-    <ul>
-      <li>Unlike RNN where each token goes to network one by one, attention <strong>relates every token to every other tokens</strong></li>
-      <li>Input sentence is represented as \( Q, K, V \) where these matrices are multipled to find relationship between all words to all words</li>
-      <ul>
-        <li>Value of diagonal element should be the highest since a word would stongly be related to itself</li>
-        <li>Dimension of \( Q, K, V \) is \( n \times  d_{\text{model}} \)</li>
-        <li>A word is represented by \( d_{\text{model}} \) vector</li>
-        <li>Number of words in vocabulary is represented by \( n \)</li>
-      </ul>
-      <li>\( \text{Attention}(Q,K,V) = \text{softmax} \left( \dfrac{QK^{T}}{\sqrt{d_{k}}} \right) V \)</li>
-      <ul>
-        <li>For large values of \( d_{k} \), dot product becomes big and softmax function can have very small gradient, so scale by \( \frac{1}{\sqrt{d_{k}}} \)</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Multi-head attention</h3>
-    <ul>
-      <li>Input \( (\text{max_seq_len} \times d_{\text{model}}) \)</li>
-      <li>\( Q \) \( (\text{max_seq_len} \times d_{\text{model}}) \)</li>
-      <li>\( K \) \( (\text{max_seq_len} \times d_{\text{model}}) \)</li>
-      <li>\( V \) \( (\text{max_seq_len} \times d_{\text{model}}) \)</li>
-      <li>\( W_{O} \) \( (d_{\text{model}} \times d_{\text{model}}) \)</li>
-      <li>\( W_{Q} \) \( (d_{\text{model}} \times d_{\text{model}}) \)</li>
-      <li>\( W_{K} \) \( (d_{\text{model}} \times d_{\text{model}}) \)</li>
-      <li>\( W_{V} \) \( (d_{\text{model}} \times d_{\text{model}}) \)</li>
-      <li>\( Q^{\prime} \) - \( (Q \times W_{Q}) \), matrix where each query that has dimension \( (\text{max_seq_len} \times d_{\text{model}}) \)</li>
-      <li>\( K^{\prime} \) - \( (K \times W_{K}) \), matrix where each key that has dimension \( (\text{max_seq_len} \times d_{\text{model}}) \)</li>
-      <li>\( V^{\prime} \) - \( (V \times W_{V}) \), matrix where each value that has dimension \( (\text{max_seq_len} \times d_{\text{model}}) \)</li>
-      <li>\( Q^{\prime} \) is split into \( Q_{1} \dots Q_{8} \) \( (d_{k} \times \text{max_seq_len}) \) where each head only sees smaller part of embedding of words</li>
-      <li>\( K^{\prime} \) is split into \( K_{1} \dots K_{8} \)</li>
-      <li>\( V^{\prime} \) is split into \( V_{1} \dots V_{8} \)</li>
-      <li>\( \text{head}_{i} \) - \( (d_{k} \times \text{max_seq_len}) \) is computed from \( Q_{i}, K_{i}, V_{i} \)</li>
-      <li>\( \text{Multi-head attention}(Q,K,V) = \text{Concat}(\text{head}_{1} \dots \text{head}_{h}) W_{O} \) \( (\text{max_seq_len} \times d_{\text{model}}) \)</li>
-      <li>Each head watches different aspect of word</li>
-      <ul>
-        <li>A head may learn a word as noun</li>
-        <li>Another head may learn the same word as verb</li>
-        <li>Another head may learn the same word as adjective</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Multi-head attention</h3>
-    <ul>
-      <li>Each word is represented by vector of \( 512 \) dimension</li>
-      <li>Ex. The cat sat on the rug and it was dry-cleaned</li>
-      <li>Model is trained to find if "it" is related to "cat" or "rug"</li>
-      <li>There are \( 8 \) heads whose dimension is \( 64 \)</li>
-      <li>In each head, weight matrices whose dimension is \( 512 \times 64 \) must be trained</li>
-      <ul>
-        <li>\( W_{Q} \) - train the queries</li>
-        <li>\( W_{K} \) - train the keys</li>
-        <li>\( W_{V} \) - train the values</li>
-      </ul>
-      <li>Example</li>
-      <ul>
-        <li>Represent the input</li>
-        <ul>
-          <li>Assume \( 3 \) input tokens (or words)</li>
-          <li>Assume \( d_{\text{model}} = 4 \)</li>
-<pre><code class="python">X = np.array([[1.0, 0.0, 1.0, 0.0],   # Input token 1
-            [0.0, 2.0, 0.0, 2.0],   # Input token 2
-            [1.0, 1.0, 1.0, 1.0]])  # Input token 3</code></pre>
-        </ul>
-        <li>Initialize the weight matrices</li>
-        <ul>
-          <li>Assume \( d_{k} = 3 \)</li>
-<pre><code class="python">W_query = np.array([[1, 0, 1],
-                  [1, 0, 0],
-                  [0, 0, 1],
-                  [0, 1, 1]])
-W_key = np.array([[0, 0, 1],
-                [1, 1, 0],
-                [0, 1, 0],
-                [1, 1, 0]])
-W_value = np.array([[0, 2, 0],
-                  [0, 3, 0],
-                  [1, 0, 3],
-                  [1, 1, 0]])</code></pre>
-        </ul>
-        <li>Compute \( Q, K, V \)</li>
-        <ul>
-          <li>Assume there is one set of \( W_{Q}, W_{K}, W_{V} \) for all inputs</li>
-<pre><code class="python">Q = np.matmul(X, W_query)
-K = np.matmul(X, W_key)
-V = np.matmul(X, W_value)</code></pre>
-        </ul>
-        <li>Compute attention score</li>
-        <ul>
-          <li>\( \text{Attention}(Q,K,V) = \text{softmax} \left( \dfrac{QK^{T}}{\sqrt{d_{k}}} \right) V \)</li>
-<pre><code class="python">d_k = 1   # Square root of k_d simplified to 1 for this example
-attention_scores = (Q@K.transpose()) / d_k</code></pre>
-          <li>Softmax score for each input token</li>
-<pre><code class="python">attention_scores[0] = softmax(attention_scores[0])
-attention_scores[1] = softmax(attention_scores[1])
-attention_scores[2] = softmax(attention_scores[2])</code></pre>
-          <li>Attention for each input token</li>
-<pre><code class="python">attention1 = attention_scores[0].reshape(-1,1)
-attention1 = attention_scores[0][0] * V[0]
-attention2 = attention_scores[0][1] * V[1]
-attention3 = attention_scores[0][2] * V[2]</code></pre>
-          <li>Sum up the result</li>
-<pre><code class="python">attention_input1 = attention1 + attention2 + attention3</code></pre>
-        </ul>
-      </ul>
-    </ul>
+<pre><code class="python"></code></pre>
   </div>
   <div class="card-footer text-muted">
-    Reference: Attention Is All You Need, Ashish Vaswani et al | Transformers for Natural Language Processing, Denis Rothman
+    Reference: <a href=""></a>
   </div>
-</div>
-
-<div class="card mb-4" id="transformer-">
-  <div class="card-body">
-    <h2 class="card-title">Post-layer Normalization</h2>
-    <ul>
-      <li>Add</li>
-      <ul>
-        <li>Processes residual connections, which transports unprocessed input \( X \) to normalization</li>
-        <li>This prevents key information, such as positional encoding, from being lost on the way</li>
-      </ul>
-      <li>Layer normalization</li>
-      <ul>
-        <li>For each sentence, compute mean and variance of all words in the sentence</li>
-        <li>Then, standardized each value using the mean and variance</li>
-        <li>\( \gamma \) and \( \beta \) is multiplied and added to allow model to amplify the values</li>
-        <li>\( \text{LayerNormalization}(v) = \gamma \dfrac{v-\mu}{\sqrt{\sigma^{2}+\epsilon}} + \beta \)</li>
-        <li>\( \epsilon \) is added so that the values don't become too big or too small</li>
-        <ul>
-          <li>\( \mu \) is the mean of \( v \) of dimension \( d \)</li>
-          <ul>
-            <li>\( \mu = \dfrac{1}{d} \displaystyle\sum_{k=1}^{d} v_{k} \)</li>
-          </ul>
-          <li>\( \sigma \) is the standard deviation of \( v \) dimension \( d \)</li>
-          <ul>
-            <li>\( \sigma^{2} = \dfrac{1}{d} \displaystyle\sum_{k=1}^{d} (v_{k}-\mu) \)</li>
-          </ul>
-          <li>\( \gamma \) is a scaling vector</li>
-          <li>\( \beta \) is a bias vector</li>
-        </ul>
-      </ul>
-    </ul>
-  <div class="card-footer text-muted">
-    Reference: Transformers for Natural Language Processing, Denis Rothman
-  </div>
-</div>
-
-<div class="card mb-4" id="transformer-">
-  <div class="card-body">
-    <h2 class="card-title">Feedforward Network</h2>
-    <ul>
-      <li>Contains two layers and applies ReLU</li>
-      <li>Input and output has \( d_{\text{model}} = 512 \) but inner layer has \( d_{\text{ff}} = 2048 \)</li>
-      <li>\( \text{FFN}(x) = max(0, xW_{1} + b_{1})W_{2} + b_{2} \)</li>
-      <li>Can be considered as two convolutions with size \( 1 \) kernels</li>
-      <li>Output goes to layer normalization, then to next layer of encoder and multi-head attention layer of decoder</li>
-    </ul>
-  <div class="card-footer text-muted">
-    Reference: Transformers for Natural Language Processing, Denis Rothman
-  </div>
-</div>
-
-<div class="card mb-4" id="transformer-">
-  <div class="card-body">
-    <h2 class="card-title">Transformer Evaluation</h2>
-
-    <h3 class="card-title">Human</h3>
-    <ul>
-      <li>Input - perception of raw events for layer 0</li>
-      <li>Output - language</li>
-      <li>Transduction - trial-and-error</li>
-      <ul>
-        <li>Take structure we perceive and represent them with patterns</li>
-      </ul>
-      <li>We learn that many events are related (Ex. sunrise-light, sunset-dark, etc)</li>
-      <li>New borns are find-tuned for many tasks by previous generations (Ex. we are taught that fire burns us)</li>
-    </ul>
-
-    <h3 class="card-title">Transformer</h3>
-    <ul>
-      <li>Perform transductions connecting all the tokens (subwords) that occur together in language sequence</li>
-      <li>Build inductions from these transductions</li>
-      <li>Train those inductions based on tokens to produce patterns of tokens</li>
-    </ul>
-
-    <h3 class="card-title">Attention</h3>
-    <ul>
-      <li>Attention sublayers can process millions of example for their inductive thinking operations</li>
-      <li>Attention sublayers find patterns in sequences through transduction and induction</li>
-      <li>Attention sublayers memorize these patterns using parameters that are stored with their model</li>
-    </ul>
-
-    <h3 class="card-title">SuperGLUE (GLUE - General language understanding evaluation)</h3>
-    <ul>
-      <li>Choice of plausible answers (COPA)</li>
-      <ul>
-        <li>Transformer chooses most plausible answer to a question</li>
-      </ul>
-      <li>BoolQ</li>
-      <ul>
-        <li>Yes-or-no answer task</li>
-      </ul>
-      <li>Commitment bank (CB)</li>
-      <ul>
-        <li>Transformer reads a premise, then examine a hypothesis</li>
-        <li>Hypothesis confirms the premise or contradict it</li>
-        <li>Transformer must label the hypothesis as neutral, entailment, or contradiction of the premise</li>
-      </ul>
-      <li>Multi-sentence reading comprehension (MultiRC)</li>
-      <ul>
-        <li>Transformer reads a text and choose from several possible choices</li>
-      </ul>
-      <li>Reading comprehension with commonsense reasoning dataset (ReCoRD)</li>
-      <ul>
-        <li>Dataset contains over 120,000 queries for more than 70,000 news articles</li>
-        <li>Transformer uses common-sense to solve the problems</li>
-      </ul>
-      <li>Recognizing textual entailment (RTE)</li>
-      <ul>
-        <li>Transformer must read the premise, examine a hypothesis, and predict the label of entailment hypothesis status</li>
-      </ul>
-      <li>Words in context (WiC)</li>
-      <ul>
-        <li>Transformer analyzes two sentences and determine whether the target word has the same meaning in both sentences</li>
-      </ul>
-      <li>The Winograd schemae challence (WSC)</li>
-      <ul>
-        <li>Each sentence contains an occupation, a participant, and a pronoun</li>
-        <li>Transformer determines whether the pronoun is coreferent with the occupation or the participant</li>
-      </ul>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: Transformers for Natural Language Processing, Denis Rothman
-  </div>
-</div>
-
-<div class="card mb-4" id="transformer-">
-  <div class="card-body">
-    <h2 class="card-title">T5</h2>
-    <ul>
-      <li>Stands for text-to-text transfer transformer</li>
-      <li>One input format for every task submitted to the transformer</li>
-      <li>Same model, hyperparameter, optimizer for a wide range of tasks</li>
-      <ul>
-        <li>Add a prefix to input sequence</li>
-        <li>Ex. translate English to German + [sequence] for machine translation problem</li>
-        <li>Ex. cola sentence + [sequence] for corpus of linguistic acceptability</li>
-        <li>Ex. stsb sentence + [sequence] for semantic textual similarity benchmarks</li>
-        <li>Ex. summarize + [sequence] for text summarization problem</li>
-      </ul>
-      <li>Same architecture as original transformer except</li>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: Transformers for Natural Language Processing, Denis Rothman
-  </div>
-</div>
-
-<div class="card mb-4" id="transformer-">
-  <div class="card-body">
-    <h2 class="card-title">Transformer Implementation</h2>
-<pre><code class="python">import torch
-import torch.nn as nn
-
-class InputEmbedding(nn.Module):
-
-    def __init__(self, vocab_size:int, d_model:int):
-        self.vocal_size = vocab_size
-        self.d_model = d_model
-        self.embedding = nn.Embedding(num_embeddings=vocab_size, embedding_dim=d_model)
-
-    def forward(self, x):
-        return self.embedding(x) * math.sqrt(self.d_model)
-
-class PositionalEncoding(nn.Module):
-
-    def __init__(self, seq_len:int, d_model:int, dropout: float):
-        self.seq_len = seq_len
-        self.d_model = d_model
-        self.dropout = nn.Dropout(p=dropout)
-
-        # Matrix of shape (seq_len, d_model)
-        pe = torch.zeros(seq_len, d_model)
-        # Vector of shape (seq_len, 1) This represents position of word in sentence
-        position = torch.arange(0, seq_len, dtype=torch.float).unsqueeze(1)
-        div_term = torch.exp(torch.arange(0, d_model, 2).float()*-(math.log(10000.0)/d_model))
-
-        # Apply sin to even indices
-        pos_enc[:, 0::2] = torch.sin(position*div_term)
-        # Apply cos to odd indices
-        pos_enc[:, 1::2] = torch.cos(position*div_term)
-
-        # (1, max_seq_len, d_model) We will have batch of sentences
-        pos_enc = pos_enc.unsqueeze(0)
-
-        # Save tensor as file since positional encoding is not learnable parameter
-        self.register_buffer('pos_enc', pos_enc)
-
-    def forward(self, x):
-        # Add positional encoding to every word in sentence
-        # No need to store grad in tensor
-        x = x + self.pe[:, :x.shape(1), :].requires_grad(False)
-        return self.dropout(x)
-
-class LayerNormalization(nn.Module):
-
-    def __init__(self, epsilon: float = 10**-6):
-        self.epsilon = epsilon
-        self.gamma = nn.Parameter(torch.ones(1))
-        self.beta = nn.Parameter(torch.zeros(1))
-
-    def forward(self, x):
-        mean = x.mean(dim=-1, keepdim=True)
-        std = x.std(dim=-1, keepdim=True)
-        return self.gamma * (x-mean) / (std+epsilon) + self.beta
-
-class FeedForwardNetwork(nn.Module):
-
-    def __init__(self, d_model: int, d_ff: float, dropout: float):
-        self.linear_1 = nn.Linear(d_model, d_ff)  # W1 and B1
-        self.dropout = nn.Dropout(dropout)
-        self.linear_2 = nn.Linear(d_ff, d_model)  # W2 and B2
-
-    def forward(self, x):
-        # (batch, max_seq_len, d_model) -> (batch, max_seq_len, d_ff) -> (batch, max_seq_len, d_model)
-        return self.linear2(self.dropout(torch.relu(self.linear_1(x))))
-
-class MultiHeadAttention(nn.Module):
-
-    def __init__(self, d_model: int, num_heads: int, dropout: float):
-        self.d_model = d_model
-        self.num_heads = num_heads
-        self.d_k = d_model // num_heads
-
-        self.w_q = nn.Linear(d_model, d_model)
-        self.w_k = nn.Linear(d_model, d_model)
-        self.w_v = nn.Linear(d_model, d_model)
-        self.w_o = nn.Linear(d_model, d_model)
-
-        self.dropout = nn.Dropout(dropout)
-
-    @staticmethod
-    def attention(self, q, k, v, mask):
-        d_k = query.shape[-1]
-
-        attention_scores = (query @ key.transpose(-2, -1)) / math.sqrt(d_k)
-        if mask:
-            attention_scores.masked_fill_(mask==0, -1e9)  # -1e9 represents negative infinity
-        attention_scores = attention_scores.softmax(dim-1)  # (batch, num_heads, seq_len, seq_len)
-
-        if dropout:
-            attention_scores = self.dropout(atten_scores)
-
-        return (attention_scores @ value), attention_scores
-
-    def forward(self, q, k, v, mask):
-        query = self.w_q(q)  # (batch, seq_len, d_model) -> (batch, seq_len, d_model)
-        key = self.w_q(k)  # (batch, seq_len, d_model) -> (batch, seq_len, d_model)
-        value = self.w_q(v)  # (batch, seq_len, d_model) -> (batch, seq_len, d_model)
-
-        # (batch, seq_len, d_model) -> (batch, seq_len, num_heads, d_k) -> (batch, num_heads, seq_len, d_k)
-        query = query.view(query.shape[0], query.shape[1], self.num_heads, self.d_k).transpose(1, 2)
-        key = key.view(key.shape[0], key.shape[1], self.num_heads, self.d_k).transpose(1, 2)
-        value = value.view(value.shape[0], value.shape[1], self.num_heads, self.d_k).transpose(1, 2)
-
-        x, self.attention_scores = MultiHeadAttention.attention(query, key, value, mask, self.dropout)
-
-class ResidualConnection(nn.Module):
-
-    def __init__(self, dropout: float):
-        self.dropout = nn.Dropout(dropout)
-        self.norm = LayerNormalization()
-
-    def forward(self, x, sublayer):
-        return x + self.dropout(sublayer(self.norm))</code></pre>
-
-<pre><code class="python">class EncoderBlock(nn.Module):
-
-    def __init__(self, multihead_attention: MultiHeadAttention, feed_forward: FeedForwardNetwork, dropout: float):
-        self.multihead_attention = multihead_attention
-        self.feed_forward = feed_forward
-        self.residual_connection = nn.ModuleList([ResidualConnection(dropout) for _ in range(2)])
-
-    # src_mask is needed in encoder because we don't want padded words to interact with other words
-    def forward(self, x, src_mask):
-        x = self.residual_connection[0](x, lambda x: self.multihead_attention(x, x, x, src_mask))
-        x = self.residual_connection[1](x, self.feed_forward)
-        return x
-
-class Encoder(nn.Module):
-
-    def __init__(self, layers: nn.ModuleList):
-        self.layers = layers
-        self.norm = LayerNormalization()
-
-    def forward(self, x):
-        for layer in self.layers:
-            x = layer(x, mask)
-        return self.norm(x)
-
-class DecoderBlock(nn.Module):
-
-    def __init__(self, multihead_attention: MultiHeadAttention, cross_attention: MultiHeadAttention, feed_forward: FeedForwardNetwork, dropout: float):
-        self.multihead_attention = multihead_attention
-        self.cross_attention = cross_attention
-        self.feed_forward = feed_forward
-        self.residual_connection = nn.ModuleList([ResidualConnection(dropout\) for _ in range(3)])
-
-    # src_mask is needed in encoder because we don't want padded words to interact with other words
-    def forward(self, x, encoder_output, src_mask, tgt_mast):
-        x = self.residual_connection[0](x, lambda x: self.multihead_attention(x, x, x, tgt_mask))
-        x = self.residual_connection[0](x, lambda x: self.cross_attention(x, encoder_output, encoder_output, src_mask))
-        x = self.residual_connection[1](x, self.feed_forward)
-        return x
-
-class Decoder(nn.Module):
-
-    def __init__(self, layers: nn.ModuleList):
-        self.layers = layers
-        self.norm = LayerNormalization()
-
-    def forward(self, encoder_output, src_mask, tgt_mask):
-        for layer in self.layers:
-            x = layer(x, encoder_output, src_mask, tgt_mask)
-        return self.norm(x)
-
-class Projection(nn.Module):
-
-    def __init__(self, vocab_size:int, d_model:int):
-        self.vocal_size = vocab_size
-        self.d_model = d_model
-        self.projection = nn.Linear(d_model, vocab_size)
-
-    def forward(self, x):
-        # (batch, max_seq_len, d_model) -> (batch, max_seq_len, vocab_size)
-        return torch.log_softmax(self.projection(x), dim=-1)</code></pre>
-
-<pre><code class="python">class Transformer(nn.Module):
-
-    def __init__(self, encoder: Encoder, deconder: Decoder, src_embedding: InputEmbedding, tgt_embedding:InputEmbedding, src_position: PositionalEncoding, tgt_position: PositionalEncoding, projection: Projection):
-        self.encoder = encoder
-        self.decoder = decoder
-        self.src_embedding = src_embedding
-        self.tgt_embedding = tgt_embedding
-        self.src_position = src_position
-        self.tgt_position = tgt_position
-        self.projection = projection
-
-    def encode(self, src, src_mask):
-        src = self.src_embedding(src)
-        src = self.src_position(src)
-        return self.encoder(src, src_mask)
-
-    def decode(self, encoder_output, src_mask, tgt, tgt_mask):
-        tgt = self.tgt_embedding(tgt)
-        tgt = self.src_position(tgt)
-        return self.encoder(tgt, encoder_output, src_mask, tgt_mask)
-
-    def project(self, x):
-        return self.projection(x)
-
-def build_transformer(src_vocab_size: int, tgt_vocab_size: int, src_seq_len: int, tgt_seq_len: int, d_model=512, num_layers=6, num_heads=8, dropout=0.1, d_ff=2048):
-
-    # Create embedding layers
-    src_embedding = InputEmbedding(src_vocab_size, d_model)
-    tgt_embedding = InputEmbedding(tgt_vocab_size, d_model)
-
-    # Positional encoding layers
-    src_position = PositionalEncoding(d_model, src_seq_len, dropout)
-    tgt_position = PositionalEncoding(d_model, tgt_seq_len, dropout)
-
-    # Encoder
-    encoders = []
-    for _ in range(n):
-        encoders.append(EncoderBlock(MultiHeadAttention(d_model, num_heads, dropout), FeedForwardNetwork(d_model, d_ff, dropout), dropout))
-    encoder = Encoder(nn.ModuleList(encoders))
-
-    # Decoder
-    decoders = []
-    for _ in range(n):
-        decoders.append(DecoderBlock(MultiHeadAttention(d_model, num_heads, dropout), CrossAttention(d_model, h, dropout), FeedForwardNetwork(d_model, d_ff, dropout), dropout))
-    decoder = Decoder(nn.ModuleList(decoders))
-
-    transformer(encoder, decoder, src_embedding, tgt_embedding, src_positional, tgt_position, Projection(d_model, tgt_vocab_size))
-
-    # Initialize parameter
-    for p in transformer.parameters():
-        if p.dim() > 1:
-            nn.init.xavier_uniform_(p)
-
-    return transformer</code></pre>
-
-<pre><code class="python">import torch
-import torch.nn as nn
-
-from torch.utils.data import Dataset, DataLoader, random_split
-from torch.utils.tensorboard import SummaryWriter
-from datasets import load_dataset
-from tokenizers import Tokenizer
-from tokenizers.model import WordLevel
-from tokenizers.trainers import WordLevelTrainer
-from tokenizers.pre_tokenizers import Whitespace
-from pathlib import Path
-from tqdm import tqdm
-
-def greedy_decode(model, source, source_mask, tokenizer_src, tokenizer_tgt, max_len, device):
-    sos_index = tokenizer_tgt.token_to_id("[SOS]")
-    eos_index = tokenizer_tgt.token_to_id("[EOS]")
-
-    # Precompute encoder output and reuse it for every token we get from the decoder
-    encoder_output = model.encode(source, source_mask)
-
-    # Initialize decoder input with sos token
-    decoder_input = torch.empty(1,1).fill_(sos_index).type_as(source).to(device)
-
-    while True:
-        if decoder_input.size(1) == max_len:
-            break
-
-        # Build mask for target (decoder input)
-        decoder_mask = casual_mask(decoder_input.size(1)).type_as(source_mask).to(device)
-
-        # Compute decoder output
-        out = model.decode(encoder_output, source_mask, decoder_input, decoder_mask)
-
-        # Get next token
-        prob = model.preject(out[:,-1])
-
-        # Select token with max probability
-        _, next_word = torch.max(prob, dim=1)
-
-        decoder_input = torch.cat([decoder_input, torch.empty(1,1).type_as(source).fill_(next_word.item()).to(device)], dim=1)
-
-        if next_word = eos_index:
-            break
-
-    return decoder_input.squeeze(0)
-
-def run_validation(model, validation_dataset, tokenizer_src, tokenizer_tgt, max_len, device, print_msg, global_step, writer, num_examples=2):
-    model.eval()
-    count = 0
-
-    # size of control window
-    control_width = 80
-
-    with torch.no_grad():
-        for batch in validation_dataset:
-            count += 1
-
-            encoder_input = batch["encoder_input"].to(device)
-            encoder_mask = batch["encoder_mask"].to(device)
-
-            model_out = greedy_decode(model, source, source_mask, tokenizer_src, tokenizer_tgt, max_len, device)
-
-            src_text = batch["src_text"][0]
-            tgt_text = batch["tgt_text"][0]
-            model_out_text = tokenizer_tgt.decode(model_out.detach().cpu().numpy())
-
-            print_msg("-"*control_with)
-            print_msg(f"SOURCE: {src_text}")
-            print_msg(f"TARGET: {tgt_text}")
-            print_msg(f"PREDICTED: {model_out_text}")
-
-            if count == num_examples:
-                break
-
-def get_all_sentences(dataset, language):
-    for item in dataset:
-        yield item["translation"][language]
-
-def get_or_build_tokenizer(config, dataset, language):
-    tokenizer_path = Path(config["tokenizer_file"].format(language))
-    if not Path.exist(tokenizer_path):
-        tokenizer = Tokenizer(WordLevel(unk_token="[UNK]"))
-        tokenizers.pre_tokenizers = WhiteSpace()
-        trainer = WordLevelTrainer(special_tokens=["[UNK]", "[PAD]", "[SOS]", "[EOD]"], min_frequency=2)
-        tokenizer.train_from_iterator(get_all_sentences(dataset, language), trainer=trainer)
-        tokenizer.save(str(tokenizer_path))
-    else:
-        tokenizer = Tokenizer.from_file(str(tokenizer_path))
-    return tokenizer
-
-def get_dataset(config):
-    dataset_raw = load_dataset("opus_books", f"{config["lang_src"]}-{config["lang_tgt"]}", split="train")
-
-    # Build tokenizer
-    tokenizer_src = get_or_build_tokenizer(config, dataset_raw, config["lang_src"])
-    tokenizer_tgt = get_or_build_tokenizer(config, dataset_raw, config["lang_tgt"])
-
-    # 90-10 split
-    train_dataset_size = int(0.9*len(dataset_raw))
-    validation_dataset_size = int(0.1*len(dataset_raw))
-    train_dataset_raw, validation_dataset_raw = random_split(dataset_raw, [train_dataset_size, validation_dataset_size])
-
-    train_dataset = BilingualDataset(train_dataset_raw, tokenizer_src, tokenizer_tgt, config["lang_src"], config["lang_tgt"], config["seq_len"])
-    validation_dataset = BilingualDataset(validation_dataset_raw, tokenizer_src, tokenizer_tgt, config["lang_src"], config["lang_tgt"], config["seq_len"])
-
-    max_len_src, max_len_tgt = 0, 0
-
-    for item in dataset_raw:
-        src_ids = tokenizer_src.encode(item["translation"][config["lang_src"]]).ids
-        tgt_ids = tokenizer_src.encode(item["translation"][config["lang_tgt"]]).ids
-        max_len_src = max(max_len_src, len(src_ids))
-        max_len_tgt = max(max_len_tgt, len(tgt_ids))
-
-    train_dataloader = DataLoader(trains_dataset, batch_size=config["batch_size"], shuffle=True)
-    validation_dataloader = DataLoader(validation_dataset, batch_size=1, shuffle=True)
-
-    return train_dataloader, validation_dataloader, tokenizer_src, tokenizer_tgt
-
-def get_model(config, src_vocal_len, tgt_vocal_len):
-
-    model = build_transformer(src_vocal_len, tgt_vocal_len, config["seq_len"], config["seq_len"], config["d_model"])
-    return model
-
-def train_model(config):
-
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print("Using device {device}")
-
-    Path(config["model_folder"]).mkdir(parents=True, exist_ok=True)
-
-    train_dataloader, val_dataloader, tokenizer_src, tokenizer_tgt = get_ds(config)
-
-    write = SummaryWriter(config["experiment_name"])
-
-    optimizer =
-
-    initial_epoch = 0
-    global_step = 0
-    if config["preload"]:
-        model_filename = get_weights_file_path(config, config["preload"])
-        print("Pre-loading model {model_filename}")
-        state = torch.load(model_filename)
-        initial_epoc = state["epoch"] + 1
-        optimizer.load_state_dict(state["optimizer_state_dict"])
-        global_step = state["global_step"]
-
-    loss_fn = nn.CrossEntropyLoss(ignore_index=tokenizer_src.token_to_id("[PAD]"), label_smoothing=0.1).to(device)
-
-    for epoch in range(initial_epoc, config["num_epocs"]):
-        
-        batch_iterator = tqdm(train_dataloader, desc=f'Processing epoch {epochL:02d}')
-
-        for batch in batch_iterator:
-            model.train()
-
-            encoder_input = batch["encoder_input"].to(device)  # (8, seq_len)
-            decoder_input = batch["decoder_input"].to(device)  # (8, seq_len)
-            encoder_mask = batch["encoder_mask"].to(device)  # (8, 1, 1, seq_len)
-            decoder_mask = batch["decoder_mask"].to(device)  # (8, 1, seq_len, seq_len)
-
-            # Run tensors through transformer
-            encoder_output = model.encode(encoder_input, encoder_mask)  # (8, seq_len, d_model)
-            decoder_output = model.decode(encoder_output, encoder_mask, decoder_input, decoder_mask)  # (8, seq_len, d_model)
-            proj_output = model.project(decoder_output)  # (8, seq_len, tgt_vocab_size)
-
-            label = batch["label"].to(device)  # (8, seq_len)
-
-            # (8, seq_len, tgt_vocab_size) -> # (8 * seq_len, tgt_vocab_size)
-            loss = loss_fn(proj_output.view(-1, tokenizer_tgt.get_vocab_size()), label_view(-1))
-            batch_iterator.set_postfix({f"loss": f"{loss.item():6.3f}"})
-
-            # Log the loss
-            writer.add_scalar("train_loss", loss.item(), global_step)
-            writer.flush()
-
-            # Backprop
-            loss.backward()
-
-            # Update weights
-            optimizer.stop()
-            optimizer.zero_grad()
-
-            global_step += 1
-
-        run_validation(model, val_dataloader, tokenizer_src, tokenizer_tgt, config["seq_len"], device, lambda msg: batch_iterator.write(msg), global_step, writer, num_examples=2)
-
-        # Save model at the end of every epoch
-        model_filename = get_weights_file_path(config, f"{epoch:02d}")
-        torch.save({
-            "epoch": epoch,
-            "model_state_dict": model.state_dict(),
-            "optimizer_state_dict": optimizer.state_dict(),
-            "global_step": global_step()
-        }, model_filename)
-
-if __name__ == "main":
-    warnings.filterwarnings("ignore")
-    config = get_config()
-    train_model(config)</code></pre>
-
-<pre><code class="python">import torch
-import torch.nn as nn
-
-from torch.utils.data import Dataset
-
-class BilingualDataset(Dataset):
-
-    def __init__(self, dataset, tokenizer_src, tokenizer_tgt, src_lang, tgt_lang, seq_len):
-
-        self.dataset = dataset
-        self.tokenizer_src = tokenizer_src
-        self.tokenizer_tgt = tokenizer_tgt
-        self.src_lang = src_lang
-        self.tgt_lang = tgt_lang
-        self.seq_len = seq_len
-
-        self.sos_token = torch.Tensor(tokenizer_src.token_to_id(["SOS"], dtype=torch.int64))
-        self.eos_token = torch.Tensor(tokenizer_src.token_to_id(["EOS"], dtype=torch.int64))
-        self.pad_token = torch.Tensor(tokenizer_src.token_to_id(["PAD"], dtype=torch.int64))
-
-    def __len__(self):
-
-        return len(self.dataset)
-
-    def __get_item__(self, index: any):
-        src_tgt_pair = self.dataset[index]
-        src_text = src_tgt_pair["translation"][src_lang]
-        tgt_text = src_tgt_pair["translation"][tgt_lang]
-
-        enc_input_tokens = self.tokenizer_src.encode(src_text).ids
-        dec_input_tokens = self.tokenizer_tgt.encode(tgt_text).ids
-
-        enc_num_padding_tokens = self.seq_len - len(enc_input_tokens) - 2
-        dec_num_padding_tokens = self.seq_len - len(dec_input_tokens) - 1
-
-        if enc_num_padding_tokens < 0 or dec_num_padding_tokens < 0:
-            raise ValueError("sentence is too long")
-
-        # Add SOS and EOS to source text
-        encoder = torch.cat(
-            [
-                self.sos_token,
-                torch.tensor(enc_input_tokens, dtype=torch.int64),
-                self.eos_token,
-                torch.tensor([self.pad_token] * enc_num_padding_tokens, dtype=torch.int64)
-            ]
-        )
-
-        # Add SOS to target text
-        decoder = torch.cat(
-            [
-                self.sos_token,
-                torch.tensor(dec_input_tokens, dtype=torch.int64),
-                torch.tensor([self.pad_token] * dec_num_padding_tokens, dtype=torch.int64)
-            ]
-        )
-
-        # Add EOS to label (ground truth - what we expect from decoder)
-        label = torch.cat(
-            [
-                torch.tensor(dec_input_tokens, dtype=torch.int64),
-                self.sos_token,
-                torch.tensor([self.pad_token] * dec_num_padding_tokens, dtype=torch.int64)
-            ]
-        )
-
-        return {
-            "encoder_input": encoder_input,  # (seq_len)
-            "decoder_input": decoder_input,  # (seq_len)
-            "encoder_mask": (encoder_input != self.pad_token).unsqeeze(0).unsqeeze(0).int(),  # (1, 1, seq_len)
-            "decoder_mask": (decoder_input != self.pad_token).unsqeeze(0).unsqeeze(0).int() & casual_mask(decoder_input.size(0)),  # (1, seq_len) (1, seq_len, seq_len)
-            "label": label,  # (seq_len)
-            "src_text": src_text,
-            "tgt_text": tgt_text
-        }
-
-    def casual_mask(size):
-
-        mask = torch.triu(torch.ones(1, size, size), diagonal=1).type(torch.int)
-        return mask == 0</code></pre>
-
-<pre><code>from pathlib import Path
-
-def get_config():
-
-    return {
-        "batch_size": 8,
-        "num_epocs": 20,
-        "lr": 10**-4,
-        "seq_len": 350,
-        "d_model": 512,
-        "lang_src": "en",
-        "lang_tgt": "it",
-        "model_folders": "weights",
-        "model_filename": "tmodel_",
-        "preload": None,
-        "tokenizer_file": "tokenizer_{0}.json",
-        "experiment_name": "runs/tmodel"
-    }
-
-def get_weights_file_path():
-    model_folder = config["model_folder"]
-    model_basename = config["model_basename"]
-    model_filename = config["model_filename"]
-    return str(Path('.')/model_folder/model_filename)</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: Umar Jamil
-  </div>
-</div>
-
-<div class="card mb-4" id="bert-">
-  <div class="card-body">
-    <h2 class="card-title">BERT (Bi-directional encoder representation from transformers)</h2>
-    <ul>
-      <li>Does not use decoder layers</li>
-      <li>Masked tokens are in the attention layers of the encoder</li>
-      <ul>
-        <li>Masked multi-head attention layer in the original transformer, that masks the rest of the sequence, impedes the attention process</li>
-        <ul>
-          <li>Ex., <q>The cat sat on it because it was a nice rug</q></li>
-          <li>If reached the word <q>it</q>, the input of the encode could be <q>The cat sat on it&lt;masked sequence&gt;</q></li>
-        </ul>
-        <li>Let attention head attend to all the words from left to right and right to left</li>
-        <li>Self-attention mask of an encoder could do the job without being hindered by the masked multi-head attention sub-layer of the decoder</li>
-      </ul>
-      <li>Input embedding and positional encoding of BERT sub-layer</li>
-      <ul>
-        <li>A sequence of words is broken down into tokens</li>
-        <li>A [MASK] token randomly replaces the inital word tokens for masked language modeling training</li>
-        <li>A [CLS] classification token is inserted at the beginning of a sequence for classification purpose</li>
-        <li>A [SEP] token separates two sentences for NSP training</li>
-        <li>Sentence embedding is added to token embedding, so that sentence A has a different sentence embedding value than sentence B</li>
-        <li>Positional encoding is learned (The positional encoding method of original transformer is not applied)</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Comparison</h3>
-    <ul>
-      <li>Original transformer</li>
-      <ul>
-        <li>Number of encoder and decoder stacks \( N = 6 \)</li>
-        <li>Number of dimensions \( d_{model} = 512 \)</li>
-        <li>Number of attention heads \( A = 8 \)</li>
-        <li>Number of dimensions of attention heads \( d_{k} = \dfrac{d_{model}}{A} = \dfrac{512}{8} = 64 \)</li>
-      </ul>
-      <li>BERT base</li>
-      <ul>
-        <li>Number of encoder stacks \( N = 12 \)</li>
-        <li>Number of dimensions \( d_{model} = 768 \)</li>
-        <li>Number of attention heads \( A = 12 \)</li>
-        <li>Number of dimensions of attention heads \( d_{k} = \dfrac{d_{model}}{A} = \dfrac{768}{12} = 64 \)</li>
-      </ul>
-      <li>BERT large</li>
-      <ul>
-        <li>Number of encoder stacks \( N = 24 \)</li>
-        <li>Number of dimensions \( d_{model} = 1024 \)</li>
-        <li>Number of attention heads \( A = 16 \)</li>
-        <li>Number of dimensions of attention heads \( d_{k} = \dfrac{d_{model}}{A} = \dfrac{1024}{16} = 64 \)</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Masked language modeling</h3>
-    <ul>
-      <li>BERT encoder makes a random token to make a prediction</li>
-      <ul>
-        <li>Ex. <q>The cat sat on it [MASK] because it was a nice rug.</q></li>
-      </ul>
-      <li>The multi-attention sub-layer can now see the whole sequence, run the self-attention process, and predict the masked token</li>
-      <li>Input sequence is masked in a tricky way</li>
-      <ul>
-        <li>Surprise the model by not masking a single token on 10% of dataset</li>
-        <ul>
-          <li>Ex. <q>The cat sat on it [because] it was a nice rug.</q></li>
-        </ul>
-        <li>Surprise the model by replacing the token with a random token on 10% of dataset</li>
-        <ul>
-          <li>Ex. <q>The cat sat on it [often] it was a nice rug.</q></li>
-        </ul>
-        <li>Replace a token by a [MASK] token on 80% of dataset</li>
-        <ul>
-          <li>Ex. <q>The cat sat on it [MASK] it was a nice rug.</q></li>
-        </ul>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Next sentence prediction</h3>
-    <ul>
-      <li>Input contains two sentences</li>
-      <ul>
-        <li>In 50% of the cases, the second sentence is the actual sentence of a document</li>
-        <li>In 50% of the cases, the second sentence is selected randomly</li>
-      </ul>
-      <li>Two new tokens are added</li>
-      <ul>
-        <li>[CLS] - binary classification token to predict if the second sentence follows the first sentence</li>
-        <li>[SEP] - separation token that signals the end of a sequence</li>
-        <li>Ex. <q>The cat slept on the rug. It likes sleeping all day.</q></li>
-        <ul>
-          <li>Becomes <q>[CLS] the cat slept on the rug [SEP] it likes sleep ##ing all day[SEP]</q></li>
-        </ul>
-      </ul>
-      <li>Additional encoding information is needed to distinguish sequence A from sequence B</li>
-      <li>Embedding process</li>
-      <ul>
-        <li>Input - [CLS] The cat slept on the rug [SEP] it likes sleep ##ing [SEP]</li>
-        <li>Token embeddings - E[CLS] E[The] E[cat] E[slept] E[on] E[the] E[rug] E[SEP] E[it] E[likes] E[sleep] E[##ing] E[SEP]</li>
-        <li>Sentence embeddings - E[A] E[A] E[A] E[A] E[A] E[A] E[A] E[A] E[B] E[B] E[B] E[B] E[B]</li>
-        <li>Positional embeddings - E[0] E[1] E[2] E[3] E[4] E[5] E[6] E[7] E[8] E[9] E[10] E[11] E[12]</li>
-        <li>Input embeddings are obtained by summing the token embeddings, sentence embeddings, and positional embeddings</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Pre-training and fune-tuning</h3>
-    <ul>
-      <li>Pre-training</li>
-      <ul>
-        <li>Define model architecture - number of layers, heads, dimensions, etc</li>
-        <li>Train the model on MLM and NSP tasks</li>
-      </ul>
-      <li>Fine-tuning</li>
-      <ul>
-        <li>Initialize downstream model chosen with trained parameters of pretained model</li>
-        <li>Fine-tune the parameters for specific downstream tasks (Ex. recognize textual entailment, question answering, situations with adversarial generations)</li>
-      </ul>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: Transformers for Natural Language Processing, Denis Rothman
-  </div>
-</div>
-
-<div class="card mb-4" id="bert-">
-  <div class="card-body">
-    <h2 class="card-title">Fine-tuning</h2>
-
-    <h3 class="card-title">Import modules</h3>
-
-<pre><code class="python">import transformers
-import torch
-import torch.nn as nn
-from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
-from keras.utils import pad_sequences
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import matthews_corrcoef
-from transformers import BertTokenizer, BertModel, BertConfig
-from transformers import AdamW, BertForSequenceClassification, get_linear_schedule_with_warmup
-from tqdm import tqdm, trange  # For progress bars
-import pandas as pd
-import io
-import numpy as np
-import matplotlib.pyplot as plt
-from IPython.display import Image  # For image rendering</code></pre>
-
-    <h3 class="card-title">Load dataset</h3>
-    <ul>
-      <li>Corpus of Linguistic Accepability (CoLA)</li>
-    </ul>
-
-<pre><code class="python">df = pd.read_csv("in_domain_train.tsv", delimiter='\t', header=None, names=['sentence_source', 'label', 'label_notes', 'sentence'])</code></pre>
-
-    <h3 class="card-title">Create sentences, label lists</h3>
-
-<pre><code class="python">labels = df.label.values
-sentences = df.sentence.values
-# Add CLS and SEP tokens at the beginning and end of each sentence
-sentences = ["[CLS] " + sentence + " [SEP]" for sentence in sentences]</code></pre>
-
-    <h3 class="card-title">Process data</h3>
-
-<pre><code class="python"># Set the maximum sequence length
-# The longest sequence in training set is 47, but will leave room on the end
-# In the original paper, the authors used a length of 512
-MAX_LEN = 128
-
-# Use BERT tokenizer to convert the tokens to their index numbers in the BERT vocabulary
-input_ids = [tokenizer.convert_tokens_to_ids(x) for x in tokenized_texts]
-
-# Pad our input tokens
-input_ids = pad_sequences(input_ids, maxlen=MAX_LEN, dtype="long", truncating="post", padding="post")</code></pre>
-
-    <h3 class="card-title">Create attention masks</h3>
-
-<pre><code class="python">attention_masks = []
-
-# Create a mask of 1s for each token followed by 0s for padding
-for seq in input_ids:
-    seq_mask = [float(i>0) for i in seq]
-    attention_masks.append(seq_mask)</code></pre>
-
-    <h3 class="card-title">Split data</h3>
-
-<pre><code class="python">train_inputs, validation_inputs, train_labels, validation_labels = train_test_split(input_ids, labels, random_state=2018, test_size=0.1)
-train_masks, validation_masks, _, _ = train_test_split(attention_masks, input_ids, random_state=2018, test_size=0.1)</code></pre>
-
-    <h3 class="card-title">Convert data to torch tensors</h3>
-
-<pre><code class="python">train_inputs = torch.tensor(train_inputs)
-validation_inputs = torch.tensor(validation_inputs)
-train_labels = torch.tensor(train_labels)
-validation_labels = torch.tensor(validation_labels)
-train_masks = torch.tensor(train_masks)
-validation_masks = torch.tensor(validation_masks)</code></pre>
-
-    <h3 class="card-title">Select batch size and create iterator</h3>
-
-<pre><code class="python"># Select a batch size for training
-# For fine-tuning BERT on a specific task, the authors recommend a batch size of 16 or 32
-batch_size = 32
-
-# Create an iterator of data with torch DataLoader
-# This helps save on memory during training
-# With an iterator (unlike a for loop) the entire dataset does not need to be loaded into memory
-
-train_data = TensorDataset(train_inputs, train_masks, train_labels)
-train_sampler = RandomSampler(train_data)
-train_dataloader = DataLoader(train_data, sampler=train_sampler, batch_size=batch_size)
-
-validation_data = TensorDataset(validation_inputs, validation_masks, validation_labels)
-validation_sampler = SequentialSampler(validation_data)
-validation_dataloader = DataLoader(validation_data, sampler=validation_sampler, batch_size=batch_size)</code></pre>
-
-    <h3 class="card-title">BERT model configuration</h3>
-
-<pre><code class="python"># Initialize BERT bert-base-uncased style configuration
-configuration = BertConfig()
-
-# Initialize model from bert-base-uncased style configuration
-model = BertModel(configuration)
-
-# Access the model configuration
-configuration = model.config</code></pre>
-
-    <h3 class="card-title">Load Hugging Face BERT uncased base model</h3>
-
-<pre><code class="python">model = BertForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=2)
-model = nn.DataParallel(model)
-model.to(device)</code></pre>
-
-    <h3 class="card-title">Optimizer grouped parameters</h3>
-
-<pre><code class="python"># Don't apply weight decay to any parameters whose names include these tokens
-# Here, the BERT doesn't have `gamma` or `beta` parameters, only `bias` terms
-param_optimizer = list(model.named_parameters())
-no_decay = ['bias', 'LayerNorm.weight']
-
-# Separate the `weight` parameters from the `bias` parameters
-#   For the `weight` parameters, this specifies a 'weight_decay_rate' of 0.01
-#   For the `bias` parameters, the 'weight_decay_rate' is 0.0
-optimizer_grouped_parameters = [
-    # Filter for all parameters which *don't* include 'bias', 'gamma', 'beta'
-    {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)],
-     'weight_decay_rate': 0.1},
-
-    # Filter for parameters which *do* include those
-    {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)],
-     'weight_decay_rate': 0.0}
-]
-# `optimizer_grouped_parameters` only includes the parameter values, not the names</code></pre>
-
-    <h3 class="card-title">Hyperparameters</h3>
-
-<pre><code class="python"># Number of training epochs (authors recommend between 2 and 4)
-epochs = 4
-
-optimizer = AdamW(optimizer_grouped_parameters,
-                  lr = 2e-5,  # args.learning_rate - default is 5e-5, our notebook had 2e-5
-                  eps = 1e-8  # args.adam_epsilon - default is 1e-8
-                  )
-# Total number of training steps is number of batches * number of epochs
-# `train_dataloader` contains batched data so `len(train_dataloader)` gives the number of batches
-total_steps = len(train_dataloader) * epochs
-
-# Create the learning rate scheduler
-scheduler = get_linear_schedule_with_warmup(optimizer,
-                                            num_warmup_steps = 0,  # Default value in run_glue.py
-                                            num_training_steps = total_steps)</code></pre>
-
-    <h3 class="card-title">Hyperparameters</h3>
-
-<pre><code class="python">def flat_accuracy(preds, labels):
-    pred_flat = np.argmax(preds, axis=1).flatten()
-    labels_flat = labels.flatten()
-    return np.sum(pred_flat == labels_flat) / len(labels_flat)</code></pre>
-
-<pre><code class="python">t = []
-
-# Store loss and accuracy for plotting
-train_loss_set = []
-
-# trange is a tqdm wrapper around the normal python range
-for _ in trange(epochs, desc="Epoch"):
-
-    # Training
-
-    # Set model to training mode
-    model.train()
-
-    # Tracking variables
-    tr_loss = 0
-    nb_tr_examples, nb_tr_steps = 0, 0
-
-    # Train the data for one epoch
-    for step, batch in enumerate(train_dataloader):
-
-        # Add batch to GPU
-        batch = tuple(t.to(device) for t in batch)
-
-        # Unpack the inputs from our dataloader
-        b_input_ids, b_input_mask, b_labels = batch
-
-        # Clear out the gradients (by default they accumulate)
-        optimizer.zero_grad()
-
-        # Forward pass
-        outputs = model(b_input_ids, token_type_ids=None, attention_mask=b_input_mask, labels=b_labels)
-        loss = outputs['loss']
-        train_loss_set.append(loss.item())
-
-        # Backward pass
-        loss.backward()
-
-        # Update parameters and take a step using the computed gradient
-        optimizer.step()
-
-        # Update the learning rate
-        scheduler.step()
-
-        # Update tracking variables
-        tr_loss += loss.item()
-        nb_tr_examples += b_input_ids.size(0)
-        nb_tr_steps += 1
-
-    print("Train loss: {}".format(tr_loss/nb_tr_steps))
-
-    # Validation
-
-    # Put model in evaluation mode to evaluate loss on the validation set
-    model.eval()
-
-    # Tracking variables
-    eval_loss, eval_accuracy = 0, 0
-    nb_eval_steps, nb_eval_examples = 0, 0
-
-    # Evaluate data for one epoch
-    for batch in validation_dataloader:
-
-        # Add batch to GPU
-        batch = tuple(t.to(device) for t in batch)
-
-        # Unpack the inputs from our dataloader
-        b_input_ids, b_input_mask, b_labels = batch
-
-        # Tell the model not to compute or store gradients, saving memory and speeding up validation
-        with torch.no_grad():
-            # Forward pass, calculate logit predictions
-            logits = model(b_input_ids, token_type_ids=None, attention_mask=b_input_mask)
-
-        # Move logits and labels to CPU
-        logits = logits['logits'].detach().cpu().numpy()
-        label_ids = b_labels.to('cpu').numpy()
-
-        tmp_eval_accuracy = flat_accuracy(logits, label_ids)
-
-        eval_accuracy += tmp_eval_accuracy
-        nb_eval_steps += 1</code></pre>
-
-    <h3 class="card-title">Predict and evaluate using the holdout dataset</h3>
-
-<pre><code class="python">df = pd.read_csv("out_of_domain_dev.tsv", delimiter='\t', header=None, names=['sentence_source', 'label', 'label_notes', 'sentence'])</code></pre>
-
-<pre><code class="python"># Create sentence and label lists
-sentences = df.sentence.values
-
-# We need to add special tokens at the beginning and end of each sentence for BERT to work properly
-sentences = ["[CLS] " + sentence + " [SEP]" for sentence in sentences]
-labels = df.label.values
-tokenized_texts = [tokenizer.tokenize(sent) for sent in sentences]
-
-MAX_LEN = 128
-
-# Use the BERT tokenizer to convert the tokens to their index numbers in the BERT vocabulary
-input_ids = [tokenizer.convert_tokens_to_ids(x) for x in tokenized_texts]
-# Pad our input tokens
-input_ids = pad_sequences(input_ids, maxlen=MAX_LEN, dtype="long", truncating="post", padding="post")
-# Create attention masks
-attention_masks = []
-
-# Create a mask of 1s for each token followed by 0s for padding
-for seq in input_ids:
-  seq_mask = [float(i>0) for i in seq]
-  attention_masks.append(seq_mask)
-
-prediction_inputs = torch.tensor(input_ids)
-prediction_masks = torch.tensor(attention_masks)
-prediction_labels = torch.tensor(labels)
-
-batch_size = 32
-
-prediction_data = TensorDataset(prediction_inputs, prediction_masks, prediction_labels)
-prediction_sampler = SequentialSampler(prediction_data)
-prediction_dataloader = DataLoader(prediction_data, sampler=prediction_sampler, batch_size=batch_size)</code></pre>
-
-<pre><code class="python">def softmax(logits):
-    e = np.exp(logits)
-    return e / np.sum(e)
-
-# Put model in evaluation mode
-model.eval()
-
-# Tracking variables
-raw_predictions, predicted_classes, true_labels = [], [], []
-
-# Predict
-for batch in prediction_dataloader:
-
-    # Add batch to GPU
-    batch = tuple(t.to(device) for t in batch)
-
-    # Unpack the inputs from dataloader
-    b_input_ids, b_input_mask, b_labels = batch
-
-    # Tell the model not to compute or store gradients, saving memory and speeding up prediction
-    with torch.no_grad():
-      # Forward pass, calculate logit predictions
-      outputs = model(b_input_ids, token_type_ids=None, attention_mask=b_input_mask)
-
-    # Move logits and labels to CPU
-    logits = outputs['logits'].detach().cpu().numpy()
-    label_ids = b_labels.to('cpu').numpy()
-
-    # Convert input_ids back to words
-    b_input_ids = b_input_ids.to('cpu').numpy()
-    batch_sentences = [tokenizer.decode(input_ids, skip_special_tokens=True) for input_ids in b_input_ids]
-
-    # Apply softmax function to convert logits into probabilities
-    probabilities = torch.nn.functional.softmax(torch.tensor(logits), dim=-1)
-
-    # The predicted class is the one with the highest probability
-    batch_predictions = np.argmax(probabilities, axis=1)
-
-    # Print the sentences and the corresponding predictions for this batch
-    for i, sentence in enumerate(batch_sentences):
-        print(f"Sentence: {sentence}")
-        print(f"Prediction: {logits[i]}")
-        print(f"Sofmax probabilities", softmax(logits[i]))
-        print(f"Prediction: {batch_predictions[i]}")
-        print(f"True label: {label_ids[i]}")
-
-    # Store raw predictions, predicted classes and true labels
-    raw_predictions.append(logits)
-    predicted_classes.append(batch_predictions)
-    true_labels.append(label_ids)</code></pre>
-
-    <h3 class="card-title">Evaluating using Matthews Correlation Coefficient</h3>
-    <ul>
-      <li>\( \text{MCC} = \dfrac{TP \times TN - FP \times FN}{\sqrt{(TP+FP)(TP+FN)(TN+FP)(TN+FN)}} \)</li>
-    </ul>
-
-<pre><code class="python"># Initialize an empty list to store Matthews correlation coefficient for each batch
-matthews_set = []
-
-# Iterate over each batch
-for i in range(len(true_labels)):
-    # Calculate the Matthews correlation coefficient for this batch
-
-    # true_labels[i] are the true labels for this batch
-    # predicted_classes[i] are the predicted classes for this batch
-    # We don't need to use np.argmax because predicted_classes already contains the predicted classes
-
-    matthews = matthews_corrcoef(true_labels[i], predicted_classes[i])
-
-    # Add the result to our list
-    matthews_set.append(matthews)
-
-# Flatten the true_labels and predicted_classes list of lists into single lists
-true_labels_flattened = [label for batch in true_labels for label in batch]
-predicted_classes_flattened = [pred for batch in predicted_classes for pred in batch]
-
-# Calculate the MCC for the entire set of predictions
-mcc = matthews_corrcoef(true_labels_flattened, predicted_classes_flattened)</code></pre>
-
-    <h3 class="card-title">Save the model</h3>
-    <ul>
-      <li>The saved <code>/content/model</code> director contains</li>
-      <ul>
-        <li><code>tokenizer_config.json</code> - configuration details specific to the tokenizer</li>
-        <li><code>special_tokens_map.json</code> - mappings for any special tokens</li>
-        <li><code>vocab.txt</code> - vocabulary of tokens that the tokenizer can recognize</li>
-        <li><code>added_tokens.json</code> - any tokens that were added to the tokenizer after its initial creation</li>
-      </ul>
-    </ul>
-
-<pre><code class="python"># Specify a directory to save your model and tokenizer
-save_directory = "/content/model"
-
-# If model is wrapped in DataParallel, access the original model using .module and then save
-if isinstance(model, torch.nn.DataParallel):
-    model.module.save_pretrained(save_directory)
-else:
-    model.save_pretrained(save_directory)
-
-# Save the tokenizer
-tokenizer.save_pretrained(save_directory)</code></pre>
-
-    <h3 class="card-title">Predict</h3>
-
-<pre><code class="python">def predict(sentence, model, tokenizer):
-
-    # Add [CLS] and [SEP] tokens
-    sentence = "[CLS] " + sentence + " [SEP]"
-
-    # Tokenize the sentence
-    tokenized_text = tokenizer.tokenize(sentence)
-
-    # Convert token to vocabulary indices
-    indexed_tokens = tokenizer.convert_tokens_to_ids(tokenized_text)
-
-    # Define a segment id (0 for all tokens; we don't have a second sequence)
-    segments_ids = [0] * len(tokenized_text)
-
-    # Convert inputs to PyTorch tensors
-    tokens_tensor = torch.tensor([indexed_tokens])
-    segments_tensors = torch.tensor([segments_ids])
-
-    # Make prediction
-    with torch.no_grad():
-        outputs = model(tokens_tensor, token_type_ids=segments_tensors)
-        logits = outputs.logits
-        predicted_label = torch.argmax(logits, dim=1).item()
-
-    return predicted_label</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: Transformers for Natural Language Processing, Denis Rothman
-  </div>
-</div>
-
-<div class="card mb-4" id="deep-learning-specialization-">
-  <div class="card-body">
-    <h2 class="card-title">Machine Translation</h2>
-    <ul>
-      <li>Choose a sentence to translate</li>
-      <li>Learn how words relate to each other with hundreds of millions of parameters</li>
-      <li>Learn the many ways in which words refer to each other</li>
-      <li>Use machine transduction to transfer the learned parameters to new sequences</li>
-      <li>Choose a candidate translation for a word or sequence</li>
-    </ul>
-
-    <h3 class="card-title">Preprocessing WMT dataset</h3>
-    <ul>
-      <li></li>
-      <li></li>
-      <li></li>
-    </ul>
-
-    <h3 class="card-title">Bilingual evaluation understudy score (BLUE)</h3>
-    <ul>
-      <li>Compares a candidate sentence (translated by machine) to reference sentences (translated by human)</li>
-      <li>Geometric evaluation</li>
-      <ul>
-        <li>\( P(N,C,R) = \displaystyle\prod_{n=1}^{N} p_{n} \)</li>
-        <li>\( C \) - candidate</li>
-        <li>\( R \) - reference</li>
-        <li>\( N \) - number of correct tokens found in \( C \)</li>
-      </ul>
-<pre><code class="python">from nltk.translate.bleu_score import sentence_bleu
-from nltk.translate.bleu_score import SmoothingFunction
-
-#Example 1
-reference = [['the', 'cat', 'likes', 'milk'], ['cat', 'likes' 'milk']]
-candidate = ['the', 'cat', 'likes', 'milk']
-score = sentence_bleu(reference, candidate)
-print('Example 1', score)
-
-#Example 2
-reference = [['the', 'cat', 'likes', 'milk']]
-candidate = ['the', 'cat', 'likes', 'milk']
-score = sentence_bleu(reference, candidate)
-print('Example 2', score)
-
-#Example 3
-reference = [['the', 'cat', 'likes', 'milk']]
-candidate = ['the', 'cat', 'enjoys','milk']
-score = sentence_bleu(reference, candidate)
-print('Example 3', score)</code></pre>
-      <li>Chencherry smoothing</li>
-      <ul>
-        <li></li>
-      </ul>
-    </ul>
-
-  </div>
-  <div class="card-footer text-muted">
-    Reference: Transformers for Natural Language Processing, Denis Rothman
-  </div>
-</div>
-
-<div class="card mb-4" id="deep-learning-specialization-">
-  <div class="card-body">
-    <h2 class="card-title">RoBERTa</h2>
-    <ul>
-      <li>Stands for robustly optimized BERT pretraining approach</li>
-      <li>Does not use WordPiece tokenization but uses byte-level Byte-Pair Encoding (BPE)</li>
-    </ul>
-
-    <h3 class="card-title">Train a tokenizer</h3>
-    <ul>
-      <li>Train a tokenizer instead of using pre-trained tokenizer</li>
-      <li>BPE tokenizer breaks a string or word down into substrings or subwords</li>
-      <ul>
-        <li>Ex. "smaller" and "smallest" can become "small", "er", "est"</li>
-        <li>Ex. Then, "small" can become "sm", "all"</li>
-      </ul>
-      <li>Special tokens</li>
-      <ul>
-        <li>&lt;s&gt; - start token</li>
-        <li>&lt;pad&gt; - padding token</li>
-        <li>&lt;/s&gt; - end token</li>
-        <li>&lt;unk&gt; - unknown token</li>
-        <li>&lt;mask&gt; - masked token for language modeling</li>
-      </ul>
-    </ul>
-
-<pre><code class="python">from pathlib import Path
-from tokenizers import ByteLevelBPETokenizer
-
-paths = [str(x) for x in Path(".").glob("**/*.txt")]
-
-# Initialize a tokenizer
-tokenizer = ByteLevelBPETokenizer()
-
-# Customize training
-tokenizer.train(files=path, vocab_size=52_000, min_frequency=2, special_token=[
-    "&lt;s&gt;",
-    "&lt;pad&gt;",
-    "&lt;/s&gt;",
-    "&lt;unk&gt;",
-    "&lt;mask&gt;"
-])</code></pre>
-
-    <h3 class="card-title">Save file to disk</h3>
-    <ul>
-      <li>The tokenizer generates two files when trained</li>
-      <ul>
-        <li><code>merges.txt</code> - contains merged tokenized substrings</li>
-        <li><code>vocab.json</code> - contains indices of tokenized substrings</li>
-      </ul>
-    </ul>
-
-<pre><code class="python">import os
-token_dir = '/content/KantaiBERT'
-if not os.path.exists(token_dir):
-    os.makedirs(token_dir)
-tokenizer.save_model('KantaiBERT')</code></pre>
-
-    <h3 class="card-title">Load the trained tokenizer files</h3>
-
-<pre><code class="python">from tokenizers.implementations import ByteLevelBPETokenizer
-from tokenizers.processors import BertProcessing
-
-tokenizer = ByteLevelBPETokenizer(
-    "./KantaiBERT/vocab.json",
-    "./KantaiBERT/merges.txt",
-)</code></pre>
-
-    <h3 class="card-title">Define configuration of the model</h3>
-
-<pre><code class="python">from transformers import RobertaConfig
-
-config = RobertaConfig(
-    vocab_size=52_000,
-    max_position_embeddings=514,
-    num_attention_heads=12,
-    num_hidden_layers=6,
-    type_vocab_size=1,
-)</code></pre>
-
-    <h3 class="card-title">Reload the tokenizer in transformers</h3>
-
-<pre><code class="python">from transformers import RobertaTokenizer
-tokenizer = RobertaTokenizer.from_pretrained("./KantaiBERT", max_length=512)</code></pre>
-
-    <h3 class="card-title">Initialize a model from scratch</h3>
-
-<pre><code class="python">from transformers import RobertaForMaskedLM
-model = RobertaForMaskedLM(config=config)</code></pre>
-
-    <h3 class="card-title">Build the dataset</h3>
-
-<pre><code class="python">from transformers import LineByLineTextDataset
-
-dataset = LineByLineTextDataset(
-    tokenizer=tokenizer,
-    file_path="./kant.txt",
-    block_size=128,
-)</code></pre>
-
-    <h3 class="card-title">Define a data collator</h3>
-    <ul>
-      <li>Take samples from dataset and collate them into batches</li>
-      <li>Results are dictionary-like objects</li>
-    </ul>
-
-<pre><code class="python">from transformers import DataCollatorForLanguageModeling
-
-data_collator = DataCollatorForLanguageModeling(
-    tokenizer=tokenizer, mlm=True, mlm_probability=0.15
-)</code></pre>
-
-    <h3 class="card-title">Initialize the trainer</h3>
-
-<pre><code class="python">from transformers import Trainer, TrainingArguments
-
-training_args = TrainingArguments(
-    output_dir="./KantaiBERT",
-    overwrite_output_dir=True,
-    num_train_epochs=1, #can be increased
-    per_device_train_batch_size=64,
-    save_steps=10_000,
-    save_total_limit=2,
-)
-
-trainer = Trainer(
-    model=model,
-    args=training_args,
-    data_collator=data_collator,
-    train_dataset=dataset,
-)</code></pre>
-
-    <h3 class="card-title">Pretrain the model</h3>
-
-<pre><code class="python">trainer.train()</code></pre>
-
-    <h3 class="card-title">Save the final model to disk</h3>
-
-<pre><code class="python">trainer.save_model("./KantaiBERT")</code></pre>
-
-    <h3 class="card-title">Language modeling with FillMaskPipeline</h3>
-
-<pre><code class="python">from transformers import pipeline
-
-fill_mask = pipeline(
-    "fill-mask",
-    model="./KantaiBERT",
-    tokenizer="./KantaiBERT"
-)</code></pre>
-
-<pre><code class="python">fill_mask("Human thinking involves human &lt;mask&gt;.")</code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: Transformers for Natural Language Processing, Denis Rothman
-  </div>
-</div>
-
-<div class="card mb-4" id="deep-learning-specialization-">
-  <div class="card-body">
-    <h2 class="card-title">CLIP (Contrastive language image pre-training)</h2>
-    <ul>
-      <li>Released in 2021</li>
-      <li>Trained on 400M (image, text) pairs to predict texts given image</li>
-      <li>Image embeddings are computed using ResNet or ViT</li>
-      <li>Learn embedding of texts such that</li>
-      <ul>
-        <li>Cosine similarity of matching image and text embeddings are maximized</li>
-        <li>Cosine similarity of unrelated image and text embeddings are minimized</li>
-        <li>Transformer architecture is used</li>
-      </ul> 
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: Aman Chadha
-  </div>
-</div>
-
-<div class="card mb-4" id="deep-learning-specialization-">
-  <div class="card-body">
-    <h2 class="card-title">GPT</h2>
-    <table class="table">
-      <thead>
-      <tr>
-        <th></th>
-        <th>GPT 1</th>
-        <th>GPT 2</th>
-        <th>GPT 3</th>
-        <th>ChatGPT</th>
-        <th>GPT 4</th>
-      </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Parameters</td>
-          <td>117M</td>
-          <td>1.5B</td>
-          <td>175B</td>
-          <td>20B (estimate)</td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>Number of heads</td>
-          <td>12</td>
-          <td>48</td>
-          <td>96</td>
-          <td></td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>Context token size</td>
-          <td>512</td>
-          <td>1024</td>
-          <td>2048</td>
-          <td></td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>Hidden layer</td>
-          <td>768</td>
-          <td>1600</td>
-          <td>12288</td>
-          <td></td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>Batch size</td>
-          <td>64</td>
-          <td>512</td>
-          <td>3.2M</td>
-          <td></td>
-          <td></td>
-        </tr>
-        <tr>
-          <td>?</td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-          <td></td>
-        </tr>
-      </tbody>
-    </table>
-    <ul>
-      <li>GPT-1</li>
-      <ul>
-        <li>Released in 2018</li>
-        <li>Model learned large range dependencies, thus could be used for transfer learning with little fine-tuning</li>
-      </ul>
-      <li>GPT-2</li>
-      <ul>
-        <li>Released in 2019</li>
-        <li>Model learned to predict next words in a sentence</li>
-      </ul>
-      <li>GPT-3</li>
-      <ul>
-        <li></li>
-        <li>Model learned to generate texts and paragraphs</li>
-      </ul>
-      <li>ChatGPT</li>
-      <ul>
-        <li></li>
-        <li>Uses RLHF</li>
-        <li>Fine-tuned from GPT 3.5</li>
-      </ul>
-      <li>GPT-4</li>
-      <ul>
-        <li>Uses RLHF</li>
-        <li>Supports multi-model input - images and texts</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">Context size</h3>
-    <ul>
-      <li>The key of Transformer is attention sub-layers, and the key of attention sub-layers is the method used to process context size</li>
-      <li>Larger the context size, more we can understand a sequence presented to us</li>
-      <li>Analyzing long-term dependencies required changing from recurrent to attention layers</li>
-      <ul>
-        <li>Recurrent layer in RNN has to store the total length of the context step by step</li>
-        <li>Maximum path length of RNN that processes context size of GPT-3 would be \( O(n) \) (In self-attention, this is \( O(1) \))</li>
-        <li>RNN cannot split context into 96 heads running in parallel</li>
-      </ul>
-    </ul>
-
-    <h3 class="card-title">From fine-tuning to zero-shot</h3>
-    <ul>
-      <li>Instead of teaching Transformers to do specific NLP tasks, train Transformers to learn a language (or task-agnostic model)</li>
-      <li>Train Transformers on raw data instead of labeled data</li>
-      <li>Decoder only stacks</li>
-      <ul>
-        <img class="img-fluid" class="card-img-top" src="/machine-learning/image/ml-0/gpt-1.png" style="width: 500px; height: 700px" alt="Card image cap">
-      </ul>
-      <li>Four milestones</li>
-      <ul>
-        <li>Fine-tuning</li>
-        <ul>
-          <li>Transformer is trained and then fine-tuned on downstream tasks</li>
-          <li>There are many fune-tuning tasks</li>
-        </ul>
-        <li>Few-shot</li>
-        <ul>
-          <li>When GPT makes inferences, it is presented with demonstrations of the task to perform as conditioning</li>
-          <li>Conditioning replaces weight updating</li>
-        </ul>
-        <li>One-shot</li>
-        <ul>
-          <li>GPT is presented with only one demonstration of the downstream task to perform</li>
-          <li>No weight updating is permitted</li>
-        </ul>
-        <li>Zero-shot</li>
-        <ul>
-          <li>GPT is presented with no demonstration of the downstream task to perform</li>
-        </ul>
-      </ul>
-    </ul>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: Transformers for Natural Language Processing, Denis Rothman | Aman Chadha
-  </div>
-</div>
+</div> -->
 <!-- Deep Learning Specialization END -->
 
 </div> <!-- /.col-md-12 -->
