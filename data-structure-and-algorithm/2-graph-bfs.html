@@ -496,39 +496,38 @@
 <pre><code class="python">class Solution:
     def networkDelayTime(self, times: List[List[int]], n: int, k: int) -> int:
         
-        # times = [[1,2,1], [1,3,1], n = 2, k = 1 => 1
-        
         # BFS
-        # For each time, store min time to get to that node
-        # Only move to next_node only if it is cheaper to do so
-        # Time O(n+m) m = len(times)
-        # Space O(n+m)
+        # Keep minimum time to reach each node
+        # Only move to next node if it is cheaper to do so
+        # Is there a cycle?
+        # Time O(n+m) n = number of nodes, m = number of edges
+        # Space O(n)
 
-        duration = defaultdict(int)
-        graph = defaultdict(set)
-        min_costs = [math.inf] * (n+1)
-        min_costs[k] = 0
+        graph, visited = defaultdict(list), defaultdict(int)
 
-        for src, det, t in times:
-            graph[src].add(det)
-            duration[(src,det)] = t
+        for a, b, t in times:
+            graph[a].append((b,t))
 
         queue = deque()
-        queue.append((k, 0))
-
+        queue.append((k,0))
+        visited[k] = 0
+        
         while queue:
-            node, cost = queue.popleft()
+            node, time = queue.popleft()
+            
+            for next_node, next_time in graph[node]:
+                if next_node not in visited:
+                    visited[next_node] = time + next_time
+                    queue.append((next_node, time+next_time))
+                else:
+                    if visited[next_node] > time + next_time:
+                        visited[next_node] = time + next_time
+                        queue.append((next_node, time+next_time))
 
-            for next_node in graph[node]:
-                if min_costs[next_node] > cost + duration[node, next_node]:
-                    min_costs[next_node] = cost + duration[node, next_node]
-                    queue.append((next_node, min_costs[next_node]))
-
-        min_costs.pop(0)
-        if math.inf in min_costs:
+        if len(visited) != n:
             return -1
-
-        return max(min_costs)</code></pre>
+        
+        return max(list(visited.values()))</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/network-delay-time">743. Network Delay Time</a> | <a href="https://neetcode.io/problems/network-delay-time">Network Delay Time</a>
