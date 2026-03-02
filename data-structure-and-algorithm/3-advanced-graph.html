@@ -58,25 +58,28 @@
 
 <pre><code class="python">class Solution:
     def findItinerary(self, tickets: List[List[str]]) -> List[str]:
-
-        # DFS 
-        # Sort tickets by destination 
-        # Greedly traverse until no destination is left
-        # Time O(nlogn) n = len(tickets)
+        
+        # DFS (with cycle)
+        # Sort tickets by destination
+        # Greedily process last item amongst destinations
+        # Time O(n+m) n = number of nodes, m = number of edges
         # Space O(n)
 
-        graph, result = defaultdict(list), []
-        tickets.sort(key=lambda x: x[1], reverse=True)
-        
-        for src, det in tickets:
+        graph = defaultdict(list)
+        sorted_ticket = tickets[:]
+        sorted_ticket.sort(key=lambda x: x[1], reverse=True)
+
+        for src, det in sorted_ticket:
             graph[src].append(det)
 
         stack = []
         stack.append("JFK")
-        
+        result = []
+
         while stack:
             while graph[stack[-1]]:
-                stack.append(graph[stack[-1]].pop())
+                next_node = graph[stack[-1]].pop()
+                stack.append(next_node)
             result.append(stack.pop())
 
         return result[::-1]</code></pre>
