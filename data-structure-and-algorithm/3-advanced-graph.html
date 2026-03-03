@@ -285,38 +285,39 @@ class Solution:
 
 <pre><code class="python">class Solution:
     def minCostConnectPoints(self, points: List[List[int]]) -> int:
-
-        # Points are nodes
-        # Edges exists between any two points
+        
         # Minimum spanning tree
-        # Greedly explore nodes not in MST and pick lowest cost
+        # Find a node not in MST, which has lowest cost
+        # Add that node to MST
+        # Update all nearby nodes
+        # Repeat
         # Time O(n**2) n = number of nodes
         # Space O(n)
 
-        n, m, cost = len(points), 0, 0
-        min_dist = [math.inf] * n
-        min_dist[0] = 0
-        mst = [False] * n
+        n = len(points)
+        nodes = [math.inf] * n
+        nodes[0] = 0
+        mst = set()
+        total_cost = 0
+        
+        while n > len(mst):
 
-        while m < n:
-            min_node, min_edge = -1, math.inf
+            min_node, min_cost = -1, math.inf
+            for i in range(n):
+                if i not in mst and nodes[i] < min_cost:
+                    min_cost = nodes[i]
+                    min_node = i
 
-            for node in range(n):
-                if not mst[node] and min_edge > min_dist[node]:
-                    min_edge = min_dist[node]
-                    min_node = node
+            total_cost += min_cost
+            mst.add(min_node)
 
-            cost += min_edge
-            m += 1
-            mst[min_node] = True
-
-            for next_node in range(n):
-                dist = abs(points[min_node][0]-points[next_node][0]) \
-                    + abs(points[min_node][1]-points[next_node][1])
-                if not mst[next_node] and min_dist[next_node] > dist:
-                    min_dist[next_node] = dist
-
-        return cost</code></pre>
+            for i in range(n):
+                d = abs(points[min_node][0]-points[i][0]) \
+                    + abs(points[min_node][1]-points[i][1])
+                if i not in mst and d < nodes[i]:
+                    nodes[i] = d
+            
+        return total_cost</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/min-cost-to-connect-all-points">1584. Min Cost to Connect All Points</a> | <a href="https://neetcode.io/problems/min-cost-to-connect-points">Min Cost to Connect Points</a>
