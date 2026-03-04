@@ -47,6 +47,7 @@
       <li><a href="#advanced-graph-">Reconstruct Itinerary</a></li>
       <li><a href="#advanced-graph-">Network Delay Time</a></li>
       <li><a href="#advanced-graph-">Swim in Rising Water</a></li>
+      <li><a href="#advanced-graph-">Cheapest Flights Within K Stops</a></li>
       <li><a href="#advanced-graph-">Making A Large Island</a></li>
       <li><a href="#advanced-graph-">Min Cost to Connect All Points</a></li>
     </ul>
@@ -172,6 +173,45 @@
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/swim-in-rising-water">778. Swim in Rising Water</a> | <a href="https://neetcode.io/problems/swim-in-rising-water">Swim in Rising Water</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="advanced-graph-">
+  <div class="card-body">
+    <h2 class="card-title">Cheapest Flights Within K Stops (150/250)</h2>
+
+<pre><code class="python">class Solution:
+    def findCheapestPrice(self, n: int, flights: List[List[int]], src: int, dst: int, k: int) -> int:
+        
+        # BFS
+        # Terminate after depth == k
+        # Only move to next_node if its cheaper to do so
+        # Time O(n+m) n = number of nodes, m = number of edges
+        # Space O(n)
+
+        graph = defaultdict(list)
+        for from_i, to_i, price_i in flights:
+            graph[from_i].append([to_i, price_i])
+
+        queue = deque()
+        queue.append((src, 0, 0))
+        nodes = [math.inf] * n
+        nodes[src] = 0
+
+        while queue:
+            node, depth, price = queue.popleft()
+            for next_node, next_price in graph[node]:
+                if price + next_price < nodes[next_node] \
+                    and depth <= k:
+                    nodes[next_node] = price + next_price
+                    queue.append([next_node, depth+1, nodes[next_node]])
+
+        if nodes[dst] == math.inf:
+            return -1
+        return nodes[dst]</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://leetcode.com/problems/cheapest-flights-within-k-stops">787. Cheapest Flights Within K Stops</a> | <a href="https://neetcode.io/problems/cheapest-flight-path">Cheapest Flights Within K Stops</a>
   </div>
 </div>
 
