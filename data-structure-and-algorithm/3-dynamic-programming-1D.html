@@ -272,29 +272,22 @@
     def maxProfit(self, prices: List[int]) -> int:
 
         # DP
-        # Ordering is buy, sell, cooldown
-        # b[i] = max profit at i where last action is buy
-        #   If buy at i, must sold at i - 2 and cooldown at i - 1
-        #   If not buy at i, b[i] = b[i-1]
-        #   b[i] = max(b[i-1], s[i-2]-prices[i])
-        # s[i] = max profit at i where last action is sell
-        #   If sell at i, must bought at i - 1
-        #   If not sell at i, s[i] = s[i-1]
-        #   s[i] = max(s[i-1], b[i-1]-prices[i])
-        # Time O(n)
+        # s[i] = profit at i after selling
+        # b[i] = profit at i after buying
+        # s[i] = max(s[i-1], prices[i]+b[i-1])
+        # b[i] = max(b[i-1], s[i-2]-prices[i])
+        # Time O(n) n = len(prices)
         # Space O(n)
 
         n = len(prices)
-        if n == 1:
-            return 0
+        s = [0 for _ in range(n+1)]
+        b = [-math.inf for _ in range(n+1)]
 
-        b, s = [-math.inf] * n, [0] * n
+        for i in range(1, n+1):
+            s[i] = max(s[i-1], prices[i-1]+b[i-1])
+            b[i] = max(b[i-1], s[i-2]-prices[i-1])
 
-        for i in range(n):
-            s[i] = max(s[i-1], b[i-1]+prices[i])
-            b[i] = max(b[i-1], s[i-2]-prices[i])
-
-        return s[-1]</code></pre>
+        return s[n]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-cooldown">309. Best Time to Buy and Sell Stock with Cooldown</a> | <a href="https://neetcode.io/problems/buy-and-sell-crypto-with-cooldown">Best Time to Buy and Sell Stock with Cooldown</a>
