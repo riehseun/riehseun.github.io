@@ -343,30 +343,24 @@
 <pre><code class="python">class Solution:
     def canPartition(self, nums: List[int]) -> bool:
 
-        # nums = [1,1] => True
-        # nums = [1] => False
-        # nums = [] => Invalid
+        # Compute half sum by computing total sum / 2
+        # Check if half sum is achievable 
+        # dp[i] = whether sum up to i can be created
+        # Time O(nm) n = len(nums), m = half_sum
+        # Space O(m)
 
-        # DP 
-        # Check if (total_sum//2) can be created 
-        # dp[i] = whether sum i can be created
-        # Time O(nm) n = sum(nums) m = len(nums)
-        # Space O(n)
-
-        total_sum = sum(nums)
-        if total_sum % 2 != 0:
+        n = len(nums)
+        if sum(nums) % 2 != 0:
             return False
-
-        subset_sum = total_sum // 2
-        dp = [False for _ in range(subset_sum+1)]
+        half_sum = sum(nums) // 2
+        dp = [False for _ in range(half_sum+1)]
         dp[0] = True
 
+        for num in nums:
+            for i in range(half_sum, num-1, -1):
+                dp[i] = dp[i] or dp[i-num]
         
-        for j in nums:
-            for i in range(subset_sum, j-1, -1):
-                dp[i] = dp[i] or dp[i-j]
-
-        return dp[subset_sum]</code></pre>
+        return dp[half_sum]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/partition-equal-subset-sum">416. Partition Equal Subset Sum</a> | <a href="https://neetcode.io/problems/partition-equal-subset-sum">Partition Equal Subset Sum</a>
