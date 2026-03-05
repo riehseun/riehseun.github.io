@@ -69,56 +69,57 @@ Should inference be immediate? Yes
 Should model be continuously trained? Yes
 Should model be deployed to mobile devices? No
 
-Input - person and transaction
-Output - whether transaction is fraud or not
-Problem - binary classification
+ML problem
+  Input - person and transaction
+  Output - whether transaction is fraud or not
+  Binary classification
+Business problem
 
 # High-Level Design
 
 # Data and Feature Engineering
 
-## Data model
-User, Account, Transaction
+Training data
 
-## Feature
-User’s age, account’s age, account balance
-Transaction $ amount
-Debit/Credit card’s limit, transaction limit, age, 
-Number of transactions in past X hours
-Average number of transactions per month
+Feature
+  User’s age, account’s age, account balance
+  Transaction $ amount
+  Debit/Credit card’s limit, transaction limit, age, 
+  Number of transactions in past X hours
+  Average number of transactions per month
 
-## Feature engineering 
-Numerical
-Categorical dense (age - bucketize) - one-hot
-No need to scale or nomalize if using Ensemble model
-Compute "averge metrics" like averge account balance for the past 12 months, as these values are less impacted by distribution drift
-Create "other" columns for data points that are outside 99% of values and put it in
-Convert date field to integer
+Feature engineering 
+  Numerical
+  Categorical dense (age - bucketize) - one-hot
+  No need to scale or nomalize if using Ensemble model
+  Compute "averge metrics" like averge account balance for the past 12 months, as these values are less impacted by distribution drift
+  Create "other" columns for data points that are outside 99% of values and put it in
+  Convert date field to integer
   
 # Model Development
 
-## Baseline
-Logistic regression 
+Baseline
+  Logistic regression 
 
-## Architecture
-NN models are not explainable
-Use XGBoost - no standardization needed but is expensive to re-train
+Architecture
+  NN models are not explainable
+  Use XGBoost - no standardization needed but is expensive to re-train
 
-## Training
-Data split
-Split labeled data by time - 80% training set, 20% test set
-Further split 80% training set into - 70% training set, 30% dev set
-Run 5 bins cross-validation
-Make sure each customer Id exist in exactly one of the bins and validation set, to avoid data leakage
+Training
+  Data split
+  Split labeled data by time - 80% training set, 20% test set
+  Further split 80% training set into - 70% training set, 30% dev set
+  Run 5 bins cross-validation
+  Make sure each customer Id exist in exactly one of the bins and validation set, to avoid data leakage
 
 # Inference and Evaluation
 
-## Offline
-Recall - catching actual fraud is very important
-Precision - accuracy of prediction is important not to reject valid transaction to annoy users
+Offline
+  Recall - catching actual fraud is very important
+  Precision - accuracy of prediction is important not to reject valid transaction to annoy users
 
-## Online
-Decrease in average number of fraud per month
+Online
+  Decrease in average number of fraud per month
 </code></pre>
   </div>
   <div class="card-footer text-muted">
