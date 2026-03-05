@@ -53,9 +53,6 @@
   <div class="card-body">
     <h2 class="card-title">Product search</h2>
 
-    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/3-1-1.png" alt="Card image cap">
-    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/3-1-2.png" alt="Card image cap">
-
 <pre><code class="markdown">
 # Requirement and Problem
 
@@ -71,54 +68,64 @@ Is there training data available? No, user-product interaction data only
 How fast should the system show search results? Under 200ms
 How many products are there in system? 1B
 
-Input - search text
-Output - ranked list of product
-Problem - supervised ranking
+ML problem
+  Input - search text
+  Output - ranked list of product
+  Supervised ranking
+Business problem
+  Maximize user engagement, thus increase number of total purchases
 
 # High-Level Design
 
+User -> Candidate Generation -> Ranking -> Re-ranking ->
+
 # Data and Feature Engineering
 
-## Data model
-User, Product, UserProductInteraction
+Training data
+  Positive - user bought the product and did not leave negative review, user clicked product, user spend more than 10 seconds viewing the product 
+  Negative - users left negative review, user did not click product
 
-## Feature
-Gender, age
-Reviews, price, text description, number of comments, comments, number of views, image, video, number of purchase, total $ amount of purchase
+Features
+  Gender, age
+  Reviews, price, text description, number of comments, comments, number of views, image, video, number of purchase, total $ amount of purchase
 
-## Feature engineering
-Numerical (number of comments, number of purchase) - standardize (Mean 0, Var 1)
-Categorical dense (gender, age, price, review) - one-hot 
-Categorical sparse (user_id, product_id) - embedding to learn
-Text (search term, comment, description) - BERT
-Image/video - CLIP
+Feature engineering
+  Numerical (number of comments, number of purchase) - standardize (Mean 0, Var 1)
+  Categorical dense (gender, age, price, review) - one-hot 
+  Categorical sparse (user_id, product_id) - embedding to learn
+  Text (search term, comment, description) - BERT
+  Image/video - CLIP
 
 # Model Development
 
-## Baseline
+Baseline
 
-## Architecture
-Find similarity between embedding of search term and product
+Architecture
+  Find similarity between embedding of search term and product
 
-## Training
-Ground truth
-Positive - user bought the product and did not leave negative review, user clicked product, user spend more than 10 seconds viewing the product 
-Negative - users left negative review, user did not click product
-
-Loss - binary classification to determine if user finds the product relevant (cross-entropy or log-loss)
+Training
+  Loss - binary classification to determine if user finds the product relevant (cross-entropy or log-loss)
 
 # Inference and Evaluation
 
-Compute ranked list of product for each search term offline 
-Continuously train the model using dynamic features (reviews, comments, views, purchases)
+Batch features 
+  Compute ranked list of product for each search term offline
 
-## Offline
-Search service - recall
-Ranking service - NDCG
+Dynamic features
+  Continuously train the model using dynamic features (reviews, comments, views, purchases)
 
-## Online
-Increase in revenue
+Offline
+  Search service - recall
+  Ranking service - NDCG
+
+Online
+  A/B testing
+
+# Detailed Design
 </code></pre>
+
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/1-3-1.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/1-3-2.png" alt="Card image cap">
   </div>
   <div class="card-footer text-muted">
     Reference: 
