@@ -67,65 +67,68 @@ Is there training data available? Yes, 100M pairs of posts and 1/0 indicating vi
 How fast should harmful contents be removed? As soon as possible
 Should model be deployed to user device? No
 
-Input - post
-Output - whether post is harmful or not
-Problem - binary classification 
+ML problem
+  Input - post
+  Output - whether post is harmful or not
+  Binary classification
+  
+Business problem
+  Minimize total number of harmful impressions, subject to minimum precision
 
 # High-Level Design
+
 Post Creation -> Content Processing -> Feature Extraction -> Inference -> Remove or Human Review or Allow
 
 # Data and Feature Engineering
 
-## Data model
-Post
-UserPostInteraction
+Training data
+  Use human labelling and user reports
 
-## Features
-Text
-Image
-Video
-Number of reports, likes, comment, share, etc
-Comments
-Author’s violation history
-Date of author’s account creation
+Features
+  Text
+  Image
+  Video
+  Number of reports, likes, comment, share, etc
+  Comments
+  Author’s violation history
+  Date of author’s account creation
 
-## Feature engineering
-Text - BERT
-Image/Video - CLIP
-Numerical - Standardize (Mean 0, Var 1)
-Date - convert to numerical (For example, number of days since a fixed date) 
+Feature engineering
+  Text - BERT
+  Image/Video - CLIP
+  Numerical - Standardize (Mean 0, Var 1)
+  Date - convert to numerical (For example, number of days since a fixed date) 
 
 # Model Development
 
-## Baseline
-Heuristics - just use number of reports
-Logistic regression - binary classification to determine whether a post in harmful or not
+Baseline
+  Heuristics - just use number of reports
+  Logistic regression - binary classification to determine whether a post in harmful or not
 
-## Architecture
-Separate model for violence/hate/nude - lots of training data needed, training cost
-Create one model but with different classification heads for violence/hate/nude
+Architecture
+  Separate model for violence/hate/nude - lots of training data needed, training cost
+  Create one model but with different classification heads for violence/hate/nude
 
-## Training
-Data - use human labelling and user reports
-Loss - compute individual loss for violence/hate/nude, then create weighted sum of those losses
-Binary classification  - use cross-entropy (log-loss)  
+Training
+  Loss - compute individual loss for violence/hate/nude, then create weighted sum of those losses
+  Binary classification  - use cross-entropy (log-loss)  
 
 # Inference and Evaluation
 
-## Multi-stage inference
-Filter
-  Blacklisted keyword
-  Known harmful images
-Model
-Human Review for borderline case
+Multi-stage inference
+  Filter
+    Blacklisted keyword
+    Known harmful images
+  Model
+  Human Review for borderline case
 
-## Offline
-Recall - percentage of actual harmful content that the model was able to retrieve
-Precision - whether predicted harmful contents are correctly classified
-PR-AUC
+Offline
+  Recall - percentage of actual harmful content that the model was able to retrieve
+  Precision - whether predicted harmful contents are correctly classified
+  PR-AUC
 
-## Online
-A/B testing
+Online
+  A/B testing
 
 # Detailed Design
 Scalability
