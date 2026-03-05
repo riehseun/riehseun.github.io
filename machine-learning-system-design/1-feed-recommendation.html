@@ -73,68 +73,66 @@ How many posts do each user view on average? 100 per day (This leads to 10B impr
 How fast should the feed be generated? Under 200ms
 Should the model be deployed to mobile devices? Up to you
 
-Input - user
-Output - list of posts ranked by relevance to user
-ML Problem - supervised ranking
-Business - maximize long-term user engagement
+ML problem
+  Input - user
+  Output - list of posts ranked by relevance to user
+  Supervised ranking 
+Business problem
+  Maximize long-term user engagement
 
 # High-Level Design
 User -> Candidate Generation -> Ranking Service -> Re-ranking Service -> Output
 
 # Data and Feature Engineering
 
-## Data Model
-User, Post, UserPostInteraction, Comment, UserFollower, Image, Video
-View - how to determine if users viewed the post? If user spent more than 2 seconds 
+Training data
+  Positive if user performs direct interaction (like, share, comment, etc)
+  Positive if user spends more than 2 seconds to view the post 
+  Negative o/w
 
-## Features
-User direct interaction with post - like, share, comment, view
-Post features - number of likes, shares, comments, view, text, text language, image, video
-Author features - historical popularity of posts uploaded by the author, whether author is followed by the user
-Contextual features - time of day, device type
+Features 
+  User direct interaction with post - like, share, comment, view
+  Post features - number of likes, shares, comments, view, text, text language, image, video
+  Author features - historical popularity of posts uploaded by the author, whether author is followed by the user
+  Contextual features - time of day, device type
 
-## Feature Engineering
-Numerical (number of likes, shares, comments, etc) - Standardize (mean 0, variance 1)
-Categorical Dense (Age, Gender) - one-hot or embedding
-Categorical Sparse (User ID, Post ID) - embedding 
-Text - encoder only model like BERT
-Image - image encoder like CLIP
-Video - video encoder like CLIP
-Contextual - bucketize and one-hot
+Feature Engineering
+  Numerical (number of likes, shares, comments, etc) - Standardize (mean 0, variance 1)
+  Categorical Dense (Age, Gender) - one-hot or embedding
+  Categorical Sparse (User ID, Post ID) - embedding 
+  Text - encoder only model like BERT
+  Image - image encoder like CLIP
+  Video - video encoder like CLIP
+  Contextual - bucketize and one-hot
   
 # Model Development
 
-## Baseline
-Heuristics - rank posts by total number of direct interaction (like, share, comment)
-Logistic regression - binary classification on whether users will like/share/comment/view post or not
+Baseline
+  Heuristics - rank posts by total number of direct interaction (like, share, comment) 
+  Logistic regression - binary classification on whether users will like/share/comment/view post or not
 
-## Architecture
-Candidate generation
-  Two-tower architecture
-    User tower computes user embedding
-    Post tower with embedding of post_id (post features are not used)
-    Take dot product between user and feed embedding (1 if close, 0 otherwise)
-  ANN to search posts that are close to user
-  Do this offline to generate 10k candidates
-Ranking
-  Two-tower architecture
-    User tower computes user embedding
-    Post tower computes post embedding using post features
-  Do this online to generate 100 candidates
-Re-ranking
-  Apply additional rules such as diversity, freshness
-  Do this online
+Architecture
+  Candidate generation
+    Two-tower architecture
+      User tower computes user embedding
+      Post tower with embedding of post_id (post features are not used)
+      Take dot product between user and feed embedding (1 if close, 0 otherwise)
+    ANN to search posts that are close to user
+    Do this offline to generate 10k candidates
+  Ranking
+    Two-tower architecture
+      User tower computes user embedding
+      Post tower computes post embedding using post features
+    Do this online to generate 100 candidates
+  Re-ranking
+    Apply additional rules such as diversity, freshness
+    Do this online
  
-## Training
-Ground truth
-Positive if user performs direct interaction (like, share, comment, etc)
-Positive if user spends more than 2 seconds to view the post 
-Negative o/w
-
-Binary classification
-Loss - cross-entropy (log-loss) - 1 if post is relevant to user, 0 o/w
-Take dot product between post and user embedding
-How to define relevance? Weighted score of probabilities of view, like, share, comment
+Training
+  Binary classification
+  Loss - cross-entropy (log-loss) - 1 if post is relevant to user, 0 o/w
+  Take dot product between post and user embedding
+  How to define relevance? Weighted score of probabilities of view, like, share, comment
 
 # Inference and Evaluation
 
