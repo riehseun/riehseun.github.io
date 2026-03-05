@@ -67,32 +67,34 @@ How many inference requests does each user make? depends on use case
 Should the system monitor model metrics? No
 Should the system perform model deployment like A/B testing? No
 
-Input - requests with static and dynamic features
-Output - prediction
-Problem - platform that serves huge number of API requests, compute/generate huge size of batch predictions
-Key points - latency under 200ms, throughtput 100M QPS
+ML problem
+  Input - requests with static and dynamic features
+  Output - prediction
+  Platform that serves huge number of API requests, compute/generate huge size of batch predictions
+  Key points - latency under 200ms, throughtput 100M QPS
 
 # High-Level Design
+
 User -> Global load balancer -> Regional edge layer -> API gatwway -> Prediction
 Single region or Kubernetes autoscaling cannot support 100M QPS
 
 # Detailed Design
 
-## Multi-region deployment
-Deploy models into US East, US West, etc
-Avoid cross-regional latency and single point of failure
+Multi-region deployment
+  Deploy models into US East, US West, etc
+  Avoid cross-regional latency and single point of failure
 
-## Multi-stage model inference
-Cache layer - serve frequent prediction, use Redis
-Candidate generation - leverage pre-computed embeddings, use ANN, focus on recall
-Model - dynamic batching (micro-batching per 5-10ms), focus on precision 
+Multi-stage model inference
+  Cache layer - serve frequent prediction, use Redis
+  Candidate generation - leverage pre-computed embeddings, use ANN, focus on recall
+  Model - dynamic batching (micro-batching per 5-10ms), focus on precision 
 
-## Model optimization
-Quantization
-Knowledge distillation (only if teacher model is available)
+Model optimization
+  Quantization
+  Knowledge distillation (only if teacher model is available)
 
-## Auto-scaling
-Traffic forecast
+Auto-scaling
+  Traffic forecast
 </code></pre> 
 
     <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-2/model-serving-1.png" alt="Card image cap">

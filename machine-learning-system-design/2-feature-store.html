@@ -64,69 +64,71 @@ What are types of data? Mostly unstructured
 What are data formats? various formats of text, image, video
 Are inferences batch and real-time? Both
 
-Problem - Database that support huge number of reads operation fast, decent amount of write operation, also has redundancy and consistency
+ML Problem
+  Database that support huge number of reads operation fast, decent amount of write operation, also has redundancy and consistency
 
 # High-Level Design
+
 Data Source -> Batch and Streaming Ingestion -> Feature Computation -> Offline and Online Store -> Feature Registry -> Model Training and Serving
 
 # Detailed Design
 
-## Feature Computation
-Features are defined once and re-used
-Same logic for training and serving - o/w models silently degrade
-Batch features
-  Daily aggregation
-  Heavy joins
-Streaming features
-  Windowed aggregation (Ex. last 5 minute)
-  write latest value to online store and full history to offline store
+Feature Computation
+  Features are defined once and re-used
+  Same logic for training and serving - o/w models silently degrade
+  Batch features
+    Daily aggregation
+    Heavy joins
+  Streaming features
+    Windowed aggregation (Ex. last 5 minute)
+    write latest value to online store and full history to offline store
 
-## Offline Store
-Historical feature values
-Used for training
+Offline Store
+  Historical feature values
+  Used for training
 
-## Online Store
-Store latest feature values only
-Shard by entity key
-Cache by hot key
-Key-value store
-Used for inference
+Online Store
+  Store latest feature values only
+  Shard by entity key
+  Cache by hot key
+  Key-value store
+  Used for inference
 
-## Feature Registry
-Stores feature definitions
-Metadata
-Versioning
-Data lineaage
+Feature Registry
+  Stores feature definitions
+  Metadata
+  Versioning
+  Data lineaage
 
 # Non-functional
 
-## Scalability
-Partition
-  By entity key
-  By time (offline store)
-Shard
-  Hash based (online store)
-Replication
-  Multi-region for availability
+Scalability
+  Partition
+    By entity key
+    By time (offline store)
+  Shard
+    Hash based (online store)
+  Replication
+    Multi-region for availability
 
-## Reliability
-Idempotent writes
-Replay capability
+Reliability
+  Idempotent writes
+  Replay capability
 
-## Consistency
-Strong consistency for training
-Eventual consistency for inference
+Consistency
+  Strong consistency for training
+  Eventual consistency for inference
 
-## Observability
-Data drift
-Distribution drigt
-Latency
-QPS
+Observability
+  Data drift
+  Distribution drigt
+  Latency
+  QPS
 
-## Governance
-Feature ownership
-Access control
-Prevent duplicate and inconsistent features   
+Governance
+  Feature ownership
+  Access control
+  Prevent duplicate and inconsistent features   
 </code></pre>
 
     <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-2/feature-store-1.png" alt="Card image cap">

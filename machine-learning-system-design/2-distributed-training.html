@@ -63,32 +63,34 @@ Should be model be continuously trained? Yes
 How many GPUs are available? 5k
 How much time can each training take? Less than a week
 
-Problem - Large compute cluster perform parallel execution
+ML Problem
+  Large compute cluster perform parallel execution
 
 # High-Level Design
+
 Data layer -> Compute layer -> Orchestration layer -> Training runtime layer -> Reliability layer -> Observability layer
 
 # Detailed Design
 
-## Data layer
-Use distributed object storage
-Shard data for parallel reading, shard by sample_id for data parallelism
-Co-host data and compute to reduce cross-rack traffic
+Data layer
+  Use distributed object storage
+  Shard data for parallel reading, shard by sample_id for data parallelism
+  Co-host data and compute to reduce cross-rack traffic
 
-## Compute layer
-Create a node with 8 GPUs
-Use Kubernetes to manage cluster for auto-scaling
+Compute layer
+  Create a node with 8 GPUs
+  Use Kubernetes to manage cluster for auto-scaling
 
-## Training runtime layer
-Data parallelism - each node get a shard
-Model parallelism - split layers across GPUs
-Pipeline parallelism - split model by layers
+Training runtime layer
+  Data parallelism - each node get a shard
+  Model parallelism - split layers across GPUs
+  Pipeline parallelism - split model by layers
 
-## Reliability
-Checkpointing - if node is down, restart from last checkpoint
+Reliability
+  Checkpointing - if node is down, restart from last checkpoint
 
-## Observability
-GPU utilization
+Observability
+  GPU utilization
 </code></pre>    
 
     <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-2/distributed-training-1.png" alt="Card image cap">
