@@ -61,8 +61,10 @@ What does a product consist of? Text description, image, video, reviews
 Should the system support multiple languages? No, English only
 Does each product have category? Yes
 Can each product have more than one category? Yes
-Can users search product within certain category? Yes
 Should search result be personalized to user? Yes
+Should search allow filters? Yes
+Should search result be sorted? Yes
+How often is the product updated? Once every 6 months on average
 
 Is there training data available? No, user-product interaction data only
 How fast should the system show search results? Under 200ms
@@ -77,21 +79,40 @@ Business problem
 
 # High-Level Design
 
-User -> Candidate Generation -> Ranking -> Re-ranking ->
+User -> Query Understanding -> Cache -> Candidate Generation -> Ranking -> Re-ranking ->
+
+Query Understanding
+  Spell correction
+  Query expansion
+  Query embedding
+Candidate Generation
+  Inverted index
+  Vector search
+Ranking
+  Learn-to-rank
+Re-ranking
+  Diversity
+  Freshness
+  Business rules
 
 # Data and Feature Engineering
 
 Training data
   Positive - user bought the product and did not leave negative review, user clicked product, user spend more than 10 seconds viewing the product 
   Negative - users left negative review, user did not click product
+  Each data point is associated with query
 
 Features
-  Gender, age
-  Reviews, price, text description, number of comments, comments, number of views, image, video, number of purchase, total $ amount of purchase
+  Query
+    Query length
+  Query-product
+    Reviews, price, text description, number of comments, comments, number of views, image, video, number of purchase, total $ amount of purchase
+  User
+    Gender, age
 
 Feature engineering
-  Numerical (number of comments, number of purchase) - standardize (Mean 0, Var 1)
-  Categorical dense (gender, age, price, review) - one-hot 
+  Numerical (number of comments, number of purchase, age, price, review) - standardize (Mean 0, Var 1)
+  Categorical dense (gender) - one-hot 
   Categorical sparse (user_id, product_id) - embedding to learn
   Text (search term, comment, description) - BERT
   Image/video - CLIP
@@ -99,29 +120,31 @@ Feature engineering
 # Model Development
 
 Baseline
+  Logistic regression to determin if product is relevant to query
 
 Architecture
-  Find similarity between embedding of search term and product
+  Candidate generation
+    Lexical search - inverted index, BM25
+    Vector search - ANN, FAISS
+  Ranking
+    Learn-to-rank
+    Find similarity between embedding of search term and product
 
 Training
   Loss - binary classification to determine if user finds the product relevant (cross-entropy or log-loss)
 
 # Inference and Evaluation
 
-Batch features 
-  Compute ranked list of product for each search term offline
-
-Dynamic features
-  Continuously train the model using dynamic features (reviews, comments, views, purchases)
-
 Offline
-  Search service - recall
-  Ranking service - NDCG
+  Candidate generation - recall
+  Ranking - NDCG
 
 Online
   A/B testing
 
 # Detailed Design
+
+Scalability
 </code></pre>
 
     <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/1-3-1.png" alt="Card image cap">
