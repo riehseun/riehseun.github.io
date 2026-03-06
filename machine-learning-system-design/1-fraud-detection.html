@@ -60,6 +60,9 @@ What kind of fraud is this? Fraudulent financial transactions
 How does fraud occur? Use stolen debit or credit card to make purchases
 Where does fraud occur? In website or app, purchases are made
 Should model explain why transaction is deemed fraud? Yes
+What should system do when detecting fraud? Reject transaction
+What is impact of false positive? Loss of revenue from not making transaction
+What is impact of false negative? Unhappy customer lost money from fraud
 
 Do we have training data available? Yes, 1M fraud transactions and 100M non-fraud transactions
 Should inference be immediate? Yes
@@ -74,6 +77,13 @@ Business problem
 
 # High-Level Design
 
+Transaction -> Reject based on simple rule -> Detection service -> Reject or human review or pass
+
+Rule
+  Blacklisted card
+  Country mismatch
+  Large amount of transaction
+
 # Data and Feature Engineering
 
 Training data
@@ -84,13 +94,18 @@ Feature
   Debit/Credit card’s limit, transaction limit, age, 
   Number of transactions in past X hours
   Average number of transactions per month
+  Device
+    Device ID
+    IP address
+  Location
+    Country
+    Speed (distance/time) since the last transaction 
 
 Feature engineering 
-  Numerical
-  Categorical dense (age - bucketize) - one-hot
+  Numerical (age) - standardize
+  Categorical dense - bucketize and one-hot
   No need to scale or nomalize if using Ensemble model
   Compute "averge metrics" like averge account balance for the past 12 months, as these values are less impacted by distribution drift
-  Create "other" columns for data points that are outside 99% of values and put it in
   Convert date field to integer
   
 # Model Development
@@ -99,7 +114,7 @@ Baseline
   Logistic regression 
 
 Architecture
-  NN models are not explainable
+  NN models are not less explainable than tree models
   Use XGBoost - no standardization needed but is expensive to re-train
 
 Training
@@ -108,15 +123,24 @@ Training
   Further split 80% training set into - 70% training set, 30% dev set
   Run 5 bins cross-validation
   Make sure each customer Id exist in exactly one of the bins and validation set, to avoid data leakage
+  Address class imbalance via undersample or oversample
 
 # Inference and Evaluation
 
+Streaming infra using Kafka and Spark Structured Streaming
+
 Offline
-  Recall - catching actual fraud is very important
+  Recall - catching actual fraud is very important 
   Precision - accuracy of prediction is important not to reject valid transaction to annoy users
+  PR-AUC
 
 Online
-  Decrease in average number of fraud per month
+  A/B testing
+
+# Detailed Design
+Adversarial behavior
+Explainability
+  SHAP value
 </code></pre>
 
     <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/1-4-1.png" alt="Card image cap">
