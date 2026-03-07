@@ -77,50 +77,39 @@ Business problem
 
 # High-Level Design
 
-Post Creation -> Content Processing -> Feature Extraction -> Inference -> Remove or Human Review or Allow
+Post Upload -> Filter -> Feature Extraction -> Inference -> Remove or Human Review or Allow
 
 # Data and Feature Engineering
 
 Training data
-  Use human labelling and user reports
+  Human labelling
+  User reports
 
 Features
-  Text
-  Image
-  Video
-  Number of reports, likes, comment, share, etc
-  Comments
-  Author’s violation history
-  Date of author’s account creation
+  Post - text, image, video
+  Author - violation history, date of account creation
 
 Feature engineering
   Text - BERT
   Image/Video - CLIP
-  Numerical - Standardize (Mean 0, Var 1)
+  Numerical (violation history) - Standardize (Mean 0, Var 1)
   Date - convert to numerical (For example, number of days since a fixed date) 
 
 # Model Development
 
 Baseline
-  Heuristics - just use number of reports
   Logistic regression - binary classification to determine whether a post in harmful or not
+  Try this first to see if ML/business objective can be achieved
 
 Architecture
   Separate model for violence/hate/nude - lots of training data needed, training cost
   Create one model but with different classification heads for violence/hate/nude
 
 Training
+  Binary classification  - use cross-entropy (log-loss)
   Loss - compute individual loss for violence/hate/nude, then create weighted sum of those losses
-  Binary classification  - use cross-entropy (log-loss)  
-
-# Inference and Evaluation
-
-Multi-stage inference
-  Filter
-    Blacklisted keyword
-    Known harmful images
-  Model
-  Human Review for borderline case
+  
+# Evaluation
 
 Offline
   Recall - percentage of actual harmful content that the model was able to retrieve
@@ -128,12 +117,20 @@ Offline
   PR-AUC
 
 Online
-  A/B testing
+  Total number of harmful impressions
 
 # Detailed Design
-Scalability
-Adversarial behavior
+
+Filter
+  Blacklisted keyword
+  Known harmful images
+
+Inference
+  Use fast and light model first
+  Use slow and heavy model after the post passes the review for double checking
+
 Feedback loop
+  Use human review for further training dataset
 </code></pre>
 
     <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/harmful-content-detection-1.png" alt="Card image cap">
