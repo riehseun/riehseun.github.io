@@ -93,10 +93,10 @@ Training data
   Negative o/w
 
 Features 
-  User direct interaction with post - like, share, comment, view
-  Post features - number of likes, shares, comments, view, text, text language, image, video
-  Author features - historical popularity of posts uploaded by the author, whether author is followed by the user
-  Contextual features - time of day, device type
+  User-Post interaction - like, share, comment, view
+  Post - number of likes, shares, comments, view, text, text language, image, video
+  Author - popularity of posts uploaded by author, whether author is followed by the user
+  Context - time of day, device type
 
 Feature Engineering
   Numerical (number of likes, shares, comments, etc) - Standardize (mean 0, variance 1)
@@ -112,6 +112,7 @@ Feature Engineering
 Baseline
   Heuristics - rank posts by total number of direct interaction (like, share, comment) 
   Logistic regression - binary classification on whether users will like/share/comment/view post or not
+  Try these models to see if users get satisfactory results first
 
 Architecture
   Candidate generation
@@ -119,16 +120,13 @@ Architecture
       User tower computes user embedding
       Post tower with embedding of post_id (post features are not used)
       Take dot product between user and feed embedding (1 if close, 0 otherwise)
-    ANN to search posts that are close to user
-    Do this offline to generate 10k candidates
+    ANN to search posts that are close to user (based on similarity between user and post embeddings)
   Ranking
     Two-tower architecture
       User tower computes user embedding
-      Post tower computes post embedding using post features
-    Do this online to generate 100 candidates
+      Post tower computes post embedding using post features (posts come from 10k candidates generated from previous step)
   Re-ranking
     Apply additional rules such as diversity, freshness
-    Do this online
  
 Training
   Binary classification
@@ -136,30 +134,40 @@ Training
   Take dot product between post and user embedding
   How to define relevance? Weighted score of probabilities of view, like, share, comment
 
-# Inference and Evaluation
+# Evaluation
 
 Offline
-  Candidate generation - recall to measure percentage of actual relevant posts that it could retrieve
-  Scoring - recall
-  Ranking - precision to measure percentage of relevant posts in the feed shown to user 
+  Candidate generation - recall to measure percentage of actual relevant posts that model could retrieve
+  Ranking - precision to measure percentage of relevant posts in the feed shown to user
+  Re-ranking - precision
   Overall - NDCG
 
 Online
   A/B testing
 
 # Detailed Design
-Cold start
+
+Candidate generation
+  Use batch features only
+  Compute 10k candidates offline
+  For each user, store candidates into cache for fast retrieval (Cons. storage footprint)
+
+Ranking
+  Retrieve batch features from feature store
+  Process dynamic features online
+  Compute 100 candidates online
+
+Re-ranking
+  Diverseity - penalize posts with same authors or same topics
+  Freshness - penalize old posts 
+  Compute online
+
+Cold start problen
   New user - suggest popular posts
-Freshness
-  Penalize old posts
-Diversity
-  Avoid same authors
-  Avoid same topics
+  Store popular posts in cache for fast retrieval
+
 Harmful content
-  Filter violence, nudity, hate during re-ranking
-Performance
-  Cache popular post
-  Feature store
+  When posts are uploaded, use a model to filter out nudity, violence, hate, etc
 </code></pre>
 
     <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/feed-recommendation-1.png" alt="Card image cap">
