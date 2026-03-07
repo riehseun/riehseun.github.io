@@ -58,7 +58,7 @@
 
 What kind of fraud is this? Fraudulent financial transactions 
 How does fraud occur? Use stolen debit or credit card to make purchases
-Where does fraud occur? In website or app, purchases are made
+Where does fraud occur? In website or app where purchases are made
 Should model explain why transaction is deemed fraud? Yes
 What should system do when detecting fraud? Reject transaction
 What is impact of false positive? Loss of revenue from not making transaction
@@ -73,37 +73,28 @@ ML problem
   Input - person and transaction
   Output - whether transaction is fraud or not
   Binary classification
+
 Business problem
+  Increase long-term user engagement, thus increase in revenue
 
 # High-Level Design
 
-Transaction -> Reject based on simple rule -> Detection service -> Reject or human review or pass
-
-Rule
-  Blacklisted card
-  Country mismatch
-  Large amount of transaction
+Transaction -> Reject based on simple rule -> Inference -> Reject or human review or pass
 
 # Data and Feature Engineering
 
 Training data
 
 Feature
-  User’s age, account’s age, account balance
-  Transaction $ amount
-  Debit/Credit card’s limit, transaction limit, age, 
-  Number of transactions in past X hours
-  Average number of transactions per month
-  Device
-    Device ID
-    IP address
-  Location
-    Country
-    Speed (distance/time) since the last transaction 
+  Account - age, balance, transaction limit, total limit
+  User - past fraud commit, country
+  Transaction - $ amount
+  Device - device ID, IP address
+  Location - country, speed (distance/time) since the last transaction
+  Temporal - number of transactions in past X hours, average number of transactions per month
 
 Feature engineering 
-  Numerical (age) - standardize
-  Categorical dense - bucketize and one-hot
+  Numerical (age, balance, transaction limit, total limit) - standardize
   No need to scale or nomalize if using Ensemble model
   Compute "averge metrics" like averge account balance for the past 12 months, as these values are less impacted by distribution drift
   Convert date field to integer
@@ -111,7 +102,8 @@ Feature engineering
 # Model Development
 
 Baseline
-  Logistic regression 
+  Logistic regression to determine if transaction is fraud or not
+  Use this to see if ML/business objective can be met
 
 Architecture
   NN models are not less explainable than tree models
@@ -123,11 +115,9 @@ Training
   Further split 80% training set into - 70% training set, 30% dev set
   Run 5 bins cross-validation
   Make sure each customer Id exist in exactly one of the bins and validation set, to avoid data leakage
-  Address class imbalance via undersample or oversample
+  Address class imbalance via undersample/oversample or focus loss
 
-# Inference and Evaluation
-
-Streaming infra using Kafka and Spark Structured Streaming
+# Evaluation
 
 Offline
   Recall - catching actual fraud is very important 
@@ -135,10 +125,19 @@ Offline
   PR-AUC
 
 Online
-  A/B testing
+  Number of user reports on fraud
 
 # Detailed Design
-Adversarial behavior
+
+Streaming features
+  Ingestion - Kafka 
+  Processing - Spark Structured Streaming
+
+Reject based on simple rule
+  Blacklisted card
+  Country mismatch
+  Large amount of transaction
+
 Explainability
   SHAP value
 </code></pre>
