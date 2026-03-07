@@ -53,9 +53,6 @@
   <div class="card-body">
     <h2 class="card-title">Chatbot</h2>
 
-    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/1-5-1.png" alt="Card image cap">
-    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/1-5-2.png" alt="Card image cap">
-
 <pre><code class="markdown">
 # Requirement and Problem
 
@@ -69,6 +66,11 @@ Is training data available? No
 How fast should the generation be? Under 200ms
 Should model be deployed to mobile devices? No
 Should model be continuously trained? Yes
+What is expected QPS? 100
+What is peak QPS? 1000
+How often is knowledge updated? New documents are avaiable every month
+Should the system support multi-turn conversation? Yes
+Should the system personalize response? No
 
 ML problem
   Input - user prompt
@@ -79,28 +81,33 @@ Business problem
 
 # High-Level Design
 
+Query -> API gateway -> Chat service -> Query understanding -> Retriever -> Vector DB -> Re-ranker -> LLM (along with system prompt) -> Safety filtering ->
+
 # Data and Feature Engineering
-N/A
+
+Data source
+  Internal document
+
+Data preprocessing
+  Document cleaning
+  Chunking
+  Embedding generation
 
 # Model Development
 
 Architecture
-  Pre-training
-    Training with large corpus to learn general pattern
-    Transformer based decoder model
-    Loss - cross-entropy to predict likelihood of next token
-  Fine-tuning
-    With pre-trained model, fine-tune with domain specific data
-    Transformer based decoder model
-    Loss - cross-entropy to predict likelihood of next token
+  Use existing model
+  Fine-tune with training data
   RAG
-    Ingest domain specific data into vector database
-    Find cosine similarity between user query embedding and document embeddings in vector DB to retrieve top k results
-    Use separate re-ranker to find most relevant document
-    Call model with user query and document
-    No model training but slower due to having to query vector DB and re-ranker
+    Embedding model
+      Cache embeddings
+    Retriever
+      ANN
+      Top-k retrieval
+    Re-ranker
+    LLM
 
-# Inference and evaluation
+# Inference and Evaluation
 
 Offline
   Retriever - recall 
@@ -111,7 +118,12 @@ Online
   A/B testing
 
 # Detailed Design
+
+Scalability
 </code></pre>
+
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/1-5-1.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/1-5-2.png" alt="Card image cap">
   </div>
   <div class="card-footer text-muted">
     Reference:
