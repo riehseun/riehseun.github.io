@@ -63,10 +63,10 @@ Does each product have category? Yes
 Can each product have more than one category? Yes
 Should search result be personalized to user? Yes
 Should search allow filters? Yes
-Should search result be sorted? Yes
+Should search result be allowed to be sorted? Yes
 How often is the product updated? Once every 6 months on average
 
-Is there training data available? No, user-product interaction data only
+Is there training data available? No, user-product (under each search) interaction data only
 How fast should the system show search results? Under 200ms
 How many products are there in system? 1B
 
@@ -79,21 +79,7 @@ Business problem
 
 # High-Level Design
 
-User -> Query Understanding -> Cache -> Candidate Generation -> Ranking -> Re-ranking ->
-
-Query Understanding
-  Spell correction
-  Query expansion
-  Query embedding
-Candidate Generation
-  Inverted index
-  Vector search
-Ranking
-  Learn-to-rank
-Re-ranking
-  Diversity
-  Freshness
-  Business rules
+User -> Query understanding -> Cache -> Candidate generation -> ranking -> Re-ranking ->
 
 # Data and Feature Engineering
 
@@ -103,16 +89,13 @@ Training data
   Each data point is associated with query
 
 Features
-  Query
-    Query length
-  Query-product
-    Reviews, price, text description, number of comments, comments, number of views, image, video, number of purchase, total $ amount of purchase
-  User
-    Gender, age
+  Query - query length
+  Product - reviews, price, text description, number of comments, comments, number of views, image, video, number of purchase, total $ amount of purchase
+  User - gender, age
 
 Feature engineering
   Numerical (number of comments, number of purchase, age, price, review) - standardize (Mean 0, Var 1)
-  Categorical dense (gender) - one-hot 
+  Categorical dense (gender) - one-hot or embedding
   Categorical sparse (user_id, product_id) - embedding to learn
   Text (search term, comment, description) - BERT
   Image/video - CLIP
@@ -120,35 +103,60 @@ Feature engineering
 # Model Development
 
 Baseline
-  Logistic regression to determin if product is relevant to query
+  Logistic regression to determine, given query, if product is relevant to to user
 
 Architecture
   Candidate generation
-    Lexical search - inverted index, BM25
-    Vector search - ANN, FAISS
+    Find similarity between query embedding and product embedding
+    Use ANN to generate 10k candidates
   Ranking
     Learn-to-rank
-    Find similarity between embedding of search term and product
+    Find similarity between embedding of user and product
+  Re-ranking
+    Diversity
+    Freshness
 
 Training
-  Loss - binary classification to determine if user finds the product relevant (cross-entropy or log-loss)
+  Ranking 
+    Loss - binary classification to determine if user finds the product relevant (cross-entropy or log-loss)
 
-# Inference and Evaluation
+# Evaluation
 
 Offline
-  Candidate generation - recall
+  Candidate generation - recall@k
   Ranking - NDCG
 
 Online
-  A/B testing
+  Revenue increase
 
 # Detailed Design
 
-Scalability
+Query understanding
+  Spell correction
+  Query expansion
+  Query embedding
+
+Cache
+  Store search result in cache (for each age and gender group) and return it
+
+Candidate generation
+  Use batch features from feature store
+    Pre-compute features for possible queries
+    Use product features that don't change often (text description, image, video)
+  Compute this offline
+
+Ranking
+  Use batch features from feature store
+    User features don't change often
+  Process dynamic features on the fly (product - number of views, reviews, etc)
+  
+Re-ranking
+  Diversity - penalize products from same vendor
+  Freshness - penalize old product
+  Business rules
 </code></pre>
 
-    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/1-3-1.png" alt="Card image cap">
-    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/1-3-2.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/product-search-1.png" alt="Card image cap">
   </div>
   <div class="card-footer text-muted">
     Reference: 
