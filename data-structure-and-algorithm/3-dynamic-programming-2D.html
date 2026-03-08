@@ -301,24 +301,28 @@
 
 <pre><code class="python">class Solution:
     def maxCoins(self, nums: List[int]) -> int:
-
+        
         # DP
-        # dp[i][j] max gain by bursting on interval i, j
+        # dp[i][j] = gain by bursting all balloons in (i, j)
+        # dp[i][j] = max(dp[i][k]+dp[k][j]+nums[i]*nums[k]*nums[j])
+        # for all k in (i, j)
         # Time O(n**3)
-        # Space O(n*2)
+        # Space O(n**2)
 
+        # Add 1 on each end to handle edge case
         nums = [1] + nums + [1]
         n = len(nums)
         dp = [[0]*n for _ in range(n)]
 
-        for i in range(n-2, 0, -1):
-            for j in range(i, n-1):
-                for k in range(i, j+1):
-                    gain = nums[i-1] * nums[k] * nums[j+1]
-                    remain = dp[i][k-1] + dp[k+1][j]
-                    dp[i][j] = max(remain+gain, dp[i][j])
-
-        return dp[1][n-2]</code></pre>
+        # Exclude first and last ballon
+        for length in range(2, n):
+            for i in range(n-length):
+                j = i + length
+                for k in range(i+1, j):
+                    dp[i][j] = max(dp[i][j],
+                        dp[i][k]+dp[k][j]+nums[i]*nums[k]*nums[j])
+                
+        return dp[0][n-1]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/burst-balloons">312. Burst Balloons</a> | <a href="https://neetcode.io/problems/burst-balloons">Burst Balloons</a>
