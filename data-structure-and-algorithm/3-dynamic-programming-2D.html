@@ -61,71 +61,41 @@
   <div class="card-body">
     <h2 class="card-title">Regular Expression Matching (150/250)</h2>
 
-<pre><code class="python"># DP
+<pre><code class="python">class Solution:
+    def isMatch(self, s: str, p: str) -> bool:
+        
+        # DP
+        # dp[i][j] if s[i] can be matched by p[j]
+        # dp[0][0] = True
+        # If p[j] == "*", dp[0][j] = dp[0][j-2]
+        # If p[j] == s[i], dp[i][j] = dp[i-1][j-1]
+        # If p[j] == ".", dp[i][j] = dp[i-1][j-1]
+        # If p[j] == "*", dp[i][j] = dp[i][j-2]
+        #   If p[j-1] == ".", dp[i][j] = dp[i][j] or dp[i-1][j]
+        #   If p[j-1] == s[i], dp[i][j] = dp[i][j] or dp[i-1][j]
         # Time O(nm) n = len(s), m = len(p)
         # Space O(nm)
 
         n, m = len(s), len(p)
-        dp = [[" "]*(m+1) for _ in range(len(s)+1)]
-        
-        # An empty pattern always mathes an empty string
-        dp[0][0] = "Y"
+        dp = [[False]*(m+1) for _ in range(n+1)]
+        dp[0][0] = True
+        for j in range(2, m+1):
+            dp[0][j] = dp[0][j-2]
 
-        # First row for a pattern to match an empty char in string
-        for j in range(1, len(p)+1):
-            # For * to match an empty string, everything up to the last
-            # two characters needs to match and the preceeding char
-            # can be anything
-            if p[j-1] == "*":
-                if dp[0][j-2] == "Y":
-                    dp[0][j] = "Y"
-                else:
-                    dp[0][j] = "N"
-            else:
-                dp[0][j] = "N"
-
-        # First column for an empty char in pattern to match any char
-        # in string
-        for i in range(1, len(s)+1):
-            dp[i][0] = "N"
-
-        for i in range(1, len(s)+1):
-            for j in range(1, len(p)+1):
-                # If two characters match, Then two substrings
-                # without these two characters will be the result
-                if s[i-1] == p[j-1]:
+        for i in range(1, n+1):
+            for j in range(1, m+1):
+                if p[j-1] == s[i-1]:
                     dp[i][j] = dp[i-1][j-1]
-                else:
-                    if p[j-1] == "*":
-                        # In this case, p[j-2] is important
-                        # This mean any character is repeated zero
-                        # or more times, so the pattern will match
-                        # all possible scenarios
+                elif p[j-1] == ".": 
+                    dp[i][j] = dp[i-1][j-1]
+                elif p[j-1] == "*": 
+                    dp[i][j] = dp[i][j-2]
+                    if p[j-2] == ".":
+                        dp[i][j] = dp[i][j] or dp[i-1][j]
+                    if p[j-2] == s[i-1]:
+                        dp[i][j] = dp[i][j] or dp[i-1][j]
 
-                        #       . * . . a *
-                        #     0 1 2 3 4 5 6
-                        #   0 Y N Y N N N N
-                        # a 1 N Y Y Y N N N
-                        if p[j-2] == s[i-1] or p[j-2] == ".":
-                            if (dp[i][j-2] == "Y" \
-                                or dp[i-1][j-2] == "Y" \
-                                or dp[i-1][j] == "Y"):
-                                dp[i][j] = "Y"
-                            else:
-                                dp[i][j] = "N"
-                        else:
-                            dp[i][j] = dp[i][j-2]
-                    # In this case, pattern can be any character to
-                    # satisfy this condition: s[j-1] == p[j-1]
-                    elif p[j-1] == ".":
-                        dp[i][j] = dp[i-1][j-1]
-                    else:
-                        dp[i][j] = "N"
-
-        if dp[n][m] == "Y":
-            return True
-        else:
-            return False</code></pre>
+        return dp[n][m]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/regular-expression-matching">10. Regular Expression Matching</a> | <a href="https://neetcode.io/problems/regular-expression-matching">Regular Expression Matching</a>
