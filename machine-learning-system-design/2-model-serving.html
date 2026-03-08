@@ -64,37 +64,37 @@ What should be latency for real-time inference? Under 200ms
 Are models continuously trained? Yes
 How many daily active users are there? 1B
 How many inference requests does each user make? depends on use case
-Should the system monitor model metrics? No
-Should the system perform model deployment like A/B testing? No
+Should the system monitor model metrics? Yes
+Should the system perform model deployment like A/B testing? Yes
 
 ML problem
   Input - requests with static and dynamic features
   Output - prediction
   Platform that serves huge number of API requests, compute/generate huge size of batch predictions
-  Key points - latency under 200ms, throughtput 100M QPS
-
+  
 # High-Level Design
 
-User -> Global load balancer -> Regional edge layer -> API gatwway -> Prediction
-Single region or Kubernetes autoscaling cannot support 100M QPS
+User -> Global load balancer -> Regional edge -> API gatwway -> Inference ->
 
 # Detailed Design
 
-Multi-region deployment
-  Deploy models into US East, US West, etc
-  Avoid cross-regional latency and single point of failure
+Deployment
+  Deploy models into different regions such as US East, US West, etc
+  This avoids cross-regional latency and single point of failure
 
-Multi-stage model inference
-  Cache layer - serve frequent prediction, use Redis
-  Candidate generation - leverage pre-computed embeddings, use ANN, focus on recall
-  Model - dynamic batching (micro-batching per 5-10ms), focus on precision 
+Inference
+  Cache - serve frequent prediction (For example, use Redis)
+  Feature store - stores batch features and its embeddings
+  Candidate generation - leverage embeddings from features store, use ANN to generate candidates offline
+  Model - use dynamic batching (For example, micro-batching per 5-10ms) to increase throughput
 
-Model optimization
+Performance
   Quantization
   Knowledge distillation (only if teacher model is available)
 
-Auto-scaling
-  Traffic forecast
+Scalability
+  Scale based on usage (For example, kubernetes)
+  Scale based on traffic forecast
 </code></pre> 
 
     <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-2/model-serving-1.png" alt="Card image cap">
