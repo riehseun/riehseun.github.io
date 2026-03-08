@@ -78,10 +78,11 @@ ML problem
   Generation
 
 Business problem
+  Provide factual response to users 
 
 # High-Level Design
 
-Query -> API gateway -> Chat service -> Query understanding -> Retriever -> Vector DB -> Re-ranker -> LLM (along with system prompt) -> Safety filtering ->
+Query -> API gateway -> Chat service -> Query understanding -> Retriever -> Vector DB -> Re-ranker -> System prompt -> LLM -> Filter ->
 
 # Data and Feature Engineering
 
@@ -92,22 +93,28 @@ Data preprocessing
   Document cleaning
   Chunking
   Embedding generation
+  Indexing
+
+Training data
+  Human can rate response for each query and response pair
+  Rating can be used to fine-tune the model
 
 # Model Development
 
 Architecture
-  Use existing model
+  Start with pre-trained model
   Fine-tune with training data
   RAG
-    Embedding model
-      Cache embeddings
+    Query understanding
+      Correct spelling mistakes
+      Add context to given query
+      Compute query embedding
     Retriever
-      ANN
-      Top-k retrieval
+      Use ANN to find top-k chunks
     Re-ranker
-    LLM
-
-# Inference and Evaluation
+      Order top-k chucks based on relevance to query
+    
+# Evaluation
 
 Offline
   Retriever - recall 
@@ -119,10 +126,11 @@ Online
 
 # Detailed Design
 
-Scalability
+Data pipeline
+  Chunk raw docuemnts -> Compute embedding for each chunk -> Store them in vector DB
 </code></pre>
 
-    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/1-5-2.png" alt="Card image cap">
+    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/chatbot-1.png" alt="Card image cap">
   </div>
   <div class="card-footer text-muted">
     Reference:
