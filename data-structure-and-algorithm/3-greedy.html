@@ -279,46 +279,38 @@
   <div class="card-body">
     <h2 class="card-title">Hand of Straights (150/250)</h2>
 
-<pre><code class="python">class Solution:
+<pre><code class="python">cclass Solution:
     def isNStraightHand(self, hand: List[int], groupSize: int) -> bool:
         
-        # hand = [1,2,3,4], size = 2 => True [1,2],[3,4]
-        # hand = [1,2,3,5], size = 2 => False
-        
-        # Store frequency of each value in hash table
-        # Find a start of sequence
-        #   Take a value and check if value - 1 exists in hash table
-        # Then, create group with groupSize
+        # Create frequency map
+        # Find start of sequence
         # Time O(n) n = len(hand)
         # Space O(n)
 
-        n, counts = len(hand), defaultdict(int)
-
-        if n % groupSize != 0:
-            return False 
-
+        freq = defaultdict(int)
         for num in hand:
-            counts[num] += 1
+            freq[num] += 1
         
-        i = 0
-        while i < n // groupSize:
-            num = next(iter(counts.keys()))
-            while num in counts:
+        i = 0  # number of groups
+        while i < len(hand) // groupSize:
+            # Find start of sequence
+            num = next(iter(freq.keys()))
+            while num in freq:
                 num -= 1 
             num += 1
-            
+
+            # Create group while updating frequency
             for _ in range(groupSize):
-                if counts[num] > 1:
-                    counts[num] -= 1
+                if freq[num] > 1:
+                    freq[num] -= 1
                 else:
-                    del counts[num]
+                    del freq[num]
                 num += 1
 
             i += 1
-
-        if counts:
+                
+        if freq:
             return False
-
         return True</code></pre>
   </div>
   <div class="card-footer text-muted">
