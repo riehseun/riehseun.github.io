@@ -240,30 +240,29 @@
 <pre><code class="python">class Solution:
     def isHappy(self, n: int) -> bool:
 
-        # When result exists in an array of seen numbers, terminate
-        # If 1 is in seen numbers, return True
-        # Else, return False
+        # Compute sum of squares of digits in while loop
+        # If sum == 1, return True
+        # If cycle, return False
+        # Use slow and fast pointer to detect cycle
+        # Slow moves 1 step while fast moves 2 steps
         # Time O(logn)
-        # Space O(logn) recursion stack
+        # Space O(1)
 
-        seen = set()
+        def move(n):
+            sum = 0
+            for d in str(n):
+                sum += int(d) ** 2
+            print(sum)
+            return sum
 
-        def get_next(n):
-
-            r = 0
-            for c in str(n):
-                r += int(c) ** 2
-
-            return r
-
-        while n not in seen:
-            seen.add(n)
-            n = get_next(n)
-            
-        if 1 in seen:
-            return True
-
-        return False</code></pre>
+        slow = fast = n
+        while True:
+            slow = move(slow)
+            fast = move(move(fast))
+            if slow == 1 or fast == 1:
+                return True
+            if slow == fast:
+                return False</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/happy-number">202. Happy Number</a> | <a href="https://neetcode.io/problems/non-cyclical-number">Non-Cyclical Number</a>
