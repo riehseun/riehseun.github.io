@@ -45,7 +45,12 @@
     <h2 class="card-title">Azure</h2>
     <ul class="list-unstyled mb-0">
       <li><a href="#azure-">Azure</a></li>
-      <li><a href="#azure-">Account and subscription</a></li>
+      <li><a href="#azure-">Account and Subscription</a></li>
+      <li><a href="#azure-">Azure Container Registry</a></li>
+      <li><a href="#azure-">Azure Data Lake Storage</a></li>
+      <li><a href="#azure-">Azure Datafactory</a></li>
+      <li><a href="#azure-">Azure Kubernetes Service</a></li>
+      <li><a href="#azure-">Azure Virtual Network</a></li>
     </ul>
   </div>
 </div>
@@ -53,11 +58,10 @@
 <div class="card mb-4" id="azure-">
   <div class="card-body">
     <h2 class="card-title">Service Principal</h2>
-    <p class="card-text"></p>
     <ul>
-      <li>Service Principal is a reference to an application.</li>
-      <li>It controls what the app can do or who can access the app.</li>
-      <li>This is also same as the Application ID.</li>
+      <li>Service Principal is a reference to an application</li>
+      <li>It controls what the app can do or who can access the app</li>
+      <li>This is also same as the Application ID</li>
     </ul>
 
 <pre><code class="bash"># Service principal expiry.
@@ -68,13 +72,13 @@ az ad sp credential reset --name &lt;display_name or object_id&gt; --years 2</co
 
   </div>
   <div class="card-footer text-muted">
-
+    Reference: 
   </div>
 </div>
 
 <div class="card mb-4" id="azure-">
   <div class="card-body">
-    <h2 class="card-title">Account and subscription</h2>
+    <h2 class="card-title">Account and Subscription</h2>
 
 <pre><code class="bash"># Show my current account information.
 az account show
@@ -83,7 +87,285 @@ az account show
 az account set -s &lt;subscription&gt;</code></pre>
   </div>
   <div class="card-footer text-muted">
+    Reference:
+  </div>
+</div>
 
+<div class="card mb-4" id="azure-">
+  <div class="card-body">
+    <h2 class="card-title">Azure Container Registry</h2>
+
+<pre><code class="bash">az acr login -n &lt;registry_name&gt;
+az acr repository list -n &lt;registry_name&gt;
+az acr repository show-tags -n &lt;registry_name&gt; --repository &lt;repository_path&gt;
+
+result=$(az acr repository list -n &lt;registry_name&gt; --output tsv)
+for i in $result; do az acr repository show-tags -n &lt;registry_name&gt; --repository $i; done</code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+    Reference:
+  </div>
+</div>
+
+<div class="card mb-4" id="azure-">
+  <div class="card-body">
+    <h2 class="card-title">Azure Data Lake Storage</h2>
+    <ul>
+      <li>Azure BLOB Storage</li>
+      <ul>
+        <li>MS storage for Binary Large Objects (BLOB) that stores Massive unstructured data</li>
+        <li>Storage account includes containers, which in turn includes BLOBs</li>
+        <li>Containers must be in lowercase. Blobs can be Block (text or binary) Append (log files) Page (frequent read/write)</li>
+      </ul>
+      <li>Azure Queue Storage</li>
+      <ul>
+        <li>Similar to Azure Queue storage that stores large number of messages</li>
+        <li>Storage account includes queues, which in turn includes messages</li>
+        <li>Queues must be in lowercase. Messages can be any format up to 64KB</li>
+      </ul>
+      <li>Authentication/Authorization</li>
+      <ul>
+        <li>Azure AD group</li>
+        <li>Service Principal</li>
+        <li>Managed Identity</li>
+      </ul>
+      <li>Mount container to virtual machine (NFS v3)</li>
+      <ul>
+        <li>Storage Account must be created with NFS v3 enabled</li>
+        <li>Storage Account -&gt; Networking must have the VNET and subnet of virtual machine(s)</li>
+<pre><code class="bash">mkdir -p &lt;directory_to_create_mount&gt;
+yum install cifs-utils -y
+yum install nfs-utils -y
+echo "&lt;storage_account_name&gt;.blob.core.windows.net:&lt;storage_account_name&gt;/&lt;container_name&gt; &lt;directory_to_create_mount&gt;    nfs defaults,sec=sys,vers=3,nolock,proto=tcp,nofail    0 0" >> /etc/fstab
+mount &lt;directory_to_create_mount&gt;</code></pre>
+      </ul>
+      <li>Mount container to AKS (Blobfuse)</li>
+      <ul>
+        <li>Storage Account -&gt; Container must allow read & write</li>
+        <li>PV and PVC must be created before the pod</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">PV</h3>
+
+<pre><code class="yaml">apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: (volume_name)
+spec:
+  capacity:
+    storage: (volume_size)  # Ex. 30Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain  # Can also set to "Delete"
+  storageClassName: (storage_class_name)
+  mountOptions:
+    - -o allow_other
+    - --file-cache-timeout-in-seconds=120
+  csi:
+    driver: blob.csi.azure.com
+    readOnly: false
+    volumeHandle: must_be_a_unique_name
+    volumeAttributes:
+      resourceGroup: (resource_group)
+      storageAccount: (storage_account)
+      containerName: (container_name)
+      AzureStorageAuthType: msi
+      AzureStorageIdentityResourceID: (id)  # Should look something like "/subscriptions/../resourceGroups/../providers/Microsoft.ManagedIdentity/userAssignedIdentities/.."</code></pre>
+
+    <h3 class="card-title">PVC</h3>
+
+<pre><code class="yaml">apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: (volume_claim_name)
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: (volume_size)  # Ex. 30Gi
+  volumeName: (volume_name)
+  storageClassName: (storage_class_name)</code></pre>
+
+    <h3 class="card-title">Pod</h3>
+
+<pre><code class="yaml">volumes:
+  - name: (any_volume_name)
+    persistentVolumeClaim:
+      claimName: (volume_name)
+
+volumeMounts:
+  - name: (any_volume_name)
+    mount_path: (mount_path)</code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+     Reference: <a href="https://learn.microsoft.com/en-us/azure/storage/blobs/network-file-system-protocol-support-how-to">Mount Blob Storage by using the Network File System (NFS) 3.0 protocol</a> | <a href="https://learn.microsoft.com/en-us/azure/aks/azure-csi-blob-storage-static?tabs=secret">Create and use a static volume with Azure Blob storage in Azure Kubernetes Service (AKS)</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="azure-">
+  <div class="card-body">
+    <h2 class="card-title">Azure Datafactory</h2>
+    <ul>
+      <li>ETL and data integation service</li>
+      <li>Pipeline</li>
+      <ul>
+        <li>Group of activities</li>
+      </ul>
+      <li>Activity</li>
+      <ul>
+        <li>Processing step in pipeline</li>
+        <li>Data movement activities, data tranformation activities, control activities</li>
+      </ul>
+      <li>Datasets</li>
+      <ul>
+        <li>Used as input/output of activities</li>
+      </ul>
+      <li>Linked services</li>
+      <ul>
+        <li>Connection information needed to connect to external resources</li>
+      </ul>
+      <li>Integration runtime</li>
+      <ul>
+        <li>Environment where activities run</li>
+      </ul>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://learn.microsoft.com/en-us/azure/data-factory/introduction">What is Azure Data Factory?</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="azure-">
+  <div class="card-body">
+    <h2 class="card-title">Azure Kubernetes Service</h2>
+    <ul>
+      <li>Pod identity</li>
+      <ul>
+        <li>Pods to be authenticated by AAD</li>
+        <li>Operator creates azureIdentity (with MSI) and azureIdentityBinding (with Pod label)</li>
+      </ul>
+      <li>Managed Identity Controller (MIC)</li>
+      <ul>
+        <li>Deployed as Deployment</li>
+        <li>Watches azureIdentityBinding objects and creates azureAssignedIdentity</li>
+        <li>Watches what Azure Identity is bound to Pod and assign corresponding MSI to Node where that Pod is running</li>
+      </ul>
+      <li>Node Managed Identity (NMI)</li>
+      <ul>
+        <li>Deployed as DeamonSet</li>
+        <li>Requests ADD token on behalf of Pod</li>
+      </ul>
+      <li>Storage Class</li>
+      <ul>
+        <li>Standard SSD</li>
+<pre><code class="yaml">kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: managed-csi-retain
+provisioner: disk.csi.azure.com
+reclaimPolicy: Retain
+allowVolumeExpansion: True
+volumeBindingMode: WaitForFirstConsumer
+parameters:
+  skuname: Standard_LRS</code></pre>
+        <li>Premium SSD</li>
+<pre><code class="yaml">kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: managed-csi-premium-retain
+provisioner: disk.csi.azure.com
+reclaimPolicy: Retain
+allowVolumeExpansion: True
+volumeBindingMode: WaitForFirstConsumer
+parameters:
+  skuname: Premium_LRS</code></pre>
+      </ul>
+      <li>Kubectl</li>
+<pre><code class="yaml"># Check availability zone of each node.
+kubectl get nodes -o custom-columns=NAME:'{.metadata.name}',REGION:'{.metadata.labels.topology\.kubernetes\.io/region}',ZONE:'{metadata.labels.topology\.kubernetes\.io/zone}'</code></pre>
+      <li>AD integration</li>
+      <ul>
+        <li>Create a role</li>
+<pre><code class="yaml">apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: my-role
+  namespace: my-namespace
+rules:
+- apiGroups: ["", "extensions", "apps"]
+  resources: ["*"]
+  verbs: ["*"]
+- apiGroups: ["batch"]
+  resources:
+  - jobs
+  - cronjobs
+  verbs: ["*"]</code></pre>
+        <li>Create a rolebinding</li>
+<pre><code class="yaml">apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: my-rolebinding
+  namespace: my-namespace
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: my-role
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: User
+  name: &lt;email_address&gt;
+- apiGroup: rbac.authorization.k8s.io
+  kind: Group
+  name: &lt;azure_add_group_object_id&gt;</code></pre>
+      </ul>
+    </ul>
+
+<pre><code class="bash"># Add a cluster information to kube config. "--admin" flag may or may not work depending on your permission in Azure
+az aks get-credentials -n &lt;cluster-name&gt; -g &lt;resource-group&gt; --admin
+
+# Show details of AKS cluster.
+az aks list --resource-group &lt;resource-group&gt;
+az aks list --resource-group &lt;resource-group&gt; --query id
+
+# Pod identity.
+kubectl get azureidentity -n &lt;namespace&gt;
+kubectl get azureidentitybinding -n &lt;namespace&gt;
+
+# Check nodepool.
+az aks nodepool list --cluster-name &lt;cluster_name&gt; --resource-group &lt;resource_group&gt;</code></pre>
+
+<pre><code class="bash"># Azure Container Registry
+az acr list
+
+# Inspect ACR and AKS integration
+az role assignment list --assignee &lt;app_id&gt; --scope &lt;acr_id&gt;</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://jonathan18186.medium.com/azure-kubernetes-service-aks-with-azure-active-directory-aad-pod-identity-620cf210361e">Azure Kubernetes Service (AKS) with Azure Active Directory (AAD) Pod Identity</a> | <a href="https://learn.microsoft.com/en-us/azure/aks/availability-zones">Create an Azure Kubernetes Service (AKS) cluster that uses availability zones</a> | <a href="https://shailender-choudhary.medium.com/aks-security-using-rbac-and-azure-ad-7e17b92e80b5">AKS Security using RBAC and Azure AD</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="azure-">
+  <div class="card-body">
+    <h2 class="card-title">Azure Virtual Network</h2>
+    <ul>
+      <li>Subnets must be unique within the vnet</li>
+      <ul>
+        <li>Private address: enable communication between Azure and on-premise</li>
+        <li>Public address: enable communication with internet</li>
+      </ul>
+      <li>5 addresses within each subnet is reserved</li>
+      <li>VNet peering: connect two or more virtual networks</li>
+      <li>Network security group: filter traffic between resources</li>
+      <li>Route table: automatically created for each subnet</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://learn.microsoft.com/en-us/training/paths/az-104-manage-virtual-networks/">AZ-104: Configure and manage virtual networks for Azure administrators</a>
   </div>
 </div>
 <!-- Azure END -->
