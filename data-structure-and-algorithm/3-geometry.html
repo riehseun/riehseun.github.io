@@ -53,43 +53,42 @@
   <div class="card-body">
     <h2 class="card-title">Detect Squares (150/250)</h2>
 
-<pre><code class="python">class DetectSquares:
+<pre><code class="python">class CountSquares:
 
-    # Use list of list
-    # For point i, j need a diagonal point x, y where
-    # abs(i-x) == abs(j-y)
-    # Time O(n) n = number of adds
-    # Space O(n)
+    # Use hash table to store coordinate and its count
+    # For given point (x, y) find (x+d, y+d) 
+    # The difference of each axis must be the same (d)
+    # Add
+    # Time O(1)
+    # Space O(n) n = number of points
+    # Count
+    # Time O(n)
+    # Space O(1)
 
     def __init__(self):
-        self.points = defaultdict(int)
+        self.coord = defaultdict(int)
 
     def add(self, point: List[int]) -> None:
-        self.points[tuple(point)] += 1
-        
+        self.coord[tuple(point)] += 1
+
     def count(self, point: List[int]) -> int:
-        
-        total_count = 0
-        
-        for key, val in self.points.items():
-            if abs(key[0]-point[0]) != abs(key[1]-point[1]):
-                continue
-            if key[0] == point[0]:
-                continue
-            one, two = 0, 0
-            if (point[0], key[1]) in self.points:
-                one = self.points[(point[0], key[1])]
-            if (key[0], point[1]) in self.points:
-                two = self.points[(key[0], point[1])]
-            total_count += val * one * two
-                        
-        return total_count
 
-
-# Your DetectSquares object will be instantiated and called as such:
-# obj = DetectSquares()
-# obj.add(point)
-# param_2 = obj.count(point)</code></pre>
+        x, y = point
+        cnt = 0
+        for key, val in self.coord.items():
+            px, py = key
+            if abs(x-px) != abs(y-py):
+                continue
+            if x == px:
+                continue
+            a, b = 0, 0
+            if (x, py) in self.coord:
+                a = self.coord[(x, py)]
+            if (px, y) in self.coord:
+                b = self.coord[(px, y)]
+            cnt += val * a * b
+            
+        return cnt</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/detect-squares">2013. Detect Squares</a> | <a href="https://neetcode.io/problems/count-squares">Detect Squares</a>
