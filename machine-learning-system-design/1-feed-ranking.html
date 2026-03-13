@@ -54,124 +54,135 @@
     <h2 class="card-title">Feed Ranking</h2>
 
 <pre><code class="markdown">
-# Requirement and Problem
+# Requirement
 
-What kind of feed is this? Instagram Feed
-What is the goal of the system? Increasing user engagement? Yes
-How is user engagement measured? User likes, shares, views, comments? Yes
-What does a feed consist of? Text, Image, Video
-Can users follow each other? Yes
-Should videos be personalized for each user? Yes
-Should the system support multiple language? No
-Should the system prioritize engagement or content quality? Up to you
-Should the system prioritize exploration or exploitation? Up to you
+Functional
+  What kind of posts in exist in feed? Social media posts like Instagram or Facebook
+  Does feed include ADs? Yes
+  Should feed be personalized to users? Yes
+  How many posts should be in feed? 100, users should see ranked posts as scrolling down
+  Should the system prioritize exploration or exploitation? Up to you
+  Should the system prioritize user engagement or post quality? Up to you
+  Should posts be moderated? Yes
+  How many langugages should the system support? Multiple languages
+  What does a post consist of? Text, image, video, like, share, comment
 
-Should the system generate training data from user interaction? Yes
-How many users are there? 1B total, 100M daily
-How many posts do each user upload on average? 1 per day
-How many posts do each user view on average? 100 per day (This leads to 10B impression per day)
-How fast should the feed be generated? Under 200ms
-Should the model be deployed to mobile devices? Up to you
+Non-functional
+  How fast should feed be generated for users? Under 200ms
+  How many users are in the system? 100M daily users
+  How many posts do each user view? 100 on average (10B impression per day)
+  How often does each user open the feed? 5 times per day (500M Queries per daily = 500M/(24*3600) QPS)
+  What is peak QPS? 20-30x of average QPS
+  Is there labeled training data available? No
 
-ML problem
+# Problem
+
+ML 
   Input - user
-  Output - list of posts ranked by relevance to user
+  Output - ranked list of posts
   Supervised ranking
-  
-Business problem
-  Maximize long-term user engagement
 
-# High-Level Design
+Business
+  Maximize user engagement subject to certain threshold
+  10-15% towards exploration and 85-90% exploitation
 
-User -> Candidate Generation -> Ranking Service -> Re-ranking Service -> Output
+# Serving
 
-# Data and Feature Engineering
+User -> Cache -> Candidate generation -> Ranking (pulls feature from online feature store) -> Re-ranking -> Output -> Data Lake -> Re-training
 
-Training data
-  Positive if user performs direct interaction (like, share, comment, etc)
-  Positive if user spends more than 2 seconds to view the post 
-  Negative o/w
+User-Post interaction -> Feature extraction -> Online feature store
 
-Features 
-  User-Post interaction - like, share, comment, view
-  Post - number of likes, shares, comments, view, text, text language, image, video
-  Author - popularity of posts uploaded by author, whether author is followed by the user
-  Context - time of day, device type
+Cache
+  Return cached feed to user
+Candidate generation
+  ANN to find posts whose embeddings are close to user embedding
+  Blend with popular and trending posts
+Ranking
+  Heavy model
+Re-ranking
+  Diversity - penalize posts from same author or posts that contain same images/vidoes 
+  Freshness - penalize old posts
+Online feature store
+  Redis can be used for fast read
 
-Feature Engineering
-  Numerical (number of likes, shares, comments, etc) - Standardize (mean 0, variance 1)
-  Categorical Dense (Age, Gender) - one-hot or embedding
-  Categorical Sparse (User ID, Post ID) - embedding 
-  Text - encoder only model like BERT
-  Image - image encoder like CLIP
-  Video - video encoder like CLIP
-  Contextual - bucketize and one-hot
-  
-# Model Development
+# Data
+
+Positive
+  If user likes or shares a post (Hard positive)
+  If user spends more than 5 seconds viewing the post
+Negative
+  If user dislikes a post (Hard negative)
+  If user spends less than 5 seconds viewing the post
+
+# Feature
+
+User
+  Age, gender - not used for fairness concern
+  Previous posts that user liked/shared/viewed - compute weighted average embedding discounted by time
+Post
+  Text - DistlimBERT for multi-language
+  Image - encoder model like CLIP
+  Video - CLIP's video encoder
+  Tag - CBOW since semantice understanding is not needed
+  Comments - sample comments and compute average embedding
+  Number of likes and shares - standardize
+Author
+  Number of likes and shares from posts that author uploaded - standardize
+Context
+  Device, time of day - bucketized and one-hot
+Temporal
+  Posts that user has been viewing/liking/sharing since opening the feed - compute weighted average embedding discounted by time
+
+# Model
 
 Baseline
-  Heuristics - rank posts by total number of direct interaction (like, share, comment) 
-  Logistic regression - binary classification on whether users will like/share/comment/view post or not
-  Try these models to see if users get satisfactory results first
+  Use logistic regression to predict whether user will view/like/share posts
 
 Architecture
-  Candidate generation
-    Two-tower architecture
-      User tower computes user embedding
-      Post tower with embedding of post_id (post features are not used)
-      Take dot product between user and feed embedding (1 if close, 0 otherwise)
-    ANN to search posts that are close to user (based on similarity between user and post embeddings)
-  Ranking
-    Two-tower architecture
-      User tower computes user embedding
-      Post tower computes post embedding using post features (posts come from 10k candidates generated from previous step)
-  Re-ranking
-    Apply additional rules such as diversity, freshness
- 
+  Pointwise learn to rank
+  All transformed features are fed into DNN
+  DNN predicts different classification head for view/like/share 
+
 Training
-  Binary classification
-  Loss - cross-entropy (log-loss) - 1 if post is relevant to user, 0 o/w
-  Take dot product between post and user embedding
-  How to define relevance? Weighted score of probabilities of view, like, share, comment
+  Cross-entropy (log-loss) since each classification head is binary
+  Individual losses are weighted and summed to create total loss
 
 # Evaluation
 
-Offline
-  Candidate generation - recall to measure percentage of actual relevant posts that model could retrieve
-  Ranking - precision to measure percentage of relevant posts in the feed shown to user
-  Re-ranking - precision
-  Overall - NDCG
+Candidate generation
+  Recall@k - find as much relevant posts as possible
+  MRR - not ideal since MRR only considers first item 
+Ranking
+  Precision@k - recommended posts should be as many relevant as possible
+  mAP
+Overall system
+  NDCG
 
 Online
-  A/B testing
+  CTR
 
-# Detailed Design
+# Discussion
 
-Candidate generation
-∑  Use batch features only
-  Compute 10k candidates offline
-  For each user, store candidates into cache for fast retrieval (Cons. storage footprint)
+Cold start problem
+  New user (user embedding not available) - suggest popular posts
+  New post (user-post interaction history not available) - find posts that user liked whose embeddins are similar to post embedding
 
-Ranking
-  Retrieve batch features from feature store
-  Process dynamic features online
-  Compute 100 candidates online
+Exploitation vs Exploration
+  During candidate generation, include 10-15% of new posts
 
-Re-ranking
-  Diverseity - penalize posts with same authors or same topics
-  Freshness - penalize old posts 
-  Compute online
+Latency
+  Store feed into cache that is geographically close to certain user group
 
-Cold start problen
-  New user - suggest popular posts
-  Store popular posts in cache for fast retrieval
+Scalability
+  Predict time of peakload and scale beforehand
 
-Harmful content
-  When posts are uploaded, use a model to filter out nudity, violence, hate, etc
-</code></pre>
+AD
+  Use a separate models to compute ranked list of ADs that are relevant to user
+  During re-ranking, apply business rules to add certain number of ADs such that one AD appears in every 15 posts  
 
-    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/feed-ranking-1.png" alt="Card image cap">
-    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/feed-ranking-2.png" alt="Card image cap">
+Moderation
+  When users upload post, use a separate model to filter out harmful contents
+</code></pre>  
   </div>
   <div class="card-footer text-muted">
     Reference: 
