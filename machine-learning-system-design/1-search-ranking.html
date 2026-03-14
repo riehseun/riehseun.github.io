@@ -54,7 +54,7 @@
     <h2 class="card-title">Search Ranking</h2>
 
 <pre><code class="markdown">
-# Requirement and Problem
+# Requirement
 
 Functional
   What do users search? Products in commercial webiste?
@@ -75,46 +75,51 @@ Non-functional
   How often are products being updated? Once in 6 months on average
   Should model be continously trained? Yes
 
-ML problem
+# Problem
+
+ML
   Input - query
   Output - list of products ranked by relevance to query
   Supervised ranking problem
 
-Business problem
+Business
   Maximize total amount of user purchase, subject to certain precision (system shouldn't just recommend bait products to maximize short-term revenue)
 
-# High-Level Design
+# Serving
 
 Query -> Query understanding -> Embedding service -> Inverted index
 Product -> Text/Image/Video encoder -> Product Embedding
 Query -> Cache -> BM25 -> Candidate generation -> Ranking -> Re-ranking -> Search result -> Data Lake -> Re-training
 
-# Data and Feature Engineering
+# Data 
 
-Training data
-  Positive - if user save product for later, stores product into cart, purchase product
-  Negative - if user clicks the product but performs no further action or impression only
-  Hard positive - if user purchases product and later leave good review or comments
-  Hard negative - if user purchases product and later leave bad review or comments
+Positive - if user save product for later, stores product into cart, purchase product
+Negative - if user clicks the product but performs no further action or impression only
+Hard positive - if user purchases product and later leave good review or comments
+Hard negative - if user purchases product and later leave bad review or comments
 
-Features
-  User - Products that user previously purchased (use average product embeddings discounted by time)
-  Product - description, image, video, review, comments, tag, price, number of inventory, next delivery date
-  User-Product interaction - purchased, carted, saved, impression, comments, review
-  Context - device, time of day
-  Temporal - previous search query, previous product that user clicked and spent X amount of time or saved or carted or purchased
-  Query -
-  Query-item cross
+# Feature
 
-Feature engineering
-  Text (description) - encoder-only models like BERT 
-  Text (tag) - CBOW (semantic understanding not needed)
-  Text (comments) - sample comments and compute averge embeddings of sampled comments
-  Numerical (price, umber of inventory, review) - standardize
-  Context (device, time of day) - bucketize and one-hot
-  Temporal - average embeddings
+User
+  Products that user previously purchased - average product embeddings discounted by time
+Product
+  Description - encoder-only models like BERT 
+  Image, video - image/video encoder
+  Review, price, number of inventory - standardize
+  Tag - CBOW (semantic understanding not needed)
+  Comments - sample comments and compute averge embeddings of sampled comments
+  Next delivery date
+User-Product interaction
+  purchased, carted, saved, impression, review - standardize
+  Comments- embedding
+Context
+  Device, time of day - bucketize and one-hot
+Temporal
+  Previous search query, previous product that user clicked and spent X amount of time or saved or carted or purchased - embedding
+Query
+Query-item cross
 
-# Model Development
+# Model
 
 Baseline
   Heuristic - rank products by reviews
@@ -153,7 +158,7 @@ Online
   CTR
   Total revenue
 
-# Detailed Design
+# Discussion
 
 Real-time user-product interaction data
   Use Kafka for data ingestion and Spark Structured Streaming for data processing
@@ -180,7 +185,7 @@ Monitoring
   Store both inference and ground truth in data lake to monitor model perfomance
   Monitor feature distribution drift
 </code></pre>
-    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/search-ranking-1.png" alt="Card image cap">
+
   </div>
   <div class="card-footer text-muted">
     Reference: 
