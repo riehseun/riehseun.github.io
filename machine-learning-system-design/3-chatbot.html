@@ -62,10 +62,12 @@ Functional
   Should chatbot generate response based on domain specific knowledge? Yes
   What domain specific knowledge should chatbot contain? Could be company internal information
   Does user query include text, image, video? Text only
+  Should response include reference to knowledge (or document)? Yes
+  Should chatbox consider previous prompts in the same session? Yes
 
 Non-functional
   Is training data available? No
-  How fast should the generation be? Under 200ms
+  How fast should the generation be? 1-3s
   Should model be deployed to mobile devices? No
   Should model be continuously trained? Yes
   What is expected QPS? 100
@@ -90,6 +92,18 @@ Document -> Parsing, cleaning, chunking -> Embedding service -> Vector DB
 
 Query -> API gateway -> Chat service -> Query understanding -> Retriever -> Re-ranker -> LLM (with system prompt) -> Filter ->
 
+Query understanding
+  Create standalone question from chat history
+  Correct spelling mistakes
+  Additional keywords
+  Transform input query into embedding
+
+Retriever
+  Search vector DB using ANN to find embeddings of chunks that are similar to embedding of query
+
+Re-ranker
+  Rank chunks from retriever
+
 # Data
 
 Human can rate response for each query and response pair
@@ -106,14 +120,17 @@ Architecture
   Fine-tune with training data
     Next word prediction
   RAG
-    Query understanding
-      Correct spelling mistakes
-      Add context to given query
-      Compute query embedding
+    Chunking
+      Fixed-size - fixed number of tokens in each chunk (fixed number of overlapping tokens are allowed)
+      Semantic - split text into sentences and create fixed-sized window, then merge windows that have certian cosine similarity
+    Embedding
+      Late chunking - break texts into tokens, compute embeddings for each token, then group tokens into chucks (need long context model)
+      Late interaction - compare similarity between query tokens and document tokens one by one, then find highest score (compute intensive)
+      SentenceBERT - compute averge embedding of all words in each sentence, feed two sentences into two BERTs at a time, then compute cosine simliarity
     Retriever
-      Use ANN to find top-k chunks
+      HNSW - build graph of chunk embeddings, compare closeness between query and random node versus query and all neighboring nodes on random node, then pick node with highest similarity
     Re-ranker
-      Order top-k chucks based on relevance to query
+      Cross-encoder - both query and chunk are fed to network, then value bewteen 0 and 1 are produced
 
 Training
   Fine-tuning
@@ -122,9 +139,9 @@ Training
 # Evaluation
 
 Offline
-  Retriever - recall
-  Reranker - precision
-  Model - factual accuracy, number of harmful response
+  Retriever - recall@k, precision@k
+  LLM - faithfulness, answer relevance
+  Overall - summarization score, context entities recall
 
 Online
   Human review
@@ -133,6 +150,26 @@ Online
 
 Deployment
   A/B testing
+
+Index
+  Embedding - chunk
+
+Inverted index
+  Text (chunk) - document
+
+Supporting images or videos are input
+  Encode images (or use a model to compute text summary of image) and store in vector DB, retriever searches for both relevant chunks and images, then final chunk and image are sent to multi-modal LLM
+
+Handle very long query
+  Text clean up + text summarization service
+
+Determine dimension of word or sentence embedding
+  1024 for word, 4096 for sentence
+
+Agentic
+  Master agent coordinates specialized agents
+  Ex. query internal DB, query user-specific info such as chat history or email, query internet
+  Better accuracy but higher latency and complex error handling
 </code></pre>
   </div>
   <div class="card-footer text-muted">
