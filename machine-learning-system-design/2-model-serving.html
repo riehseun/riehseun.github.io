@@ -61,7 +61,8 @@ What kind of models? Feed recommendation, harmful content detection, product sea
 Are inferences batch and real-time? Both
 What should be latency for real-time inference? Under 200ms
 How many daily active users are there? 1B
-How many inference requests does each user make? depends on use case
+How many inference requests does each user make? depends on use case but 100 QPS on average
+What is peak QPS? 20-30x of average QPS
 Should the system perform model deployment like A/B testing? Yes
 Should the system support continuous training? Yes
 Should the system support online and offline feature store? Yes
@@ -86,7 +87,10 @@ Raw storage
 Curated storage
   Store data in parquet format for fast columar access 
 
-Model training -> Model registry -> A/B testing -> Deployment
+Feature engineering -> Offline feature store -> Model training ->  Model registry -> A/B testing -> Deployment
+
+Offline feature store
+  Stores transformed features to be re-used
 
 Model training
   Data parallelism
@@ -107,7 +111,7 @@ Deployment
   Deploy models into different regions such as US East, US West, etc
   This avoids cross-regional latency and single point of failure
 
-User -> Global load balancer -> Regional edge -> API gatwway -> Cache -> Online feature store -> Inference -> Output -> Offline feature store -> Data Lake -> Training
+User -> Global load balancer -> Regional edge -> API gatwway -> Cache -> Online feature store -> Inference -> Output -> Data Lake -> Training
 
 API gateway
   Route to differet models based on request
@@ -121,9 +125,6 @@ Online feature store
 
 Inference
   Dynamic batching (For example, micro-batching per 5-10ms) to increase throughput
-
-Offline feature store
-  Stores batch features for continuous training
 
 Data lake
   Stores inference and ground truth to generate metrics to monitor model performance 
