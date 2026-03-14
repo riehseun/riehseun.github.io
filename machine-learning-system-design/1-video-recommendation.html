@@ -54,7 +54,7 @@
     <h2 class="card-title">Video Recommendation</h2>
 
 <pre><code class="markdown">
-# Requirement and Problem
+# Requirement
 
 Functional
   Where should recommendations appear? In webpage or mobile web
@@ -79,52 +79,55 @@ Non-functional
   Should the model be continously trained? Yes
   How often should the model be trained? Up to you
 
-ML problem
+# Problem
+
+ML
   Input - user
   Output - list of videos in order of relevance
   Supervised ranking problem
 
-Business problem
+Business
   Maximize user engagement, subject to certain precision (system shouldn't recommend just click baits to increase user engagement)
 
-# High-Level Design
+# Serving
 
 User -> Feature store -> Candidate Generation -> Ranking -> Re-ranking -> Output -> Data Lake -> Training
 
-# Data and Feature Engineering
+# Data
 
-Training data
-  Positive if user likes/shares video
-  Positive if user watches more than half of video
-  Negative if user dislike video
-  Negative if user does not click recommended video
+Positive if user likes/shares video
+Positive if user watches more than half of video
+Negative if user dislike video
+Negative if user does not click recommended video
 
-Features 
-  User - country
-  Video - title, tag, description, resolution, duration, langugage, comments, date uploaded
-  User-Video interaction - like, dislike, share
-  Context - device, time of day
-  Author - popularity of videos (measured by number of likes and total watch time) uploaded by author
-  Temporal - previous videos watched since opening app or coming to website, previous videos clicked but not watched 
+# Feature
 
-Feature Engineering
-  Numerical (resolution, duration, popularity of videos) - Standardize (mean 0, variance 1)
-  Categorical Sparse (language) - embedding 
-  Contextual (device, time of day) - bucketize and one-hot
-  Temporal - sequence model like Transformer
-  Text (title, description) - encoder only model like distlimBERT for multi-langugage
-  Text (tag) - CBOW since semantic understanding is not important for tag
+User
+  Country
+Video
+  Title, description - distlimBERT for multi-langugage
+  Tag - CBOW since semantic understanding is not important for tag
+  Resolution, duration - standardize (mean 0, variance 1)
+  Langugage - embedding (categorical)
+  Comments - sample and compute averge embedding
+  Date uploaded
   Image (thumbnail) - image encoder like CLIP
-  Video - video encoder like CLIP
-  Audio - audio encoder  
+  Audio - audio encoder
+User-Video interaction
+  Number of like, dislike, share - standardize
+Context
+  Device, time of day - bucketized and one-hot
+Author
+  Popularity of videos (measured by number of likes and total watch time) uploaded by author - standardize
+Temporal
+  Previous videos watched since opening app or coming to website, previous videos clicked but not watched - compute average embedding
 
-# Model Development
+# Model
 
 Baseline
   Heuristics - rank posts by total number of likes or total watch time
   Logistic regression - binary classification to predict whether users will interact with video where like/share/comment/watch can be separate classiction head and total loss is computed by weighted average of individual losses
-  Try these models to see if users get satisfactory results first
-
+  
 Architecture
   Candidate generation
     Two-tower architecture ()
@@ -163,7 +166,7 @@ Online
   Increase in user engagement measured by total number of like/share/comment
   Decrease in number of videos that are clicked but not watched
 
-# Detailed Design
+# Discussion
 
 Real-time feature ingestion
   Use Kafka for streaming data and spark structured streaming to process it
