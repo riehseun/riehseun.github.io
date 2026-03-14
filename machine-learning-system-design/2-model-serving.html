@@ -54,32 +54,23 @@
     <h2 class="card-title">Model Serving</h2>
 
 <pre><code class="markdown">
-# Requirement and Problem
+# Requirement
 
 How many models are there? Over 100
 What kind of models? Feed recommendation, harmful content detection, product search, fraud detection
-
 Are inferences batch and real-time? Both
 What should be latency for real-time inference? Under 200ms
-Are models continuously trained? Yes
 How many daily active users are there? 1B
 How many inference requests does each user make? depends on use case
-Should the system monitor model metrics? Yes
 Should the system perform model deployment like A/B testing? Yes
+Should the system support continuous training? Yes
+Should the system support online and offline feature store? Yes
+Should the system support model registry? Yes
+Should the system support monitoring of models and infra? Yes
 
-ML problem
-  Input - requests with static and dynamic features
-  Output - prediction
-  Platform that serves huge number of API requests, compute/generate huge size of batch predictions
-  
-# High-Level Design
+# Design
 
-User -> Global load balancer -> Regional edge -> API gatwway -> Inference ->
-
-# Detailed Design
-
-Data pipeline 
-  Data ingestion -> Data processing -> Raw storage -> Curated storage
+Data ingestion -> Data processing -> Raw storage -> Curated storage
 
 Data ingestion
   Kafka can be used for both real-time and batch ingestion
@@ -95,8 +86,7 @@ Raw storage
 Curated storage
   Store data in parquet format for fast columar access 
 
-Training pipeline
-  Model training -> Model registry -> A/B testing -> Deployment
+Model training -> Model registry -> A/B testing -> Deployment
 
 Model training
   Data parallelism
@@ -117,8 +107,10 @@ Deployment
   Deploy models into different regions such as US East, US West, etc
   This avoids cross-regional latency and single point of failure
 
-Inference pipeline
-  Request -> Cache - > Online feature store -> Model -> Output -> Data lake (Offline feature store) -> Training
+User -> Global load balancer -> Regional edge -> API gatwway -> Cache -> Online feature store -> Inference -> Output -> Offline feature store -> Data Lake -> Training
+
+API gateway
+  Route to differet models based on request
 
 Cache
   Serve frequent prediction (For example, use Redis)
@@ -127,7 +119,7 @@ Online feature store
   Store dynamic features for inference
   Stores data into raw storage (before processing) and curated storage (after processing)
 
-Model
+Inference
   Dynamic batching (For example, micro-batching per 5-10ms) to increase throughput
 
 Offline feature store
@@ -136,8 +128,7 @@ Offline feature store
 Data lake
   Stores inference and ground truth to generate metrics to monitor model performance 
 
-API gateway
-  Route to differet models based on request
+# Discussion
 
 Performance
   Quantization
@@ -151,8 +142,6 @@ Monitoring
   System metrics
   Model metrics
 </code></pre> 
-
-    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-2/model-serving-1.png" alt="Card image cap">
   </div>
   <div class="card-footer text-muted">
     Reference:
