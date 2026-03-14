@@ -54,52 +54,57 @@
     <h2 class="card-title">Harmful Content Detection</h2>
 
 <pre><code class="markdown">
-# Requirement and Problem
+# Requirement
 
-Where does potentially harmful content exist? Instagram feed
-What is considered as harmful post? Posts with violent or hate text, nude images and videos
-Should the system tell author why content was removed? Yes
-Can users report post as harmful? Yes
-Should the system support multiple languages? No
+Functional
+  Where does potentially harmful content exist? Instagram feed
+  What is considered as harmful post? Posts with violent or hate text, nude images and videos
+  Should the system tell author why content was removed? Yes
+  Can users report post as harmful? Yes
+  Should the system support multiple languages? Yes
 
-How many posts does each user create? 1 per day
-Is there training data available? Yes, 100M pairs of posts and 1/0 indicating violence/hate/nude or not
-How fast should harmful contents be removed? As soon as possible
-Should model be deployed to user device? No
+Non-functioanl
+  How many posts does each user create? 1 per day 
+  How many users are there in platform? 100M daily active users (100M post created per day)
+  Is there training data available? Yes, 100M pairs of posts and 1/0 indicating violence/hate/nude or not
+  How fast should harmful contents be removed? As soon as possible
+  Should model be deployed to user device? No
+  Should model be continously trained? Yes
 
-ML problem
+# Problem
+
+ML
   Input - post
   Output - whether post is harmful or not
   Binary classification
   
-Business problem
+Business
   Minimize total number of harmful impressions, subject to minimum precision
 
-# High-Level Design
+# Serving
 
 Post Upload -> Filter -> Feature Extraction -> Inference -> Remove or Human Review or Allow
 
-# Data and Feature Engineering
+# Data
 
-Training data
-  Human labelling
-  User reports
+Human labelling to detect violence, hate, nudity
+User reports
+Results from human review
 
-Features
-  Post - text, image, video
-  Author - violation history, date of account creation
+# Features
 
-Feature engineering
-  Text - BERT
-  Image/Video - CLIP
-  Numerical (violation history) - Standardize (Mean 0, Var 1)
-  Date - convert to numerical (For example, number of days since a fixed date) 
+Post
+  Text - encoder model like DistlimBERT for multi-language
+  Text embedded within image - model to extract texts with images, then DistlimBERT
+  Image, video, audio - image/video/audio encoder
+Author
+ Violation history - standardize (Mean 0, Var 1)
+ Date of account creation
 
-# Model Development
+# Model
 
 Baseline
   Logistic regression - binary classification to determine whether a post in harmful or not
-  Try this first to see if ML/business objective can be achieved
 
 Architecture
   Separate model for violence/hate/nude - lots of training data needed, training cost
@@ -119,7 +124,7 @@ Offline
 Online
   Total number of harmful impressions
 
-# Detailed Design
+# Discussion
 
 Filter
   Blacklisted keyword
@@ -132,8 +137,6 @@ Inference
 Feedback loop
   Use human review for further training dataset
 </code></pre>
-
-    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/harmful-content-detection-1.png" alt="Card image cap">
   </div>
   <div class="card-footer text-muted">
     Reference: 

@@ -54,22 +54,26 @@
     <h2 class="card-title">Fraud Detection</h2>
 
 <pre><code class="markdown">
-# Requirement and Problem
+# Requirement
 
-What kind of fraud is this? Fraudulent financial transactions 
-How does fraud occur? Use stolen debit or credit card to make purchases
-Where does fraud occur? In website or app where purchases are made
-Should model explain why transaction is deemed fraud? Yes
-What should system do when detecting fraud? Reject transaction
-What is impact of false positive? Loss of revenue from not making transaction
-What is impact of false negative? Unhappy customer lost money from fraud
+Functional
+  What kind of fraud is this? Fraudulent financial transactions 
+  How does fraud occur? Use stolen debit or credit card to make purchases
+  Where does fraud occur? In website or app where purchases are made
+  Should model explain why transaction is deemed fraud? Yes
+  What should system do when detecting fraud? Reject transaction
+  What is impact of false positive? Loss of revenue from not making transaction
+  What is impact of false negative? Unhappy customer lost money from fraud
 
-Do we have training data available? Yes, 1M fraud transactions and 100M non-fraud transactions
-Should inference be immediate? Yes
-Should model be continuously trained? Yes
-Should model be deployed to mobile devices? No
+Non-functional
+  Do we have training data available? Yes, 1M fraud transactions and 100M non-fraud transactions
+  Should inference be immediate? Yes
+  Should model be continuously trained? Yes
+  Should model be deployed to mobile devices? No
 
-ML problem
+# Problem
+
+ML
   Input - person and transaction
   Output - whether transaction is fraud or not
   Binary classification
@@ -77,33 +81,39 @@ ML problem
 Business problem
   Increase long-term user engagement, thus increase in revenue
 
-# High-Level Design
+# Serving
 
 Transaction -> Reject based on simple rule -> Inference -> Reject or human review or pass
 
-# Data and Feature Engineering
+# Data
 
-Training data
+We have labeled dataset
+Also, use result from human review
 
-Feature
-  Account - age, balance, transaction limit, total limit
-  User - past fraud commit, country
-  Transaction - $ amount
-  Device - device ID, IP address
-  Location - country, speed (distance/time) since the last transaction
-  Temporal - number of transactions in past X hours, average number of transactions per month
+# Feature
 
-Feature engineering 
-  Numerical (age, balance, transaction limit, total limit) - standardize
-  No need to scale or nomalize if using Ensemble model
-  Compute "averge metrics" like averge account balance for the past 12 months, as these values are less impacted by distribution drift
-  Convert date field to integer
+Account
+  Age, balance, transaction limit, total limit - standardize
+User
+  Past fraud commit
+  Country - embedding 
+Transaction
+  $ amount
+Context
+  Device ID, IP address - bucketize + one-hot
+Location
+  Country
+  Speed (distance/time) since the last transaction
+Temporal
+  Number of transactions in past X hours, average number of transactions per month
+
+No need to scale or nomalize if using Ensemble model
+Compute "averge metrics" like averge account balance for the past 12 months, as these values are less impacted by distribution drift
   
-# Model Development
+# Model
 
 Baseline
   Logistic regression to determine if transaction is fraud or not
-  Use this to see if ML/business objective can be met
 
 Architecture
   NN models are not less explainable than tree models
@@ -122,12 +132,12 @@ Training
 Offline
   Recall - catching actual fraud is very important 
   Precision - accuracy of prediction is important not to reject valid transaction to annoy users
-  PR-AUC
+  PR-AUC - better than ROC-AUC due to class imbalance
 
 Online
   Number of user reports on fraud
 
-# Detailed Design
+# Discussion
 
 Streaming features
   Ingestion - Kafka 
@@ -141,8 +151,6 @@ Reject based on simple rule
 Explainability
   SHAP value
 </code></pre>
-
-    <img class="img-fluid" class="card-img-top" src="/machine-learning-system-design/image/mlsd-1/1-4-1.png" alt="Card image cap">
   </div>
   <div class="card-footer text-muted">
     Reference: 
