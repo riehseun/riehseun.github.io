@@ -111,13 +111,19 @@ Deployment
   Deploy models into different regions such as US East, US West, etc
   This avoids cross-regional latency and single point of failure
 
-User -> Global load balancer -> Regional edge -> API gatwway -> Cache -> Online feature store -> Inference -> Output -> Data Lake -> Training
+User -> Global load balancer -> Regional edge -> API gatwway -> Cache -> Feature extraction -> Online feature store -> Inference -> Output -> Data Lake -> Training
 
 API gateway
   Route to differet models based on request
+  Load balancing
+  Rate limiting
 
 Cache
   Serve frequent prediction (For example, use Redis)
+  TTL to invalidate stale information
+
+Feature extraction
+  Use Flink or Spark Structured Streaming
   
 Online feature store
   Store dynamic features for inference
@@ -131,13 +137,21 @@ Data lake
 
 # Discussion
 
-Performance
-  Quantization
-  Knowledge distillation (only if teacher model is available)
+Availability
+  Run multiple replicas of each service (active-active or active-passive)
+
+Reliability
+  Store replicas of data in data center with different geo location
 
 Scalability
-  Scale based on usage (For example, kubernetes)
-  Scale based on traffic forecast
+  Compute - horizontal scaling (based on usage or traffic forecast)
+  Data - paritioning (Ex. consistent hashing)
+
+Performance
+  Remove unnecessary features, thus size of feature vector
+  Pruning - remove non-contributing connections between neurons or neruons themselves
+  Quantization - use less number of bits to store weight values
+  Knowledge distillation (only if teacher model is available)
 
 Monitoring
   System metrics
