@@ -154,29 +154,26 @@
 
 <pre><code class="python">class Solution:
     def groupAnagrams(self, strs: List[str]) -> List[List[str]]:
+        
+        # [ac, ca, bk, kb, pc] ? [ac, ca], [bk, kb], [pc]
 
-        # ["abc", "bca", "dky", "ykd", "cjp"] ? 
-        #   [["abc", "bca"], ["dky", "ykd"], ["cjp"]]
+        # Represent each char as tuple of 26 nums
+        # Each num in tuple means occurance of each char
+        # Use tuple as a key in mapping
+        # Time O(n) n = total number of chars in strs
+        # Space O(n)
 
-        # Represent anagram as a key in dictionary
-        # Represent each string as tuple of 26 chars
-        # Convert each char into number using ord function
-        # Time O(nm) n = len(strs), m = length of word
-        # Space O(nm) = O(n) up to 26 chars in alphabet
-
-        groups = defaultdict(list)
+        mapping = defaultdict(list)
 
         for s in strs:
-            tup = [0] * 26
+            t = [0] * 26
             for c in s:
-                index = ord("a") - ord(c)
-                tup[index] += 1
-            groups[tuple(tup)].append(s)
+                t[ord(c)-ord("a")] += 1
+            mapping[tuple(t)].append(s)
 
         result = []
-        for key, val in groups.items():
-            result.append(val)
-
+        for k, v in mapping.items():
+            result.append(v)
         return result</code></pre>
   </div>
   <div class="card-footer text-muted">
@@ -381,26 +378,37 @@
 
 <pre><code class="python">class Solution:
 
-    # ["how", "are", "you"] ? ["how", "are", "you"]
+    # [ab, cd] ? [ab, cd]
 
-    # Need to know break point for each word
-    #   Insert a (non ASCII) char between words, say | 
+    # Encode array of strings using delimiter
+    # For example, use length of each string and #
     # Encode
-    # Time O(n) n = len(strs)
-    # Space O(k) k = number of words
+    #   Time O(n) n = len(strs)
+    #   Space O(n)
     # Decode
-    # Time O(m) m = len(s)
-    # Space O(1) ignoring space for result 
+    #   Time O(m) m = len(s)
+    #   Space O(1) ignoring space for result
 
     def encode(self, strs: List[str]) -> str:
-        if not strs:
-            return "α"
-        return "π".join(strs)
-        
+        result = []
+        for s in strs:
+            result.append(str(len(s)))
+            result.append("#")
+            result.append(s)
+        return "".join(result)
+
     def decode(self, s: str) -> List[str]:
-        if s == "α":
-            return []
-        return s.split("π")</code></pre>
+        print(s)
+        result, i = [], 0
+        while i < len(s):
+            j = i
+            while s[j] != "#":
+                j += 1
+            length = int(s[i:j])
+            result.append(s[j+1:j+1+length])
+            i = j + 1 + length 
+
+        return result</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/encode-and-decode-strings">271. Encode and Decode Strings</a> | <a href="https://neetcode.io/problems/string-encode-and-decode">Encode and Decode Strings</a>
