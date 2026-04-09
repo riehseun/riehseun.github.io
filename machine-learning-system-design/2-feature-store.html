@@ -53,7 +53,7 @@
   <div class="card-body">
     <h2 class="card-title">Feature Store</h2>
 
-    <pre><code class="markdown">
+<pre><code class="markdown">
 # Requirement
 
 How many models are there? Over 100
@@ -62,13 +62,20 @@ What is size of data? PBs
 What are types of data? Mostly unstructured
 What are data formats? various formats of text, image, video
 Are inferences batch and real-time? Both
+How fast should real-time inference be? Under 200ms
 
 # Design
 
 Data Source -> Batch and Streaming Ingestion -> Feature Computation -> Offline and Online Store -> Feature Registry -> Model Training and Serving
 
+Ingestion
+  Batch - API dump or DB change data capture
+  Streaming - Kafka (Spark Structured Streaming for processing)
+
 Feature Computation
   Features are defined once and re-used
+    Use Airflow for DAG
+    Backfill historical features
   Same logic for training and serving - o/w models silently degrade
   Batch features
     Daily aggregation
@@ -76,10 +83,14 @@ Feature Computation
   Streaming features
     Windowed aggregation (Ex. last 5 minute)
     write latest value to online store and full history to offline store
+  Embeddings
+    For unstrucrtured data, embeddings are computed using GPUs and stored in offline feature store
 
 Offline Store
   Historical feature values
   Used for training
+  Feature versioning to ensure point-in-time correctness
+  Use S3
 
 Online Store
   Store latest feature values only
@@ -87,23 +98,28 @@ Online Store
   Cache by hot key
   Key-value store
   Used for inference
+  Fetching should be done under 50ms
+  Use Redis
 
 Feature Registry
   Stores feature definitions
   Metadata
   Versioning
-  Data lineaage
+  Data lineage
+  Use Feast
+
+Model serving
+
 
 # Discussion
 
+Availability
+  Span compute resources across multi-region
+  Trade-off between cost and availability
+
 Scalability
-  Partition
-    By entity key
-    By time (offline store)
-  Shard
-    Hash based (online store)
-  Replication
-    Multi-region for availability
+  Compute - horizontal scaling
+  Data - partition by entity key or time (offline store)
 
 Reliability
   Idempotent writes
@@ -113,11 +129,9 @@ Consistency
   Strong consistency for training
   Eventual consistency for inference
 
-Observability
-  Data drift
-  Distribution drigt
-  Latency
-  QPS
+Monitoring
+  Model - score distribution, data drift, feature drift
+  System - latency, QPS
 
 Governance
   Feature ownership
