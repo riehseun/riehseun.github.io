@@ -141,36 +141,38 @@
 
 <pre><code class="python">class Solution:
     def threeSum(self, nums: List[int]) -> List[List[int]]:
-
-        # [-1,0,1,2,3] ? [[-1,0,1]]
-
-        # Sort array
-        # Fix a value
-        # Check from both ends to see value + nums[i] + nums[j] == 0
-        # Time O(nlogn+n**2) n = len(nums)
-        # Space O(1)
         
-        nums.sort()
-        result = set()
+        # Sort nums
+        # Fix a num and initiate two pointers at num + 1 and at the end
+        # To avoid duplicate, pass if num[i] == num[i-1]
+        # Time O(nlogn+n**2) n = len(nums)
+        # Space O(logn) space for sorting
 
-        for i in range(len(nums)):
-            # Skip duplicate check
-            if i != 0 and nums[i] == nums[i-1]:
+        nums.sort()
+        n = len(nums)
+        result = []
+
+        for i in range(n):
+            if i > 0 and nums[i] == nums[i-1]:
                 continue
-            
-            j, k = i + 1, len(nums) - 1
+            j, k = i + 1, n - 1
+
             while j < k:
-                three_sum = nums[j] + nums[i] + nums[k]
-                if three_sum < 0:
+                sum = nums[i] + nums[j] + nums[k]
+                if sum < 0:
                     j += 1
-                elif three_sum > 0:
+                elif sum > 0:
                     k -= 1
                 else:
-                    result.add((nums[i], nums[j], nums[k]))
+                    result.append([nums[i], nums[j], nums[k]])
+                    while j < k and nums[j] == nums[j+1]:
+                        j += 1
+                    while j < k and nums[k] == nums[k-1]:
+                        k -= 1
                     j += 1
                     k -= 1
 
-        return list(result)</code></pre>
+        return result</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/3sum">15. 3Sum</a> | <a href="https://neetcode.io/problems/three-integer-sum">3Sum</a>
