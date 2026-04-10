@@ -60,25 +60,29 @@
 
 <pre><code class="python">class Solution:
     def lengthOfLongestSubstring(self, s: str) -> int:
+        
+        # "babcdde" ? 4
 
-        # "abccdef" ? 4 (cdef)
-
-        # Interate i and j from the beginning
-        # j increments when substring has no repeating char
-        # i increments when substring has repeating char
-        # Use set to remember chars that have been seen
+        # Sliding window
+        # Move end pointer until there is no duplicate
+        # If duplicate, move start pointer until there is no duplicate
+        # Use hash table to keep chars in window
         # Time O(n) n = len(s)
         # Space O(n)
 
-        i, j, n = 0, 0, len(s)
-        seen, max_len = set(), 0
+        chars = {}
+        i, j = 0, 0
+        max_len = 0
 
-        while i <= j and j < n:
-            if s[j] not in seen:
-                seen.add(s[j])
+        while i <= j and j < len(s):
+
+            if s[j] not in chars:
+                chars[s[j]] = 1
                 j += 1
             else:
-                seen.remove(s[i])
+                chars[s[i]] -= 1
+                if chars[s[i]] == 0:
+                    del chars[s[i]]
                 i += 1
             max_len = max(max_len, j-i)
 
