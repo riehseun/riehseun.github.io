@@ -64,30 +64,32 @@
 
 <pre><code class="python">class Solution:
     def isValid(self, s: str) -> bool:
+        
+        # [{()}] ? True
+        # [({)}] ? False
 
-        # s = "()" ? True
-        # s = "[]()" True
-        # s = "[{]}" False
-
-        # If char is (, {, [ append to stack 
-        # If char is ), }, ] check top of the stack
-        #   If matching opening, pop from stack
-        #   Else append to stack
+        # Put each token into a stack
+        # If closing bracket, check if top of stack has corresponding
+        # opening braket
+        # Use hash map to store opening and closing brackets
         # Time O(n) n = len(s)
-        # Space O(n)
+        # Space O(1)
 
-        stack = []
-        paren = {
+        brackets = {
             ")": "(",
-            "]": "[",
-            "}": "{"
+            "}": "{",
+            "]": "["
         }
+        stack = []
 
         for c in s:
-            if stack and c in paren and stack[-1] == paren[c]:
-                stack.pop()
-            else:
+            if c not in brackets:
                 stack.append(c)
+            else:
+                if stack and stack[-1] == brackets[c]:
+                    stack.pop()
+                else:
+                    return False
 
         if stack:
             return False
