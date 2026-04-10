@@ -100,52 +100,39 @@
 <pre><code class="python">class Solution:
     def minWindow(self, s: str, t: str) -> str:
 
-        # s = "ABCDE" t = "BCE" ? "BCDE"
+        # "ABCDEFG", "CDF" ? "CDEF"
 
-        # Iterate i and j from beginning
-        # Increment j when not all chars in t are in substring
-        # Increment i when all chars in t are in substring
-        # For each char in t, compare its count in t vs count in substring
-        # Time O(n+m) n = len(s), m = len(t)
-        # Space O(n+m) = O(52) only upper and lower english chars
+        # Sliding window
+        # Substring is valid when occurance of each char in substring
+        # > occurance of each char in t 
+        # Time O(n) n = len(s)
+        # Space O(m)
 
-        i, j, n, m = 0, 0, len(s), len(t)
-        freq_s, freq_t = defaultdict(int), defaultdict(int)
-        num_chars_satisfied = 0
-        min_len, min_substring = math.inf, ""
-        
+        i, j, min_len, min_str = 0, 0, math.inf, ""
+        freq_t, freq_s = defaultdict(int), defaultdict(int)
+
         for c in t:
             freq_t[c] += 1
+        required = len(freq_t)
+        satisfied = 0
 
-        while i <= j and j < n:
+        while i <= j and j < len(s):
+            
+            freq_s[s[j]] += 1
+            if s[j] in freq_t and freq_s[s[j]] == freq_t[s[j]]:
+                satisfied += 1
+            j += 1
 
-            if num_chars_satisfied < len(freq_t):
-                freq_s[s[j]] += 1
-                if s[j] in freq_t and freq_s[s[j]] == freq_t[s[j]]:
-                    num_chars_satisfied += 1
-                j += 1
-            else:
+            while satisfied == required:
+                if j - i < min_len:
+                    min_len = j - i
+                    min_str = s[i:j]
                 freq_s[s[i]] -= 1
-                if s[i] in freq_t and freq_s[s[i]] < freq_t[s[i]]:
-                    num_chars_satisfied -= 1
+                if s[i] in freq_t and freq_t[s[i]] > freq_s[s[i]]:
+                    satisfied -= 1
                 i += 1
-            if j - i < min_len \
-                and num_chars_satisfied == len(freq_t):
-                min_len = min(min_len, j-i)
-                min_substring = s[i:j]
                 
-        # Move i pointer forwards after j reached n
-        while num_chars_satisfied == len(freq_t):
-            freq_s[s[i]] -= 1
-            if s[i] in freq_t and freq_s[s[i]] < freq_t[s[i]]:
-                num_chars_satisfied -= 1
-            i += 1
-            if j - i < min_len \
-                and num_chars_satisfied == len(freq_t):
-                min_len = min(min_len, j-i)
-                min_substring = s[i:j]
-
-        return min_substring</code></pre>
+        return min_str</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/minimum-window-substring">76. Minimum Window Substring</a> | <a href="https://neetcode.io/problems/minimum-window-with-characters">Minimum Window Substring</a>
