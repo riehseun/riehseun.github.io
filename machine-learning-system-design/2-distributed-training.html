@@ -65,23 +65,54 @@ How much time can each training take? Less than a week
 
 # Design
 
-Data layer -> Compute layer -> Orchestration layer -> Training runtime layer -> Reliability layer -> Observability layer
+Data ingestion -> Data processing -> Raw storage -> Offline feature store -> Compute -> Orchestration -> Training -> Model registry
 
-Data layer
-  Use distributed object storage
+Data ingestion
+  Both real-time and batch data
+  Ex. Kafka
+
+Data processing
+  Real-time processing 
+  Ex. Spark structured streaming 
+
+Raw storage 
+  Append only (immutable)
+  Ex. S3
+  
+Offline feature store (curated data)
+  Extract features into feature store
   Shard data for parallel reading, shard by sample_id for data parallelism
+  Store in parquet format for fast feature read
   Co-host data and compute to reduce cross-rack traffic
+  Compute reads features from feature store when models are trained 
+  Ex. Feast
 
-Compute layer
+Compute
   Create a node with 8 GPUs
   Use Kubernetes to manage cluster for auto-scaling
 
-Training runtime layer
-  Data parallelism - each node get a shard
+Orchestration
+  Invokes different model training
+  Ex. Kubeflow, Metaflow
+
+Training
+  Data parallelism - each node get a shard, gradients are computed locally and syncs via AllReduce
   Model parallelism - split layers across GPUs
   Pipeline parallelism - split model by layers
+  Async gradient update over sync for faster training
+
+Model registry
+  Track experiments
+  Ex. MLflow
+  Store model versions and parameters
+
+Re-training
+  Trigger when batch of data becomes available or when data distribution drift is detected
 
 # Discussion
+
+Scalability
+  Elastically scale GPU nodes
 
 Reliability
   Checkpointing - if node is down, restart from last checkpoint
