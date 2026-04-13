@@ -162,35 +162,38 @@ class Solution:
 class Solution:
     def mergeTwoLists(self, list1: Optional[ListNode], list2: Optional[ListNode]) -> Optional[ListNode]:
         
-        # N(1)->N(2)->N(4), N(3)->N(5) ? N(1)->N(2)->N(3)->N(4)->N(5)
+        # N(1)->N(4)->N(6)
+        # N(2)->N(3)->N(7)
+        # N(1)->N(2)->N(3)->N(4)->N(6)->N(7)
 
-        # Iterate both LL
-        # If l1.val < l2.val, create new node with l1.val and move l1
-        # Else, create new node with l2.val and move l2
-        # Time O(n+m) n, m = number of node in LLs (list1 and list2) 
-        # Space O(1) ignoring space for output
+        # Iterate two LL togethers
+        # prev = ListNode(0)
+        # If list1.val < list2.val:
+        #   prev.next = list1
+        #   list1 = list1.next 
+        # Else
+        #   prev.next = list2
+        #   list2 = list2.next
+        # Time O(n+m) n = number of nodes in list1, m = number of nodes in list2
+        # Space O(1) ignoring space for result
 
         head = prev = ListNode(0)
-        
         while list1 or list2:
-
-            if not list1:
-                prev.next = list2
-                break
             if not list2:
                 prev.next = list1
                 break
-
+            if not list1:
+                prev.next = list2
+                break
             if list1.val < list2.val:
-                node = ListNode(list1.val)
-                list1 = list1.next
+                prev.next = list1
+                prev = list1
+                list1 = list1.next 
             else:
-                node = ListNode(list2.val)
+                prev.next = list2
+                prev = list2
                 list2 = list2.next
-            
-            prev.next = node
-            prev = node
-
+                
         return head.next</code></pre>
   </div>
   <div class="card-footer text-muted">
@@ -473,25 +476,23 @@ class Solution:
 
 class Solution:
     def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
-                
-        # N(1)->N(2)->N(3)->N(4) ? N(1)<-N(2)<-N(3)<-N(4)
 
-        # Iterate while remembering prev node
-        # next_node = node.next
+        # N(1)->N(2)->N(3) ? N(1)<-N(2)<-N(2)
+
+        # Remember previous nodes
+        # node_next = node.next
         # node.next = prev
         # prev = node
-        # node = next_node
-        # At the end, return prev
+        # node = node_next
         # Time O(n) n = number of nodes in LL
         # Space O(1)
 
         node, prev = head, None
-
         while node:
-            next_node = node.next
+            node_next = node.next
             node.next = prev
             prev = node
-            node = next_node
+            node = node_next
 
         return prev</code></pre>
   </div>
