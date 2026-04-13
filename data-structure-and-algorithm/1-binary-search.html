@@ -277,39 +277,34 @@
 
 <pre><code class="python">class Solution:
     def findMin(self, nums: List[int]) -> int:
-        
-        # [1,2,3,4,5] ? 1
-        # [2,3,4,5,1] ? 1
-        # [4,5,1,2,3] ? 1
-        # [5,1,2,3,4] ? 1
 
-        # If mid < right most, right side is sorted
-        #   Min is on left side   
-        #   right = mid - 1
-        # If mid > right most, left side is sorted
-        #   Min is on right side
-        #   left = mid + 1
-        # If mid < mid - 1, mid is the min
-        # If mid + 1 < mid, mid + 1 is the min
-        # If nums is already in sorted order, return left most
-        # Time O(logn) n = len(nums)
+        # [3,4,5,6,1,2] ? 1
+        # [5,6,1,2,3,4] ? 1
+        # [1,2,3,4,5,6] ? 1
+        # [4,5,6,1,2,3] ? 1
+
+        # Consider mid point
+        # If nums[mid] > nums[n], left side is sorted
+        #   Min is on right side, set left = mid + 1
+        # Else, right side is sorted
+        #   Min is on left side, set right = mid - 1
+        # If nums[mid] > nums[mid+1], mid + 1 is the min!
+        # Similarly, nums[mid-1] > nums[mid], mid is the min
+        # Time O(logn)
         # Space O(1)
 
         left, right = 0, len(nums) - 1
 
-        if nums[left] <= nums[right]:
-            return nums[left]
-
-        while left <= right:
+        while left < right:
             mid = (left+right) // 2
-            if nums[mid] < nums[mid-1]:
-                return nums[mid]
-            if nums[mid+1] < nums[mid]:
+            if mid < len(nums) -1 and nums[mid] > nums[mid+1]:
                 return nums[mid+1]
-            if nums[mid] < nums[right]:
-                right = mid
+            if mid > 0 and nums[mid-1] > nums[mid]:
+                return nums[mid]
+            if nums[mid] > nums[right]:
+                left = mid + 1
             else:
-                left = mid
+                right = mid - 1
 
         return nums[left]</code></pre>
   </div>
