@@ -187,6 +187,158 @@ Candidate generation
 Harmful content
   When posts are uploaded, use a model to filter out nudity, violence, hate, etc
 </code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<pre><code class="markdown">
+# Requirement
+
+How many recommended videos do users see? Videos are available as users scroll down the pages in website or app
+How many language should system support? Multiple languages
+Can users like/comment/share videos? Yes
+Do videos have thumbnails and tags? Yes
+Are there training data available? No
+Can I construct training data via implicit or explict feedbacks from users? Yes
+Should recommendation be personalized to each user? Yes
+Should recommendation be moderated? Yes
+Should the system focus on exploration or exploitation? There should be a balance between both
+Should the system focus on engagement or content quality? Content quality
+
+How fast should recommendation be generated? Under 1s
+Should the model be continously trained? Yes
+How many users are there? 100M daily active users
+How many videos does each user view? 100 per day on average (100 * 100M / 24 * 3600 QPS)
+What is peak QPS? Can I assume 20-30x of average QPS? Yes
+How many videos are there? 1B
+
+# Problem
+
+ML - given user as input, output a list of videos ranked by relevance to the user. Supervised ranking problem
+Business - maximize user engagement measured by direct and indirect interaction, subject to minimum precision (not to recommend click baits)
+
+# High-level
+
+User -> Cache -> Candidate generation -> Ranking -> Re-ranking -> Output -> Collect feedback & re-train 
+
+Cache - respond using cached recomendation if generation takes longer than 1s
+Candidate generation - select 1% videos out of 1B videos. Also, add-in popular and trending videos
+Ranking - use a model to select 1% from candidate generation
+Re-ranking - apply additional rules such as freshness and diversity
+
+# Data
+
+Positive - if user watches a certain percentage of videos, users likes video, user leaves positive comments about video, user shares video
+Negative - if users skip videos, user watches less than certain percentage, user dislike video, user leaves negative comments about video
+
+# Feature
+
+Video
+  Video - encode using CLIP
+  Thumbnail - encode using CLIP
+  Likes, dislike, shares - normalize
+  Comments - sample them and compute average embedding
+  Tags - word2vec like CBOW (context awareness not needed)
+User
+  Previous videos that users liked, disliked, shared, left positive comments, left negative comments - sample and compute average embedding, discount by time
+  City, country - embedding
+  Language - embedding
+Context
+  Time of day, device type, month - bucketized and one-hot (or just embedding)
+Temporal
+  Videos that users liked, disliked, shared, left positive comments, left negative comments in current session - sample and compute average embedding, discount by time
+
+# Model
+
+Baseline
+  Simply suggest videos ranked by number of likes
+
+Candidate generation - two-tower
+  Video tower encodes all features of videos
+  User tower encode all user features
+  Dot product between video and user encoder is taken, which is closer to 1 if video and user are relevant, 0 otherwise
+Ranking - list-wise learn to rank
+  More compute intensive than point-wise or pair-wise, but more accurate in terms of computing ranked lists
+Re-ranking
+  Freshness - penalize videos uploaded in the past
+  Diversity - penalize videos that has simialr contents (similar video embedddings)
+
+# Evaluation
+
+Candidate generation
+  Recall at K
+Ranking
+  NDCG
+
+Increase of positive user direct feedbacks
+Increase of total watch time of vidoes
+Click-through rate
+
+# Discussion
+
+Content moderation - use a separate model to filter out harmful videos when users upload them
+Exploration vs exploitation - direct 10-15% towards exploration and rest to exploitation
+Continuouly training - store user direct and indirect feedbak into offline feature store (after processing features), then use them to re-train the model 
+
+Availability
+  Use multiple replicas of each service in different geo region (trade-off with cost)
+Scalability
+  Horizontally scale each services (scale based on traffic pattern)
+Reliability
+  Parition feature store into shards (Ex. consistent hashing) and spread replicas into data centers across different geo regions
+Performance
+  Use cached response if latency exceeds certain threshold
+  Optimize model - quantization (limit number of bits to represent numbers), pruning, distillation (if teacher model is available)
+Monitoring
+  System metrics - latency
+  Model metrics - feature drift, data drift
+</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: 
