@@ -56,190 +56,6 @@
 <pre><code class="markdown">
 # Requirement
 
-Functional
-  Where should recommendations appear? In webpage or mobile web
-  How many recommendations should the system show? Up to 100 videos in order of relevance
-  Should the system prioritize engagement or quality of recommended video? Quality
-  Should the system prioritize exploitation or exploration? Exploration
-  How many languages should the system support? Multiple
-  Does each video come with title, tag, metadata? Yes
-  Does each video come with audio? Yes
-  Can users like/dislike videos? Yes
-  Can users make comments on videos? Yes
-  Can users share video to other users? Yes
-  Should the model explain to users why certain videos are recommended? No
-  Should recommendation be personalized to each user? Yes
-  Should recommended video be moderated? No
-
-Non-functional
-  How fast should recommendation be generated? Under 200ms
-  How many videos are there in platform? 1B
-  How many daily users are there in platform? 100M
-  How many videos does each user watch? 100 per day (100M * 100 * 100 = 100B recommendation generated per day)
-  Should the model be continously trained? Yes
-  How often should the model be trained? Up to you
-
-# Problem
-
-ML
-  Input - user
-  Output - list of videos in order of relevance
-  Supervised ranking problem
-
-Business
-  Maximize user engagement, subject to certain precision (system shouldn't recommend just click baits to increase user engagement)
-
-# Design
-
-User -> Feature store -> Candidate Generation -> Ranking -> Re-ranking -> Output -> Data Lake -> Training
-
-# Data
-
-Positive if user likes/shares video
-Positive if user watches more than half of video
-Negative if user dislike video
-Negative if user does not click recommended video
-
-# Feature
-
-User
-  Country
-Video
-  Title, description - distlimBERT for multi-langugage
-  Tag - CBOW since semantic understanding is not important for tag
-  Resolution, duration - standardize (mean 0, variance 1)
-  Langugage - embedding (categorical)
-  Comments - sample and compute averge embedding
-  Date uploaded
-  Image (thumbnail) - image encoder like CLIP
-  Audio - audio encoder
-User-Video interaction
-  Number of like, dislike, share - standardize
-Context
-  Device, time of day - bucketized and one-hot
-Author
-  Popularity of videos (measured by number of likes and total watch time) uploaded by author - standardize
-Temporal
-  Previous videos watched since opening app or coming to website, previous videos clicked but not watched - compute average embedding
-
-# Model
-
-Baseline
-  Heuristics - rank posts by total number of likes or total watch time
-  Logistic regression - binary classification to predict whether users will interact with video where like/share/comment/watch can be separate classiction head and total loss is computed by weighted average of individual losses
-  
-Architecture
-  Candidate generation
-    Two-tower architecture ()
-      User tower computes user embedding
-      Video tower with embedding of post_id (video features are not used)
-      Take dot product between user and video embedding (1 if close , 0 otherwise)
-      Ground truth - 1 if user intected with video, 0 otherwise
-    ANN to search videos that are close to user (based on similarity between user and video embeddings)
-    Blend the result with popular and trending videos to come up with 10k candidates
-  Ranking
-    DNN with feature crosses
-  Re-ranking
-    Diversity - penalized videos from same authors or similar topics and description (meatures by embeddings of topics and description)
-    Freshness - penalized old videos
-    Deduplication - avoid videos with simialr embeddings
- 
-Training
-  Learn to rank
-  Cross-entropy (log-loss) for each classification head - 1 if user will like/share/comment/watch, 0 o/w
-  Loss - weighted average of individual losses
-
-# Evaluation
-
-Offline
-  Candidate generation
-    Recall@k to measure percentage of actual relevant videos that model could retrieve
-    MRR - not suitable since this metric only cares about the first recommended video in the output list
-  Ranking
-    Precision@k to measure percentage of relevant videos in recommendation list shown to user
-    mAP 
-  Overall
-    NDCG 
-
-Online
-  Total watch time of all users in the platform
-  Increase in user engagement measured by total number of like/share/comment
-  Decrease in number of videos that are clicked but not watched
-
-# Discussion
-
-Real-time feature ingestion
-  Use Kafka for streaming data and spark structured streaming to process it
-  Use micro-batching (every 1-60s) to increase throughput
-  Store processed features on online feature store (Ex. Redis)
-
-Batch features
-  Store in offline feature store (Ex. Data Lake) for continuous training
-
-Deployment
-  A/B testing
-
-Candidate generation
-  Cold start problen
-    New user - suggest popular or trending videos
-    New video - find videos with similar embeddings that has historical interaction with user
-
-Harmful content
-  When posts are uploaded, use a model to filter out nudity, violence, hate, etc
-</code></pre>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<pre><code class="markdown">
-# Requirement
-
 How many recommended videos do users see? Videos are available as users scroll down the pages in website or app
 How many language should system support? Multiple languages
 Can users like/comment/share videos? Yes
@@ -268,7 +84,7 @@ Business - maximize user engagement measured by direct and indirect interaction,
 User -> Cache -> Candidate generation -> Ranking -> Re-ranking -> Output -> Collect feedback & re-train 
 
 Cache - respond using cached recomendation if generation takes longer than 1s
-Candidate generation - select 1% videos out of 1B videos. Also, add-in popular and trending videos
+Candidate generation - select 1% videos out of 1B videos (ANN like HNSW). Also, add-in popular and trending videos
 Ranking - use a model to select 1% from candidate generation
 Re-ranking - apply additional rules such as freshness and diversity
 
@@ -276,6 +92,7 @@ Re-ranking - apply additional rules such as freshness and diversity
 
 Positive - if user watches a certain percentage of videos, users likes video, user leaves positive comments about video, user shares video
 Negative - if users skip videos, user watches less than certain percentage, user dislike video, user leaves negative comments about video
+Finally, compute weighted engagement score using direct and indirect interactions
 
 # Feature
 
@@ -306,7 +123,7 @@ Candidate generation - two-tower
 Ranking - list-wise learn to rank
   More compute intensive than point-wise or pair-wise, but more accurate in terms of computing ranked lists
 Re-ranking
-  Freshness - penalize videos uploaded in the past
+  Freshness - penalize old videos
   Diversity - penalize videos that has simialr contents (similar video embedddings)
 
 # Evaluation
@@ -324,7 +141,14 @@ Click-through rate
 
 Content moderation - use a separate model to filter out harmful videos when users upload them
 Exploration vs exploitation - direct 10-15% towards exploration and rest to exploitation
-Continuouly training - store user direct and indirect feedbak into offline feature store (after processing features), then use them to re-train the model 
+Offline feature store
+  Store user direct and indirect feedbak (after processing features), then use them to re-train the model
+  Build ANN index
+Online feature store
+  Fetch user embeddings during inference time
+  Search ANN index
+Cold-start
+  New user - recommend popular videos for user's geo location and language
 
 Availability
   Use multiple replicas of each service in different geo region (trade-off with cost)
