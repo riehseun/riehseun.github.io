@@ -421,40 +421,41 @@ class Solution:
 class Solution:
     def reorderList(self, head: Optional[ListNode]) -> None:
 
-        # N(1)->N(2)->N(3)->N(4)->N(5) ? N(1)->N(5)->N(2)->N(4)->N(3)
+        # N(1)->N(2)->N(3)->N(4)->N(5) ?
+        # N(1)->N(5)->N(2)->N(4)->N(3)
 
-        # First node points to last
-        # Last node points to first.next
-        # First.next points to last.prev
-        # Repeat
-        # Revese second half of LL
-        # Ex. N(1)->N(2)->N(3)<-N(4)<-N(5)
+        # Find middle node and reverse second half
+        # N(1)->N(2)->N(3)<-N(4)<-N(5)
+        # start_next = start.next
+        # start.next = end
+        # start = start_next
+        # end_next = end.next
+        # end.next = start_next
+        # end = end_next
         # Time O(n) n = number of nodes in LL
         # Space O(1)
 
-        # Find middle node
         slow, fast = head, head
         while slow and fast and fast.next:
             slow = slow.next
             fast = fast.next.next
 
-        # Reverse second half
-        prev, node = None, slow
+        prev, node = None, slow.next
+        slow.next = None
         while node:
             node_next = node.next
             node.next = prev
             prev = node
             node = node_next
 
-        # Reorder
-        while prev.next:
-            head_next = head.next
-            head.next = prev
-            head = head_next
-
-            prev_next = prev.next
-            prev.next = head_next
-            prev = prev_next</code></pre>
+        start, end = head, prev
+        while end:
+            start_next = start.next
+            start.next = end
+            start = start_next
+            end_next = end.next
+            end.next = start_next
+            end = end_next</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/reorder-list">143. Reorder List</a> | <a href="https://neetcode.io/problems/reorder-linked-list">Reorder Linked List</a>
