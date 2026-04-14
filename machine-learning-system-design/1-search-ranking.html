@@ -56,134 +56,109 @@
 <pre><code class="markdown">
 # Requirement
 
-Functional
-  What do users search? Products in commercial webiste?
-  What does a product consist of? Image, video, description, price, category, inventory, tag, review, comment
-  Should the system consider next delivery date for out-of-inventory items? Yes
-  Should the system multiple language? No, English only
-  How many products should each search show? Up to 100
-  Should the system moderate product image, video, description? Yes
-  Should the system moderate language used in comments? Yes
-  Should the system prioritize exploration and exploitation? Up to you
-  Should the system prioritize user engagement and purchase or quality of products? Up to you
-  Should search result be personalized to each user? Yes
+What do users search for? products that users want to purchase
+Should search be personalized for each user? Yes
+How many languages should the system support? Multiple languages
+Does product consist of text description, image, video, review, comments, likes? Yes
+Can users put products into cart without purchasing it? Yes
+Should the system focus on user engagement or product quality? product quality
+Should the system focus on exploration or exploitation? balance of both
+Should the system moderate products? Yes
 
-Non-functional
-  How fast should search result be? Under 200ms
-  How many users are there? 100M daily users
-  How many total products are there? 10B
-  How often are products being updated? Once in 6 months on average
-  Should model be continously trained? Yes
+How fast should search result be? Under 1s
+How many products are there? 1B
+How many users are there? 100M
+How many search does each user execute per day? 10 per day (100M * 10) / (24 * 3600) QPS
+Can the peak QPS be 20-30 times the average? Yes
+Should model be continusouly trained? Yes
 
 # Problem
 
-ML
-  Input - query
-  Output - list of products ranked by relevance to query
-  Supervised ranking problem
+ML - given search term and user as inputs, output a ranked list of products (supervised ranking problem)
+Business - maximize user engagement subject to certain precision (we don't want to recommend products that are just click baits)
 
-Business
-  Maximize total amount of user purchase, subject to certain precision (system shouldn't just recommend bait products to maximize short-term revenue)
+# High-level
 
-# Design
+User and search term -> Query expansion -> Cache -> Candidate generation -> Ranking -> Re-ranking -> Output -> Feedback -> Re-training
 
-Query -> Query understanding -> Embedding service -> Inverted index
-Product -> Text/Image/Video encoder -> Product Embedding
-Query -> Cache -> BM25 -> Candidate generation -> Ranking -> Re-ranking -> Search result -> Data Lake -> Re-training
+Query expansion
+  Trim search terms
+  Add additional context around search terms
+  For example - spell correction, query embedding, query intent
+  Search term embeddings can be computed and stored in inverted index, and retrieved during inference time (Ex. Elasticsearch)
+Cache
+  If generation takes longer than 1s, return cached search result
+Candidate generation
+  Trim 1B products into 10M
+  Use ANN between user embedding and embedding computed from both search term and product (Ex. HNSW)
+Ranking
+  Rank search result 
+Re-ranking
+  Apply additional criteria such as diversity and freshness of products
 
-# Data 
+# Data
 
-Positive - if user save product for later, stores product into cart, purchase product
-Negative - if user clicks the product but performs no further action or impression only
-Hard positive - if user purchases product and later leave good review or comments
-Hard negative - if user purchases product and later leave bad review or comments
+Explicit - like/dislike, positive/negative review, report, hide, cart, purchase
+Implicit - takes longer than X seconds to view the product
+Take a weighted sum of both explicit and implicit feedbacks to compute engagement score
 
 # Feature
 
 User
-  Products that user previously purchased - average product embeddings discounted by time
+  Previous products user carted/purchased - take average embeddings of products, discounted by time
+  Country, city, language - embedding
 Product
-  Description - encoder-only models like BERT 
-  Image, video - image/video encoder
-  Review, price, number of inventory - standardize
-  Tag - CBOW (semantic understanding not needed)
-  Comments - sample comments and compute averge embeddings of sampled comments
-  Next delivery date
-User-Product interaction
-  purchased, carted, saved, impression, review - standardize
-  Comments- embedding
-Context
-  Device, time of day - bucketize and one-hot
+  Image, video - CLIP
+  Text description - DistlimBERT
+  Review - sample and compute average embedding using DistlimBERT
+Content
+  Time of day, month of year, device - one-hot
 Temporal
-  Previous search query, previous product that user clicked and spent X amount of time or saved or carted or purchased - embedding
-Query
-Query-item cross
+  Products that user carted/purchased in current session - take average embeddings of products, discounted by time
 
 # Model
 
-Baseline
-  Heuristic - rank products by reviews
-  Logistic regression - binary classification on whether user will purcahse product
-
-Architecture
-  Candidate generation
-    Two-tower network
-    User tower computes user embedding
-    Item tower computer item embedding
-    Take dot product where ground truth of 1 represents whether user saved, carted, purchsed product. 0 o/w
-    Create different classification head for save, cart, purchase
-  Ranking
-    XGBoost
-  Re-ranking
-    Diversity - penalize products from same vendors
-    Freshness - penalize old products
-
-Traning
-  Ranking
-    Loss - take weighted linear combination of individual losses (likelihhood of save, cart, purchase)
+Candidate generation - two-tower
+  User tower computes user embedding
+  Item tower computes embeddings based on product features and search term embedding
+  Dot product is taken to find closeness between user and item tower
+Ranking - list-wise learn to rank
+  Point-wise and pair-wise is less compute-intensive, but list-wise has better accuracy
+Re-ranking
+  Freshness - penalize old products 
+  Diversity - penalize products with similar embeddings
 
 # Evaluation
 
-Offline
-  Candidate generation
-    Recall@k - need to retrieve as many relevant products as possible
-    MRR - not suitable because MRR only consider first item in rank
-  Ranking
-    Precision@k - recommended product should be relevant to users
-    mAP
-  Overall
-    NDCG
+Candidate generation
+  Recall @ k
+Ranking
+  NDCG
 
-Online
-  CTR
-  Total revenue
+Click-through rate
+Increase in total time that user spends in platform
+Increase in total number of products carted or purchased
 
 # Discussion
 
-Real-time user-product interaction data
-  Use Kafka for data ingestion and Spark Structured Streaming for data processing
-  Store computed features in online feature store (Ex. Redis) for fast read
-
-Product features
-  Compute features and store them in offline feature store for training 
-
-Product update
-  Extract features
-  Generate new embedding
-  Update offline feature store
-
-Cache
-  Store search results for each user for each query in cache, with TTL 
-
-Query understanding
-  Spell correction
-  Query embedding
-  Query intent
-  Product category
-
+Availabilty
+  Run multiple replcas of each service in different geo location (trade-off with cost)
+Reliability
+  Partion data in shards and store multiple replca for each shard in different geo location
+Scaliability
+  Horizontally scale each service based on traffic pattern
+Performance
+  Cached search result
+  Model optimization - quantization (fewer bits to represent number), pruning, distillation (if teach model is available)
 Monitoring
-  Store both inference and ground truth in data lake to monitor model perfomance
-  Monitor feature distribution drift
+  System - latency
+  Model - feature drift, input data drift
+
+Offline feature store
+  Process user feedbacks (interaction data) as features and store them in offline feature store, to be used for re-training
+Online feature store
+  Dynamic user and item features are read from online feature store during inference time
+  Transformation logic for offline and online store must be the same, not to degrade the model over time
 </code></pre>
 
   </div>
