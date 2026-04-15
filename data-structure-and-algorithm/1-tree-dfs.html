@@ -121,28 +121,26 @@ class Solution:
 class Solution:
     def isSameTree(self, p: Optional[TreeNode], q: Optional[TreeNode]) -> bool:
         
-        # p = [1,2,3] q = [1,2,3] ? True
-        # p = [1,2,3] q = [1,3,2] ? False
+        # Pre-order
+        # Check if values are the same 
+        # Time O(n+m) n, m = number of nodes in trees p and q
+        # Space O(h+h') h, h' = heights of trees in h and h', n, m in worsr case
 
-        # Pre-order traverse on both p and q
-        # Check if values at each ndoe is the same
-        # Time O(n) n = number of nodes in tree
-        # Space O(n) recursion stack worst case h = n
-
-        def pre_order(p, q, result=True):
-
+        def pre_order(p, q):
             if p and q:
                 if p.val != q.val:
-                    self.result = False
-                pre_order(p.left, q.left)
-                pre_order(p.right, q.right)
-            if (p and not q) \
-                or (q and not p):
-                self.result = False
+                    return False
+                left = pre_order(p.left, q.left) 
+                right = pre_order(p.right, q.right) 
+                return left and right
+            elif p and not q:
+                return False
+            elif not p and q:
+                return False
+            else:
+                return True
 
-        self.result = True
-        pre_order(p, q)
-        return self.result</code></pre>
+        return pre_order(p, q)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/same-tree">100. Same Tree</a> | <a href="https://neetcode.io/problems/same-binary-tree">Same Binary Tree</a>
