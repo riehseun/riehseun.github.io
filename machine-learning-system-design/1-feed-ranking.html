@@ -56,191 +56,6 @@
 <pre><code class="markdown">
 # Requirement
 
-Functional
-  What kind of posts in exist in feed? Social media posts like Instagram or Facebook
-  Does feed include ADs? Yes
-  Should feed be personalized to users? Yes
-  How many posts should be in feed? 100, users should see ranked posts as scrolling down
-  Should the system prioritize exploration or exploitation? Up to you
-  Should the system prioritize user engagement or post quality? Up to you
-  Should posts be moderated? Yes
-  How many langugages should the system support? Multiple languages
-  What does a post consist of? Text, image, video, like, share, comment
-
-Non-functional
-  How fast should feed be generated for users? Under 200ms
-  How many users are in the system? 100M daily users
-  How many posts do each user view? 100 on average (10B impression per day)
-  How often does each user open the feed? 5 times per day (500M Queries per daily = 500M/(24*3600) QPS)
-  What is peak QPS? 20-30x of average QPS
-  Is there labeled training data available? No
-
-# Problem
-
-ML 
-  Input - user
-  Output - ranked list of posts
-  Supervised ranking
-
-Business
-  Maximize user engagement subject to certain threshold
-  10-15% towards exploration and 85-90% exploitation
-
-# Design
-
-User -> Cache -> Candidate generation -> Ranking (pulls feature from online feature store) -> Re-ranking -> Output -> Data Lake -> Re-training
-
-User-Post interaction -> Feature extraction -> Online feature store
-
-Cache
-  Return cached feed to user
-Candidate generation
-  ANN to find posts whose embeddings are close to user embedding
-  Blend with popular and trending posts
-Ranking
-  Heavy model
-Re-ranking
-  Diversity - penalize posts from same author or posts that contain same images/vidoes 
-  Freshness - penalize old posts
-Online feature store
-  Redis can be used for fast read
-
-# Data
-
-Positive
-  If user likes or shares a post (Hard positive)
-  If user spends more than 5 seconds viewing the post
-Negative
-  If user dislikes a post (Hard negative)
-  If user spends less than 5 seconds viewing the post
-
-# Feature
-
-User
-  Age, gender - not used for fairness concern
-  Previous posts that user liked/shared/viewed - compute weighted average embedding discounted by time
-Post
-  Text - DistlimBERT for multi-language
-  Image - encoder model like CLIP
-  Video - CLIP's video encoder
-  Tag - CBOW since semantice understanding is not needed
-  Comments - sample comments and compute average embedding
-  Number of likes and shares - standardize
-Author
-  Number of likes and shares from posts that author uploaded - standardize
-Context
-  Device, time of day - bucketized and one-hot
-Temporal
-  Posts that user has been viewing/liking/sharing since opening the feed - compute weighted average embedding discounted by time
-
-# Model
-
-Baseline
-  Use logistic regression to predict whether user will view/like/share posts
-
-Architecture
-  Pointwise learn to rank
-  All transformed features are fed into DNN
-  DNN predicts different classification head for view/like/share 
-
-Training
-  Cross-entropy (log-loss) since each classification head is binary
-  Individual losses are weighted and summed to create total loss
-
-# Evaluation
-
-Candidate generation
-  Recall@k - find as much relevant posts as possible
-  MRR - not ideal since MRR only considers first item 
-Ranking
-  Precision@k - recommended posts should be as many relevant as possible
-  mAP
-Overall system
-  NDCG
-
-Online
-  CTR
-
-# Discussion
-
-Cold start problem
-  New user (user embedding not available) - suggest popular posts
-  New post (user-post interaction history not available) - find posts that user liked whose embeddins are similar to post embedding
-
-Exploitation vs Exploration
-  During candidate generation, include 10-15% of new posts
-
-Latency
-  Store feed into cache that is geographically close to certain user group
-
-Scalability
-  Predict time of peakload and scale beforehand
-
-AD
-  Use a separate models to compute ranked list of ADs that are relevant to user
-  During re-ranking, apply business rules to add certain number of ADs such that one AD appears in every 15 posts  
-
-Moderation
-  When users upload post, use a separate model to filter out harmful contents
-</code></pre>  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<pre><code class="markdown">
-# Requirement
-
 What kind of feed is this? Instagram feeds
 Does feed consist of text, image, video, like, comment, share? Yes
 How many languages should the system support? Multiple
@@ -308,7 +123,7 @@ Candidate generation - two-tower
   Model is trained to learn user and post embedding
 Ranking
   List-wise learn to rank (more compute-intensive but accurace than pair-wise and point-wise)
-  DNN with feature cross (careful feature selection needed, total number of features should not exceed 40-50)
+  DNN with feature cross
 Re-ranking
   Freshness - penalize old posts or posts from same authors
   Diversity - penalize posts with similar embeddings
@@ -351,7 +166,11 @@ Online feature store
 
 Moderation
   Use a separate model to reject posts if deemed harmful 
+
+Cold start
+  New users - show popular posts
 </code></pre>
+
   </div>
   <div class="card-footer text-muted">
     Reference: 
