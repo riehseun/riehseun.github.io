@@ -648,30 +648,28 @@ class Solution:
 class Solution:   
     def isSubtree(self, root: Optional[TreeNode], subRoot: Optional[TreeNode]) -> bool:
         
-        # [1,2,3,4,5,6,7] [2,4,5] ? True
-        # [1,2,3,4,5,6,7] [2,4] ? False
-
-        # Pre-order traverse - root, left, right
-        # Serialize tree in a unique way
-        # Compare if substring is in string
-        # Time O(n+m) n,m  = number of nodes in trees
-        # Space O(n+m) recursion stack worst case h = n, m
-
-        def pre_order(node, array):
-
+        # Encode tree and subtree into a string
+        # Check if substring is in string
+        # Pre_order traverse
+        # Time O(nm) n, m = number of nodes in tree and subtree
+        # Space O(n+m) 
+        
+        def pre_order(node):
             if node:
-                array.append("*")
-                array.append(str(node.val))
-                pre_order(node.left, array)
-                pre_order(node.right, array)
+                encode.append("*")
+                encode.append(str(node.val))
+                pre_order(node.left)
+                pre_order(node.right)
             else:
-                array.append("#")
-
-        tree, subtree = [], []
-        pre_order(root, tree)
-        pre_order(subRoot, subtree)
-        tree_str, subtree_str = "".join(tree), "".join(subtree)
-        return subtree_str in tree_str</code></pre>
+                encode.append("#")
+        
+        encode = []
+        pre_order(root)
+        tree = ",".join(encode)
+        encode = []
+        pre_order(subRoot)
+        subtree = ",".join(encode)
+        return subtree in tree</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/subtree-of-another-tree">572. Subtree of Another Tree</a> | <a href="https://neetcode.io/problems/subtree-of-a-binary-tree">Subtree of Another Tree</a>
