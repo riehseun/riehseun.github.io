@@ -438,36 +438,23 @@ class Solution:
 class Solution:
     def lowestCommonAncestor(self, root: TreeNode, p: TreeNode, q: TreeNode) -> TreeNode:
         
-        # [1,2,3,4,5,6,7] p = 2 q = 3 ? 1
-        # [1,2,3,4,5,6,7] p = 2 q = 4 ? 2
-
-        # Post-order traverse - left, right, root
-        # If node == p or q, return 1
-        # If left child + right child + root == 2, return root
+        # Pre-order
+        # BST, when both p and q are less than root, just go left
+        # when both p and q are greater than root, just go right
+        # Otherwise, current node is lca
         # Time O(n) n = number of nodes in tree
-        # Space O(n) recursion stack worst case h = n
+        # Space O(h) h = height of tree = n worst case
 
-        def post_order(node):
-
+        def pre_order(node):
             if node:
-                left = post_order(node.left)
-                right = post_order(node.right)
+                if p.val < node.val and q.val < node.val:
+                    return pre_order(node.left)
+                elif p.val > node.val and q.val > node.val:
+                    return pre_order(node.right)
+                else:
+                    return node
 
-                parent = 0
-                if node.val == p.val or node.val == q.val:
-                    parent = 1
-
-                if left + right + parent == 2 \
-                    and not self.lca:
-                    self.lca = node
-                    
-                return left + right + parent
-            else:
-                return 0
-
-        self.lca = None
-        post_order(root)
-        return self.lca</code></pre>
+        return pre_order(root)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree">236. Lowest Common Ancestor of a Binary Tree</a> | <a href="https://neetcode.io/problems/lowest-common-ancestor-in-binary-search-tree">Lowest Common Ancestor in Binary Search Tree</a>
