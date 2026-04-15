@@ -183,6 +183,175 @@ AD
 Moderation
   When users upload post, use a separate model to filter out harmful contents
 </code></pre>  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<pre><code class="markdown">
+# Requirement
+
+What kind of feed is this? Instagram feeds
+Does feed consist of text, image, video, like, comment, share? Yes
+How many languages should the system support? Multiple
+Should training data be collected from user interaction with feeds? Yes
+Should model focus on exploration or exploitation of feeds? Balance of both
+Should model focus on user engagement or post quality? post quality
+Should the system moderate posts? Yes
+
+How many users are there? 100M
+How many posts do each user view per day? 100 (10B total impression per day = 10B / (24 * 3600) QPS
+Can peak QPS be 20-30x the average? Yes
+How fast should inference be? under 1s
+Should model be continously trained? Yes
+
+# Problem
+
+ML - given user as input, output a list of ranked posts (supervised ranking)
+Business - maximize user engagement, subject to certain precision (we don't want click-bait posts)
+
+# High-level
+
+User -> Cache -> Candidate generation -> Ranking -> Re-ranking -> Feedback & Re-training
+
+Cache
+  If latency exceeds 1s, return cached feed
+Candidate generation
+  ANN to find closeness between user and post embeddings (Ex. FAISS)
+Ranking
+  Model to rank posts based on relevance to user
+Re-ranking
+  Freshness 
+  Diversity
+
+# Data
+
+Positive - user likes, shares, leaves comments showing engagement, spends more than X seconds viewing posts
+Negative - user hides, leaves comments showing disengagement, spends less than X seconds viewing posts    
+Engagement score can be computed by taking weighted sum of each positive and negative interation
+
+# Feature
+
+User
+  Country, city, language - embedding
+  Previous posts that user engaged or disengaged - sample and compute average embedding, discounted by time
+Post
+  Video, image - CLIP
+  Text - distlimBERT (Multi-language)
+  Comments - sample and compute average embedding using distlimBERT (Multi-language)
+  Number of likes, shares - normalize
+Author
+  Number of likes, shares of posts uploaded by the author - normalize
+Temporal
+  Posts that user engaged or disengaged in current session - sample and compute average embedding, discounted by time
+
+# Model
+
+Baseline
+  Rank posts based on number of likes 
+
+Candidate generation - two-tower
+  User tower computes user embedding using user features
+  Post tower computes post embedding using post features
+  Dot product is taken between the two
+  Ground truth is 1 if user found post relevant, 0 otherwise
+  Model is trained to learn user and post embedding
+Ranking
+  List-wise learn to rank (more compute-intensive but accurace than pair-wise and point-wise)
+  DNN with feature cross (careful feature selection needed, total number of features should not exceed 40-50)
+Re-ranking
+  Freshness - penalize old posts or posts from same authors
+  Diversity - penalize posts with similar embeddings
+
+# Evaluation
+
+Candidate generation
+  Recall at K
+Ranking
+  NDCG
+
+Click-through rate
+Increase in total number of likes and shares of all posts
+Increase in total time spent on feed by users
+
+# Discussion
+
+Availability
+  Create replica of each service in different geo regions (trade-off with costs)
+Reliability
+  Partition data into shards, create multiple replicas for each shard, and spread replicas in different geo regions
+  Data is relatively cheaper than compute, so trade-off with cost is not too much of a concern
+Scalability
+  Horizontall scale each service based on traffic pattern
+Performance
+  Use cached feed
+  Model optimization - quantization (use fewer bits to represent numbers), pruning, distillation (if teacher models are available)
+Monitoring
+  System - QPS, latency
+  Model - input data drift, feature drift
+
+Offline feature store
+  Process user inteaction with posts, and store them to use during re-training
+  Also, process posts when they get uploaded, and store them
+  Ex. S3
+
+Online feature store
+  Support fast reading of user and post features during inference time
+  Ex. Redis
+
+Moderation
+  Use a separate model to reject posts if deemed harmful 
+</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: 
