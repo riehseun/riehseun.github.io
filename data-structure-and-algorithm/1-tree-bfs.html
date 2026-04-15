@@ -65,31 +65,32 @@
 
 class Solution:
     def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
-        
-        # [1,2,3,4,5,6,7] ? [[1] [2,3] [4,5,6,7]]
 
         # BFS
-        # Keep a dictionary whose key is depth 
+        # Process nodes in each level
         # Time O(n) n = number of nodes in tree
         # Space O(n)
 
-        queue = deque()
-        queue.append((root,0))
-        nodes = defaultdict(list)
+        def bfs(start_node):
 
-        while queue:
-            node, depth = queue.popleft()
-            if node:
-                nodes[depth].append(node.val)
-
-            if node and node.left:
-                queue.append((node.left, depth+1))
-            if node and node.right:
-                queue.append((node.right, depth+1))
-
+            queue = deque()
+            queue.append(start_node)
+            while queue:
+                size = len(queue)
+                level = []
+                for _ in range(size):
+                    node = queue.popleft()
+                    level.append(node.val)
+                    if node.left:
+                        queue.append(node.left)
+                    if node.right:
+                        queue.append(node.right)
+                result.append(level)
+        
+        if not root:
+            return []
         result = []
-        for key, val in nodes.items():
-            result.append(val)
+        bfs(root)
         return result</code></pre>
   </div>
   <div class="card-footer text-muted">
