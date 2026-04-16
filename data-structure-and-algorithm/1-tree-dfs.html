@@ -192,27 +192,29 @@ class Solution:
 class Solution:
     def buildTree(self, preorder: List[int], inorder: List[int]) -> Optional[TreeNode]:
         
-        # preorder = [1,2,3,4] inorder = [4,2,1,3] ? [1,2,3,4,N,N,N]
+        # The beginning for preorder is alway a root
+        # Build left subtree using inorder(left, root-1)
+        # Build right subtree using inorder(root+1, right)
+        # Build mapping between index and val for inorder
+        # Time O(n+m) n = len(preorder), m = len(inorder)
+        # Space O(h) h = height of tree = n worst case
 
-        # Pre-order traverse - root, left, right
-        # Root is first element in preorder
-        # Left subtree is inorder[:root]
-        # Right subtree is inorder[root+1:]
-        # Time O(n) n = number of nodes in tree
-        # Space O(n) recursion stack worst case h = n
+        def build(left, right):
+            if left > right:
+                return
+            node_val = preorder[self.index_preorder]
+            self.index_preorder += 1
+            index_inorder = inorder_map[node_val]
+            node = TreeNode(node_val)
+            node.left = build(left, index_inorder-1)
+            node.right = build(index_inorder+1, right)
+            return node
 
-        def pre_order(preorder, inorder):
-
-            if inorder:
-                node_val = preorder.pop(0)
-                node = TreeNode(node_val)
-                index = inorder.index(node_val) 
-                node.left = pre_order(preorder, inorder[:index])
-                node.right = pre_order(preorder, inorder[index+1:])
-
-                return node
-
-        return pre_order(preorder, inorder)</code></pre>
+        self.index_preorder = 0
+        inorder_map = {}
+        for i, num in enumerate(inorder):
+            inorder_map[num] = i
+        return build(0, len(inorder)-1)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal">105. Construct Binary Tree from Preorder and Inorder Traversal</a> | <a href="https://neetcode.io/problems/binary-tree-from-preorder-and-inorder-traversal">Construct Binary Tree from Preorder and Inorder Traversal</a>
