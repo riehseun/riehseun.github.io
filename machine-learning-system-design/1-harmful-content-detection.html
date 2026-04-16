@@ -49,99 +49,112 @@
   </div>
 </div>
 
-<div class="card mb-4" id="harmful-content-detection-">
-  <div class="card-body">
-    <h2 class="card-title">Harmful Content Detection</h2>
-
 <pre><code class="markdown">
 # Requirement
 
-Functional
-  Where does potentially harmful content exist? Instagram feed
-  What is considered as harmful post? Posts with violent or hate text, nude images and videos
-  Should the system tell author why content was removed? Yes
-  Can users report post as harmful? Yes
-  Should the system support multiple languages? Yes
+Where do harmful posts potentially exist? Posts in Instagram
+What kinds of posts are considered harmful? Nudity, violence, hate
+Can harmful contents be in form of texts, video, images? Yes
+How do harmful posts get created? Users upload them
+Should the system consider multiple languages? Yes
+What is impact of false positive? Users lose engagement because their uploads are deleted
+What is impact of false negative? Users will view harmful contents, and platform will be flagged
 
-Non-functioanl
-  How many posts does each user create? 1 per day 
-  How many users are there in platform? 100M daily active users (100M post created per day)
-  Is there training data available? Yes, 100M pairs of posts and 1/0 indicating violence/hate/nude or not
-  How fast should harmful contents be removed? As soon as possible
-  Should model be deployed to user device? No
-  Should model be continously trained? Yes
+How fast should the inference be? Under 500ms
+How many users are there? 100M daily active users
+How many posts does each user upload per day? 1, (1 * 100M) / (24 * 3600) QPS
+Can peak QPS be 20-30x the average? Yes
+Should model be continuously trained? Yes
 
 # Problem
 
-ML
-  Input - post
-  Output - whether post is harmful or not
-  Binary classification
-  
-Business
-  Minimize total number of harmful impressions, subject to minimum precision
+ML - given a post, determine whether post is harmful or not
+Business - minimize total number of harmful impressions, subject to minimum precision (we don't want to flag every posts as harmful to minimize harmful impressions)
 
-# Design
+# High-level
 
-Post Upload -> Filter -> Feature Extraction -> Inference -> Remove or Human Review or Allow
+Post -> Rule-based detection -> ML-based detection -> Decision (pass/delete/review) -> Feedback and re-training
+
+Rule-based detection
+  Use known keywords, sentences, images, videos that represent harmfulness
+ML based detection
+Decision
+  Delete - if > 95% confidnece that post if harmful
+  Review - if between 70% and 95%
+  Pass - if < 70%
 
 # Data
 
-Human labelling to detect violence, hate, nudity
-User reports
-Results from human review
+Positive - if review determines that post if harmful, if user reports harmful posts
+Negative - if review determines that post is not harmful
+Also, use self-supervision to create synthetic texts/images/videos that are harmful
 
-# Features
+# Feature
 
 Post
-  Text - encoder model like DistlimBERT for multi-language
-  Text embedded within image - model to extract texts with images, then DistlimBERT
-  Image, video, audio - image/video/audio encoder
+  image, video - CLIP
+  text - distlimBERT
+  comments - sample and compute average embedding
+  number of reports - normalize
 Author
- Violation history - standardize (Mean 0, Var 1)
- Date of account creation
+  number of previously uploaded harmful posts - normalize
+  account creation date - convert to integer representing (current date - creation date), then normalize
 
-# Model
+# Model 
 
 Baseline
-  Logistic regression - binary classification to determine whether a post in harmful or not
+  Logistic regression - use features discussed and do binary classification to determine if posts is harmful or not
+Options
+  XGBoost
+    Pros - explainable, feature scaling not necessary, works well with structured data
+    Cons - expensive to re-train, cannot handle embeddings
+  DNN
+    Pros - re-training is easier than tree model
+    Cons - less explainable, lots of dataprep, compute-intensive
+  Pick DNN for handling embeddings
+    Separate models for each classification (nudity, violence, hate) - requires lots of training data
+    One model for nudity, violence, hate but different classification head for each - pick this approach
+    Combine embeddings from encoders (also combine numerical encoders) and use them in each classifier
+  Loss - cross-entropy (log-loss), create weighted loss of individual loess from nudity, violence, hate
+  Data imbalance - under-sample negative ground truth labels
 
-Architecture
-  Separate model for violence/hate/nude - lots of training data needed, training cost
-  Create one model but with different classification heads for violence/hate/nude
-
-Training
-  Binary classification  - use cross-entropy (log-loss)
-  Loss - compute individual loss for violence/hate/nude, then create weighted sum of those losses
-  
 # Evaluation
 
-Offline
-  Recall - percentage of actual harmful content that the model was able to retrieve
-  Precision - whether predicted harmful contents are correctly classified
-  PR-AUC
+Recall at fixed precision - percentage of actual harmful posts that model was able to retrieve
+Precision - percentage of predicted harmful posts that were correct
+Accuracy - can't be used as data set is likely imbalanced
+PR-curve
 
-Online
-  Total number of harmful impressions
+Total number of reports by users on harmful posts
+Total number of impressions on harmful posts
 
 # Discussion
 
-Filter
-  Blacklisted keyword
-  Known harmful images
+Availability
+  Replicate each service in different geo region (trade-off with cost)
+Reliability
+  Partition data into shards and create replicas for each shard, then store them in different geo location
+Scalability
+  Horizontally scale each service based on traffic patterns
+Performance
+  Model optimization - quantization (fewer bits to represent number)
+Monitoring
+  System - latency, QPS
+  Model - feature drift, score drift
 
-Inference
-  Use fast and light model first
-  Use slow and heavy model after the post passes the review for double checking
+Offline feature store
+  Store all processed features of author and posts (when they are uploaded) for re-training
+  Ex. S3
+Online feature store
+  Store for fast-read during inference
+  Processing logic must be idential with offline feature store to prevent model degrading
+  Ex. Redis
 
-Feedback loop
-  Use human review for further training dataset
+Latency
+  Rule-detection - 50ms
+  ML-detection - 400ms
+  Decision (except review) - 50ms
 </code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: 
-  </div>
-</div>
 <!-- Harmful Content Detection END -->
 
 </div> <!-- /.col-md-12 -->
