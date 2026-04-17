@@ -465,53 +465,52 @@ class Solution:
 #         self.right = right
 
 class Codec:
-
-    # [1,2,3,N,N,4,5] ? *1*2*#*#*3*4*#*#*5*#*#
-
-    # Pre-order traverse - root, left, right
-    # Insert * before node val
-    # Insert # for null node
-    # Time O(n) n = number of nodes in tree
-    # Space O(n) recursion stack worst case h = n
-
-    # Split by *
-    # Pop the first element
-    # If element != #, create root node with first element
-    # Recurse on left and right child with remaining array  
     
+    # Pre-order traverse
+    # Encode 
+    #   Use string to encode tree
+    #   If None, add #
+    # Decode
+    #   Split encoded string by *
+    #   If elem is not #, create a TreeNode
+    # Encode
+    #   Time O(n) n = number of nodes in tree
+    #   Space O(h) h = height of tree = n worst case
+    # Decode
+    #   Time O(n)
+    #   Space O(h) recursion stack to rebuild the tree
+
     # Encodes a tree to a single string.
     def serialize(self, root: Optional[TreeNode]) -> str:
 
         def pre_order(node):
-
             if node:
-                self.array.append("*")
-                self.array.append(str(node.val))
+                string.append(str(node.val))
                 pre_order(node.left)
                 pre_order(node.right)
             else:
-                self.array.append("*")
-                self.array.append("#")
-
-        self.array = []
+                string.append("#")
+                return 
+        
+        string = []
         pre_order(root)
-        return "".join(self.array)
+        return ",".join(string)
         
     # Decodes your encoded data to tree.
     def deserialize(self, data: str) -> Optional[TreeNode]:
         
-        def pre_order(array):
-            
-            value = array.pop(0)
-            if value != "#":
-                node = TreeNode(int(value))
-                node.left = pre_order(array)
-                node.right = pre_order(array)
+        def build(array):
+            node_val = array[self.index]
+            self.index += 1
+            if node_val != "#":
+                node = TreeNode(int(node_val))
+                node.left = build(array)
+                node.right = build(array)
                 return node
 
-        array = data.split("*")
-        array.pop(0)  # Remove first *
-        return pre_order(array)</code></pre>
+        array = data.split(",")
+        self.index = 0
+        return build(array)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/serialize-and-deserialize-binary-tree">297. Serialize and Deserialize Binary Tree</a> | <a href="hhttps://neetcode.io/problems/serialize-and-deserialize-binary-tree">Serialize and Deserialize Binary Tree</a>
