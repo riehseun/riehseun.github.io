@@ -56,124 +56,99 @@
 <pre><code class="markdown">
 # Requirement
 
-Functional
-  What kind of fraud is this? Fraudulent financial transactions 
-  How does fraud occur? Use stolen debit or credit card to make purchases
-  Where does fraud occur? In website or app where purchases are made
-  Should model explain why transaction is deemed fraud? Yes
-  What should system do when detecting fraud? Reject transaction
-  What is impact of false positive? Loss of revenue from not making transaction
-  What is impact of false negative? Unhappy customer lost money from fraud
+What kind of fraud should we detect? Fradulent financial transactions
+Are there training data available? Yes, 10k fraud, and 1M non-fraud data available
+Should model explain to users why transaction is declined? Yes
+What is impact of false positive? Valid transaction decline, which drops user engagement
+What is impact of false negative? Fraud goes through, damaging reputation of platform
 
-Non-functional
-  Do we have training data available? Yes, 1M fraud transactions and 100M non-fraud transactions
-  Should inference be immediate? Yes
-  Should model be continuously trained? Yes
-  Should model be deployed to mobile devices? No
+How fast should inference be? Under 1s
+How many transactions occur per day? 1M, 1M / (24 * 3600) QPS
+Can peak QPS be 20-30x the average? Yes
+Should model be continously trained? Yes
 
 # Problem
 
-ML
-  Input - person and transaction
-  Output - whether transaction is fraud or not
-  Binary classification
+ML - given a transcation, determine whether it is fraud or not, subject to minumum precision (we don't want to decline every transaction)
+Business - minimize total number of fradulent transactions
 
-Business problem
-  Increase long-term user engagement, thus increase in revenue
+# High-level
 
-# Design
+Transaction -> Rule-based detection -> ML-based detection with light model -> ML-based detection with heavy model -> Output (pass/decline/review) -> Feedback and re-train
 
-Transaction -> Reject based on simple rule -> Inference -> Reject or human review or pass
+Rule-based detection
+  Use simple rule such as known fraud users and cards, or unreasonably large amount of transaction
+ML-based detection
+  Light model - decline if > 95% confident, otherwise pass to heave model for further review
+  Heavy model - decline if > 90%, human review if between 90% and 70%, pass if < 70%
 
-# Data
+# Data 
 
-We have labeled dataset
-Also, use result from human review
+We have training data, that is imbalanced. Undersample negative labels
+Use result from human review for re-training
 
 # Feature
 
 Account
-  Age, balance, transaction limit, total limit - standardize
+  Date of creation - convert to number by compute (inference date - creation date)
+  Balance - compute average month-end balance for the last 3, 6, 12 months to make feature more robust against distribution drift
+  Remaning credit amount
+Transactions
+  Number of transactions in last 3, 6, 12 months from user initiating current transaction
 User
-  Past fraud commit
-  Country - embedding 
-Transaction
-  $ amount
-Context
-  Device ID, IP address - bucketize + one-hot
-Location
-  Country
-  Speed (distance/time) since the last transaction
+  City, country
 Temporal
-  Number of transactions in past X hours, average number of transactions per month
+  Speed from last transaction
 
-No need to scale or nomalize if using Ensemble model
-Compute "averge metrics" like averge account balance for the past 12 months, as these values are less impacted by distribution drift
-  
 # Model
 
-Baseline
-  Logistic regression to determine if transaction is fraud or not
-
-Architecture
-  NN models are not less explainable than tree models
-  Use XGBoost - no standardization needed but is expensive to re-train
-
-Training
-  Data split
-  Split labeled data by time - 80% training set, 20% test set
-  Further split 80% training set into - 70% training set, 30% dev set
-  Run 5 bins cross-validation
-  Make sure each customer Id exist in exactly one of the bins and validation set, to avoid data leakage
-  Address class imbalance via undersample/oversample or focus loss
-
-Hyperparemeters
-  booster - type of booster to use
-  tree_method - method for constructing trees
-  n_estimators - number of trees to ensemble
-  learning_rate - step size in gradient descent
-  reg_lambda - L2 regularization
-  reg_alpha - L1 regularization
-  max_depth - maximum depth of nodes in each tree
-  scale_pos_weight - weight assigned to positive instances
+Light model
+  Logistic regression to perform binary classification to determin whether transaction is fraud or not
+Heavy model
+  XGBoost - feature scaling not needed, very explainable, but expensive to re-train
+  Feature selection
+    Too many features become tech debt and increases inference time
+    Run XGBoost model with each feature to compute predictive power
+    Rank features by predictive power
+    Add features one by one to the model (if adding more features does not improve the model, features are correlated, remove those features from feature set)
+    Trim features down to 40-50
+  Do cross-validation
+    Split data into 20% test, 15% validation, 65% training set
+    Test set must come (time-wise) after validation and training set
+    Split training set into k bins - one bin for validation and all others for training set
+    Population must not co-exist between validation and any of training set   
 
 # Evaluation
 
-Offline
-  Recall - catching actual fraud is very important 
-  Precision - accuracy of prediction is important not to reject valid transaction to annoy users
-  PR-AUC - better than ROC-AUC due to class imbalance
+Recall at certain precision
+PR curve
 
-Online
-  Number of user reports on fraud
+Decrease in total number of fraud transaction
 
 # Discussion
 
-Streaming features
-  Ingestion - Kafka 
-  Processing - Spark Structured Streaming
+Availability
+  Replicate each service in different geo location (trade-off with cost)
+Reliability
+  Partition data into shards, and replicates shards into different geo location
+Scalability
+  Horizontally scale each service based on traffic pattern
+Performance
+  Model optimization - quantization (use fewer bits to represent number)
+Monitoring
+  Model - score drift, feature drift (PST), Kendall's Tau Rank Correlation (measures changes in rank of feature), ShapBand (measure tha deviation of SHAP values from baseline to inference data for each feature)
+  System - latency, QPS
 
-Feature selection
-  Too many features can lead to overfitting, technical debt
-  Run XGBoost with a single feature to compute predictive power for that feature
-  Rank all features by thier predictive power
-  Add first feature to feature set
-  Add next feature if the dependecy with the first feature is lower than certain threshold
-  Repeat until a pre-defined number of features are collected
-
-Reject based on simple rule
-  Blacklisted card
-  Country mismatch
-  Large amount of transaction
+Offline feature store
+  Store review result and new transaction/account/user record into offline feature store for re-training
+  Ex. S3
+Online feature store
+  Fast reading of features during inference time
+  Must have indentical feature transformation logic with offline feature store to avoid model degradation
+  Ex. Redis
 
 Explainability
   SHAP value
-
-Model monitoring
-  Feature PSI - PSI calculated for each feature
-  Score PSI
-  Kendall's Tau Rank Correlation - measure the changes in the ranking of all features
-  ShapBand - measure tha deviation of SHAP values from baseline to inference data for each feature
 </code></pre>
   </div>
   <div class="card-footer text-muted">
