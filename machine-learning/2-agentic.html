@@ -54,11 +54,54 @@
     <h2 class="card-title">Agentic</h2>
 
 <pre><code class="markdown">
-# Design an AI agent system for TD Bank that automates fraud investigation.
+# Build Agentic AI system for RAG
 
-Typical model serving pipeline 
+Document
+Parse - converting input document into Markdown to minimize tokens
+Chunk - typically, split document by sentence, and use SentenceBERT to generate embedding
+Vector DB - mapping between embedding and chunk
 
-Transaction -> Rule based detection -> Light model -> Heavy model -> Decision -> Re-training
+Input query
+Query understanding - correct spelling mistakes, summarize prompt to reduce token, and generate input embedding
+Retrieval - search vector DB and find top k chunks that has closest embedding distance to input embedding (ANN - HNSW)
+Re-ranking - rank retrieved chucks based on relevance to input embedding
+Output - combine system prompt, chunks, and input query and generate response
+
+Cache
+Query understading - use embedding cache for input
+Retrieval - use cache to store retrived document for input query
+Output - use cache to store generated response for each combo of input query and chunks
+
+Evaluation
+Retrieval - recall at k
+Re-ranking - NDCG
+Output - BLUE, ROGUE (precision, recall based on reference genereation), factual accuracy
+
+Agent
+Select between cheap and strong model based on confidence level of retrieved document
+Self-critique generated response
+When conflicting documents are retrieved, select best document based on freshness and authoritativeness of documents
+When RAG output degrades measure by offline evaluation, find chunks from poorly generated reponse and mark that chuck as stale
+Not only queries vector DB for retrieval, but also queries internal DB and APIs to retrieve relevant information if appicable
+
+Agent workflow
+Simple question -> direct LLM
+Knowledge question -> RAG
+Transactional -> API/DB call
+Complex question -> Decompose input into multi tasks -> Execute each task -> Verify -> Terminate (Ex. loop detected, max number of call reached, max cost per query reached, confidence threshold reached)
+
+Discussion
+
+Confidence of retrieved document is determined by cosine similarity between input query and chunk embedding, normalized per query
+If distribution between top-1 and top-k is flat, we have low-confidence
+If retrieved docuemnts have conflicting information, we have low-confidence
+Alternatively, use light weight model to check if chunks have enough information to answer user query
+
+To deal with low-confidence senario
+Increase k, use different retrieval strategy, re-run ANN 
+Then, we use stronger model and tell the model to say don't know if it is not very confident about the generated output 
+
+# Design an Agent system for fraud detection
 
 Rule based detection 
   Agent runs a software with simple logic to automatically decline transaction (Ex. blacklisted users/card) 
@@ -72,58 +115,6 @@ Decision
   Reason - generate response explaning the decision
 Re-training
   Agent triggers re-training when new batch of data become available
-
-# How do you detect and prevent incorrect reasoning and halluciation in production?
-
-Prepare careful system prompt to train LLM to say it does not know when it is not absolutely confident about the response it generates
-Provide steps by step instructions to LLM rather than giving multiple tasks in one prompt
-Also, ask LLM to perform self-verification before generating final response
-
-Alternatively, use RAG and say "only use retrieved document to generate response, and if no relevet doc is found, answer do not know"
-
-Use newest version of LLM although there is trade-off with cost
-
-# Build Agentic RAG system
-
-Document ingestion -> Parsing and chunking -> Vector DB
-Query -> Query expansion -> Retrieval -> Re-ranking -> Output
-
-Parsing and chunking
-  Agent convert documents to markdown format to minimize total number of tokens to minimize cost
-  Chunking - agent split documents by sentences and use SentenceBERT to compute embedding
-Vector DB  
-  Store mapping between embedding and chunk
-Query expansion
-  Agent correct spelling mistakes, and additional context to input prompt
-  Agent compute embedding of input prompt
-Retrieval
-  Agent searches Vector DB to retrieve top k relevant chunks using ANN (Ex. HNSW)
-  If conflict documents are retrieved, agent calls LLM to remediate them
-Re-ranking 
-  Agent re-ranks chunking based on relevance to query, freshness and trust level of document
-Output
-  System prompt + input query + most relevant chunks are sent to LLM to genereate response
-  If LLM is not confident about outputs due to trust level of chunks, either say it does not know or agent resume from retrieval stage with different strategy
-
-Retrieval
-  Agent computes recall at k to measure percentage of actual relevant documents retrieved
-Re-ranking
-  Agent computes NDCG to measure the ranking quality of chunks 
-Output
-  Agent computes BLUE, ROGUE to compute precision and recall against reference outputs
-  Agent also computes factual accuracy
-
-Self-improve
-  When RAG is degrading (by observing evaluation metrics), agent identifies chunks retrieved for generating poor response
-  Agent identifies chunks in vector DB and mark them as stale
-
-# Optimize Agent RAG serving 1M queries per day
-
-Embedding cache - during query understading, read from cache rather than computing embedding of input query
-Retrieval cache - for known input query, use cached top k chunks
-Output cache - cache with TTL for known input query and chunk combo
-In retrieval step, if confidence is high, use cheaper model, if confidence is low, use stronger model
-Squeeze tokens - use cheap model to summarize inputs, de-dup chunks, limit final chunks to less than 3
 </code></pre>
   </div>
   <div class="card-footer text-muted">
