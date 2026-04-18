@@ -54,17 +54,31 @@
     <h2 class="card-title">Agentic</h2>
 
 <pre><code class="markdown">
-# Build Agentic AI system for RAG
+# Design Agentic RAG system
 
-Document
+Plan - clasifies query using LLM and generates execution graph
+  Simple question -> direct LLM
+  Knowledge question -> RAG
+  Transactional -> API/DB call
+  Complex question -> Decompose input into multi tasks -> Execute each task (RAG) -> Verify -> Terminate (Ex. loop detected, max number of call reached, max cost per query reached, confidence threshold reached)
+Execute - run tools
+  API calls, DB queries
+  Retrieval - select between cheap and strong model based on confidence level of retrieved document, when conflicting documents are retrieved, select best document based on freshness and authoritativeness of documents
+  Evaluation - when RAG output degrades measure by offline evaluation, find chunks from poorly generated reponse and mark that chuck as stale
+Verify
+  Self-critic final generated response
+Terminate
+  Terminate if cycle is detected in the execution graph or when target confidence is met
+
+Ingestion
 Parse - converting input document into Markdown to minimize tokens
-Chunk - typically, split document by sentence, and use SentenceBERT to generate embedding
+Chunk - semantic chunking and generate embedding for each chunk
 Vector DB - mapping between embedding and chunk
 
-Input query
+RAG
 Query understanding - correct spelling mistakes, summarize prompt to reduce token, and generate input embedding
 Retrieval - search vector DB and find top k chunks that has closest embedding distance to input embedding (ANN - HNSW)
-Re-ranking - rank retrieved chucks based on relevance to input embedding
+Re-ranking - rank retrieved chunks based on relevance to input embedding
 Output - combine system prompt, chunks, and input query and generate response
 
 Cache
@@ -75,20 +89,8 @@ Output - use cache to store generated response for each combo of input query and
 Evaluation
 Retrieval - recall at k
 Re-ranking - NDCG
-Output - BLUE, ROGUE (precision, recall based on reference genereation), factual accuracy
-
-Agent
-Select between cheap and strong model based on confidence level of retrieved document
-Self-critique generated response
-When conflicting documents are retrieved, select best document based on freshness and authoritativeness of documents
-When RAG output degrades measure by offline evaluation, find chunks from poorly generated reponse and mark that chuck as stale
-Not only queries vector DB for retrieval, but also queries internal DB and APIs to retrieve relevant information if appicable
-
-Agent workflow
-Simple question -> direct LLM
-Knowledge question -> RAG
-Transactional -> API/DB call
-Complex question -> Decompose input into multi tasks -> Execute each task -> Verify -> Terminate (Ex. loop detected, max number of call reached, max cost per query reached, confidence threshold reached)
+Generation - Answer faithfulness, groundedness, context precision/recall
+End-to-end - task success rate
 
 Discussion
 
@@ -121,6 +123,71 @@ Re-training
     Reference: 
   </div>
 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<pre><code class="markdown">
+# Design agentic system for fraud detection
+
+Real-time fraud detection using predictive ML
+  Rule-based detection
+  Logistic regression
+  XGBoost
+  Decision - pass/review/decline
+
+Agent-based fraud investigation
+  Plan - use LLM to determine which data to gather (user, account, transaction, etc) and which tools (API, DB query) to call to retrieve data 
+  Execute - run a series or API calls and DB queries to gather data
+  Reason - using model score, generate response explaning the decision
+</code></pre>
 <!-- Agentic END -->
 
 </div> <!-- /.col-md-12 -->
