@@ -104,40 +104,45 @@
   <div class="card-body">
     <h2 class="card-title">Find Median from Data Stream (75/150/250)</h2>
 
-<pre><code class="python">class MedianFinder:
+<pre><code class="python">from heapq import heappush, heappop
 
-    # [1,2,3] ? 2
-    # [1,2] ? 1.5
+class MedianFinder:
 
-    # Use two heaps
-    # Max heap to store lower half (root can be median)
-    # Min heap to store upper half (root can be median)
-    # Balance heaps so that len(min_heap) >= len(max_heap) by 1
-    # Time O(logn) n = number of elements in stream
-    # Space O(n) 
+    # Use two heaps where number of values are equal
+    # Send upper half to min_heap
+    # Send lower half to max_heap
+    # If len(min_heap) > len(max_heap), add to max_heap
+    # Else, add to min heap
+    # If len(min_heap) > len(max_heap), median is root of min_heap
+    # Else, median is average of two roots
+    # Add
+    #   Time O(logn) n = number of elements coming in to stream
+    #   Space O(n)
+    # Median
+    #   Time O(1)
 
     def __init__(self):
         self.min_heap = []
         self.max_heap = []
 
     def addNum(self, num: int) -> None:
-        if len(self.min_heap) == len(self.max_heap):
-            heappush(self.min_heap, num)
-        else:
+        if len(self.min_heap) > len(self.max_heap):
             heappush(self.max_heap, -num)
-        while self.min_heap \
-            and self.max_heap \
-            and self.min_heap[0] < -self.max_heap[0]: 
-            a = heappop(self.min_heap)
-            b = heappop(self.max_heap)
-            heappush(self.min_heap, -b)
-            heappush(self.max_heap, -a)
+        else:
+            heappush(self.min_heap, num)
+        # Adjust
+        if self.min_heap and self.max_heap \
+            and -self.max_heap[0] > self.min_heap[0]:
+            a = heappop(self.max_heap)
+            b = heappop(self.min_heap)
+            heappush(self.max_heap, -b)
+            heappush(self.min_heap, -a)
 
     def findMedian(self) -> float:
-        if len(self.min_heap) == len(self.max_heap):
-            return (self.min_heap[0]-self.max_heap[0]) / 2
+        if len(self.min_heap) > len(self.max_heap):
+            return self.min_heap[0]
         else:
-            return self.min_heap[0]</code></pre>
+            return (self.min_heap[0]-self.max_heap[0]) / 2</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/find-median-from-data-stream">295. Find Median from Data Stream</a> | <a href="https://neetcode.io/problems/find-median-in-a-data-stream">Find Median From Data Stream</a>
