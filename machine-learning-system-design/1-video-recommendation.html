@@ -84,7 +84,7 @@ Business - maximize user engagement measured by direct and indirect interaction,
 User -> Cache -> Candidate generation -> Ranking -> Re-ranking -> Output -> Collect feedback & re-train 
 
 Cache - respond using cached recomendation if generation takes longer than 1s
-Candidate generation - select 1% videos out of 1B videos (ANN like HNSW). Also, add-in popular and trending videos
+Candidate generation - select 1% videos out of 1B videos (ANN like HNSW). Also, add-in popular, trending, similar videos to recently watched videos
 Ranking - use a model to select 1% from candidate generation
 Re-ranking - apply additional rules such as freshness and diversity
 
@@ -100,16 +100,16 @@ Video
   Video - encode using CLIP
   Thumbnail - encode using CLIP
   Likes, dislike, shares - normalize
-  Comments - sample them and compute average embedding
-  Tags - word2vec like CBOW (context awareness not needed)
+  Comments - sample them and compute weighted embedding, discounted by time
+  Tags - BERT
 User
-  Previous videos that users liked, disliked, shared, left positive comments, left negative comments - sample and compute average embedding, discount by time
+  Previous videos that users liked, disliked, shared, left positive comments, left negative comments - sample and compute weighted embedding, discounted by time
   City, country - embedding
   Language - embedding
 Context
   Time of day, device type, month - bucketized and one-hot (or just embedding)
 Temporal
-  Videos that users liked, disliked, shared, left positive comments, left negative comments in current session - sample and compute average embedding, discount by time
+  Videos that users liked, disliked, shared, left positive comments, left negative comments in current session - sample and compute weighted embedding, discounted by time
 
 # Model
 
@@ -122,7 +122,8 @@ Candidate generation - two-tower
   Dot product between video and user encoder is taken, which is closer to 1 if video and user are relevant, 0 otherwise
   Learn both video and user embeddings
 Ranking - list-wise learn to rank or DNN with feature cross 
-  list-wise ois more compute intensive than point-wise or pair-wise, but more accurate in terms of computing ranked lists
+  list-wise is more compute intensive than point-wise or pair-wise, but more accurate in terms of computing ranked lists
+  Cost - weighted loss of individual losses representing weighted engagement score, total watch time, etc
 Re-ranking
   Freshness - penalize old videos
   Diversity - penalize videos that has simialr contents (similar video embedddings)
@@ -164,11 +165,15 @@ Offline feature store
 Online feature store
   Fetch user embeddings during inference time
   Search ANN index
+Real-time feature ingestion
+  Use Kafka for streaming data, using Spark Structured Streming for processing in real-time
+  Store computed features in both online and offline feature stored for inference and training
+
 Cold-start
-  New user - recommend popular videos for user's geo location and language
+  New user - recommend popular videos for user's geo location and language, content-based recommendation based on answers from onboarding questions
 
 Content moderation - use a separate model to filter out harmful videos when users upload them
-Exploration vs exploitation - direct 10-15% towards exploration and rest to exploitation
+Exploration vs exploitation - adaptive exploration using bandits
 </code></pre>
   </div>
   <div class="card-footer text-muted">
