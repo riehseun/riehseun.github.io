@@ -116,15 +116,21 @@ Temporal
 Baseline
   Simply suggest videos ranked by number of likes
 
-Candidate generation - two-tower
+Candidate generation - two-tower 
   Video tower encodes all features of videos
   User tower encode all user features
   Dot product between video and user encoder is taken, which is closer to 1 if video and user are relevant, 0 otherwise
-Ranking - list-wise learn to rank
-  More compute intensive than point-wise or pair-wise, but more accurate in terms of computing ranked lists
+  Learn both video and user embeddings
+Ranking - list-wise learn to rank or DNN with feature cross 
+  list-wise ois more compute intensive than point-wise or pair-wise, but more accurate in terms of computing ranked lists
 Re-ranking
   Freshness - penalize old videos
   Diversity - penalize videos that has simialr contents (similar video embedddings)
+
+Latency
+  Candidate generation - 200ms
+  Ranking - 500ms
+  Re-ranking - 300ms
 
 # Evaluation
 
@@ -139,17 +145,6 @@ Click-through rate
 
 # Discussion
 
-Content moderation - use a separate model to filter out harmful videos when users upload them
-Exploration vs exploitation - direct 10-15% towards exploration and rest to exploitation
-Offline feature store
-  Store user direct and indirect feedbak (after processing features), then use them to re-train the model
-  Build ANN index
-Online feature store
-  Fetch user embeddings during inference time
-  Search ANN index
-Cold-start
-  New user - recommend popular videos for user's geo location and language
-
 Availability
   Use multiple replicas of each service in different geo region (trade-off with cost)
 Scalability
@@ -162,6 +157,18 @@ Performance
 Monitoring
   System metrics - latency
   Model metrics - feature drift, data drift
+
+Offline feature store
+  Store user direct and indirect feedbak (after processing features), then use them to re-train the model
+  Build ANN index
+Online feature store
+  Fetch user embeddings during inference time
+  Search ANN index
+Cold-start
+  New user - recommend popular videos for user's geo location and language
+
+Content moderation - use a separate model to filter out harmful videos when users upload them
+Exploration vs exploitation - direct 10-15% towards exploration and rest to exploitation
 </code></pre>
   </div>
   <div class="card-footer text-muted">
