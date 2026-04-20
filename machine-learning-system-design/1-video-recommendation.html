@@ -83,8 +83,8 @@ Business - maximize user engagement measured by direct and indirect interaction,
 
 User -> Cache -> Candidate generation -> Ranking -> Re-ranking -> Output -> Collect feedback & re-train 
 
-Cache - respond using cached recomendation if generation takes longer than 1s
-Candidate generation - select 1% videos out of 1B videos (ANN like HNSW). Also, add-in popular, trending, similar videos to recently watched videos
+Cache - respond using cached recomendation, especially if generation takes longer than acceptable latency
+Candidate generation - select 1% videos out of 1B videos combining search result from ANN, popular videos, trending videos, similar videos to recently watched videos
 Ranking - use a model to select 1% from candidate generation
 Re-ranking - apply additional rules such as freshness and diversity
 
@@ -143,6 +143,7 @@ Ranking
 Increase of positive user direct feedbacks
 Increase of total watch time of vidoes
 Click-through rate
+User churn
 
 # Discussion
 
@@ -167,13 +168,15 @@ Online feature store
   Search ANN index
 Real-time feature ingestion
   Use Kafka for streaming data, using Spark Structured Streming for processing in real-time
-  Store computed features in both online and offline feature stored for inference and training
+  Store computed features in both online and offline feature store for inference and training (update ANN index)
 
 Cold-start
   New user - recommend popular videos for user's geo location and language, content-based recommendation based on answers from onboarding questions
 
 Content moderation - use a separate model to filter out harmful videos when users upload them
-Exploration vs exploitation - adaptive exploration using bandits
+Exploration vs exploitation - adaptive exploration using bandits (thompson sampling)
+Continuous training - A/B testing to direct 10-15% of traffic to candidate and rest to production, direct all traffic to candidate if it performs significantly better
+Bias - penalize videos that have been high in the rank (position bias)
 </code></pre>
   </div>
   <div class="card-footer text-muted">
