@@ -149,16 +149,13 @@
 <pre><code class="python">class Solution:
     def combinationSum(self, nums: List[int], target: int) -> List[List[int]]:
         
-        # [1,2,3,4] 4 ? [[1,1,1,1], [1,1,2], [2,2], [1,3], [4]]
+        # [1,2,3,5], 5? [[2,3], [5]]
 
         # Backtracking
-        # Choose a num in array that is less than target
-        # Recurse with target - num
-        # Backtrack
-        # Terminite if target < 0
-        # Add to result if target == 0
-        # Time O(n**m) n = len(nums) m = target
-        # Space O(m) recursion stack
+        # Select a num and update target like target -= num
+        # When target == 0, return
+        # Time O(2**n) n = len(nums)
+        # Space O(t) recursion stack
 
         def backtrack(index, target, array):
 
@@ -166,13 +163,18 @@
                 return
             if target == 0:
                 result.append(array[:])
-
-            for j in range(index, len(nums)):
-                array.append(nums[j])
-                backtrack(j, target-nums[j], array)
+                return
+                
+            for i in range(index, n):
+                if nums[i] > target:
+                    break
+                array.append(nums[i])
+                backtrack(i, target-nums[i], array)
                 array.pop()
 
+        nums.sort()
         result = []
+        n = len(nums)
         backtrack(0, target, [])
         return result</code></pre>
   </div>
