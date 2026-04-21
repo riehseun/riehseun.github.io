@@ -160,18 +160,10 @@
 <pre><code class="python">class Solution:
     def findWords(self, board: List[List[str]], words: List[str]) -> List[str]:
         
-        # [[a,b],[c,d]] words = [abc, abd, cd] ? [abd, cd]
-
-        # Construct a trie and backtrack
-        # Insert all words into trie
-        # Move to next char if it can be searched in trie
-        # Backtrack
-        # Time O(k) + O(nm(4**l)) 
-        #   k = all chars in words
-        #   l = number of chars in word
-        #   n = number of rows
-        #   m = number of cols
-        # Space O(k) = O(1) Up to 26 chars in alphabet
+        # Backtracking with tree
+        # For each word, traverse board to find it
+        # Time O(m4**n) m = number of words, n = max length of a word
+        # Space O(n)
 
         trie = {}
         for word in words:
@@ -180,14 +172,15 @@
                 if c not in node:
                     node[c] = {}
                 node = node[c]
-            node["word"] = word
-            
+            node["#"] = word
+
         def backtrack(i, j, node):
 
             node = node[board[i][j]]
-            if "word" in node:
-                result.add(node["word"])
-                
+            if "#" in node:
+                result.add(node["#"])
+                node.pop("#")
+
             c = board[i][j]
             board[i][j] = "#"
             for x, y in dirs:
