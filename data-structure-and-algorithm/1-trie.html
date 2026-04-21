@@ -107,16 +107,14 @@
 
 <pre><code class="python">class WordDictionary:
 
-    # Insert "abc" ? a -> b -> c
-    # Search "a.c" ? True
-
-    # Construct trie
-    # Use adjacency list
-    # If dot, search all chars at next level via recursive search
-    # Insert Time O(n) n = length of string
-    # Insert Space O(n)
-    # Search Time O(26**n) worst case "........"
-    # Search Space O(1)
+    # Use dictionary of dictionaries to store chars
+    # Search - if . is found, invoke search on all possible words
+    # AddWord
+    #   Time O(n) n = number of words in each iteration
+    #   Space O(nm) m = total number of words
+    # Search
+    #   Time O(26**n)
+    #   Space O(1)
 
     def __init__(self):
         self.trie = {}
@@ -127,25 +125,28 @@
             if c not in node:
                 node[c] = {}
             node = node[c]
-        node["end"] = True
+        node["#"] = True
 
     def search(self, word: str) -> bool:
 
-        def recursive_search(word, node):
-            for i, c in enumerate(word):
+        def dfs(i, node):
+            if i == len(word):
+                return "#" in node
+
+            c = word[i]
+            if c == ".":
+                for key, val in node.items():
+                    if key == "#":
+                        continue
+                    if dfs(i+1, val):
+                        return True
+                return False
+            else:
                 if c not in node:
-                    if c == ".":
-                        for next_node in node:
-                            if next_node != "end" \
-                                and recursive_search(word[i+1:], node[next_node]):
-                                return True
                     return False
-                else:
-                    node = node[c]
+                return dfs(i+1, node[c])
 
-            return "end" in node
-
-        return recursive_search(word, self.trie)</code></pre>
+        return dfs(0, self.trie)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/design-add-and-search-words-data-structure">211. Design Add and Search Words Data Structure</a> | <a href="https://neetcode.io/problems/design-word-search-data-structure">Design Add and Search Word Data Structure</a>
