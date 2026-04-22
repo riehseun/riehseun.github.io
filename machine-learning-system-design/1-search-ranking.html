@@ -81,19 +81,21 @@ Business - maximize user engagement subject to certain precision (we don't want 
 
 User and search term -> Query expansion -> Cache -> Candidate generation -> Ranking -> Re-ranking -> Output -> Feedback -> Re-training
 
-Query expansion
+Query expansion (100ms)
   Trim search terms
   Add additional context around search terms
-  For example - spell correction, query embedding, query intent
+  For example - spell correction, query embedding, query intent (Ex. navigation, transaction, browsing)
   Search term embeddings can be computed and stored in inverted index, and retrieved during inference time (Ex. Elasticsearch)
-Cache
-  If generation takes longer than 1s, return cached search result
-Candidate generation
-  Trim 1B products into 10M
-  Use ANN between user embedding and embedding computed from both search term and product (Ex. HNSW)
-Ranking
+Cache (100ms)
+  If generation takes longer than acceptable latency, return cached search result
+Candidate generation (300ms)
+  Trim 1B products into 1-10k
+  Merge results from
+    Using exact keyword matching using inverted index (Ex. BM25)
+    Using ANN between user embedding and embedding computed from both search term and product (Ex. HNSW)
+Ranking (400ms)
   Rank search result 
-Re-ranking
+Re-ranking (100ms)
   Apply additional criteria such as diversity and freshness of products
 
 # Data
@@ -105,7 +107,7 @@ Take a weighted sum of both explicit and implicit feedbacks to compute engagemen
 # Feature
 
 User
-  Previous products user carted/purchased - take average embeddings of products, discounted by time
+  Previous products user carted/purchased - sample and compute weighted average embeddings of products, discounted by time
   Country, city, language - embedding
 Product
   Image, video - CLIP
@@ -114,7 +116,7 @@ Product
 Content
   Time of day, month of year, device - one-hot
 Temporal
-  Products that user carted/purchased in current session - take average embeddings of products, discounted by time
+  Products that user carted/purchased in current session - sample and compute weighted average embeddings of products, discounted by time
 
 # Model
 
@@ -122,7 +124,7 @@ Candidate generation - two-tower
   User tower computes user embedding
   Item tower computes embeddings based on product features and search term embedding
   Dot product is taken to find closeness between user and item tower
-Ranking - list-wise learn to rank
+Ranking - list-wise learn to rank or DNN with feature cross
   Point-wise and pair-wise is less compute-intensive, but list-wise has better accuracy
 Re-ranking
   Freshness - penalize old products 
@@ -159,6 +161,9 @@ Offline feature store
 Online feature store
   Dynamic user and item features are read from online feature store during inference time
   Transformation logic for offline and online store must be the same, not to degrade the model over time
+
+Position bias - penalize products shown near the top for a long time
+Continuous testing - A/B testing to direct 10-15% traffic to candidate and rest to production, if candidate performs significantly better, direct all traffic to candidate
 </code></pre>
 
   </div>
