@@ -67,38 +67,30 @@ class Node:
 
 class Solution:
     def cloneGraph(self, node: Optional['Node']) -> Optional['Node']:
-
-        # 1->2->3 ? 1->2->3 (copy)
-
+        
         # DFS
-        # Create a new graph to return as copy of original
-        # New graph should be mapping between original and new node 
+        # While traversing create new node and connect neighbors
+        # Use gragh (defaultdict) to maintain relationship between nodes
         # Time O(n+m) n = number of nodes, m = number of edges
         # Space O(n)
 
         if not node:
             return None
-        
-        stack = []
-        stack.append(node)
 
-        visited = set()
-        visited.add(node)
-
-        graph = defaultdict(Node)
-        graph[node] = Node(node.val)
         start = node
-        
+        stack = []
+        stack.append(start)
+        graph = {}
+        graph[start] = Node(start.val)
+
         while stack:
             node = stack.pop()
-            
             for next_node in node.neighbors:
-                if next_node not in visited:
-                    visited.add(next_node)
+                if next_node not in graph:
                     stack.append(next_node)
                     graph[next_node] = Node(next_node.val)
                 graph[node].neighbors.append(graph[next_node])
-
+        
         return graph[start]</code></pre>
   </div>
   <div class="card-footer text-muted">
