@@ -221,47 +221,43 @@ class Solution:
 <pre><code class="python">class Solution:
     def pacificAtlantic(self, heights: List[List[int]]) -> List[List[int]]:
         
-        # [[0,0,0],[0,0,0],[0,0,0]] ? [1,1] and 4 corners
+        # From pacific and atlantic shore, find all cells it can reach
+        # For example, can travel if height is equal or greater
+        # Find disjoint set between answers from pacific and atlantic
+        # Time O(nm) n = number of rows, m = number of cols
+        # Space O(nm)
 
-        # Find cells that flows to Pacific
-        #   Start DFS from top and left cells
-        #   Skip visited cell
-        # Find cells that flows to Atlantic
-        #   Start DFS from right and bottom cells
-        #   Skip visited cell
-        # Find intersection from above two
-        # Time O(n+m) = O(n) n = number of nodes, m = number of edges
-        # Space O(n)
-
-        def dfs(start, visited):
-
-            visited.add(start)
+        def dfs(i, j, visited):
 
             stack = []
-            stack.append(start)
-
+            stack.append((i,j))
+            visited.add((i,j))
             while stack:
                 i, j = stack.pop()
                 for x, y in dirs:
-                    if 0 <= i + x < n \
-                        and 0 <= j + y < m \
-                        and heights[i+x][j+y] >= heights[i][j] \
-                        and (i+x, j+y) not in visited:
-                        visited.add((i+x, j+y))
-                        stack.append((i+x, j+y))
+                    nx, ny = i + x, j + y
+                    if 0 <= nx < n \
+                        and 0 <= ny < m \
+                        and heights[nx][ny] >= heights[i][j] \
+                        and (nx, ny) not in visited:
+                        visited.add((nx, ny))
+                        stack.append((nx, ny))
                         
+        pacific, atlantic = set(), set()
         dirs = [(-1,0), (1,0), (0,1), (0,-1)]
         n, m = len(heights), len(heights[0])
-        v_p, v_a = set(), set()
-
         for i in range(n):
-            for j in range(m):
-                if i == 0 or j == 0:
-                    dfs((i,j), v_p)
-                if i == n - 1 or j == m - 1:
-                    dfs((i,j), v_a)
-                  
-        return list(v_p.intersection(v_a))</code></pre>
+            if (i, 0) not in pacific:
+                dfs(i, 0, pacific)
+            if (i, m-1) not in atlantic:
+                dfs(i, m-1, atlantic)
+        for j in range(m):
+            if (n-1, j) not in atlantic:
+                dfs(n-1, j, atlantic)
+            if (0, j) not in pacific:
+                dfs(0, j, pacific)
+            
+        return list(pacific.intersection(atlantic))</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/pacific-atlantic-water-flow">417. Pacific Atlantic Water Flow</a> | <a href="https://neetcode.io/problems/pacific-atlantic-water-flow">Pacific Atlantic Water Flow</a>
