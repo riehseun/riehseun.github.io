@@ -73,28 +73,34 @@ Business - minimize total number of harmful impressions, subject to minimum prec
 
 # High-level
 
-Post -> Rule-based detection -> ML-based detection -> Decision (pass/delete/review) -> Feedback and re-training
+Post -> Rule-based detection -> ML-based detection -> Decision (pass/delete/review) -> Intervene -> Feedback and re-training
 
-Rule-based detection
+Rule-based detection (50ms)
   Use known keywords, sentences, images, videos that represent harmfulness
-ML based detection
-Decision
-  Delete - if > 95% confidnece that post if harmful
-  Review - if between 70% and 95%
-  Pass - if < 70%
+ML based detection (400ms)
+Decision (50ms)
+  Pass/review/delete
+  High precision is need for nudity
+  High recall is needed to violence and hate
+  For human review, prioritize violence, and also contents with higher confidence of harmfulness
+Intervene
+  New posts should be lower in the rank to minimize exposure in case model and human missed harmful content
+  ML-based detection model also runs after the post goes live to inference based on real-time features
 
 # Data
 
-Positive - if review determines that post if harmful, if user reports harmful posts
-Negative - if review determines that post is not harmful
-Also, use self-supervision to create synthetic texts/images/videos that are harmful
+Positive - if review determines that post if harmful, if posts passes the model but later found to be harmful from user reports
+Negative - if posts passes the model and not reported as harmful by users 
+Use self-supervision to create synthetic texts/images/videos that are harmful
+Use false negative post as trainging set
+Use posts that are generated to fool the model
 
 # Feature
 
 Post
   image, video - CLIP
   text - distlimBERT
-  comments - sample and compute average embedding
+  comments - sample and compute average embedding, discounted by time
   number of reports - normalize
 Author
   number of previously uploaded harmful posts - normalize
@@ -104,19 +110,14 @@ Author
 
 Baseline
   Logistic regression - use features discussed and do binary classification to determine if posts is harmful or not
-Options
-  XGBoost
-    Pros - explainable, feature scaling not necessary, works well with structured data
-    Cons - expensive to re-train, cannot handle embeddings
-  DNN
-    Pros - re-training is easier than tree model
-    Cons - less explainable, lots of dataprep, compute-intensive
-  Pick DNN for handling embeddings
-    Separate models for each classification (nudity, violence, hate) - requires lots of training data
-    One model for nudity, violence, hate but different classification head for each - pick this approach
-    Combine embeddings from encoders (also combine numerical encoders) and use them in each classifier
-  Loss - cross-entropy (log-loss), create weighted loss of individual loess from nudity, violence, hate
-  Data imbalance - under-sample negative ground truth labels
+
+Use DNN for handling embeddings
+  Separate models for each classification (nudity, violence, hate) - requires lots of training data
+  One model for nudity, violence, hate but different classification head for each - pick this approach
+  Fused features and feed them to a single model
+  Combine embeddings from encoders (also combine numerical encoders) and use them in each classifier
+Loss - cross-entropy (log-loss), create weighted loss of individual loess from nudity, violence, hate
+Data imbalance - under-sample negative ground truth labels
 
 # Evaluation
 
@@ -150,10 +151,8 @@ Online feature store
   Processing logic must be idential with offline feature store to prevent model degrading
   Ex. Redis
 
-Latency
-  Rule-detection - 50ms
-  ML-detection - 400ms
-  Decision (except review) - 50ms
+Real-time data ingestion - use Kafka for ingestion and Spark Structured Streaming for processing, store processed features to both online (for inference) and offliun (for training) feature store
+Continuous training - A/B testing to direct 10-15% of traffic to candidate, and when it performs significantly better, switch 100% traffic over to candidate
 </code></pre>
 <!-- Harmful Content Detection END -->
 
