@@ -105,17 +105,15 @@ class Solution:
 <pre><code class="python">class Solution:
     def countComponents(self, n: int, edges: List[List[int]]) -> int:
         
-        # [0,1],[1,2],[3,4], n = 5 ? 2
-        # [], n = 2 ? 2
-
         # BFS
-        # Time O(n+m) n = number of nodes, m = number of edges
+        # Time O(n+m) m = len(edges)
         # Space O(n)
 
-        def bfs(start, visited):
-            visited.add(start)
+        def bfs(start):
+
             queue = deque()
             queue.append(start)
+            visited.add(start)
             while queue:
                 node = queue.popleft()
                 for next_node in graph[node]:
@@ -123,17 +121,18 @@ class Solution:
                         visited.add(next_node)
                         queue.append(next_node)
 
-        graph, visited, count = defaultdict(set), set(), 0
+        graph = defaultdict(set)
         for a, b in edges:
             graph[a].add(b)
             graph[b].add(a)
 
+        visited = set()
+        num_comp = 0
         for i in range(n):
             if i not in visited:
-                bfs(i, visited)
-                count += 1
-
-        return count</code></pre>
+                bfs(i)
+                num_comp += 1
+        return num_comp</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/number-of-connected-components-in-an-undirected-graph">323. Number of Connected Components in an Undirected Graph</a> | <a href="https://neetcode.io/problems/count-connected-components">Number of Connected Components in an Undirected Graph</a>
