@@ -146,20 +146,20 @@
 
 <pre><code class="python">class Solution:
     def foreignDictionary(self, words: List[str]) -> str:
-
-        # [a, b] ? ab
-        # [ab, ac] ? bc
-
-        # Construct graph based on ordering
-        # Time O(c) c = total number of chars in words 
-        # Topological sort  
-        # Time O(n+m) n = number of nodes, m = number of edges
-        # Space O(n) = O(1) 26 chars in alphabet
-
-        graph, indegree, nodes = defaultdict(set), defaultdict(int), set()
         
+        # Create a directed graph 
+        # Only first different between two words matter
+        # Topological sort
+        # Time O(n) n = total number of chars in words
+        # Space O(1) up to 26 chars in alphabet
+
+        graph = defaultdict(set)
+        indegree = {}
+        for word in words:
+            for c in word:
+                indegree[c] = 0
         for i in range(len(words)-1):
-            # If next word is prefix of current word, False
+            # If next word is prefix of current word, return ""
             if words[i].startswith(words[i+1]) \
                 and len(words[i]) > len(words[i+1]):
                 return ""
@@ -168,19 +168,13 @@
                 if words[i][j] == words[i+1][j]:
                     j += 1
                     continue
-                graph[words[i][j]].add(words[i+1][j])
+                if words[i+1][j] not in graph[words[i][j]]:
+                    graph[words[i][j]].add(words[i+1][j])
+                    indegree[words[i+1][j]] += 1
                 break
-
-        for key, val in graph.items():
-            for c in val:
-                indegree[c] += 1
-
-        for i in range(len(words)):
-            for c in words[i]:
-                nodes.add(c)
-
+        
         queue = deque()
-        for c in nodes:
+        for c in indegree:
             if indegree[c] == 0:
                 queue.append(c)
         
@@ -192,11 +186,10 @@
                 indegree[next_node] -= 1
                 if indegree[next_node] == 0:
                     queue.append(next_node)
-        
-        # If cycle, False
-        for key, val in indegree.items():
-            if val > 0:
-                return ""
+
+        # Check check
+        if len(result) != len(indegree):
+            return ""
         return "".join(result)</code></pre>
   </div>
   <div class="card-footer text-muted">
