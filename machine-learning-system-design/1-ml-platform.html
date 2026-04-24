@@ -39,39 +39,68 @@
 <div class="col-md-12">
 <h1 class="my-4">Machine Learning</h1>
 
-<!-- Model Serving BEGIN -->
-<div class="card mb-4" id="model-serving">
+<!-- ML Platform BEGIN -->
+<div class="card mb-4" id="ml-platform">
   <div class="card-body">
-    <h2 class="card-title">Model Serving</h2>
+    <h2 class="card-title">ML Platform</h2>
     <ul class="list-unstyled mb-0">
-      <li><a href="#model-serving-">Model Serving</a></li>
+      <li><a href="#ml-platform-">ML Platform</a></li>
     </ul>
   </div>
 </div>
 
-<div class="card mb-4" id="model-serving-">
+<div class="card mb-4" id="ml-platform-">
   <div class="card-body">
-    <h2 class="card-title">Model Serving</h2>
+    <h2 class="card-title">ML Platform</h2>
 
 <pre><code class="markdown">
 # Requirement
 
 How many models are there? Over 100
 What kind of models? Feed recommendation, harmful content detection, product search, fraud detection
-Are inferences batch and real-time? Both
+Are inferences in real-time? Yes
 What should be latency for real-time inference? Under 200ms
 How many daily active users are there? 1B
 How many inference requests does each user make? 100 on average per day (2M QPS)
 What is peak QPS? 20-30x of average QPS
-Should the system perform model deployment like A/B testing? Yes
-Should the system support continuous training? Yes
+Should the system support data ingestion? Yes
+Should the system support continuous training and deployment? Yes
+Should the system support model serving via API? Yes
 Should the system support online and offline feature store? Yes
 Should the system support model registry? Yes
 Should the system support monitoring of models and infra? Yes
 
-# Design
+# Design (data ingestion)
 
-User -> Global load balancer -> API gatwway -> Model router -> Cache -> Online feature store -> Serving layer -> Output -> Data lake -> Training -> A/B Testing 
+Data -> Ingestion (Kafka) -> Processing (Spark Structured Processing) -> Raw storage -> Curated storage
+
+Ingestion
+  Kafka can be used for both batch and real-time data ingestion
+Processing
+  Transform features in real-time and store them in online and offlien feature store
+
+Raw storage
+  Append only and immutable
+
+Curated storage
+  Store data in parquet format for fast columar access
+
+# Design (training)
+
+Offline feature store -> Model training -> Model registry
+
+Model training
+  Data parallelism - each node get a shard, gradients are computed locally and consolidate via AllReduce (ayncs or sync for faster update)
+  Model parallelism - split layers across GPUs
+  Pipeline parallelism - split model by layers
+
+Model registry
+  Model versions
+  Model parameters
+
+# Design (serving)
+
+User -> API gatwway -> Model router -> Cache -> Inference -> Output -> Data lake -> Training -> A/B Testing 
 
 API gateway
   Authorization
@@ -79,62 +108,50 @@ API gateway
 
 Model reuter
   Route to differet models based on request (or endpoint)
-  For recommendation and search ranking models, use candidate generation -> ranking -> re-ranking in serving layer
-  For real-time detection models  
+  For recommendation and search ranking models, use candidate generation -> ranking -> re-ranking in inference layer
+  For real-time detection models, use rule-based detection -> light model -> heavy model in inference layer 
 
 Cache
   Serve frequent prediction (For example, use Redis)
   TTL to invalidate stale information
   
-Online feature store
-  Use key-value store like Redis
-  Store user and item features
-  Feature versioning to ensure point-in-time correctness
-
-Serving layer
+Inference
   Load models into memory
   Service predictions via RPC
+  Read features from read-optimized online feature store
   Use Tensorflow Serving or Triton Inference Server
 
 Data lake
   Stores inference and ground truth to generate metrics to monitor model performance 
-
-Data pipeline
-  Ingestion - Kafka for both real-time and batch
-  Processing - Spark Structured Streaming
-  Raw storage - append only and immutable
-  Curated storage - store data in parquet format for fast columar access
-
-Trainign pipeline
-  Offline feature store - Stores transformed features to be re-used
-  Model training - data/model/pipeline parallelism
-  Model registry - model versions, parameters
-
-A/B testing
-  Gradual rollout to candidate model (5% -> 10% -> 25% and so on)
-  Only when candidate model perform significantly better, direct 100% traffic to candidate model
-  100% traffic to existing and 100% traffic to candidate is safer but double number of prediction is too costly
 
 # Discussion
 
 Availability
   Run multiple replicas of each service in different geo location (active-active)
   Trade off between cost and availability
-
 Reliability
   Store replicas of data in data center in different geo location
-
 Scalability
   Compute - horizontal scaling (based on CPU/GPU usage or traffic patterns)
   Data - paritioning (Ex. consistent hashing)
-
 Performance
   Remove unnecessary features, thus size of feature vector
   Pruning - remove non-contributing connections between neurons or neruons themselves
   Quantization - use less number of bits to store weight values
   Knowledge distillation (only if teacher model is available)
   Use dynamic batching (5-10ms) to increase throughput (trade-off bewteen latency and throughput)
-  GPU for large DL models and CPU for lightweight models (trade-off bewteen performance from GPU and cost)
+  GPU for large DL models and CPU for lightweight models (trade-off bewteen performance and cost)
+Monitoring
+  Model metrics - score distribution, feature drift, data drift
+  System metrics - QPS, latency
+
+Offline feature store
+  Store features for model training
+  Ex. S3
+Online feature store
+  Store features for model inference
+  Compute feature transformation within a fixed-sized window to ensure point-in-time correctness
+  Ex. Redis
 
 Latency
   Network - 20ms
@@ -145,9 +162,10 @@ Latency
     Cached predictions
     Simpler backup models
 
-Monitoring
-  Model metrics - score distribution, feature drift, data drift
-  System metrics - QPS, latency
+A/B testing
+  Gradual rollout to candidate model (5% -> 10% -> 25% and so on)
+  Only when candidate model perform significantly better, direct 100% traffic to candidate model
+  100% traffic to existing and 100% traffic to candidate is safer but double number of prediction is too costly
 </code></pre>
 
   </div>
@@ -155,7 +173,7 @@ Monitoring
     Reference:
   </div>
 </div>
-<!-- Model Serving END -->
+<!-- ML Platform END -->
 
 </div> <!-- /.col-md-12 -->
 </div> <!-- /.row -->
