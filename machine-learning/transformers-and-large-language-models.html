@@ -46,6 +46,7 @@
     <!-- <ul class="list-unstyled mb-0"> -->
     <ul>
       <li><a href="#transformers-and-large-language-models-">Transformer</a></li>
+      <li><a href="#transformers-and-large-language-models-">Transformer-Based Models & Tricks</a></li>
     </ul>
   </div>
 </div>
@@ -151,6 +152,61 @@
       <li>Positional embedding is added to embedding of each token (to produce in input)</li>
       <li>Input is projected into Q,K,V (via W_Q, W_K, W_V, which are all learned by the model)</li>
       <li>Apply attention formula to product output</li>
+    </ul>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: <a href="https://cme295.stanford.edu">CME 295 - Transformers & Large Language Models</a>
+  </div>
+</div>
+
+<div class="card mb-4" id="transformers-and-large-language-models-">
+  <div class="card-body">
+    <h2 class="card-title">Transformer-Based Models & Tricks</h2>
+
+    <h3 class="card-title">Position embeddings</h3>
+    <ul>
+      <li>Idea - tokens close together are highly related, tokens far away from one-another are less related</li>
+      <li>RoPE (Rotary Position Embedding)</li>
+      <ul>
+        <li>Idea - rotate query and key vector by some angle</li>
+        <li>Create a 2 by 2 rotation matirx</li>
+        <li>Multiply vector by the matrix, result results in vector rotated by some angle</li>
+      </ul>
+    </ul>
+
+    <h3 class="card-title">Layer normalization</h3>
+    <ul>
+      <li>PostNorm -> PreNorm -> RSMNorm</li>
+    </ul>
+
+    <h3 class="card-title">Attention approximation</h3>
+    <ul>
+      <li>Silding window attention - restrict attention to neighboring tokens only to reduce computation, window can be thousands of tokens</li>
+      <li>Sharing attention heads - share projection matrices for key and value (not key), key and value come a lot during decoding!</li>
+    </ul>
+
+    <h3 class="card-title">Transformer-based models</h3>
+    <ul>
+      <li>Encoder-decoder - T5</li>
+      <li>Encoder - BERT</li>
+      <li>Decoder - GPT</li>
+    </ul>
+
+    <h3 class="card-title">BERT deep dive</h3>
+    <ul>
+      <li>[CLS] - placeholder at the beginning of sequence</li>
+      <li>[SEP] - aims to separate sentences</li>
+      <li>Multi-stage training</li>
+      <ul>
+        <li>Pre-train using MLM (Masked Language Modelling) and NSP (Next Sentence Prediction)</li>
+        <ul>
+          <li>MLM - replace input with mask (80% of time), replace input with random word (10% of time), or leave input unchanged (10% of time)</li>
+          <li>NSP - pick two sentences from corpus, they either follow each other (50% of time), or not (50% of time), task is to determine if sentence A follows sentence B</li>
+        </ul>
+        <li>Fine-tune for target task</li>
+      </ul>
+      <li>Segment encoding - added on top of positional and input embedding, A if first sentence, B if second sentence, learned during training</li>
+      <li>Inference can be slow, cost can be high (Solution - DistillBert, where it removed NSP step and dynamic masking per epoch)</li>
     </ul>
   </div>
   <div class="card-footer text-muted">
