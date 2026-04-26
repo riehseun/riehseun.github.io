@@ -56,114 +56,73 @@
 <pre><code class="markdown">
 # Requirement
 
-Functional
-  What should Agentic RAG do? Generate response upon user query
-  What type of query does user input? General query
-  Should Agentic RAG generate response based on domain specific knowledge? Yes
-  What domain specific knowledge should Agentic RAG contain? Could be company internal information
-  Does user query include text, image, video? Text only
-  Should response include reference to knowledge (or document)? Yes
-  Should chatbox consider previous prompts in the same session? Yes
+Functional  
+  Should the system include human gates? Yes
 
 Non-functional
-  Is training data available? Yes
-  How fast should the generation be? 1-3s
-  Should model be deployed to mobile devices? No
-  Should model be continuously trained? Yes
-  What is expected QPS? 100
-  What is peak QPS? 20-30 average QPS
-  How often is knowledge updated? New documents are avaiable every month
-  Should the system support multi-turn conversation? Yes
-  Should the system personalize response? No
-
-# Problem
-
-ML
-  Input - user prompt
-  Output - response
-  Generation
-
-Business
-  Provide factual response to users 
-
+  How long can the agent take to generate working app and infra? Few or several hours
+  How much token budget is allowed for executing each user prompt? Should be configurable
+ 
 # Design
 
-Plan -> Execute -> Verify -> (if applicable) Terminate
+Product -> Planner -> Develop -> Review -> Test -> Release -> Monitor
 
-Plan - clasifies query using LLM and generates execution graph
-  Simple question -> direct LLM
-  Knowledge question -> RAG
-  Transactional -> API/DB call
-  Complex question -> Decompose input into multi tasks -> Execute each task (RAG) -> Verify -> Terminate (Ex. loop detected, max number of call reached, max cost per query reached, confidence threshold reached)
-Execute - run tools
-  API calls, DB queries
-  Retrieval - select between cheap and strong model based on confidence level of retrieved document, when conflicting documents are retrieved, select best document based on freshness and authoritativeness of documents
-  Evaluation - when RAG output degrades measure by offline evaluation, find chunks from poorly generated reponse and mark that chuck as stale
-Verify
-  Self-critic final generated response
-Terminate
-  Terminate if cycle is detected in the execution graph or when target confidence is met
+Product
+  Takes user prompt and create user stories includeing acceptance criteria
+  Human approves created user stories, or reject quoting reasons and planner improves them and ask for re-approval
 
-# Data
+Planner
+  Design APIs, test case, DB schema, auth mechanisms, networking
+  Human approves proposed design
 
-Human can rate response for each query and response pair
-Rating can be used to fine-tune the model
+Develop
+  Write small PRs (including unit tests)
+  Improves PRs based on feedback from Review agent
 
-# Feature
+Review (developer)
+  Reviews PR from developer agents (lint, test coverage, etc)
+  Human provides the final approval before merge
 
-N/A
+Release
+  Creates infrasturcture files (Docker, Terraform, etc)
+  Improves PRs based on feedback from Review agent
 
-# Model
+Review (devops)
+  Reviews PR from release agents
+  Human provides the final approval before merge
 
-Document -> Chunking -> Embedding -> Vector DB
+Test
+  Performs functional tests on APIs (load testing in upper environments)
 
-Chunking
-  Fixed-size - fixed number of tokens in each chunk (fixed number of overlapping tokens are allowed)
-  Semantic - split text into sentences and create fixed-sized window, then merge windows that have certian cosine similarity
-Embedding
-  Late chunking - break texts into tokens, compute embeddings for each token, then group tokens into chucks (need long context model)
-  Late interaction - compare similarity between query tokens and document tokens one by one, then find highest score (compute intensive)
-  SentenceBERT - compute averge embedding of all words in each sentence, feed two sentences into two BERTs at a time, then compute cosine simliarity
+Release-Review-Test repeats in high environment
 
-Query -> API gateway -> Chat service -> Query understanding -> Retriever -> Re-ranker -> LLM (with system prompt) -> Filter ->
-
-Query understanding
-  Correct spelling mistakes
-  Additional keywords
-  Transform input query into embedding
-  Cache - store and read query embedding from cache
-
-Retriever
-  Search vector DB and find top k chunks that has closest embedding distance to input embedding using ANN (EX. HNSW)
-  HNSW - build graph of chunk embeddings, compare closeness between query and random node versus query and all neighboring nodes on random node, then pick node with highest similarity
-  Cache - store and read top k result from cache
-
-Re-ranker
-  Rank chunks from retriever
-  Cross-encoder - both query and chunk are fed to network, then value bewteen 0 and 1 are produced
-      
-# Evaluation
-
-Retriever - recall@k, precision@k
-Re-ranking - NDCG
-LLM - faithfulness, answer relevance, context precision/recall
-Overall - summarization score, task success rate
+Monitor
+  Conducts integration with monitoring tools to monitor app and infra
+  Executes roll-back upon finding bugs running in production
+  Then, agent can invoke bug fixing steps to fix the code, test, and release
 
 # Discussion
 
-Confidence
-  Retrieval - cosine similarity between input query and chunk embedding, normalized per query
-  If distribution between top-1 and top-k is flat, we have low-confidence
-  If retrieved docuemnts have conflicting information, we have low-confidence
-Low-confidence
-  Increase k, use different retrieval strategy, re-run ANN
-  Then, use stronger model
+Compancy specific codebase 
+  Vectorize them and storm them in Vector DB
+  Develop and Release agents will be provided with working examples from this DB
+  Agent can watch github codebase and insert updated codes into this DB to keep syntax of company-specific codes up to date
 
-Supporting images or videos are input
-  Encode images (or use a model to compute text summary of image) and store in vector DB, retriever searches for both relevant chunks and images, then final chunk and image are sent to multi-modal LLM
+Change record creation
+  Agent can use information from planning state to generate contents to put into change record
+  Use API to create record and move it to different stages
+  Agent can contact change record approver and update the content based on feedbacks received
 
-Handle very long query
-  Text clean up + text summarization service
+Agent workflow
+  All agents can run inside a container of Kubernetes cluster
+  Agent orchestrator is continuously running, creates executiong graph as DAG, and create each agent as a Job
+  Each agent execute a single task from each skill stored in Github repo
+  Upon finishing exeuction, agent stores the execution results in both short term (Ex. Redis) and permanent storage (Ex. S3)
+  When all agents successfully complete their tasks, orchestrator shuts down
+  Secrets used to interact with LLM, APIs, can be created in K8s Secret where each agent can access secret in its own namespace
+
+Model routing
+  Each task is routed to different models based its type and complexity
 </code></pre>
   </div>
   <div class="card-footer text-muted">
