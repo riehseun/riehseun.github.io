@@ -56,80 +56,26 @@
 <pre><code class="markdown">
 # Requirement
 
+What kinds of models are there? Various LLMs
+What kinds of inputs should model handle? Multi-modal
 How many models are there? Over 100
-What kind of models? Feed recommendation, harmful content detection, product search, fraud detection
-What is size of data? PBs
-What are types of data? Mostly unstructured
-What are data formats? various formats of text, image, video
-Are inferences batch and real-time? Both
-How fast should real-time inference be? Under 200ms
+
+How fast should inferene be? Few seconds
 
 # Design
 
-Data Source -> Batch and Streaming Ingestion -> Feature Computation -> Offline and Online Store -> Feature Registry -> Model Training and Serving
-
-Ingestion
-  Batch - API dump or DB change data capture
-  Streaming - Kafka (Spark Structured Streaming for processing)
-
-Feature Computation
-  Features are defined once and re-used
-    Use Airflow for DAG
-    Backfill historical features
-  Shared transformation logic for training and serving - o/w models silently degrade
-  Batch features
-    Daily aggregation
-    Heavy joins
-  Streaming features
-    Windowed aggregation (Ex. last 5 minute)
-    write latest value to online store and full history to offline store
-  Embeddings
-    For unstrucrtured data, embeddings are computed using GPUs and stored in offline feature store
-
-Offline Store
-  Historical feature values
-  Used for training
-  Compute feature within a fixed time window to ensure point-in-time correctness
-  Use S3
-
-Online Store
-  Store latest feature values only
-  Shard by entity key
-  Cache by hot key
-  Key-value store
-  Used for inference
-  Fetching should be done under 50ms
-  Use Redis
-
-Feature Registry
-  Stores feature definitions
-  Metadata
-  Versioning
-  Data lineage
-  Use Feast
+User -> API gateway -> Cache -> Model router -> Inference -> Streaming response
 
 # Discussion
 
-Availability
-  Span compute resources across multi-region
-  Trade-off between cost and availability
-Scalability
-  Compute - horizontal scaling
-  Data - partition by entity key or time (offline store)
-Reliability
-  Idempotent writes
-  Replay capability
-Consistency
-  Strong consistency for training
-  Eventual consistency for inference
-Monitoring
-  Model - score distribution, data drift, feature drift
-  System - latency, QPS
+KV cache
+  Stores key-value for fast decoding
 
-Governance
-  Feature ownership
-  Access control
-  Prevent duplicate and inconsistent features   
+Scheduler + queue
+  Maximize GPU utilization
+
+Batching
+  Batch queries and send them to GPU at once
 </code></pre>
 
   </div>
