@@ -56,133 +56,151 @@
 <pre><code class="markdown">
 # Requirement
 
-How many recommended videos do users see? Videos are available as users scroll down the pages in website or app
-How many language should system support? Multiple languages
-Can users like/comment/share videos? Yes
-Do videos have thumbnails and tags? Yes
-Are there training data available? No
-Can I construct training data via implicit or explict feedbacks from users? Yes
-Should recommendation be personalized to each user? Yes
-Should recommendation be moderated? Yes
-Should the system focus on exploration or exploitation? There should be a balance between both
-Should the system focus on engagement or content quality? Content quality
+Should recommendations appear on webpage or mobile devices? Yes
+How many videos should appear in recommendation? Unlimited
+Should the system support multiple languages? Yes
+Does video consist of text description, thumbnail image, tags, comments, likes, shares? Yes
+Should the system moderate videos? Yes
+Should the system focus on user engagement or content quality? Content quality
+Should the system focus on exploration or exploitation? Balance of both
+Should recommendation be personalized for each user? Yes
 
-How fast should recommendation be generated? Under 1s
-Should the model be continously trained? Yes
-How many users are there? 100M daily active users
-How many videos does each user view? 100 per day on average (100 * 100M / 24 * 3600 QPS)
-What is peak QPS? Can I assume 20-30x of average QPS? Yes
+How fast should recommendations be generated? Under 1s
 How many videos are there? 1B
+How many users are there? 100M
+How many times does each user visit the system per day? 5, QPS = (5 * 100M) / (24 * 3600)
+Can max QPS be 20-30 times the average? Yes 
+Should model be continuously trained? Yes
 
 # Problem
 
-ML - given user as input, output a list of videos ranked by relevance to the user. Supervised ranking problem
-Business - maximize user engagement measured by direct and indirect interaction, subject to minimum precision (not to recommend click baits)
+ML 
+  Input - a user
+  Output - a list of videos ranked based on relevance to user
+  Supervised ranking problem
 
-# High-level
+Business
+  Maximize user engagement while maintaining minimum target precision (we don't want to just recommend click-bait to maximize user clicks)
 
-User -> Cache -> Candidate generation -> Ranking -> Re-ranking -> Output -> Collect feedback & re-train 
+# Serving
 
-Cache - respond using cached recomendation, especially if generation takes longer than acceptable latency
-Candidate generation - select 1% videos out of 1B videos combining search result from ANN, popular videos, trending videos, similar videos to recently watched videos
-Ranking - use a model to select 1% from candidate generation
-Re-ranking - apply additional rules such as freshness and diversity
+User -> Cache -> Candidate generation -> Ranking -> Re-ranking -> Output & feedback
+
+Cache 
+  Return cached recommendation if latency exceeds 1s
+  If not, compute generation and store result in cache (many features are dynamic, thus cached recommendation is likely stale)
+
+Candidate generation
+  Invoke ANN between user embedding and video embeddings (stored in vector storage) to come up with 1k candidates
+  Find 100 popular and trending videos based on speed of increasing likes, watch times, etc
+  Find 10 videos that user had very positive previous engagements
+  Combine all these to generate candidates
+  Latency ~ 200ms  
+
+Ranking
+  Use DNN with feature-cross or transformer based ranking
+  Latency ~ 500ms
+
+Re-ranking
+  Use cross-encoder
+  Latency ~ 300ms
 
 # Data
 
-Positive - if user watches a certain percentage of videos, users likes video, user leaves positive comments about video, user shares video
-Negative - if users skip videos, user watches less than certain percentage, user dislike video, user leaves negative comments about video
-Finally, compute weighted engagement score using direct and indirect interactions
+Positive - if user likes video, leaves positive comments, shares videos, watches at least half of video
+Negative - if user dislikes video, don't click recommended video, leaves negative comment
 
 # Feature
 
 Video
-  Video - encode using CLIP
-  Thumbnail - encode using CLIP
-  Likes, dislike, shares - normalize
-  Comments - sample them and compute weighted embedding, discounted by time
-  Tags - BERT
-User
-  Previous videos that users liked, disliked, shared, left positive comments, left negative comments - sample and compute weighted embedding, discounted by time
-  City, country - embedding
-  Language - embedding
-Context
-  Time of day, device type, month - bucketized and one-hot (or just embedding)
+  Image - CLIP's visual encoder
+  Video - split into frames and user CLIP
+  Text description, tags - dislimBERT for multi-language
+  Number of likes, shared - normalize
+  Comments - sample them, and compute weighted average embedding where recent comments have higher weights and old comments have lower weights
+
+User 
+  Device, time of day, month of year - bucketized and one-hot
+  Language, country, city - embedding
+
 Temporal
-  Videos that users liked, disliked, shared, left positive comments, left negative comments in current session - sample and compute weighted embedding, discounted by time
+  Previous videos that user engaged (watch, like, etc) - sample and compute weighted average embedding
 
 # Model
 
-Baseline
-  Simply suggest videos ranked by number of likes
+Candidate generation - two-tower NN
+  User tower encodes all user features into a single embedding
+  Video tower encodes all video features into a single embedding
+  Dot product betwee two embeddings are 1 if user engaged with video, 0 otherwise
+  User engagement can be determined by computing weighted sum of all user engagements, positive or negative
+  Use BCE loss
 
-Candidate generation - two-tower 
-  Video tower encodes all features of videos
-  User tower encode all user features
-  Dot product between video and user encoder is taken, which is closer to 1 if video and user are relevant, 0 otherwise
-  Learn both video and user embeddings
-Ranking - list-wise learn to rank or DNN with feature cross 
-  list-wise is more compute intensive than point-wise or pair-wise, but more accurate in terms of computing ranked lists
-  Cost - weighted loss of individual losses representing weighted engagement score, total watch time, etc
-Re-ranking
-  Freshness - penalize old videos
-  Diversity - penalize videos that has simialr contents (similar video embedddings)
-
-Latency
-  Candidate generation - 200ms
-  Ranking - 500ms
-  Re-ranking - 300ms
+Ranking - transformer-based ranking
+  Point-wise learn to rank where each user-video pair gets a score
+  
+Re-ranking - cross-encoder
+  Learn user and video feature interactions using transformer encoder 
+  Apply penality to score by taking in diversity, freshness into consideration
+    Diversity - penalize if similar videos (close video embedding distancecs)
+    Freshness - penalize if old video
+  Inference is feasible when number of videos are less than hundreds 
 
 # Evaluation
 
 Candidate generation
-  Recall at K
+  Recall at k
+  PR curve
 Ranking
   NDCG
+Re-ranking
+  NDCG
 
-Increase of positive user direct feedbacks
-Increase of total watch time of vidoes
 Click-through rate
-User churn
+Increase in total watchtime
+Increase in number of likes, shares, comments
 
 # Discussion
 
 Availability
-  Use multiple replicas of each service in different geo region (trade-off with cost)
-Scalability
-  Horizontally scale each services (scale based on traffic pattern)
+  Replicate each service in different geo regions (trade-off with cost)
 Reliability
-  Parition feature store into shards (Ex. consistent hashing) and spread replicas into data centers across different geo regions
+  Partitiion data into shards, create replicas for each shard, and spread them across different geo regions
+Scalability
+  Horizontally scale each service based on traffic forecast
 Performance
-  Use cached response if latency exceeds certain threshold
-  Optimize model - quantization (limit number of bits to represent numbers), pruning, distillation (if teacher model is available)
+  Model quantization - use fewer number of bits to represent floating number
+  Pruning - apply regularization like drop-out to shut down some neurons to make network less dense
 Monitoring
-  System metrics - latency
-  Model metrics - feature drift, data drift
+  System - QPS, latency
+  Model - input data drift, feature drift, score drift
 
+Real-time data ingestion
+  Dynamic data (or feature) can be ingested via Kafka
+  Feature can be computated via Spark Structure Streaming inside Kafka Topic
+  Both raw and curated data are persisted in raw (data lake) and curated storage (offline feature store)
+  Curated data is also stored in online feature store
 Offline feature store
-  Store user direct and indirect feedbak (after processing features), then use them to re-train the model
-  Build ANN index
+  Store features for training
+  Ex. S3
 Online feature store
-  Fetch user embeddings during inference time
-  Search ANN index
-Real-time feature ingestion
-  Use Kafka for streaming data, using Spark Structured Streming for processing in real-time
-  Store computed features in both online and offline feature store for inference and training (update ANN index)
+  Store features for inference
+  Use fixed-size window to aggregate features, to ensure point-in-time correctness
+  Ex. Redis
+
+Content moderation
+  Use a separate classification model to detect harmful contents when users upload videos
+  Continue using the model after the video is uploaded since features that contributes to prediction may change after video got uploaded
+
+Exploitation vs exploration
+  Use bandits to direct 10-15% of recommendation to exploration (Ex. thompson sampling)
+
+Continuous training
+  A/B testing to direct 10-15% of traffic to candidate
+  Slowly increase traffic to candidate if it performs better than production  
 
 Cold-start
   New user - recommend popular videos for user's geo location and language, content-based recommendation based on answers from onboarding questions
-
-Content moderation - use a separate model to filter out harmful videos when users upload them
-Exploration vs exploitation - adaptive exploration using bandits (thompson sampling)
-Continuous training - A/B testing to direct 10-15% of traffic to candidate and rest to production, direct all traffic to candidate if it performs significantly better
-Bias - penalize videos that have been high in the rank (position bias)
 </code></pre>
-  </div>
-  <div class="card-footer text-muted">
-    Reference: 
-  </div>
-</div>
 <!-- Video Recommendation END -->
 
 </div> <!-- /.col-md-12 -->
