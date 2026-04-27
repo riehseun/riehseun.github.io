@@ -230,22 +230,17 @@
 <pre><code class="python">class Solution:
     def rob(self, nums: List[int]) -> int:
         
-        # [1,2,3,4] ? 2+4=6
-        # [2,0,3,4] ? 2+3=5
-
         # DP
-        # Consider two valid cases
-        #   Don't rob first
-        #   Don't rob last
-        # dp[i] = max amount by robbing up to i
-        # dp[i] = max(dp[i-1], dp[i-2]+nums[i])
+        # dp[i] = maximum amount robbed till index i
+        # Either rob first or not (try both and return better result)
+        # Init: dp = [0] * (n+1) 
+        # Recurse: dp[i] = max(dp[i-1], dp[i-2]+nums[i])
         # Time O(n) n = len(nums)
         # Space O(n)
 
-        def helper(nums):
+        def dp_helper(nums):
             n = len(nums)
-            dp = [0 for _ in range(n+1)]
-
+            dp = [0] * (n+1)
             for i in range(1, n+1):
                 dp[i] = max(dp[i-1], dp[i-2]+nums[i-1])
 
@@ -253,7 +248,7 @@
 
         if len(nums) == 1:
             return nums[0]
-        return max(helper(nums[1:]), helper(nums[:-1]))</code></pre>
+        return max(dp_helper(nums[1:]), dp_helper(nums[:-1]))</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/house-robber-ii">213. House Robber II</a> | <a href="https://neetcode.io/problems/house-robber-ii">House Robber II</a>
