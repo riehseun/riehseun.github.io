@@ -56,118 +56,150 @@
 <pre><code class="markdown">
 # Requirement
 
-What do users search for? products that users want to purchase
-Should search be personalized for each user? Yes
-How many languages should the system support? Multiple languages
-Does product consist of text description, image, video, review, comments, likes? Yes
-Can users put products into cart without purchasing it? Yes
-Should the system focus on user engagement or product quality? product quality
-Should the system focus on exploration or exploitation? balance of both
-Should the system moderate products? Yes
+What do users search for? Videos 
+Should search result be personalized for each user? Yes
+Can video include text description, thumbnail image, likes, shares, comments, tags? Yes
+Should the system support multiple languages? Yes
+Should the system focus on user engagement or content quality? Quality
+Should the system focus on exploitation or exploration? Balance of both
+Should the system moderate contents? Yes
 
-How fast should search result be? Under 1s
-How many products are there? 1B
+How fast should inference be? Under 1s
+How many videos are there? 1B
 How many users are there? 100M
-How many search does each user execute per day? 10 per day (100M * 10) / (24 * 3600) QPS
-Can the peak QPS be 20-30 times the average? Yes
-Should model be continusouly trained? Yes
+How many searches does each user make per day? 5, (5 * 100M) / (24 * 3600) QPS
+Can peak QPS be 20-30 times the average? Yes
+Should model be continuously trained? Yes
+Should model handle positional bias? Yes
 
 # Problem
 
-ML - given search term and user as inputs, output a ranked list of products (supervised ranking problem)
-Business - maximize user engagement subject to certain precision (we don't want to recommend products that are just click baits)
+ML
+  Input - user and search term
+  Output - ranked list of videos
+  Supervised ranking
 
-# High-level
+Business
+  Maximize user engagement, subject to certain precision (we don't want to just return click-baits)
 
-User and search term -> Query expansion -> Cache -> Candidate generation -> Ranking -> Re-ranking -> Output -> Feedback -> Re-training
+# Serving
 
-Query expansion (100ms)
-  Trim search terms
-  Add additional context around search terms
-  For example - spell correction, query embedding, query intent (Ex. navigation, transaction, browsing)
-  Search term embeddings can be computed and stored in inverted index, and retrieved during inference time (Ex. Elasticsearch)
-Cache (100ms)
-  If generation takes longer than acceptable latency, return cached search result
-Candidate generation (300ms)
-  Trim 1B products into 1-10k
-  Merge results from
-    Using exact keyword matching using inverted index (Ex. BM25)
-    Using ANN between user embedding and embedding computed from both search term and product (Ex. HNSW)
-Ranking (400ms)
-  Rank search result 
-Re-ranking (100ms)
-  Apply additional criteria such as diversity and freshness of products
+Query -> Query processing -> Cache -> Candidate generation -> Ranking -> Re-ranking -> Output & feedback
+
+Query processing
+  Correct spelling mistakes
+  Add contexts
+  Read query embedding from cache or compute embedding and store it in cache (Ex. FAISS)
+
+
+Cache
+  Return cached search results matching query embedding if inference takes longer than 1s
+
+Candidate generation
+  Come up with ~1k candidates using ANN between query embedding and video embeddings
+  Gather hundreds of popular and trending vidoes based on speed of increasing positive user engagement
+  Gather tens of previously watched videos by the user
+  Combine all these to generate candidates
+
+Ranking
+  Use a model that can rank thousands of videos
+
+Re-ranking
+  Use a model that can rank 20-30 videos
 
 # Data
 
-Explicit - like/dislike, positive/negative review, report, hide, cart, purchase
-Implicit - takes longer than X seconds to view the product
-Take a weighted sum of both explicit and implicit feedbacks to compute engagement score
+Positive - if user likes/shares videos, leaves positive comments, watches more than half of videos
+Negative - if user dislikes videos, leaves negative comments, watches less than quarter of videos
 
 # Feature
 
+Video
+  Image - CLIP's visual encoder
+  Video - split into frames, and use image encoder
+  Text description, tags - distlimBERT embedding (for multi-language)
+  Number of likes, shares - normalized
+  Comments - sample them, and compute weighted embedding discouted by time
+
 User
-  Previous products user carted/purchased - sample and compute weighted average embeddings of products, discounted by time
-  Country, city, language - embedding
-Product
-  Image, video - CLIP
-  Text description - DistlimBERT
-  Review - sample and compute average embedding using DistlimBERT
-Content
-  Time of day, month of year, device - one-hot
+  Device, time of day, day of week, month of year - bucketize and one-hot
+  Country, city, language - BERT embedding
+
 Temporal
-  Products that user carted/purchased in current session - sample and compute weighted average embeddings of products, discounted by time
+  Previous queries that user executed - sample and compute weighted embedding discouted by time
 
 # Model
 
-Candidate generation - two-tower
-  User tower computes user embedding
-  Item tower computes embeddings based on product features and search term embedding
-  Dot product is taken to find closeness between user and item tower
-Ranking - list-wise learn to rank
-  Point-wise and pair-wise is less compute-intensive, but list-wise has better accuracy
-  Loss - compute weighted average of individuals loess from engagement score, price, relevance measured by closeness of text match (exact match is heavily weighted)
-Re-ranking
-  DNN with feature cross
-  Freshness - penalize old products 
-  Diversity - penalize products with similar embeddings
+Candidate generation - two-tower NN (~200ms)
+  Video tower concatenates all video features and encode them into one embedding
+  User-query tower concatenates all user features and query embedding, and generates one user-query embedding
+  Dot product between user-query and video embedding is taken, where 1 means user found search result relevant, 0 otherwise
+  Loss is weighted sum of individual losses where each loss is regarding likes, shares, comments, score from match between query and text description (exact match should get very high weight)
+
+Ranking - transformer ranking (~300ms)
+  Point-wise learn to rank where input is pair of user-query and video embedding, and output is similarity between the two
+
+Re-ranking - cross-encoder (~200ms)
+  Ranking using transformer encoder is feasible at inference time only when data points are about 20-30 
+  Input is again pair of user-query and video embedding
+  Loss also consist of diversity and freshness concern
+  Diversity - penalize videos with similar embeddings
+  Freshness - penalize old videos
 
 # Evaluation
 
 Candidate generation
-  Recall @ k
+  Recall at K
 Ranking
+  NDCG
+Re-ranking
   NDCG
 
 Click-through rate
-Increase in total time that user spends in platform
-Increase in total number of products carted or purchased
+Increase in total watch time
+User churn rate
+Increase in total number of engagement
 
 # Discussion
 
-Availabilty
-  Run multiple replcas of each service in different geo location (trade-off with cost)
+Availability
+  Replicate each service in different geo region (trade-off with cost)
 Reliability
-  Partion data in shards and store multiple replca for each shard in different geo location
-Scaliability
+  Partition data into shards, create replicas for each shared, spread replicas across different geo region
+Scalability
   Horizontally scale each service based on traffic pattern
 Performance
-  Cached search result
-  Model optimization - quantization (fewer bits to represent number), pruning, distillation (if teach model is available)
+  Quantization - use fewer bits to represent number
+  Pruning - regularization such as drop-out to make network more sparse
 Monitoring
-  System - latency
-  Model - feature drift, input data drift
+  System - QPS, latency
+  Model - feature drift, score drift  
 
+Real-time data ingestion
+  Ingestion data into Kafka and process it using Spark Structured Streaming
+  Store data into both offline and online feature store
+  Use fixed-size window to aggregate features, to ensure point-in-time correctness
+  Use same processing logic for both offline and online store
 Offline feature store
-  Process user feedbacks (interaction data) as features and store them in offline feature store, to be used for re-training
+  Store features in columar format (Ex. parquet)
+  For model training
+  Ex. S3
 Online feature store
-  Dynamic user and item features are read from online feature store during inference time
-  Transformation logic for offline and online store must be the same, not to degrade the model over time
+  For model inference
+  Ex. Redis
 
-Bias - penalize videos that have been high in the rank (position bias)
-Continuous testing - A/B testing to direct 10-15% traffic to candidate and rest to production, if candidate performs significantly better, direct all traffic to candidate
-Exploration vs exploitation - use bandits (Ex. thompson sampling)
-Content moderation - use a separate model to pass/reject/review products when they are uploaded
+Exploration
+  Direct 10-15% of recommendation to exploration (Ex. bandit - thompson sampling)
+
+Moderation
+  When users upload videos, use a separate model to check if videos are harmful
+  After vidoes are uploaded, use another model to check if videos are harmful (features that contributes to harmfulness can change after video gets uploaded, for example, harmful comments)
+
+Bias
+  Positional - penalize videos that were ranked high for more than certain duration of time, and apply this during re-ranking
+ 
+Continuous deployment
+  A/B testing - direct small portion of traffic to candidate, increase traffic to candidate if it performs better than production model
 </code></pre>
 
   </div>
