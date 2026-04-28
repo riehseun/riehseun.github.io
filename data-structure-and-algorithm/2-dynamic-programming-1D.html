@@ -291,29 +291,28 @@
 
 <pre><code class="python">class Solution:
     def coinChange(self, coins: List[int], amount: int) -> int:
+        
+        # DP
+        # dp[i] = min number of ways to achieve amount i
+        # Init
+        #   dp = [0] * (amount+1)
+        # Recurse
+        #   dp[i] = dp[i-j] + 1 for all j in coins
+        #   It must be i - j >= 0
+        # Time O(amount*n) n = len(coins)
+        # Space O(amount)
 
-        # [1,2], 3 ? 2 ([1,2])
-        # [1,2], 4 ? 2 ([2,2])
+        dp = [math.inf] * (amount+1)
+        dp[0] = 0
 
-        # dp[i] = min number of coins to make up amount i
-        # dp[i] = min(dp[i-c1]+1, dp[i-c2]+1, ...) for all c in coins
-        # dp[0] = 0
-        # Time O(nm) n = amount, m = len(coins)
-        # Space O(n)
-
-        n, m = amount, len(coins)
-        dp = [0 for _ in range(n+1)]
-
-        for i in range(1, n+1):
-            cnt = math.inf
+        for i in range(1, amount+1):
             for j in coins:
                 if i - j >= 0:
-                    cnt = min(cnt, dp[i-j])
-            dp[i] = cnt + 1
+                    dp[i] = min(dp[i], dp[i-j]+1)
 
-        if dp[n] == math.inf:
+        if dp[amount] == math.inf:
             return -1
-        return dp[n]</code></pre>
+        return dp[amount]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/coin-change">322. Coin Change</a> | <a href="https://neetcode.io/problems/coin-change">Coin Change</a>
