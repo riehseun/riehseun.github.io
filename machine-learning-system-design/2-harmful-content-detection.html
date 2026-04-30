@@ -49,111 +49,138 @@
   </div>
 </div>
 
+<div class="card mb-4" id="harmful-content-detection-">
+  <div class="card-body">
+    <h2 class="card-title">Harmful Content Detection</h2>
+
 <pre><code class="markdown">
 # Requirement
 
-Where do harmful posts potentially exist? Posts in Instagram
-What kinds of posts are considered harmful? Nudity, violence, hate
-Can harmful contents be in form of texts, video, images? Yes
-How do harmful posts get created? Users upload them
-Should the system consider multiple languages? Yes
-What is impact of false positive? Users lose engagement because their uploads are deleted
-What is impact of false negative? Users will view harmful contents, and platform will be flagged
+Where do harmful contents appear? Like posts in social media feeds?
+What kind of harmfulness should the system detect? Nudity, violence, hate
+Should the system support multiple languages? Yes
+What is impact of false positive? Users lose engagement due to valid upload getting removed? Yes
+What is impact of false negative? System gains bad reputation due to harmful posts going viral? Yes
+What does a post consist of? Does it include text description, tags, images, videos, comments, etc? Yes
+Can users report posts as harmful? Yes
+Should model explain to users why posts got removed? Yes
 
-How fast should the inference be? Under 500ms
-How many users are there? 100M daily active users
-How many posts does each user upload per day? 1, (1 * 100M) / (24 * 3600) QPS
-Can peak QPS be 20-30x the average? Yes
-Should model be continuously trained? Yes
+Should harmful contents be removed immediately? For violence yes, for nudity and hate, system can take some time
+How fast should inference be? Under 1s
+How many posts does each user upload per day? 1 per day
+How many daily active users are there? 100M, (1 * 100M) / (24 * 3600) QPS
+Can peak QPS be 10-20 times the average? Yes
+Should model be continously trained? Yes
 
 # Problem
 
-ML - given a post, determine whether post is harmful or not
-Business - minimize total number of harmful impressions, subject to minimum precision (we don't want to flag every posts as harmful to minimize harmful impressions)
+ML
+  Input - a post
+  Output - whether the post is harmful (violence, nudity, hate) or not
+  Multi-class classification 
 
-# High-level
+Business
+  Minimize total number of harmful impressions, subject to certain precision (we don't want to remove all posts just to minimize impressions)
 
-Post -> Rule-based detection -> ML-based detection -> Decision (pass/delete/review) -> Intervene -> Feedback and re-training
+# Serving
 
-Rule-based detection (50ms)
-  Use known keywords, sentences, images, videos that represent harmfulness
-ML based detection (400ms)
-Decision (50ms)
-  Pass/review/delete
-  High precision is need for nudity
-  High recall is needed to violence and hate
-  For human review, prioritize violence, and also contents with higher confidence of harmfulness
-Intervene
-  New posts should be lower in the rank to minimize exposure in case model and human missed harmful content
-  ML-based detection model also runs after the post goes live to inference based on real-time features
+Post -> Rule-based classification -> Light model -> Heavy model -> Review -> Monitoring model
+
+Rule-based classification (~50ms)
+  Simple rule such as known harmful keyword, image, video
+
+Light model (~100ms)
+  Reject post only if model has very high confidence
+  Be strict on violence contents while be little lenient towards nudity and hate
+
+Heavy model (~500ms)
+  Reject if high confidence
+  Send for review if medium confidence
+  Pass if low confidence
+
+Monitoring model
+  Model to watch posts based on its new (dynamic) features like text, image, video added to comment section or updated in post itself
 
 # Data
 
-Positive - if review determines that post if harmful, if posts passes the model but later found to be harmful from user reports
-Negative - if posts passes the model and not reported as harmful by users 
-Use self-supervision to create synthetic texts/images/videos that are harmful
-Use false negative post as trainging set
-Use posts that are generated to fool the model
+Postive - user reports, create synthetic harmful images (self-supervision), result from human review
+Negative - result from human review, posts that have not been deemed harmful after it goes live in production
 
 # Feature
 
 Post
-  image, video - CLIP
-  text - distlimBERT
-  comments - sample and compute average embedding, discounted by time
-  number of reports - normalize
+  Image, thumbnail image - CLIP's visual encoder
+  Video - split into frames and use image encoder
+  Text description, tags - distlimBERT (multi-language)
+  Comments - sample them, then take weighted averge embedding, discounted by time
+
 Author
-  number of previously uploaded harmful posts - normalize
-  account creation date - convert to integer representing (current date - creation date), then normalize
+  Previous violation count, total number of posts uploaded by author - normalize
+  Country, city, language - embedding
+  Account creation date - convert to integer representing (current date - creation date), then normalize
 
-# Model 
+# Model
 
-Baseline
-  Logistic regression - use features discussed and do binary classification to determine if posts is harmful or not
+Light model
+  XGBoost - struggles with embedding
+  DNN with one model per harmful category - requires lots of data
+  DNN with one model for all category 
+    Gather all post and author features
+    Training where total loss is weighted sum of losses from each category (violence, nudity, hate)
+    Use focal loss to deal with class imbalance
+    Use classification head during inference
 
-Use DNN for handling embeddings
-  Separate models for each classification (nudity, violence, hate) - requires lots of training data
-  One model for nudity, violence, hate but different classification head for each - pick this approach
-  Fused features and feed them to a single model
-  Combine embeddings from encoders (also combine numerical encoders) and use them in each classifier
-Loss - cross-entropy (log-loss), create weighted loss of individual loess from nudity, violence, hate
-Data imbalance - under-sample negative ground truth labels
+Heave model
+  Transformer-based encoder where input is combined feature set and output is handled by softmax for multi-classification
 
 # Evaluation
 
-Recall at fixed precision - percentage of actual harmful posts that model was able to retrieve
-Precision - percentage of predicted harmful posts that were correct
-Accuracy - can't be used as data set is likely imbalanced
-PR-curve
+Recall - percentage of actual harmful contents that model was able to detect
+Precision - out of positive predictions, what percentage of them were correct 
+PR curve - recall vs precision
 
-Total number of reports by users on harmful posts
-Total number of impressions on harmful posts
+Total number of harmful impressions
+Total number of user reports
+User churn rate
 
 # Discussion
 
 Availability
   Replicate each service in different geo region (trade-off with cost)
 Reliability
-  Partition data into shards and create replicas for each shard, then store them in different geo location
+  Parition data into shards, create multiple replicas of each shard, spread them across different geo region
 Scalability
-  Horizontally scale each service based on traffic patterns
-Performance
-  Model optimization - quantization (fewer bits to represent number)
+  Hortizontally scale each service based on traffic forecast
+Performane
+  Quantization - use fewer bits to represent number
+  Pruning - in DNN, use drop-out to randomly shutdown neuron to make network more sparse
+  Attention approximation - in transformer, avoid quadratic computation by approximating it with linear computation
+  Multi-head attention - split computation into parallel running GPUs, and aggregate result
 Monitoring
   System - latency, QPS
   Model - feature drift, score drift
 
+Real-time data ingestion
+  Kafka to handle real-time data and Spark Structure Processing to transform them
+  Store features into both online and offline store, ensuring that transformation logic is identical
+  Use a fixed-sized window to aggregate features (point-in-time correctness)
 Offline feature store
-  Store all processed features of author and posts (when they are uploaded) for re-training
-  Ex. S3
+  Used for training 
+  Store data in columar format for fast feature level access (Ex. parquet)
+  Use persistant storage (Ex. S3)
 Online feature store
-  Store for fast-read during inference
-  Processing logic must be idential with offline feature store to prevent model degrading
-  Ex. Redis
+  Used for inference
+  Store data in cache for fast read (Ex. Redis)
 
-Real-time data ingestion - use Kafka for ingestion and Spark Structured Streaming for processing, store processed features to both online (for inference) and offliun (for training) feature store
-Continuous training - A/B testing to direct 10-15% of traffic to candidate, and when it performs significantly better, switch 100% traffic over to candidate
+Continuous training
+  A/B testing - direct traffic to candidate, and if candidate performs better than production, direct more traffics to candidate
 </code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+    Reference: 
+  </div>
+</div>
 <!-- Harmful Content Detection END -->
 
 </div> <!-- /.col-md-12 -->
