@@ -91,32 +91,32 @@ Query processing
   Add contexts
   Read query embedding from cache or compute embedding and store it in cache (Ex. FAISS)
 
-
 Cache
-  Return cached search results matching query embedding if inference takes longer than 1s
+  Return cached search results matching query embedding
 
-Candidate generation
+Candidate generation ~ 200ms
   Come up with ~1k candidates using ANN between query embedding and video embeddings
+  Execute text search from inverted index storing video's textual data, to find relevant videos 
   Gather hundreds of popular and trending vidoes based on speed of increasing positive user engagement
   Gather tens of previously watched videos by the user
   Combine all these to generate candidates
 
-Ranking
+Ranking ~ 400ms
   Use a model that can rank thousands of videos
 
-Re-ranking
+Re-ranking ~ 100ms
   Use a model that can rank 20-30 videos
 
 # Data
 
 Positive - if user likes/shares videos, leaves positive comments, watches more than half of videos
-Negative - if user dislikes videos, leaves negative comments, watches less than quarter of videos
+Negative - if user dislikes videos, leaves negative comments
 
 # Feature
 
 Video
   Image - CLIP's visual encoder
-  Video - split into frames, and use image encoder
+  Video - split into frames, sample them, and use image encoder
   Text description, tags - distlimBERT embedding (for multi-language)
   Number of likes, shares - normalized
   Comments - sample them, and compute weighted embedding discouted by time
@@ -130,19 +130,18 @@ Temporal
 
 # Model
 
-Candidate generation - two-tower NN (~200ms)
+Candidate generation - two-tower NN
   Video tower concatenates all video features and encode them into one embedding
   User-query tower concatenates all user features and query embedding, and generates one user-query embedding
   Dot product between user-query and video embedding is taken, where 1 means user found search result relevant, 0 otherwise
   Loss is weighted sum of individual losses where each loss is regarding likes, shares, comments, score from match between query and text description (exact match should get very high weight)
 
-Ranking - transformer ranking (~300ms)
-  Point-wise learn to rank where input is pair of user-query and video embedding, and output is similarity between the two
+Ranking - DeepFM
+  Point-wise learn to rank
 
-Re-ranking - cross-encoder (~200ms)
+Re-ranking - cross-encoder
   Ranking using transformer encoder is feasible at inference time only when data points are about 20-30 
   Input is again pair of user-query and video embedding
-  Loss also consist of diversity and freshness concern
   Diversity - penalize videos with similar embeddings
   Freshness - penalize old videos
 
