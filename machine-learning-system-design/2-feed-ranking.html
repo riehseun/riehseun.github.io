@@ -80,14 +80,18 @@ Business - maximize user engagement, subject to certain precision (we don't want
 User -> Cache -> Candidate generation -> Ranking -> Re-ranking -> Feedback & Re-training
 
 Cache
-  If latency exceeds acceptable value, return cached feed
-Candidate generation (200ms)
+  Return cached feed if available
+  Store user embedding in cache and read from it
+
+Candidate generation ~ 200ms
   ANN to find closeness between user and post embeddings (Ex. FAISS)
   Find popular and treding posts
   Combine results from above
-Ranking (500ms)
+
+Ranking ~ 400ms
   Model to rank posts based on relevance to user
-Re-ranking (300ms)
+
+Re-ranking ~ 100ms
   Re-rank posts using additional criteria
 
 # Data
@@ -122,7 +126,7 @@ Candidate generation - two-tower
   Ground truth is 1 if user found post relevant, 0 otherwise
   Model is trained to learn user and post embedding
 Ranking
-  Transformer ranker - good at capturing temporal aspect (sequence of user actions), high latency, high training cost
+  Multi-task DNN with each classification head for like, comment, share, etc
   Loss - multi-task loss, which is weigted average of individual losses from positive and negative user-interaction
 Re-ranking
   LambdaMART - XGBoost with LambdaRank loss, cannot learn from video/image/text
@@ -167,10 +171,17 @@ Online feature store
   Support fast reading of user and post features during inference time
   Ex. Redis
 
-Real-time data - Kafka for ingestion and Spark Structured Streaming for processing, store data in both online and offline feature store for fast read and re-training
-Moderation - use a separate model to reject posts if deemed harmful 
-Exploration vs exploitation - use bandits (thompson sampling)
-Continuous testing - A/B testing to direct 10-15% taffic to candidate and rest to production, switch over if candidate performs significantly better
+Real-time data
+  Kafka for ingestion and Spark Structured Streaming for processing, store data in both online and offline feature store for fast read and re-training
+
+Moderation
+  Use a separate model to reject posts if deemed harmful 
+
+Exploration vs exploitation
+  Use bandits (thompson sampling)
+
+Continuous testing
+  A/B testing to direct 10-15% taffic to candidate and rest to production, switch over if candidate performs significantly better
 </code></pre>
 
   </div>
