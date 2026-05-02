@@ -57,7 +57,7 @@
 # Requirement
 
 Should recommendations appear on webpage or mobile devices? Yes
-How many videos should appear in recommendation? Unlimited
+How many videos should appear in recommendation? They will appear in batch as user scrolls down
 Should the system support multiple languages? Yes
 Does video consist of text description, thumbnail image, tags, comments, likes, shares? Yes
 Should the system moderate videos? Yes
@@ -80,15 +80,16 @@ ML
   Supervised ranking problem
 
 Business
-  Maximize user engagement while maintaining minimum target precision (we don't want to just recommend click-bait to maximize user clicks)
+  Maximize user engagement (measured by weighted sum of positive and negative interactions), subject to minimum precision (we don't want to just recommend click-bait)
 
 # Serving
 
 User -> Cache -> Candidate generation -> Ranking -> Re-ranking -> Output & feedback
 
 Cache 
-  Return cached recommendation if latency exceeds 1s
-  If not, compute generation and store result in cache (many features are dynamic, thus cached recommendation is likely stale)
+  Ranked videos - return cached recommendation if available (Also, compute generation and update cache offline)
+  User embedding - return user embedding from cache (user features don't change often, so update cache once in a while)
+  Video embedding - to large to store in cache, use ANN index (Ex. FAISS) instead
 
 Candidate generation
   Invoke ANN between user embedding and video embeddings (stored in vector storage) to come up with 1k candidates
@@ -99,16 +100,16 @@ Candidate generation
 
 Ranking
   Use DNN with feature-cross or transformer based ranking
-  Latency ~ 500ms
+  Latency ~ 400ms
 
 Re-ranking
   Use cross-encoder
-  Latency ~ 300ms
+  Latency ~ 100ms
 
 # Data
 
 Positive - if user likes video, leaves positive comments, shares videos, watches at least half of video
-Negative - if user dislikes video, don't click recommended video, leaves negative comment
+Negative - if user dislikes video, leaves negative comment
 
 # Feature
 
@@ -200,6 +201,9 @@ Continuous training
 
 Cold-start
   New user - recommend popular videos for user's geo location and language, content-based recommendation based on answers from onboarding questions
+
+Position Bias
+  Penalize score of videos that were ranked higher in the output
 </code></pre>
 
 <div class="card mb-4" id="video-recommendation-">
