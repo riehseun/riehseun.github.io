@@ -132,6 +132,111 @@ Governance
   Prevent duplicate and inconsistent features   
 </code></pre>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<pre><code class="markdown">
+# Requirement
+
+Should feature store consist on online and offline store? Yes
+Should feature store be used during model training and inference? Yes
+
+How many models should the system support? 100+
+How fast should inference be? Under 1s
+Should models be continuously trained? Yes
+What is size of incoming data per day? 1TB per day
+What is rate of growth of data 10% per year
+
+# Design
+
+Data ingestion -> Data processing -> Online and offline feature store -> Feature registry -> Model serving or training
+
+Data ingestion
+  Kafka brokers can autoscale based on ingestion load
+
+Data procesing
+  Spark structured streaming can be used to tranform features
+
+Online store
+  Use Redis for fast read during inference
+  Store latest value of features
+
+Offline store
+  Use S3 object storage for persistant storage
+  Store entire history of features
+  
+
+Feature registry
+  Use Feast to store metadata such as ownership, version
+
+# Discussion
+
+Availability
+  For online store, create multiple replicas of cache servers in different geo regions
+Reliability
+  For offline store, partition data into shards, and create mutiple replicas of shards, and spread replicas across different geo region
+Scalability
+  Horizontally scale cache servers (online) and data nodes (offline) based on traffic forecast
+Performance
+  Keep size of each replicas small and perform parallel read or write
+Monitoring
+  System metric (QPS, size of data coming into online and offline store, number of read from online and offline store per model)
+
+Point-in-time correctness
+  Offline store must support point-in-time joins to train with features that are available during prediction
+
+Training-serving skew
+  Feature values are aggregated by a fixed time window for both online and offline store
+  Feature transformation logic must be identical for both online and offline store
+</code></pre>
+
   </div>
   <div class="card-footer text-muted">
     Reference:
