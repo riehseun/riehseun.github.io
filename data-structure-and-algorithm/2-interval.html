@@ -93,34 +93,29 @@
   <div class="card-body">
     <h2 class="card-title">Insert Interval (75/150/250)</h2>
 
-<pre><code class="python">class Solution:
+<pre><code class="python">cclass Solution:
     def insert(self, intervals: List[List[int]], newInterval: List[int]) -> List[List[int]]:
         
-        # [1,2],[3,4],[7,8] new = [4,5] ? [1,2],[3,5],[7,8]
-        # [1,2],[3,4],[7,8] new = [4,9] ? [1,2],[3,9]
-        # [1,2],[3,4],[7,8] new = [4,7] ? [1,2],[3,8]
-
-        # Insert newInterval into result
-        # Loop through intervals and iteratively merge
+        # Add all intervals before new interval
+        # Merge overlapping interval
+        # Add all intervals after
         # Time O(n) n = len(intervals)
         # Space O(1) ignoring space for result
 
-        i, n, result = 0, len(intervals), []
-        result = [newInterval]
+        i, n = 0, len(intervals)
+        result = []
+        while i < n and intervals[i][1] < newInterval[0]:
+            result.append(intervals[i])
+            i += 1
+        while i < n and intervals[i][0] <= newInterval[1]:
+            newInterval[0] = min(newInterval[0], intervals[i][0]) 
+            newInterval[1] = max(newInterval[1], intervals[i][1])
+            i += 1 
+        result.append(newInterval)
+        while i < n:
+            result.append(intervals[i])
+            i += 1
 
-        for c, d in intervals:
-            a, b = result[-1]
-            if c <= d < a <= b:
-                result.pop()
-                result.append([c,d])
-                result.append([a,b])
-                continue
-            if a <= b < c <= d:
-                result.append([c,d])
-                continue
-            result.pop()
-            result.append([min(a,c), max(b,d)])
-            
         return result</code></pre>
   </div>
   <div class="card-footer text-muted">
