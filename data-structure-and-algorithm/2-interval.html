@@ -171,37 +171,26 @@ class Interval(object):
         self.end = end
 """
 
+from heapq import heappush, heappop
+
 class Solution:
     def minMeetingRooms(self, intervals: List[Interval]) -> int:
-
-        # (1,2), (2,3), (2,4) ? 2
-
+        
         # Sort by start time
-        # Insert first meeting into heap
-        # If a meeting does not conflict with top of heap, 
-        # Replace first meeting with second
-        # Else, Insert second meeting into heap
-        # Keep meeting that end earlest at top of heap
+        # When meeting conflict, insert end time to heap
+        # Keep earliest end time at root of heap
         # Time O(nlogn) n = len(intervals)
         # Space O(n)
 
         if not intervals:
             return 0
-
-        # intervals_array = []
-        # for interval in intervals:
-            # intervals_array.append([interval.start, interval.end])
-        # intervals = intervals_array
-
-        intervals.sort(key=lambda x: x[0])
-        min_heap = [[intervals[0][1], intervals[0][0]]]
+        intervals.sort(key=lambda x: x.start)
+        min_heap = []
         
-        for a, b in intervals[1:]:
-            d, c = min_heap[0]
-            if a >= d:
-                heappop(min_heap)    
-            heappush(min_heap, [b, a])
-                
+        for interval in intervals:
+            if min_heap and interval.start >= min_heap[0]:
+                heappop(min_heap)
+            heappush(min_heap, interval.end)
         return len(min_heap)</code></pre>
   </div>
   <div class="card-footer text-muted">
