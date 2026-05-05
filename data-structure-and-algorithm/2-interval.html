@@ -63,25 +63,25 @@
 <pre><code class="python">class Solution:
     def merge(self, intervals: List[List[int]]) -> List[List[int]]:
         
-        # [1,2], [2,3], [4,5] ? [1,3], [4,5]
-
         # Sort intervals by start time
-        # Put first interval into the result
-        # Check each interval against the last interval in the result
+        # Place first interval into result
+        # Iterate from second to last interval and check
+        # if interval should be merged to last item in result
         # Time O(nlogn) n = len(intervals)
-        # Space O(n) for sorting
+        # Space O(1) ignoring space for result
 
+        if not intervals:
+            return []
         intervals.sort(key=lambda x: x[0])
         result = [intervals[0]]
 
         for c, d in intervals[1:]:
             a, b = result[-1]
-            if b >= c:
+            if c <= b:
                 result.pop()
-                result.append([a,max(b,d)])
+                result.append([min(a,c), max(b,d)])
             else:
-                result.append([c,d])
-
+                result.append([c, d])
         return result</code></pre>
   </div>
   <div class="card-footer text-muted">
