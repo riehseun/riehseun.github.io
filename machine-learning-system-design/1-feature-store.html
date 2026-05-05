@@ -87,12 +87,15 @@ Offline store
 Feature registry
   Use Feast to store metadata such as feature definition, ownership, version
 
+Request -> Online feature store (1-10ms) -> Inference (~500ms) -> Output
+
 # Discussion
 
 Availability
   For online store, create multiple replicas of cache servers in different geo regions
 Reliability
   For offline store, partition data into shards, and create mutiple replicas of shards, and spread replicas across different geo region
+  If using S3, these will be taken care of
 Scalability
   Horizontally scale cache servers (online) and data nodes (offline) based on traffic forecast
 Performance
@@ -106,11 +109,9 @@ Point-in-time correctness
   Offline store must support training only with features that are available during prediction
   Offline store should support paritioning features by time
 
-Backfill
-  When new features are added, run backfill jobs offline to fill offline store
-
 Training-serving skew
-  Streaming feature transformation and backfill logics must be identical for both online and offline store
+  When new features are added, run backfill jobs offline to fill offline store
+  Re-use spark jobs for streaming feature transformation (for online feature store) and backfill (for offline feature store)
 </code></pre>
 
   </div>
