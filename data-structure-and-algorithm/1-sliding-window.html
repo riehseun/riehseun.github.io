@@ -99,38 +99,43 @@
 <pre><code class="python">class Solution:
     def minWindow(self, s: str, t: str) -> str:
 
-        # "ABCDEFG", "CDF" ? "CDEF"
+        # "ABBCDDEF", "CDE" ? "CDDE"
 
         # Sliding window
-        # Substring is valid when occurance of each char in substring
-        # > occurance of each char in t 
-        # Time O(n) n = len(s)
-        # Space O(m)
+        # Use start and end pointer
+        # Move end pointer while substring contains all chars in t
+        # Move start pointer if substring contains all chars in t
+        # Remember the minimum length of valid substring
+        # Use a counter to check if number of chars in t has been met 
+        # Use dictioanries to keep track of chars seen in s and t
+        # Time O(n) n = len(s) + len(t)
+        # Space O(n)
 
-        i, j, min_len, min_str = 0, 0, math.inf, ""
-        freq_t, freq_s = defaultdict(int), defaultdict(int)
+        start, end = 0, 0
+        min_len, min_str = math.inf, ""
+        freq_s, freq_t = defaultdict(int), defaultdict(int)
 
         for c in t:
             freq_t[c] += 1
         required = len(freq_t)
-        satisfied = 0
+        formed = 0
 
-        while i <= j and j < len(s):
-            
-            freq_s[s[j]] += 1
-            if s[j] in freq_t and freq_s[s[j]] == freq_t[s[j]]:
-                satisfied += 1
-            j += 1
+        while start <= end and end < len(s):
 
-            while satisfied == required:
-                if j - i < min_len:
-                    min_len = j - i
-                    min_str = s[i:j]
-                freq_s[s[i]] -= 1
-                if s[i] in freq_t and freq_t[s[i]] > freq_s[s[i]]:
-                    satisfied -= 1
-                i += 1
-                
+            freq_s[s[end]] += 1
+            if s[end] in freq_t and freq_s[s[end]] == freq_t[s[end]]:
+                formed += 1
+            end += 1
+
+            while required == formed:
+                if min_len > end - start:
+                    min_len = end - start
+                    min_str = s[start:end]
+                if s[start] in freq_t and freq_s[s[start]] == freq_t[s[start]]:
+                    formed -= 1
+                freq_s[s[start]] -= 1
+                start += 1
+
         return min_str</code></pre>
   </div>
   <div class="card-footer text-muted">
