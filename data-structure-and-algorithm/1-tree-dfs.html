@@ -657,7 +657,7 @@ class Solution:
 
 <div class="card mb-4" id="tree-dfs-">
   <div class="card-body">
-    <h2 class="card-title">All Nodes Distance K in Binary Tree (M)</h2>
+    <h2 class="card-title">All Nodes Distance K in Binary Tree (eBay)</h2>
 
 <pre><code class="python"># Definition for a binary tree node.
 # class TreeNode:
@@ -669,53 +669,46 @@ class Solution:
 class Solution:
     def distanceK(self, root: TreeNode, target: TreeNode, k: int) -> List[int]:
 
-        # DFS on tree to convert to graph
-        # DFS on graph
-
-        graph = defaultdict(set)
-
-        # Time O(n)
-        #   n = number of nodes in tree
+        # BFS from target node until reaching depth of k
+        # First convert tree into graph
+        #   Do post-order traversal
+        #   Connect such as graph[parent].add(child)
+        # Time O(n+m) n = number of nodes, m = number of edges = const
         # Space O(n)
-        def pre_order(node, parent, graph):
 
+        def post_order(node):
             if node:
-                
-                if parent:
-                    graph[parent.val].add(node.val)
-                    graph[node.val].add(parent.val)
+                left = post_order(node.left)
+                right = post_order(node.right)
+                if left:
+                    self.graph[node].add(left)
+                    self.graph[left].add(node)
+                if right:
+                    self.graph[node].add(right)
+                    self.graph[right].add(node)
+                return node
+            else:
+                return None
+        
+        self.graph = defaultdict(set)
+        post_order(root)
+        
+        queue = deque()
+        queue.append((target, 0))
+        visited = set()
+        visited.add(target)
+        result = []
+        while queue:
+            node, depth = queue.popleft()
+            if depth == k:
+                result.append(node.val)
+                continue
+            for next_node in self.graph[node]:
+                if next_node not in visited:
+                    visited.add(next_node)
+                    queue.append((next_node, depth+1))
 
-                pre_order(node.left, node, graph)
-                pre_order(node.right, node, graph)
-
-        pre_order(root, None, graph)
-
-        distances = defaultdict(list)
-
-        # Time O(n+m) 
-        #   n = number of nodes
-        #   m = number of edges
-        # Space O(n)
-        def dfs(graph, start):
-            
-            explored = set()
-            explored.add(start)
-
-            stack = []
-            stack.append((start, 0))
-
-            while stack:
-                node, depth = stack.pop()
-                distances[depth].append(node)
-                
-                for next_node in graph[node]:
-                    if next_node not in explored:
-                        explored.add(next_node)
-                        stack.append((next_node, depth+1))
-                        
-        dfs(graph, target.val)
-
-        return distances[k]</code></pre>
+        return result</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/accounts-merge">863. All Nodes Distance K in Binary Tree</a>
