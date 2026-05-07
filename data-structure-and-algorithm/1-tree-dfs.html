@@ -758,7 +758,7 @@ class Solution:
 
 <div class="card mb-4" id="tree-dfs">
   <div class="card-body">
-    <h2 class="card-title">Range Sum of BST (H)</h2>
+    <h2 class="card-title">Binary Tree Cameras (eBay)</h2>
 
 <pre><code class="python"># Definition for a binary tree node.
 # class TreeNode:
@@ -771,26 +771,33 @@ class Solution:
 
         # From bottom of tree, greedily cover node
         # Post order
+        # If any one of children need coverage, current node must have camera
+        # If any one of children has camera, current node is covered
+        # If neither children has camera, current node need coverage
         # Time O(n) n = number of nodes in tree
         # Space O(h) = height of tree = n worst case
+
+        NEED_COVERAGE = 0
+        CAMERA = 1
+        COVERED = 2
 
         def post_order(node):
             if node:
                 left = post_order(node.left)
                 right = post_order(node.right)
                 # If children needs coverage, place camera at current node
-                if left == 0 or right == 0:
+                if left == NEED_COVERAGE or right == NEED_COVERAGE:
                     self.count += 1
-                    return 1
+                    return CAMERA
                 # If one of children has camera, current node is already covered
-                elif left == 1 or right == 1:
-                    return 2
+                if left == CAMERA or right == CAMERA:
+                    return COVERED
                 # Otherwise, current node needs coverage
                 else:
-                    return 0
+                    return NEED_COVERAGE
             else:
                 # Covered
-                return 2    
+                return COVERED    
         
         self.count = 0
         if post_order(root) == 0:
