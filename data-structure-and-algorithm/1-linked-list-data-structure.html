@@ -56,80 +56,84 @@
     <h2 class="card-title">LRU Cache (150/250)</h2>
 
 <pre><code class="python">class Node:
-    def __init__(self, key=0, val=0, next=None, prev=None):
+
+    def __init__(self, key=0, val=0, prev=None, next=None):
         self.key = key
         self.val = val
-        self.next = next
         self.prev = prev
+        self.next = next
+
 
 class LRUCache:
 
-    # Create a dictionary to keep tract of key-value pair
-    # If cache reaches capacity, remove one before putting new
-    # Use LL where head is most recently used and tail is least
-    # When get is called
-    #   If key does exist, return -1
-    #   Update LL to move "get" item to head
-    #   Return value from dictionary
-    # When put is called
-    #   If value does not exist in dic, create node at head
-    #   Else, find node and move it to head   
-    #   Insert new key-value in dictionary 
+    # Use hash table
+    # Get
+    #   Return the value or -1, done in O(1)
+    #   Mark the key as most recently used?
+    # Put
+    #   Add/update the value in dictionary - O(1)
+    #   Mark the key as most recently used?
+    #   Evict least recently used if necessary?
+    # Use LL
+    #   Head points to mostly recently used
+    #   Tail points to least recently used
+    #   Nodes in the middle are ordered 
 
     def __init__(self, capacity: int):
-        self.dic = defaultdict(int)
+        self.dictionary = {}
+        self.capacity = capacity
+        self.size = 0
         self.head = Node()
         self.tail = Node()
         self.head.next = self.tail
         self.tail.prev = self.head
-        self.capacity = capacity
 
     def get(self, key: int) -> int:
-        if key not in self.dic:
-            return -1
+        if key in self.dictionary:
+            self.move_to_front(self.dictionary[key])
+            return self.dictionary[key].val
         else:
-            node = self.dic[key]
-            self.move_to_head(node)
-            return node.val
+            return -1
         
     def put(self, key: int, value: int) -> None:
-        if key in self.dic:
-            node = self.dic[key]
-            node.val = value
-            self.move_to_head(node)
+        if key in self.dictionary:
+            self.move_to_front(self.dictionary[key])
+            self.dictionary[key].val = value
         else:
-            node = Node(key, value)
-            self.dic[key] = node
+            node = Node(key,value)
             self.add_to_head(node)
-            if len(self.dic) > self.capacity:
-                removed_node = self.remove_from_tail()
-                del self.dic[removed_node.key]
-            
-    def move_to_head(self, node):
-        node_next = node.next
-        node_prev = node.prev
-        node_next.prev = node_prev
-        node_prev.next = node_next
+            self.dictionary[key] = node
+            self.size += 1
+        
+        if self.size > self.capacity:
+            key = self.remove_from_tail()
+            del self.dictionary[key]
+            self.size -= 1
 
-        head_next = self.head.next
+    def add_to_head(self, node: Node) -> None:
+        node.next = self.head.next
+        self.head.next.prev = node
         self.head.next = node
-        head_next.prev = node
-        node.next = head_next
         node.prev = self.head
-
-    def add_to_head(self, node):
-        head_next = self.head.next
-        self.head.next = node
-        head_next.prev = node
-        node.next = head_next
-        node.prev = self.head
-
-    def remove_from_tail(self):
-        node = self.tail.prev
-        node_prev = self.tail.prev.prev
-        self.tail.prev = node_prev
-        node_prev.next = self.tail
-        return node</code></pre>
+        
+    def move_to_front(self, node: Node) -> None:
+        # Remove
+        node.prev.next = node.next
+        node.next.prev = node.prev
+        # Add
+        self.add_to_head(node)
+        
+    def remove_from_tail(self) -> None:
+        key = self.tail.prev.key
+        self.tail.prev.prev.next = self.tail
+        self.tail.prev = self.tail.prev.prev
+        return key
+                
+    
+# Your LRUCache object will be instantiated and called as such:
+# obj = LRUCache(capacity)
+# param_1 = obj.get(key)
+# obj.put(key,value)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/lru-cache">146. LRU Cache</a> | <a href="https://neetcode.io/problems/lru-cache">LRU Cache</a>
