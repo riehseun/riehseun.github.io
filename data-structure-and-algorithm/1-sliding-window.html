@@ -241,40 +241,31 @@
 
 <pre><code class="python">class Solution:
     def checkInclusion(self, s1: str, s2: str) -> bool:
-
-        # "abc", "kabmc" ? False
-        # "abc", "kbacm" ? True
-
-        # Create dictionary to frequency for s1
-        # Move window of size s1 in s2
-        # Check is char count match
-        # Time O(nm) n = len(s2)
+        
+        # Create dictionary of char count of s1
+        # Sliding window on s2 where window size of len(s1)
+        # Time O(n) n = len(s2)
         # Space O(m) m = len(s1)
 
-        cnts_1, cnts_2 = defaultdict(int), defaultdict(int)
         n, m = len(s2), len(s1)
-
+        freq_1, freq_2 = defaultdict(int), defaultdict(int)
         for c in s1:
-            cnts_1[c] += 1
+            freq_1[c] += 1
 
         for c in s2[:m]:
-            if c in cnts_1:
-                cnts_2[c] += 1
-        
-        if cnts_2 == cnts_1:
+            if c in freq_1:
+                freq_2[c] += 1
+        if freq_2 == freq_1:
             return True
-
+        
         for i in range(n-m):
-            old_c = s2[i]
-            new_c = s2[i+m]
-            if old_c in cnts_1:
-                cnts_2[old_c] -= 1
-            if cnts_2[old_c] == 0:
-                del cnts_2[old_c]
-            if new_c in cnts_1:
-                cnts_2[new_c] += 1
-
-            if cnts_2 == cnts_1:
+            if s2[i] in freq_1:
+                freq_2[s2[i]] -= 1
+            if freq_2[s2[i]] == 0:
+                del freq_2[s2[i]]
+            if s2[i+m] in freq_1:
+                freq_2[s2[i+m]] += 1
+            if freq_1 == freq_2:
                 return True
 
         return False</code></pre>
