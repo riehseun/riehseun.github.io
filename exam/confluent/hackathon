@@ -1,0 +1,326 @@
+SELECT * FROM `ride_requests`
+
+
+CREATE TOOL lab3_remote_mcp
+USING CONNECTION `remote-mcp-connection`
+WITH (
+  'type' = 'mcp',
+  'allowed_tools' = 'http_get, http_post',
+  'request_timeout' = '30'
+);
+
+
+CREATE VIEW zone_metrics AS
+SELECT
+  pickup_zone,
+
+  window_start,
+  window_end,
+
+  COUNT(*) AS demand,
+  SUM(price) AS revenue,
+  AVG(price) AS avg_price,
+  SUM(number_of_passengers) AS total_passengers
+
+FROM TABLE(
+  HOP(
+    TABLE ride_requests,
+    DESCRIPTOR(request_ts),
+    INTERVAL '1' MINUTE,   -- slide (smoothness)
+    INTERVAL '5' MINUTE    -- window size (context)
+  )
+)
+
+GROUP BY
+  pickup_zone,
+  window_start,
+  window_end;
+
+
+SELECT * from `zone_metrics`
+
+
+CREATE VIEW zone_velocity AS
+SELECT
+  pickup_zone,
+  window_start,
+  demand,
+  demand - LAG(demand) OVER (
+    PARTITION BY pickup_zone
+    ORDER BY window_start
+  ) AS demand_velocity,
+  revenue - LAG(revenue) OVER (
+    PARTITION BY pickup_zone
+    ORDER BY window_start
+  ) AS revenue_velocity
+
+FROM zone_metrics;
+
+
+SELECT * from `zone_velocity`
+
+
+CREATE VIEW market_baseline AS
+SELECT
+  AVG(avg_price) AS market_avg_price
+FROM zone_metrics;
+
+
+CREATE VIEW zone_pricing_pressure AS
+SELECT
+  z.pickup_zone,
+  z.window_start,
+
+  z.demand,
+  z.revenue,
+  z.avg_price,
+
+  -- demand velocity
+  z.demand - LAG(z.demand) OVER (
+    PARTITION BY z.pickup_zone ORDER BY z.window_start
+  ) AS demand_velocity,
+
+  -- demand growth %
+  (
+    (z.demand - LAG(z.demand) OVER (
+      PARTITION BY z.pickup_zone ORDER BY z.window_start
+    )) * 1.0
+    /
+    NULLIF(
+      LAG(z.demand) OVER (
+        PARTITION BY z.pickup_zone ORDER BY z.window_start
+      ),
+      0
+    )
+  ) AS demand_growth_rate,
+
+  CASE
+
+    -- UNDERPRICED
+    WHEN
+      (
+        (
+          (z.demand - LAG(z.demand) OVER (
+            PARTITION BY z.pickup_zone ORDER BY z.window_start
+          )) * 1.0
+          /
+          NULLIF(
+            LAG(z.demand) OVER (
+              PARTITION BY z.pickup_zone ORDER BY z.window_start
+            ),
+            0
+          )
+        ) > 0.10
+      )
+      AND z.avg_price < m.market_avg_price
+    THEN 'UNDERPRICED'
+
+    -- OVERPRICED
+    WHEN
+      (
+        (
+          (z.demand - LAG(z.demand) OVER (
+            PARTITION BY z.pickup_zone ORDER BY z.window_start
+          )) * 1.0
+          /
+          NULLIF(
+            LAG(z.demand) OVER (
+              PARTITION BY z.pickup_zone ORDER BY z.window_start
+            ),
+            0
+          )
+        ) < -0.10
+      )
+      AND z.avg_price > m.market_avg_price
+    THEN 'OVERPRICED'
+
+    ELSE 'STABLE'
+
+  END AS pricing_signal
+
+FROM zone_metrics z
+CROSS JOIN market_baseline m;
+
+
+SELECT
+  pricing_signal,
+  COUNT(*) AS zone_count
+FROM zone_pricing_pressure
+GROUP BY pricing_signal;
+
+
+CREATE VIEW pricing_actions AS
+SELECT
+  pickup_zone,
+  window_start,
+  pricing_signal,
+  demand_growth_rate,
+  avg_price,
+
+  CASE
+
+    -- WEAK INCREASE
+    WHEN pricing_signal = 'UNDERPRICED'
+         AND demand_growth_rate > 0.00
+         AND demand_growth_rate <= 0.05
+      THEN 0.03
+
+    -- MODERATE INCREASE
+    WHEN pricing_signal = 'UNDERPRICED'
+         AND demand_growth_rate > 0.05
+         AND demand_growth_rate <= 0.15
+      THEN 0.08
+
+    -- STRONG INCREASE
+    WHEN pricing_signal = 'UNDERPRICED'
+         AND demand_growth_rate > 0.15
+      THEN 0.15
+
+    -- WEAK DECREASE
+    WHEN pricing_signal = 'OVERPRICED'
+         AND demand_growth_rate < 0.00
+         AND demand_growth_rate >= -0.05
+      THEN -0.03
+
+    -- MODERATE DECREASE
+    WHEN pricing_signal = 'OVERPRICED'
+         AND demand_growth_rate < -0.05
+         AND demand_growth_rate >= -0.15
+      THEN -0.08
+
+    -- STRONG DECREASE
+    WHEN pricing_signal = 'OVERPRICED'
+         AND demand_growth_rate < -0.15
+      THEN -0.15
+
+    ELSE 0.0
+
+  END AS price_change_pct
+
+FROM zone_pricing_pressure;
+
+
+SELECT
+  CASE
+    WHEN price_change_pct >= 0.15 THEN 'STRONG_INCREASE'
+    WHEN price_change_pct >= 0.05 THEN 'MODERATE_INCREASE'
+    WHEN price_change_pct > 0 THEN 'WEAK_INCREASE'
+
+    WHEN price_change_pct <= -0.15 THEN 'STRONG_DECREASE'
+    WHEN price_change_pct <= -0.05 THEN 'MODERATE_DECREASE'
+    WHEN price_change_pct < 0 THEN 'WEAK_DECREASE'
+
+    ELSE 'NO_CHANGE'
+  END AS action_bucket,
+
+  COUNT(*) AS action_count
+
+FROM pricing_actions
+GROUP BY
+  CASE
+    WHEN price_change_pct >= 0.15 THEN 'STRONG_INCREASE'
+    WHEN price_change_pct >= 0.05 THEN 'MODERATE_INCREASE'
+    WHEN price_change_pct > 0 THEN 'WEAK_INCREASE'
+
+    WHEN price_change_pct <= -0.15 THEN 'STRONG_DECREASE'
+    WHEN price_change_pct <= -0.05 THEN 'MODERATE_DECREASE'
+    WHEN price_change_pct < 0 THEN 'WEAK_DECREASE'
+
+    ELSE 'NO_CHANGE'
+  END;
+
+
+CREATE VIEW final_prices AS
+SELECT
+  pickup_zone,
+  window_start,
+  avg_price,
+  price_change_pct,
+
+  avg_price * (1 + price_change_pct) AS recommended_price
+
+FROM pricing_actions;
+
+
+SELECT * from `final_prices`
+
+
+CREATE AGENT `boat_price_adjustment_agent`
+USING MODEL `remote_mcp_model`
+USING PROMPT 'You are an intelligent real-time boat pricing adjustment coordinator for a riverboat ride-sharing service.
+
+Your input is a stream of pricing recommendations per zone.
+  
+Each record contains:
+- pickup_zone
+- window_start
+- avg_price
+- recommended_price
+- price_change_pct
+
+Your task:
+You must decide whether to ACCEPT, MODIFY, or REJECT the recommended price change.
+
+---
+
+## BUSINESS OBJECTIVE
+Maximize revenue while maintaining demand stability and avoiding excessive price volatility.
+
+---
+
+## DECISION RULES
+
+### 1. ACCEPT recommendation if:
+- price_change_pct is between -0.10 and +0.10
+AND
+- pricing direction matches expected signal:
+  - positive change for UNDERPRICED zones
+  - negative change for OVERPRICED zones
+
+---
+
+### 2. MODERATE recommendation if:
+- price_change_pct is between 0.10 and 0.15 OR -0.10 and -0.15
+
+Action:
+- reduce magnitude by 50%
+
+---
+
+### 3. REJECT recommendation if:
+- price_change_pct > 0.20 OR price_change_pct < -0.20
+- OR price jumps are too volatile compared to previous window
+
+Action:
+- set price_change_pct = 0
+
+---
+
+### 4. SAFETY CONSTRAINTS
+- Never change price by more than ±15% in one step
+- Never reduce price below 70% of avg_price
+- Never increase price above 150% of avg_price
+
+
+## OUTPUT FORMAT
+
+Return JSON:
+
+{
+  "pickup_zone": "...",
+  "window_start": "...",
+  "action": "ACCEPT | MODIFY | REJECT",
+  "final_price": number,
+  "reason": "short explanation"
+}
+
+---
+
+## EXPLANATION RULES
+- Be concise
+- Mention demand pressure or stability
+- Do NOT show formulas'
+USING TOOLS `lab3_remote_mcp`
+WITH (
+  'max_iterations' = '10'
+);
