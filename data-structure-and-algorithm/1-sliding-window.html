@@ -154,35 +154,25 @@
     def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
         
         # Use a queue of size k
-        # Enqueue incoming number in queue
-        # Deque outgoing number in queue if size is exceeded
-        #   Keep maximum number in front by
-        #   removing all numbers smaller than incoming number
-        #   from the end
-        
-        # Ex. [1,2,1,-1,4,2,6]
-        # [1,2,1] => [2,1]
-        # [2,1,-1]  
-        # [2,1,-1,4] => [4]
-        # [4,2] 
-        # [4,2,6] => [6]
+        # Add indices of nums into queue
+        # Keep max number at the front of queue 
+        # Time O(n) n = len(nums)
+        # Space O(k)
 
-        queue, result = deque(), []
-
+        queue = deque()
+        result = []
+        n = len(nums)
         for i in range(k):
             while queue and nums[queue[-1]] < nums[i]:
-                queue.pop()
+                queue.pop() 
             queue.append(i)
         result.append(nums[queue[0]])
         
-        # Time O(n)
-        #   n = len(nums)
-        # Space O(k)
-        for i in range(k, len(nums)):
+        for i in range(k, n):
             while queue and nums[queue[-1]] < nums[i]:
                 queue.pop()
             queue.append(i)
-            
+
             while queue and queue[0] <= i - k:
                 queue.popleft()
             result.append(nums[queue[0]])
