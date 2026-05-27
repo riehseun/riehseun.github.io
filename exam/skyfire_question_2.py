@@ -13,17 +13,19 @@
 
 #!/usr/bin/env python3
 
-from datetime import datetime, timedelta
+# Reference
+# https://stackoverflow.com/questions/7728694/python-regex-how-to-extract-date-from-filename-using-regular-expression
+# https://stackoverflow.com/questions/3743222/how-do-i-convert-a-datetime-to-date
+
+from datetime import datetime, timedelta, date
 from pathlib import Path
 import logging
-import os, sys
+import os, sys, re
 import argparse
 
 def parse_args():
-    # Example: python3 skyfire_prep_2.py --dir /tmp/logs --days 7 --recursive --dry-run
-    # Example: python3 skyfire_prep_2.py --dir /tmp/log --days 7 --recursive --dry-run
-    # Example: python3 skyfire_prep_2.py --dir /tmp/logs --days 7 --recursive 
-    # Example: python3 skyfire_prep_2.py --dir /tmp/logs --days 7 --verbose
+    # Example: python3 test.py --dir ./uploads --days 90 --recursive --dry-run --verbose
+    # Example: python3 test.py --dir ./uploads --days 90 --recursive
     parser = argparse.ArgumentParser(description="Parse argument")
     parser.add_argument("--dir", required=True, help="Target directory")
     parser.add_argument("--days", type=int, required=True, help="Delete files older than N days")
@@ -47,50 +49,31 @@ def setup_logging(verbose: bool):
         ],
     )
 
-def validate_directory(directory: str) -> Path:
-    path = Path(directory)
-    if not path.exists():
-        logging.error(f"Directory does not exist: {directory}")
-        sys.exit(1)
-    if not path.is_dir():
-        logging.error(f"Path is not a directory: {directory}")
-        sys.exit(1)
-    return path
-
 def get_files(directory: Path, recursive: bool):
     if recursive:
         return directory.rglob("*")
     else:
         return directory.glob("*")
-    
+
 def is_older_than(file_path: Path, cutoff_time: datetime) -> bool:
-    try:
-        mtime = datetime.fromtimestamp(file_path.stat().st_mtime)
-        return mtime < cutoff_time
-    except Exception as e:
-        logging.warning(f"Could not read file metadata: {file_path} ({e})")
-        return False
+    mtime = datetime.fromtimestamp(file_path.stat().st_mtime)
+    return mtime.date() < cutoff_time
 
 def collect_old_files(directory: Path, days: int, recursive: bool):
-    cutoff_time = datetime.now() - timedelta(days=days)
+    logging.debug(f"Directory: {directory}")
+    cutoff_time = date.fromisoformat('2024-05-15') - timedelta(days=days)
     logging.debug(f"Cutoff time: {cutoff_time}")
     old_files = []
     for path in get_files(directory, recursive):
+        print(path)
         if path.is_file():
             if is_older_than(path, cutoff_time):
+                logging.debug(f"File to be deleted: {path}")
                 old_files.append(path)
 
     return old_files
 
-def should_delete(file_path, cutoff_time):
-    if dry_run:
-        print(f"[DRY RUN] Would delete {file}")
-    else:
-        os.remove(file)
-
 def delete_files(files, dry_run: bool):
-    deleted_count = 0
-
     for file_path in files:
         try:
             if dry_run:
@@ -98,18 +81,8 @@ def delete_files(files, dry_run: bool):
             else:
                 file_path.unlink()
                 logging.info(f"Deleted: {file_path}")
-                deleted_count += 1
-        except PermissionError:
-            logging.error(f"Permission denied: {file_path}")
         except Exception as e:
             logging.error(f"Failed to delete {file_path}: {e}")
-
-    return deleted_count
-
-def get_time():
-    # cutoff = datetime.now() - timedelta(days=days)
-    # return cutoff
-    pass
 
 def main():
     args = parse_args()
@@ -117,16 +90,8 @@ def main():
 
     logging.info("Starting script")
 
-    directory = validate_directory(args.dir)
-
-    files = get_files(Path(args.dir), False)
-    logging.info(f"files: {files}")
-
-    files_recursive = get_files(Path(args.dir), True)
-    logging.info(f"files: {files_recursive}")
-
     old_files = collect_old_files(
-        directory=directory,
+        directory=Path(args.dir),
         days=args.days,
         recursive=args.recursive,
     )
@@ -140,3 +105,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+0 2 * * * /usr/bin/python3 python3 test.py --dir /home/data/uploads --days 90 --recursive --verbose
