@@ -306,33 +306,23 @@
 <pre><code class="python">class Solution:
     def carFleet(self, target: int, position: List[int], speed: List[int]) -> int:
         
-        # p = [1,2,3], s = [5,3,2], t = 6 ? [5, 5, 5] -> 1
+        # Sort cars by position
+        # Calculate time required for each car to finish
+        # Appen time into stack if finishing time < than stack[-1]
+        # If finishing time >= than stack[-1], it means they become fleet
+        # Time O(nlogn) n = len(temperature)
+        # Space O(n) 
 
-        # Sort by position
-        # For each car, find time that it will pass the target
-        # If time[i+1] < time[i], car at i + 1 will not be caught
-        # Else, car at i + 1 will be caught before reaching target
-        # Time O(nlogn) n = len(position)
-        # Space O(n)
+        cars = sorted(zip(position, speed), reverse=True)
+        stack = []
 
-        result, cars = 0, []
-        for p, s in zip(position, speed):
-            cars.append([p,s])
-        cars.sort(key=lambda x: x[0])
+        for p, s in cars:
+            time = (target - p) / s
 
-        times = [(target-p)/s for p, s in cars]
-        print(times)
+            if not stack or time > stack[-1]:
+                stack.append(time)
 
-        while len(times) > 1:
-            lead = times.pop()
-            if lead < times[-1]:
-                result += 1
-            else:
-                times[-1] = lead
-
-        if times:
-            result += 1
-        return result</code></pre>
+        return len(stack)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/car-fleet">853. Car Fleet</a> | <a href="https://neetcode.io/problems/car-fleet">Car Fleet</a>
