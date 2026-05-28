@@ -1,5 +1,27 @@
 # Social media integration (FB, Twitter, Instagram) with the app is broken. How do you investigate
 
+A few months ago, your team released a feature to pull in some social media profile information when a new user is added to the system. An email is provided to a third-party library, which then pulls down some basic information from Facebook, Twitter, LinkedIn, Instagram, Pinterest, and Snapchat.
+
+You come into work one morning and check your email and see the following message from Casey, a senior software engineer on your team:
+
+Hey, something might be up with the social media integration... Do you have any time to take a look at this today? Just want to make sure it's not too big of an issue. Here's a [link] to the bug report. Thank you!
+
+Casey was able to narrow the bug down to one area of code, and even provided some test cases for you to work with to get started. The two accounts in TestSomeUsersThatWork are working as expected and saving successfully. The three accounts in TestSomeUsersThatFail should be saving, but they are not, which is why they incorrectly return false right now.
+
+Debug the issue
+
+The data is being stored in a PostgreSQL database. You do not have the time or system access needed to fix this bug, but you can make progress and recommend a fix.
+
+Document what you learned
+
+Whether or not you have identified the issue, stop with ~5 minutes left and spend 5-10 minutes on communication. You will be passing this info to another engineer for continued debugging/fixing, so consider what might be helpful to them. (Who knows, that other engineer might be Future You™!)
+
+Enter your response in the "Your Notes" tab (in the upper-right quadrant). You will write two responses:
+
+An email back to Casey with any technical details on what the issue is or how to solve it
+A comment on the support ticket to give Tamara the information she needs to help the customer make progress.
+
+
 **From**: You
 **To**: Casey (senior engineer teammate)
 **Subject**: re: User creation error
