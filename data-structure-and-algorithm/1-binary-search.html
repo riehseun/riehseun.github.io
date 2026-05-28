@@ -234,36 +234,40 @@
 <pre><code class="python">class Solution:
     def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
         
-        # Consider middle row
-        # If target < first num, search in upper row
-        # If target > last num, search in lower row
-        # Else, search in middle row
-        # Time O(logn+logm) n = number of rows, m = number of cols
+        # Find a correct row, then execute binary search
+        # Find mid row
+        # If nums[mid][0] > target, right = mid - 1
+        # If nums[mid][m-1] < target, left = mid + 1
+        # Else, row = mid
+        # Time O(logm+logn)
         # Space O(1)
 
-        def binary_search(nums, target):
+        n, m = len(matrix), len(matrix[0])
+        left, right = 0, n - 1
+        row = -1
+        while left <= right:
+            mid = (left+right) // 2
+            if matrix[mid][0] > target:
+                right = mid - 1
+            elif matrix[mid][m-1] < target:
+                left = mid + 1
+            else:
+                row = mid
+                break
 
-            i, j = 0, len(nums)
-            while i <= j:
-                m = (i+j) // 2
-                if nums[m] < target:
-                    i = m + 1
-                elif nums[m] > target:
-                    j = m - 1
-                else:
-                    return True
+        if row == -1:
             return False
 
-        i, j = 0, len(matrix) - 1
-        while i <= j:
-            m = (i+j) // 2
-            if matrix[m][-1] < target:
-                i = m + 1
-            elif matrix[m][0] > target:
-                j = m - 1
+        left, right = 0, m - 1
+        while left <= right:
+            mid = (left+right) // 2
+            if matrix[row][mid] > target:
+                right = mid - 1
+            elif matrix[row][mid] < target:
+                left = mid + 1
             else:
-                return binary_search(matrix[m], target)
-            
+                return True
+
         return False</code></pre>
   </div>
   <div class="card-footer text-muted">
