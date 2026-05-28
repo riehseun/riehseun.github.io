@@ -1,15 +1,16 @@
-# Script to delete files older than X days
+'''
+Write a script to remove client files that are more than 90 days old, based on the naming conventions above. Feel free to use any programming language you would like.
+This script is going to be running in production on mission-critical files that aren't easy to restore, so make sure to build in some debugging capabilities for your teammates, including Future You™!
 
-## What we liked
+What we liked
+- We liked that the shape of your scripts looked good overall. It looked like you were going to find the right files and then remove them.
+- We also liked that you set up the crontab correctly to execute the script nightly at 2:00 AM.
+- We appreciated that you used multiple functions and added a usage statement.
 
-# We liked that the shape of your scripts looked good overall. It looked like you were going to find the right files and then remove them.
-# We also liked that you set up the crontab correctly to execute the script nightly at 2:00 AM.
-# We appreciated that you used multiple functions and added a usage statement.
-
-## Potential areas for improvement
-
-# We liked solutions that redirected one or more of the output streams in the crontab (stdout or stderr) to a log file to be able to inspect the results of the script after it ran.
-# We don't have additional feedback for you on potential improvements because your work accomplished many of the things we check for.
+Potential areas for improvement
+- We liked solutions that redirected one or more of the output streams in the crontab (stdout or stderr) to a log file to be able to inspect the results of the script after it ran.
+- We don't have additional feedback for you on potential improvements because your work accomplished many of the things we check for.
+'''
 
 #!/usr/bin/env python3
 
