@@ -57,3 +57,15 @@ Once the issue is addressed, we will also provide you with steps that we've take
 Thanks,
 
 Seungmoon
+
+
+# What we liked
+
+You did a good job diagnosing the issue by identifying:
+  that the profile id has a type mismatch
+  that there is a problem with users who have linked their Snapchat and Instagram profiles
+We liked that you documented specific details about the problem like a specific hexadecimal value (bad id) and the exact error message returned when saving a profile. This would help teammates gain a shared understanding of the problem.
+
+# Potential areas for improvement
+
+A few of the top responses so far communicated a potential non-code workaround to customer support while the problem is being fixed.

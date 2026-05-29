@@ -45,3 +45,14 @@ Order your potential cause ideas from most likely to least likely (in your exper
 
 - Checking pointing may be happening synchronously blocking training until check point is fully written to disk
 
+
+# What we liked
+
+We liked that you prioritized data loading as being a key area most likely to be causing the GPU underutilization
+We also liked that you included very detailed hypotheses addressing categories that best fit the evidence of the scenario
+We appreciated that you identified hypotheses in categories that best fit the evidence of the scenario
+
+# Potential areas for improvement
+
+Some top solutions prioritized more likely ideas over less likely ones
+We liked solutions that look for solutions that support analysis with observed metrics and usage data
