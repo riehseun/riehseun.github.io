@@ -44,12 +44,13 @@ We can use Github Actions to deploy infrastructure. The actions will run inside 
 - GitHub (CI/CD files and Terraform files to deploy base module)
 - GitHub (Python code repo which contains deployment logics)
 
-## What we liked
+
+# What we liked
 
 We liked that you specified all parts of the infrastructure we look for
 We also liked that you considered security, scalability, reliability, availability, and monitoring of the infrastructure
 We appreciated that you clearly specified tools and platforms used in building the infrastructure
 
-## Potential areas for improvement
+# Potential areas for improvement
 
 Some top solutions gave specific commands to clarify their solution
