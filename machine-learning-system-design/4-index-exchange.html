@@ -77,7 +77,7 @@ Output - winning buyer
 
 # High-level
 
-Seller -> Bid request -> Exchange -> Buyer selection -> Auction request -> Bid response -> Auction -> Winning AD -> Seller
+Seller -> Bid request -> Load Balancer -> Exchange -> Buyer selection -> Auction request -> Bid response -> Auction -> Winning AD -> Seller
 
 Bid request - 10ms (network)
 Buyer selection - 1-2ms (ML)
@@ -99,6 +99,11 @@ Availabiity
 Latency 
 - Use cached decision when latency budget runs out
 
+Monitoring
+- Latency
+- QPS
+- CPU/memory usage
+
 Edge
 - All requests are handled by edge server close to seller
 - Buyers close to edge are preferred
@@ -109,12 +114,18 @@ Cache
 - response rate, average bid, timeout rate, win rate
 
 Real-time data processing
-- Impression/click event
+- Ex. impression/click event, buyers respond with bid
 - Event is sent to Kafka
 - Flink/Spark to process event data
   - Validate against missing fields, incorrect timestamps
   - Feature computation and aggregation (compute response rate over 1 minute window, average bid in last 5/10/20 minutes)
-- Data is persisted in Data Lake (in parquet format)
+- Data is persisted in Data Lake (offline store for model training, in parquet) and Redis (online store for model serving, feature vector in redis hash)
+
+Exactly once
+- Not needed for request/response because of large size (small duplicate events won't change features too much)
+- Needed for billing  
+  - Used UUID generator
+  - Store UUID for each billing event entry
 
 Buyer selection
 - Feature
