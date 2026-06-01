@@ -69,22 +69,16 @@ What is latency budget for entire auction? 5-10ms
 How fast do buyers return their bid? Varies
 What is availablity required? 99.9999%
 
-# Problem
-
-Maximize expected value from each seller and buyer match. E = bid value + number of impressions
-Input - request from sellers
-Output - winning buyer
-
 # High-level
 
-Seller -> Bid request -> Load Balancer -> Exchange -> Buyer selection -> Auction request -> Bid response -> Auction -> Winning AD -> Seller
+Seller -> Bid request -> Load Balancer -> Buyer selection -> Auction request -> Bid response -> Auction -> Winning AD -> Seller
 
-Bid request - 10ms (network)
+Bid request - 30ms (network)
 Buyer selection - 1-2ms (ML)
 Auction request - 1ms (network)
-Bid response - 1ms (network)
+Bid response - 30ms (network)
 Auction - <1ms (ML/rule)
-Winning AD - 10ms (network)
+Winning AD - 30ms (network)
 
 # Discussion
 
@@ -94,24 +88,56 @@ Scalability
 
 Availabiity
 - If multiple data centers, replicate servers in different geo locations
-- Edge decides which region to route requests to
+- Active-active (both replicas are serving traffic)
+- Buyer does not respond: remove from candidate generation
+- Kafka down: retry when it comes back
+- Redis down: 
 
 Latency 
 - Use cached decision when latency budget runs out
+- Edge
+  - All requests are handled by edge server close to seller
+  - Buyers close to edge are preferred
+  - buyer selection model is deployed to edge server
+- Cache 
+  - buyers id, endpoint
+  - response rate, average bid, timeout rate, win rate
 
 Monitoring
 - Latency
 - QPS
 - CPU/memory usage
+- Buyer's average response, time-out rate
 
-Edge
-- All requests are handled by edge server close to seller
-- Buyers close to edge are preferred
-- buyer selection model is deployed to edge server
+Buyer selection
+- Fanout to all 100+ buyers and waits for responses? Too expensive
+- Feature
+  - Seller: site, ad size, ad format
+  - Buyer: geoloation, historical response rate, historical win rate, historical time-out rate, historical bid price
+  - Auction: 
+- Model: ranking problem to select top 5 likely buyers
+- Objective: maximize P(response)E(bid)P(no-timeout)
+- Candidate generation 
+  - LR with focus on recall
+  - Objective: binary cross entroy (1 if buyer responds within timeout window, 0 o/w)
+- Ranking
+  - XGBoost with focus on precision
+  - Objective: expected bid
+- Selection bias towards buyers with no historical interaction: Multi-arm bandit
+  - Exploitation: buyers with historically strong bid and response rate
+  - Exploration: new buyers
+  - Thompson sampling to include new buyers to candidate generation
+  - New buyers get default feature values (global average reponse rate, timeout rate, win rate, etc)
 
-Cache 
-- buyers id, endpoint
-- response rate, average bid, timeout rate, win rate
+Auction request
+- Create thread for each buyer: 5 buyers * 10M auctions per second? Memory, context switching overhead
+- Async IO: 1 thread manages thousands of auctions at the same time
+
+Bid response
+- Slower responses outside of latency budget are dropped
+
+Auction
+- Winner pay bid price
 
 Real-time data processing
 - Ex. impression/click event, buyers respond with bid
@@ -126,24 +152,6 @@ Exactly once
 - Needed for billing  
   - Used UUID generator
   - Store UUID for each billing event entry
-
-Buyer selection
-- Feature
-  - Seller: site, ad size, ad format
-  - Buyer: geoloation, historical response rate, historical win rate, historical time-out rate, historical bid price
-  - Auction: 
-- Model: ranking problem to select top 5 likely buyers
-- Objective: maximize P(response)E(bid)P(no-timeout)
-- Selection bias towards buyers with no historical interaction: Multi-arm bandit
-  - Exploitation: buyers with historically strong bid and response rate
-  - Exploration: new buyers
-
-Auction request
-- Fanout to 100+ selected buyers
-- Waits for responses
-- Slower responses outside of latency budget are dropped
-  - Create thread for each buyer: 5 buyers * 10M auctions per second = ? (memory, context switching overhead)
-  - Async IO: 1 thread manages thousands of auctions at the same time
 </code></pre>
   </div>
   <div class="card-footer text-muted">
