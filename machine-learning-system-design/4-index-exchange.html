@@ -63,22 +63,21 @@ Does Index Exchange perform auction? Yes
 Does Index Exchange make commission when an auction is won? Yes
 Does commission also depend on number of click on the AD? No, it depends on number of impressions
 
-How many requests come from sellers per second? 10M per seconds (which can be 100x when talking to buyers)
+How many requests come from sellers per second? 10M per seconds
 How many buyers are there? 100+
 What is latency budget for entire auction? 5-10ms
-How fast do buyers return their bid? Varies
 What is availablity required? 99.9999%
 
 # High-level
 
-Seller -> Bid request -> Global Load Balancer -> Regional Edge -> Buyer selection -> Auction request -> Bid response -> Auction -> Winning bid -> Seller
+Seller -> Bid Request -> Global Load Balancer -> Regional Edge -> Exchange -> Buyer Selection -> Buyer Request/Response -> Auction -> Bid Response -> Seller
 
-Bid request - 30ms (network)
-Buyer selection - 1-2ms (ML)
-Auction request - 1ms (network)
-Bid response - 30ms (network)
+Bid Request - 10-30ms (network)
+Exchange - 1ms (read/write)
+Buyer Selection - 1-2ms (ML)
+Buyer Request/Response - 10-50ms (network)
 Auction - <1ms (ML/rule)
-Winning AD - 30ms (network)
+Bid Response - 10-30ms (network)
 
 # Discussion
 
@@ -89,7 +88,7 @@ Availabiity
 Reliability
 - Buyer does not respond: temporarily remove from candidate generation until it comes back
 - Kafka down: retry when it comes back
-- Redis down: 
+- Redis down: backup latest feature values to local in-memory cache
 
 Scalability
 - Stateless servers
@@ -114,11 +113,22 @@ Monitoring
 
 Bid request
 - ad slot, site URL, geolocation
+- seller's timeout
 
 Global Load Balancer
-- Traffic enters nearest edge
+- Route traffic to nearest edge
+- Perform regional fail-over
 
-Buyer selection
+Regional Edge
+- TLS termination: removes handshake, decryption work from downstream servers
+- Rate limiting
+- DDoS protection
+
+Exchange 
+- Lookup feature vectors from online feature store
+- Event generation into Kafka
+
+Buyer Selection
 - Fanout to all 100+ buyers and waits for responses? Too expensive
 - Ranking problem to select top 5-10 likely buyers
 - Candidate generation
@@ -135,12 +145,12 @@ Buyer selection
   - Thompson sampling to include new buyers to candidate generation
   - New buyers get default feature values (global average reponse rate, timeout rate, win rate, etc)
 
-Auction request
-- Async IO: send out requests to multiple buyers at once
-
-Bid response
+Buyer Request/Response
+- Async IO: one machine handles tens of thousands of auctions (Instead of one thread per auction)
+  - 
 - Compute expected revenue from waiting (say per ms) and expected cost of waiting (say per ms)
 - Drop when cost exceeds revenue
+- Maintain buyer's response latency distribution, bid distribution. Then, compute expected revenue at certain timeout values
 
 Auction
 - Winner pay bid price
