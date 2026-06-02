@@ -151,7 +151,23 @@ Buyer Selection
 
 Buyer Request/Response
 - Async IO: one machine handles tens of thousands of auctions (Instead of one thread per auction)
-  - 
+  - def auction(): 
+        bid1 = call(A) # 20ms
+        bid2 = call(B) # 20ms
+        bid3 = call(C) # 20ms
+        max(bid1, bid2, bid3) # 60ms for each auction
+  - def auction():
+        thread(A) # 20ms
+        thread(B) # 20ms
+        thread(C) # 20ms
+        wait_for_all() # 20ms but 3 thread for each auction
+  - async def auction():
+        result = await asyncio.gather(
+            call(A)
+            call(B)
+            call(C)
+        )
+    asyncio.run(auction)
 - Drop buyers when cost of waiting exceeds revenue from waiting
 - Expected revenue from waiting
   - Maintain buyer's response latency distribution, bid distribution
