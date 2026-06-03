@@ -66,6 +66,7 @@ Does commission also depend on number of click on the AD? No, it depends on numb
 How many requests come from sellers per second? 10M per seconds
 How many buyers are there? 100+
 What is latency budget for entire auction? 5-10ms
+Is above latency budget for traffc within Exchange, excluding traffic between sellers and Exchange? Yes
 What is availablity required? 99.9999%
 
 # High-level
@@ -129,13 +130,19 @@ Buyer Selection
 - Fanout to all 100+ buyers and waits for responses? Too expensive
 - Ranking problem to select top 5-10 likely buyers
 - Candidate generation
-  - Feature: response rate, time-out rate, seller id, geolocation
-  - Model: LR with focus on recall
-  - Objective: binary cross entroy (1 if buyer responds within timeout window, 0 o/w)
+  - Feature
+    - Buyer: response rate, time-out rate, win rate, bid price, impression rate, revenue per auction won
+    - Seller: seller id, geolocation
+    - Auction: ad size, ad format, time of day, day of month
+  - Model: LR
+  - Objective: maximize E(revenue)
   - Trims 100+ down to 20
 - Ranking
-  - Feature: win rate, bid price, impression rate, 
-  - Model: XGBoost with focus on precision
+  - Feature
+    - Buyer: response rate, time-out rate, win rate, bid price, impression rate, revenue per auction won
+    - Seller: seller id, geolocation
+    - Auction: ad size, ad format, time of day, day of month
+  - Model: XGBoost
   - Objective: maximize E(revenue)
   - Trims 20 down to 5
 - Selection bias towards buyers with no historical interaction
@@ -181,6 +188,7 @@ Buyer Fanout
     - P(timeout)E(revenue)
 
 Auction
+- If highest bid < floor price, return No Winner result to seller
 - Buyer with highest bid becomes the winner
 
 Real-time data processing
@@ -195,7 +203,7 @@ Real-time data processing
 Exactly once
 - Not needed for request/response because of large size (small duplicate events won't change features too much)
 - Needed for billing  
-  - Used UUID generator
+  - Use UUID generator
   - Store UUID for each billing event entry
 
 MLOps
