@@ -70,7 +70,7 @@ What is availablity required? 99.9999%
 
 # High-level
 
-Seller -> Bid Request -> Global Load Balancer -> Regional Edge -> Exchange Service -> Buyer Selection -> Buyer Fanout -> Auction Service -> Bid Response -> Seller
+Seller -> Bid Request -> Global Load Balancer -> Regional Edge -> Exchange Service (Buyer Selection, Buyer Fanout, Auction) -> Bid Response -> Seller
 
 Bid Request - 10-30ms (network)
 Exchange - 1ms
@@ -121,15 +121,15 @@ Regional Edge
 - Rate limiting
 - DDoS protection
 
-Exchange 
-- Lookup feature vectors from online feature store
-- Event generation into Kafka
+Auction Service
+- Read feature vectors from Redis
+- Write events to Kafka
 
 Buyer Selection
 - Fanout to all 100+ buyers and waits for responses? Too expensive
 - Ranking problem to select top 5-10 likely buyers
 - Candidate generation
-  - Feature: historical response rate, historical time-out rate
+  - Feature: historical response rate, historical time-out rate, seller id, geolocation
   - Model: LR with focus on recall
   - Objective: binary cross entroy (1 if buyer responds within timeout window, 0 o/w)
   - Trims 100+ down to 20
@@ -143,8 +143,9 @@ Buyer Selection
   - Exploration: new buyers
   - Sampling to include new buyers to candidate generation
     - For example, pick top 15 and sample 5 out from remaining candidates
-    - Sample from distribution (x-axis is response rate and y-axis is probability density)
+    - Create reward distribution for known buyers
     - Treat new buyers with uniform distribution
+    - Sample 5 from above two sets of distributions
   - At ranking stage, new buyers will have some feature values missing
     - If XGBoost is used, missing values are natively handled
     - If other model is used, missing values can be filled using global statistics
