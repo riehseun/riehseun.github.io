@@ -158,11 +158,13 @@ Buyer Fanout
     asyncio.run(auction)
 - Drop buyers when cost of waiting exceeds revenue from waiting
   - Expected revenue from waiting
-    - Compute expected revenue from buyer's response latency distribution, bid distribution
-    - P(response)E(bid)
+    - For each buyer, consider their latency and bid distribution
+    - Compute P(response is less than t)E(bid) for each t = 1ms, 2ms, 3ms
+    - Store this in cache and compute sum over all buyers who has not responded in each auction
   - Expected cost of waiting
-    - Compute probability of missing seller's timeout
-    - P(timeout)E(revenue)
+    - For each seller, consider their latency distribution
+    - P(timeout)E(current_best_bid)
+  - Terminate when Expected revenue from waiting < Expected cost of waiting
 
 Auction
 - If highest bid < floor price, return No Winner result to seller
