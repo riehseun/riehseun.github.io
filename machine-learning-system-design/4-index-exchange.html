@@ -57,60 +57,30 @@
 
 <pre><code class="markdown">
 # Requirement
-Is the goal to find buyer, who is willing to pay most, for the sellers? Yes
-Do sellers make AD request? Yes
-Does Index Exchange perform auction? Yes
-Does Index Exchange make commission when an auction is won? Yes
-Does commission also depend on number of click on the AD? No, it depends on number of impressions
+Sellers send bid request
+Exchanges asks buyers to submit bids
+Buyers submit bids
+Auction takes places
+Winning buyer (AD) is returned to seller
 
 How many requests come from sellers per second? 10M per seconds
 How many buyers are there? 100+
-What is latency budget for entire auction? 5-10ms
-Is above latency budget for traffc within Exchange, excluding traffic between sellers and Exchange? Yes
+What is latency budget for auction? 5-10ms
 What is availablity required? 99.9999%
+How does Exchange make money? winning bid times number of impressions
 
 # High-level
 
 Seller -> Bid Request -> Global Load Balancer -> Regional Edge -> Exchange Service (Buyer Selection, Buyer Fanout, Auction) -> Bid Response -> Seller
 
-Bid Request - 10-30ms (network)
-Exchange - 1ms
 Buyer Selection - 1-2ms (ML)
 Buyer Request/Response - 2-5ms (network with timeout)
 Auction - <1ms
-Bid Response - 10-30ms (network)
 
 # Discussion
 
-Availabiity
-- If multiple data centers, replicate servers in different geo locations
-- Active-active (both replicas are serving traffic)
-
-Reliability
-- Buyer does not respond: temporarily remove from candidate generation until it comes back
-- Kafka down: retry when it comes back
-- Redis down: backup latest feature values to local in-memory cache
-
-Scalability
-- Stateless servers
-- Add more servers behind load balancer (horizontal scaling)
-
-Latency 
-- Use cached decision when latency budget runs out
-- Edge
-  - All requests are handled by edge server close to seller
-  - Buyers close to edge are preferred 
-- Cache (No DB calls)
-  - buyers id, endpoint
-
-Monitoring
-- Latency
-- QPS
-- CPU/memory usage
-- Buyer's average response, time-out rate
-
 Bid Request
-- ad slot, site URL, geolocation
+- ad size, ad format, site URL, geolocation
 - seller's timeout
 
 Global Load Balancer
@@ -122,10 +92,6 @@ Regional Edge
 - Rate limiting
 - DDoS protection
 
-Auction Service
-- Read feature vectors from Redis
-- Write events to Kafka
-
 Buyer Selection
 - Fanout to all 100+ buyers and waits for responses? Too expensive
 - Ranking problem to select top 5-10 likely buyers
@@ -133,8 +99,8 @@ Buyer Selection
   - Data: positive if buyers responded before timeout, negative otherwise
   - Feature
     - Buyer: response rate, time-out rate, bid price, impression rate
-    - Seller: seller id, geolocation
-    - Auction: ad size, ad format, time of day, day of month
+    - Seller: ad size, ad format, seller id, geolocation
+    - Auction: time of day, day of month
   - Model: LR
   - Objective: maximize P(response)P(no-time-out)
   - Metric: recall
@@ -143,8 +109,8 @@ Buyer Selection
   - Data: bid request and buyers who responded, ranked by bid price
   - Feature
     - Buyer: response rate, time-out rate, bid price, impression rate
-    - Seller: seller id, geolocation
-    - Auction: ad size, ad format, time of day, day of month
+    - Seller: ad size, ad format, seller id, geolocation
+    - Auction: time of day, day of month
   - Model: XGBoost
   - Objective: maximize E(revenue) = P(response)P(no-time-out)P(impression)E(bid)
   - metric: NDCG
@@ -157,9 +123,10 @@ Buyer Selection
   - Exploitation: buyers with historically strong bid and response rate
   - Exploration: new buyers
   - Sampling to include new buyers to candidate generation
-    - For example, pick top 15 and sample 5 out from remaining candidates
+    - For example, pick top 15 first using candidate generation
+    - Then, sample 5 out from remaining candidates
     - Create reward distribution for known buyers
-    - Treat new buyers with uniform distribution
+    - Treat new buyers with prior, which is initially uniform distribution
     - Sample 5 from above two sets of distributions
   - At ranking stage, new buyers will have some feature values missing
     - If XGBoost is used, missing values are natively handled
@@ -189,8 +156,8 @@ Buyer Fanout
     asyncio.run(auction)
 - Drop buyers when cost of waiting exceeds revenue from waiting
   - Expected revenue from waiting
-    - Maintain buyer's response latency distribution, bid distribution
-    - Compute expected revenue at certain timeout values by P(response)E(bid)
+    - Compute expected revenue from buyer's response latency distribution, bid distribution
+    - P(response)E(bid)
   - Expected cost of waiting
     - Compute probability of missing seller's timeout
     - P(timeout)E(revenue)
@@ -198,6 +165,33 @@ Buyer Fanout
 Auction
 - If highest bid < floor price, return No Winner result to seller
 - Buyer with highest bid becomes the winner
+
+Availabiity
+- If multiple data centers, replicate servers in different geo locations
+- Active-active (both replicas are serving traffic)
+
+Reliability
+- Kafka down: retry when it comes back
+- Redis down: backup latest feature values to local in-memory cache
+- Buyer does not respond: temporarily remove from candidate generation until it comes back
+
+Scalability
+- Add more servers behind load balancer (horizontal scaling)
+- Stateless servers
+
+Latency 
+- Use cached decision when latency budget runs out
+- Edge
+  - All requests are handled by edge server close to seller
+  - Buyers close to edge are preferred 
+- Cache (No DB calls)
+  - buyers id, endpoint
+
+Monitoring
+- Latency
+- QPS
+- CPU/memory usage
+- Buyer's average response, time-out rate
 
 Real-time data processing
 - Ex. impression event, buyers respond with bid, sellers send bid requests
@@ -207,21 +201,22 @@ Real-time data processing
   - Feature computation and aggregation (compute response rate over 1 minute window, average bid in last 5/10/20 minutes)
 - Data is persisted in Data Lake (offline store for model training, in parquet) and Redis (online store for model serving, feature vector in redis hash)
 - Online feature store holds latest values only
+- Need mapping between model version and feature version
+  - Model registry: model version, training data, feature used (including versions), model metrics
+  - Feature registry: feature version, transformation logic, freshness SLA, owner
 
 Exactly once
 - Not needed for request/response because of large size (small duplicate events won't change features too much)
 - Needed for billing  
+  - Use check-pointing in Kafka to reject duplicate events (not preferred, slow)
   - Use UUID generator
   - Use UUID for each billing event id and use it as primary key
 
-MLOps
-- Model registry: model version, training data, feature used, model metrics
-- Feature registry: feature version, transformation logic, freshness SLA, owner
-- A/B testing (candidate generation, ranking, only A/B test one of them at a time)
-  - Randomly split traffic between control and treatment 50/50
-  - Track revenue per bid request, buyer response rate, recall on winning buyer
-  - 100/100 duplication is biased because buyers will never see actions from treatment and adopt to it
-  - Start by 1/99, then 10/90, then 20/80
+A/B testing (candidate generation, ranking, only A/B test one of them at a time)
+- Randomly split traffic between control and treatment 50/50
+- Track revenue per bid request, buyer response rate, recall on winning buyer
+- 100/100 duplication is biased because buyers will never see actions from treatment and adopt to it
+- Start by 1/99, then 10/90, then 20/80
 </code></pre>
   </div>
   <div class="card-footer text-muted">
