@@ -96,31 +96,26 @@ Buyer Selection
 - Fanout to all 100+ buyers and waits for responses? Too expensive
 - Ranking problem to select top 5-10 likely buyers
 - Candidate generation
-  - Data: positive if buyers responded before timeout and bid > floor price, negative otherwise
+  - Data: positive if buyers responded before timeout and bid > threshold, negative otherwise
   - Feature
     - Buyer: response rate, time-out rate, bid price, impression rate
     - Seller: ad size, ad format, seller id, geolocation
     - Auction: time of day, day of month
   - Model: LR
-  - Objective: maximize P(response)P(no-time-out)E(bid)
   - Loss: BCE 
   - Metric: recall@k (k=20)
   - Trims 100+ down to 20
 - Ranking
-  - Data: bid request and buyers who responded, ranked by bid price
-  - Feature
-    - Buyer: response rate, time-out rate, bid price, impression rate
-    - Seller: ad size, ad format, seller id, geolocation
-    - Auction: time of day, day of month
+  - Data: bid request and buyers who responded, ranked by score (3 bid won, 2 bid > floor, 1 bid < floor, 0 no response)
+  - Feature: same feature set as candidate generation
   - Model: XGBoost
-  - Objective: maximize E(revenue) = P(response)P(no-time-out)P(impression)E(bid)
-  - Loss: LambdaMART
+  - Loss: pairwise learn-to-rank (LambdaMART)
   - metric: NDCG@k (k=5)
   - Trims 20 down to 10
 - Re-ranking
   - Objective: diversify ADs
   - Penalize ADs that are similar to ADs that are already selected (decrease ranking score by similarity penality)
-  - Similarity can be weighted sum of same buyer, same category, image embedding similarity of images that are already included in the result set
+  - Similarity can be weighted sum of same buyer, same category of images that are already included in the result set
 - Selection bias towards buyers with no historical interaction
   - Exploitation: buyers with historically strong bid and response rate
   - Exploration: new buyers
@@ -135,37 +130,19 @@ Buyer Selection
     - If other model is used, missing values can be filled using global statistics
 
 Buyer Fanout
-- Async IO: one machine handles tens of thousands of auctions (Instead of one thread per auction)
-  - Synchronous call will take lots of time. For example, 
-    - def auction(): 
-          bid1 = call(A) # 20ms
-          bid2 = call(B) # 20ms
-          bid3 = call(C) # 20ms
-          max(bid1, bid2, bid3) # 60ms for each auction
-  - One thread for each buyer will spwan too many threads. For example,
-    - def auction():
-          thread(A) # 20ms
-          thread(B) # 20ms
-          thread(C) # 20ms
-        wait_for_all() # 20ms but 3 thread for each auction
-  - Async IO lets a machine to act on network events. For example,
-    - async def auction():
-          result = await asyncio.gather(
-              call(A)
-              call(B)
-              call(C)
-          )
-      asyncio.run(auction)
-    - coroutine: function that can pause execution and resume later w/o blocking thread
-    - epoll sleeps thread until socket arrives
+- Async IO: one machine handles tens of thousands of auctions using event loop (Instead of one thread per auction)
+  - async def auction():
+        result = await asyncio.gather(
+            call(A)
+            call(B)
+            call(C)
+        )
+    asyncio.run(auction)
 - Drop buyers when cost of waiting exceeds revenue from waiting
   - Expected revenue from waiting
-    - For each buyer, consider their latency and bid distribution
-    - Compute P(response is less than t)E(bid) for each t = 1ms, 2ms, 3ms
-    - Store this in cache and compute sum over all buyers who has not responded in each auction
+    - Consider buyers latency and bid distribution, and compute using heuristics
   - Expected cost of waiting
-    - For each seller, consider their latency distribution
-    - P(timeout)E(current_best_bid)
+    - Cnsider sellers latency distribution, and compute using heuristics
   - Terminate when Expected revenue from waiting < Expected cost of waiting
 
 Auction
