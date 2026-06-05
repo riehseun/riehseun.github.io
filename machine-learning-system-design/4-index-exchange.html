@@ -85,6 +85,9 @@ Bid Request
 Global Load Balancer
 - Route traffic to nearest edge
 - Perform regional fail-over
+- Can be implemented by Anycast
+  - All edge advertise same IP address
+  - Policies determine most reachable edge
 
 Regional Edge
 - TLS termination: removes handshake, decryption work from downstream servers
@@ -109,7 +112,7 @@ Auction (<1ms)
 Buyer Selection
 - Candidate generation
   - Objective: trims 100+ down to 20
-  - Data: positive if buyers responded before timeout and bid > threshold, negative otherwise
+  - Data: positive if buyers responded before timeout and bid > floor, negative otherwise
   - Feature
     - Buyer: response rate, time-out rate, bid price, impression rate
     - Seller: ad size, ad format, seller id, geolocation
@@ -119,7 +122,7 @@ Buyer Selection
   - Metric: recall@k (k=20)
 - Ranking
   - Objecgtive: trims 20 down to 10
-  - Data: bid request and buyers who responded, ranked by score (3 bid won, 2 bid > floor, 1 bid < floor, 0 no response)
+  - Data: bid request and buyers who responded, ranked by their bid value
   - Feature: same feature set as candidate generation
   - Model: XGBoost
   - Loss: pairwise learn-to-rank (LambdaMART)
@@ -161,11 +164,13 @@ Buyer Fanout
 
 Availabiity
 - If multiple data centers, replicate servers in different geo locations
-- Active-active (both replicas are serving traffic)
+- Active-Active (both replicas are serving traffic)
+  - When healthcheck fails, GLB sends traffic to next best edge
 
 Reliability
 - Kafka down: retry when it comes back
 - Redis down: backup latest feature values to local in-memory cache
+  - When Flink updates Redis, update local cache too
 
 Scalability
 - Add more servers behind load balancer (horizontal scaling)
@@ -195,15 +200,13 @@ Real-time data processing
 
 Exactly once
 - Not needed for request/response because of large size (small duplicate events won't change features too much)
-- Needed for billing  
-  - Use check-pointing in Kafka to reject duplicate events (not preferred, slow)
+- Needed for billing
   - Use UUID generator
   - Use UUID for each billing event id and use it as primary key
 
 A/B testing (candidate generation, ranking, only A/B test one of them at a time)
 - Randomly split traffic between control and treatment 50/50
 - Track revenue per bid request, buyer response rate, recall on winning buyer
-- 100/100 duplication is biased because buyers will never see actions from treatment and adopt to it
 - Start by 1/99, then 10/90, then 20/80
 </code></pre>
   </div>
