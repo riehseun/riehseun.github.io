@@ -100,8 +100,8 @@ Buyer Selection (2-3ms)
 
 Buyer Fanout (2-5ms)
 - Simultaneously send requests to buyers
-- Wake up thread when socket returns
-- Drop buyers who are unresponsive
+- epoll notices event loop when sockets arrive
+- Event loop resume coroutine
 
 Auction (<1ms)
 - If highest bid < floor price, return No Winner result to seller
@@ -122,13 +122,13 @@ Buyer Selection
   - Metric: recall@k (k=20)
 - Ranking
   - Objecgtive: trims 20 down to 10
-  - Data: bid request and buyers who responded, ranked by their bid value
+  - Data: bid request and buyers who responded, ranked by their bid value (buyers who don't respond get the last position in the ranking)
   - Feature: same feature set as candidate generation
   - Model: XGBoost
   - Loss: pairwise learn-to-rank (LambdaMART)
   - metric: NDCG@k (k=5)
 - Re-ranking
-  - Objective: diversify ADs
+  - Objective: trims 10 to final 5, diversifying ADs
   - Penalize ADs score (score -= lambda * sim_socre)
   - sim_score = weighted sum of same buyer, same category of images that are already included in the result set
 - Selection bias towards buyers with no historical interaction
@@ -136,13 +136,7 @@ Buyer Selection
   - Exploration: new buyers
   - Sampling to include new buyers to candidate generation
     - For example, pick top 15 first using candidate generation
-    - Then, sample 5 out from remaining candidates
-      - Create revenue distribution for known buyers
-      - Treat new buyers with prior, which is initially uniform distribution
-      - Sample 5 from above two sets of distributions
-  - At ranking stage, new buyers will have some feature values missing
-    - If XGBoost is used, missing values are natively handled
-    - If other model is used, missing values can be filled using global statistics
+    - Then, random sample 5 out from remaining candidates
 
 Buyer Fanout
 - Async IO: one machine handles tens of thousands of auctions using event loop (Instead of one thread per auction)
@@ -164,8 +158,7 @@ Buyer Fanout
 
 Availabiity
 - If multiple data centers, replicate servers in different geo locations
-- Active-Active (both replicas are serving traffic)
-  - When healthcheck fails, GLB sends traffic to next best edge
+- Active-Active (multiple regions serving traffic together)
 
 Reliability
 - Kafka down: retry when it comes back
@@ -177,9 +170,7 @@ Scalability
 - Stateless servers
 
 Latency 
-- Cache (No DB calls)
-  - buyers id, endpoint
-- Use cached decision when latency budget runs out
+- Cache (No DB calls): buyers id, endpoint
 
 Monitoring
 - Latency/QPS
