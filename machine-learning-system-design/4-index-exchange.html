@@ -63,21 +63,20 @@ Buyers submit bids
 Auction takes places
 Winning buyer (AD) is returned to seller
 
-How many requests come from sellers per second? 10M per seconds
-How many buyers are there? 100+
 What is latency budget for auction? 5-10ms
-What is availablity required? 99.9999%
-How does Exchange make money? winning bid times number of impressions
+How many buyers are there? 100+
+How many requests come from sellers per second? 10M per seconds
+How does Exchange make money? winning bid and number of impressions
+
+# Problem
+
+Maximize expected revenue under latency constraint
+Input: bid request from seller
+Output: winning bid
 
 # High-level
 
-Seller -> Bid Request -> Global Load Balancer -> Regional Edge -> Exchange Service (Buyer Selection, Buyer Fanout, Auction) -> Bid Response -> Seller
-
-Buyer Selection - 2-3ms (ML)
-Buyer Request/Response - 2-5ms (network with timeout)
-Auction - <1ms
-
-# Discussion
+Seller -> Bid Request -> Global Load Balancer -> Regional Edge -> Auction Service (Buyer Selection, Buyer Fanout, Auction) -> Bid Response -> Seller
 
 Bid Request
 - ad size, ad format, site URL, geolocation
@@ -92,10 +91,24 @@ Regional Edge
 - Rate limiting
 - DDoS protection
 
+Buyer Selection (2-3ms)
+- Trim 100+ buyers down to 5-10
+- Candidate generation -> Ranking -> Re-ranking
+
+Buyer Fanout (2-5ms)
+- Simultaneously send requests to buyers
+- Wake up thread when socket returns
+- Drop buyers who are unresponsive
+
+Auction (<1ms)
+- If highest bid < floor price, return No Winner result to seller
+- Buyer with highest bid becomes the winner
+
+# Discussion
+
 Buyer Selection
-- Fanout to all 100+ buyers and waits for responses? Too expensive
-- Ranking problem to select top 5-10 likely buyers
 - Candidate generation
+  - Objective: trims 100+ down to 20
   - Data: positive if buyers responded before timeout and bid > threshold, negative otherwise
   - Feature
     - Buyer: response rate, time-out rate, bid price, impression rate
@@ -104,27 +117,26 @@ Buyer Selection
   - Model: LR
   - Loss: BCE 
   - Metric: recall@k (k=20)
-  - Trims 100+ down to 20
 - Ranking
+  - Objecgtive: trims 20 down to 10
   - Data: bid request and buyers who responded, ranked by score (3 bid won, 2 bid > floor, 1 bid < floor, 0 no response)
   - Feature: same feature set as candidate generation
   - Model: XGBoost
   - Loss: pairwise learn-to-rank (LambdaMART)
   - metric: NDCG@k (k=5)
-  - Trims 20 down to 10
 - Re-ranking
   - Objective: diversify ADs
-  - Penalize ADs that are similar to ADs that are already selected (decrease ranking score by similarity penality)
-  - Similarity can be weighted sum of same buyer, same category of images that are already included in the result set
+  - Penalize ADs score (score -= lambda * sim_socre)
+  - sim_score = weighted sum of same buyer, same category of images that are already included in the result set
 - Selection bias towards buyers with no historical interaction
   - Exploitation: buyers with historically strong bid and response rate
   - Exploration: new buyers
   - Sampling to include new buyers to candidate generation
     - For example, pick top 15 first using candidate generation
     - Then, sample 5 out from remaining candidates
-    - Create reward distribution for known buyers
-    - Treat new buyers with prior, which is initially uniform distribution
-    - Sample 5 from above two sets of distributions
+      - Create revenue distribution for known buyers
+      - Treat new buyers with prior, which is initially uniform distribution
+      - Sample 5 from above two sets of distributions
   - At ranking stage, new buyers will have some feature values missing
     - If XGBoost is used, missing values are natively handled
     - If other model is used, missing values can be filled using global statistics
@@ -140,14 +152,12 @@ Buyer Fanout
     asyncio.run(auction)
 - Drop buyers when cost of waiting exceeds revenue from waiting
   - Expected revenue from waiting
-    - Consider buyers latency and bid distribution, and compute using heuristics
+    - Keep buyers overall latency and bid distribution
+    - Pre-compute expected value from waiting 1ms, 2ms, 3ms, so on
   - Expected cost of waiting
-    - Cnsider sellers latency distribution, and compute using heuristics
+    - Keep sellers latency distribution
+    - Compute probability of missing seller timeout, multipled by highest bid so far
   - Terminate when Expected revenue from waiting < Expected cost of waiting
-
-Auction
-- If highest bid < floor price, return No Winner result to seller
-- Buyer with highest bid becomes the winner
 
 Availabiity
 - If multiple data centers, replicate servers in different geo locations
@@ -156,25 +166,20 @@ Availabiity
 Reliability
 - Kafka down: retry when it comes back
 - Redis down: backup latest feature values to local in-memory cache
-- Buyer does not respond: temporarily remove from candidate generation until it comes back
 
 Scalability
 - Add more servers behind load balancer (horizontal scaling)
 - Stateless servers
 
 Latency 
-- Use cached decision when latency budget runs out
-- Edge
-  - All requests are handled by edge server close to seller
-  - Buyers close to edge are preferred 
 - Cache (No DB calls)
   - buyers id, endpoint
+- Use cached decision when latency budget runs out
 
 Monitoring
-- Latency
-- QPS
+- Latency/QPS
 - CPU/memory usage
-- Buyer's average response, time-out rate
+- Buyer's response rate, time-out rate
 
 Real-time data processing
 - Ex. impression event, buyers respond with bid, sellers send bid requests
