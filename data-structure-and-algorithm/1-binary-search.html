@@ -67,6 +67,16 @@
 <pre><code class="python">class Solution:
     def findMedianSortedArrays(self, nums1: List[int], nums2: List[int]) -> float:
         
+        # Consider kth element in sorted(nums1+nums2)
+        # Consider mid points in nums1 and nums2
+        # If nums1[m1] <= nums2[m2]
+        #   left elemts of m1 cannot be solution
+        #   k -= m1 - l1 + 1 (adjust k)
+        #   l1 = m1 + 1 
+        # Else
+        #   left elements of m2 cannot be solution
+        #   k -= m2 - l2 + 1 (adjust k)
+        #   l2 = m2 + 1 
         # Time O(log(n1+n2))
         # Space O(1)
 
@@ -81,16 +91,14 @@
                 if k == 0:
                     return min(nums1[l1], nums2[l2])
                 step = (k-1) // 2
-                i = min(l1+step, n1-1)
-                j = min(l2+step, n2-1)
-                if nums1[i] <= nums2[j]:
-                    removed = i - l1 + 1
-                    l1 = i + 1
-                    k -= removed
+                m1 = min(l1+step, n1-1)
+                m2 = min(l2+step, n2-1)
+                if nums1[m1] <= nums2[m2]:
+                    k -= m1 - l1 + 1
+                    l1 = m1 + 1
                 else:
-                    removed = j - l2 + 1
-                    l2 = j + 1
-                    k -= removed
+                    k -= m2 - l2 + 1
+                    l2 = m2 + 1
 
         n = len(nums1) + len(nums2)
         if n % 2 == 1:
