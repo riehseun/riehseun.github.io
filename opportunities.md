@@ -137,15 +137,6 @@ Thomson Reuters (Toronto)
 - R: 
 - Screen: 2 Python (random question), multiple choice ML and AWS question 
 
-Autodesk (Toronto)
-- R:
-- 3554706aA!
-
-Scotiabank
-- R:
-- 3554706aA!
-- I will succeed as a mle !
-
 
 Others
 
