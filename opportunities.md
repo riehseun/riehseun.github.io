@@ -126,7 +126,7 @@ Georgian (Toronto)
 
 Ebay (Toronto) 
 - R: Nilsu Ozel
-- Screen: 
+- Screen: Split string by delimter of variable length
 
 Index exchange (Toronto)
 - R: Yoyo Wan, Priyanka Choudhary
