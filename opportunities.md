@@ -106,6 +106,10 @@ World Quants (Connecticut - Toronto)
 Collimator AI (Denver - Toronto)
 - R: Allahverdi Suleymanov
 
+Guidewire (SF)
+- R: Annie Jose
+- Screen: https://leetcode.ca/2021-12-09-2086-Minimum-Number-of-Buckets-Required-to-Collect-Rainwater-from-Houses/#google_vignette
+
 
 Canada
 
@@ -120,8 +124,14 @@ Boosted.ai (Toronto)
 Georgian (Toronto)
 - R: James Roadnight
 
+Ebay (Toronto) 
+- R: Nilsu Ozel
+- Screen: 
+
 Index exchange (Toronto)
 - R: Yoyo Wan, Priyanka Choudhary
+- Screen: stack question
+- Onsite: model serving | parking lot reservation | monitoring and alerting
 
 Thomson Reuters (Toronto)
 - R: 
