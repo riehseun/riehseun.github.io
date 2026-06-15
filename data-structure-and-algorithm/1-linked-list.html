@@ -262,32 +262,29 @@ class Solution:
         # Time O(n) n = number of nodes in LL
         # Space O(1)
 
-        node, first_node, last_end_node = head, None, None
-        while node:
-            cnt, prev, end_node = 0, None, None
-            temp, l = node, 0
-            while temp:
-                l += 1
-                temp = temp.next
-            if l >= k:
-                while cnt < k:
-                    if not prev:
-                        end_node = node
-                    node_next = node.next
-                    node.next = prev
-                    prev = node
-                    node = node_next
-                    cnt += 1
-                if last_end_node:
-                    last_end_node.next = prev
-                last_end_node = end_node
-                if not first_node:
-                    first_node = prev
-            else:
-                last_end_node.next = node
-                break
-            
-        return first_node</code></pre>
+        dummy = ListNode(0)
+        dummy.next = head
+        group_prev = dummy
+
+        while True:
+            kth = group_prev
+            for _ in range(k):
+                kth = kth.next
+                if not kth:
+                    return dummy.next
+            group_next = kth.next
+
+            prev = group_next
+            curr = group_prev.next
+            while curr != group_next:
+                nxt = curr.next
+                curr.next = prev
+                prev = curr
+                curr = nxt
+
+            old_group_start = group_prev.next
+            group_prev.next = kth
+            group_prev = old_group_start</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/reverse-nodes-in-k-group">25. Reverse Nodes in k-Group</a> | <a href="https://neetcode.io/problems/reverse-nodes-in-k-group">Reverse Nodes in K-Group</a>
