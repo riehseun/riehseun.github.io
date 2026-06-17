@@ -178,56 +178,47 @@ class Solution:
   <div class="card-body">
     <h2 class="card-title">Design Twitter (150/250)</h2>
 
-<pre><code class="python">class Twitter:
+<pre><code class="python">from heapq import heappush, heappop
 
-    # postTweet
-    #   Dictionary tweetId:userId
-    #   Time O(1)
-    #   Space O(n) n = number of tweets
-    # getNewsFeed
-    #   Use count for tracking time
-    #   Insert [count, tweetId] into max_heap 
-    #   Retrive onces that matches userId or dic[followerId]
-    #   Time O(nlogn)
-    #   Space O(n)
-    # follow/unfollow
-    #   Dictionary followerId:followeeId  
-    #   Time O(1)
-    #   Space O(n)
+class Twitter:
 
     def __init__(self):
-        self.tweets = defaultdict(int)
-        self.follows = defaultdict(set)
-        self.max_heap = []
         self.time = 0
-        
+        self.following = defaultdict(set)
+        self.tweets = defaultdict(list)
+
     def postTweet(self, userId: int, tweetId: int) -> None:
-        self.tweets[tweetId] = userId
-        heappush(self.max_heap, [-self.time, tweetId])
+        self.tweets[userId].append((self.time, tweetId))
         self.time += 1
 
     def getNewsFeed(self, userId: int) -> List[int]:
-        result, count, temp = [], 0, []
-        while self.max_heap:
-            t, tweet_id = heappop(self.max_heap)
-            temp.append([t, tweet_id])
-            if self.tweets[tweet_id] == userId \
-                or self.tweets[tweet_id] in self.follows[userId]:
-                result.append(tweet_id)
-                count += 1
-            if count == 10:
-                break
-        while temp:
-            t, tweet_id = temp.pop()
-            heappush(self.max_heap, [t, tweet_id])
-        return result
+        result = []
+        max_heap = []
+        user_ids = self.following[userId].copy()
+        user_ids.add(userId)
+
+        for user_id in user_ids:
+            if self.tweets[user_id]:
+                index = len(self.tweets[user_id]) - 1
+                timestamp, tweet_id = self.tweets[user_id][index]
+                heappush(max_heap, (-timestamp, tweet_id, user_id, index-1))
         
+        while max_heap and len(result) < 10:
+            neg_time, tweet_id, user_id, next_index = heappop(max_heap)
+            result.append(tweet_id)
+            if next_index >= 0:
+                timestamp, next_tweet = self.tweets[user_id][next_index]
+                heappush(max_heap, (-timestamp, next_tweet, user_id, next_index-1))
+
+        return result
+
     def follow(self, followerId: int, followeeId: int) -> None:
-        self.follows[followerId].add(followeeId)
+        if followerId != followeeId:
+            self.following[followerId].add(followeeId)
 
     def unfollow(self, followerId: int, followeeId: int) -> None:
-        if followeeId in self.follows[followerId]:
-            self.follows[followerId].remove(followeeId)</code></pre>
+        if followeeId in self.following[followerId]:
+            self.following[followerId].remove(followeeId)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/design-twitter">355. Design Twitter</a> | <a href="https://neetcode.io/problems/design-twitter-feed">Design Twitter</a>
