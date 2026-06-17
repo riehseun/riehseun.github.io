@@ -249,7 +249,9 @@ class Solution:
   <div class="card-body">
     <h2 class="card-title">Task Scheduler (150/250)</h2>
 
-<pre><code class="python">class Solution:
+<pre><code class="python">from heapq import heappush, heappop
+
+class Solution:
     def leastInterval(self, tasks: List[str], n: int) -> int:
         
         # [A,A,B,B], n = 2 ? 5 (A -> B -> idle -> A -> B)
@@ -264,31 +266,29 @@ class Solution:
         # Time O(nlogn) n = len(tasks)
         # Space O(n)
 
-        last, freq, max_heap = defaultdict(int), defaultdict(int), [] 
+        freq = defaultdict(int)
         for t in tasks:
             freq[t] += 1
         
+        max_heap = []
         for key, val in freq.items():
-            heappush(max_heap, [-val, key])
-        
-        i = 0
-        while max_heap:
-            cycle, temp = n + 1, []
-            while cycle > 0 and max_heap:
-                val, key = heappop(max_heap)
-                if key in last:
-                    for _ in range(n-i+last[key]+1):
-                        i += 1
-                last[key] = i
-                i += 1
-                cycle -= 1
-                if val != -1:
-                    temp.append([val+1, key])
-            while temp:
-                val, key = temp.pop()
-                heappush(max_heap, [val, key])
+            heappush(max_heap, -val)
 
-        return i</code></pre>
+        cooldown = deque()
+        time = 0
+
+        while max_heap or cooldown:
+            time += 1
+            if max_heap:
+                count = heappop(max_heap) + 1
+                if count != 0:
+                    cooldown.append((time+n, count))
+
+            if cooldown and cooldown[0][0] == time:
+                _, count = cooldown.popleft()
+                heappush(max_heap, count)
+
+        return time</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/task-scheduler">621. Task Scheduler</a> | <a href="https://neetcode.io/problems/task-scheduling">Task Scheduler</a>
