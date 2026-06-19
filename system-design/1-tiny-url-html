@@ -54,7 +54,88 @@
     <h2 class="card-title">Tiny URL</h2>
 
 <pre><code class="markdown">
+# Requirement
 
+Given an url, create a short version or simply return it if short version is already created
+Length of URL of short version should be minimal
+Can update existing URL to have different short version
+Can delete existing URL
+
+20 users, but grows
+Each user make 1 write request and 10 read request per day, but grows
+Size of each URL is estimated to be 100 bytes
+Latency - 300ms
+
+# High level
+
+Long URL -> Service (->DB) -> Short URL
+
+Workflow
+- Service checks if short version already exists in DB
+- If yes, return retrieved short URL 
+- Else, compute short version, store it in DB, and return it
+
+Service
+- A single virtual machine
+- Assume there is 64 chars to use to generate URLs
+- Number of short URLs = 64**n where n is number of chars
+- Assume 20 users grow to 1M, write QPS grows to 10 per day, and data retension is 5 years
+- Then, we need to have 64**n > 1M * 10 * 365 * 5
+
+DB
+- A single SQL server
+
+# API and Data
+
+REST implementd by HTTP
+- /api/v1/create_short_url(url) -> short_url
+- /api/v1/update_short_url(url) -> short_rul
+- /api/v1/delete_short_url(url) -> None
+
+Data
+
+Table - URL
+- url_id (int, pk)
+- url (string)
+- short_url (string)
+
+# Discussion
+
+Performance
+- Use cache in front of DB to handle read traffic fast
+- Store frequently access data in key-value store
+  - key: url
+  - value: short_url
+- Invalidate with TTL 
+- Cache aside (if cache miss, read from DB and put it in DB, then return it)
+
+Scalability
+- Triggers
+  - Server: >70% CPU, 80% memory, latency > SLA, number of connections > 10K/s
+  - DB: read >5ms, throughput >10K write per second
+  - Cache: >20% cache miss, read > 1ms
+- Server
+  - Add nodes (horizontal scaling)
+- Cache/DB
+  - Shard/partition data using shard key
+  - Shard key is url_id
+  - Consistent hashing to distribute shards across different nodes
+
+Availability
+- GLB to route incoming requests to nearest edge
+- Servers, DB, Cache are deployed to each edge
+- Active-Active where GLB healtchecks periodically on edge servers, and route traffic to live edges
+
+Reliability
+- Read path: in-memory cache -> Cache (Redis) -> DB. Three places to read data (can read data even if two of them fails) 
+- When sharding, create replicas for each shard and spread replicas in nodes in different geo region
+
+Consistency
+- Strong consistency not needed (stale url is fine)
+- Eventual consistency where data is consolidated later
+- Sync: multiple requests to create/update the same URL
+  - If single SQL DB, rely on built-in ACID
+  - If distributed DB, use only one region for write relying on ACID and rest for read (slow write, SPOF)
 </code></pre>
 
   </div>
