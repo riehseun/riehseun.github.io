@@ -54,7 +54,91 @@
     <h2 class="card-title">Parking Lot Reservation</h2>
 
 <pre><code class="markdown">
+# Requirement
 
+User request parking reservation with specific time slots
+Parking spot is released at the end of reservation
+
+20 users but expected to grow
+5 parking spaces but expected to grow
+Each user make 1 reservation request per month on average
+
+# High-level
+
+Request -> Service (->DB) -> Response
+
+Write path
+- Service checks if there is free slot in DB between start and end time
+- If yes, respond with slot #. If no, respond with reservation failure
+
+Service
+- A single virtual machine
+- Find all parking lots
+- Find all reservations and check if each parking lot has current booking or not (end_time < current_time)
+- If so, remove from candidates
+
+DB
+- A single SQL instance
+
+# API and Data
+
+POST /parking
+{
+  "start": start_time
+  "end": end_time
+}
+
+Table - User
+- user_id (int, pk)
+- email (string)
+
+Table - Parking
+- parking_id (int, pk)
+- size (string)
+- location (string)
+
+Table - Reservation
+- reservation_id (int, pk)
+- parking_id
+- user_id
+- start_time
+- end_time
+
+# Discussion
+
+Scalability
+- Triggers:
+  - Server: >70% cpu, >80% memory, latency > SLA, >10k number of connections
+  - DB: >5ms read, >10k write per second
+- Service: horizontally add nodes
+- DB: partition/shard data where shard id is reservation_id
+  - Denorm table such that Table - Reservation includes all user and parking detail
+  - Use consistent hashing to distribute partitions/shards to different data nodes
+
+Availability
+- GLB to route traffic to nearest edge
+- Each edge has set of services and DBs
+- Active-Active setup where GLB does healthchecks on edge and send traffic to live edge
+
+Reliability
+- Service fails? route to other service node
+- DB fails? write to cache and backfill when DB is back up
+- Data loss? create replicas for each shard and spread them across different geo region
+
+Performance
+- System is write heavy, so read optimization is not needed
+- Create 2D table where row is timeslot and column is parking slots
+  - As reservations are made, update the table
+  - As requests come in, scan the table to see if there is available slot
+
+Consistency
+- Strong consistency by leveraging ACID property of SQL (if using a single SQL instance)
+- If DB is distributed, choose consistency over availability
+
+Synchronization
+- If multiple users race against the same time slot
+- If using single SQL, leaverage ACID property 
+- If distributed, use one region for write and all other regions for read
 </code></pre>
 
   </div>
