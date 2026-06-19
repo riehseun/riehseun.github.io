@@ -72,20 +72,21 @@ Request -> Service (->DB) -> Response
 
 Write path
 - Service checks if short version already exists in DB
-- If yes, return retrieved short URL 
+- If yes, return retrieved short url
 - Else, compute short version, store it in DB, and return it
 
 Read path
 - User types short url
-- Service converts short_url to original url
+- Service read original url using short url from DB
 - User is redirected to original url
 
 Service
 - A single virtual machine
-- Assume there is 64 chars to use to generate URLs
-- Number of short URLs = 64**n where n is number of chars
+- Assume there is 62 chars to use to generate URLs
+- Number of short URLs = 62**n where n is number of chars
 - Assume 20 users grow to 1B, write QPS grows to 10 per day, and data retension is 5 years
-- Then, we need to have 64**n > 1B * 10 * 365 * 5
+- Then, we need to have 62**n > 1B * 10 * 365 * 5
+- Generate a sequence nubmer, then use base 62 conversion to generate random string
 
 DB
 - A single SQL server
@@ -93,16 +94,24 @@ DB
 # API and Data
 
 REST implementd by HTTP
-- GET /api/vi/get_short_url(url) -> short_url
-- GET /api/vi/get_url(short_url) -> url
-- POST /api/v1/create_short_url(url) -> short_url
-- PUT /api/v1/update_short_url(url) -> short_rul
-- DELETE /api/v1/delete_short_url(url) -> None
+- GET /short_url
+- POST /url -> short_url
+{
+  "url": original_url
+}
+- PUT /url
+{
+  "url": short_url
+}
+- DELETE /url
+{
+  "url": short_url
+}
 
 Data
 
 Table - URL
-- url_id (int, pk)
+- url_id (bigint, pk)
 - short_url (string)
 - url (string)
 - user_id (int)
