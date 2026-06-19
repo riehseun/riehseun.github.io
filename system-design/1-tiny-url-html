@@ -68,19 +68,24 @@ Latency - 300ms
 
 # High level
 
-Long URL -> Service (->DB) -> Short URL
+Request -> Service (->DB) -> Response
 
-Workflow
+Write path
 - Service checks if short version already exists in DB
 - If yes, return retrieved short URL 
 - Else, compute short version, store it in DB, and return it
+
+Read path
+- User types short url
+- Service converts short_url to original url
+- User is redirected to original url
 
 Service
 - A single virtual machine
 - Assume there is 64 chars to use to generate URLs
 - Number of short URLs = 64**n where n is number of chars
-- Assume 20 users grow to 1M, write QPS grows to 10 per day, and data retension is 5 years
-- Then, we need to have 64**n > 1M * 10 * 365 * 5
+- Assume 20 users grow to 1B, write QPS grows to 10 per day, and data retension is 5 years
+- Then, we need to have 64**n > 1B * 10 * 365 * 5
 
 DB
 - A single SQL server
@@ -88,24 +93,27 @@ DB
 # API and Data
 
 REST implementd by HTTP
-- /api/v1/create_short_url(url) -> short_url
-- /api/v1/update_short_url(url) -> short_rul
-- /api/v1/delete_short_url(url) -> None
+- GET /api/vi/get_short_url(url) -> short_url
+- GET /api/vi/get_url(short_url) -> url
+- POST /api/v1/create_short_url(url) -> short_url
+- PUT /api/v1/update_short_url(url) -> short_rul
+- DELETE /api/v1/delete_short_url(url) -> None
 
 Data
 
 Table - URL
 - url_id (int, pk)
-- url (string)
 - short_url (string)
+- url (string)
+- user_id (int)
 
 # Discussion
 
 Performance
 - Use cache in front of DB to handle read traffic fast
 - Store frequently access data in key-value store
-  - key: url
-  - value: short_url
+  - key: short_url
+  - value: url
 - Invalidate with TTL 
 - Cache aside (if cache miss, read from DB and put it in DB, then return it)
 
