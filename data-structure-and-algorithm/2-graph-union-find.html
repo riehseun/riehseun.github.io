@@ -90,6 +90,65 @@
     Reference: <a href="https://leetcode.com/problems/graph-valid-tree">261. Graph Valid Tree</a> | <a href="https://neetcode.io/problems/valid-tree">Graph Valid Tree</a>
   </div>
 </div>
+
+<div class="card mb-4" id="union-find-">
+  <div class="card-body">
+    <h2 class="card-title">Single Circle Group (Google)</h2>
+
+<pre><code class="python">class Solution:
+    def isSingleCircleGroup(circles):
+
+        # Consider two circles
+        # If distance between their centroid <= sum of their radius, they overlap or touch
+        # Consider each circle as node in graph
+        # Union circles that overlap
+        # Time O(n**2) n = number of circles 
+        # Space O(n)
+
+        if not circles:
+            return True
+
+        n = len(circles)
+        parent = list(range(n))
+
+        def find(i):
+            if parent[i] == i:
+                return i
+            parent[i] = find(parent[i])
+            return parent[i]
+
+        def union(i, j):
+            root_i = find(i)
+            root_j = find(j)
+            if root_i != root_j:
+                parent[root_i] = root_j
+
+        # Check intersections
+        for i in range(n):
+            for j in range(i+1, n):
+                x1, y1, r1 = circles[i]
+                x2, y2, r2 = circles[j]
+                
+                dist_sq = (x2-x1) ** 2 + (y2-y1) ** 2
+                radii_sum_sq = (r1+r2) ** 2
+                
+                if dist_sq <= radii_sum_sq:
+                    union(i, j)
+
+        # Find the root of the first circle
+        first_root = find(0)
+        
+        # Check if all circles belong to the same group
+        for i in range(1, n):
+            if find(i) != first_root:
+                return False
+                
+        return True</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: 
+  </div>
+</div>
 <!-- Union Find END -->
 
 </div> <!-- /.col-md-12 -->
