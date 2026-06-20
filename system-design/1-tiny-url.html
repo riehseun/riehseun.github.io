@@ -56,15 +56,14 @@
 <pre><code class="markdown">
 # Requirement
 
-Given an url, create a short version or simply return it if short version is already created
-Length of URL of short version should be minimal
-Can update existing URL to have different short version
-Can delete existing URL
+Create short url from long url
+Redirect short url to long url
+Update or delete existing mapping
 
-20 users, but grows
-Each user make 1 write request and 10 read request per day, but grows
-Size of each URL is estimated to be 100 bytes
-Latency - 300ms
+Scale from few users to billions
+10:1 read-write ratio
+End-to-end Latency - 300ms
+High availability
 
 # High level
 
@@ -76,7 +75,6 @@ Write path
 - Else, compute short version, store it in DB, and return it
 
 Read path
-- User types short url
 - Service read original url using short url from DB
 - User is redirected to original url
 
@@ -87,34 +85,37 @@ Service
 - Assume 20 users grow to 1B, write QPS grows to 10 per day, and data retension is 5 years
 - Then, we need to have 62**n > 1B * 10 * 365 * 5
 - Generate a sequence nubmer, then use base 62 conversion to generate random string
+  - How to generate sequence number
+  - Snowflake: timestamp + machine ID + sequence, distributed
 
 DB
 - A single SQL server
 
 # API and Data
 
-REST implementd by HTTP
-- GET /short_url
-- POST /url -> short_url
+- GET /{short_url}
+- POST /urls
 {
   "url": original_url
 }
-- PUT /url
+- PUT /urls/{short_url}
 {
-  "url": short_url
+  "url": original_url
 }
-- DELETE /url
-{
-  "url": short_url
-}
-
-Data
+- DELETE /urls/{short_url}
 
 Table - URL
 - url_id (bigint, pk)
-- short_url (string)
-- url (string)
-- user_id (int)
+- short_url (varchar, unique)
+- original_url (text)
+- user_id (bigint)
+- created_at (timestamp)
+- updated_at (timestamp)
+
+Index
+- short_url: optimize read path, duplication not expected so performance is good
+- original_url: optimize write path, little duplication expected so performane is good
+- Write is little slower having to update sorted data in memory
 
 # Discussion
 
@@ -124,7 +125,14 @@ Performance
   - key: short_url
   - value: url
 - Invalidate with TTL 
-- Cache aside (if cache miss, read from DB and put it in DB, then return it)
+- Cache aside (if cache miss, read from DB and put it in cache, then return it)
+- Eviction: least recently used
+
+Latency
+- Cache hit: 10ms
+- Cache miss and DB query: 100ms
+- Network on request/response: 200ms
+- Overall <300ms
 
 Scalability
 - Triggers
@@ -144,20 +152,24 @@ Availability
 - Active-Active where GLB healtchecks periodically on edge servers, and route traffic to live edges
 
 Reliability
-- Read path: in-memory cache -> Cache (Redis) -> DB. Three places to read data (can read data even if two of them fails) 
-- When sharding, create replicas for each shard and spread replicas in nodes in different geo region
-
-Consistency
-- Strong consistency not needed (stale url is fine)
-- Eventual consistency where data is consolidated later
-- Sync: multiple requests to create/update the same URL
-  - If single SQL DB, rely on built-in ACID
-  - If distributed DB, use only one region for write relying on ACID and rest for read (slow write, SPOF)
+- Service fails? route to other service node
+- Cache fails? fallback to DB
+- DB fails? fallback to replicas (create replicas for each shard and spread them across different geo region)
 
 Monitoring
-- Build a cluster of virtual machine and DB to install Prometheus
-- Deploy clients to APP/DB servers to send metrics about CPU, memory, requests to monitoring cluster
-- Display key metrics using Grafana
+- Metrics: latency, QPS, cache hit rate, cpu/memory utilization
+- Tools: Prometheus for metrics, Grafana for dashborad
+- Alerts: when metrics hit threshold
+
+Consistency
+- If using a single SQL instance, use strong consistency by leveraging ACID property of SQL
+- If DB is distributed, choose availability over consistency
+  - Being redirected to a stale URL in rare cases is okay
+
+Synchronization
+- If multiple requests to create/update the same URL
+- If single SQL DB, rely on built-in ACID
+- If distributed DB, use only one region for write relying on ACID and rest for read (slow write, SPOF)
 </code></pre>
 
   </div>
