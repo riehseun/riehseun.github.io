@@ -149,6 +149,66 @@
     Reference: 
   </div>
 </div>
+
+<div class="card mb-4" id="union-find-">
+  <div class="card-body">
+    <h2 class="card-title">Group Clusters (Nuro AI)</h2>
+
+<pre><code class="python">class Solution:
+    def findPointClusters(self, points: List[List[int]], K: float) -> List[List[List[int]]]:
+
+        # Consider two points
+        # If distance between them <= K, they are in the same group
+        # Consider each point as node in graph
+        # Union points whose distance <= K
+        # Time O(n**2) n = number of points 
+        # Space O(n)
+
+        if not points:
+            return []
+        
+        n = len(points)
+        parent = list(range(n))
+        rank = [1] * n
+        
+        def find(i: int) -> int:
+            if parent[i] == i:
+                return i
+            parent[i] = find(parent[i])
+            return parent[i]
+        
+        def union(i: int, j: int):
+            root_i = find(i)
+            root_j = find(j)
+            if root_i != root_j:
+                if rank[root_i] > rank[root_j]:
+                    parent[root_j] = root_i
+                elif rank[root_i] < rank[root_j]:
+                    parent[root_i] = root_j
+                else:
+                    parent[root_j] = root_i
+                    rank[root_i] += 1
+
+        for i in range(n):
+            x1, y1, z1 = points[i]
+            for j in range(i+1, n):
+                x2, y2, z2 = points[j]
+                dist_sq = (x1-x2) ** 2 + (y1-y2) ** 2 + (z1-z2) ** 2
+                if dist_sq <= K * K:
+                    union(i, j)
+        
+        # Group points by their final root component ID
+        clusters = defaultdict(list)
+        for i in range(n):
+            root_id = find(i)
+            clusters[root_id].append(points[i])
+            
+        return list(clusters.values())</code></pre>
+  </div>
+  <div class="card-footer text-muted">
+    Reference: 
+  </div>
+</div>
 <!-- Union Find END -->
 
 </div> <!-- /.col-md-12 -->
