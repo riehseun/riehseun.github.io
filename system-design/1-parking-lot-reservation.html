@@ -106,6 +106,12 @@ Table - Reservation
 
 # Discussion
 
+Performance
+- System is write heavy, so read optimization is not needed
+- Create 2D table where row is timeslot and column is parking slots
+  - As reservations are made, update the table
+  - As requests come in, scan the table to see if there is available slot
+
 Scalability
 - Triggers:
   - Server: >70% cpu, >80% memory, latency > SLA, >10k number of connections
@@ -125,11 +131,10 @@ Reliability
 - DB fails? write to cache and backfill when DB is back up
 - Data loss? create replicas for each shard and spread them across different geo region
 
-Performance
-- System is write heavy, so read optimization is not needed
-- Create 2D table where row is timeslot and column is parking slots
-  - As reservations are made, update the table
-  - As requests come in, scan the table to see if there is available slot
+Monitoring
+- Build a cluster of virtual machine and DB to install Prometheus
+- Deploy clients to APP/DB servers to send metrics about CPU, memory, requests to monitoring cluster
+- Display key metrics using Grafana
 
 Consistency
 - Strong consistency by leveraging ACID property of SQL (if using a single SQL instance)
