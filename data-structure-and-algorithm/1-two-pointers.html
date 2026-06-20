@@ -517,41 +517,32 @@
 
 <div class="card mb-4" id="two-pointers-">
   <div class="card-body">
-    <h2 class="card-title">Valid Palindrome II</h2>
+    <h2 class="card-title">Valid Palindrome II (Meta)</h2>
 
 <pre><code class="python">class Solution:
     def validPalindrome(self, s: str) -> bool:
 
         # Two pointers
         # Iterate from both ends until there is mismatch
-        # If there is mismatch
-        #   Remove either start or end, then check again
-
-        # Time O(n)
-        #   n = len(s)
+        # If there is mismatch, remove either one, then check again
+        # Time O(n) n = len(s)
         # Space O(1)
-        def valid_palindrome(s):
 
-            start = 0
-            end = len(s) - 1
-
-            while start < end:
+        def valid_palindrome(start, end):
+            while start < end and end < len(s):
                 if s[start] != s[end]:
-                    return (start, end)
+                    return False
                 start += 1
                 end -= 1
-            
-            return (-1, -1)
-
-        start, end = valid_palindrome(s)
-        if (start, end) == (-1, -1):
             return True
-        else:
-            if valid_palindrome(s[:start]+s[start+1:]) == (-1, -1):
-                return True
-            if valid_palindrome(s[:end]+s[end+1:]) == (-1, -1):
-                return True
-            return False</code></pre>
+
+        start, end = 0, len(s) - 1
+        while start < end:
+            if s[start] != s[end]:
+                return valid_palindrome(start+1, end) or valid_palindrome(start, end-1)
+            start += 1
+            end -= 1
+        return True</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/valid-palindrome-ii">680. Valid Palindrome II</a>
