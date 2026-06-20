@@ -56,12 +56,15 @@
 <pre><code class="markdown">
 # Requirement
 
-User request parking reservation with specific time slots
+User request parking reservation with specific time slots (start, end)
+System assigns available spot automatically
 Parking spot is released at the end of reservation
+Parking spot could be under maintenance
 
 20 users but expected to grow
 5 parking spaces but expected to grow
 Each user make 1 reservation request per month on average
+Prevent double booking
 
 # High-level
 
@@ -69,21 +72,20 @@ Request -> Service (->DB) -> Response
 
 Write path
 - Service checks if there is free slot in DB between start and end time
-- If yes, respond with slot #. If no, respond with reservation failure
+  - For all parking spots, query reservation table to see if there is active booking between start and end time (if result is null, then spot is free)
+- If yes, create reservation and respond with slot #. If no, respond with reservation failure
 
 Service
 - A single virtual machine
-- Find all parking lots
-- Find all reservations and check if each parking lot has current booking or not (end_time < current_time)
-- If so, remove from candidates
 
 DB
 - A single SQL instance
 
 # API and Data
 
-POST /parking
+POST /reservations
 {
+  "user_id" user_id
   "start": start_time
   "end": end_time
 }
@@ -93,24 +95,21 @@ Table - User
 - email (string)
 
 Table - Parking
-- parking_id (int, pk)
-- size (string)
-- location (string)
+- parking_id (bigint, pk)
+- location (varchar)
+- status (enum - active, maintenance)
 
 Table - Reservation
-- reservation_id (int, pk)
-- parking_id
-- user_id
-- start_time
-- end_time
+- reservation_id (bigint, pk)
+- parking_id (bigint)
+- user_id (bigint)
+- start_time (timestamp)
+- end_time (timestamp)
 
 # Discussion
 
 Performance
-- System is write heavy, so read optimization is not needed
-- Create 2D table where row is timeslot and column is parking slots
-  - As reservations are made, update the table
-  - As requests come in, scan the table to see if there is available slot
+- Index query that finds all available parking spots given start and end time
 
 Scalability
 - Triggers:
@@ -118,7 +117,7 @@ Scalability
   - DB: >5ms read, >10k write per second
 - Service: horizontally add nodes
 - DB: partition/shard data where shard id is reservation_id
-  - Denorm table such that Table - Reservation includes all user and parking detail
+  - Write path requires querying from parking and reservation table distributed
   - Use consistent hashing to distribute partitions/shards to different data nodes
 
 Availability
@@ -128,17 +127,17 @@ Availability
 
 Reliability
 - Service fails? route to other service node
-- DB fails? write to cache and backfill when DB is back up
-- Data loss? create replicas for each shard and spread them across different geo region
+- DB fails? fallback to replicas (create replicas for each shard and spread them across different geo region)
 
 Monitoring
-- Build a cluster of virtual machine and DB to install Prometheus
-- Deploy clients to APP/DB servers to send metrics about CPU, memory, requests to monitoring cluster
-- Display key metrics using Grafana
+- Metrics: latency, QPS, cache hit rate, cpu/memory utilization
+- Tools: Prometheus for metrics, Grafana for dashborad
+- Alerts: when metrics hit threshold
 
 Consistency
-- Strong consistency by leveraging ACID property of SQL (if using a single SQL instance)
+- If using a single SQL instance, use strong consistency by leveraging ACID property of SQL
 - If DB is distributed, choose consistency over availability
+  - Being redirected to a stale URL in rare cases is okay
 
 Synchronization
 - If multiple users race against the same time slot
