@@ -73,6 +73,8 @@ Request -> Service (->DB) -> Response
 Write path
 - Service checks if there is free slot in DB between start and end time
   - For all parking spots, query reservation table to see if there is active booking between start and end time (if result is null, then spot is free)
+  - SELECT * FROM reservation where parking_id = ? AND start_time <= requested_end_time AND end_time >= requested_start_time
+  - If above query returns result, that parking spot in unavailable
 - If yes, create reservation and respond with slot #. If no, respond with reservation failure
 
 Service
@@ -110,14 +112,14 @@ Table - Reservation
 
 Performance
 - Index query that finds all available parking spots given start and end time
+- parking id column must be indexed
 
 Scalability
 - Triggers:
   - Server: >70% cpu, >80% memory, latency > SLA, >10k number of connections
   - DB: >5ms read, >10k write per second
 - Service: horizontally add nodes
-- DB: partition/shard data where shard id is reservation_id
-  - Write path requires querying from parking and reservation table distributed
+- DB: partition/shard data where shard id is parking_id
   - Use consistent hashing to distribute partitions/shards to different data nodes
 
 Availability
