@@ -139,12 +139,14 @@ Monitoring
 Consistency
 - If using a single SQL instance, use strong consistency by leveraging ACID property of SQL
 - If DB is distributed, choose consistency over availability
-  - Being redirected to a stale URL in rare cases is okay
+  - Do not commit transaction until R + W > N 
 
 Synchronization
 - If multiple users race against the same time slot
 - If using single SQL, leaverage ACID property 
-- If distributed, use one region for write and all other regions for read
+- If distributed, write goes in one shard in region A and read takes place in all other shards in region B,C,D,E
+- If write shard dies, one of remaining shards become the write shard
+- Write shard propagates updates to all other shards synchronously (use quorum to achieve strong consistency)
 </code></pre>
 
   </div>
