@@ -59,44 +59,43 @@
 
 <div class="card mb-4" id="graph-bfs-">
   <div class="card-body">
-    <h2 class="card-title">Word Ladder (150/250)</h2>
+    <h2 class="card-title">Word Ladder (150/250) (Amazon)</h2>
 
 <pre><code class="python">class Solution:
     def ladderLength(self, beginWord: str, endWord: str, wordList: List[str]) -> int:
-        
+
         # If endWord is not in wordList, return 0
-        # Build graph (bidirectional) where words with one char diff
-        # are connected
         # BFS shortest path
-        # Time O(n**2) n = number of nodes = len(wordList)
-        # Space O(n)
+        # Time O(nm**2) n = number of words, m = word length
+        # Space O(nm**2)
+
+        if endWord not in wordList:
+            return 0
 
         words = wordList[:]
         words.append(beginWord)
-        graph = defaultdict(set)
-        n = len(words)
-        for i in range(n):
-            for j in range(i+1, n):
-                cnt = 0
-                for a, b in zip(words[i], words[j]):
-                    if a != b:
-                        cnt += 1
-                if cnt == 1:
-                    graph[words[i]].add(words[j])
-                    graph[words[j]].add(words[i])
+        graph = defaultdict(list)
+        n = len(beginWord)
+        for word in wordList:
+            for i in range(n):
+                pattern = word[:i] + "*" + word[i+1:]
+                graph[pattern].append(word)
 
         queue, visited = deque(), set()
-        queue.append((beginWord, 0))
+        queue.append((beginWord, 1))
         visited.add(beginWord)
 
         while queue:
             node, depth = queue.popleft() 
-            for next_node in graph[node]:
-                if next_node == endWord:
-                    return depth + 2
-                if next_node not in visited:
-                    queue.append((next_node, depth+1))
-                    visited.add(next_node)
+            if node == endWord:
+                return depth
+
+            for i in range(n):
+                pattern = node[:i] + "*" + node[i+1:]
+                for next_node in graph[pattern]:
+                    if next_node not in visited:
+                        queue.append((next_node, depth+1))
+                        visited.add(next_node)
 
         return 0</code></pre>
   </div>
