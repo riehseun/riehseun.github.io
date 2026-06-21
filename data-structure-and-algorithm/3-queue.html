@@ -94,20 +94,16 @@
 
 <div class="card mb-4" id="queue-">
   <div class="card-body">
-    <h2 class="card-title">Design Snake Game (M)</h2>
+    <h2 class="card-title">Design Snake Game (Autonomic)</h2>
 
 <pre><code class="python">class SnakeGame:
 
-    # If snake moves to empty space
-    #   Move snake head to new slot
-    #   Move snake body in the same direction (use deque)
-    # If snake moves to food
-    #   Move snake head to new slot
-    #   Snake body stays in the same place
-    # If snake moves to itself
-    #   Game over
-    # If snake moves to out of bounds
-    #   Game over
+    # If snake moves to empty space, add head and remove tail
+    # If snake moves to food, 
+    # If snake moves to itself, game over
+    # If snake moves to out of bounds, game over
+    # Time O(1)
+    # Space O(n) n = length of snake = width * height in the worst case
 
     def __init__(self, width: int, height: int, food: List[List[int]]):
         self.height = height
@@ -123,44 +119,22 @@
         self.snake = deque()
         self.snake.append((0, 0))
         # Initialize food
-        self.food = food
-        self.food.reverse()
+        self.food = deque(food)
         
-    # Time O(1)
-    # Space O(n)
-    #   n = length of snake = width * height in the worst case
     def move(self, direction: str) -> int:
         x, y = self.directions[direction]
         i, j = self.snake[0]
-
-        if x + i < 0 or x + i >= self.height:
-            print("OOB X")
-            return -1
-        if y + j < 0 or y + j >= self.width:
-            print("OOB Y")
+        # Out of boundry
+        if not (0 <= x + i < self.height and 0 <= y + j < self.width):
             return -1
 
-        if (x+i, y+j) in self.snake:
-            # Check if snake moves circular
-            if (x+i, y+j) == self.snake[-1]:
-                self.snake.appendleft(self.snake.pop())
-                return self.score
-            else:
-                print("OUCH")
-                return -1
-
-        if self.food and (x+i, y+j) == tuple(self.food[-1]):
-            # Snake grows
-            self.snake.appendleft((x+i, y+j))
-            # Take out food that snake ate
-            self.food.pop()
-            # Increment score
+        # If ate food
+        if self.food and x + i == self.food[0][0] and y + j == self.food[0][1]:
+            self.food.popleft()
             self.score += 1
-            return self.score
-        
-        # Snake moves
+        else:
+            self.snake.pop()
         self.snake.appendleft((x+i, y+j))
-        self.snake.pop()
         return self.score
         
 
