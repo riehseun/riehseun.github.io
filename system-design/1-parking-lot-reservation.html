@@ -112,7 +112,8 @@ Table - Reservation
 
 Performance
 - Index query that finds all available parking spots given start and end time
-- parking id column must be indexed
+  - parking id column must be indexed
+- Compute query offline and insert all available parking slots into queue
 
 Scalability
 - Triggers:
@@ -137,16 +138,17 @@ Monitoring
 - Alerts: when metrics hit threshold
 
 Consistency
-- If using a single SQL instance, use strong consistency by leveraging ACID property of SQL
-- If DB is distributed, choose consistency over availability
-  - Do not commit transaction until R + W > N 
-
-Synchronization
 - If multiple users race against the same time slot
-- If using single SQL, leaverage ACID property 
-- If distributed, write goes in one shard in region A and read takes place in all other shards in region B,C,D,E
-- If write shard dies, one of remaining shards become the write shard
-- Write shard propagates updates to all other shards synchronously (use quorum to achieve strong consistency)
+- If using a single SQL
+  - Leaverage ACID property 
+  - Lock candidate parking spot
+  - Check availability
+  - If available, commit transaction
+  - Release lock
+- If distributed
+  - Write goes in one shard and all of its replicas are used for read
+  - If write shard dies, one of remaining replicas become the write shard
+  - Write shard propagates updates to all if its replicas synchronously (use quorum to achieve strong consistency)
 </code></pre>
 
   </div>
