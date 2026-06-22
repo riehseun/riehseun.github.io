@@ -94,14 +94,14 @@ VTS (NYC - Toronto)
 
 Wayfair (Boston - Toronto)
 - R: Erin LeBel
-- Screen: 1 AL (graph), SD IQ
+- Screen: 1 AL (graph), SD SQL
 
 X (Austin - Toronto)
 - R: Genevieve Schweikert
 
 World Quants (Connecticut - Toronto)
 - R:
-- Screen: 1 AL (given an arrays of stocks prices, compute max profit - can only buy asset one at a time but can sell however many you have at the moment), Python IQ ("yield", "class method vs static method", "decorator")
+- Screen: 1 AL (given an arrays of stocks prices, compute max profit - can only buy asset one at a time but can sell however many you have at the moment), Python ("yield", "class method vs static method", "decorator")
 
 Collimator AI (Denver - Toronto)
 - R: Allahverdi Suleymanov
