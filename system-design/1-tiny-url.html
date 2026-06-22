@@ -123,10 +123,11 @@ Performance
 - Use cache in front of DB to handle read traffic fast
 - Store frequently access data in key-value store
   - key: short_url
-  - value: url
+  - value: original_url
 - Invalidate with TTL 
 - Cache aside (if cache miss, read from DB and put it in cache, then return it)
 - Eviction: least recently used
+- Use CDN to serve frequently accessed URLs
 
 Latency
 - Cache hit: 10ms
@@ -143,7 +144,7 @@ Scalability
   - Add nodes (horizontal scaling)
 - Cache/DB
   - Shard/partition data using shard key
-  - Shard key is url_id
+  - Shard key is short_url
   - Consistent hashing to distribute shards across different nodes
 
 Availability
@@ -163,7 +164,11 @@ Monitoring
 
 Consistency
 - If multiple requests to create/update the same URL
-- If using a single SQL instance, use strong consistency by leveraging ACID property of SQL
+- If using a single SQL
+  - Leaverage ACID property 
+  - Lock original_url
+  - Commit transaction
+  - Release lock
 - If DB is distributed, choose availability over consistency
   - Being redirected to a stale URL in rare cases is okay
 </code></pre>
