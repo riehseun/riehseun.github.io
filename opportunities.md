@@ -67,27 +67,26 @@ World Quants
 - R:
 - Screen: 1 AL (given an arrays of stocks prices, compute max profit - can only buy asset one at a time but can sell however many you have at the moment), Python ("yield", "class method vs static method", "decorator")
 
-
 Boosted.ai
 - R: Daniela Zambrano
 - On-site: 3 AL (string modification, overlapping matrices, log streaming and processing)
-
 
 Runway AI
 - R:
 - Screen: Python currency (await, asynco, callable)
 
-
 DoorDash
 - R: sho sato
 - Screen: 1 AL in 60 mins (sliding window maximum)
 
-
-Ebay (Toronto) 
+Ebay
 - R: Nilsu Ozel
 - Screen: Split string by delimter of variable length
-
 
 Guidewire
 - R: Annie Jose
 - Screen: https://leetcode.ca/2021-12-09-2086-Minimum-Number-of-Buckets-Required-to-Collect-Rainwater-from-Houses
+
+RBC Borealis
+- R: Cathy C Lam
+- Screen: task schedule with timestamp
