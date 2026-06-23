@@ -73,7 +73,7 @@ Request -> Service (->DB) -> Response
 Write path
 - Service checks if there is free slot in DB between start and end time
   - For all parking spots, query reservation table to see if there is active booking between start and end time (if result is null, then spot is free)
-  - SELECT * FROM reservation where parking_id = ? AND start_time <= requested_end_time AND end_time >= requested_start_time
+  - SELECT * FROM reservation where parking_id = ? AND start_time <= requested_end_time AND end_time >= requested_start_time AND status == "active"
   - If above query returns result, that parking spot in unavailable
 - If yes, create reservation and respond with slot #. If no, respond with reservation failure
 
@@ -112,8 +112,7 @@ Table - Reservation
 
 Performance
 - Index query that finds all available parking spots given start and end time
-  - parking id column must be indexed
-- Compute query offline and insert all available parking slots into queue
+  - parking id, start_time, end_time columns must be indexed
 
 Scalability
 - Triggers:
