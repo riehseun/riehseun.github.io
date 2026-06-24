@@ -57,36 +57,36 @@ Intact
 
 VTS
 - R: Louisa Petkov
-- On-site: 1 AL, 1 SD (design TinyURL), 1 Terraform (AWS)
+- On-site: DSA, SD (TinyURL), Infra (Terraform AWS)
 
 Wayfair
 - R: Erin LeBel
-- Screen: 1 AL (graph), SD SQL
+- Screen: DSA and SD (graph, SQL)
 
 World Quants
 - R:
-- Screen: 1 AL (given an arrays of stocks prices, compute max profit - can only buy asset one at a time but can sell however many you have at the moment), Python ("yield", "class method vs static method", "decorator")
+- Screen: DSA and Coding (compute max profit given an arrays of stocks prices - can only buy asset one at a time but can sell however many you have at the moment, Python "yield", "class method vs static method", "decorator")
 
 Boosted.ai
 - R: Daniela Zambrano
-- On-site: 3 AL (string modification, overlapping matrices, log streaming and processing)
+- On-site: Coding (string modification, overlapping matrices, log streaming and processing)
 
 Runway AI
 - R:
-- Screen: Python currency (await, asynco, callable)
+- Screen: Coding (Python currency, await, asynco, callable)
 
 DoorDash
 - R: sho sato
-- Screen: 1 AL in 60 mins (sliding window maximum)
+- Screen: DSA (sliding window maximum)
 
 Ebay
 - R: Nilsu Ozel
-- Screen: Split string by delimter of variable length
+- Screen: DSA (Split string by delimter of variable length)
 
 Guidewire
 - R: Annie Jose
-- Screen: https://leetcode.ca/2021-12-09-2086-Minimum-Number-of-Buckets-Required-to-Collect-Rainwater-from-Houses
+- Screen: DSA (https://leetcode.ca/2021-12-09-2086-Minimum-Number-of-Buckets-Required-to-Collect-Rainwater-from-Houses)
 
 RBC Borealis
 - R: Cathy C Lam
-- Screen: task schedule with timestamp
+- Onsite: behavioral, DSA (task scheduler with timestamp, multithreading and concurrency), SD
