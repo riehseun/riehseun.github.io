@@ -7,7 +7,7 @@ Autonomic
 Index exchange
 - R: Yoyo Wan, Priyanka Choudhary
 - Screen: DSA (stack)
-- Onsite: MLSD (model serving) SD (parking lot reservation)
+- Onsite: MLSD (model serving) SD (parking lot reservation, concurrency and locking mechanisms at the application and infrastructure level, database performance tuning and concurrency design, metrics and observability systems including how monitoring pipelines are implemented internally)
 
 Meta
 - R: James Hargett, Christine Wilson
