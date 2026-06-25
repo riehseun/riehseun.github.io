@@ -89,4 +89,4 @@ Guidewire
 
 RBC Borealis
 - R: Cathy C Lam
-- Onsite: Behavioral, DSA (task scheduler with timestamp, multithreading and concurrency), SD (Layer6 ML platform, how to scale queue, how to identify bottlenecks in API serving)
+- Onsite: Behavioral, DSA (task scheduler with timestamp, multithreading and concurrency), SD (Layer6 ML platform, how to scale queue, how to identify bottlenecks in API serving and scale each component in API path)
