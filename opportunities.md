@@ -69,7 +69,7 @@
 
 17. Wayfair
 - Erin LeBel
-- Screen: DSA (graph) & SD (SQL)
+- DSA (graph), SD (SQL)
 
 18. World Quants
 - 
