@@ -24,7 +24,7 @@
 
 6. Autodesk
 - Joshua Joel Bartolome
-- Conversation based
+- Behavioral
 
 7. Amazon
 - R: Antonio Ang
