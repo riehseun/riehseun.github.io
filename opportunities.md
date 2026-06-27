@@ -26,7 +26,7 @@
 
 6. Autodesk
 - Joshua Joel Bartolome
-- Behavioral
+- Conversational
 
 7. Amazon
 - R: Antonio Ang
@@ -57,61 +57,69 @@
 - Mattson Heiner 
 - DSA (maximum breahth of parenthesis)
 
-14. Intact
+14. Collimator
+- Reda Dehy 
+- Conversational
+
+15. Mendal AI
+- Natalee Merrill
+- Conversational
+
+16. Intact
 - Stephen Wong
 - DSA (add two numbers represented by linked list, the smallest string can be formed from all possible combo of strings in given array, the number of palindrom combo possible by 4 increasing indexes ex. ghhhgh - 0124, 0234, 0134, 1235)
 
-15. VTS
+17. VTS
 - Louisa Petkov
 - DSA, SD (TinyURL), Infra (Terraform AWS)
 
-16. Runway AI
+18. Runway AI
 - Rebecca McPherson 
 - Python (Python currency, await, asynco, callable)
 
-17. Wayfair
+19. Wayfair
 - Erin LeBel
 - DSA (graph), SD (SQL)
 
-18. World Quants
+20. World Quants
 - 
 - DSA, Python (compute max profit given an arrays of stocks prices - can only buy asset one at a time but can sell however many you have at the moment, Python "yield", "class method vs static method", "decorator")
 
-19. DoorDash
+21. DoorDash
 - Sho Sato
 - DSA (sliding window maximum)
 
-20. Modular
+22. Modular
 - Laura Nguyen
-- Behavioral
+- Conversational
 
-21. Jarvis
+23. Jarvis
 - Saif Zafar
-- Behavioral
+- Conversational
 
-22. Skyfire
+24. Skyfire
 - Vlad Djordjevski
 - Python (debug web app), Python (script to delete files older than X days), Infra (migrate from monolith to microservice)
 
-23. Ebay
+25. Ebay
 - Nilsu Ozel
 - DSA (split string by delimter of variable length)
 
-24. Sysdane
+26. Sysdane
 - Riley Idelson
 - ML (debug model training), Python (debug web app), ML (quiz)
-- Behavioral
+- Conversational
 
-25. Guidewire
+27. Guidewire
 - Annie Jose
 - DSA (https://leetcode.ca/2021-12-09-2086-Minimum-Number-of-Buckets-Required-to-Collect-Rainwater-from-Houses)
 
-26. RBC Borealis
+28. RBC Borealis
 - Peter Kuchnio, Cathy C Lam
 - Behavioral
 - DSA (task scheduler with timestamp, multithreading and concurrency)
 - SD (Layer6 ML platform, how to scale queue, how to identify bottlenecks in API serving and scale each component in API path)
 
-27. Lightworks
+29. Lightworks
 - Osama Shaukat
 - Behavioral
