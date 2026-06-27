@@ -7,7 +7,8 @@
 2. Index exchange
 - Yoyo Wan, Priyanka Choudhary
 - DSA (stack)
-- MLSD (model serving) SD (parking lot reservation, concurrency and locking mechanisms at the application and infrastructure level, database performance tuning and concurrency design, metrics and observability systems including how monitoring pipelines are implemented internally)
+- MLSD (model serving) 
+- SD (parking lot reservation, concurrency and locking mechanisms at the application and infrastructure level, database performance tuning and concurrency design, metrics and observability systems including how monitoring pipelines are implemented internally)
 
 3. Meta
 - James Hargett, Christine Wilson
@@ -15,8 +16,9 @@
 
 4. Bloomberg
 - Michael Feinstein, Sian Naiken-Cooke
-- Python (class for transit system, 1 AL, get/set for sparse array)
+- Python (class for transit system, 1 AL)
 - Python (class for lottery create/delete/pickwinner in O(1)), SD (TinyURL)
+- Python (get/set for sparse array)
 
 5. Confluent
 - Sandhya Shivaram
