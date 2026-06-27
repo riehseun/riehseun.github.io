@@ -81,33 +81,37 @@
 - Sho Sato
 - DSA (sliding window maximum)
 
-20. Jarvis
+20. Modular
+- Laura Nguyen
+- Behavioral
+
+21. Jarvis
 - Saif Zafar
 - Behavioral
 
-21. Skyfire
+22. Skyfire
 - Vlad Djordjevski
 - Python (debug web app), Python (script to delete files older than X days), Infra (migrate from monolith to microservice)
 
-22. Ebay
+23. Ebay
 - Nilsu Ozel
 - DSA (split string by delimter of variable length)
 
-23. Sysdane
+24. Sysdane
 - Riley Idelson
 - ML (debug model training), Python (debug web app), ML (quiz)
 - Behavioral
 
-24. Guidewire
+25. Guidewire
 - Annie Jose
 - DSA (https://leetcode.ca/2021-12-09-2086-Minimum-Number-of-Buckets-Required-to-Collect-Rainwater-from-Houses)
 
-25. RBC Borealis
+26. RBC Borealis
 - Peter Kuchnio, Cathy C Lam
 - Behavioral
 - DSA (task scheduler with timestamp, multithreading and concurrency)
 - SD (Layer6 ML platform, how to scale queue, how to identify bottlenecks in API serving and scale each component in API path)
 
-26. Lightworks
+27. Lightworks
 - Osama Shaukat
 - Behavioral
