@@ -123,3 +123,7 @@
 29. Lightworks
 - Osama Shaukat
 - Behavioral
+
+30. Saris AI
+- Carrick Rogers
+- MLSD (chatbot, data stucture like user_id, timestamp, query, answer, framework like langchain, PCI compliancy of cloud providers)
