@@ -126,4 +126,4 @@
 
 30. Saris AI
 - Carrick Rogers
-- MLSD (chatbot, data stucture like user_id, timestamp, query, answer, framework like langchain, PCI compliancy of cloud providers)
+- MLSD (chatbot, data stucture of user_id/timestamp/query/answer, framework like langchain, PCI compliancy of cloud providers, whether system prompt changes based on underlying LLM)
