@@ -75,7 +75,7 @@
 
 18. Runway AI
 - Rebecca McPherson 
-- Python (Python currency, await, asynco, callable)
+- Python (currency, await, asynco, callable)
 
 19. Wayfair
 - Erin LeBel
@@ -107,7 +107,7 @@
 
 26. Sysdane
 - Riley Idelson
-- ML (debug model training), Python (debug web app), ML (quiz)
+- ML (debug model training with GPU cluster), Python (debug web app), ML (quiz)
 - Conversational
 
 27. Guidewire

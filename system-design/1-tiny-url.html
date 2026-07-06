@@ -91,7 +91,7 @@ Service
 DB
 - A single SQL server
 
-# API and Data
+# API
 
 - GET /{short_url}
 - POST /urls
@@ -103,6 +103,8 @@ DB
   "url": original_url
 }
 - DELETE /urls/{short_url}
+
+# Data
 
 Table - URL
 - url_id (bigint, pk)
@@ -121,13 +123,13 @@ Index
 
 Performance
 - Use cache in front of DB to handle read traffic fast
+  - User is redirected to original url
 - Store frequently access data in key-value store
   - key: short_url
   - value: original_url
 - Invalidate with TTL 
 - Cache aside (if cache miss, read from DB and put it in cache, then return it)
 - Eviction: least recently used
-- Use CDN to serve frequently accessed URLs
 
 Latency
 - Cache hit: 10ms
@@ -171,6 +173,9 @@ Consistency
   - Release lock
 - If DB is distributed, choose availability over consistency
   - Being redirected to a stale URL in rare cases is okay
+
+New design
+- Request -> Global load balancer -> Regional edge -> Service (->Cache->DB) -> Response
 </code></pre>
 
   </div>
