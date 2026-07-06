@@ -382,37 +382,38 @@
 
 <pre><code class="python">class Solution:
 
-    # [ab, cd] ? [ab, cd]
-
-    # Encode array of strings using delimiter
-    # For example, use length of each string and #
+    # ["hi", "pi"] ? ["hi", "pi"]
+    
+    # Use length of each string as prefix
+    # Use # as limiter to note where length ends
     # Encode
     #   Time O(n) n = len(strs)
-    #   Space O(n)
+    #   Space O(1) ignoring space for result
     # Decode
     #   Time O(m) m = len(s)
     #   Space O(1) ignoring space for result
 
     def encode(self, strs: List[str]) -> str:
-        result = []
+        encoded_string = []
         for s in strs:
-            result.append(str(len(s)))
-            result.append("#")
-            result.append(s)
-        return "".join(result)
+            encoded_string.append(str(len(s)))
+            encoded_string.append("#")
+            encoded_string.append(s)
+        return "".join(encoded_string)
 
     def decode(self, s: str) -> List[str]:
-        print(s)
-        result, i = [], 0
+        decoded_string = []
+        i, j = 0, 0
         while i < len(s):
-            j = i
-            while s[j] != "#":
-                j += 1
-            length = int(s[i:j])
-            result.append(s[j+1:j+1+length])
-            i = j + 1 + length 
-
-        return result</code></pre>
+            if s[i] == "#":
+                length = int(s[j:i])
+                string = s[i+1:i+1+length]
+                decoded_string.append(string)
+                i = i + 1 + length
+                j = i
+            else:
+                i += 1
+        return decoded_string</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/encode-and-decode-strings">271. Encode and Decode Strings</a> | <a href="https://neetcode.io/problems/string-encode-and-decode">Encode and Decode Strings</a>
