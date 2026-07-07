@@ -127,3 +127,7 @@
 30. Saris AI
 - Carrick Rogers
 - MLSD (chatbot, data stucture of user_id/timestamp/query/answer, framework like langchain, PCI compliancy of cloud providers, whether system prompt changes based on underlying LLM)
+
+31. Mozilla
+- Olivia Sargent 
+- Python (Github API to retrieve repos under org in a loop)
