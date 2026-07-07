@@ -63,17 +63,17 @@
 
 <pre><code class="python">class Solution:
     def ladderLength(self, beginWord: str, endWord: str, wordList: List[str]) -> int:
+        
+        # "cat", "rat", ["bat", "hat"] ? 0
+        # "cat", "rat", ["bat", "hat", "rat"] ? 1
 
-        # If endWord is not in wordList, return 0
         # BFS shortest path
-        # Time O(nm**2) n = number of words, m = word length
-        # Space O(nm**2)
+        # Create a graph where key is pattern like "*at"
+        # and value is word in WordList that belong to that pattern
+        # Time O(nm) n = len(wordList) = len(beginWord)
+        # Space O(nm)
 
-        if endWord not in wordList:
-            return 0
-
-        words = wordList[:]
-        words.append(beginWord)
+        wordList.append(beginWord)
         graph = defaultdict(list)
         n = len(beginWord)
         for word in wordList:
@@ -81,12 +81,12 @@
                 pattern = word[:i] + "*" + word[i+1:]
                 graph[pattern].append(word)
 
-        queue, visited = deque(), set()
+        queue = deque()
         queue.append((beginWord, 1))
-        visited.add(beginWord)
+        visited = set(beginWord)
 
         while queue:
-            node, depth = queue.popleft() 
+            node, depth = queue.popleft()
             if node == endWord:
                 return depth
 

@@ -131,3 +131,7 @@
 31. Mozilla
 - Olivia Sargent 
 - Python (Github API to retrieve repos under org in a loop)
+
+32. Nubank
+- Dhialick Oliveira
+- Python ()
