@@ -188,33 +188,33 @@
 <pre><code class="python">class Solution:
     def characterReplacement(self, s: str, k: int) -> int:
         
-        # AABBAA, 2 ? 6
-        # CCAAABB, 2 ? 5
+        # "ABBA", k = 2 ? 4
+        # "CCBBBAA", k = 2 ? 5
 
-        # Sliding window
-        # Substring is valid when counts of total chars minus
-        # counts of most frequent char don't exceed k
-        # Move end pointer while substring is valid
-        # When substring is invalid, move start pointer
+        # Consider count of most frequent char in a window
+        # Substring is valid when end - start - most_freq_count <= k
+        # Move end pointer
+        # While string is not valid, move start pointer
         # Time O(n) n = len(s)
-        # Space O(n) up to 26 chars 
+        # Space O(1) 26 chars in alphabet
 
         most_freq_count = 0
-        i, j, max_len = 0, 0, 0
         freq = defaultdict(int)
+        start, end = 0, 0 
+        max_len = 0
 
-        while i <= j and j < len(s):
+        while start <= end and end < len(s):
 
-            freq[s[j]] += 1
-            most_freq_count = max(most_freq_count, freq[s[j]])
-            j += 1
+            freq[s[end]] += 1
+            most_freq_count = max(most_freq_count, freq[s[end]])
+            end += 1
 
-            while i <= j and j - i - most_freq_count > k:
-                freq[s[i]] -= 1
-                i += 1
-
-            max_len = max(max_len, j-i)
+            while end - start - most_freq_count > k:
+                freq[s[start]] -= 1
+                start += 1
             
+            max_len = max(max_len, end-start)
+
         return max_len</code></pre>
   </div>
   <div class="card-footer text-muted">
