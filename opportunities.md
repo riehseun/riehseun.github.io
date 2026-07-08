@@ -135,3 +135,6 @@
 32. Nubank
 - Dhialick Oliveira
 - Python ()
+
+33. Socure
+- Behavioral (ADB job cluster - what steps I took, how did I persuade team members, challenges as solution was rolled out, lessons learned)
