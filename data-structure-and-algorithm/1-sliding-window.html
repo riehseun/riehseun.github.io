@@ -65,23 +65,23 @@
         # "aa" ? a
 
         # Use a set to hold seen chars
-        # Move end pointer if new char is not in seen
-        # If new char is in seen, move start pointer
+        # Move end pointer
+        # While new char is in seen, move start pointer
         # Time O(n) n = len(s)
-        # Space O(n)
+        # Space O(1) fixed number of ASCII chars
 
         seen = set()
         start, end = 0, 0
         max_len = 0
 
-        while start <= end and end < len(s):
+        while end < len(s):
 
-            if s[end] not in seen:
-                seen.add(s[end])
-                end += 1
-            else:
+            while s[end] in seen:
                 seen.remove(s[start])
                 start += 1
+
+            seen.add(s[end])
+            end += 1
             max_len = max(max_len, end-start)
 
         return max_len</code></pre>
@@ -97,46 +97,40 @@
 
 <pre><code class="python">class Solution:
     def minWindow(self, s: str, t: str) -> str:
+        
+        # "ABCDEEFG", "FEEC" ? "CDEEF"
 
-        # ABCDDEFGH, CDE ? CDDE
+        # Use two dictionary for counting chars in t and window
+        # Substring is valid when each char in t is satisfied
+        # Move end pointer
+        # While substring is valid, move start pointer
+        # Time O(n+m) n = len(s), m = len(t)
+        # Space O(n+m)
 
-        # Sliding window
-        # Use start and end pointer
-        # Move end pointer if substring is invalid
-        # Move start pointer if substring is valid
-        #   Remember min length valid substring
-        # How to tell valid substring
-        #   Use dictionary to remember char count of t  
-        #   Use another dictionary to keep track of char count while iterating s
-        #   If freq_s[c] == freq_t[c], then num_match += 1
-        #   Substring is valid when num_match == len(freq_t)
-        # Time O(n) n = len(s) + len(t)
-        # Space O(n)
-
-        start, end = 0, 0 
-        min_len, min_str = math.inf, ""
         freq_s, freq_t = defaultdict(int), defaultdict(int)
+        num_satisfied = 0
+        start, end = 0, 0
+        min_len, min_string = math.inf, ""
+
         for c in t:
             freq_t[c] += 1
-        num_match = 0
 
-        while start <= end and end < len(s):
-
+        while end < len(s):
             freq_s[s[end]] += 1
             if s[end] in freq_t and freq_s[s[end]] == freq_t[s[end]]:
-                num_match += 1
+                num_satisfied += 1
             end += 1
 
-            while num_match == len(freq_t):
+            while len(freq_t) == num_satisfied:
                 if end - start < min_len:
                     min_len = end - start
-                    min_str = s[start:end]
+                    min_string = s[start:end]
                 if s[start] in freq_t and freq_s[s[start]] == freq_t[s[start]]:
-                    num_match -= 1
-                freq_s[s[start]] -= 1    
+                    num_satisfied -= 1
+                freq_s[s[start]] -= 1
                 start += 1
 
-        return min_str</code></pre>
+        return min_string</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/minimum-window-substring">76. Minimum Window Substring</a> | <a href="https://neetcode.io/problems/minimum-window-with-characters">Minimum Window Substring</a>
@@ -203,7 +197,7 @@
         start, end = 0, 0 
         max_len = 0
 
-        while start <= end and end < len(s):
+        while end < len(s):
 
             freq[s[end]] += 1
             most_freq_count = max(most_freq_count, freq[s[end]])
