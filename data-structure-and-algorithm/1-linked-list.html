@@ -116,27 +116,26 @@ class Solution:
 class Solution:
     def removeNthFromEnd(self, head: Optional[ListNode], n: int) -> Optional[ListNode]:
         
-        # N(1)->N(2)->N(3)->N(4) n = 2 ?
-        # N(1)->N(2)->N(4)
+        # 1->2->3->4, n = 2? 1->2->4
 
-        # Move fast pointer n steps
-        # Move slow and fast pointer together till the end
-        # Remove slow pointer
+        # Two pointers
+        # Move fast pointer n times
+        # Then, move slow and fast pointer together
+        # Use dummy head to prevent slow.next being null
         # Time O(n) n = number of nodes in LL
         # Space O(1)
 
-        # Deal with null head case
-        dummy_head = ListNode()
+        dummy_head = ListNode(0)
         dummy_head.next = head
         slow = fast = dummy_head
-
+        
         for _ in range(n):
             fast = fast.next
 
         while fast.next:
-            fast = fast.next
             slow = slow.next
-            
+            fast = fast.next
+
         slow.next = slow.next.next
         return dummy_head.next</code></pre>
   </div>
@@ -207,30 +206,27 @@ class Solution:
 class Solution:    
     def mergeKLists(self, lists: List[Optional[ListNode]]) -> Optional[ListNode]:
         
-        # [1,2,6], [3,4,7], [5,10] ?
-        # [1,2,3,4,5,6,7,10]
+        # [1,3,5], [2,6], [4,7] ? [1,2,3,4,5,6,7]
 
-        # Put head of each lists into min_heap
-        # Pop from min_heap and insert next node into min_heap
-        # Time O(nlogm) n = total number of nodes, m = number of LL in lists
+        # Pull head of each LL into a heap
+        # Pop from heap to create new node
+        # Time O(mlogn) n = number of LL, m = number of nodes in LL
         # Space O(n)
 
         min_heap = []
+        dummy_head = node = ListNode(0)
 
-        for i, l in enumerate(lists):
-            if l:
-                heappush(min_heap, (l.val, i, l))
+        for i, head in enumerate(lists):
+            heappush(min_heap, (head.val, i, head))
 
-        node = ListNode()
-        dummy = node
         while min_heap:
-            val, i, l = heappop(min_heap)
-            if l.next:
-                heappush(min_heap, (l.next.val, i, l.next))
-            node.next = l
+            val, i, head = heappop(min_heap)
+            if head.next:
+                heappush(min_heap, (head.next.val, i, head.next))
+            node.next = head
             node = node.next
 
-        return dummy.next</code></pre>
+        return dummy_head.next</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/merge-k-sorted-lists">23. Merge k Sorted Lists</a> | <a href="https://neetcode.io/problems/merge-k-sorted-linked-lists">Merge K Sorted Linked Lists</a>
@@ -393,42 +389,43 @@ class Solution:
 
 class Solution:
     def reorderList(self, head: Optional[ListNode]) -> None:
+        
+        # 1->2->3->4->5->6 ? 1->6->2->5->3->4
+        # 1->2->3->4<-5<-6
 
-        # N(1)->N(2)->N(3)->N(4)->N(5) ?
-        # N(1)->N(5)->N(2)->N(4)->N(3)
-
-        # Find middle node and reverse second half
-        # N(1)->N(2)->N(3)<-N(4)<-N(5)
-        # start_next = start.next
-        # start.next = end
-        # start = start_next
-        # end_next = end.next
-        # end.next = start_next
-        # end = end_next
+        # head_next = head.next
+        # head.next = tail
+        # tail_next = tail.next
+        # tail.next = head_next
+        # head = head_next
+        # tail = tail_next
+        # Find mid point
+        # Reverse second half
         # Time O(n) n = number of nodes in LL
         # Space O(1)
 
-        slow, fast = head, head
-        while slow and fast and fast.next:
+        fast = slow = head
+        while fast and fast.next:
             slow = slow.next
             fast = fast.next.next
 
-        prev, node = None, slow.next
+        node = slow.next
         slow.next = None
+        prev = None
         while node:
             node_next = node.next
             node.next = prev
             prev = node
             node = node_next
 
-        start, end = head, prev
-        while end:
-            start_next = start.next
-            start.next = end
-            start = start_next
-            end_next = end.next
-            end.next = start_next
-            end = end_next</code></pre>
+        tail = prev
+        while tail:
+            head_next = head.next
+            head.next = tail
+            tail_next = tail.next
+            tail.next = head_next
+            head = head_next
+            tail = tail_next</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/reorder-list">143. Reorder List</a> | <a href="https://neetcode.io/problems/reorder-linked-list">Reorder Linked List</a>
