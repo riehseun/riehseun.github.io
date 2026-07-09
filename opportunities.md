@@ -130,11 +130,11 @@
 
 31. Mozilla
 - Olivia Sargent 
-- Python (Github API to retrieve repos under org in a loop)
+- Python (Github API to retrieve repos under orgs in a loop)
 
 32. Nubank
 - Dhialick Oliveira
-- Python ()
+- Python (heap sort by second value in ascending order, pattern of nested dictionary - user_id, timestamp)
 
 33. Socure
-- Behavioral (ADB job cluster - what steps I took, how did I persuade team members, challenges as solution was rolled out, lessons learned)
+- Behavioral (high impact project - scalability, quality controls, better customer satisfaction, features that had business impacts, manage conflict with other teams, work under pressure)
