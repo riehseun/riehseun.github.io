@@ -81,22 +81,23 @@
 class Solution:
     def isValidBST(self, root: Optional[TreeNode]) -> bool:
         
-        # In-order
-        # Prev node must be less than current node
+        # DFS
+        # In-order traverse
+        # At each node, check if prev < current
         # Time O(n) n = number of nodes in tree
-        # Space O(h) h = height of tree = n worst case
+        # Space O(n)
 
-        def in_order(node):
+        def dfs(node):
             if node:
-                in_order(node.left)
-                if self.prev is not None and self.prev.val >= node.val:
+                left = dfs(node.left)
+                if self.prev and self.prev.val >= node.val:
                     self.result = False
-                    return
                 self.prev = node
-                in_order(node.right)
-
-        self.prev, self.result = None, True
-        in_order(root)
+                right = dfs(node.right)
+                
+        self.prev = None
+        self.result = True
+        dfs(root)
         return self.result</code></pre>
   </div>
   <div class="card-footer text-muted">
@@ -402,24 +403,22 @@ class Solution:
 class Solution:
     def kthSmallest(self, root: Optional[TreeNode], k: int) -> int:
         
+        # DFS
         # In-order traverse
-        # Return kth seen element
-        # Time O(k)
-        # Space O(h) h = height of tree = k worst case
+        # Time O(n) n = number of nodes in tree
+        # Space O(n)
 
-        def in_order(node):
+        def dfs(node):
             if node:
-                in_order(node.left)
-                self.i -= 1
-                if self.i == 0:
+                dfs(node.left)
+                self.count += 1
+                if self.count == k:
                     self.result = node.val
-                    return
-                in_order(node.right)
-            else:
-                return
-                
-        self.i, self.result = k, None
-        in_order(root)
+                dfs(node.right)
+
+        self.result = None
+        self.count = 0
+        dfs(root)
         return self.result</code></pre>
   </div>
   <div class="card-footer text-muted">
@@ -441,23 +440,23 @@ class Solution:
 class Solution:
     def lowestCommonAncestor(self, root: TreeNode, p: TreeNode, q: TreeNode) -> TreeNode:
         
-        # Pre-order
-        # BST, when both p and q are less than root, just go left
-        # when both p and q are greater than root, just go right
-        # Otherwise, current node is lca
+        # DFS
+        # Pre-order traverse
+        # If p and q are both less than root, go left
+        # Elif p and q are both greater than root, go right
+        # Else, curret node is LCA
         # Time O(n) n = number of nodes in tree
-        # Space O(h) h = height of tree = n worst case
+        # Space O(n)
 
-        def pre_order(node):
-            if node:
-                if p.val < node.val and q.val < node.val:
-                    return pre_order(node.left)
-                elif p.val > node.val and q.val > node.val:
-                    return pre_order(node.right)
-                else:
-                    return node
+        def dfs(node):
+            if p.val < node.val and q.val < node.val:
+                return dfs(node.left)
+            elif p.val > node.val and q.val > node.val:
+                return dfs(node.right)
+            else:
+                return node
 
-        return pre_order(root)</code></pre>
+        return dfs(root)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree">236. Lowest Common Ancestor of a Binary Tree</a> | <a href="https://neetcode.io/problems/lowest-common-ancestor-in-binary-search-tree">Lowest Common Ancestor in Binary Search Tree</a>
