@@ -478,52 +478,45 @@ class Solution:
 #         self.right = right
 
 class Codec:
-    
-    # Pre-order traverse
-    # Encode 
-    #   Use string to encode tree
-    #   If None, add #
-    # Decode
-    #   Split encoded string by *
-    #   If elem is not #, create a TreeNode
+
+    # Before root node, append *
+    # At each None node, append #
     # Encode
     #   Time O(n) n = number of nodes in tree
-    #   Space O(h) h = height of tree = n worst case
+    #   Space O(n)
     # Decode
-    #   Time O(n)
-    #   Space O(h) recursion stack to rebuild the tree
-
+    #   Time O(m) m = len(data)
+    #   Space O(1) ignoring space to craete tree
+    
     # Encodes a tree to a single string.
     def serialize(self, root: Optional[TreeNode]) -> str:
-
-        def pre_order(node):
+        
+        def dfs(node):
             if node:
                 string.append(str(node.val))
-                pre_order(node.left)
-                pre_order(node.right)
+                dfs(node.left)
+                dfs(node.right)
             else:
                 string.append("#")
-                return 
-        
         string = []
-        pre_order(root)
+        dfs(root)
         return ",".join(string)
         
     # Decodes your encoded data to tree.
     def deserialize(self, data: str) -> Optional[TreeNode]:
         
-        def build(array):
-            node_val = array[self.index]
+        def dfs(data_array):
+            node_val = data_array[self.index]
             self.index += 1
             if node_val != "#":
-                node = TreeNode(int(node_val))
-                node.left = build(array)
-                node.right = build(array)
+                node = TreeNode(node_val)
+                node.left = dfs(data_array)
+                node.right = dfs(data_array)
                 return node
 
-        array = data.split(",")
+        data_array = data.split(",")
         self.index = 0
-        return build(array)</code></pre>
+        return dfs(data_array)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/serialize-and-deserialize-binary-tree">297. Serialize and Deserialize Binary Tree</a> | <a href="hhttps://neetcode.io/problems/serialize-and-deserialize-binary-tree">Serialize and Deserialize Binary Tree</a>
