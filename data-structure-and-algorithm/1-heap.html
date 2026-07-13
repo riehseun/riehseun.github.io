@@ -97,17 +97,18 @@ class Solution:
 
 class MedianFinder:
 
-    # Use two heaps where number of values are equal
-    # Send upper half to min_heap
-    # Send lower half to max_heap
-    # Push to max heap
+    # [1,2,3,4,5,6] ? 3.5  
+
+    # Use two heaps
+    # Keep lower half in max heap
+    # Keep upper half in min heap
+    # Push to max_heap first
     # Adjust if max_heap[0] > min_heap[0]
-    # Balance
+    # Adjust if len(max_heap) > len(min_heap) + 1
+    # Adjust if len(max_heap) < len(min_heap)
     # Add
-    #   Time O(logn) n = number of elements coming in to stream
+    #   Time O(logn)
     #   Space O(n)
-    # Median
-    #   Time O(1)
 
     def __init__(self):
         self.min_heap = []
@@ -115,15 +116,17 @@ class MedianFinder:
 
     def addNum(self, num: int) -> None:
         heappush(self.max_heap, -num)
-        if self.max_heap and self.min_heap and (-self.max_heap[0] > self.min_heap[0]):
-            val = -heappop(self.max_heap)
-            heappush(self.min_heap, val)
-
+        if self.max_heap \
+            and self.min_heap \
+            and -self.max_heap[0] > self.min_heap[0]:
+            num = -heappop(self.max_heap)
+            heappush(self.min_heap, num)
         if len(self.max_heap) > len(self.min_heap) + 1:
-            heappush(self.min_heap, -heappop(self.max_heap))
-
-        if len(self.min_heap) > len(self.max_heap):
-            heappush(self.max_heap, -heappop(self.min_heap))
+            num = -heappop(self.max_heap)
+            heappush(self.min_heap, num)
+        if len(self.max_heap) < len(self.min_heap):
+            num = heappop(self.min_heap)
+            heappush(self.max_heap, -num)
 
     def findMedian(self) -> float:
         if len(self.max_heap) > len(self.min_heap):
