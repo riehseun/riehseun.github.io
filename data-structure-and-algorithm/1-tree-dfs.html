@@ -285,25 +285,28 @@ class Solution:
 
 class Solution:
     def maxPathSum(self, root: Optional[TreeNode]) -> int:
-        
-        # At each node, path sum can be max(left, right) + node.val
-        # At each node, max path sum could be max(left,0) + max(right,0) + node.val
-        # Post-order
-        # Time O(n) n = number of nodes in tree
-        # Space O(h) h = height of tree = n worst case
 
-        def post_order(node):
+        # At each node, path sum can be
+        #   node.val + max(left, 0) + max(right, 0)
+        # If None, return 0
+        # Else, return node.val + max(left, right, 0)
+        # DFS
+        # Post-order traverse
+        # Time O(n) n = number of nodes in tree
+        # Space O(n)
+
+        def dfs(node):
             if node:
-                left = post_order(node.left) 
-                right = post_order(node.right)
-                path_sum = max(left, 0) + max(right, 0) + node.val
+                left = dfs(node.left)
+                right = dfs(node.right)
+                path_sum = node.val + max(left, 0) + max(right, 0)
                 self.max_path_sum = max(self.max_path_sum, path_sum)
-                return max(left, right, 0) + node.val
+                return node.val + max(left, right, 0)
             else:
-                return 0 
+                return 0
 
         self.max_path_sum = -math.inf
-        post_order(root)
+        dfs(root)
         return self.max_path_sum</code></pre>
   </div>
   <div class="card-footer text-muted">
