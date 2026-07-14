@@ -344,7 +344,38 @@
   <div class="card-body">
     <h2 class="card-title">Word Search (75/150/250)</h2>
 
-<pre><code class="python"></code></pre>
+<pre><code class="python">class Solution:
+    def exist(self, board: List[List[str]], word: str) -> bool:
+        
+        # Backtracking
+        # Try all neighboring chars and update index
+        # Time O(nm3**k) n = number of rows, m = number of cols, k = len(word)
+        # Space O(k) recursion stack
+
+        def backtrack(i, j, index):
+
+            if index == len(word):
+                return True
+            if not 0 <= i < n or not 0 <= j < m:
+                return False
+            if board[i][j] != word[index]:
+                return False
+
+            current_char = board[i][j]
+            board[i][j] = "#"
+            for x, y in dirs:
+                if backtrack(i+x, j+y, index+1):
+                    return True
+                    break
+            board[i][j] = current_char
+
+        n, m = len(board), len(board[0])
+        dirs = [(-1,0), (1,0), (0,-1), (0,1)]
+        for i in range(n):
+            for j in range(m):
+                if backtrack(i, j, 0):
+                    return True
+        return False</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/word-search">79. Word Search</a> | <a href="https://neetcode.io/problems/search-for-word">Word Search</a>
