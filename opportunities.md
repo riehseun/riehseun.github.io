@@ -119,6 +119,7 @@
 - Behavioral
 - DSA (task scheduler with timestamp, multithreading and concurrency)
 - SD (Layer6 ML platform, how to scale queue, how to identify bottlenecks in API serving and scale each component in API path)
+- OFFER: 165K + 25K + 20K (3 years - at Dec 2029) + 20K (sign-in) + 9K RSP Matching + 20 days per year + unlimited sick day, Start date is Sep 7th, Respond by Friday
 
 29. Lightworks
 - Osama Shaukat
