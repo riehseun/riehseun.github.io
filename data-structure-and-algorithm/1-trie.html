@@ -63,7 +63,7 @@
     #   Space O(n)
     # Search & startsWith
     #   Time O(n) 
-    #   Space O(1)
+    #   Space O(n) recursion stack
 
     def __init__(self):
         self.trie = {}
@@ -77,20 +77,30 @@
         node["end"] = True
         
     def search(self, word: str) -> bool:
-        node = self.trie
-        for c in word:
-            if c not in node:
-                return False
-            node = node[c]
-        return "end" in node
 
-    def startsWith(self, prefix: str) -> bool:
-        node = self.trie
-        for c in prefix:
+        def dfs(i, node):
+            if i == len(word):
+                return "end" in node
+
+            c = word[i]
             if c not in node:
                 return False
-            node = node[c]
-        return True</code></pre>
+            return dfs(i+1, node[c]) 
+
+        return dfs(0, self.trie)
+        
+    def startsWith(self, prefix: str) -> bool:
+
+        def dfs(i, node):
+            if i == len(prefix):
+                return True
+
+            c = prefix[i]
+            if c not in node:
+                return False
+            return dfs(i+1, node[c]) 
+
+        return dfs(0, self.trie)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/implement-trie-prefix-tree">208. Implement Trie (Prefix Tree)</a> | <a href="https://neetcode.io/problems/implement-prefix-tree">Implement Trie Prefix Tre</a>
@@ -103,14 +113,13 @@
 
 <pre><code class="python">class WordDictionary:
 
-    # Use dictionary of dictionaries to store chars
-    # Search - if . is found, invoke search on all possible words
-    # AddWord
-    #   Time O(n) n = number of words in each iteration
-    #   Space O(nm) m = total number of words
+    # Use nested dictionary
+    # Add
+    #   Time O(n) n = len(word)
+    #   Space O(n)
     # Search
-    #   Time O(26**n)
-    #   Space O(1)
+    #   Time O(m) m = all words in trie
+    #   Space O(n) recursion stack
 
     def __init__(self):
         self.trie = {}
@@ -121,18 +130,18 @@
             if c not in node:
                 node[c] = {}
             node = node[c]
-        node["#"] = True
+        node["end"] = True
 
     def search(self, word: str) -> bool:
-
+        
         def dfs(i, node):
             if i == len(word):
-                return "#" in node
+                return "end" in node
 
             c = word[i]
             if c == ".":
                 for key, val in node.items():
-                    if key == "#":
+                    if key == "end":
                         continue
                     if dfs(i+1, val):
                         return True
