@@ -147,19 +147,20 @@
 <pre><code class="python">class Solution:
     def foreignDictionary(self, words: List[str]) -> str:
         
-        # Create a directed graph 
-        # Only first different between two words matter
         # Topological sort
-        # Time O(n) n = total number of chars in words
-        # Space O(1) up to 26 chars in alphabet
+        # Find indegree of each node (number of incoming edges)
+        # Start with nodes (indegree==0), DFS
+        # Iterate two words at a time and compare char by char
+        # Time O(nm) n = len(word), m = max length of word
+        # Space O(1) only 26 chars in alphabet
 
-        graph = defaultdict(set)
-        indegree = {}
+        graph, indegree = defaultdict(set), {}
         for word in words:
             for c in word:
                 indegree[c] = 0
+
         for i in range(len(words)-1):
-            # If next word is prefix of current word, return ""
+            # If current word is prefix of next word
             if words[i].startswith(words[i+1]) \
                 and len(words[i]) > len(words[i+1]):
                 return ""
@@ -172,7 +173,7 @@
                     graph[words[i][j]].add(words[i+1][j])
                     indegree[words[i+1][j]] += 1
                 break
-        
+
         queue = deque()
         for c in indegree:
             if indegree[c] == 0:
@@ -187,7 +188,7 @@
                 if indegree[next_node] == 0:
                     queue.append(next_node)
 
-        # Check check
+        # Cycle check
         if len(result) != len(indegree):
             return ""
         return "".join(result)</code></pre>
