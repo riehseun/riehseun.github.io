@@ -12,7 +12,7 @@
 
 3. Meta
 - James Hargett, Christine Wilson
-- DSA (valid palindrome after deleting at most one character)
+- DSA (https://leetcode.com/problems/valid-palindrome-ii)
 
 4. Bloomberg
 - Michael Feinstein, Sian Naiken-Cooke
@@ -25,8 +25,9 @@
 - DSA (https://leetcode.com/problems/regular-expression-matching)
 
 6. Autodesk
-- Joshua Joel Bartolome
-- Conversational
+- Joshua Joel Bartolome, Waseem Ali
+- Conversational (A/B test), Behavioral (made current system better)
+- Python (Implementation of retreving feaures, scores, TTL, making sure predictions are made for each customer within 50ms, what happens to code when large number of requests)
 
 7. Amazon
 - R: Antonio Ang
@@ -112,7 +113,7 @@
 
 27. Guidewire
 - Annie Jose
-- DSA (https://leetcode.ca/2021-12-09-2086-Minimum-Number-of-Buckets-Required-to-Collect-Rainwater-from-Houses)
+- DSA (https://leetcode.com/problems/minimum-number-of-food-buckets-to-feed-the-hamsters)
 
 28. RBC Borealis
 - Peter Kuchnio, Cathy C Lam
