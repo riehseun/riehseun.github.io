@@ -260,7 +260,7 @@
         dp[1] = nums[0]
         dp[2] = max(nums[0], nums[1])
 
-        for i in range(2, n+1):
+        for i in range(3, n+1):
             dp[i] = max(nums[i-1]+dp[i-2], dp[i-1])
 
         return dp[n]</code></pre>
@@ -277,25 +277,40 @@
 <pre><code class="python">class Solution:
     def rob(self, nums: List[int]) -> int:
         
+        # [4,1,2,3] ? 6
+
         # DP
-        # dp[i] = maximum amount robbed till index i
-        # Either rob first or not (try both and return better result)
-        # Init: dp = [0] * (n+1) 
-        # Recurse: dp[i] = max(dp[i-1], dp[i-2]+nums[i])
+        # dp[i] = max money robbing up to i
+        # Init
+        #   dp[0] = 0, dp[1] = nums[0], dp[2] = max(nums[0], nums[1])
+        # Recurse
+        #   dp[i] = max(nums[i-1]+dp[i-2], dp[i-1])
+        # Exclude first element and run DP
+        # Exclude last element and run DP
         # Time O(n) n = len(nums)
         # Space O(n)
 
-        def dp_helper(nums):
+        def dp(nums):
             n = len(nums)
+            if n == 0:
+                return 0
+            if n == 1:
+                return nums[0]
+
             dp = [0] * (n+1)
-            for i in range(1, n+1):
-                dp[i] = max(dp[i-1], dp[i-2]+nums[i-1])
+            dp[1] = nums[0]
+            dp[2] = max(nums[0], nums[1])
+
+            for i in range(3, n+1):
+                dp[i] = max(nums[i-1]+dp[i-2], dp[i-1])
 
             return dp[n]
 
+        if len(nums) == 0:
+            return 0
         if len(nums) == 1:
             return nums[0]
-        return max(dp_helper(nums[1:]), dp_helper(nums[:-1]))</code></pre>
+        return max(dp(nums[1:]), dp(nums[:-1]))</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/house-robber-ii">213. House Robber II</a> | <a href="https://neetcode.io/problems/house-robber-ii">House Robber II</a>
