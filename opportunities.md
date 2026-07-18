@@ -84,7 +84,7 @@
 
 20. World Quants
 - 
-- DSA, Python (compute max profit given an arrays of stocks prices - can only buy asset one at a time but can sell however many you have at the moment, Python "yield", "class method vs static method", "decorator")
+- DSA, Python (https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii, Python "yield", "class method vs static method", "decorator")
 
 21. DoorDash
 - Sho Sato
