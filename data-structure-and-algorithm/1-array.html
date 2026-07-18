@@ -343,34 +343,36 @@
 <pre><code class="python">class Solution:
     def lengthOfLIS(self, nums: List[int]) -> int:
         
-        # [1,3,7,5,4,6] ? [1,3,4,6]
+        # [5,2,6,8,2,4,9] ? 4 (5,6,8,9)
 
-        # Iterate nums
-        # Add increasing sequence into a list
-        # If num <= stack[-1], 
-        #   find first num from beginning >= incoming num, and replace
+        # Append to stack if incoming num > top of stack
+        # If incoming num < top of stack, find first number in stack
+        # that is >= incoming num, then replace
         # Time O(nlogn) n = len(nums)
         # Space O(n)
 
-        def binary_search(num, result):
-            left, right = 0, len(result) - 1
+        def binary_search(num, array):
+            left, right = 0, len(array) - 1
             while left < right:
                 mid = (left+right) // 2
-                if result[mid] >= num:
+                if array[mid] >= num:
                     right = mid
                 else:
                     left = mid + 1
             return left
 
-        result = []
+        stack = []
         for num in nums:
-            if not result or num > result[-1]:
-                result.append(num)
+            if stack:
+                if num > stack[-1]:
+                    stack.append(num)
+                else:
+                    index = binary_search(num, stack)
+                    stack[index] = num
             else:
-                index = binary_search(num, result)
-                result[index] = num
+                stack.append(num)
         
-        return len(result)</code></pre>
+        return len(stack)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/longest-increasing-subsequence">300. Longest Increasing Subsequence</a> | <a href="https://neetcode.io/problems/longest-increasing-subsequence">Longest Increasing Subsequence</a>
