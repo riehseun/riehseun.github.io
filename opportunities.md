@@ -27,7 +27,7 @@
 6. Autodesk
 - Joshua Joel Bartolome, Waseem Ali
 - Conversational (A/B test), Behavioral (made current system better)
-- Python (Implementation of retreving feaures, scores, TTL, making sure predictions are made for each customer within 50ms, what happens to code when large number of requests)
+- [CoderPad] Python (Implementation of retreving feaures, scores, TTL, making sure predictions are made for each customer within 50ms, what happens to code when large number of requests)
 
 7. Amazon
 - R: Antonio Ang
@@ -40,7 +40,7 @@
 
 9. Workday
 - Johnny Wang
-- DSA (given 2D array of data, and computing mean and std w/o using libs)
+- Python (given 2D array of data, and computing mean and std w/o using libs)
 
 10. Boosted.ai
 - Daniela Zambrano
@@ -84,11 +84,11 @@
 
 20. World Quants
 - 
-- DSA, Python (https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii, Python "yield", "class method vs static method", "decorator")
+- DSA (https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii), Python ("yield", "class method vs static method", "decorator")
 
 21. DoorDash
 - Sho Sato
-- DSA (sliding window maximum)
+- DSA (https://leetcode.com/problems/sliding-window-maximum)
 
 22. Modular
 - Laura Nguyen
@@ -100,7 +100,7 @@
 
 24. Skyfire
 - Vlad Djordjevski
-- Python (debug web app), Python (script to delete files older than X days), Infra (migrate from monolith to microservice)
+- [Woven] Python (debug web app), Python (script to delete files older than X days), Infra (migrate from monolith to microservice)
 
 25. Ebay
 - Nilsu Ozel
@@ -108,7 +108,7 @@
 
 26. Sysdane
 - Riley Idelson
-- ML (debug model training with GPU cluster), Python (debug web app), ML (quiz)
+- [Woven] ML (debug model training with GPU cluster), Python (debug web app), ML (quiz)
 - Conversational
 
 27. Guidewire
@@ -137,7 +137,7 @@
 
 32. Nubank
 - Dhialick Oliveira
-- Python (heap sort by second value in ascending order, pattern of nested dictionary - user_id, timestamp)
+- [CodeSignal] Python (heap sort by second value in ascending order, pattern of nested dictionary - user_id, timestamp)
 
 33. Socure
 - Behavioral (high impact project - scalability, quality controls, better customer satisfaction, features that had business impacts, manage conflict with other teams, work under pressure)
