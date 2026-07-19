@@ -132,7 +132,7 @@
 
 31. Mozilla
 - Olivia Sargent 
-- Python (Github API to retrieve repos under orgs in a loop)
+- [CoderPad] Python (Github API to retrieve repos under orgs in a loop)
 - Conversation (observability metrics for API - other than latency, number of requests, cpu/memory utilization, how to elastically scale compute based on load - rule or ml based)
 
 32. Nubank
