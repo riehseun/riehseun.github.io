@@ -138,8 +138,8 @@ class Interval(object):
 class Solution:
     def canAttendMeetings(self, intervals: List[Interval]) -> bool:
 
-        # Check if any intervals conflict
         # Sort by start time
+        # Check if any intervals conflict by remembering last end
         # Time O(nlogn) n = len(intervals)
         # Space O(1)
 
@@ -147,11 +147,12 @@ class Solution:
             return True
         intervals.sort(key=lambda x: x.start)
         last_end = intervals[0].end
-        
+
         for interval in intervals[1:]:
             if interval.start < last_end:
                 return False
             last_end = interval.end
+            
         return True</code></pre>
   </div>
   <div class="card-footer text-muted">
@@ -163,7 +164,9 @@ class Solution:
   <div class="card-body">
     <h2 class="card-title">Meeting Rooms II (75/150/250)</h2>
 
-<pre><code class="python">"""
+<pre><code class="python">from heapq import heappush, heappop
+
+"""
 Definition of Interval:
 class Interval(object):
     def __init__(self, start, end):
@@ -171,14 +174,12 @@ class Interval(object):
         self.end = end
 """
 
-from heapq import heappush, heappop
-
 class Solution:
     def minMeetingRooms(self, intervals: List[Interval]) -> int:
         
         # Sort by start time
-        # When meeting conflict, insert end time to heap
-        # Keep earliest end time at root of heap
+        # Insert end time to min_heap (assume conflict)
+        # At each non-conflict, pop from heap 
         # Time O(nlogn) n = len(intervals)
         # Space O(n)
 
@@ -186,11 +187,12 @@ class Solution:
             return 0
         intervals.sort(key=lambda x: x.start)
         min_heap = []
-        
+
         for interval in intervals:
             if min_heap and interval.start >= min_heap[0]:
                 heappop(min_heap)
             heappush(min_heap, interval.end)
+            
         return len(min_heap)</code></pre>
   </div>
   <div class="card-footer text-muted">
