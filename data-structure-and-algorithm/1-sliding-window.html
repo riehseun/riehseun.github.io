@@ -223,32 +223,35 @@
 <pre><code class="python">class Solution:
     def checkInclusion(self, s1: str, s2: str) -> bool:
         
-        # Create dictionary of char count of s1
-        # Sliding window on s2 where window size of len(s1)
-        # Time O(n) n = len(s2)
-        # Space O(m) m = len(s1)
+        # Create counter for s1
+        # Create running counter while iterating s2
+        # Check if frequency matches 
+        # Time O(nm) n = len(s1), m = len(s2)
+        # Space O(m) 
 
-        n, m = len(s2), len(s1)
-        freq_1, freq_2 = defaultdict(int), defaultdict(int)
-        for c in s1:
-            freq_1[c] += 1
+        n, m = len(s1), len(s2)
+        freq_1 = Counter(s1)
 
-        for c in s2[:m]:
+        freq_2 = defaultdict(int)
+        for c in s2[:n]:
             if c in freq_1:
                 freq_2[c] += 1
-        if freq_2 == freq_1:
+
+        if freq_1 == freq_2:
             return True
-        
-        for i in range(n-m):
-            if s2[i] in freq_1:
-                freq_2[s2[i]] -= 1
-            if freq_2[s2[i]] == 0:
-                del freq_2[s2[i]]
-            if s2[i+m] in freq_1:
-                freq_2[s2[i+m]] += 1
+
+        for i in range(n, m):
+            new, old = s2[i], s2[i-n] 
+            if new in freq_1:
+                freq_2[new] += 1
+            if old in freq_1:
+                freq_2[old] -= 1
+                if freq_2[old] == 0:
+                    del freq_2[old]
+
             if freq_1 == freq_2:
                 return True
-
+            
         return False</code></pre>
   </div>
   <div class="card-footer text-muted">
