@@ -144,28 +144,31 @@
 <pre><code class="python">class Solution:
     def maxSlidingWindow(self, nums: List[int], k: int) -> List[int]:
         
-        # Use a queue of size k
-        # Add indices of nums into queue
-        # Keep max number at the front of queue 
+        # [1,2,1,0,4,2,6], k = 3 ? [2,2,4,4,6]
+         
+        # Keep index of max num in at the front of queue
+        # While new number > last num in queue, pop last num
+        # [1,2,1] -> [2,1,0] -> [4] -> [4,2] -> [6]
         # Time O(n) n = len(nums)
         # Space O(k)
 
-        queue = deque()
         result = []
-        n = len(nums)
+        queue = deque()
         for i in range(k):
             while queue and nums[queue[-1]] < nums[i]:
-                queue.pop() 
+                queue.pop()
             queue.append(i)
         result.append(nums[queue[0]])
-        
-        for i in range(k, n):
+
+        for i in range(k, len(nums)):
+            
             while queue and nums[queue[-1]] < nums[i]:
                 queue.pop()
             queue.append(i)
 
             while queue and queue[0] <= i - k:
                 queue.popleft()
+
             result.append(nums[queue[0]])
 
         return result</code></pre>
