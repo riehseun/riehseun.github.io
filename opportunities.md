@@ -141,3 +141,7 @@
 
 33. Socure
 - Behavioral (high impact project - scalability, quality controls, better customer satisfaction, features that had business impacts, manage conflict with other teams, work under pressure)
+
+34. Mckesson
+- 
+- [Torc] Kubernetes networking (gateway.networking.k8s.io/v1, templates.gatekeeper.sh/v1) ArgoCD, Github Actions
