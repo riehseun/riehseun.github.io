@@ -57,18 +57,24 @@
 <pre><code class="python">class Solution:
     def largestRectangleArea(self, heights: List[int]) -> int:
         
-        # For each index i, consider max area it can achieve
-        # Expand to left and right till hitting lower height
-        # Keep only increasing sequence to stack
-        # When sequene decreases, current num is right boundry of top of stack
-        # Left boundry of top of stack is its previous element in stack
+        # For each index i, consider the max area it can achieve
+        # Expand left and right until hitting lower height
+        # Try appending sequence into stack
+        # When sequence decreases, consider stack[-1]
+        #   Right boundry is current num
+        #   Left boundry is previous element of stack
         # Time O(n) n = len(heights)
         # Space O(n)
 
+        # Ex. [1,2,4,3,7,2]
+        # stack = [1] -> [1,2] -> [1,2,4] -> [1,2,3] -> [1,2,3,7] -> [1,2,3]
+        
         stack = [-1]
+        n = len(heights)
         max_area = 0
-        for i, h in enumerate(heights):
-            while stack[-1] != -1 and h < heights[stack[-1]]:
+
+        for i in range(n):
+            while stack[-1] != -1 and heights[i] < heights[stack[-1]]:
                 height = heights[stack.pop()]
                 right = i
                 left = stack[-1]
@@ -77,7 +83,7 @@
 
         while stack[-1] != -1:
             height = heights[stack.pop()]
-            right = len(heights)
+            right = n
             left = stack[-1]
             max_area = max(max_area, (right-left-1)*height)
 
