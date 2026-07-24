@@ -449,10 +449,12 @@
 
     # Use dictionary of tuple (timestamp, value)
     # If key does not exist, return ""
-    # If key exist
-    #   Find last timestamp <= timestamp 
-    # Time O(1) for set and O(logn) for get
-    # Space O(n) n = data in stream
+    # If key exist, find last timestamp <= timestamp 
+    # Set
+    #   Time O(1)
+    #   Space O(1)
+    # Get - use binary search
+    #   Time O(logn)
 
     def __init__(self):
         self.data = defaultdict(list)
@@ -463,20 +465,19 @@
     def get(self, key: str, timestamp: int) -> str:
         if key not in self.data:
             return ""
-        if timestamp < self.data[key][0][0]:
+        timestamps = self.data[key]
+        if timestamp < timestamps[0][0]:
             return ""
         
-        left, right = 0, len(self.data[key])
-        while left < right:
-            mid = (left+right) // 2
-            if self.data[key][mid][0] <= timestamp:
+        left, right = 0, len(timestamps) - 1
+        while left <= right:
+            mid = (left + right) // 2
+            if timestamps[mid][0] <= timestamp:
                 left = mid + 1
             else:
-                right = mid
+                right = mid - 1
 
-        if left == 0:
-            return ""
-        return self.data[key][left-1][1]</code></pre>
+        return timestamps[left-1][1]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/time-based-key-value-store">981. Time Based Key-Value Store</a> | <a href="https://neetcode.io/problems/time-based-key-value-store">Time Based Key-Value Store</a>
