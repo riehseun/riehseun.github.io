@@ -205,37 +205,23 @@
 <pre><code class="python">class Solution:
     def searchMatrix(self, matrix: List[List[int]], target: int) -> bool:
         
-        # Find a correct row, then execute binary search
-        # Find mid row
-        # If nums[mid][0] > target, right = mid - 1
-        # If nums[mid][m-1] < target, left = mid + 1
-        # Else, row = mid
-        # Time O(logm+logn)
+        # Treat the matrix as a sorted 1D array.
+        # Convert each 1D index back to (row, col).
+        # Time O(log(nm)) n = len(matrix), m = len(matrix[0])
         # Space O(1)
 
         n, m = len(matrix), len(matrix[0])
-        left, right = 0, n - 1
-        row = -1
-        while left <= right:
-            mid = (left+right) // 2
-            if matrix[mid][0] > target:
-                right = mid - 1
-            elif matrix[mid][m-1] < target:
-                left = mid + 1
-            else:
-                row = mid
-                break
+        left, right = 0, n * m - 1
 
-        if row == -1:
-            return False
-
-        left, right = 0, m - 1
         while left <= right:
-            mid = (left+right) // 2
-            if matrix[row][mid] > target:
-                right = mid - 1
-            elif matrix[row][mid] < target:
+            mid = (left + right) // 2
+            row = mid // m
+            col = mid % m
+
+            if matrix[row][col] < target:
                 left = mid + 1
+            elif matrix[row][col] > target:
+                right = mid - 1
             else:
                 return True
 
