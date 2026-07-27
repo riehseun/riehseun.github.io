@@ -66,21 +66,17 @@
 
 class LRUCache:
 
-    # Use hash table
+    # Use dictionary and linked list
     # Get
-    #   Return the value or -1, done in O(1)
-    #   Mark the key as most recently used?
+    #   Return value from dictioary
+    #   Move node to head
     # Put
-    #   Add/update the value in dictionary - O(1)
-    #   Mark the key as most recently used?
-    #   Evict least recently used if necessary?
-    # Use LL
-    #   Head points to mostly recently used
-    #   Tail points to least recently used
-    #   Nodes in the middle are ordered 
+    #   Update dictionary
+    #   Add/Move node to head
+    #   (If size exceed), remove from tail
 
     def __init__(self, capacity: int):
-        self.dictionary = {}
+        self.cache = {}
         self.capacity = capacity
         self.size = 0
         self.head = Node()
@@ -89,45 +85,41 @@ class LRUCache:
         self.tail.prev = self.head
 
     def get(self, key: int) -> int:
-        if key in self.dictionary:
-            self.move_to_front(self.dictionary[key])
-            return self.dictionary[key].val
+        if key in self.cache:
+            self.move(self.cache[key])
+            return self.cache[key].val
         else:
             return -1
-        
+
     def put(self, key: int, value: int) -> None:
-        if key in self.dictionary:
-            self.move_to_front(self.dictionary[key])
-            self.dictionary[key].val = value
+        if key in self.cache:
+            self.move(self.cache[key])
+            self.cache[key].val = value
         else:
-            node = Node(key,value)
-            self.add_to_head(node)
-            self.dictionary[key] = node
+            node = Node(key, value)
+            self.add(node)
+            self.cache[key] = node
             self.size += 1
-        
+            
         if self.size > self.capacity:
-            key = self.remove_from_tail()
-            del self.dictionary[key]
+            node = self.tail.prev
+            self.remove(self.tail.prev)
+            del self.cache[node.key]
             self.size -= 1
 
-    def add_to_head(self, node: Node) -> None:
+    def add(self, node: Node) -> None:
         node.next = self.head.next
         self.head.next.prev = node
         self.head.next = node
         node.prev = self.head
-        
-    def move_to_front(self, node: Node) -> None:
-        # Remove
+
+    def remove(self, node: Node) -> None:
         node.prev.next = node.next
         node.next.prev = node.prev
-        # Add
-        self.add_to_head(node)
         
-    def remove_from_tail(self) -> None:
-        key = self.tail.prev.key
-        self.tail.prev.prev.next = self.tail
-        self.tail.prev = self.tail.prev.prev
-        return key
+    def move(self, node: Node) -> None:
+        self.remove(node)
+        self.add(node)
                 
     
 # Your LRUCache object will be instantiated and called as such:
