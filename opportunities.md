@@ -28,6 +28,7 @@
 - Joshua Joel Bartolome, Waseem Ali
 - Conversational (A/B test), Behavioral (made current system better)
 - [CoderPad] Python (Implementation of retreving feaures, scores, TTL, making sure predictions are made for each customer within 50ms, what happens to code when large number of requests)
+- MLSD (model serving, model training, data pipeline, investigate dashboarding displaying data being slow - investigate query and DB indexing)
 
 7. Amazon
 - R: Antonio Ang
@@ -131,7 +132,7 @@
 - MLSD (chatbot, data stucture of user_id/timestamp/query/answer, framework like langchain, PCI compliancy of cloud providers, whether system prompt changes based on underlying LLM)
 
 31. Mozilla
-- Olivia Sargent 
+- Olivia Sargent, Julia Wineriter 
 - [CoderPad] Python (Github API to retrieve repos under orgs in a loop)
 - Conversation (observability metrics for API - other than latency, number of requests, cpu/memory utilization, how to elastically scale compute based on load - rule or ml based)
 - [CoderPad] Python (Parse a log file and perform some logics)
@@ -140,7 +141,7 @@
 32. Nubank
 - Dhialick Oliveira
 - [CodeSignal] Python (heap sort by second value in ascending order, pattern of nested dictionary - user_id, timestamp)
-- SD (Batch processing, pre-fetching into memory, parallel processing, scheduler, UUID)
+- [Miro] SD (Batch processing, pre-fetching into memory, parallel processing, scheduler, UUID)
 
 33. Socure
 - Behavioral (high impact project - scalability, quality controls, better customer satisfaction, features that had business impacts, manage conflict with other teams, work under pressure)
