@@ -592,26 +592,25 @@ class Solution:
 class Solution:
     def diameterOfBinaryTree(self, root: Optional[TreeNode]) -> int:
         
-        # Diameter = left subtree + right subtree
+        # Diameter at each node is 
+        #   height of left child + height of right child
+        # At each node, return 1 + max(left, right)
         # Post-order traverse
-        # At leaf node, return 0
-        # At root, take 1 + max(left ,right)
         # Time O(n) n = number of nodes in tree
         # Space O(n) recursion stack
 
-        def post_order(node):
-
+        def dfs(node):
             if node:
-                left = post_order(node.left)
-                right = post_order(node.right)
-                self.max_d = max(self.max_d, left+right)
+                left = dfs(node.left)
+                right = dfs(node.right)
+                self.diameter = max(self.diameter, left + right)
                 return 1 + max(left, right)
             else:
                 return 0
-
-        self.max_d = 0
-        post_order(root)
-        return self.max_d</code></pre>
+        
+        self.diameter = 0
+        dfs(root)
+        return self.diameter</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/diameter-of-binary-tree">543. Diameter of Binary Tree</a> | <a href="https://neetcode.io/problems/binary-tree-diameter">Diameter of Binary Tree</a>
