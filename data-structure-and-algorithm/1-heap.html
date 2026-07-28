@@ -245,38 +245,31 @@ class Twitter:
 class Solution:
     def leastInterval(self, tasks: List[str], n: int) -> int:
         
-        # [A,A,B,B], n = 2 ? 5 (A -> B -> idle -> A -> B)
-
-        # Need to handle most frequent task first
-        # Use heap to keep track of most frequent task
-        # Remember the last position of each task
-        # Insert idle appropriately
-        # Instead of reducing frequency by 1 and immediately putting it
-        # back to heap, store it in temp array (this is to avoid using
-        # same tasks in a cycle)
+        # Use heap to store most frequent task at root
+        # After scheduleing tasks at root, decrement count of that task
+        # Instead of immediate push updated count back to heap, store in queue
         # Time O(nlogn) n = len(tasks)
         # Space O(n)
 
-        freq = defaultdict(int)
-        for t in tasks:
-            freq[t] += 1
-        
+        freq = Counter(tasks)
         max_heap = []
+        time = 0
+        queue = deque()
+
         for key, val in freq.items():
             heappush(max_heap, -val)
 
-        cooldown = deque()
-        time = 0
+        while max_heap or queue:
 
-        while max_heap or cooldown:
             time += 1
+                
             if max_heap:
                 count = heappop(max_heap) + 1
                 if count != 0:
-                    cooldown.append((time+n, count))
-
-            if cooldown and cooldown[0][0] == time:
-                _, count = cooldown.popleft()
+                    queue.append((count, time + n))
+                    
+            if queue and queue[0][1] == time:
+                count, _ = queue.popleft()
                 heappush(max_heap, count)
 
         return time</code></pre>
