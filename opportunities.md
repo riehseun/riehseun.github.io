@@ -28,7 +28,7 @@
 - Joshua Joel Bartolome, Waseem Ali
 - Conversational (A/B test), Behavioral (made current system better)
 - [CoderPad] Python (Implementation of retreving feaures, scores, TTL, making sure predictions are made for each customer within 50ms, what happens to code when large number of requests)
-- MLSD (model serving, model training, data pipeline, investigate dashboarding displaying data being slow - investigate query and DB indexing)
+- [Excalidraw] MLSD (model serving, model training, data pipeline, investigate API inference being slow - lag from feature store or lag from model registry or etc, investigate dashboarding displaying data being slow - investigate query and DB indexing)
 
 7. Amazon
 - R: Antonio Ang
@@ -137,6 +137,7 @@
 - Conversation (observability metrics for API - other than latency, number of requests, cpu/memory utilization, how to elastically scale compute based on load - rule or ml based)
 - [CoderPad] Python (Parse a log file and perform some logics)
 - Conversational
+- [Excalidraw] LLM serving, GPU scaling, privacy
 
 32. Nubank
 - Dhialick Oliveira
