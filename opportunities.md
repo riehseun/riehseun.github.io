@@ -26,9 +26,10 @@
 
 6. Autodesk
 - Joshua Joel Bartolome, Waseem Ali
-- Conversational (A/B test), Behavioral (made current system better)
+- Conversation (A/B test), Behavioral (made current system better)
 - [CoderPad] Python (Implementation of retreving feaures, scores, TTL, making sure predictions are made for each customer within 50ms, what happens to code when large number of requests)
 - [Excalidraw] MLSD (model serving, model training, data pipeline, investigate API inference being slow - lag from feature store or lag from model registry or etc, investigate dashboarding displaying data being slow - investigate query and DB indexing)
+- Conversation
 
 7. Amazon
 - R: Antonio Ang
@@ -61,11 +62,11 @@
 
 14. Collimator
 - Reda Dehy 
-- Conversational
+- Conversation
 
 15. Mendal AI
 - Natalee Merrill
-- Conversational
+- Conversation
 
 16. Intact
 - Stephen Wong
@@ -93,11 +94,11 @@
 
 22. Modular
 - Laura Nguyen
-- Conversational
+- Conversation
 
 23. Jarvis
 - Saif Zafar
-- Conversational
+- Conversation
 
 24. Skyfire
 - Vlad Djordjevski
@@ -110,7 +111,7 @@
 26. Sysdane
 - Riley Idelson
 - [Woven] ML (debug model training with GPU cluster), Python (debug web app), ML (quiz)
-- Conversational
+- Conversation
 
 27. Guidewire
 - Annie Jose
@@ -125,7 +126,8 @@
 
 29. Lightworks
 - Osama Shaukat
-- Behavioral
+- Conversation (Behavioral)
+- Git (explain git, fetch vs pull) REST (GET/POST/PUT/DELETE, why we can't use PUT to create resource) Python (list vs tuple, why we used immutable data structure, what does star-star kargs do, shallow copy vs deep copy, how to do deep copy of dictionary, how to create abstract class and interfaces in Python) SD (how to manage microservice architecture, how to implement monitoring and logging for microservice architecture) DB (when to use SQL and no-SQL, how to ensure consistency in SQL and no-SQL) SD (hotel reservation - how to implement load balancer, what does API gateway do, DB for each service or just one DB, full request flow with data, two users trying to make booking at the same time)
 
 30. Saris AI
 - Carrick Rogers
