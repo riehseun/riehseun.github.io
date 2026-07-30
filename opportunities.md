@@ -127,7 +127,7 @@
 29. Lightworks
 - Osama Shaukat
 - Conversation (Behavioral)
-- Git (explain git, fetch vs pull) REST (GET/POST/PUT/DELETE, why we can't use PUT to create resource) Python (list vs tuple, why we used immutable data structure, what does star-star kargs do, shallow copy vs deep copy, how to do deep copy of dictionary, how to create abstract class and interfaces in Python) SD (how to manage microservice architecture, how to implement monitoring and logging for microservice architecture) DB (when to use SQL and no-SQL, how to ensure consistency in SQL and no-SQL) SD (hotel reservation - how to implement load balancer, what does API gateway do, DB for each service or just one DB, full request flow with data, two users trying to make booking at the same time)
+- Git (explain git, fetch vs pull) REST (GET/POST/PUT/DELETE, why we can't use PUT to create resource) Python (list vs tuple, when do you use tuple and list, why we used immutable data structure, what does star-star kargs do, shallow copy vs deep copy, how to do deep copy of dictionary, how to create abstract class and interfaces in Python) SD (how to manage microservice architecture, how to implement monitoring and logging for microservice architecture) DB (when to use SQL and no-SQL, how to ensure consistency in SQL and no-SQL) SD (hotel reservation - how to implement load balancer, what does API gateway do, DB for each service or just one DB, full request flow with data, two users trying to make booking at the same time)
 
 30. Saris AI
 - Carrick Rogers
