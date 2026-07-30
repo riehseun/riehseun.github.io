@@ -57,12 +57,11 @@
 <pre><code class="python">class Solution:
     def orangesRotting(self, grid: List[List[int]]) -> int:
         
-        # Multi source BFS
-        # From all rotten node, expand at the same time
-        # If seen fresh node, convert it to rotten
-        # If seen empty cell, don't expand
-        # Time O(n) n = number of nodes
-        # Space O(n)
+        # BFS multi-source
+        # From each rotten fruit, compute distance to nearby nodes
+        # Return max distance
+        # Time O(nm) n = len(grid), m = len(grid[0])
+        # Space O(nm)
 
         n, m = len(grid), len(grid[0])
         dirs = [(-1,0), (1,0), (0,1), (0,-1)]
@@ -76,19 +75,20 @@
 
         while queue:
             i, j, d = queue.popleft()
-
             for x, y in dirs:
-                if 0 <= i + x < n \
-                    and 0 <= j + y < m \
-                    and grid[i+x][j+y] == 1:
-                    queue.append((i+x, j+y, d+1))
-                    grid[i+x][j+y] = 2
+                nx, ny = i + x, j + y
+                if 0 <= nx < n \
+                    and 0 <= ny < m \
+                    and grid[nx][ny] == 1:
+                    queue.append((nx, ny, d+1))
+                    grid[nx][ny] = 2
             depth = d
 
         for i in range(n):
             for j in range(m):
                 if grid[i][j] == 1:
                     return -1
+
         return depth</code></pre>
   </div>
   <div class="card-footer text-muted">
@@ -103,11 +103,11 @@
 <pre><code class="python">class Solution:
     def islandsAndTreasure(self, grid: List[List[int]]) -> None:
         
-        # From each treasure chest, find distance to land
-        # Keep minimum distance in each cell
-        # Multi source BFS
-        # Time O(n) n = number of nodes
-        # Space O(n)
+        # BFS multi-source
+        # From each treasure chest, compute distance to nearby node
+        # Use min distance if more than one distance is computed
+        # Time O(nm) n = len(grid), m = len(grid[0])
+        # Space O(nm)
 
         n, m = len(grid), len(grid[0])
         dirs = [(-1,0), (1,0), (0,-1), (0,1)]
@@ -122,11 +122,12 @@
             i, j = queue.popleft()
 
             for x, y in dirs:
-                if 0 <= i + x < n \
-                    and 0 <= j + y < m \
-                    and grid[i+x][j+y] == 2**31 - 1:
-                    queue.append((i+x, j+y))
-                    grid[i+x][j+y] = grid[i][j] + 1</code></pre>
+                nx, ny = i + x, j + y
+                if 0 <= nx < n \
+                    and 0 <= ny < m \
+                    and grid[nx][ny] == 2**31 - 1:
+                    queue.append((nx, ny))
+                    grid[nx][ny] = grid[i][j] + 1</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://neetcode.io/problems/islands-and-treasure">Islands and Treasure</a>
