@@ -136,20 +136,22 @@ class Solution:
   <div class="card-body">
     <h2 class="card-title">Swim in Rising Water (150/250)</h2>
 
-<pre><code class="python">class Solution:
-    def swimInWater(self, grid: List[List[int]]) -> int:
+<pre><code class="python">from heapq import heappush, heappop
 
-        # Starting at (0,0), add all nearby cells to min_heap
-        # Always try walking on cell with lowest possible
+class Solution:
+    def swimInWater(self, grid: List[List[int]]) -> int:
+        
+        # Dijkstra
+        # Starting at (0, 0), add all nearby cells to min_heap
+        # Always try walking on cell with lowest possible number
         # Biggest number seen in the path is the answer
         # Time O((n**2)log(n**2))
         # Space O(n**2)
 
-        min_heap = [] 
-        min_heap.append([grid[0][0], 0, 0])
+        min_heap = [(grid[0][0], 0, 0)]
         dirs = [(-1,0), (1,0), (0,-1), (0,1)]
         visited = set()
-        visited.add((0,0))
+        visited.add((0, 0))
         n = len(grid)
         result = 0
 
@@ -159,11 +161,12 @@ class Solution:
             if i == j == n - 1:
                 break
             for x, y in dirs:
-                if 0 <= i + x < n \
-                    and 0 <= j + y < n \
-                    and (i+x, j+y) not in visited:
-                    visited.add((i+x, j+y))
-                    heappush(min_heap, [grid[i+x][j+y], i+x, j+y])
+                nx, ny = i + x, j + y
+                if 0 <= nx < n \
+                    and 0 <= ny < n \
+                    and (nx, ny) not in visited:
+                    visited.add((nx, ny))
+                    heappush(min_heap, [grid[nx][ny], nx, ny])
 
         return result</code></pre>
   </div>

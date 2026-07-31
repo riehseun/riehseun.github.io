@@ -152,3 +152,6 @@
 34. Mckesson
 - 
 - [Torc] Kubernetes networking (gateway.networking.k8s.io/v1, templates.gatekeeper.sh/v1) ArgoCD, Github Actions
+
+35. Scotiabank
+- Databricks (difference between managed vs external volume) Kubernetes (key components of K8s cluster, security config of K8s cluster)
