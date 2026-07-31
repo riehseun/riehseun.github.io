@@ -95,41 +95,37 @@
   <div class="card-body">
     <h2 class="card-title">Network Delay Time (150/250)</h2>
 
-<pre><code class="python">class Solution:
+<pre><code class="python">from heapq import heappush, heappop
+
+class Solution:
     def networkDelayTime(self, times: List[List[int]], n: int, k: int) -> int:
         
-        # BFS
-        # Keep minimum time to reach each node
-        # Only move to next node if it is cheaper to do so
-        # Is there a cycle?
-        # Time O(n+m) n = number of nodes, m = number of edges
-        # Space O(n)
+        # Dijkstra
+        # Use min_heap to move to nodes with min cost
+        # Time O(nm) m = len(times)
+        # Space O(n+m) 
 
-        graph, visited = defaultdict(list), defaultdict(int)
-
+        graph = defaultdict(list)
         for a, b, t in times:
-            graph[a].append((b,t))
+            graph[a].append((b, t))
 
-        queue = deque()
-        queue.append((k,0))
-        visited[k] = 0
+        min_heap = [(0, k)]
+        dist = {}
         
-        while queue:
-            node, time = queue.popleft()
-            
-            for next_node, next_time in graph[node]:
-                if next_node not in visited:
-                    visited[next_node] = time + next_time
-                    queue.append((next_node, time+next_time))
-                else:
-                    if visited[next_node] > time + next_time:
-                        visited[next_node] = time + next_time
-                        queue.append((next_node, time+next_time))
+        while min_heap:
+            time, node = heappop(min_heap)
+            if node in dist:
+                continue
 
-        if len(visited) != n:
+            dist[node] = time
+            for d, t in graph[node]:
+                if d not in dist:
+                    heappush(min_heap, (time + t, d))
+
+        if len(dist) != n:
             return -1
-        
-        return max(list(visited.values()))</code></pre>
+
+        return max(dist.values())</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/network-delay-time">743. Network Delay Time</a> | <a href="https://neetcode.io/problems/network-delay-time">Network Delay Time</a>
