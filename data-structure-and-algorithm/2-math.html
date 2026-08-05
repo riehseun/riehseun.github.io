@@ -131,18 +131,30 @@
     def multiply(self, num1: str, num2: str) -> str:
         
         # Multiply digit by digit
-        # Add trailing zeros based on location of digit
+        # Store intermediate results
         # Time O(nm) n = len(num1), m = len(num2)
-        # Space O(1)
+        # Space O(n+m)
 
-        n, m , result = len(num1), len(num2), 0
+        if num1 == "0" or num2 == "0":
+            return "0"
 
-        for i in range(n-1, -1, -1):
-            for j in range(m-1, -1, -1):
-                k = n - 1 - i + m - 1 - j
-                result += int(num1[i]) * int(num2[j]) * (10**k)
+        n, m = len(num1), len(num2)
+        result = [0] * (n + m)
 
-        return str(result)</code></pre>
+        for i in range(n - 1, -1, -1):
+            for j in range(m - 1, -1, -1):
+                mul = int(num1[i]) * int(num2[j])
+                p1 = i + j
+                p2 = i + j + 1
+                total = mul + result[p2]
+                result[p2] = total % 10
+                result[p1] += total // 10
+
+        i = 0
+        while i < len(result) and result[i] == 0:
+            i += 1
+
+        return "".join(map(str, result[i:]))</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/multiply-strings">43. Multiply Strings</a> | <a href="https://neetcode.io/problems/multiply-strings">Multiply Strings</a>
