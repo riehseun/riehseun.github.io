@@ -288,34 +288,22 @@
     def isNStraightHand(self, hand: List[int], groupSize: int) -> bool:
         
         # Create frequency map
-        # Find start of sequence
-        # Time O(n) n = len(hand)
+        # Sort by frequncy
+        # Time O(nlogn) n = len(hand)
         # Space O(n)
 
-        freq = defaultdict(int)
-        for num in hand:
-            freq[num] += 1
-        
-        i = 0  # number of groups
-        while i < len(hand) // groupSize:
-            # Find start of sequence
-            num = next(iter(freq.keys()))
-            while num in freq:
-                num -= 1 
-            num += 1
-
-            # Create group while updating frequency
-            for _ in range(groupSize):
-                if freq[num] > 1:
-                    freq[num] -= 1
-                else:
-                    del freq[num]
-                num += 1
-
-            i += 1
-                
-        if freq:
+        if len(hand) % groupSize != 0:
             return False
+
+        freq = Counter(hand)
+        
+        for card in sorted(freq):
+            while freq[card] > 0:
+                for next_card in range(card, card + groupSize):
+                    if freq[next_card] == 0:
+                        return False
+                    freq[next_card] -= 1
+
         return True</code></pre>
   </div>
   <div class="card-footer text-muted">
