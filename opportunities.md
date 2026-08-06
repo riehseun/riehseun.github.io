@@ -145,7 +145,7 @@
 - Dhialick Oliveira
 - [CodeSignal] Python (heap sort by second value in ascending order, pattern of nested dictionary - user_id, timestamp)
 - [Miro] SD (Batch processing, pre-fetching into memory, parallel processing, scheduler, UUID)
-- [CodeSignal] Python
+- [CodeSignal] Python (Compute tax on capital gain during stock buy and sell transactions)
 
 33. Socure
 - Behavioral (high impact project - scalability, quality controls, better customer satisfaction, features that had business impacts, manage conflict with other teams, work under pressure)
