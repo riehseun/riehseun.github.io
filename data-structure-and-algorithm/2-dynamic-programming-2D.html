@@ -66,27 +66,33 @@
 <pre><code class="python">class Solution:
     def isMatch(self, s: str, p: str) -> bool:
         
+        # "ab", ".c" ? False
+        # "aufn", "a*" ? False
+        # "a", "a*" ? True
+        # "aaa", "a*" ? True  
+
         # DP
-        # dp[i][j] if s[i] can be matched by p[j]
-        # dp[0][0] = True
-        # If p[j] == "*", dp[0][j] = dp[0][j-2]
-        # If p[j] == s[i], dp[i][j] = dp[i-1][j-1]
-        # If p[j] == ".", dp[i][j] = dp[i-1][j-1]
-        # If p[j] == "*", dp[i][j] = dp[i][j-2]
-        #   If p[j-1] == ".", dp[i][j] = dp[i][j] or dp[i-1][j]
-        #   If p[j-1] == s[i], dp[i][j] = dp[i][j] or dp[i-1][j]
-        # Time O(nm) n = len(s), m = len(p)
-        # Space O(nm)
+        # Let
+        #   dp[i][j] = True/False of s[:i] and p[:j]
+        # Init
+        #   dp = [[False] * (m + 1) for _ in range(n + 1)]
+        #   dp[0][0] = True
+        # Recurse
+        #   dp[i][j] = dp[i-1][j-1] if s[i-1] == p[j-1] or p[j-1] == "."
+        #   dp[i][j] = dp[i][j-2] if p[j] == "*"
+        # Time: O(nm) n = len(s), m = len(p)
+        # Space: O(nm)
 
         n, m = len(s), len(p)
-        dp = [[False]*(m+1) for _ in range(n+1)]
+        dp = [[False] * (m + 1) for _ in range(n + 1)]
         dp[0][0] = True
-        for j in range(2, m+1):
+
+        for j in range(2, m + 1):
             if p[j-1] == "*":
                 dp[0][j] = dp[0][j-2]
 
-        for i in range(1, n+1):
-            for j in range(1, m+1):
+        for i in range(1, n + 1):
+            for j in range(1, m + 1):
                 if p[j-1] == s[i-1]:
                     dp[i][j] = dp[i-1][j-1]
                 elif p[j-1] == ".": 
@@ -292,24 +298,28 @@
     def maxCoins(self, nums: List[int]) -> int:
         
         # DP
-        # dp[i][j] = gain by bursting all balloons in (i, j)
-        # dp[i][j] = max(dp[i][k]+dp[k][j]+nums[i]*nums[k]*nums[j])
-        # for all k in (i, j)
-        # Time O(n**3)
-        # Space O(n**2)
+        # Let
+        #   dp[i][j] = gain by bursting all balloons in (i, j)
+        # Init
+        #   dp = [[0] * n for _ in range(n)]
+        # Recurse
+        #   dp[i][j] = max(dp[i][k]+dp[k][j]+nums[i]*nums[k]*nums[j])
+        #   for all k in (i, j)
+        # Time: O(n**3)
+        # Space: O(n**2)
 
         # Add 1 on each end to handle edge case
         nums = [1] + nums + [1]
         n = len(nums)
-        dp = [[0]*n for _ in range(n)]
+        dp = [[0] * n for _ in range(n)]
 
         # Exclude first and last ballon
         for length in range(2, n):
-            for i in range(n-length):
+            for i in range(n - length):
                 j = i + length
-                for k in range(i+1, j):
+                for k in range(i + 1, j):
                     dp[i][j] = max(dp[i][j],
-                        dp[i][k]+dp[k][j]+nums[i]*nums[k]*nums[j])
+                        dp[i][k] + dp[k][j] + nums[i] * nums[k] * nums[j])
                 
         return dp[0][n-1]</code></pre>
   </div>
