@@ -189,32 +189,37 @@
 
 <pre><code class="python">class Solution:
     def isInterleave(self, s1: str, s2: str, s3: str) -> bool:
-
+        
         # "aaaa", "bbbb", "aabbbbaa" ? True
 
         # DP
+        # Let
+        #   dp[i][j] = True if s3 up to i + j can be formed by s1[i], s2[j]
+        # Init
+        #   dp = [[False] * (m + 1) for _ in range(n + 1)]
+        # Recurse
+        #   If i == 0, dp[i][j] = dp[i][j-1] and s2[j-1] == s3[i+j-1] (1)
+        #   If j == 0, dp[i][j] = dp[i-1][j] and s1[i-1] == s3[i-1+j] (2)
+        #   If i != 0 and j != 0, dp[i][j] = (1) or (2)
+        # Time: O(nm) n = len(s1), m = len(s2)
+        # Space: O(nm) 
+
         #   0 b b b b
         # 0 T F F F F
         # a T F F F F
         # a T T T T T
         # a F F F F T
         # a F F F F T
-        # dp[i][j] = True if s3 up to i + j can be formed by s1[i], s2[j]
-        # If i == 0, dp[i][j] = dp[i][j-1] and s2[j-1] == s3[i+j-1] (1)
-        # If j == 0, dp[i][j] = dp[i-1][j] and s1[i-1] == s3[i-1+j] (2)
-        # If i != 0 and j != 0, dp[i][j] = (1) or (2)
-        # Time O(nm) n = len(s1), m = len(s2)
-        # Space O(nm) 
 
         n, m = len(s1), len(s2)
         if n + m != len(s3):
             return False
 
-        dp = [[False]*(m+1) for _ in range(n+1)]
+        dp = [[False] * (m + 1) for _ in range(n + 1)]
         dp[0][0] = True
 
-        for i in range(n+1):
-            for j in range(m+1):
+        for i in range(n + 1):
+            for j in range(m + 1):
                 if i == 0 and j != 0:
                     dp[i][j] = dp[i][j-1] and s2[j-1] == s3[i+j-1]
                 if i != 0 and j == 0:
@@ -223,7 +228,7 @@
                     dp[i][j] = (dp[i][j-1] and s2[j-1] == s3[i+j-1]
                         or dp[i-1][j] and s1[i-1] == s3[i-1+j])
         
-        return dp[n][m]Distinct Subsequences</code></pre>
+        return dp[n][m]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/interleaving-string">97. Interleaving String</a> | <a href="https://neetcode.io/problems/interleaving-string">Interleaving String</a>
