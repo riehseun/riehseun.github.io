@@ -156,3 +156,7 @@
 
 35. Scotiabank
 - Databricks (difference between managed vs external volume) Kubernetes (key components of K8s cluster, security config of K8s cluster)
+
+36. Sardine AI
+- George Cave (how to debug when 10% drop in precision)
+- 
