@@ -10,17 +10,17 @@
 - MLSD (model serving) 
 - SD (parking lot reservation, concurrency and locking mechanisms at the application and infrastructure level, database performance tuning and concurrency design, metrics and observability systems including how monitoring pipelines are implemented internally)
 
-3. Meta
+3. **Meta**
 - James Hargett, Christine Wilson
 - DSA (https://leetcode.com/problems/valid-palindrome-ii)
 
-4. Bloomberg
+4. **Bloomberg**
 - Michael Feinstein, Sian Naiken-Cooke
 - Python (class for transit system, 1 AL)
 - Python (class for lottery create/delete/pickwinner in O(1)), SD (TinyURL)
 - Python (get/set for sparse array)
 
-5. Confluent
+5. **Confluent**
 - Sandhya Shivaram
 - DSA (https://leetcode.com/problems/regular-expression-matching)
 
@@ -31,12 +31,12 @@
 - [Excalidraw] MLSD (model serving, model training, data pipeline, investigate API inference being slow - lag from feature store or lag from model registry or etc, investigate dashboarding displaying data being slow - investigate query and DB indexing)
 - Conversation
 
-7. Amazon
+7. **Amazon**
 - R: Antonio Ang
 - DSA
 - DSA (https://leetcode.com/problems/word-ladder, etc), Behavioral, SD (Amazon)
 
-8. Google
+8. **Google**
 - Alfred Donovan
 - Behavioral, DSA (longest substring with no more than 2 unique chars - leet159, find whether all circles are connected, etc)
 
@@ -88,7 +88,7 @@
 - 
 - DSA (https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii), Python ("yield", "class method vs static method", "decorator")
 
-21. DoorDash
+21. **DoorDash**
 - Sho Sato
 - DSA (https://leetcode.com/problems/sliding-window-maximum)
 
@@ -121,7 +121,7 @@
 - Peter Kuchnio, Cathy C Lam
 - Behavioral
 - DSA (task scheduler with timestamp, multithreading and concurrency)
-- SD (Layer6 ML platform, how to scale queue, how to identify bottlenecks in API serving and scale each component in API path)
+- MLSD (Layer6 ML platform, how to scale queue, how to identify bottlenecks in API serving and scale each component in API path)
 - OFFER: 165K + 25K + 20K (3 years - at Dec 2029) + 20K (sign-in) + 9K RSP Matching + 20 days per year + unlimited sick day, Start date is Sep 7th, Respond by Friday
 
 29. Lightworks
