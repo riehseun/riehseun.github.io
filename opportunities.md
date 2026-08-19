@@ -30,6 +30,7 @@
 - [CoderPad] Python (Implementation of retreving feaures, scores, TTL, making sure predictions are made for each customer within 50ms, what happens to code when large number of requests)
 - [Excalidraw] MLSD (model serving, model training, data pipeline, investigate API inference being slow - lag from feature store or lag from model registry or etc, investigate dashboarding displaying data being slow - investigate query and DB indexing)
 - Conversation
+- OFFER: 150-160k, 10%
 
 7. **Amazon**
 - R: Antonio Ang
@@ -160,3 +161,7 @@
 36. Sardine AI
 - George Cave (how to debug when 10% drop in precision)
 - 
+
+37. Affirm
+- Josh Rodriguez
+- Python (Given Offer, OfferList, users, write processing logics of each offer based on rules and create desired result set)
