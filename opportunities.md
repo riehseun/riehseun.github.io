@@ -165,3 +165,7 @@
 37. Affirm
 - Josh Rodriguez
 - Python (Given Offer, OfferList, users, write processing logics of each offer based on rules and create desired result set)
+
+38. BDO
+- Emmanuel Florakas
+- Kubernetes (how control plane works, how operator works)
