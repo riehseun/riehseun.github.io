@@ -169,4 +169,4 @@
 38. BDO
 - Emmanuel Florakas
 - Kubernetes (how control plane works, how operator works)
-- SQL (How to manage evolution of schema ex. Flyway)
+- SQL (How to manage evolution of schema ex. Flyway, API authentication/authorization)
