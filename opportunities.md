@@ -166,7 +166,7 @@
 - Josh Rodriguez
 - Python (Given Offer, OfferList, users, write processing logics of each offer based on rules and create desired result set)
 
-38. BDO
+38. BDO/RBC
 - Emmanuel Florakas
 - Kubernetes (how control plane works, how operator works)
 - SQL (How to manage evolution of schema ex. Flyway, API authentication/authorization)
@@ -174,3 +174,7 @@
 39. EY
 - 
 - MLSD (Multi-agent orchestration/architecture)
+
+40. Rhyme
+-
+- MLSD (Chatbot - synchronous, event-driven, identify bottlenecks, websocket)
