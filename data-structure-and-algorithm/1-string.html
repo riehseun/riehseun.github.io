@@ -395,38 +395,50 @@
 
 <pre><code class="python">class Solution:
 
-    # ["hi", "pi"] ? ["hi", "pi"]
-    
-    # Use length of each string as prefix
-    # Use # as limiter to note where length ends
     # Encode
-    #   Time O(n) n = len(strs)
-    #   Space O(1) ignoring space for result
+    #   Use a length of each word in front
+    #   Insert a delimiter after length 
     # Decode
-    #   Time O(m) m = len(s)
-    #   Space O(1) ignoring space for result
+    #   Find chars until finding delimiter, that represents length
+    #   Find real word after the delimiter
+
+    # Encode
+    #   Time: O(n), n = len(strs)
+    #   Space: O(n)
+    # Decode
+    #   Time: O(m), len(s)
+    #   Space: O(1), ignoring space for output
 
     def encode(self, strs: List[str]) -> str:
-        encoded_string = []
+
+        encode = []
+
         for s in strs:
-            encoded_string.append(str(len(s)))
-            encoded_string.append("#")
-            encoded_string.append(s)
-        return "".join(encoded_string)
+            encode.append(str(len(s)))
+            encode.append("#")
+            encode.append(s)
+
+        return "".join(encode)
 
     def decode(self, s: str) -> List[str]:
-        decoded_string = []
-        i, j = 0, 0
+
+        decode = []
+        i = 0
+
         while i < len(s):
-            if s[i] == "#":
-                length = int(s[j:i])
-                string = s[i+1:i+1+length]
-                decoded_string.append(string)
-                i = i + 1 + length
-                j = i
-            else:
-                i += 1
-        return decoded_string</code></pre>
+            j = i
+
+            while s[j] != "#":
+                j += 1
+
+            length = int(s[i:j])
+            start = j + 1
+            end = start + length
+
+            decode.append(s[start:end])
+            i = end
+
+        return decode</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/encode-and-decode-strings">271. Encode and Decode Strings</a> | <a href="https://neetcode.io/problems/string-encode-and-decode">Encode and Decode Strings</a>
