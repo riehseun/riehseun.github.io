@@ -1,65 +1,126 @@
 1. Autonomic
-- Cyndi Tran
-- Infra (bash, networking)
-- DSA
-- Behavioral, Infra (k8s, terraform), Python (snake game)
+- Screen
+	- Cyndi Tran
+		- Infra (bash, networking)
+- Round 1
+	- DSA
+- Round 2
+	- Behavioral
+	- Infra (k8s, terraform)
+	- Python (snake game)
 
 2. Index exchange
-- Yoyo Wan, Priyanka Choudhary
-- DSA (stack)
-- MLSD (model serving) 
-- SD (parking lot reservation, concurrency and locking mechanisms at the application and infrastructure level, database performance tuning and concurrency design, metrics and observability systems including how monitoring pipelines are implemented internally)
+- Screen
+	- Yoyo Wan
+	- Priyanka Choudhary
+- Round 1
+	- DSA
+		- Stack
+- Round 2
+	- MLSD
+		- Model serving at AD tech 
+	- SD 
+		- Parking lot reservation
+		- Concurrency and locking mechanisms at the application and infrastructure level
+		- Database performance tuning and concurrency design
+		- Metrics and observability systems including how monitoring pipelines are implemented internally
 
-3. **Meta**
-- James Hargett, Christine Wilson
-- DSA (https://leetcode.com/problems/valid-palindrome-ii)
+3. Meta
+- Screen
+	- James Hargett
+	- Christine Wilson
+- Round 1
+	- DSA
+		- https://leetcode.com/problems/valid-palindrome-ii
 
-4. **Bloomberg**
-- Michael Feinstein, Sian Naiken-Cooke
-- Python (class for transit system, 1 AL)
-- Python (class for lottery create/delete/pickwinner in O(1)), SD (TinyURL)
-- Python (get/set for sparse array)
+4. Bloomberg
+- Screen
+	- Michael Feinstein
+	- Sian Naiken-Cooke
+- Round 1
+	- Python
+		- Class for transit system
+	- Python 
+		- Class for lottery create/delete/pickwinner in O(1)
+	- Python 
+		- get/set for sparse array
+- Round 2
+	- SD
+		- TinyURL
 
-5. **Confluent**
-- Sandhya Shivaram
-- DSA (https://leetcode.com/problems/regular-expression-matching)
+5. Confluent
+- Screen
+	- Sandhya Shivaram
+- Round 1
+	- DSA
+		- https://leetcode.com/problems/regular-expression-matching
 
 6. Autodesk
-- Joshua Joel Bartolome, Waseem Ali
+- Screen
+	- Joshua Joel Bartolome: Machine Learning Engineer
+	- Waseem Ali: Machine Learning Engineer
 - Conversation (A/B test), Behavioral (made current system better)
-- [CoderPad] Python (Implementation of retreving feaures, scores, TTL, making sure predictions are made for each customer within 50ms, what happens to code when large number of requests)
-- [Excalidraw] MLSD (model serving, model training, data pipeline, investigate API inference being slow - lag from feature store or lag from model registry or etc, investigate dashboarding displaying data being slow - investigate query and DB indexing)
-- Conversation
-- OFFER: 150-160k, 10%
+- Round 1
+	- Python (Implementation of retreving feaures, scores, TTL) [CoderPad] 
+	- How to make sure predictions are made for each customer within 50ms
+	- What happens to code when large number of requests
+- Round 2
+	- MLSD (model serving, model training, data pipeline) [Excalidraw]
+	- How to investigate API inference being slow - lag from feature store or lag from model registry or etc
+	- How to investigate dashboarding displaying data being slow - investigate query and DB indexing  
+- Round 3
+	- Conversation
+- OFFER
+	- 165K base + 10% bonus + 32K USD equity (plus 15K signing) 
 
-7. **Amazon**
-- R: Antonio Ang
-- DSA
-- DSA (https://leetcode.com/problems/word-ladder, etc), Behavioral, SD (Amazon)
+7. Amazon
+- Screen
+	- Antonio Ang
+- Round 2
+	- DSA
+		- https://leetcode.com/problems/word-ladder
+	- Behavioral
+	- SD
+		- Amazon
 
-8. **Google**
-- Alfred Donovan
-- Behavioral, DSA (longest substring with no more than 2 unique chars - leet159, find whether all circles are connected, etc)
+8. Google
+- Screen
+	- Alfred Donovan
+- Round 2
+	- DSA
+		- longest substring with no more than 2 unique chars - leet159
+		- find whether all circles are connected
+	- Behavioral
 
 9. Workday
-- Johnny Wang
-- Python (given 2D array of data, and computing mean and std w/o using libs)
+- Screen
+	- Johnny Wang
+- Round 1
+	- Python (given 2D array of data, and computing mean and std w/o using libs)
 
 10. Boosted.ai
-- Daniela Zambrano
-- Python (string modification, overlapping matrices, log streaming and processing)
+- Screen
+	- Daniela Zambrano
+- Round 1
+	- Python (string modification, overlapping matrices, log streaming and processing)
 
 11. Pinterest
-- Alexandra Vu
-- Python (backend API)
+- Screen
+	- Alexandra Vu
+- Round 1
+	- Python (backend API)
 
 12. Nuro AI
-- Naser Kohgadai
-- DSA (from a set of 3D points and distance K, find all clusters of points less than K (If dist(A,B) <= K and dist(B,C), then A,B,C are in the same cluster))
+- Screen
+	- Naser Kohgadai
+- Round 1
+	- DSA (from a set of 3D points and distance K, find all clusters of points less than K (If dist(A,B) <= K and dist(B,C), then A,B,C are in the same cluster))
 
 13. Braze
-- Mattson Heiner 
-- DSA (maximum breahth of parenthesis)
+- Screen
+	- Mattson Heiner 
+- Round 1
+	- DSA (maximum breahth of parenthesis)
 
 14. Collimator
 - Reda Dehy 
@@ -89,7 +150,7 @@
 - 
 - DSA (https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii), Python ("yield", "class method vs static method", "decorator")
 
-21. **DoorDash**
+21. DoorDash
 - Sho Sato
 - DSA (https://leetcode.com/problems/sliding-window-maximum)
 
