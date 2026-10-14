@@ -99,38 +99,39 @@
 <pre><code class="python">class Solution:
     def threeSum(self, nums: List[int]) -> List[List[int]]:
         
-        # [-1,0,1,2,-3] ? [[-1,0,1],[1,2,-3]]
+        # Sort nums, then iterate nums
+        # At each num, consiter two pointers (next num, last num)
+        # If num == num - 1, skip to avoid duplicate
 
-        # Sort nums
-        # For each i in len(nums), run two pointers j > i, k = len(nums) - 1
-        # Time O(n**2)
-        # Space O(n) sorting can take O(n) in worst case
+        # Time: O(n**2), n = len(nums)
+        # Space: O(1), ignoring space for result
 
-        n = len(nums)
-        nums.sort()
         result = []
+        nums.sort()
+        n = len(nums)
+        
+        for i in range(n):
 
-        for i in range(n-2):
-            # Skip duplicate
             if i > 0 and nums[i] == nums[i-1]:
                 continue
+
             j = i + 1
             k = n - 1
 
             while j < k:
-                three_sum = nums[i] + nums[j] + nums[k]
-                if three_sum > 0:
-                    k -= 1
-                elif three_sum < 0:
+                s = nums[i] + nums[j] + nums[k]
+                if s < 0:
                     j += 1
+                elif s > 0:
+                    k -= 1
                 else:
-                    result.append([nums[i], nums[j], nums[k]])
-                    while j < k and nums[j] == nums[j+1]:
-                        j += 1
                     while j < k and nums[k] == nums[k-1]:
                         k -= 1
-                    k -= 1
+                    while j < k and nums[j] == nums[j+1]:
+                        j += 1
+                    result.append([nums[i], nums[j], nums[k]])
                     j += 1
+                    k -= 1
 
         return result</code></pre>
   </div>
