@@ -1,202 +1,247 @@
-1. Autonomic
-- Screen
-	- Cyndi Tran
-		- Infra (bash, networking)
+1. Autonomic (Software Engineering)
+- Recruiter: Cyndi Tran
 - Round 1
+	- DSA
 	- DSA
 - Round 2
 	- Behavioral
-	- Infra (k8s, terraform)
-	- Python (snake game)
+	- Infra: k8s, terraform
+	- Python: snake game
 
 2. Index exchange
+- Recruiter: Yoyo Wan
+
+2. Index exchange **(Machine Learning)**
+- Recruiter: Priyanka Choudhary
 - Screen
-	- Yoyo Wan
-	- Priyanka Choudhary
-- Round 1
-	- DSA
-		- Stack
-- Round 2
-	- MLSD
-		- Model serving at AD tech 
-	- SD 
-		- Parking lot reservation
+	- DSA: stack
+- Onsite
+	- MLSD: model serving at AD tech
+
+2. Index exchange **(Machine Learning)**
+- Recruiter: Priyanka Choudhary
+- Screen
+	- Conversation
+- Onsite
+	- SD: parking lot reservation
 		- Concurrency and locking mechanisms at the application and infrastructure level
 		- Database performance tuning and concurrency design
 		- Metrics and observability systems including how monitoring pipelines are implemented internally
 
 3. Meta
-- Screen
-	- James Hargett
-	- Christine Wilson
-- Round 1
-	- DSA
-		- https://leetcode.com/problems/valid-palindrome-ii
+- Recruiter: James Hargett
 
-4. Bloomberg
+3. Meta **(Machine Learning)**
+- Recruiter: Christine Wilson
 - Screen
-	- Michael Feinstein
-	- Sian Naiken-Cooke
+	- DSA: https://leetcode.com/problems/valid-palindrome-ii
+
+4. Bloomberg (Software Engineering)
+- Recruiter: Michael Feinstein
 - Round 1
-	- Python
-		- Class for transit system
-	- Python 
-		- Class for lottery create/delete/pickwinner in O(1)
-	- Python 
-		- get/set for sparse array
+	- Python: class for transit system
+	- Python: class for lottery create/delete/pickwinner in O(1)
 - Round 2
-	- SD
-		- TinyURL
+	- SD: TinyURL
 
-5. Confluent
-- Screen
-	- Sandhya Shivaram
+4. Bloomberg **(Machine Learning)**
+- Recruiter: Sian Naiken-Cooke
 - Round 1
-	- DSA
-		- https://leetcode.com/problems/regular-expression-matching
+	- Python: get/set for sparse array
 
-6. Autodesk
-- Screen
-	- Joshua Joel Bartolome: Machine Learning Engineer
-	- Waseem Ali: Machine Learning Engineer
-- Conversation (A/B test), Behavioral (made current system better)
+5. Confluent (Software Engineering)
+- Recruiter: Sandhya Shivaram
 - Round 1
-	- Python (Implementation of retreving feaures, scores, TTL) [CoderPad] 
-	- How to make sure predictions are made for each customer within 50ms
-	- What happens to code when large number of requests
+	- DSA: https://leetcode.com/problems/regular-expression-matching
+
+6. Autodesk **(Machine Learning)**
+- Recruiter: Joshua Joel Bartolome
+- Round 1
+	- Conversation: A/B test, made current system better
+
+6. Autodesk **(Machine Learning)**
+- Recruiter: Waseem Ali
+- Round 1
+	- Python: implementation of retreving feaures, scores, TTL [CoderPad] 
+		- How to make sure predictions are made for each customer within 50ms
+		- What happens to code when large number of requests
 - Round 2
-	- MLSD (model serving, model training, data pipeline) [Excalidraw]
-	- How to investigate API inference being slow - lag from feature store or lag from model registry or etc
-	- How to investigate dashboarding displaying data being slow - investigate query and DB indexing  
+	- MLSD: model serving, model training, data pipeline [Excalidraw]
+		- How to investigate API inference being slow - lag from feature store or lag from model registry or etc
+		- How to investigate dashboarding displaying data being slow - investigate query and DB indexing  
 - Round 3
+	- Conversation
+- Round 4
 	- Conversation
 - OFFER
 	- 165K base + 10% bonus + 32K USD equity (plus 15K signing) 
 
-7. Amazon
-- Screen
-	- Antonio Ang
-- Round 2
-	- DSA
-		- https://leetcode.com/problems/word-ladder
-	- Behavioral
-	- SD
-		- Amazon
-
-8. Google
-- Screen
-	- Alfred Donovan
-- Round 2
-	- DSA
-		- longest substring with no more than 2 unique chars - leet159
-		- find whether all circles are connected
-	- Behavioral
-
-9. Workday
-- Screen
-	- Johnny Wang
+7. Amazon (Software Engineering)
+- Recruiter: Antonio Ang
 - Round 1
-	- Python (given 2D array of data, and computing mean and std w/o using libs)
+	- DSA
+	- DSA
+- Round 2
+	- DSA: https://leetcode.com/problems/word-ladder
+	- Behavioral
+	- SD: Amazon
 
-10. Boosted.ai
-- Screen
-	- Daniela Zambrano
+8. Google (Software Engineering)
+- Recruiter: Alfred Donovan
+- Round 2
+	- DSA: longest substring with no more than 2 unique chars - leet159
+	- DSA:
+	- Behavioral
+	- DSA: find whether all circles are connected
+	
+9. Workday **(Machine Learning)**
+- Recruiter: Johnny Wang
 - Round 1
-	- Python (string modification, overlapping matrices, log streaming and processing)
+	- Python: given 2D array of data, and computing mean and std w/o using libs
+
+10. Boosted.ai **(Machine Learning)**
+- Recruiter: Daniela Zambrano
+- Round 1
+	- Python: string modification, overlapping matrices, log streaming and processing
 
 11. Pinterest
 - Screen
 	- Alexandra Vu
 - Round 1
-	- Python (backend API)
+	- Python: backend API
 
 12. Nuro AI
 - Screen
 	- Naser Kohgadai
 - Round 1
-	- DSA (from a set of 3D points and distance K, find all clusters of points less than K (If dist(A,B) <= K and dist(B,C), then A,B,C are in the same cluster))
+	- DSA: from a set of 3D points and distance K, find all clusters of points less than K (If dist(A,B) <= K and dist(B,C), then A,B,C are in the same cluster)
 
 13. Braze
 - Screen
 	- Mattson Heiner 
 - Round 1
-	- DSA (maximum breahth of parenthesis)
+	- DSA: maximum breahth of parenthesis
 
 14. Collimator
-- Reda Dehy 
+- Screen
+	- Reda Dehy 
 - Conversation
 
 15. Mendal AI
-- Natalee Merrill
+- Screen
+	- Natalee Merrill
 - Conversation
 
 16. Intact
-- Stephen Wong
-- DSA (add two numbers represented by linked list, the smallest string can be formed from all possible combo of strings in given array, the number of palindrom combo possible by 4 increasing indexes ex. ghhhgh - 0124, 0234, 0134, 1235)
+- Screen
+	- Stephen Wong
+- Round 1
+	- DSA: add two numbers represented by linked list
+	- DSA: the smallest string can be formed from all possible combo of strings in given array
+	- DSA: the number of palindrom combo possible by 4 increasing indexes ex. ghhhgh - 0124, 0234, 0134, 1235)
 
 17. VTS
-- Louisa Petkov
-- DSA, SD (TinyURL), Infra (Terraform AWS)
+- Screen
+	- Louisa Petkov
+- Round 1
+	- DSA
+	- SD: TinyURL
+	- Infra: Terraform AWS
 
 18. Runway AI
-- Rebecca McPherson 
-- Python (currency, await, asynco, callable)
+- Screen
+	- Rebecca McPherson 
+- Round 1
+	- Python: currency, await, asynco, callable
 
 19. Wayfair
-- Erin LeBel
-- DSA (graph), SD (SQL)
+- Screen
+	- Erin LeBel
+- Round 1
+	- DSA: graph
+	- Conversation: SQL
 
 20. World Quants
 - 
-- DSA (https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii), Python ("yield", "class method vs static method", "decorator")
+- Round 1
+	- DSA: https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii
+	- Python: "yield", "class method vs static method", "decorator"
 
-21. DoorDash
-- Sho Sato
-- DSA (https://leetcode.com/problems/sliding-window-maximum)
+21. DoorDash (Software Engineer - Machine Learning)
+- Screen
+	- Sho Sato
+- Round 1
+	- DSA: https://leetcode.com/problems/sliding-window-maximum
 
 22. Modular
-- Laura Nguyen
+- Screen
+	- Laura Nguyen
 - Conversation
 
 23. Jarvis
-- Saif Zafar
+- Screen
+	- Saif Zafar
 - Conversation
 
 24. Skyfire
-- Vlad Djordjevski
-- [Woven] Python (debug web app), Python (script to delete files older than X days), Infra (migrate from monolith to microservice)
+- Screen
+	- Vlad Djordjevski
+- Round 1
+	- Python: debug web app [Woven]
+	- Python: script to delete files older than X days [Woven]
+	- Infra: migrate from monolith to microservice [Woven]
 
 25. Ebay
-- Nilsu Ozel
-- DSA (split string by delimter of variable length)
+- Screen
+	- Nilsu Ozel
+- Round 1
+	- DSA: split string by delimter of variable length
+	- Conversation: how many trees in XGBoost, how models were loaded 
 
 26. Sysdane
-- Riley Idelson
-- [Woven] ML (debug model training with GPU cluster), Python (debug web app), ML (quiz)
-- Conversation
+- Screen
+	- Riley Idelson
+- Round 1
+	- ML: debug model training with GPU cluster [Woven]
+	- Python: debug web app [Woven]
+	- ML: quiz [Woven]
+- Round 2
+	- Conversation
 
 27. Guidewire
-- Annie Jose
-- DSA (https://leetcode.com/problems/minimum-number-of-food-buckets-to-feed-the-hamsters)
+- Screen
+	- Annie Jose
+- Round 1	
+	- DSA: https://leetcode.com/problems/minimum-number-of-food-buckets-to-feed-the-hamsters
 
 28. RBC Borealis
-- Peter Kuchnio, Cathy C Lam
-- Behavioral
-- DSA (task scheduler with timestamp, multithreading and concurrency)
-- MLSD (Layer6 ML platform, how to scale queue, how to identify bottlenecks in API serving and scale each component in API path)
+- Screen
+	- Peter Kuchnio, Cathy C Lam
+- Round 1
+	- Behavioral
+	- DSA: task scheduler with timestamp, multithreading and concurrency
+	- MLSD: Layer6 ML platform, how to scale queue, how to identify bottlenecks in API serving and scale each component in API path
 - OFFER: 165K + 25K + 20K (3 years - at Dec 2029) + 20K (sign-in) + 9K RSP Matching + 20 days per year + unlimited sick day, Start date is Sep 7th, Respond by Friday
 
 29. Lightworks
-- Osama Shaukat
+- Screen
+	- Osama Shaukat
 - Conversation (Behavioral)
 - Git (explain git, fetch vs pull) REST (GET/POST/PUT/DELETE, why we can't use PUT to create resource) Python (list vs tuple, when do you use tuple and list, why we used immutable data structure, what does star-star kargs do, shallow copy vs deep copy, how to do deep copy of dictionary, how to create abstract class and interfaces in Python) SD (how to manage microservice architecture, how to implement monitoring and logging for microservice architecture) DB (when to use SQL and no-SQL, how to ensure consistency in SQL and no-SQL) SD (hotel reservation - how to implement load balancer, what does API gateway do, DB for each service or just one DB, full request flow with data, two users trying to make booking at the same time)
 
 30. Saris AI
-- Carrick Rogers
-- MLSD (chatbot, data stucture of user_id/timestamp/query/answer, framework like langchain, PCI compliancy of cloud providers, whether system prompt changes based on underlying LLM)
+- Screen
+	- Carrick Rogers
+- Round 1
+	- MLSD:chatbot
+		- Data stucture of user_id/timestamp/query/answer
+		- Framework like langchain
+		- PCI compliancy of cloud providers
+		- Whether system prompt changes based on underlying LLM)
 
 31. Mozilla
-- Olivia Sargent, Julia Wineriter 
+- Screen
+	- Olivia Sargent, Julia Wineriter 
 - [CoderPad] Python (Github API to retrieve repos under orgs in a loop)
 - Conversation (observability metrics for API - other than latency, number of requests, cpu/memory utilization, how to elastically scale compute based on load - rule or ml based)
 - [CoderPad] Python (Parse a log file and perform some logics)
