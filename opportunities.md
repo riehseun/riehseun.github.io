@@ -15,7 +15,9 @@
 - Screen
 	- DSA: stack
 - Onsite
-	- MLSD: model serving at AD tech 
+	- MLSD: model serving at AD tech
+		- Large Scale
+		- Latency
 
 2c. Index exchange **(Machine Learning)**
 - Recruiter: Priyanka Choudhary
@@ -41,7 +43,7 @@
 	- Python: class for transit system
 	- Python: class for lottery create/delete/pickwinner in O(1)
 - Round 2
-	- SD: TinyURL
+	- SD: design TinyURL
 
 4b. Bloomberg **(Machine Learning)**
 - Recruiter: Sian Naiken-Cooke
@@ -57,7 +59,8 @@
 - Recruiter: Joshua Joel Bartolome
 - Round 1
 	- Conversation: behavioral, technical
-		- A/B test, made current system better
+		- Made current system better
+		- A/B test
 
 6b. Autodesk **(Machine Learning)**
 - Recruiter: Waseem Ali
@@ -68,7 +71,7 @@
 - Round 2
 	- MLSD: model serving, model training, data pipeline [Excalidraw]
 		- How to investigate API inference being slow - lag from feature store or lag from model registry or etc
-		- How to investigate dashboarding displaying data being slow - investigate query and DB indexing  
+		- How to investigate dashboarding displaying data being slow - investigate query and DB indexing 
 - Round 3
 	- Conversation: technical
 - Round 4
@@ -79,12 +82,12 @@
 7. Amazon (Software Engineering)
 - Recruiter: Antonio Ang
 - Round 1
-	- DSA
-	- DSA
+	- DSA:
+	- DSA:
 - Round 2
 	- DSA: https://leetcode.com/problems/word-ladder
 	- Conversation: behavioral
-	- SD: Amazon
+	- SD: design Amazon
 
 8. Google (Software Engineering)
 - Recruiter: Alfred Donovan
@@ -97,7 +100,7 @@
 9. Workday **(Machine Learning)**
 - Recruiter: Johnny Wang
 - Round 1
-	- Python: given 2D array of data, and computing mean and std w/o using libs
+	- Python: given 2D array of data, and compute mean and std w/o using libs
 
 10. Boosted.ai **(Machine Learning)**
 - Recruiter: Daniela Zambrano
@@ -112,7 +115,7 @@
 12. Nuro AI **(Machine Learning)**
 - Recruiter: Naser Kohgadai
 - Round 1
-	- DSA: from a set of 3D points and distance K, find all clusters of points less than K (If dist(A,B) <= K and dist(B,C), then A,B,C are in the same cluster)
+	- DSA: from a set of 3D points and distance K, find all clusters of points less than K. If dist(A,B) <= K and dist(B,C), then A,B,C are in the same cluster
 
 13. Braze (Software Engineering)
 - Recruiter: Mattson Heiner 
@@ -139,9 +142,9 @@
 17. VTS (Software Engineering)
 - Recruiter: Louisa Petkov
 - Round 1
-	- DSA
-	- SD: TinyURL
-	- Infra: Terraform AWS
+	- DSA: 
+	- SD: design TinyURL
+	- Infra: write Terraform on AWS
 
 18. Runway AI (Software Engineering)
 - Recruiter: Rebecca McPherson 
@@ -152,7 +155,8 @@
 - Recruiter: Erin LeBel
 - Round 1
 	- DSA: graph
-	- Conversation: SQL
+	- Conversation: technical 
+		- Relational table, SQL
 
 20. World Quants (Software Engineering)
 - Recruiter: Mahir Khan
@@ -195,7 +199,7 @@
 	- Python: debug web app [Woven]
 	- ML: quiz [Woven]
 - Round 2
-	- Conversation
+	- Conversation: technical
 		- E2E model development for fraud detection use case
 
 27. Guidewire **(Machine Learning)**
@@ -219,12 +223,12 @@
 	- Conversation: behavioral + technical
 - Round 2
 	- Conversation: Technical
-		- Git (explain git, fetch vs pull) 
-		- REST (GET/POST/PUT/DELETE, why we can't use PUT to create resource) 
-		- Python (list vs tuple, when do you use tuple and list, why we used immutable data structure, what does star-star kargs do, shallow copy vs deep copy, how to do deep copy of dictionary, how to create abstract class and interfaces in Python) 
-		- SD (how to manage microservice architecture, how to implement monitoring and logging for microservice architecture) 
-		- DB (when to use SQL and no-SQL, how to ensure consistency in SQL and no-SQL) 
-		- SD (hotel reservation - how to implement load balancer, what does API gateway do, DB for each service or just one DB, full request flow with data, two users trying to make booking at the same time)
+		- Git: explain git, fetch vs pull
+		- REST: GET/POST/PUT/DELETE, why we can't use PUT to create resource
+		- Python: list vs tuple, when do you use tuple and list, why we used immutable data structure, what does star-star kargs do, shallow copy vs deep copy, how to do deep copy of dictionary, how to create abstract class and interfaces in Python
+		- SD: how to manage microservice architecture, how to implement monitoring and logging for microservice architecture
+		- DB: when to use SQL and no-SQL, how to ensure consistency in SQL and no-SQL
+		- SD: hotel reservation - how to implement load balancer, what does API gateway do, DB for each service or just one DB, full request flow with data, two users trying to make booking at the same time
 
 30. Saris AI (Software Engineering)
 - Recruiter: Carrick Rogers
@@ -260,7 +264,7 @@
 33. Socure **(Machine Learning)**
 - Recruiter: 
 - Round 1
-	- Conversation (Behavioral) 
+	- Conversation: behavioral 
 		- high impact project 
 		- scalability, quality controls, better customer satisfaction, features that had business impacts, manage conflict with other teams, work under pressure
 
@@ -301,4 +305,5 @@
 40. Rhyme **(Machine Learning)**
 - Recruiter: 
 - Round 1
-	- MLSD (Chatbot - synchronous, event-driven, identify bottlenecks, websocket)
+	- MLSD: Chatbot 
+		- Synchronous, event-driven, identify bottlenecks, websocket
