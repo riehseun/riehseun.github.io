@@ -2,9 +2,8 @@
 - Recruiter: Cyndi Tran
 - Round 1
 	- DSA
-	- DSA
 - Round 2
-	- Behavioral
+	- Conversation: behavioral
 	- Infra: k8s, terraform
 	- Python: snake game
 
@@ -21,7 +20,7 @@
 2c. Index exchange **(Machine Learning)**
 - Recruiter: Priyanka Choudhary
 - Screen
-	- Conversation
+	- Conversation: behavioral, technical
 - Onsite
 	- SD: parking lot reservation
 		- Concurrency and locking mechanisms at the application and infrastructure level
@@ -57,7 +56,8 @@
 6a. Autodesk **(Machine Learning)**
 - Recruiter: Joshua Joel Bartolome
 - Round 1
-	- Conversation: A/B test, made current system better
+	- Conversation: behavioral, technical
+		- A/B test, made current system better
 
 6b. Autodesk **(Machine Learning)**
 - Recruiter: Waseem Ali
@@ -70,9 +70,9 @@
 		- How to investigate API inference being slow - lag from feature store or lag from model registry or etc
 		- How to investigate dashboarding displaying data being slow - investigate query and DB indexing  
 - Round 3
-	- Conversation
+	- Conversation: technical
 - Round 4
-	- Conversation
+	- Conversation: top-grading
 - OFFER
 	- 165K base + 10% bonus + 32K USD equity (plus 15K signing) 
 
@@ -83,7 +83,7 @@
 	- DSA
 - Round 2
 	- DSA: https://leetcode.com/problems/word-ladder
-	- Behavioral
+	- Conversation: behavioral
 	- SD: Amazon
 
 8. Google (Software Engineering)
@@ -91,7 +91,7 @@
 - Round 2
 	- DSA: longest substring with no more than 2 unique chars - leet159
 	- DSA:
-	- Behavioral
+	- Conversation: behavioral
 	- DSA: find whether all circles are connected
 	
 9. Workday **(Machine Learning)**
@@ -121,11 +121,13 @@
 
 14. Collimator (Software Engineering)
 - Recruiter: Reda Dehy 
-- Conversation
+- Round 1
+	- Conversation: technical
 
 15. Mendal AI (Software Engineering)
 - Recruiter: Natalee Merrill
-- Conversation
+- Round 1
+	- Conversation: technical
 
 16. Intact (Software Engineering)
 - Recruiter: Stephen Wong
@@ -166,12 +168,12 @@
 22. Modular (Software Engineering)
 - Recruiter: : Laura Nguyen
 - Round 1
-	- Conversation
+	- Conversation: technical
 
 23. Jarvis **(Machine Learning)**
 - Recruiter: Saif Zafar
 - Round 1
-	- Conversation
+	- Conversation: technical
 
 24. Skyfire (Software Engineering)
 - Recruiter: Vlad Djordjevski
@@ -202,19 +204,21 @@
 	- DSA: https://leetcode.com/problems/minimum-number-of-food-buckets-to-feed-the-hamsters
 
 28. RBC Borealis **(Machine Learning)**
-- Recruiter: Peter Kuchnio, Cathy C Lam
+- Recruiter: Cathy C Lam
 - Round 1
-	- Behavioral
+	- Conversation: behavioral
+- Round 2
 	- DSA: task scheduler with timestamp, multithreading and concurrency
+- Round 3
 	- MLSD: Layer6 ML platform, how to scale queue, how to identify bottlenecks in API serving and scale each component in API path
 - OFFER: 165K + 25K + 20K (3 years - at Dec 2029) + 20K (sign-in) + 9K RSP Matching + 20 days per year + unlimited sick day, Start date is Sep 7th, Respond by Friday
 
 29. Lightworks (Software Engineering)
 - Recruiter: Osama Shaukat
 - Round 1
-	- Conversation (Behavioral)
+	- Conversation: behavioral + technical
 - Round 2
-	- Conversation (Technical)
+	- Conversation: Technical
 		- Git (explain git, fetch vs pull) 
 		- REST (GET/POST/PUT/DELETE, why we can't use PUT to create resource) 
 		- Python (list vs tuple, when do you use tuple and list, why we used immutable data structure, what does star-star kargs do, shallow copy vs deep copy, how to do deep copy of dictionary, how to create abstract class and interfaces in Python) 
@@ -225,7 +229,7 @@
 30. Saris AI (Software Engineering)
 - Recruiter: Carrick Rogers
 - Round 1
-	- MLSD:chatbot
+	- MLSD: chatbot
 		- Data stucture of user_id/timestamp/query/answer
 		- Framework like langchain
 		- PCI compliancy of cloud providers
@@ -236,13 +240,13 @@
 - Round 1
 	- Python: Github API to retrieve repos under orgs in a loop [CoderPad]
 - Round 2
-	- Conversation (Technical)
+	- Conversation: technical
 		- observability metrics for API - other than latency, number of requests, cpu/memory utilization, how to elastically scale compute based on load - rule or ml based
 - Round 3
-	- Python (Parse a log file and perform some logics) [CoderPad]
+	- Python: parse a log file and perform some logics [CoderPad]
 - Round 4
-	- Conversation (Topgrading)
-	- Conversation (LLM serving, GPU scaling, privacy) [Excalidraw]
+	- Conversation: top-grading
+	- MLSD: LLM serving, GPU scaling, privacy [Excalidraw]
 
 32. Nubank (Software Engineering)
 - Recruiter: Dhialick Oliveira
@@ -257,7 +261,8 @@
 - Recruiter: 
 - Round 1
 	- Conversation (Behavioral) 
-		- (high impact project - scalability, quality controls, better customer satisfaction, features that had business impacts, manage conflict with other teams, work under pressure)
+		- high impact project 
+		- scalability, quality controls, better customer satisfaction, features that had business impacts, manage conflict with other teams, work under pressure
 
 34. Mckesson (Software Engineering)
 - Recruiter: 
@@ -267,7 +272,7 @@
 35. Scotiabank (Software Engineering)
 - Recruiter: 
 - Round 1
-	- Conversation (Technical)
+	- Conversation: technical
 		- Databricks (difference between managed vs external volume) 
 		- Kubernetes (key components of K8s cluster, security config of K8s cluster)
 
