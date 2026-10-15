@@ -8,17 +8,17 @@
 	- Infra: k8s, terraform
 	- Python: snake game
 
-2. Index exchange
+2a. Index exchange
 - Recruiter: Yoyo Wan
 
-2. Index exchange **(Machine Learning)**
+2b. Index exchange **(Machine Learning)**
 - Recruiter: Priyanka Choudhary
 - Screen
 	- DSA: stack
 - Onsite
-	- MLSD: model serving at AD tech
+	- MLSD: model serving at AD tech 
 
-2. Index exchange **(Machine Learning)**
+2c. Index exchange **(Machine Learning)**
 - Recruiter: Priyanka Choudhary
 - Screen
 	- Conversation
@@ -28,15 +28,15 @@
 		- Database performance tuning and concurrency design
 		- Metrics and observability systems including how monitoring pipelines are implemented internally
 
-3. Meta
+3a. Meta
 - Recruiter: James Hargett
 
-3. Meta **(Machine Learning)**
+3b. Meta **(Machine Learning)**
 - Recruiter: Christine Wilson
 - Screen
 	- DSA: https://leetcode.com/problems/valid-palindrome-ii
 
-4. Bloomberg (Software Engineering)
+4a. Bloomberg (Software Engineering)
 - Recruiter: Michael Feinstein
 - Round 1
 	- Python: class for transit system
@@ -44,7 +44,7 @@
 - Round 2
 	- SD: TinyURL
 
-4. Bloomberg **(Machine Learning)**
+4b. Bloomberg **(Machine Learning)**
 - Recruiter: Sian Naiken-Cooke
 - Round 1
 	- Python: get/set for sparse array
@@ -54,12 +54,12 @@
 - Round 1
 	- DSA: https://leetcode.com/problems/regular-expression-matching
 
-6. Autodesk **(Machine Learning)**
+6a. Autodesk **(Machine Learning)**
 - Recruiter: Joshua Joel Bartolome
 - Round 1
 	- Conversation: A/B test, made current system better
 
-6. Autodesk **(Machine Learning)**
+6b. Autodesk **(Machine Learning)**
 - Recruiter: Waseem Ali
 - Round 1
 	- Python: implementation of retreving feaures, scores, TTL [CoderPad] 
@@ -104,134 +104,126 @@
 - Round 1
 	- Python: string modification, overlapping matrices, log streaming and processing
 
-11. Pinterest
-- Screen
-	- Alexandra Vu
+11. Pinterest (Software Engineering)
+- Recruiter: Alexandra Vu
 - Round 1
 	- Python: backend API
 
-12. Nuro AI
-- Screen
-	- Naser Kohgadai
+12. Nuro AI **(Machine Learning)**
+- Recruiter: Naser Kohgadai
 - Round 1
 	- DSA: from a set of 3D points and distance K, find all clusters of points less than K (If dist(A,B) <= K and dist(B,C), then A,B,C are in the same cluster)
 
-13. Braze
-- Screen
-	- Mattson Heiner 
+13. Braze (Software Engineering)
+- Recruiter: Mattson Heiner 
 - Round 1
 	- DSA: maximum breahth of parenthesis
 
-14. Collimator
-- Screen
-	- Reda Dehy 
+14. Collimator (Software Engineering)
+- Recruiter: Reda Dehy 
 - Conversation
 
-15. Mendal AI
-- Screen
-	- Natalee Merrill
+15. Mendal AI (Software Engineering)
+- Recruiter: Natalee Merrill
 - Conversation
 
-16. Intact
-- Screen
-	- Stephen Wong
+16. Intact (Software Engineering)
+- Recruiter: Stephen Wong
 - Round 1
 	- DSA: add two numbers represented by linked list
 	- DSA: the smallest string can be formed from all possible combo of strings in given array
 	- DSA: the number of palindrom combo possible by 4 increasing indexes ex. ghhhgh - 0124, 0234, 0134, 1235)
 
-17. VTS
-- Screen
-	- Louisa Petkov
+17. VTS (Software Engineering)
+- Recruiter: Louisa Petkov
 - Round 1
 	- DSA
 	- SD: TinyURL
 	- Infra: Terraform AWS
 
-18. Runway AI
-- Screen
-	- Rebecca McPherson 
+18. Runway AI (Software Engineering)
+- Recruiter: Rebecca McPherson 
 - Round 1
 	- Python: currency, await, asynco, callable
 
-19. Wayfair
-- Screen
-	- Erin LeBel
+19. Wayfair (Software Engineering)
+- Recruiter: Erin LeBel
 - Round 1
 	- DSA: graph
 	- Conversation: SQL
 
-20. World Quants
-- 
+20. World Quants (Software Engineering)
+- Recruiter: Mahir Khan
 - Round 1
 	- DSA: https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii
 	- Python: "yield", "class method vs static method", "decorator"
 
-21. DoorDash (Software Engineer - Machine Learning)
-- Screen
-	- Sho Sato
+21. DoorDash **(Machine Learning)**
+- Recruiter: Sho Sato
 - Round 1
 	- DSA: https://leetcode.com/problems/sliding-window-maximum
 
-22. Modular
-- Screen
-	- Laura Nguyen
-- Conversation
+22. Modular (Software Engineering)
+- Recruiter: : Laura Nguyen
+- Round 1
+	- Conversation
 
-23. Jarvis
-- Screen
-	- Saif Zafar
-- Conversation
+23. Jarvis **(Machine Learning)**
+- Recruiter: Saif Zafar
+- Round 1
+	- Conversation
 
-24. Skyfire
-- Screen
-	- Vlad Djordjevski
+24. Skyfire (Software Engineering)
+- Recruiter: Vlad Djordjevski
 - Round 1
 	- Python: debug web app [Woven]
 	- Python: script to delete files older than X days [Woven]
 	- Infra: migrate from monolith to microservice [Woven]
 
-25. Ebay
-- Screen
-	- Nilsu Ozel
+25. Ebay **(Machine Learning)**
+- Recruiter: Nilsu Ozel
 - Round 1
 	- DSA: split string by delimter of variable length
 	- Conversation: how many trees in XGBoost, how models were loaded 
 
-26. Sysdane
-- Screen
-	- Riley Idelson
+26. Sysdane **(Machine Learning)**
+- Recruiter: Riley Idelson
 - Round 1
 	- ML: debug model training with GPU cluster [Woven]
 	- Python: debug web app [Woven]
 	- ML: quiz [Woven]
 - Round 2
 	- Conversation
+		- E2E model development for fraud detection use case
 
-27. Guidewire
-- Screen
-	- Annie Jose
+27. Guidewire **(Machine Learning)**
+- Recruiter: Annie Jose
 - Round 1	
 	- DSA: https://leetcode.com/problems/minimum-number-of-food-buckets-to-feed-the-hamsters
 
-28. RBC Borealis
-- Screen
-	- Peter Kuchnio, Cathy C Lam
+28. RBC Borealis **(Machine Learning)**
+- Recruiter: Peter Kuchnio, Cathy C Lam
 - Round 1
 	- Behavioral
 	- DSA: task scheduler with timestamp, multithreading and concurrency
 	- MLSD: Layer6 ML platform, how to scale queue, how to identify bottlenecks in API serving and scale each component in API path
 - OFFER: 165K + 25K + 20K (3 years - at Dec 2029) + 20K (sign-in) + 9K RSP Matching + 20 days per year + unlimited sick day, Start date is Sep 7th, Respond by Friday
 
-29. Lightworks
-- Screen
-	- Osama Shaukat
-- Conversation (Behavioral)
-- Git (explain git, fetch vs pull) REST (GET/POST/PUT/DELETE, why we can't use PUT to create resource) Python (list vs tuple, when do you use tuple and list, why we used immutable data structure, what does star-star kargs do, shallow copy vs deep copy, how to do deep copy of dictionary, how to create abstract class and interfaces in Python) SD (how to manage microservice architecture, how to implement monitoring and logging for microservice architecture) DB (when to use SQL and no-SQL, how to ensure consistency in SQL and no-SQL) SD (hotel reservation - how to implement load balancer, what does API gateway do, DB for each service or just one DB, full request flow with data, two users trying to make booking at the same time)
+29. Lightworks (Software Engineering)
+- Recruiter: Osama Shaukat
+- Round 1
+	- Conversation (Behavioral)
+- Round 2
+	- Conversation (Technical)
+		- Git (explain git, fetch vs pull) 
+		- REST (GET/POST/PUT/DELETE, why we can't use PUT to create resource) 
+		- Python (list vs tuple, when do you use tuple and list, why we used immutable data structure, what does star-star kargs do, shallow copy vs deep copy, how to do deep copy of dictionary, how to create abstract class and interfaces in Python) 
+		- SD (how to manage microservice architecture, how to implement monitoring and logging for microservice architecture) 
+		- DB (when to use SQL and no-SQL, how to ensure consistency in SQL and no-SQL) 
+		- SD (hotel reservation - how to implement load balancer, what does API gateway do, DB for each service or just one DB, full request flow with data, two users trying to make booking at the same time)
 
-30. Saris AI
-- Screen
-	- Carrick Rogers
+30. Saris AI (Software Engineering)
+- Recruiter: Carrick Rogers
 - Round 1
 	- MLSD:chatbot
 		- Data stucture of user_id/timestamp/query/answer
@@ -239,48 +231,69 @@
 		- PCI compliancy of cloud providers
 		- Whether system prompt changes based on underlying LLM)
 
-31. Mozilla
-- Screen
-	- Olivia Sargent, Julia Wineriter 
-- [CoderPad] Python (Github API to retrieve repos under orgs in a loop)
-- Conversation (observability metrics for API - other than latency, number of requests, cpu/memory utilization, how to elastically scale compute based on load - rule or ml based)
-- [CoderPad] Python (Parse a log file and perform some logics)
-- Conversation (Topgrading)
-- [Excalidraw] Conversation (LLM serving, GPU scaling, privacy)
+31. Mozilla **(Machine Learning)**
+- Recruiter: Olivia Sargent, Julia Wineriter 
+- Round 1
+	- Python: Github API to retrieve repos under orgs in a loop [CoderPad]
+- Round 2
+	- Conversation (Technical)
+		- observability metrics for API - other than latency, number of requests, cpu/memory utilization, how to elastically scale compute based on load - rule or ml based
+- Round 3
+	- Python (Parse a log file and perform some logics) [CoderPad]
+- Round 4
+	- Conversation (Topgrading)
+	- Conversation (LLM serving, GPU scaling, privacy) [Excalidraw]
 
-32. Nubank
-- Dhialick Oliveira
-- [CodeSignal] Python (heap sort by second value in ascending order, pattern of nested dictionary - user_id, timestamp)
-- [Miro] SD (Batch processing, pre-fetching into memory, parallel processing, scheduler, UUID)
-- [CodeSignal] Python (Compute tax on capital gain during stock buy and sell transactions)
+32. Nubank (Software Engineering)
+- Recruiter: Dhialick Oliveira
+- Round 1
+	- Python (heap sort by second value in ascending order, pattern of nested dictionary - user_id, timestamp) [CodeSignal]
+- Round 2
+	- SD (Batch processing, pre-fetching into memory, parallel processing, scheduler, UUID) [Miro] 
+- Round 3
+	- Python (Compute tax on capital gain during stock buy and sell transactions) [CodeSignal]
 
-33. Socure
-- Behavioral (high impact project - scalability, quality controls, better customer satisfaction, features that had business impacts, manage conflict with other teams, work under pressure)
+33. Socure **(Machine Learning)**
+- Recruiter: 
+- Round 1
+	- Conversation (Behavioral) 
+		- (high impact project - scalability, quality controls, better customer satisfaction, features that had business impacts, manage conflict with other teams, work under pressure)
 
-34. Mckesson
-- 
-- [Torc] Kubernetes networking (gateway.networking.k8s.io/v1, templates.gatekeeper.sh/v1) ArgoCD, Github Actions
+34. Mckesson (Software Engineering)
+- Recruiter: 
+- Round 1
+	- Kubernetes networking (gateway.networking.k8s.io/v1, templates.gatekeeper.sh/v1) ArgoCD, Github Actions [Torc]
 
-35. Scotiabank
-- Databricks (difference between managed vs external volume) Kubernetes (key components of K8s cluster, security config of K8s cluster)
+35. Scotiabank (Software Engineering)
+- Recruiter: 
+- Round 1
+	- Conversation (Technical)
+		- Databricks (difference between managed vs external volume) 
+		- Kubernetes (key components of K8s cluster, security config of K8s cluster)
 
-36. Sardine AI
-- George Cave (how to debug when 10% drop in precision)
-- 
+36. Sardine AI **(Machine Learning)**
+- Recruiter: George Cave (how to debug when 10% drop in precision)
 
-37. Affirm
-- Josh Rodriguez
-- Python (Given Offer, OfferList, users, write processing logics of each offer based on rules and create desired result set)
+37. Affirm **(Machine Learning)**
+- Recruiter: Josh Rodriguez
+- Round 1
+	- Python: given offer, offerList, users, write processing logics of each offer based on rules and create desired result set
 
-38. BDO/RBC
-- Emmanuel Florakas
-- Kubernetes (how control plane works, how operator works)
-- SQL (How to manage evolution of schema ex. Flyway, API authentication/authorization)
+38. BDO/RBC (Software Engineering)
+- Recruiter: Emmanuel Florakas
+- Round 1
+	- Conversation (Technical)
+		- Kubernetes (how control plane works, how operator works)
+		- SQL (How to manage evolution of schema ex. Flyway, API authentication/authorization)
 
-39. EY
-- 
-- MLSD (Multi-agent orchestration/architecture)
+39. EY **(Machine Learning)**
+- Recruiter: 
+- Round 1
+	- Conversation (Technical)
+- Round 2
+	- MLSD (Multi-agent orchestration/architecture)
 
-40. Rhyme
--
-- MLSD (Chatbot - synchronous, event-driven, identify bottlenecks, websocket)
+40. Rhyme **(Machine Learning)**
+- Recruiter: 
+- Round 1
+	- MLSD (Chatbot - synchronous, event-driven, identify bottlenecks, websocket)
