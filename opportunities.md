@@ -76,8 +76,7 @@
 	- Conversation: technical
 - Round 4
 	- Conversation: top-grading
-- OFFER
-	- 165K base + 10% bonus + 32K USD equity (plus 15K signing) 
+- OFFER: 165K base + 10% bonus + 32K USD equity + 15K signing + 3K RSP matching  + 20 days vacation + flex forward
 
 7. Amazon (Software Engineering)
 - Recruiter: Antonio Ang
@@ -216,7 +215,7 @@
 	- **DSA: task scheduler with timestamp, multithreading and concurrency**
 - Round 3
 	- **MLSD: Layer6 ML platform, how to scale queue, how to identify bottlenecks in API serving and scale each component in API path**
-- OFFER: 165K + 25K + 20K (3 years - at Dec 2029) + 20K (sign-in) + 9K RSP Matching + 20 days per year + unlimited sick day
+- OFFER: 165K base + 25K bonus + 20K equity (3 years - at Dec 2029) + 20K signing + 9K RSP matching + 20 days vacation + unlimited sick day
 
 29. Lightworks (Software Engineering)
 - Recruiter: Osama Shaukat
@@ -253,7 +252,7 @@
 	- Python: Github API to retrieve repos under orgs in a loop [CoderPad]
 - Round 2
 	- Conversation: technical
-		- observability metrics for API - other than latency, number of requests, cpu/memory utilization, how to elastically scale compute based on load - rule or ml based
+		- observability metrics for API: other than latency, number of requests, cpu/memory utilization, how to elastically scale compute based on load - rule or ml based
 - Round 3
 	- Python: parse a log file and perform some logics [CoderPad]
 - Round 4
@@ -263,30 +262,31 @@
 32. Nubank (Software Engineering)
 - Recruiter: Dhialick Oliveira
 - Round 1
-	- Python (heap sort by second value in ascending order, pattern of nested dictionary - user_id, timestamp) [CodeSignal]
+	- Python: heap sort by second value in ascending order, pattern of nested dictionary - user_id, timestamp [CodeSignal]
 - Round 2
-	- SD (Batch processing, pre-fetching into memory, parallel processing, scheduler, UUID) [Miro] 
+	- SD: batch processing, pre-fetching into memory, parallel processing, scheduler, UUID [Miro] 
 - Round 3
-	- Python (Compute tax on capital gain during stock buy and sell transactions) [CodeSignal]
+	- Python: compute tax on capital gain during stock buy and sell transactions [CodeSignal]
 
 33. Socure (Machine Learning)
 - Recruiter: 
 - Round 1
 	- Conversation: behavioral 
-		- high impact project 
-		- scalability, quality controls, better customer satisfaction, features that had business impacts, manage conflict with other teams, work under pressure
+		- High impact project, scalability, quality controls, better customer satisfaction, features that had business impacts, manage conflict with other teams, work under pressure
 
 34. Mckesson (Software Engineering)
 - Recruiter: 
 - Round 1
-	- Kubernetes networking (gateway.networking.k8s.io/v1, templates.gatekeeper.sh/v1) ArgoCD, Github Actions [Torc]
+	- Kubernetes networking about gateway.networking.k8s.io/v1, templates.gatekeeper.sh/v1 [Torc]
+	- ArgoCD [Torc]
+	- Github Actions [Torc]
 
 35. Scotiabank (Software Engineering)
 - Recruiter: 
 - Round 1
 	- Conversation: technical
-		- Databricks (difference between managed vs external volume) 
-		- Kubernetes (key components of K8s cluster, security config of K8s cluster)
+		- Databricks: difference between managed vs external volume
+		- Kubernetes: key components of K8s cluster, security config of K8s cluster
 
 36. Sardine AI (Machine Learning)
 - Recruiter: George Cave 
@@ -304,6 +304,7 @@
 		- Kubernetes: how control plane works, how operator works
 		- SQL: how to manage evolution of schema ex. Flyway 
 		- API authentication/authorization
+- OFFER: 90/hr -> 105/hr
 
 39. EY (Machine Learning)
 - Recruiter: 
@@ -311,6 +312,7 @@
 	- Conversation (Technical)
 - Round 2
 	- **MLSD (Multi-agent orchestration/architecture)**
+- OFFER: 80/hr -> 90/hr
 
 40. Rhyme (Machine Learning)
 - Recruiter: 
