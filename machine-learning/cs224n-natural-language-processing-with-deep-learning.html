@@ -45,16 +45,56 @@
     <h2 class="card-title">Natural Language Processing with Deep Learning</h2>
     <!-- <ul class="list-unstyled mb-0"> -->
     <ul>
-      <li><a href="#deep-learning-"></a></li>
+      <li><a href="#deep-learning-"></a>Introduction and Word Vectors</li>
     </ul>
   </div>
 </div>
 
 <div class="card mb-4" id="natural-language-processing-with-deep-learning-">
   <div class="card-body">
-    <h2 class="card-title"></h2>
+    <h2 class="card-title">Introduction and Word Vectors</h2>
+    <ul>
+      <li>word vectors = word embedding: measure similarity by dot product</li>
+    </ul>
 
-    <h3 class="card-title"></h3>
+    <h3 class="card-title">Word2vec</h3>
+    <ul>
+      <li>Idea</li>
+      <ul>
+        <li>Interate center and outside words in a corpus</li>
+        <li>Calculate probability of center word given outside word (or vice versa)</li>
+        <li>Keep adjusting vectors to maximize the probability</li>
+      </ul>
+      <li>Objective function</li>
+      <ul>   
+        <li>For each position \( t = {1 \dots T} \), predict context window of fixed size \( m \) given center word \( w_{t} \)</li> 
+        <li>Data likelyhood: \[ \text{Likelihood} = L(\theta) = \prod_{t=1}^{T} \prod_{\substack{-m \leq j \leq m \\ j \neq 0}} P(w_{t+j} \mid w_t; \theta) \]</li>
+        <li>Objective function is average negative log likelihood \[J(\theta) = -\frac{1}{T}\log L(\theta) = -\frac{1}{T}\sum_{t=1}^{T} \sum_{\substack{-m \leq j \leq m \\ j \neq 0}} \log P(w_{t+j} \mid w_t; \theta) \]</li>
+        <li>To calculate \( P(w_{t+j} \mid w_t; \theta) \), use two vectors per \( w \)</li>
+        <ul>
+          <li>\( v_{w} \) when \( w \) is center word</li>
+          <li>\( u_{w} \) when \( w \) is context word</li>
+        </ul>
+      </ul>
+      <li>Prediction function</li>
+      <ul>
+        <li>For center word \( c \) and outside word \( o \) (This is an example of softmax function) \[ P(o|c) = \frac{\exp(u_o^T v_c)}{\sum_{w \in V} \exp(u_w^T v_c)} \]</li>
+      </ul>
+      <li>Model training</li>
+      <ul>
+        <li>\( \theta \) represents all model parameters</li>
+        <li>With \( d \) dimensional vectors and \( v \) many words \[ \theta = \begin{bmatrix} 
+v_{aardvark} \\ 
+v_a \\ 
+\vdots \\ 
+v_{zebra} \\ 
+u_{aardvark} \\ 
+u_a \\ 
+\vdots \\ 
+u_{zebra} 
+\end{bmatrix} \in \mathbb{R}^{2dV} \]</li>
+      </ul>
+    </ul>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://web.stanford.edu/class/cs224n">CS224N Natural Language Processing with Deep Learning</a>
