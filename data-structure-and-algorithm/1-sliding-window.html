@@ -97,39 +97,42 @@
 <pre><code class="python">class Solution:
     def minWindow(self, s: str, t: str) -> str:
         
-        # "ABCDEEFG", "FEEC" ? "CDEEF"
+        # Consider start and end pointers
+        # Move end pointer until every char in t is in window
+        #   Create counter of t
+        #   When each char count is met within window, 
+        #   increase num_satisfied by 1
+        #   When num_satisfied == len(counter), condition is satisfied
+        # Move start pointer while condition is satisfied
+        #   When each char count not met within window,
+        #   decrease num_satisfied by 1
 
-        # Use two dictionary for counting chars in t and window
-        # Substring is valid when each char in t is satisfied
-        # Move end pointer
-        # While substring is valid, move start pointer
-        # Time O(n+m) n = len(s), m = len(t)
-        # Space O(n+m)
+        # Time: O(n+m), n = len(s), m = len(t)
+        # Space: O(m)
 
-        freq_s, freq_t = defaultdict(int), defaultdict(int)
-        num_satisfied = 0
         start, end = 0, 0
-        min_len, min_string = math.inf, ""
-
-        for c in t:
-            freq_t[c] += 1
+        freq_t = Counter(t)
+        freq_s = defaultdict(int)
+        num_satisfied = 0
+        min_len, min_str = math.inf, ""
 
         while end < len(s):
+            
             freq_s[s[end]] += 1
             if s[end] in freq_t and freq_s[s[end]] == freq_t[s[end]]:
                 num_satisfied += 1
             end += 1
 
-            while len(freq_t) == num_satisfied:
+            while num_satisfied == len(freq_t):
                 if end - start < min_len:
                     min_len = end - start
-                    min_string = s[start:end]
+                    min_str = s[start:end]
                 if s[start] in freq_t and freq_s[s[start]] == freq_t[s[start]]:
                     num_satisfied -= 1
                 freq_s[s[start]] -= 1
                 start += 1
 
-        return min_string</code></pre>
+        return min_str</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/minimum-window-substring">76. Minimum Window Substring</a> | <a href="https://neetcode.io/problems/minimum-window-with-characters">Minimum Window Substring</a>
