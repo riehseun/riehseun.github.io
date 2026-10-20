@@ -67,24 +67,24 @@ What is rate of growth of data 10% per year
 
 # Design
 
-Data ingestion -> Data processing -> Online and offline feature store -> Feature registry -> Model serving or training
+Data Ingestion -> Data Processing -> Online and Offline Feature Store -> Feature Registry -> Model Serving and Training
 
-Data ingestion
+Data Ingestion
   Kafka brokers can autoscale based on ingestion load
 
-Data procesing
-  Spark structured streaming can be used to tranform features
+Data Procesing
+  Spark Structured Streaming can be used to tranform features
 
-Online store
+Online Store
   Use Redis for fast read during inference
   Store latest value of features with TTL
   Key should be entity id and value should be feature vector
 
-Offline store
+Offline Store
   Use S3 object storage for persistant storage
   Store entire history of features
   
-Feature registry
+Feature Registry
   Use Feast to store metadata such as feature definition, ownership, version
 
 Request -> Online feature store (1-10ms) -> Inference (~500ms) -> Output
@@ -93,13 +93,17 @@ Request -> Online feature store (1-10ms) -> Inference (~500ms) -> Output
 
 Availability
   For online store, create multiple replicas of cache servers in different geo regions
+
 Reliability
   For offline store, partition data into shards, and create mutiple replicas of shards, and spread replicas across different geo region
   If using S3, these will be taken care of
+
 Scalability
   Horizontally scale cache servers (online) and data nodes (offline) based on traffic forecast
+
 Performance
   Keep size of each replicas small and perform parallel read or write
+  
 Monitoring
   System metric (QPS, latency, throughput)
   Model metric (feature drift)
