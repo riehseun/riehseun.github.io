@@ -75,8 +75,8 @@ Should model be continuously trained? Yes
 # Problem
 
 ML 
-  Input - a user
-  Output - a list of videos ranked based on relevance to user
+  Input: a user
+  Output: a list of videos ranked based on relevance to user
   Supervised ranking problem
 
 Business
@@ -84,12 +84,12 @@ Business
 
 # Serving
 
-User -> Cache -> Candidate generation -> Ranking -> Re-ranking -> Output & feedback
+User -> Cache -> Candidate Generation -> Ranking -> Re-Ranking -> Output & Feedback
 
 Cache 
-  Ranked videos - return cached recommendation if available (Also, compute generation and update cache offline)
-  User embedding - return user embedding from cache (user features don't change often, so update cache once in a while)
-  Video embedding - to large to store in cache, use ANN index (Ex. FAISS) instead
+  Ranked videos: return cached recommendation if available (Also, compute generation and update cache offline)
+  User embedding: return user embedding from cache (user features don't change often, so update cache once in a while)
+  Video embedding: to large to store in cache, use ANN index (Ex. FAISS) instead
 
 Candidate generation
   Invoke ANN between user embedding and video embeddings (stored in vector storage) to come up with 1k candidates
@@ -108,59 +108,71 @@ Re-ranking
 
 # Data
 
-Positive - if user likes video, leaves positive comments, shares videos, watches at least half of video
-Negative - if user dislikes video, leaves negative comment
+Positive: if user likes video, leaves positive comments, shares videos, watches at least half of video
+Negative: if user dislikes video, leaves negative comment
 
 # Feature
 
 Video
-  Image - CLIP's visual encoder
-  Video - split into frames and user CLIP
-  Text description, tags - dislimBERT for multi-language
-  Number of likes, shared - normalize
-  Comments - sample them, and compute weighted average embedding where recent comments have higher weights and old comments have lower weights
+  Image: CLIP's visual encoder
+  Video: split into frames and user CLIP
+  Text description, tags: dislimBERT for multi-language
+  Number of likes, shared: normalize
+  Comments: sample them, and compute weighted average embedding where recent comments have higher weights and old comments have lower weights
 
 User 
-  Device, time of day, month of year - bucketized and one-hot
-  Language, country, city - embedding
+  Device, time of day, month of year: bucketized and one-hot
+  Language, country, city: embedding
 
 Temporal
-  Previous videos that user engaged (watch, like, etc) - sample and compute weighted average embedding
+  Previous videos that user engaged (watch, like, etc): sample and compute weighted average embedding
 
 # Model
 
-Candidate generation - two-tower NN
+Candidate generation: two-tower NN
   User tower encodes all user features into a single embedding
   Video tower encodes all video features into a single embedding
   Dot product betwee two embeddings are 1 if user engaged with video, 0 otherwise
   User engagement can be determined by computing weighted sum of all user engagements, positive or negative
   Use BCE loss
 
-Ranking - transformer-based ranking
+Ranking: transformer-based ranking
   Point-wise learn to rank where each user-video pair gets a score
   
-Re-ranking - cross-encoder
+Re-ranking: cross-encoder
   Learn user and video feature interactions using transformer encoder 
   Apply penality to score by taking in diversity, freshness into consideration
-    Diversity - penalize if similar videos (close video embedding distancecs)
-    Freshness - penalize if old video
+    Diversity: penalize if similar videos (close video embedding distancecs)
+    Freshness: penalize if old video
   Inference is feasible when number of videos are less than hundreds 
 
 # Evaluation
 
-Candidate generation
-  Recall at k
-  PR curve
-Ranking
-  NDCG
-Re-ranking
-  NDCG
+Offline
+  Candidate generation: Recall at k, PR curve
+  Ranking: NDCG
+  Re-ranking: NDCG
 
-Click-through rate
-Increase in total watchtime
-Increase in number of likes, shares, comments
+Online
+  Click-through rate
+  Increase in total watchtime
+  Increase in number of likes, shares, comments
 
 # Discussion
+
+Cold-start
+  New user: recommend popular videos for user's geo location and language, content-based recommendation based on answers from onboarding questions
+
+Position Bias
+  Penalize score of videos that were ranked higher in the output
+
+Exploitation vs exploration
+  Use bandits to direct 10-15% of recommendation to exploration (Ex. thompson sampling)
+
+Content moderation
+  Use a separate classification model to detect harmful contents when users upload videos
+  Continue using the model after the video is uploaded since features that contributes to prediction may change after video got uploaded
+
 
 Availability
   Replicate each service in different geo regions (trade-off with cost)
@@ -188,22 +200,9 @@ Online feature store
   Use fixed-size window to aggregate features, to ensure point-in-time correctness
   Ex. Redis
 
-Content moderation
-  Use a separate classification model to detect harmful contents when users upload videos
-  Continue using the model after the video is uploaded since features that contributes to prediction may change after video got uploaded
-
-Exploitation vs exploration
-  Use bandits to direct 10-15% of recommendation to exploration (Ex. thompson sampling)
-
 Continuous training
   A/B testing to direct 10-15% of traffic to candidate
   Slowly increase traffic to candidate if it performs better than production  
-
-Cold-start
-  New user - recommend popular videos for user's geo location and language, content-based recommendation based on answers from onboarding questions
-
-Position Bias
-  Penalize score of videos that were ranked higher in the output
 </code></pre>
 
   </div>
