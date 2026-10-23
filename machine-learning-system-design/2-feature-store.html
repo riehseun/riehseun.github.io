@@ -81,7 +81,7 @@ Online Store
   Key should be entity id and value should be feature vector
 
 Offline Store
-  Use S3 object storage for persistant storage
+  Use S3 object storage for persistant storage (for training)
   Store entire history of features
   
 Feature Registry
@@ -92,7 +92,7 @@ Request -> Online feature store (1-10ms) -> Inference (~500ms) -> Output
 # Discussion
 
 Availability
-  For online store, create multiple replicas of cache servers in different geo regions
+  For online store, create multiple replicas of cache servers in different geo regions (trade-off with cost)
 
 Reliability
   For offline store, partition data into shards, and create mutiple replicas of shards, and spread replicas across different geo region
@@ -105,17 +105,23 @@ Performance
   Keep size of each replicas small and perform parallel read or write
   
 Monitoring
-  System metric (QPS, latency, throughput)
-  Model metric (feature drift)
-
+  QPS, latency, throughput
+  
 Point-in-time correctness
   Features must be computed by event time, not current time
   Offline store must support training only with features that are available during prediction
   Offline store should support paritioning features by time
+  There has to be one-to-many mapping between model version and correspoding feature versions
 
 Training-serving skew
   When new features are added, run backfill jobs offline to fill offline store
   Re-use spark jobs for streaming feature transformation (for online feature store) and backfill (for offline feature store)
+
+Real-time data ingestion
+  Dynamic data (or feature) can be ingested via Kafka
+  Feature can be computated via Spark Structure Streaming inside Kafka Topic
+  Both raw and curated data are persisted in raw (data lake) and curated storage (offline feature store)
+  Curated data is also stored in online feature store
 </code></pre>
 
   </div>
