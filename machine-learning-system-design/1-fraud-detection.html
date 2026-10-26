@@ -69,10 +69,10 @@ Should model be continously trained? Yes
 
 # Problem
 
-ML - given a transcation, determine whether it is fraud or not, subject to minumum precision (we don't want to decline every transaction)
-Business - minimize total number of fradulent transactions
+ML: given a transcation, determine whether it is fraud or not, subject to minumum precision (we don't want to decline every transaction)
+Business: minimize total number of fradulent transactions
 
-# High-level
+# Serving
 
 Transaction -> Rule-based detection -> ML-based detection with light model -> ML-based detection with heavy model -> Output (pass/decline/review) -> Feedback and re-train
 
@@ -90,8 +90,8 @@ Use result from human review for re-training
 # Feature
 
 Account
-  Date of creation - convert to number by computing (inference date - creation date)
-  Balance - compute average month-end balance for the last 3, 6, 12 months to make feature more robust against distribution drift
+  Date of creation: convert to number by computing (inference date - creation date)
+  Balance: compute average month-end balance for the last 3, 6, 12 months to make feature more robust against distribution drift
   Remaning credit amount
 Transactions
   Number of transactions in last 3, 6, 12 months from user initiating current transaction
@@ -105,7 +105,7 @@ Temporal
 Light model
   Logistic regression to perform binary classification to determin whether transaction is fraud or not
 Heavy model
-  XGBoost - feature scaling not needed, very explainable, but relatively more expensive to re-train
+  XGBoost: feature scaling not needed, very explainable, but relatively more expensive to re-train
   Feature selection
     Too many features become tech debt and increases inference time
     Run XGBoost model with each feature to compute predictive power
@@ -120,40 +120,23 @@ Heavy model
 
 # Evaluation
 
-Recall at certain precision
-PR curve
+Offline
+  Recall at certain precision
+  PR curve
 
-Decrease in total number of fraud transaction
+Online
+  Decrease in total number of fraud transaction
 
 # Discussion
 
-Availability
-  Replicate each service in different geo location (trade-off with cost)
-Reliability
-  Partition data into shards, and replicates shards into different geo location
-Scalability
-  Horizontally scale each service based on traffic pattern
-Performance
-  Model optimization - quantization (use fewer bits to represent number)
-Monitoring
-  Model - score drift, feature drift (PST), Kendall's Tau Rank Correlation (measures changes in rank of feature), ShapBand (measure tha deviation of SHAP values from baseline to inference data for each feature)
-  System - latency, QPS
-
-Offline feature store
-  Store review result and new transaction/account/user record into offline feature store for re-training
-  Ex. S3
-Online feature store
-  Fast reading of features during inference time
-  Must have indentical feature transformation logic with offline feature store to avoid model degradation
-  Ex. Redis
+Model monitoring
+  Score drift
+  Feature drift (PST)
+  Kendall's Tau Rank Correlation (measures changes in rank of feature)
+  ShapBand (measure tha deviation of SHAP values from baseline to inference data for each feature)
 
 Explainability
   SHAP value
-
-Real-time data ingestion
-  Kafka for ingestion and Spark Structured Streaming for processing
-  Transformed features are stored in both online and offline store for inference and re-training
-  Features are aggregated in certain time window to ensure point-in-time correctness
 </code></pre>
   </div>
   <div class="card-footer text-muted">
