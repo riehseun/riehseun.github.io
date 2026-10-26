@@ -196,29 +196,32 @@ class Solution:
 class Solution:
     def buildTree(self, preorder: List[int], inorder: List[int]) -> Optional[TreeNode]:
         
-        # First element in preorder is root value
-        # Left side of root index in inorder is left tree
-        # Right side of root index in  inorder is right tree
-        # Create mapping between value and index in inorder
-        # Time O(n) n = len(preorder)
-        # Space O(n)
+        # Root element is first element of preorder, call it r
+        # Left side of r is left subtree and
+        # right side of r is right subtree inside inorder 
+        # Call buildTree on left and right side
+        # Build mapping between node_val and index of inorder
+
+        # Time: O(n), n = len(preorder)
+        # Space: O(n), recursion stack
 
         def dfs(left, right):
             if left > right:
-                return 
+                return
             node_val = preorder[self.index]
             self.index += 1
             node_index = inorder_map[node_val]
             new_node = TreeNode(node_val)
-            new_node.left = dfs(left, node_index-1)
-            new_node.right = dfs(node_index+1, right)
+            new_node.left = dfs(left, node_index - 1)
+            new_node.right = dfs(node_index + 1, right)
             return new_node
 
         inorder_map = {}
-        self.index = 0
         for i, num in enumerate(inorder):
             inorder_map[num] = i
-        return dfs(0, len(preorder)-1)</code></pre>
+
+        self.index = 0
+        return dfs(0, len(preorder) - 1)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal">105. Construct Binary Tree from Preorder and Inorder Traversal</a> | <a href="https://neetcode.io/problems/binary-tree-from-preorder-and-inorder-traversal">Construct Binary Tree from Preorder and Inorder Traversal</a>
