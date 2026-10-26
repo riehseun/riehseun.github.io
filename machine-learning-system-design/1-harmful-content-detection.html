@@ -75,8 +75,8 @@ Should model be continously trained? Yes
 # Problem
 
 ML
-  Input - a post
-  Output - whether the post is harmful (violence, nudity, hate) or not
+  Input: a post
+  Output: whether the post is harmful (violence, nudity, hate) or not
   Multi-class classification 
 
 Business
@@ -103,27 +103,27 @@ Monitoring model
 
 # Data
 
-Postive - user reports, create synthetic harmful images (self-supervision), result from human review
-Negative - result from human review, posts that have not been deemed harmful after it goes live in production
+Postive: user reports, create synthetic harmful images (self-supervision), result from human review
+Negative: result from human review, posts that have not been deemed harmful after it goes live in production
 
 # Feature
 
 Post
-  Image, thumbnail image - CLIP's visual encoder
-  Video - split into frames and use image encoder
-  Text description, tags - distlimBERT (multi-language)
-  Comments - sample them, then take weighted averge embedding, discounted by time
+  Image, thumbnail image: CLIP's visual encoder
+  Video: split into frames and use image encoder
+  Text description, tags: distlimBERT (multi-language)
+  Comments: sample them, then take weighted averge embedding, discounted by time
 
 Author
-  Previous violation count, total number of posts uploaded by author - normalize
-  Country, city, language - embedding
-  Account creation date - convert to integer representing (current date - creation date), then normalize
+  Previous violation count, total number of posts uploaded by author: normalize
+  Country, city, language: embedding
+  Account creation date: convert to integer representing (current date - creation date), then normalize
 
 # Model
 
 Light model
-  XGBoost - struggles with embedding
-  DNN with one model per harmful category - requires lots of data
+  XGBoost: struggles with embedding
+  DNN with one model per harmful category: requires lots of data
   DNN with one model for all category (multi-task NN)
     Gather all post and author features
     Training where total loss is weighted sum of losses from each category (violence, nudity, hate)
@@ -135,45 +135,23 @@ Heave model
 
 # Evaluation
 
-Recall - percentage of actual harmful contents that model was able to detect
-Precision - out of positive predictions, what percentage of them were correct 
-PR curve - recall vs precision
+Offline
+  Recall: percentage of actual harmful contents that model was able to detect
+  Precision: out of positive predictions, what percentage of them were correct 
+  PR curve: recall vs precision
 
-Total number of harmful impressions
-Total number of user reports
-User churn rate
+Online
+  Total number of harmful impressions
+  Total number of user reports
+  User churn rate
 
 # Discussion
 
-Availability
-  Replicate each service in different geo region (trade-off with cost)
-Reliability
-  Parition data into shards, create multiple replicas of each shard, spread them across different geo region
-Scalability
-  Hortizontally scale each service based on traffic forecast
-Performane
+Model optimization
   Quantization - use fewer bits to represent number
   Pruning - in DNN, use drop-out to randomly shutdown neuron to make network more sparse
   Attention approximation - in transformer, avoid quadratic computation by approximating it with linear computation
   Multi-head attention - split computation into parallel running GPUs, and aggregate result
-Monitoring
-  System - latency, QPS
-  Model - feature drift, score drift
-
-Real-time data ingestion
-  Kafka to handle real-time data and Spark Structure Processing to transform them
-  Store features into both online and offline store, ensuring that transformation logic is identical
-  Use a fixed-sized window to aggregate features (point-in-time correctness)
-Offline feature store
-  Used for training 
-  Store data in columar format for fast feature level access (Ex. parquet)
-  Use persistant storage (Ex. S3)
-Online feature store
-  Used for inference
-  Store data in cache for fast read (Ex. Redis)
-
-Continuous training
-  A/B testing - direct traffic to candidate, and if candidate performs better than production, direct more traffics to candidate
 </code></pre>
 
   </div>
