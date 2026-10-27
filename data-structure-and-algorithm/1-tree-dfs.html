@@ -481,45 +481,48 @@ class Solution:
 #         self.right = right
 
 class Codec:
-
-    # Before root node, append *
-    # At each None node, append #
-    # Encode
-    #   Time O(n) n = number of nodes in tree
-    #   Space O(n)
-    # Decode
-    #   Time O(m) m = len(data)
-    #   Space O(1) ignoring space to craete tree
     
+    # Encode
+    #   DFS preorder traverse
+    #   Append # at leaf node
+    #   Time: O(n), n = number of nodes in tree
+    #   Space: O(n), recursion stack
+    # Decode
+    #   First element is root node
+    #   Time: O(n), n = number of nodes in tree
+    #   Space: O(n), recursion stack    
+
     # Encodes a tree to a single string.
     def serialize(self, root: Optional[TreeNode]) -> str:
-        
+
         def dfs(node):
+
             if node:
-                string.append(str(node.val))
+                tree.append(str(node.val))
                 dfs(node.left)
                 dfs(node.right)
             else:
-                string.append("#")
-        string = []
+                tree.append("#")
+
+        tree = []
         dfs(root)
-        return ",".join(string)
+        return ",".join(tree)
         
     # Decodes your encoded data to tree.
     def deserialize(self, data: str) -> Optional[TreeNode]:
-        
-        def dfs(data_array):
-            node_val = data_array[self.index]
+
+        def dfs(tree):
+            node_val = tree[self.index]
             self.index += 1
             if node_val != "#":
-                node = TreeNode(node_val)
-                node.left = dfs(data_array)
-                node.right = dfs(data_array)
+                node = TreeNode(int(node_val))
+                node.left = dfs(tree)
+                node.right = dfs(tree)
                 return node
 
-        data_array = data.split(",")
         self.index = 0
-        return dfs(data_array)</code></pre>
+        tree = data.split(",")
+        return dfs(tree)</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/serialize-and-deserialize-binary-tree">297. Serialize and Deserialize Binary Tree</a> | <a href="hhttps://neetcode.io/problems/serialize-and-deserialize-binary-tree">Serialize and Deserialize Binary Tree</a>
