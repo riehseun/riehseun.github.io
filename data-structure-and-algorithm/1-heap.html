@@ -95,40 +95,37 @@ class Solution:
 
 class MedianFinder:
 
-    # [1,2,3,4,5,6] ? 3.5  
-
     # Use two heaps
     # Keep lower half in max heap
     # Keep upper half in min heap
     # Push to max_heap first
-    # Adjust if max_heap[0] > min_heap[0]
-    # Adjust if len(max_heap) > len(min_heap) + 1
-    # Adjust if len(max_heap) < len(min_heap)
+    # Then, pop root of max_heap and push to min_heap
+    # Adjust if len(min_heap) > len(max_heap)
+    
     # Add
-    #   Time O(logn)
-    #   Space O(n)
+    #   Time: O(logn), n = number of data points in stream
+    #   Space: O(n)
+    # Find
+    #   Time: O(1)
+    #   Space: O(1)
 
     def __init__(self):
         self.min_heap = []
         self.max_heap = []
 
     def addNum(self, num: int) -> None:
+
         heappush(self.max_heap, -num)
-        if self.max_heap \
-            and self.min_heap \
-            and -self.max_heap[0] > self.min_heap[0]:
-            num = -heappop(self.max_heap)
-            heappush(self.min_heap, num)
-        if len(self.max_heap) > len(self.min_heap) + 1:
-            num = -heappop(self.max_heap)
-            heappush(self.min_heap, num)
-        if len(self.max_heap) < len(self.min_heap):
-            num = heappop(self.min_heap)
-            heappush(self.max_heap, -num)
+        heappush(self.min_heap, -heappop(self.max_heap))
+
+        if len(self.min_heap) > len(self.max_heap):
+            heappush(self.max_heap, -heappop(self.min_heap))
 
     def findMedian(self) -> float:
+
         if len(self.max_heap) > len(self.min_heap):
             return float(-self.max_heap[0])
+
         return (-self.max_heap[0] + self.min_heap[0]) / 2</code></pre>
   </div>
   <div class="card-footer text-muted">
