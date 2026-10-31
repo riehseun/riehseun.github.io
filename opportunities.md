@@ -7,7 +7,7 @@
 	- Infra: k8s, terraform
 	- Python: snake game
 
-2a. Index exchange
+2a. Index exchange 
 - Recruiter: Yoyo Wan
 
 2b. Index exchange (Machine Learning)
