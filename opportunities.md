@@ -114,43 +114,43 @@
 	- Python: given 2D array of data, and compute mean and std w/o using libs
 
 10. Boosted.ai
-- Role: Machine Learning Platform in 
+- Role: Machine Learning Platform in 2022
 - Recruiter: Daniela Zambrano
 - Round 1
 	- Python: string modification, overlapping matrices, log streaming and processing
 
 11. Pinterest
-- Role: Developer
+- Role: Software Engineering in 2022
 - Recruiter: Alexandra Vu
 - Round 1
 	- Python: backend API
 
 12. Nuro AI
-- Role: Machine Learning
+- Role: Machine Learning Platform in 2022
 - Recruiter: Naser Kohgadai
 - Round 1
 	- **DSA: from a set of 3D points and distance K, find all clusters of points less than K. If dist(A,B) <= K and dist(B,C), then A,B,C are in the same cluster**
 
 13. Braze
-- Role: ?
+- Role: Software Engineering in 2022
 - Recruiter: Mattson Heiner 
 - Round 1
 	- **DSA: maximum breahth of parenthesis**
 
 14. Collimator
-- Role: ?
+- Role: Engineering at StartUp in 2022
 - Recruiter: Reda Dehy 
 - Round 1
 	- Conversation: technical
 
 15. Mendal AI
-- Role: ?
+- Role: Engineering at StartUp in 2022
 - Recruiter: Natalee Merrill
 - Round 1
 	- Conversation: technical
 
 16. Intact
-- Role: Developer
+- Role: Software Engineering in 2022
 - Recruiter: Stephen Wong
 - Round 1
 	- DSA: add two numbers represented by linked list
@@ -158,7 +158,7 @@
 	- DSA: the number of palindrom combo possible by 4 increasing indexes ex. ghhhgh - 0124, 0234, 0134, 1235)
 
 17. VTS
-- Role: Infrastructure and DevOps
+- Role: Infrastructure and DevOps in 2022
 - Recruiter: Louisa Petkov
 - Round 1
 	- DSA: 
@@ -166,13 +166,13 @@
 	- Infra: write Terraform on AWS
 
 18. Runway AI (Software Engineering)
-- Role: ?
+- Role: Engineering at StartUp in 2022
 - Recruiter: Rebecca McPherson 
 - Round 1
 	- Python: currency, await, asynco, callable
 
 19. Wayfair
-- Role ? 
+- Role Infrastructure and DevOps in 2022
 - Recruiter: Erin LeBel
 - Round 1
 	- DSA: graph
@@ -180,32 +180,32 @@
 		- Relational table, SQL
 
 20. World Quants
-- Role: ?
+- Role: Software Engineering in 2023
 - Recruiter: Mahir Khan
 - Round 1
 	- **DSA: https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii**
 	- Python: "yield", "class method vs static method", "decorator"
 
 21. DoorDash
-- Role: Machine Learning
+- Role: Machine Learning in 2025
 - Recruiter: Sho Sato
 - Round 1
 	- **DSA: https://leetcode.com/problems/sliding-window-maximum**
 
 22. Modular 
-- Role: ?
+- Role: Engineering at StartUp in 2025
 - Recruiter: : Laura Nguyen
 - Round 1
 	- Conversation: technical
 
 23. Jarvis 
-- Role: Machine Learning
+- Role: Machine Learning in 2025
 - Recruiter: Saif Zafar
 - Round 1
 	- Conversation: technical
 
 24. Skyfire 
-- Role: ?
+- Role: Engineering at StartUp in 2026
 - Recruiter: Vlad Djordjevski
 - Round 1
 	- Python: debug web app [Woven]
@@ -213,7 +213,7 @@
 	- Infra: migrate from monolith to microservice [Woven]
 
 25. Ebay 
-- Role: Machine Learning
+- Role: Machine Learning in 2026
 - Recruiter: Nilsu Ozel
 - Round 1
 	- **DSA: split string by delimter of variable length**
@@ -221,7 +221,7 @@
 		- **How many trees in XGBoost, how models were loaded**
 
 26. Sysdane 
-- Role: ?
+- Role: Engineering at StartUp in 2026
 - Recruiter: Riley Idelson
 - Round 1
 	- ML: debug model training with GPU cluster [Woven]
@@ -232,13 +232,13 @@
 		- **E2E model development for fraud detection use case**
 
 27. Guidewire 
-- Role: Machine Learning
+- Role: Machine Learning in 2026
 - Recruiter: Annie Jose
 - Round 1	
 	- **DSA: https://leetcode.com/problems/minimum-number-of-food-buckets-to-feed-the-hamsters**
 
 28. RBC Borealis
-- Role: Machine Learning
+- Role: Machine Learning Platform in 2026
 - Recruiter: Cathy C Lam
 - Round 1
 	- Conversation: behavioral
@@ -249,7 +249,7 @@
 - OFFER: 165K base + 25K bonus + 20K equity (3 years - at Dec 2029) + 20K signing + 9K RSP matching + 20 days vacation + unlimited sick day
 
 29. Lightworks
-- Role: ?
+- Role: Agentic Platform in 2026
 - Recruiter: Osama Shaukat
 - Round 1
 	- Conversation: behavioral + technical
@@ -270,7 +270,7 @@
 		- How to ensure consistency in SQL and no-SQL
 
 30. Saris AI 
-- Role: ?
+- Role: Engineering at StartUp in 2026
 - Recruiter: Carrick Rogers
 - Round 1
 	- **MLSD: chatbot**
@@ -280,7 +280,7 @@
 		- Whether system prompt changes based on underlying LLM)
 
 31. Mozilla
-- Role: Machine Learning
+- Role: Machine Learning Platform in 2026
 - Recruiter: Olivia Sargent, Julia Wineriter
 - Round 1
 	- Python: Github API to retrieve repos under orgs in a loop [CoderPad]
@@ -294,7 +294,7 @@
 	- **MLSD: LLM serving, GPU scaling, privacy [Excalidraw]**
 
 32. Nubank 
-- Role: ?
+- Role: Software Engineering in 2026
 - Recruiter: Dhialick Oliveira
 - Round 1
 	- Python: heap sort by second value in ascending order, pattern of nested dictionary - user_id, timestamp [CodeSignal]
@@ -304,14 +304,14 @@
 	- Python: compute tax on capital gain during stock buy and sell transactions [CodeSignal]
 
 33. Socure 
-- Role: ?
+- Role: Agentic Platform in 2026
 - Recruiter: 
 - Round 1
 	- Conversation: behavioral 
 		- High impact project, scalability, quality controls, better customer satisfaction, features that had business impacts, manage conflict with other teams, work under pressure
 
 34. Mckesson
-- Role: ?
+- Role: Data Platform in 2026
 - Recruiter: 
 - Round 1
 	- Kubernetes networking about gateway.networking.k8s.io/v1, templates.gatekeeper.sh/v1 [Torc]
@@ -319,7 +319,7 @@
 	- Github Actions [Torc]
 
 35. Scotiabank
-- Role: Data Platform
+- Role: Data Platform in 2026
 - Recruiter: 
 - Round 1
 	- Conversation: technical
@@ -327,18 +327,18 @@
 		- Kubernetes: key components of K8s cluster, security config of K8s cluster
 
 36. Sardine AI
-- Role: ?
+- Role: Engineering at StartUp in 2026
 - Recruiter: George Cave 
 	- **ML: how to debug when 10% drop in precision**
 
 37. Affirm
-- Role: Machine Learning
+- Role: Machine Learning Platform in 2026
 - Recruiter: Josh Rodriguez
 - Round 1
 	- Python: given offer, offerList, users, write processing logics of each offer based on rules and create desired result set
 
 38. BDO/RBC
-- Role: Software Developer
+- Role: Software Engineering in 2026
 - Recruiter: Emmanuel Florakas
 - Round 1
 	- Conversation: technical
@@ -348,7 +348,7 @@
 - OFFER: 90/hr -> 105/hr
 
 39. EY
-- Role: Machine Learning
+- Role: AI Platform in 2026
 - Recruiter: 
 - Round 1
 	- Conversation (Technical)
@@ -357,7 +357,7 @@
 - OFFER: 80/hr -> 90/hr
 
 40. Rhyme
-- Role: ?
+- Role: Engineering at StartUp in 2026
 - Recruiter: 
 - Round 1
 	- **MLSD: Chatbot** 
