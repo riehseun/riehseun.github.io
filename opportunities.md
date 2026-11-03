@@ -1,4 +1,5 @@
-1. Autonomic (Software Engineering)
+1. Autonomic
+- Role: Infrastructure and DevOps in 2022
 - Recruiter: Cyndi Tran
 - Round 1
 	- DSA
@@ -10,20 +11,22 @@
 2a. Index exchange 
 - Recruiter: Yoyo Wan
 
-2b. Index exchange (Machine Learning)
+2b. Index exchange
+- Role: Machine Learning Platform in 2025
 - Recruiter: Priyanka Choudhary
-- Screen
+- Round 1
 	- DSA: stack
-- Onsite
+- Round 2
 	- **MLSD: model serving at AD tech**
 		- Large Scale
 		- Latency
 
-2c. Index exchange (Machine Learning)
+2c. Index exchange
+- Role: Machine Learning Platform in 2026
 - Recruiter: Priyanka Choudhary
-- Screen
+- Round 1
 	- Conversation: behavioral, technical
-- Onsite
+- Round 2
 	- **SD: parking lot reservation**
 		- Concurrency and locking mechanisms at the application and infrastructure level
 		- Database performance tuning and concurrency design
@@ -32,12 +35,14 @@
 3a. Meta
 - Recruiter: James Hargett
 
-3b. Meta (Machine Learning)
+3b. Meta
+- Role: Machine Learning in 2025
 - Recruiter: Christine Wilson
-- Screen
+- Round 1
 	- **DSA: https://leetcode.com/problems/valid-palindrome-ii**
 
-4a. Bloomberg (Software Engineering)
+4a. Bloomberg
+- Role: Software Development in 2022
 - Recruiter: Michael Feinstein
 - Round 1
 	- Python: class for transit system
@@ -45,24 +50,28 @@
 - Round 2
 	- SD: design TinyURL
 
-4b. Bloomberg (Machine Learning)
+4b. Bloomberg 
+- Role: Machine Learning in 2025
 - Recruiter: Sian Naiken-Cooke
 - Round 1
 	- **DSA: get/set for sparse array**
 
-5. Confluent (Software Engineering)
+5. Confluent
+- Role: Software Engineering in 2022
 - Recruiter: Sandhya Shivaram
 - Round 1
 	- **DSA: https://leetcode.com/problems/regular-expression-matching**
 
-6a. Autodesk (Machine Learning)
+6a. Autodesk
+- Role: Machine Learning Platform in 2022
 - Recruiter: Joshua Joel Bartolome
 - Round 1
 	- Conversation: behavioral, technical
 		- Made current system better
 		- A/B test
 
-6b. Autodesk (Machine Learning)
+6b. Autodesk
+- Role: Machine Learning Platform in 2026
 - Recruiter: Waseem Ali
 - Round 1
 	- Python: implementation of retreving feaures, scores, TTL [CoderPad] 
@@ -78,7 +87,8 @@
 	- Conversation: top-grading
 - OFFER: 165K base + 10% bonus + 32K USD equity + 15K signing + 3K RSP matching  + 20 days vacation + flex forward
 
-7. Amazon (Software Engineering)
+7. Amazon
+- Role: Software Engineering in 2022
 - Recruiter: Antonio Ang
 - Round 1
 	- DSA:
@@ -88,7 +98,8 @@
 	- Conversation: behavioral (calculated risk)
 	- SD: design Amazon
 
-8. Google (Software Engineering)
+8. Google
+- Role: Software Engineering in 2022
 - Recruiter: Alfred Donovan
 - Round 2
 	- **DSA: longest substring with no more than 2 unique chars - leet159**
@@ -96,49 +107,58 @@
 	- Conversation: behavioral
 	- **DSA: find whether all circles are connected**
 	
-9. Workday (Machine Learning)
+9. Workday
+- Role: Software Engineering in 2022
 - Recruiter: Johnny Wang
 - Round 1
 	- Python: given 2D array of data, and compute mean and std w/o using libs
 
-10. Boosted.ai (Machine Learning)
+10. Boosted.ai
+- Role: Machine Learning Platform in 
 - Recruiter: Daniela Zambrano
 - Round 1
 	- Python: string modification, overlapping matrices, log streaming and processing
 
-11. Pinterest (Software Engineering)
+11. Pinterest
+- Role: Developer
 - Recruiter: Alexandra Vu
 - Round 1
 	- Python: backend API
 
-12. Nuro AI (Machine Learning)
+12. Nuro AI
+- Role: Machine Learning
 - Recruiter: Naser Kohgadai
 - Round 1
 	- **DSA: from a set of 3D points and distance K, find all clusters of points less than K. If dist(A,B) <= K and dist(B,C), then A,B,C are in the same cluster**
 
-13. Braze (Software Engineering)
+13. Braze
+- Role: ?
 - Recruiter: Mattson Heiner 
 - Round 1
 	- **DSA: maximum breahth of parenthesis**
 
-14. Collimator (Software Engineering)
+14. Collimator
+- Role: ?
 - Recruiter: Reda Dehy 
 - Round 1
 	- Conversation: technical
 
-15. Mendal AI (Software Engineering)
+15. Mendal AI
+- Role: ?
 - Recruiter: Natalee Merrill
 - Round 1
 	- Conversation: technical
 
-16. Intact (Software Engineering)
+16. Intact
+- Role: Developer
 - Recruiter: Stephen Wong
 - Round 1
 	- DSA: add two numbers represented by linked list
 	- DSA: the smallest string can be formed from all possible combo of strings in given array
 	- DSA: the number of palindrom combo possible by 4 increasing indexes ex. ghhhgh - 0124, 0234, 0134, 1235)
 
-17. VTS (Software Engineering)
+17. VTS
+- Role: Infrastructure and DevOps
 - Recruiter: Louisa Petkov
 - Round 1
 	- DSA: 
@@ -146,53 +166,62 @@
 	- Infra: write Terraform on AWS
 
 18. Runway AI (Software Engineering)
+- Role: ?
 - Recruiter: Rebecca McPherson 
 - Round 1
 	- Python: currency, await, asynco, callable
 
-19. Wayfair (Software Engineering)
+19. Wayfair
+- Role ? 
 - Recruiter: Erin LeBel
 - Round 1
 	- DSA: graph
 	- Conversation: technical 
 		- Relational table, SQL
 
-20. World Quants (Software Engineering)
+20. World Quants
+- Role: ?
 - Recruiter: Mahir Khan
 - Round 1
 	- **DSA: https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii**
 	- Python: "yield", "class method vs static method", "decorator"
 
-21. DoorDash (Machine Learning)
+21. DoorDash
+- Role: Machine Learning
 - Recruiter: Sho Sato
 - Round 1
 	- **DSA: https://leetcode.com/problems/sliding-window-maximum**
 
-22. Modular (Software Engineering)
+22. Modular 
+- Role: ?
 - Recruiter: : Laura Nguyen
 - Round 1
 	- Conversation: technical
 
-23. Jarvis (Machine Learning)
+23. Jarvis 
+- Role: Machine Learning
 - Recruiter: Saif Zafar
 - Round 1
 	- Conversation: technical
 
-24. Skyfire (Software Engineering)
+24. Skyfire 
+- Role: ?
 - Recruiter: Vlad Djordjevski
 - Round 1
 	- Python: debug web app [Woven]
 	- Python: script to delete files older than X days [Woven]
 	- Infra: migrate from monolith to microservice [Woven]
 
-25. Ebay (Machine Learning)
+25. Ebay 
+- Role: Machine Learning
 - Recruiter: Nilsu Ozel
 - Round 1
 	- **DSA: split string by delimter of variable length**
 	- Conversation: technical
 		- **How many trees in XGBoost, how models were loaded**
 
-26. Sysdane (Machine Learning)
+26. Sysdane 
+- Role: ?
 - Recruiter: Riley Idelson
 - Round 1
 	- ML: debug model training with GPU cluster [Woven]
@@ -202,12 +231,14 @@
 	- Conversation: technical
 		- **E2E model development for fraud detection use case**
 
-27. Guidewire (Machine Learning)
+27. Guidewire 
+- Role: Machine Learning
 - Recruiter: Annie Jose
 - Round 1	
 	- **DSA: https://leetcode.com/problems/minimum-number-of-food-buckets-to-feed-the-hamsters**
 
-28. RBC Borealis (Machine Learning)
+28. RBC Borealis
+- Role: Machine Learning
 - Recruiter: Cathy C Lam
 - Round 1
 	- Conversation: behavioral
@@ -217,7 +248,8 @@
 	- **MLSD: Layer6 ML platform, how to scale queue, how to identify bottlenecks in API serving and scale each component in API path**
 - OFFER: 165K base + 25K bonus + 20K equity (3 years - at Dec 2029) + 20K signing + 9K RSP matching + 20 days vacation + unlimited sick day
 
-29. Lightworks (Software Engineering)
+29. Lightworks
+- Role: ?
 - Recruiter: Osama Shaukat
 - Round 1
 	- Conversation: behavioral + technical
@@ -237,7 +269,8 @@
 		- When to use SQL and no-SQL
 		- How to ensure consistency in SQL and no-SQL
 
-30. Saris AI (Software Engineering)
+30. Saris AI 
+- Role: ?
 - Recruiter: Carrick Rogers
 - Round 1
 	- **MLSD: chatbot**
@@ -246,7 +279,8 @@
 		- PCI compliancy of cloud providers
 		- Whether system prompt changes based on underlying LLM)
 
-31. Mozilla (Machine Learning)
+31. Mozilla
+- Role: Machine Learning
 - Recruiter: Olivia Sargent, Julia Wineriter
 - Round 1
 	- Python: Github API to retrieve repos under orgs in a loop [CoderPad]
@@ -259,7 +293,8 @@
 	- Conversation: top-grading
 	- **MLSD: LLM serving, GPU scaling, privacy [Excalidraw]**
 
-32. Nubank (Software Engineering)
+32. Nubank 
+- Role: ?
 - Recruiter: Dhialick Oliveira
 - Round 1
 	- Python: heap sort by second value in ascending order, pattern of nested dictionary - user_id, timestamp [CodeSignal]
@@ -268,36 +303,42 @@
 - Round 3
 	- Python: compute tax on capital gain during stock buy and sell transactions [CodeSignal]
 
-33. Socure (Machine Learning)
+33. Socure 
+- Role: ?
 - Recruiter: 
 - Round 1
 	- Conversation: behavioral 
 		- High impact project, scalability, quality controls, better customer satisfaction, features that had business impacts, manage conflict with other teams, work under pressure
 
-34. Mckesson (Software Engineering)
+34. Mckesson
+- Role: ?
 - Recruiter: 
 - Round 1
 	- Kubernetes networking about gateway.networking.k8s.io/v1, templates.gatekeeper.sh/v1 [Torc]
 	- ArgoCD [Torc]
 	- Github Actions [Torc]
 
-35. Scotiabank (Software Engineering)
+35. Scotiabank
+- Role: Data Platform
 - Recruiter: 
 - Round 1
 	- Conversation: technical
 		- Databricks: difference between managed vs external volume
 		- Kubernetes: key components of K8s cluster, security config of K8s cluster
 
-36. Sardine AI (Machine Learning)
+36. Sardine AI
+- Role: ?
 - Recruiter: George Cave 
 	- **ML: how to debug when 10% drop in precision**
 
-37. Affirm (Machine Learning)
+37. Affirm
+- Role: Machine Learning
 - Recruiter: Josh Rodriguez
 - Round 1
 	- Python: given offer, offerList, users, write processing logics of each offer based on rules and create desired result set
 
-38. BDO/RBC (Software Engineering)
+38. BDO/RBC
+- Role: Software Developer
 - Recruiter: Emmanuel Florakas
 - Round 1
 	- Conversation: technical
@@ -306,7 +347,8 @@
 		- API authentication/authorization
 - OFFER: 90/hr -> 105/hr
 
-39. EY (Machine Learning)
+39. EY
+- Role: Machine Learning
 - Recruiter: 
 - Round 1
 	- Conversation (Technical)
@@ -314,7 +356,8 @@
 	- **MLSD (Multi-agent orchestration/architecture)**
 - OFFER: 80/hr -> 90/hr
 
-40. Rhyme (Machine Learning)
+40. Rhyme
+- Role: ?
 - Recruiter: 
 - Round 1
 	- **MLSD: Chatbot** 
