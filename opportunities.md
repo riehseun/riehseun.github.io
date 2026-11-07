@@ -335,7 +335,7 @@
 - Role: Machine Learning Platform in 2026
 - Recruiter: Josh Rodriguez
 - Round 1
-	- Python: given offer, offerList, users, write processing logics of each offer based on rules and create desired result set
+	- Python: given offer, offerList, users, write processing logics of each offer based on rules and create desired result set [HackerRank]
 
 38. BDO/RBC
 - Role: Software Engineering in 2026
