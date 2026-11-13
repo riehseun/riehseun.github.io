@@ -66,11 +66,6 @@
 <pre><code class="python">class Solution:
     def isMatch(self, s: str, p: str) -> bool:
         
-        # "ab", ".c" ? False
-        # "aufn", "a*" ? False
-        # "a", "a*" ? True
-        # "aaa", "a*" ? True  
-
         # DP
         # Let
         #   dp[i][j] = True/False of s[:i] and p[:j]
@@ -78,9 +73,10 @@
         #   dp = [[False] * (m + 1) for _ in range(n + 1)]
         #   dp[0][0] = True
         # Recurse
-        #   dp[i][j] = dp[i-1][j-1] if s[i-1] == p[j-1] or p[j-1] == "."
-        #   dp[i][j] = dp[i][j-2] if p[j] == "*"
-        # Time: O(nm) n = len(s), m = len(p)
+        #   dp[i][j] = dp[i - 1][j - 1] if s[i - 1] == p[j - 1] or p[j - 1] == "."
+        #   dp[i][j] = dp[i][j - 2] if p[j] == "*"
+        
+        # Time: O(nm), n = len(s), m = len(p)
         # Space: O(nm)
 
         n, m = len(s), len(p)
@@ -88,21 +84,21 @@
         dp[0][0] = True
 
         for j in range(2, m + 1):
-            if p[j-1] == "*":
-                dp[0][j] = dp[0][j-2]
+            if p[j - 1] == "*":
+                dp[0][j] = dp[0][j - 2]
 
         for i in range(1, n + 1):
             for j in range(1, m + 1):
-                if p[j-1] == s[i-1]:
-                    dp[i][j] = dp[i-1][j-1]
-                elif p[j-1] == ".": 
-                    dp[i][j] = dp[i-1][j-1]
-                elif p[j-1] == "*": 
-                    dp[i][j] = dp[i][j-2]
-                    if p[j-2] == ".":
-                        dp[i][j] = dp[i][j] or dp[i-1][j]
-                    if p[j-2] == s[i-1]:
-                        dp[i][j] = dp[i][j] or dp[i-1][j]
+                if p[j - 1] == s[i - 1]:
+                    dp[i][j] = dp[i - 1][j - 1]
+                elif p[j - 1] == ".": 
+                    dp[i][j] = dp[i - 1][j - 1]
+                elif p[j - 1] == "*": 
+                    dp[i][j] = dp[i][j - 2]
+                    if p[j - 2] == ".":
+                        dp[i][j] = dp[i][j] or dp[i - 1][j]
+                    if p[j - 2] == s[i - 1]:
+                        dp[i][j] = dp[i][j] or dp[i - 1][j]
 
         return dp[n][m]</code></pre>
   </div>
@@ -158,9 +154,9 @@
         # Init
         #   dp = [[0] * (m + 1) for _ in range(n + 1)]
         # Recurse
-        #   If word1[i] == word2[j], dp[i][j] = dp[i-1][j-1]
-        #   Else, dp[i][j] = min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]) + 1
-        # Time: O(nm) n = len(word1), m = len(word2)
+        #   If word1[i] == word2[j], dp[i][j] = dp[i - 1][j - 1]
+        #   Else, dp[i][j] = min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]) + 1
+        # Time: O(nm), n = len(word1), m = len(word2)
         # Space: O(nm)
 
         #   n e a t c d e e
@@ -184,10 +180,10 @@
 
         for i in range(1, n + 1):
             for j in range(1, m + 1):
-                if word1[i-1] == word2[j-1]:
-                    dp[i][j] = dp[i-1][j-1]
+                if word1[i - 1] == word2[j - 1]:
+                    dp[i][j] = dp[i - 1][j - 1]
                 else:
-                    dp[i][j] = min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]) + 1
+                    dp[i][j] = min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]) + 1
 
         return dp[n][m]</code></pre>
   </div>
@@ -203,18 +199,17 @@
 <pre><code class="python">class Solution:
     def isInterleave(self, s1: str, s2: str, s3: str) -> bool:
         
-        # "aaaa", "bbbb", "aabbbbaa" ? True
-
         # DP
         # Let
         #   dp[i][j] = True if s3 up to i + j can be formed by s1[i], s2[j]
         # Init
         #   dp = [[False] * (m + 1) for _ in range(n + 1)]
         # Recurse
-        #   If i == 0, dp[i][j] = dp[i][j-1] and s2[j-1] == s3[i+j-1] (1)
-        #   If j == 0, dp[i][j] = dp[i-1][j] and s1[i-1] == s3[i-1+j] (2)
+        #   If i == 0, dp[i][j] = dp[i][j - 1] and s2[j - 1] == s3[i + j - 1] (1)
+        #   If j == 0, dp[i][j] = dp[i - 1][j] and s1[i - 1] == s3[i - 1 + j] (2)
         #   If i != 0 and j != 0, dp[i][j] = (1) or (2)
-        # Time: O(nm) n = len(s1), m = len(s2)
+        
+        # Time: O(nm), n = len(s1), m = len(s2)
         # Space: O(nm) 
 
         #   0 b b b b
@@ -234,57 +229,58 @@
         for i in range(n + 1):
             for j in range(m + 1):
                 if i == 0 and j != 0:
-                    dp[i][j] = dp[i][j-1] and s2[j-1] == s3[i+j-1]
+                    dp[i][j] = dp[i][j - 1] and s2[j - 1] == s3[i + j - 1]
                 if i != 0 and j == 0:
-                    dp[i][j] = dp[i-1][j] and s1[i-1] == s3[i-1+j]
+                    dp[i][j] = dp[i - 1][j] and s1[i - 1] == s3[i - 1 + j]
                 if i != 0 and j != 0:
-                    dp[i][j] = (dp[i][j-1] and s2[j-1] == s3[i+j-1]
-                        or dp[i-1][j] and s1[i-1] == s3[i-1+j])
+                    dp[i][j] = (dp[i][j - 1] and s2[j - 1] == s3[i + j - 1]
+                        or dp[i - 1][j] and s1[i - 1] == s3[i - 1 + j])
         
         return dp[n][m]</code></pre>
+    </div>
+    <div class="card-footer text-muted">
+      Reference: <a href="https://leetcode.com/problems/interleaving-string">97. Interleaving String</a> | <a href="https://neetcode.io/problems/interleaving-string">Interleaving String</a>
+    </div>
   </div>
-  <div class="card-footer text-muted">
-    Reference: <a href="https://leetcode.com/problems/interleaving-string">97. Interleaving String</a> | <a href="https://neetcode.io/problems/interleaving-string">Interleaving String</a>
-  </div>
-</div>
 
-<div class="card mb-4" id="dynamic-programming-2d-">
-  <div class="card-body">
-    <h2 class="card-title">Distinct Subsequences (150/250)</h2>
+  <div class="card mb-4" id="dynamic-programming-2d-">
+    <div class="card-body">
+      <h2 class="card-title">Distinct Subsequences (150/250)</h2>
 
-<pre><code>class Solution:
-    def numDistinct(self, s: str, t: str) -> int:
-        
-        # DP
-        # Let
-        #   dp[i][j] = number of way to generate t[j] from s[i]
-        # Init
-        #   dp = [[0] * (m + 1) for _ in range(n + 1)]
-        # Recurse
-        #   If s[i-1] == t[j-1], dp[i][j] = dp[i-1][j-1] + dp[i-1][j]
-        #   Else, dp[i][j] = dp[i-1][j]
-        # Time: O(nm) n = len(s), m = len(t)
-        # Space: O(nm)
+  <pre><code>class Solution:
+      def numDistinct(self, s: str, t: str) -> int:
+          
+          # DP
+          # Let
+          #   dp[i][j] = number of way to generate t[j] from s[i]
+          # Init
+          #   dp = [[0] * (m + 1) for _ in range(n + 1)]
+          # Recurse
+          #   If s[i - 1] == t[j - 1], dp[i][j] = dp[i - 1][j - 1] + dp[i - 1][j]
+          #   Else, dp[i][j] = dp[i - 1][j]
+          
+          # Time: O(nm), n = len(s), m = len(t)
+          # Space: O(nm)
 
-        #   0 c a a a t
-        # 0 1 1 1 1 1 1
-        # c 0 1 1 1 1 1
-        # a 0 0 1 2 3 3
-        # t 0 0 0 0 0 3
+          #   0 c a a a t
+          # 0 1 1 1 1 1 1
+          # c 0 1 1 1 1 1
+          # a 0 0 1 2 3 3
+          # t 0 0 0 0 0 3
 
-        n, m = len(s), len(t)
-        dp = [[0] * (m + 1) for _ in range(n + 1)]
-        for i in range(n + 1):
-            dp[i][0] = 1
+          n, m = len(s), len(t)
+          dp = [[0] * (m + 1) for _ in range(n + 1)]
+          for i in range(n + 1):
+              dp[i][0] = 1
 
-        for i in range(1, n + 1):
-            for j in range(1, m + 1):
-                if s[i-1] == t[j-1]:
-                    dp[i][j] = dp[i-1][j-1] + dp[i-1][j]
-                else:
-                    dp[i][j] = dp[i-1][j]
+          for i in range(1, n + 1):
+              for j in range(1, m + 1):
+                  if s[i - 1] == t[j - 1]:
+                      dp[i][j] = dp[i - 1][j - 1] + dp[i - 1][j]
+                  else:
+                      dp[i][j] = dp[i - 1][j]
 
-        return dp[n][m]</code></pre>
+          return dp[n][m]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/distinct-subsequences">115. Distinct Subsequences</a> | <a href="https://neetcode.io/problems/count-subsequences">Distinct Subsequences</a>
@@ -304,10 +300,11 @@
         # Init
         #   dp = [[0] * n for _ in range(n)]
         # Recurse
-        #   dp[i][j] = max(dp[i][k]+dp[k][j]+nums[i]*nums[k]*nums[j])
+        #   dp[i][j] = max(dp[i][k] + dp[k][j] + nums[i] * nums[k] * nums[j])
         #   for all k in (i, j)
-        # Time: O(n**3)
-        # Space: O(n**2)
+        
+        # Time: O(n ** 3)
+        # Space: O(n ** 2)
 
         # Add 1 on each end to handle edge case
         nums = [1] + nums + [1]
@@ -322,7 +319,7 @@
                     dp[i][j] = max(dp[i][j],
                         dp[i][k] + dp[k][j] + nums[i] * nums[k] * nums[j])
                 
-        return dp[0][n-1]</code></pre>
+        return dp[0][n - 1]</code></pre>
   </div>
   <div class="card-footer text-muted">
     Reference: <a href="https://leetcode.com/problems/burst-balloons">312. Burst Balloons</a> | <a href="https://neetcode.io/problems/burst-balloons">Burst Balloons</a>
@@ -343,7 +340,8 @@
         #   dp = [[0] * m for _ in range(n)]
         # Recurse
         #   dfs(i, j) = 1 + max(dfs(ni, nj))
-        # Time: O(nm) n = number of rows, m = number of cols
+        
+        # Time: O(nm), n = number of rows, m = number of cols
         # Space: O(nm)
 
         n, m = len(matrix), len(matrix[0])
@@ -394,10 +392,11 @@
         #   dp = [[0] * (m + 1) for _ in range(n + 1)]
         #   dp[0][0] = 1 sum 0 can be achieved with no number
         # Recurse
-        #   If i < nums[j], number j cannot be used, dp[i][j] = dp[i][j-1]
+        #   If i < nums[j], number j cannot be used, dp[i][j] = dp[i][j - 1]
         #   Else, number j can either be used or not used
-        #   dp[i][j] = dp[i][j-1] + dp[i-nums[j-1]][j-1]
-        # Time: O(nm) n = len(nums), m = target
+        #   dp[i][j] = dp[i][j - 1] + dp[i - nums[j - 1]][j - 1]
+      
+        # Time: O(nm), n = len(nums), m = target
         # Space: O(nm)
         
         temp = target + sum(nums)
@@ -411,10 +410,10 @@
         
         for i in range(n + 1):
             for j in range(1, m + 1):
-                if i < nums[j-1]:
-                    dp[i][j] = dp[i][j-1]
+                if i < nums[j - 1]:
+                    dp[i][j] = dp[i][j - 1]
                 else:
-                    dp[i][j] = dp[i][j-1] + dp[i-nums[j-1]][j-1]
+                    dp[i][j] = dp[i][j - 1] + dp[i - nums[j - 1]][j - 1]
 
         return dp[n][m]</code></pre>
   </div>
@@ -438,10 +437,11 @@
         #   dp[0][j] = 1 (amount 0 can be made by not selecting any coins)
         # Recurse
         #   If i < coins[j], coin j cannot be used
-        #   dp[i][j] = dp[i][j-1]
+        #   dp[i][j] = dp[i][j - 1]
         #   Else, coin j can either be used or not used
-        #   dp[i][j] = dp[i][j-1] + dp[i-coins[j]][j]
-        # Time: O(nm) n = len(coins), m = amount
+        #   dp[i][j] = dp[i][j - 1] + dp[i - coins[j]][j]
+        
+        # Time: O(nm), n = len(coins), m = amount
         # Space: O(nm)
 
         n, m = amount, len(coins)
@@ -451,10 +451,10 @@
 
         for i in range(1, n + 1):
             for j in range(1, m + 1):
-                if i < coins[j-1]:
-                    dp[i][j] = dp[i][j-1]
+                if i < coins[j - 1]:
+                    dp[i][j] = dp[i][j - 1]
                 else:
-                    dp[i][j] = dp[i][j-1] + dp[i-coins[j-1]][j]
+                    dp[i][j] = dp[i][j - 1] + dp[i - coins[j - 1]][j]
 
         return dp[n][m]</code></pre>
   </div>
