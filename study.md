@@ -44,6 +44,7 @@ Design problems are most important; randomly pick 150 out of 250.
 - NeetCode
 - LeetCode
 
+
 # SOFTWARE ENGINEERING (25%)
 
 - W1 - practice 1 mandatory problem per day + practice 1 behavioral story per day
@@ -57,7 +58,9 @@ Design problems are most important; randomly pick 150 out of 250.
 - W9 - practice 1 mandatory problem per day + practice 1 behavioral story per day
 - W0 - practice 1 mandatory problem per day + practice 1 behavioral story per day
 
-## Mandatory: Tier 1
+## Mandatory
+
+### Tier 1
 
 - **Rate limiter:** allow(user_id) with token bucket and per-user limits; thread-safe without a global lock (per-key locks or sharding); sliding window log vs counter on memory and accuracy; Redis distribution (Lua atomicity, clock skew, Redis failure behavior); evict idle users; burst vs sustained rates and per-tier limits.
 - **Worker pool:** fixed workers, bounded queue, submit(task); backpressure policy (block, reject, caller-runs); cancel queued and running tasks; graceful vs immediate shutdown; futures for results and exceptions; priorities; worker crash mid-task.
@@ -74,7 +77,7 @@ Design problems are most important; randomly pick 150 out of 250.
 - **Tool registry:** typed schemas; validate and coerce arguments; versioning and deprecation; permission scoping per agent or tenant; structured validation errors an LLM can act on.
 - **Token budget tracker:** per-tenant metering; streaming responses; hard vs soft quotas and reset windows; reserve up front then reconcile with actuals; concurrent requests racing past the limit; distributed counters.
 
-## Tier 2
+### Tier 2
 
 - **Continuous batching scheduler:** token-step scheduling within a token budget; admit against KV memory; preempt or evict when memory runs out; prefill vs decode (chunked prefill); starvation and priorities; cancel mid-batch.
 - **Point-in-time join:** latest feature value as of each event’s timestamp; late data and backfills; tie-breaking on equal timestamps; feature TTL and staleness limits; out-of-core scale (sorted merge, partitioning, key skew); multiple feature tables; batch vs streaming.
@@ -83,7 +86,7 @@ Design problems are most important; randomly pick 150 out of 250.
 - **Log parser:** parse lines into records with p50/p99; tolerate malformed lines; streaming mergeable percentiles (t-digest, histograms); out-of-order timestamps.
 - **Config merge/diff:** deep merge with override rules; list merge semantics; path-level diff; secret redaction; schema validation.
 
-## Tier 3
+### Tier 3
 
 - **KV/prefix cache (radix):** reuse computed prompt prefixes; split and merge radix nodes; ref-count in-use prefixes; LRU leaf eviction under a memory budget; concurrent readers and writers; block-level memory accounting.
 - **Streaming aggregator:** rolling windowed aggregates; late events with watermarks and allowed lateness; tumbling, sliding, session windows; exactly-once via idempotent sinks or checkpointed offsets; bounded state.
@@ -92,13 +95,25 @@ Design problems are most important; randomly pick 150 out of 250.
 - **Distributed lock with fencing:** expiring leases; fencing tokens rejected by the resource when stale; lease renewal, GC pauses, clock skew; leader election on top; Redis single-instance lock vs consensus.
 - **Count-min/HLL:** approximate frequency and cardinality; error bounds and sketch sizing; merging across nodes; heavy hitters; why deletes are hard.
 
-## Behavioral stories
+## Behavioral
 
-Ownership, Conflict, Leadership, Mentorship, Ambiguity, Challenge, Impact, Failure, Risk, Influence without authority, Technical strategy, Disagree and commit.
+- Ownership
+- Conflict
+- Leadership
+- Mentorship
+- Ambiguity
+- Challenge
+- Impact
+- Failure
+- Risk
+- Influence without authority
+- Technical strategy
+- Disagree and commit.
 
 ## Reference
 
 - Software Engineer’s Guidebook
+
 
 # SYSTEM DESIGN (25%)
 
@@ -156,17 +171,23 @@ Ownership, Conflict, Leadership, Mentorship, Ambiguity, Challenge, Impact, Failu
 
 ## Optional
 
-- TinyURL
-- Amazon
-- Instagram
-- Parking Reservation
-- Hotel Reservation
+### TinyURL
+
+### Amazon
+
+### Instagram
+
+### Parking Reservation
+
+### Hotel Reservation
 
 ## Reference
 
 - System Design I
 - System Design II
 - Designing Data-Intensive Applications
+
+
 # MACHINE LEARNING SYSTEM DESIGN (25%)
 
 - W1 - break
@@ -223,11 +244,15 @@ Ownership, Conflict, Leadership, Mentorship, Ambiguity, Challenge, Impact, Failu
 
 ## Optional
 
-- Recommendation System
-- Search Ranking
-- Real-time Detection
-- Fraud Detection (Layer6 AI)
-- Real-time Auction (Index Exchange)
+### Recommendation System
+
+### Search Ranking
+
+### Real-time Detection
+
+### Fraud Detection (Layer6 AI)
+
+### Real-time Auction (Index Exchange)
 
 ## Reference
 
@@ -236,18 +261,20 @@ Ownership, Conflict, Leadership, Mentorship, Ambiguity, Challenge, Impact, Failu
 - Machine Learning System Design
 - Generative AI System Design
 
+
 # MACHINE LEARNING
 
-W1 - CS336, CME295, CME296, CS224N  
-W2 - CS336, CME295, CME296, CS224N  
-W3 - CS336, CME295, CME296, CS224N  
-W4 - CS336, CME295, CME296, CS224N  
-W5 - CS336, CME295, CME296, CS224N  
-W6 - CS336, CME295, CME296, CS224N  
-W7 - CS336, CME295, CME296, CS224N  
-W8 - CS336, CME295, CME296, CS224N  
-W9 - CS336, CME295, CME296, CS224N  
-W0 - CS336, CME295, CME296, CS224N
+- W1 - CS336, CME295, CME296, CS224N  
+- W2 - CS336, CME295, CME296, CS224N  
+- W3 - CS336, CME295, CME296, CS224N  
+- W4 - CS336, CME295, CME296, CS224N  
+- W5 - CS336, CME295, CME296, CS224N  
+- W6 - CS336, CME295, CME296, CS224N  
+- W7 - CS336, CME295, CME296, CS224N  
+- W8 - CS336, CME295, CME296, CS224N  
+- W9 - CS336, CME295, CME296, CS224N  
+- W0 - CS336, CME295, CME296, CS224N
+
 
 # ORGANIZE
 
