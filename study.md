@@ -1,15 +1,17 @@
 # DATA STRUCTURE AND ALGORITHM (25%)
 
-- W1 - 3 medium/hard mandatory problems per day
-- W2 - 3 medium/hard mandatory problems per day
-- W3 - 3 medium/hard mandatory problems per day
-- W4 - 3 medium/hard mandatory problems per day
-- W5 - 3 medium/hard mandatory problems per day
-- W6 - 3 medium/hard mandatory problems per day
-- W7 - 3 medium/hard mandatory problems per day
-- W8 - 3 medium/hard mandatory problems per day
-- W9 - 3 medium/hard mandatory problems per day
-- W0 - 3 medium/hard mandatory problems per day
+| Week | Plan |
+|---|---|
+| W1 | 3 medium/hard mandatory problems per day |
+| W2 | 3 medium/hard mandatory problems per day |
+| W3 | 3 medium/hard mandatory problems per day |
+| W4 | 3 medium/hard mandatory problems per day |
+| W5 | 3 medium/hard mandatory problems per day |
+| W6 | 3 medium/hard mandatory problems per day |
+| W7 | 3 medium/hard mandatory problems per day |
+| W8 | 3 medium/hard mandatory problems per day |
+| W9 | 3 medium/hard mandatory problems per day |
+| W0 | 3 medium/hard mandatory problems per day |
 
 ## Mandatory
 
@@ -47,16 +49,18 @@ Design problems are most important; randomly pick 150 out of 250.
 
 # SOFTWARE ENGINEERING (25%)
 
-- W1 - practice 1 mandatory problem per day + practice 1 behavioral story per day
-- W2 - practice 1 mandatory problem per day + practice 1 behavioral story per day
-- W3 - practice 1 mandatory problem per day + practice 1 behavioral story per day
-- W4 - practice 1 mandatory problem per day + practice 1 behavioral story per day
-- W5 - practice 1 mandatory problem per day + practice 1 behavioral story per day
-- W6 - practice 1 mandatory problem per day + practice 1 behavioral story per day
-- W7 - practice 1 mandatory problem per day + practice 1 behavioral story per day
-- W8 - practice 1 mandatory problem per day + practice 1 behavioral story per day
-- W9 - practice 1 mandatory problem per day + practice 1 behavioral story per day
-- W0 - practice 1 mandatory problem per day + practice 1 behavioral story per day
+| Week | Plan |
+|---|---|
+| W1 | practice 1 mandatory problem per day + practice 1 behavioral story per day |
+| W2 | practice 1 mandatory problem per day + practice 1 behavioral story per day |
+| W3 | practice 1 mandatory problem per day + practice 1 behavioral story per day |
+| W4 | practice 1 mandatory problem per day + practice 1 behavioral story per day |
+| W5 | practice 1 mandatory problem per day + practice 1 behavioral story per day |
+| W6 | practice 1 mandatory problem per day + practice 1 behavioral story per day |
+| W7 | practice 1 mandatory problem per day + practice 1 behavioral story per day |
+| W8 | practice 1 mandatory problem per day + practice 1 behavioral story per day |
+| W9 | practice 1 mandatory problem per day + practice 1 behavioral story per day |
+| W0 | practice 1 mandatory problem per day + practice 1 behavioral story per day |
 
 ## Mandatory
 
@@ -117,16 +121,18 @@ Design problems are most important; randomly pick 150 out of 250.
 
 # SYSTEM DESIGN (25%)
 
-- W1 - review 1 mandatory problem per day
-- W2 - break
-- W3 - practice 1 mandatory problem per day
-- W4 - break
-- W5 - review 1 mandatory problem per day
-- W6 - break
-- W7 - practice 1 mandatory problem per day
-- W8 - break
-- W9 - review 1 optional problem per day
-- W0 - break
+| Week | Plan |
+|---|---|
+| W1 | review 1 mandatory problem per day |
+| W2 | break |
+| W3 | practice 1 mandatory problem per day |
+| W4 | break |
+| W5 | review 1 mandatory problem per day |
+| W6 | break |
+| W7 | practice 1 mandatory problem per day |
+| W8 | break |
+| W9 | review 1 optional problem per day |
+| W0 | break |
 
 ## Mandatory
 
@@ -190,16 +196,18 @@ Design problems are most important; randomly pick 150 out of 250.
 
 # MACHINE LEARNING SYSTEM DESIGN (25%)
 
-- W1 - break
-- W2 - review 1 mandatory problem per day
-- W3 - break
-- W4 - practice 1 mandatory problem per day
-- W5 - break
-- W6 - review 1 mandatory problem per day
-- W7 - break
-- W8 - practice 1 mandatory problem per day
-- W9 - break
-- W0 - review 1 optional problem per day
+| Week | Plan |
+|---|---|
+| W1 | break |
+| W2 | review 1 mandatory problem per day |
+| W3 | break |
+| W4 | practice 1 mandatory problem per day |
+| W5 | break |
+| W6 | review 1 mandatory problem per day |
+| W7 | break |
+| W8 | practice 1 mandatory problem per day |
+| W9 | break |
+| W0 | review 1 optional problem per day |
 
 ## Mandatory
 
@@ -264,27 +272,31 @@ Design problems are most important; randomly pick 150 out of 250.
 
 # MACHINE LEARNING
 
-- W1 - CS336, CME295, CME296, CS224N  
-- W2 - CS336, CME295, CME296, CS224N  
-- W3 - CS336, CME295, CME296, CS224N  
-- W4 - CS336, CME295, CME296, CS224N  
-- W5 - CS336, CME295, CME296, CS224N  
-- W6 - CS336, CME295, CME296, CS224N  
-- W7 - CS336, CME295, CME296, CS224N  
-- W8 - CS336, CME295, CME296, CS224N  
-- W9 - CS336, CME295, CME296, CS224N  
-- W0 - CS336, CME295, CME296, CS224N
+| Week | Plan |
+|---|---|
+| W1 | CS336, CME295, CME296, CS224N   |
+| W2 | CS336, CME295, CME296, CS224N   |
+| W3 | CS336, CME295, CME296, CS224N   |
+| W4 | CS336, CME295, CME296, CS224N   |
+| W5 | CS336, CME295, CME296, CS224N   |
+| W6 | CS336, CME295, CME296, CS224N   |
+| W7 | CS336, CME295, CME296, CS224N   |
+| W8 | CS336, CME295, CME296, CS224N   |
+| W9 | CS336, CME295, CME296, CS224N   |
+| W0 | CS336, CME295, CME296, CS224N |
 
 
 # ORGANIZE
 
-- W1 - Data (Password, Sketch, Kakaotalk, SD Card, Portable Disk, Google Drive, ICloud)
-- W2 - Data (Password, Sketch, Kakaotalk, SD Card, Portable Disk, Google Drive, ICloud)
-- W3 - Data (Password, Sketch, Kakaotalk, SD Card, Portable Disk, Google Drive, ICloud)
-- W4 - Data (Password, Sketch, Kakaotalk, SD Card, Portable Disk, Google Drive, ICloud)
-- W5 - Data (Password, Sketch, Kakaotalk, SD Card, Portable Disk, Google Drive, ICloud)
-- W6 - Documents (Paper, Electronic)
-- W7 - SMS Pictures (LinkedIn, Instagram, Turo, Airbnb, Facebook, Meet Up)
-- W8 - Address (Job, Banks - TD / CIBC / SIM / EQ / TG / WS / US, Service Ontario - Driver / Health / Car Ownership, CRA, Family Doctor, Car Insurance - N/A, Amazon)
-- W9 - ID (Passport 2036-04-14, Driver 2030-04-06, Health 2030-04-06, Nexus 2030-04-06)
-- W0 - Computer (Format big one, sell old one)
+| Week | Plan |
+|---|---|
+| W1 | Data (Password, Sketch, Kakaotalk, SD Card, Portable Disk, Google Drive, ICloud) |
+| W2 | Data (Password, Sketch, Kakaotalk, SD Card, Portable Disk, Google Drive, ICloud) |
+| W3 | Data (Password, Sketch, Kakaotalk, SD Card, Portable Disk, Google Drive, ICloud) |
+| W4 | Data (Password, Sketch, Kakaotalk, SD Card, Portable Disk, Google Drive, ICloud) |
+| W5 | Data (Password, Sketch, Kakaotalk, SD Card, Portable Disk, Google Drive, ICloud) |
+| W6 | Documents (Paper, Electronic) |
+| W7 | SMS Pictures (LinkedIn, Instagram, Turo, Airbnb, Facebook, Meet Up) |
+| W8 | Address (Job, Banks - TD / CIBC / SIM / EQ / TG / WS / US, Service Ontario - Driver / Health / Car Ownership, CRA, Family Doctor, Car Insurance - N/A, Amazon) |
+| W9 | ID (Passport 2036-04-14, Driver 2030-04-06, Health 2030-04-06, Nexus 2030-04-06) |
+| W0 | Computer (Format big one, sell old one) |
