@@ -1,27 +1,3 @@
-# MACHINE LEARNING
-
-W1 - CS336, CME295, CME296, CS224N  
-W2 - CS336, CME295, CME296, CS224N  
-W3 - CS336, CME295, CME296, CS224N  
-W4 - CS336, CME295, CME296, CS224N  
-W5 - CS336, CME295, CME296, CS224N  
-W6 - CS336, CME295, CME296, CS224N  
-W7 - CS336, CME295, CME296, CS224N  
-W8 - CS336, CME295, CME296, CS224N  
-W9 - CS336, CME295, CME296, CS224N  
-W0 - CS336, CME295, CME296, CS224N
-# ORGANIZE
-
-- W1 - Data (Password, Sketch, Kakaotalk, SD Card, Portable Disk, Google Drive, ICloud)
-- W2 - Data (Password, Sketch, Kakaotalk, SD Card, Portable Disk, Google Drive, ICloud)
-- W3 - Data (Password, Sketch, Kakaotalk, SD Card, Portable Disk, Google Drive, ICloud)
-- W4 - Data (Password, Sketch, Kakaotalk, SD Card, Portable Disk, Google Drive, ICloud)
-- W5 - Data (Password, Sketch, Kakaotalk, SD Card, Portable Disk, Google Drive, ICloud)
-- W6 - Documents (Paper, Electronic)
-- W7 - SMS Pictures (LinkedIn, Instagram, Turo, Airbnb, Facebook, Meet Up)
-- W8 - Address (Job, Banks - TD / CIBC / SIM / EQ / TG / WS / US, Service Ontario - Driver / Health / Car Ownership, CRA, Family Doctor, Car Insurance - N/A, Amazon)
-- W9 - ID (Passport 2036-04-14, Driver 2030-04-06, Health 2030-04-06, Nexus 2030-04-06)
-- W0 - Computer (Format big one, sell old one)
 # DATA STRUCTURE AND ALGORITHM (25%)
 
 - W1 - 3 medium/hard mandatory problems per day
@@ -67,6 +43,7 @@ Design problems are most important; randomly pick 150 out of 250.
 
 - NeetCode
 - LeetCode
+
 # SOFTWARE ENGINEERING (25%)
 
 - W1 - practice 1 mandatory problem per day + practice 1 behavioral story per day
@@ -122,6 +99,7 @@ Ownership, Conflict, Leadership, Mentorship, Ambiguity, Challenge, Impact, Failu
 ## Reference
 
 - Software Engineer’s Guidebook
+
 # SYSTEM DESIGN (25%)
 
 - W1 - review 1 mandatory problem per day
@@ -257,3 +235,29 @@ Ownership, Conflict, Leadership, Mentorship, Ambiguity, Challenge, Impact, Failu
 - Machine Learning Design Patterns
 - Machine Learning System Design
 - Generative AI System Design
+
+# MACHINE LEARNING
+
+W1 - CS336, CME295, CME296, CS224N  
+W2 - CS336, CME295, CME296, CS224N  
+W3 - CS336, CME295, CME296, CS224N  
+W4 - CS336, CME295, CME296, CS224N  
+W5 - CS336, CME295, CME296, CS224N  
+W6 - CS336, CME295, CME296, CS224N  
+W7 - CS336, CME295, CME296, CS224N  
+W8 - CS336, CME295, CME296, CS224N  
+W9 - CS336, CME295, CME296, CS224N  
+W0 - CS336, CME295, CME296, CS224N
+
+# ORGANIZE
+
+- W1 - Data (Password, Sketch, Kakaotalk, SD Card, Portable Disk, Google Drive, ICloud)
+- W2 - Data (Password, Sketch, Kakaotalk, SD Card, Portable Disk, Google Drive, ICloud)
+- W3 - Data (Password, Sketch, Kakaotalk, SD Card, Portable Disk, Google Drive, ICloud)
+- W4 - Data (Password, Sketch, Kakaotalk, SD Card, Portable Disk, Google Drive, ICloud)
+- W5 - Data (Password, Sketch, Kakaotalk, SD Card, Portable Disk, Google Drive, ICloud)
+- W6 - Documents (Paper, Electronic)
+- W7 - SMS Pictures (LinkedIn, Instagram, Turo, Airbnb, Facebook, Meet Up)
+- W8 - Address (Job, Banks - TD / CIBC / SIM / EQ / TG / WS / US, Service Ontario - Driver / Health / Car Ownership, CRA, Family Doctor, Car Insurance - N/A, Amazon)
+- W9 - ID (Passport 2036-04-14, Driver 2030-04-06, Health 2030-04-06, Nexus 2030-04-06)
+- W0 - Computer (Format big one, sell old one)
