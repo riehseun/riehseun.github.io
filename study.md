@@ -6,39 +6,40 @@
 | W2 | 3 medium/hard mandatory problems per day |
 | W3 | 3 medium/hard mandatory problems per day |
 | W4 | 3 medium/hard mandatory problems per day |
-| W5 | 3 medium/hard mandatory problems per day |
+| W5 | break |
 | W6 | 3 medium/hard mandatory problems per day |
 | W7 | 3 medium/hard mandatory problems per day |
 | W8 | 3 medium/hard mandatory problems per day |
 | W9 | 3 medium/hard mandatory problems per day |
-| W0 | 3 medium/hard mandatory problems per day |
+| W0 | break |
 
 ## Mandatory
 
-Design problems are most important; randomly pick 150 out of 250.
+Randomly pick a question out of Leet 250 if Array & Hashmap, Two Pointers, Sliding Window
+Randomly pick a question out of Leet 150 if everything else
 
 | Topic | Problems |
 |---|---:|
-| Array / Prefix Sum / Hash Map / String | 8/9/22 |
+| Arrays & Hashing (Prefix Sum, String) | 8/9/22 |
 | Two Pointers | 3/5/13 |
 | Stack | 1/6/14 |
 | Binary Search | 2/7/14 |
 | Sliding Window | 4/6/9 |
 | Linked List | 6/11/14 |
-| Tree DFS / BFS | 11/15/23 |
+| Tree (DFS, BFS) | 11/15/23 |
 | Heap | 1/7/12 |
-| Graph DFS / BFS / Topo Sort / Union Find | 6/13/21 |
+| Graph (DFS, BFS, Topological Sort, Union Find) | 6/13/21 |
 | 1D DP | 10/12/17 |
 | Interval | 5/6/7 |
 | Greedy | 2/8/14 |
-| Advanced Graph | 1/6/10 |
+| Advanced Graph (Dijkstra, Bellman-Ford, Prim, Hierholzer) | 1/6/10 |
 | 2D DP | 2/11/16 |
 | Trie | 3/3/4 |
 | Backtracking | 2/10/17 |
 
 ## Optional
 
-- Math / Geometry (3/8/13)
+- Math & Geometry (3/8/13)
 - Bit Manipulation (5/7/10)
 
 
@@ -46,53 +47,47 @@ Design problems are most important; randomly pick 150 out of 250.
 
 | Week | Plan |
 |---|---|
-| W1 | practice 1 mandatory problem per day + practice 1 behavioral story per day |
-| W2 | practice 1 mandatory problem per day + practice 1 behavioral story per day |
-| W3 | practice 1 mandatory problem per day + practice 1 behavioral story per day |
-| W4 | practice 1 mandatory problem per day + practice 1 behavioral story per day |
+| W1 | break |
+| W2 | break |
+| W3 | break |
+| W4 | break |
 | W5 | practice 1 mandatory problem per day + practice 1 behavioral story per day |
-| W6 | practice 1 mandatory problem per day + practice 1 behavioral story per day |
-| W7 | practice 1 mandatory problem per day + practice 1 behavioral story per day |
-| W8 | practice 1 mandatory problem per day + practice 1 behavioral story per day |
-| W9 | practice 1 mandatory problem per day + practice 1 behavioral story per day |
+| W6 | break |
+| W7 | break |
+| W8 | break |
+| W9 | break |
 | W0 | practice 1 mandatory problem per day + practice 1 behavioral story per day |
 
 ## Mandatory
 
-### Tier 1
+Thread-safe token bucket rate limiter: allow or reject requests per key under concurrent callers, with burst and sustained limits.
+LRU cache with TTL: O(1) get/put with eviction, thread safety, expiry, and single-flight loading.
+Bounded blocking queue: producer/consumer queue with blocking put/take, backpressure, and graceful shutdown.
+Async worker pool: run tasks on N workers with timeouts, cancellation, priorities, and result futures.
+KV store with transactions: get/set/delete plus begin/commit/rollback, including nested transactions.
+SQS-like queue with visibility timeout: enqueue, receive, and ack, redeliver on timeout, and route to a DLQ after max receives.
+Log aggregator with sliding window: count errors per service per minute, then rolling p95 or top-K, handling late events.
+API client with pagination and retries: paginate results, retry on 429/5xx with backoff, and support a resumable cursor.
+Dynamic request batcher: group requests by max size or max wait time, with per-request futures and error isolation.
+DAG task executor: run tasks in topological order with a parallelism limit, cycle detection, and failure propagation.
 
-- **Rate limiter:** allow(user_id) with token bucket and per-user limits; thread-safe without a global lock (per-key locks or sharding); sliding window log vs counter on memory and accuracy; Redis distribution (Lua atomicity, clock skew, Redis failure behavior); evict idle users; burst vs sustained rates and per-tier limits.
-- **Worker pool:** fixed workers, bounded queue, submit(task); backpressure policy (block, reject, caller-runs); cancel queued and running tasks; graceful vs immediate shutdown; futures for results and exceptions; priorities; worker crash mid-task.
-- **KV store with transactions:** get/set/delete with begin/commit/rollback; nested transactions; isolation for concurrent transactions (read committed vs snapshot); optimistic versioning for conflicts; undo log vs write buffer; durability with a WAL.
-- **Dynamic request batcher:** flush when full or on max wait; per-request futures with error isolation; variable-length inputs (bucketing, padding); queue cap and backpressure; adaptive wait time; flush on shutdown.
-- **Request coalescing:** collapse identical in-flight calls; one caller’s cancel must not cancel the others; share errors and negative caching; TTL and stale-while-revalidate; key normalization; cross-process coalescing (lease or lock); stuck leader timeout.
-- **Tool-calling agent loop:** mocked LLM reason-and-call cycles; malformed tool calls (repair, retry, feed error back); parallel calls with ordered results; step limits, timeouts, loop detection; context growth; streaming and cancellation.
-- **DAG executor:** dependency order under a parallelism limit; fail-fast vs continue independent branches; rerun from the failed node; step caching by content hash; cycle detection; resource-aware limits; cancellation.
-- **Job scheduler (simplified):** priority plus dependencies; retry with backoff; preemption; fair share and team quotas; priority aging; cycle detection; persist state and recover after a crash.
-- **Retry wrapper:** exponential backoff with jitter; retryable vs non-retryable errors; retry budget and overall deadline; idempotency requirement; preventing retry storms across layers.
-- **Circuit breaker:** closed, open, half-open; error rate vs consecutive failures; limit concurrent probes in half-open; sliding window; per-dependency state; thread safety.
-- **Pub/sub with DLQ:** delivery to subscribers; at-least-once vs at-most-once; per-key ordering and consumer groups; retry policy before dead-lettering; slow consumer backpressure; DLQ replay.
-- **Consistent hashing:** key-to-node mapping with virtual nodes; add/remove nodes and measure keys moved; replicate to N successors; weighted nodes and hot keys; bounded-load hashing.
-- **Tool registry:** typed schemas; validate and coerce arguments; versioning and deprecation; permission scoping per agent or tenant; structured validation errors an LLM can act on.
-- **Token budget tracker:** per-tenant metering; streaming responses; hard vs soft quotas and reset windows; reserve up front then reconcile with actuals; concurrent requests racing past the limit; distributed counters.
+## Optional
 
-### Tier 2
-
-- **Continuous batching scheduler:** token-step scheduling within a token budget; admit against KV memory; preempt or evict when memory runs out; prefill vs decode (chunked prefill); starvation and priorities; cancel mid-batch.
-- **Point-in-time join:** latest feature value as of each event’s timestamp; late data and backfills; tie-breaking on equal timestamps; feature TTL and staleness limits; out-of-core scale (sorted merge, partitioning, key skew); multiple feature tables; batch vs streaming.
-- **Model router:** load-aware routing across replicas; least-loaded vs power-of-two-choices; health checks and ejection; session stickiness for KV cache reuse; retries and hedging; heterogeneous replicas.
-- **Heartbeat monitor:** detect dead workers; reduce false positives (phi-accrual, grace periods); reschedule without duplicating work; network partition detection; zombie workers returning.
-- **Log parser:** parse lines into records with p50/p99; tolerate malformed lines; streaming mergeable percentiles (t-digest, histograms); out-of-order timestamps.
-- **Config merge/diff:** deep merge with override rules; list merge semantics; path-level diff; secret redaction; schema validation.
-
-### Tier 3
-
-- **KV/prefix cache (radix):** reuse computed prompt prefixes; split and merge radix nodes; ref-count in-use prefixes; LRU leaf eviction under a memory budget; concurrent readers and writers; block-level memory accounting.
-- **Streaming aggregator:** rolling windowed aggregates; late events with watermarks and allowed lateness; tumbling, sliding, session windows; exactly-once via idempotent sinks or checkpointed offsets; bounded state.
-- **Agent state/memory store:** per-session state; truncate vs summarize over context limit; pin critical messages; concurrent writes to one session; persist and expire sessions; accurate token counting.
-- **Eval harness:** parallel prompts and aggregated scores; respect rate limits; retry flaky failures without double-counting; partial results on interruption; confidence intervals; LLM-as-judge.
-- **Distributed lock with fencing:** expiring leases; fencing tokens rejected by the resource when stale; lease renewal, GC pauses, clock skew; leader election on top; Redis single-instance lock vs consensus.
-- **Count-min/HLL:** approximate frequency and cardinality; error bounds and sketch sizing; merging across nodes; heavy hitters; why deletes are hard.
+GPU job scheduler (coding version): place jobs by resource fit, then priorities, bin-packing, preemption, and gang scheduling.
+Agent tool-execution loop: call tools and feed results back, with timeouts, retries, parallel calls, state persistence, and a max-step guard.
+Read/write lock or semaphore: build a lock from basic primitives with fairness and starvation avoidance.
+Pub/sub event bus: subscribe and publish with subscriber isolation, ordering, DLQ, and replay.
+Time-versioned KV store: return the value at timestamp T, with deletes, range queries, and compaction.
+In-memory file system: mkdir, ls, read/write, move, and delete, then permissions and quotas.
+Bank / ledger: accounts and transfers with history, idempotency, scheduled payments, and merges.
+In-memory SQL-like table: insert, filter, sort, and project rows, then add a secondary index and simple joins.
+Reservation / booking system: book and cancel with overlap conflict detection, then waitlists and concurrency.
+Sessionization of an event stream: group events into gap-based sessions, handling out-of-order events with bounded memory.
+Event deduplicator: drop duplicate events by ID, with TTL on seen IDs and restart safety.
+CSV/JSON transformer with validation: parse and map records with schema checks and bad-row handling, streaming large files.
+Idempotent webhook handler: verify signatures and dedupe by event ID, handling out-of-order delivery and replays.
+Debug failing tests / race condition: reproduce a bug in an unfamiliar repo, find the root cause, and fix it with a regression test.
+Retry with backoff plus circuit breaker: add jittered backoff and per-error policies, then half-open state and retry budgets.
 
 ## Behavioral
 
@@ -107,7 +102,7 @@ Design problems are most important; randomly pick 150 out of 250.
 - Risk
 - Influence without authority
 - Technical strategy
-- Disagree and commit.
+- Disagree and commit
 
 
 # SYSTEM DESIGN (25%)
@@ -127,28 +122,25 @@ Design problems are most important; randomly pick 150 out of 250.
 
 ## Mandatory
 
-### Distributed Job Scheduler and Message Queue
+### Distributed Job Scheduler
 
-- **Job Scheduling:** delayed and recurring jobs; priority scheduling and fairness; resource-aware scheduling; scheduling across multiple workers.
-- **Message Queue Architecture:** queue vs. pub/sub; partitioning and consumer groups; ordering guarantees; consumer rebalancing and partition reassignment.
-- **Delivery and Processing Guarantees:** at-most-once, at-least-once, exactly-once semantics; acknowledgments and visibility timeouts; deduplication and idempotency; dead-letter queues and poison messages.
-- **Distributed Coordination:** leader election; distributed locks, leases, and lease renewal/expiration; worker registration, heartbeats, and failure detection; fencing tokens and stale worker protection.
-- **Reliability and Scalability:** backpressure and load shedding; retry policies; queue recovery and replay; horizontal scaling and autoscaling; consumer lag monitoring and mitigation.
+- Job API, DAG dependencies, queueing, worker leasing, retries, priorities, multi-tenant fairness, exactly-once vs. at-least-once
+- Duplicate execution, stuck leases, thundering herd on cron boundaries, backfills
 
-### Distributed Cache and Key-Value Store
+### Distributed Rate Limiter
 
-- **Data Partitioning and Distribution:** consistent hashing and virtual nodes; partition rebalancing and data migration; hot partitions and hot keys.
-- **Caching Strategies and Eviction:** cache-aside, write-through, write-back; LRU, LFU, TTL-based eviction; cache stampede, penetration, and avalanche, plus prevention (request coalescing, locking, probabilistic early expiration).
-- **Consistency and Replication:** strong vs. eventual consistency; quorum reads/writes; leader-follower vs. leaderless replication; conflict resolution and versioning; split-brain scenarios (fencing tokens: see W3); read repair and hinted handoff (name-drop).
-- **Reliability and Performance:** failover and replica recovery; cache invalidation; latency, throughput, and availability trade-offs; multi-region replication (name-drop).
+- Token bucket vs. sliding window, central vs. local counters, per-tenant and per-key limits, fail-open vs. fail-closed
+- Clock skew, hot keys, Redis failover, burst handling
 
-### Distributed Workflow Engine
+### Distributed Message Queue
 
-- **Workflow Definition and Execution:** DAG-based vs. state-machine-based workflows; dependency resolution and parallel execution; dynamic workflow generation.
-- **Durable Execution:** event sourcing, execution history, and event replay semantics; persisted state and deterministic replay; workflow versioning and schema evolution.
-- **Failure Handling:** retry policies and exponential backoff; idempotency and deduplication; compensation and saga patterns; cancellation and timeout propagation.
-- **Distributed Execution:** worker assignment, task leasing, heartbeats, and failure detection (see SD W3); task queues and scheduling (see SD W3).
-- **Scalability and Operations:** workflow throughput and execution latency; long-running workflow management; multi-tenancy and resource isolation; workflow observability and debugging.
+- Partitioning, ordering, consumer groups, offsets, replication, retention, DLQ, backpressure
+- Rebalancing, ordering vs. throughput, replay, poison messages
+
+### Distributed Cache
+
+- Consistent hashing, replication, quorum, eviction, TTL, cache invalidation, hot-key mitigation
+- Leader election, split brain, stampedes, consistency model choice
 
 ### Metrics, Logging, Monitoring platform
 
@@ -157,14 +149,6 @@ Design problems are most important; randomly pick 150 out of 250.
 - **Distributed Processing:** stream processing, aggregation, and sampling; windowing (tumbling, sliding, session); late-arriving and out-of-order events; deduplication and exactly-once vs. at-least-once ingestion.
 - **Query and Observability:** query execution, indexing, and distributed fan-out; aggregation and filtering; metrics, logs, and distributed traces; trace context propagation and correlation IDs; alerting and anomaly detection.
 - **Reliability and Scaling:** replication and fault tolerance; data loss prevention; multi-tenancy and noisy-neighbor isolation; cost optimization.
-
-### Distributed Object Storage
-
-- **Storage Architecture:** object metadata vs. object data; metadata service architecture; control plane vs. data plane; storage abstraction and object naming.
-- **Data Partitioning and Durability:** replication vs. erasure coding; data placement and rebalancing; checksums and data integrity; failure domains and availability zones.
-- **Upload and Download:** multipart and resumable uploads, including cleanup of incomplete uploads; range requests and large-object streaming; pre-signed URLs and delegated access.
-- **Consistency and Reliability:** strong vs. eventual and read-after-write consistency; metadata consistency; repair and recovery; object versioning and deletion semantics.
-- **Performance, Cost, and Security (name-drop):** hot/cold tiers, lifecycle policies, CDN, compression/deduplication; authentication/authorization, encryption, tenant isolation, audit logging.
 
 ## Optional
 
