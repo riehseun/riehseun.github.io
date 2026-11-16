@@ -41,11 +41,6 @@ Design problems are most important; randomly pick 150 out of 250.
 - Math / Geometry (3/8/13)
 - Bit Manipulation (5/7/10)
 
-## Reference
-
-- NeetCode
-- LeetCode
-
 
 # SOFTWARE ENGINEERING (25%)
 
@@ -114,24 +109,20 @@ Design problems are most important; randomly pick 150 out of 250.
 - Technical strategy
 - Disagree and commit.
 
-## Reference
-
-- Software Engineer’s Guidebook
-
 
 # SYSTEM DESIGN (25%)
 
 | Week | Plan |
 |---|---|
-| W1 | practice 1 mandatory problem per day + review 1 reference problem per day |
+| W1 | practice 1 mandatory problem per day |
 | W2 | break |
-| W3 | practice 1 mandatory problem per day + review 1 reference problem per day |
+| W3 | practice 1 mandatory problem per day |
 | W4 | break |
-| W5 | practice 1 mandatory problem per day + review 1 reference problem per day |
+| W5 | practice 1 mandatory problem per day |
 | W6 | break |
-| W7 | practice 1 mandatory problem per day + review 1 reference problem per day |
+| W7 | practice 1 mandatory problem per day |
 | W8 | break |
-| W9 | practice 1 mandatory problem per day + review 1 reference problem per day |
+| W9 | practice 1 mandatory problem per day |
 | W0 | break |
 
 ## Mandatory
@@ -187,27 +178,21 @@ Design problems are most important; randomly pick 150 out of 250.
 
 ### Hotel Reservation
 
-## Reference
-
-- System Design I
-- System Design II
-- Designing Data-Intensive Applications
-
 
 # MACHINE LEARNING SYSTEM DESIGN (25%)
 
 | Week | Plan |
 |---|---|
 | W1 | break |
-| W2 | practice 1 mandatory problem per day  + review 1 reference problem per day |
+| W2 | practice 1 mandatory problem per day |
 | W3 | break |
-| W4 | practice 1 mandatory problem per day  + review 1 reference problem per day |
+| W4 | practice 1 mandatory problem per day |
 | W5 | break |
-| W6 | practice 1 mandatory problem per day  + review 1 reference problem per day |
+| W6 | practice 1 mandatory problem per day |
 | W7 | break |
-| W8 | practice 1 mandatory problem per day  + review 1 reference problem per day |
+| W8 | practice 1 mandatory problem per day |
 | W9 | break |
-| W0 | practice 1 mandatory problem per day  + review 1 reference problem per day |
+| W0 | practice 1 mandatory problem per day |
 
 ## Mandatory
 
@@ -261,13 +246,6 @@ Design problems are most important; randomly pick 150 out of 250.
 ### Fraud Detection (Layer6 AI)
 
 ### Real-time Auction (Index Exchange)
-
-## Reference
-
-- Designing Machine Learning Systems
-- Machine Learning Design Patterns
-- Machine Learning System Design
-- Generative AI System Design
 
 
 # MACHINE LEARNING
