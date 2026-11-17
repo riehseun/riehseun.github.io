@@ -13,8 +13,8 @@
 | W9 | 3 medium/hard mandatory problems per day |
 | W0 | 3 medium/hard mandatory problems per day |
 
-Randomly pick a question out of Leet 250 if Array & Hashmap, Two Pointers, Sliding Window
-Randomly pick a question out of Leet 150 if everything else
+Randomly pick a question out of Leet 250 if Array & Hashmap, Two Pointers, Sliding Window.
+Randomly pick a question out of Leet 150 if everything else.
 
 | Topic | Problems |
 |---|---:|
@@ -36,6 +36,21 @@ Randomly pick a question out of Leet 150 if everything else
 | Backtracking | Neet 150 |
 | Math & Geometry | Out of Scope |
 | Bit Manipulation | Out of Scope |
+
+| Topic | Problems |
+|---|---:|
+| Rate limiter | 359, 362, 933, 346, 1797 |
+| LRU cache with TTL, thread-safe | 146, 460, 1797, 2622 |
+| Micro-batching collector | 1188, 622, 1834, 2636 |
+| DAG task executor | 207, 210, 1136, 2050, 2115, 269 |
+| Worker pool / bounded queue | 1188, 1114, 1115, 1116, 1195, 1226, 1242 |
+| KV store with transactions | 588, 1166, 2043, 380, 1146 |
+| Time-versioned KV store | 981, 1146, 2034 |
+| Retry, backoff, circuit breaker |  |
+| Request router / load balancer | 1882, 1606, 528, 2402 |
+| Log / metrics aggregator | 347, 692, 295, 480, 239, 1396, 636, 635 |
+| Job scheduler with priorities and resources | 621, 1834, 253, 355, 1235, 2365, 2502, 3408 |
+| Debug a broken codebase | |
 
 
 # SOFTWARE ENGINEERING (25%)
