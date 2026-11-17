@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<!-- Metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="description" content="">
+<meta name="author" content="Seungmoon Rieh">
+<meta name="keywords" content="">
+
+<!-- Title and image -->
+<title>Seungmoon Rieh</title>
+<link href="/img/seungmoonrieh.jpg" rel="icon">
+
+<!-- CSS -->
+<link href="/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/monokai-sublime.css" rel="stylesheet">
+<link href="/css/site.css" rel="stylesheet">
+
+<!-- JavaScript -->
+<script src="/js/jquery.min.js" type="text/javascript"></script>
+<script src="/js/bootstrap.bundle.min.js" type="text/javascript"></script>
+<script src="/js/highlight.pack.js" type="text/javascript"></script>
+<script src="/js/include_html.js" type="text/javascript"></script>
+<script src="/js/mathjax/tex-chtml.js" type="text/javascript"></script>
+<script src="/js/site.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<include src="/header.html"></include>
+
+<div class="container">
+<div class="row">
+<div class="col-md-12">
+<h1 class="my-4">System Design</h1>
+
+<!-- Product Design BEGIN -->
+<div class="card mb-4" id="product-design">
+  <div class="card-body">
+    <h2 class="card-title">Product Design</h2>
+    <ul class="list-unstyled mb-0">
+      <li><a href="#parking-lot-reservation">Parking Lot Reservation</a></li>
+      <li><a href="#hotel-reservation">Hotel Reservation</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="card mb-4" id="parking-lot-reservation">
+  <div class="card-body">
+    <h2 class="card-title">Parking Lot Reservation</h2>
+
+<pre><code class="markdown">
+# Requirement
+
+User request parking reservation with specific time slots (start, end)
+System assigns available spot automatically
+Parking spot is released at the end of reservation
+Parking spot could be under maintenance
+
+20 users but expected to grow
+5 parking spaces but expected to grow
+Each user make 1 reservation request per month on average
+Prevent double booking
+
+# Design
+
+Request -> Service (->DB) -> Response
+
+Write path
+- Service checks if there is free slot in DB between start and end time
+  - For all parking spots, query reservation table to see if there is active booking between start and end time (if result is null, then spot is free)
+  - SELECT * FROM reservation where parking_id = ? AND start_time <= requested_end_time AND end_time >= requested_start_time AND status == "active"
+  - If above query returns result, that parking spot in unavailable
+- If yes, create reservation and respond with slot #. If no, respond with reservation failure
+
+Service
+- A single virtual machine
+
+DB
+- A single SQL instance
+
+# API
+
+POST /reservations
+{
+  "user_id" user_id
+  "start": start_time
+  "end": end_time
+}
+
+# Data
+
+Table - User
+- user_id (int, pk)
+- email (string)
+
+Table - Parking
+- parking_id (bigint, pk)
+- location (varchar)
+- status (enum - active, maintenance)
+
+Table - Reservation
+- reservation_id (bigint, pk)
+- parking_id (bigint)
+- user_id (bigint)
+- start_time (timestamp)
+- end_time (timestamp)
+
+# Discussion
+
+Performance
+- Index query that finds all available parking spots given start and end time
+  - parking id, start_time, end_time columns must be indexed
+
+Scalability
+- Triggers:
+  - Server: >70% cpu, >80% memory, latency > SLA, >10k number of connections
+  - DB: >5ms read, >10k write per second
+- Service: horizontally add nodes
+- DB: partition/shard data where shard id is parking_id
+  - Use consistent hashing to distribute partitions/shards to different data nodes
+
+Availability
+- GLB to route traffic to nearest edge
+- Each edge has set of services and DBs
+- Active-Active setup where GLB does healthchecks on edge and send traffic to live edge
+
+Reliability
+- Service fails? route to other service node
+- DB fails? fallback to replicas (create replicas for each shard and spread them across different geo region)
+
+Monitoring
+- Metrics: latency, QPS, cache hit rate, cpu/memory utilization
+- Tools: Prometheus for metrics, Grafana for dashborad
+- Alerts: when metrics hit threshold
+
+Consistency
+- If multiple users race against the same time slot
+- If using a single SQL
+  - Leaverage ACID property 
+  - Lock candidate parking spot
+  - Check availability
+  - If available, commit transaction
+  - Release lock
+- If distributed
+  - Write goes in one shard and all of its replicas are used for read
+  - If write shard dies, one of remaining replicas become the write shard
+  - Write shard propagates updates to all if its replicas synchronously (use quorum to achieve strong consistency)
+</code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+    Reference:
+  </div>
+</div>
+
+<div class="card mb-4" id="hotel-reservation-">
+  <div class="card-body">
+    <h2 class="card-title">Hotel Reservation</h2>
+
+<pre><code class="markdown">
+
+</code></pre>
+
+  </div>
+  <div class="card-footer text-muted">
+    Reference:
+  </div>
+</div>
+<!-- Product Design END -->
+
+</div> <!-- /.col-md-12 -->
+</div> <!-- /.row -->
+</div> <!-- /.container -->
+
+<include src="/footer.html"></include>
+
+</body>
+
+</html>
