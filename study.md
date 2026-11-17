@@ -1,4 +1,4 @@
-# DATA STRUCTURE AND ALGORITHM (25%)
+# DATA STRUCTURE AND ALGORITHM (40%)
 
 | Week | Plan |
 |---|---|
@@ -53,7 +53,7 @@ Randomly pick a question out of Leet 150 if everything else.
 | Debug a broken codebase | |
 
 
-# SOFTWARE ENGINEERING (25%)
+# SOFTWARE ENGINEERING (10%)
 
 | Week | Plan |
 |---|---|
