@@ -17,7 +17,7 @@
 - Round 1
 	- DSA: stack
 - Round 2
-	- **MLSD: model serving at AD tech**
+	- MLSD: model serving at AD tech
 		- Large Scale
 		- Latency
 
@@ -27,7 +27,7 @@
 - Round 1
 	- Conversation: behavioral, technical
 - Round 2
-	- **SD: parking lot reservation**
+	- SD: parking lot reservation
 		- Concurrency and locking mechanisms at the application and infrastructure level
 		- Database performance tuning and concurrency design
 		- Metrics and observability systems including how monitoring pipelines are implemented internally
@@ -35,28 +35,28 @@
 3a. Meta
 - Recruiter: James Hargett
 
-3b. Meta
+**3b. Meta**
 - Role: Machine Learning in 2025
 - Recruiter: Christine Wilson
 - Round 1
 	- **DSA: https://leetcode.com/problems/valid-palindrome-ii**
 
-4a. Bloomberg
+**4a. Bloomberg**
 - Role: Software Development in 2022
 - Recruiter: Michael Feinstein
 - Round 1
-	- Python: class for transit system
-	- Python: class for lottery create/delete/pickwinner in O(1)
+	- **Python: class for transit system**
+	- **Python: class for lottery create/delete/pickwinner in O(1)**
 - Round 2
 	- SD: design TinyURL
 
-4b. Bloomberg 
+**4b. Bloomberg**
 - Role: Machine Learning in 2025
 - Recruiter: Sian Naiken-Cooke
 - Round 1
-	- **DSA: get/set for sparse array**
+	- **Python: get/set for sparse array**
 
-5. Confluent
+**5. Confluent**
 - Role: Software Engineering in 2022
 - Recruiter: Sandhya Shivaram
 - Round 1
@@ -87,7 +87,7 @@
 	- Conversation: top-grading
 - OFFER: 165K base + 10% bonus + 32K USD equity + 15K signing + 3K RSP matching  + 20 days vacation + flex forward
 
-7. Amazon
+**7. Amazon**
 - Role: Software Engineering in 2022
 - Recruiter: Antonio Ang
 - Round 1
@@ -98,7 +98,7 @@
 	- Conversation: behavioral (calculated risk)
 	- SD: design Amazon
 
-8. Google
+**8. Google**
 - Role: Software Engineering in 2022
 - Recruiter: Alfred Donovan
 - Round 2
@@ -119,11 +119,11 @@
 - Round 1
 	- Python: string modification, overlapping matrices, log streaming and processing
 
-11. Pinterest
+**11. Pinterest**
 - Role: Software Engineering in 2022
 - Recruiter: Alexandra Vu
 - Round 1
-	- Python: backend API
+	- **Python: backend API**
 
 12. Nuro AI
 - Role: Machine Learning Platform in 2022
@@ -186,7 +186,7 @@
 	- **DSA: https://leetcode.com/problems/best-time-to-buy-and-sell-stock-ii**
 	- Python: "yield", "class method vs static method", "decorator"
 
-21. DoorDash
+**21. DoorDash**
 - Role: Machine Learning in 2025
 - Recruiter: Sho Sato
 - Round 1
