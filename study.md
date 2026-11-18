@@ -2,30 +2,30 @@
 
 | Week | Plan |
 |---|---|
-| W1 | pick 3 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
-| W2 | pick 3 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
-| W3 | pick 3 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
-| W4 | pick 3 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
-| W5 | pick 3 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
-| W6 | pick 3 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
-| W7 | pick 3 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
-| W8 | pick 3 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
-| W9 | pick 3 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
-| W10 | pick 3 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
+| W1 | pick 2 + 1 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
+| W2 | pick 2 + 1 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
+| W3 | pick 2 + 1 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
+| W4 | pick 2 + 1 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
+| W5 | pick 2 + 1 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
+| W6 | pick 2 + 1 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
+| W7 | pick 2 + 1 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
+| W8 | pick 2 + 1 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
+| W9 | pick 2 + 1 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
+| W10 | pick 2 + 1 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
 
 | Topic | Problems |
 |---|---:|
 | Arrays & Hashing (Prefix Sum, String) | Tier 1 - Neet 250 |
-| Two Pointers | Tier 2 - Neet 250 |
+| Two Pointers | Tier 1 - Neet 250 |
 | Stack | Tier 2 - Neet 250 |
-| Binary Search | Tier 2 - Neet 250 |
-| Sliding Window | Tier 2 - Neet 250 |
+| Binary Search | Tier 1 - Neet 250 |
+| Sliding Window | Tier 1 - Neet 250 |
 | Linked List | Tier 2 - Neet 250 |
 | Tree (DFS, BFS) | Tier 1 - Neet 250 |
 | Heap | Tier 1 - Neet 250 |
 | Graph (DFS, BFS, Topological Sort, Union Find) | Tier 1 - Neet 250 |
 | 1D DP | Tier 2 - Neet 250 |
-| Interval | Tier 2 - Neet 250 |
+| Interval | Tier 1 - Neet 250 |
 | Greedy | Tier 2 - Neet 250 |
 | Advanced Graph (Dijkstra, Bellman-Ford, Prim, Hierholzer) | Tier 3 - Neet 250 |
 | 2D DP | Tier 3 - Neet 250 |
@@ -38,7 +38,7 @@
 |---|---:|
 | Rate limiter | Tier 1 - 359, 362, 933, 346, 1797 |
 | LRU cache with TTL, thread-safe | Tier 1 - 146, 460 |
-| Micro-batching collector | Tier 2 - 622 |
+| Micro-batching collector | Tier 2 |
 | DAG task executor | Tier 1 - 207, 210, 1136, 2050, 2115, 269 |
 | Worker pool / bounded queue | Tier 1 - 1188, 1114, 1115, 1116, 1195, 1226, 1242 |
 | KV store with transactions | Tier 2 - 588, 1166, 2043, 380, 1146 |
@@ -90,7 +90,7 @@
 | W7 | practice 1 problem per day |
 | W8 | break |
 | W9 | practice 1 problem per day |
-| W0 | break |
+| W10 | break |
 
 ## Table of Contents
 
@@ -242,7 +242,7 @@
 | W7 | break |
 | W8 | practice 1 problem per day |
 | W9 | break |
-| W0 | practice 1 problem per day |
+| W10 | practice 1 problem per day |
 
 # System Design Review: ML and AI Platform Systems
 
