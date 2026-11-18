@@ -2,52 +2,52 @@
 
 | Week | Plan |
 |---|---|
-| W1 | 3 problems per day |
-| W2 | 3 problems per day |
-| W3 | 3 problems per day |
-| W4 | 3 problems per day |
-| W5 | 3 problems per day |
-| W6 | 3 problems per day |
-| W7 | 3 problems per day |
-| W8 | 3 problems per day |
-| W9 | 3 problems per day |
-| W10 | 3 problems per day |
+| W1 | pick 3 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
+| W2 | pick 3 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
+| W3 | pick 3 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
+| W4 | pick 3 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
+| W5 | pick 3 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
+| W6 | pick 3 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
+| W7 | pick 3 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
+| W8 | pick 3 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
+| W9 | pick 3 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
+| W10 | pick 3 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
 
 | Topic | Problems |
 |---|---:|
-| Arrays & Hashing (Prefix Sum, String) | Neet 250 |
-| Two Pointers | Neet 250 |
-| Stack | Neet 150 |
-| Binary Search | Neet 150 |
-| Sliding Window | Neet 250 |
-| Linked List | Neet 150 |
-| Tree (DFS, BFS) | Neet 150 |
-| Heap | Neet 150 |
-| Graph (DFS, BFS, Topological Sort, Union Find) | Neet 150 |
-| 1D DP | Neet 150 |
-| Interval | Neet 150 |
-| Greedy | Neet 150 |
-| Advanced Graph (Dijkstra, Bellman-Ford, Prim, Hierholzer) | Neet 150 |
-| 2D DP | Neet 150 |
-| Trie | Neet 150 |
-| Backtracking | Neet 150 |
+| Arrays & Hashing (Prefix Sum, String) | Tier 1 - Neet 250 |
+| Two Pointers | Tier 2 - Neet 250 |
+| Stack | Tier 2 - Neet 250 |
+| Binary Search | Tier 2 - Neet 250 |
+| Sliding Window | Tier 2 - Neet 250 |
+| Linked List | Tier 2 - Neet 250 |
+| Tree (DFS, BFS) | Tier 1 - Neet 250 |
+| Heap | Tier 1 - Neet 250 |
+| Graph (DFS, BFS, Topological Sort, Union Find) | Tier 1 - Neet 250 |
+| 1D DP | Tier 2 - Neet 250 |
+| Interval | Tier 2 - Neet 250 |
+| Greedy | Tier 2 - Neet 250 |
+| Advanced Graph (Dijkstra, Bellman-Ford, Prim, Hierholzer) | Tier 3 - Neet 250 |
+| 2D DP | Tier 3 - Neet 250 |
+| Trie | Tier 3 - Neet 250 |
+| Backtracking | Tier 3 - Neet 250 |
 | Math & Geometry | Out of Scope |
 | Bit Manipulation | Out of Scope |
 
 | Topic | Problems |
 |---|---:|
-| Rate limiter | 359, 362, 933, 346, 1797 |
-| LRU cache with TTL, thread-safe | 146, 460, 1797, 2622 |
-| Micro-batching collector | 1188, 622, 1834, 2636 |
-| DAG task executor | 207, 210, 1136, 2050, 2115, 269 |
-| Worker pool / bounded queue | 1188, 1114, 1115, 1116, 1195, 1226, 1242 |
-| KV store with transactions | 588, 1166, 2043, 380, 1146 |
-| Time-versioned KV store | 981, 1146, 2034 |
-| Retry, backoff, circuit breaker |  |
-| Request router / load balancer | 1882, 1606, 528, 2402 |
-| Log / metrics aggregator | 347, 692, 295, 480, 239, 1396, 636, 635 |
-| Job scheduler with priorities and resources | 621, 1834, 253, 355, 1235, 2365, 2502, 3408 |
-| Debug a broken codebase | |
+| Rate limiter | Tier 1 - 359, 362, 933, 346, 1797 |
+| LRU cache with TTL, thread-safe | Tier 1 - 146, 460 |
+| Micro-batching collector | Tier 2 - 622 |
+| DAG task executor | Tier 1 - 207, 210, 1136, 2050, 2115, 269 |
+| Worker pool / bounded queue | Tier 1 - 1188, 1114, 1115, 1116, 1195, 1226, 1242 |
+| KV store with transactions | Tier 2 - 588, 1166, 2043, 380, 1146 |
+| Time-versioned KV store | Tier 2 - 981, 2034 |
+| Retry, backoff, circuit breaker | Tier 2 |
+| Request router / load balancer | Tier 2 - 1882, 1606, 528, 2402 |
+| Log / metrics aggregator | Tier 2 - 347, 692, 295, 480, 239, 1396, 636, 635 |
+| Job scheduler with priorities and resources | Tier 1 - 621, 1834, 253, 1235, 2365, 2502, 3408 |
+| Debug a broken codebase | Tier 2 |
 
 
 # SOFTWARE ENGINEERING (10%)
@@ -65,22 +65,17 @@
 | W9 | practice 1 behavioral story per day |
 | W10 | practice 1 behavioral story per day |
 
-
-## Behavioral
-
-- Ownership
-- Conflict
-- Leadership
-- Mentorship
-- Ambiguity
-- Challenge
-- Impact
-- Failure
-- Risk
-- Influence without authority
-- Technical strategy
-- Disagree and commit
-
+| Week | Plan |
+|---|---|
+| Ownership |  |
+| Conflict |  |
+| Leadership / Influence without authority |  |
+| Mentorship |  |
+| Ambiguity |  |
+| Challenge |  |
+| Impact |  |
+| Failure |  |
+| Risk |  |
 
 # SYSTEM DESIGN (25%)
 
