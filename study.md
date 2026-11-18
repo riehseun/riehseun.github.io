@@ -104,11 +104,6 @@
 | Distributed Message Queue | partitioning, ordering, consumer groups, offsets, replication, retention, DLQ, backpressure, rebalancing, ordering vs. throughput, replay, poison messages |
 | Distributed Cache | consistent hashing, replication, quorum, eviction, TTL, cache invalidation, hot-key mitigation, leader election, split brain, stampedes, consistency model choice |
 | Metrics, Logging, Monitoring platform | push vs. pull models; agent-based collection; batching and buffering; backpressure and ingestion throttling |
-| TinyURL | Out of Scope |
-| Amazon | Out of Scope |
-| Instagram | Out of Scope |
-| Parking Reservation | Out of Scope |
-| Hotel Reservation | Out of Scope |
 
 
 # MACHINE LEARNING SYSTEM DESIGN (25%)
@@ -133,11 +128,6 @@
 | Agentic Platform | DAG and state-machine execution; sequential and parallel tool execution; durable execution, checkpointing, recovery, and workflow versioning; agent loop and execution lifecycle; stateful vs. stateless agent execution; multi-agent communication and coordination, tool authentication, authorization, permissions, and access control; sandboxing, execution isolation, and resource limits; tool timeouts, cancellation, idempotency, and retry handling; prompt injection, tool output validation, and trust boundaries, context-window management; short-term vs. long-term memory; conversation state persistence; retrieval and context compression, offline and online evaluation, regression testing, and evaluation datasets; agent trajectory evaluation (end-to-end task success, tool-call success rate, tool-selection errors, hallucination); failure detection and recovery; human approval and escalation, token budgets and cost attribution; model selection and routing; caching and reuse; concurrency limits and rate limiting |
 | Model Training | distributed data loading; data sharding and sampling; data preprocessing bottlenecks; storage throughput and caching, gang scheduling; GPU fragmentation, allocation, and topology; scheduling fairness and priority; multi-tenant workload isolation; elastic training and worker scaling; training/inference workload contention, data parallelism and FSDP; tensor and pipeline parallelism; AllReduce and NCCL; communication/computation overlap; gradient accumulation and gradient checkpointing; mixed precision training; RDMA and InfiniBand (name-drop), distributed checkpoint coordination; asynchronous vs. synchronous checkpointing; checkpoint frequency, recovery-point objectives, and checkpoint storage; recovery from partial worker failures; training job preemption and resumption, GPU and memory utilization; data-loader wait time; communication overhead and network bandwidth; straggler identification; training throughput and time-to-train |
 | Feature Store | feature definitions and metadata; feature registry, versioning, ownership, and discovery; feature schema evolution; online vs. offline store architecture; feature transformation consistency between training and inference, batch vs. streaming feature computation; stream processing and event-time vs. processing-time semantics; windowed aggregations; late-arriving events and corrections; point-in-time joins and historical feature retrieval, low-latency and batch feature retrieval; cache strategies and eviction; hot-key mitigation; fallback behavior for missing or stale features, training-serving skew detection and prevention; feature freshness SLAs and monitoring; data quality validation; backfill consistency and recovery; online/offline synchronization, high-throughput feature ingestion; partitioning and replication; multi-tenant isolation; storage cost optimization |
-| Recommendation System | Out of Scope |
-| Search Ranking | Out of Scope |
-| Real-time Detection | Out of Scope |
-| Fraud Detection (Layer6 AI) | Out of Scope |
-| Real-time Auction (Index Exchange) | Out of Scope |
 
 
 # MACHINE LEARNING
