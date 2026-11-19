@@ -1,39 +1,50 @@
+# Schedule 2027
+
+Winter: 1/4, 1/11, 1/18, 1/25, 2/1, 2/8, 2/15, 2/22, ~3/1~, ~3/8~, ~3/15~, ~3/22~, ~3/29~ (7 weeks to work, 5 weeks vacation)
+Spring: 4/5, 4/12, 4/19, 4/26, 5/3, 5/10, 5/17, ~5/24~, 5/31, 6/7, 6/14, 6/21, ~6/28~ (11 weeks to work, 2 weeks vacation)
+Summer: 7/5, 7/12, 7/19, 7/26, ~8/2~, 8/9, 8/16, 8/23, 8/30, ~9/6~, 9/13, 9/20, 9/27 (11 weeks to work, 2 weeks vacation)
+Fall: 10/4, ~10/11~, 10/18, 10/25, 11/1, 11/8, 11/15, 11/22, 11/29, 12/6, 12/13, ~12/20~, ~12/27~ (10 weeks to work, 3 week vacation)
+
+## Rule
+- Quarterly iteration
+- Vacations, weeks with holidays, year ends are excluded
+
+
 # DATA STRUCTURE AND ALGORITHM (40%)
 
-| Week | Plan |
-|---|---|
-| W1 | pick 2 + 1 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
-| W2 | pick 2 + 1 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
-| W3 | pick 2 + 1 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
-| W4 | pick 2 + 1 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
-| W5 | pick 2 + 1 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
-| W6 | pick 2 + 1 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
-| W7 | pick 2 + 1 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
-| W8 | pick 2 + 1 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
-| W9 | pick 2 + 1 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
-| W10 | pick 2 + 1 per day (failed problems first then randomly pick new problems by weight of tier 1/2/3 at 50%/35%/15%) |
+| Day | Time | Plan |
+|---|---|---|
+| MRWRF | 7AM - 9AM | pick 3 Type 1 + 1 Type 2 per day |
 
+## Rules
+- If failed problems are in the backlog and due on that day, do them first
+- For new problems, pick a topic first (weighted by tier - 50/35/15/0), then randomly pick unsolved problem inside that row
+- Failed problems are backlogged and retried exactly a week later
+- Failed if the problem does not pass Leetcode submit or overtime (15 mins for easy, 30 mins for medium, 45 mins for hard)
+
+## Type 1
 | Topic | Problems |
 |---|---:|
 | Arrays & Hashing (Prefix Sum, String) | Tier 1 - Neet 250 |
 | Two Pointers | Tier 1 - Neet 250 |
-| Stack | Tier 2 - Neet 250 |
+| Stack | Tier 2 - Neet 150 |
 | Binary Search | Tier 1 - Neet 250 |
 | Sliding Window | Tier 1 - Neet 250 |
-| Linked List | Tier 2 - Neet 250 |
+| Linked List | Tier 2 - Neet 150 |
 | Tree (DFS, BFS) | Tier 1 - Neet 250 |
 | Heap | Tier 1 - Neet 250 |
 | Graph (DFS, BFS, Topological Sort, Union Find) | Tier 1 - Neet 250 |
-| 1D DP | Tier 2 - Neet 250 |
+| 1D DP | Tier 2 - Neet 150 |
 | Interval | Tier 1 - Neet 250 |
-| Greedy | Tier 2 - Neet 250 |
-| Advanced Graph (Dijkstra, Bellman-Ford, Prim, Hierholzer) | Tier 3 - Neet 250 |
-| 2D DP | Tier 3 - Neet 250 |
-| Trie | Tier 3 - Neet 250 |
-| Backtracking | Tier 3 - Neet 250 |
-| Math & Geometry | Out of Scope |
-| Bit Manipulation | Out of Scope |
+| Greedy | Tier 2 - Neet 150 |
+| Advanced Graph (Dijkstra, Bellman-Ford, Prim, Hierholzer) | Tier 3 - Neet 150 |
+| 2D DP | Tier 3 - Neet 150 |
+| Trie | Tier 3 - Neet 150 |
+| Backtracking | Tier 3 - Neet 150 |
+| Math & Geometry | Tier 4 / Out of Scope |
+| Bit Manipulation | Tier 4 / Out of Scope |
 
+## Type 2
 | Topic | Problems |
 |---|---:|
 | Rate limiter | Tier 1 - 359, 362, 933, 346, 1797 |
@@ -50,54 +61,45 @@
 | Debug a broken codebase | Tier 2 |
 
 
-# SOFTWARE ENGINEERING (10%)
+# BEHAVIORAL (10%)
 
-| Week | Plan |
-|---|---|
-| W1 | practice 1 behavioral story per day |
-| W2 | practice 1 behavioral story per day |
-| W3 | practice 1 behavioral story per day |
-| W4 | practice 1 behavioral story per day |
-| W5 | practice 1 behavioral story per day |
-| W6 | practice 1 behavioral story per day |
-| W7 | practice 1 behavioral story per day |
-| W8 | practice 1 behavioral story per day |
-| W9 | practice 1 behavioral story per day |
-| W10 | practice 1 behavioral story per day |
+| Day | Time | Plan |
+|---|---|---|
+| M | 5PM - 7PM | practice 4 topics per day |
 
-| Week | Plan |
-|---|---|
-| Ownership |  |
-| Conflict |  |
-| Leadership / Influence without authority |  |
-| Mentorship |  |
-| Ambiguity |  |
-| Challenge |  |
-| Impact |  |
-| Failure |  |
-| Risk |  |
+| Topic |
+|---|
+| Ownership - Tier 1 |
+| Conflict - Tier 1 |
+| Leadership / Influence without authority - Tier 2 |
+| Mentorship - Tier 2 |
+| Ambiguity - Tier 1 |
+| Challenge - Tier 1 |
+| Impact - Tier 1 |
+| Failure - Tier 2 |
+| Risk - Tier 2 | 
+| Trade-off - Tier 2 |
+| Production Incident - Tier 2 |
+| Project Deepdive - Tier 1 |
+
+## Rule
+- Pick a topic (weighted by tier - 60/40)
+- Use max 10 stories to cover all topics
+- Use stories in different angle for different topics
+- Use recent stories only Autodesk (2026.10-Presnet), TD Securities (2025.08-2026.09), Layer6 AI (2021.01-2025.07)
 
 # SYSTEM DESIGN (25%)
 
-| Week | Plan |
-|---|---|
-| W1 | practice 1 problem per day |
-| W2 | break |
-| W3 | practice 1 problem per day |
-| W4 | break |
-| W5 | practice 1 problem per day |
-| W6 | break |
-| W7 | practice 1 problem per day |
-| W8 | break |
-| W9 | practice 1 problem per day |
-| W10 | break |
+| Day | Time | Plan |
+|---|---|---|
+| WF | 5PM - 7PM | practice 1 problem per day |
 
 ## Table of Contents
 
 1. [Distributed Job Scheduler](#1-distributed-job-scheduler)
-2. [Distributed Rate Limiter](#2-distributed-rate-limiter)
+2. [Distributed Rate Limiter / API Gateway](#2-distributed-rate-limiter)
 3. [Distributed Message Queue](#3-distributed-message-queue)
-4. [Distributed Cache](#4-distributed-cache)
+4. [Distributed Cache / KV Store](#4-distributed-cache)
 5. [Metrics, Logging, and Monitoring Platform](#5-metrics-logging-and-monitoring-platform)
 6. [Cross-Cutting Themes](#6-cross-cutting-themes)
 
@@ -231,18 +233,9 @@
 
 # MACHINE LEARNING SYSTEM DESIGN (25%)
 
-| Week | Plan |
-|---|---|
-| W1 | break |
-| W2 | practice 1 problem per day |
-| W3 | break |
-| W4 | practice 1 problem per day |
-| W5 | break |
-| W6 | practice 1 problem per day |
-| W7 | break |
-| W8 | practice 1 problem per day |
-| W9 | break |
-| W10 | practice 1 problem per day |
+| Day | Time | Plan |
+|---|---|---|
+| TR | practice 1 problem per day |
 
 # System Design Review: ML and AI Platform Systems
 
@@ -253,7 +246,8 @@
 3. [Agentic Platform](#3-agentic-platform)
 4. [Model Training](#4-model-training)
 5. [Feature Store](#5-feature-store)
-6. [Cross-Cutting Themes](#6-cross-cutting-themes)
+6. [Chatbot/ RAG / Knowledge Base]
+7. [Cross-Cutting Themes](#7-cross-cutting-themes)
 
 ---
 
