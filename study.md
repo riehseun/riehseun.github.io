@@ -5,7 +5,7 @@ Spring: 4/5, 4/12, 4/19, 4/26, 5/3, 5/10, 5/17, ~5/24~, 5/31, 6/7, 6/14, 6/21, ~
 Summer: 7/5, 7/12, 7/19, 7/26, ~8/2~, 8/9, 8/16, 8/23, 8/30, ~9/6~, 9/13, 9/20, 9/27 (11 weeks to work, 2 weeks vacation)
 Fall: 10/4, ~10/11~, 10/18, 10/25, 11/1, 11/8, 11/15, 11/22, 11/29, 12/6, 12/13, ~12/20~, ~12/27~ (10 weeks to work, 3 week vacation)
 
-## Rule
+## Rules
 - Quarterly iteration
 - Vacations, weeks with holidays, year ends are excluded
 
@@ -65,8 +65,15 @@ Fall: 10/4, ~10/11~, 10/18, 10/25, 11/1, 11/8, 11/15, 11/22, 11/29, 12/6, 12/13,
 
 | Day | Time | Plan |
 |---|---|---|
-| M | 5PM - 7PM | practice 4 topics per day |
+| M | 5PM - 7PM | practice 4 themes per day |
 
+## Rules
+- Pick a topic (weighted by tier - 60/40)
+- Use max 10 stories to cover all topics
+- Use stories in different angle for different topics
+- Use recent stories only Autodesk (2026.10-Presnet), TD Securities (2025.08-2026.09), Layer6 AI (2021.01-2025.07)
+
+## Theme
 | Topic |
 |---|
 | Ownership - Tier 1 |
@@ -82,11 +89,6 @@ Fall: 10/4, ~10/11~, 10/18, 10/25, 11/1, 11/8, 11/15, 11/22, 11/29, 12/6, 12/13,
 | Production Incident - Tier 2 |
 | Project Deepdive - Tier 1 |
 
-## Rule
-- Pick a topic (weighted by tier - 60/40)
-- Use max 10 stories to cover all topics
-- Use stories in different angle for different topics
-- Use recent stories only Autodesk (2026.10-Presnet), TD Securities (2025.08-2026.09), Layer6 AI (2021.01-2025.07)
 
 # SYSTEM DESIGN (25%)
 
@@ -94,14 +96,20 @@ Fall: 10/4, ~10/11~, 10/18, 10/25, 11/1, 11/8, 11/15, 11/22, 11/29, 12/6, 12/13,
 |---|---|---|
 | WF | 5PM - 7PM | practice 1 problem per day |
 
+## Rules
+- Each problem gets 1 review day before practice begins
+- If failed problems are in the backlog and due on that day, do them first
+- For new problems, pick a topic by tier weight - 60/40
+- Failed problems are backlogged and retried exactly a week later
+- Failed if the problem gets below 9/10 when graded by Claude targeting Senior Bar or gets below 9/10 on 10 follow up questions 
+
 ## Table of Contents
 
-1. [Distributed Job Scheduler](#1-distributed-job-scheduler)
-2. [Distributed Rate Limiter / API Gateway](#2-distributed-rate-limiter)
-3. [Distributed Message Queue](#3-distributed-message-queue)
-4. [Distributed Cache / KV Store](#4-distributed-cache)
-5. [Metrics, Logging, and Monitoring Platform](#5-metrics-logging-and-monitoring-platform)
-6. [Cross-Cutting Themes](#6-cross-cutting-themes)
+1. [Distributed Job Scheduler / Message Queue - Tier 2](#1-distributed-job-scheduler)
+2. [Distributed Cache / KV Store - Tier 2](#2-distributed-cache)
+3. [Distributed Rate Limiter / API Gateway - Tier 1](#3-distributed-rate-limiter)
+4. [Metrics, Logging, and Monitoring Platform - Tier 1](#4-metrics-logging-and-monitoring-platform)
+5. [Cross-Cutting Themes](#5-cross-cutting-themes)
 
 ---
 
@@ -128,7 +136,45 @@ Fall: 10/4, ~10/11~, 10/18, 10/25, 11/1, 11/8, 11/15, 11/22, 11/29, 12/6, 12/13,
 
 ---
 
-## 2. Distributed Rate Limiter
+## 1. Distributed Message Queue
+
+| Topic | Details |
+|---|---|
+| Partitioning | A topic is split into partitions for parallelism. The partition key (hash) determines placement. |
+| Ordering | Guaranteed only *within a partition*. Same key maps to the same partition. Global ordering means one partition, which kills throughput. |
+| Consumer groups | Each partition is consumed by exactly one consumer per group, so max parallelism equals partition count. Different groups read independently. |
+| Offsets | Per-partition position committed by consumers. Commit after processing = at-least-once. Commit before = at-most-once. Exactly-once needs transactions or idempotent sinks. |
+| Replication | Leader/follower per partition, an ISR (in-sync replica) set, and `acks` (0/1/all) with `min.insync.replicas` trading durability vs. latency. Leader failover via controller or consensus. |
+| Retention | Time- or size-based (or log compaction by key). Retention enables replay. |
+| DLQ | Messages failing after N retries go to a dead-letter queue for inspection and reprocessing. Keep error metadata with them. |
+| Backpressure | Pull-based consumption is naturally self-throttling. Use bounded buffers, producer quotas, and lag monitoring. Pause consumption when downstream is slow. |
+| Rebalancing | Consumers joining or leaving triggers partition reassignment and pauses. Mitigate with cooperative/incremental rebalancing, static membership, and sensible session timeouts. |
+| Ordering vs. throughput | Retries can break ordering (B succeeds while A retries). Options: block the partition, use retry topics (loses order), or check sequence numbers. |
+| Replay | Reset offsets to a timestamp or position. Requires idempotent consumers. |
+| Poison messages | One bad message can block a partition. Detect via retry count, skip to DLQ, and validate schemas up front. |
+
+---
+
+## 2. Distributed Cache
+
+| Topic | Details |
+|---|---|
+| Consistent hashing | Minimizes key movement when nodes join or leave. Virtual nodes smooth distribution and handle heterogeneous capacity. |
+| Replication | Primary/replica for read scaling and availability. Async replication means possible stale reads and loss on failover. |
+| Quorum | With N replicas, `R + W > N` gives strong-ish consistency. Lower values favor latency and availability. |
+| Eviction | LRU, LFU, FIFO, random, or TTL-based. LFU resists scan pollution. Memory limit and eviction policy interact with TTLs. |
+| TTL | Add jitter to avoid synchronized expiry. |
+| Invalidation | The hard problem. Options: TTL only, write-through, write-behind, cache-aside with delete-on-write, event-driven (CDC). Delete-on-write races (stale value re-populated after delete) can be handled with versioning or a short delayed double-delete. |
+| Hot-key mitigation | Replicate hot keys across nodes, add a local in-process (L1) cache, split keys with suffixes, use request coalescing. |
+| Stampedes (dogpile) | Many requests miss at once. Use single-flight / request coalescing, mutex or lease on regeneration, probabilistic early refresh, stale-while-revalidate, TTL jitter. |
+| Leader election & split brain | Needed for primary selection (Raft, Sentinel, ZooKeeper). Prevent split brain with quorum-based election, fencing, and epoch numbers. Minority partitions should stop accepting writes if consistency matters. |
+| Consistency model choice | Caches are usually eventually consistent. Choose by cost of staleness: strong for inventory and balances (or bypass the cache), eventual for feeds and profiles. |
+
+**Also consider:** negative caching (cache "not found" briefly), cache warming, and cold-start protection.
+
+---
+
+## 3. Distributed Rate Limiter
 
 ### Algorithms
 
@@ -155,45 +201,7 @@ Fall: 10/4, ~10/11~, 10/18, 10/25, 11/1, 11/8, 11/15, 11/22, 11/29, 12/6, 12/13,
 
 ---
 
-## 3. Distributed Message Queue
-
-| Topic | Details |
-|---|---|
-| Partitioning | A topic is split into partitions for parallelism. The partition key (hash) determines placement. |
-| Ordering | Guaranteed only *within a partition*. Same key maps to the same partition. Global ordering means one partition, which kills throughput. |
-| Consumer groups | Each partition is consumed by exactly one consumer per group, so max parallelism equals partition count. Different groups read independently. |
-| Offsets | Per-partition position committed by consumers. Commit after processing = at-least-once. Commit before = at-most-once. Exactly-once needs transactions or idempotent sinks. |
-| Replication | Leader/follower per partition, an ISR (in-sync replica) set, and `acks` (0/1/all) with `min.insync.replicas` trading durability vs. latency. Leader failover via controller or consensus. |
-| Retention | Time- or size-based (or log compaction by key). Retention enables replay. |
-| DLQ | Messages failing after N retries go to a dead-letter queue for inspection and reprocessing. Keep error metadata with them. |
-| Backpressure | Pull-based consumption is naturally self-throttling. Use bounded buffers, producer quotas, and lag monitoring. Pause consumption when downstream is slow. |
-| Rebalancing | Consumers joining or leaving triggers partition reassignment and pauses. Mitigate with cooperative/incremental rebalancing, static membership, and sensible session timeouts. |
-| Ordering vs. throughput | Retries can break ordering (B succeeds while A retries). Options: block the partition, use retry topics (loses order), or check sequence numbers. |
-| Replay | Reset offsets to a timestamp or position. Requires idempotent consumers. |
-| Poison messages | One bad message can block a partition. Detect via retry count, skip to DLQ, and validate schemas up front. |
-
----
-
-## 4. Distributed Cache
-
-| Topic | Details |
-|---|---|
-| Consistent hashing | Minimizes key movement when nodes join or leave. Virtual nodes smooth distribution and handle heterogeneous capacity. |
-| Replication | Primary/replica for read scaling and availability. Async replication means possible stale reads and loss on failover. |
-| Quorum | With N replicas, `R + W > N` gives strong-ish consistency. Lower values favor latency and availability. |
-| Eviction | LRU, LFU, FIFO, random, or TTL-based. LFU resists scan pollution. Memory limit and eviction policy interact with TTLs. |
-| TTL | Add jitter to avoid synchronized expiry. |
-| Invalidation | The hard problem. Options: TTL only, write-through, write-behind, cache-aside with delete-on-write, event-driven (CDC). Delete-on-write races (stale value re-populated after delete) can be handled with versioning or a short delayed double-delete. |
-| Hot-key mitigation | Replicate hot keys across nodes, add a local in-process (L1) cache, split keys with suffixes, use request coalescing. |
-| Stampedes (dogpile) | Many requests miss at once. Use single-flight / request coalescing, mutex or lease on regeneration, probabilistic early refresh, stale-while-revalidate, TTL jitter. |
-| Leader election & split brain | Needed for primary selection (Raft, Sentinel, ZooKeeper). Prevent split brain with quorum-based election, fencing, and epoch numbers. Minority partitions should stop accepting writes if consistency matters. |
-| Consistency model choice | Caches are usually eventually consistent. Choose by cost of staleness: strong for inventory and balances (or bypass the cache), eventual for feeds and profiles. |
-
-**Also consider:** negative caching (cache "not found" briefly), cache warming, and cold-start protection.
-
----
-
-## 5. Metrics, Logging, and Monitoring Platform
+## 4. Metrics, Logging, and Monitoring Platform
 
 ### Push vs. Pull
 
@@ -220,7 +228,7 @@ Fall: 10/4, ~10/11~, 10/18, 10/25, 11/1, 11/8, 11/15, 11/22, 11/29, 12/6, 12/13,
 
 ---
 
-## 6. Cross-Cutting Themes
+## 5. Cross-Cutting Themes
 
 - **Idempotency + at-least-once** beats chasing exactly-once (scheduler, queue, cache invalidation).
 - **Leases, fencing tokens, and epochs** solve zombie and split-brain problems (scheduler, cache, queue leaders).
@@ -237,16 +245,21 @@ Fall: 10/4, ~10/11~, 10/18, 10/25, 11/1, 11/8, 11/15, 11/22, 11/29, 12/6, 12/13,
 |---|---|---|
 | TR | practice 1 problem per day |
 
-# System Design Review: ML and AI Platform Systems
+## Rules
+- Each problem gets 1 review day before practice begins
+- If failed problems are in the backlog and due on that day, do them first
+- For new problems, pick a topic by tier weight - 60/40
+- Failed problems are backlogged and retried exactly a week later
+- Failed if the problem gets below 9/10 when graded by Claude targeting Senior Bar or gets below 9/10 on 10 follow up questions 
 
 ## Table of Contents
 
-1. [Model Serving](#1-model-serving)
-2. [LLM Serving](#2-llm-serving)
-3. [Agentic Platform](#3-agentic-platform)
-4. [Model Training](#4-model-training)
-5. [Feature Store](#5-feature-store)
-6. [Chatbot/ RAG / Knowledge Base]
+1. [Model Serving - Tier 1](#1-model-serving)
+2. [LLM Serving - Tier 1](#2-llm-serving)
+3. [Agentic Platform - Tier 1](#3-agentic-platform)
+4. [Model Training - Tier 2](#4-model-training)
+5. [Feature Store - Tier 2](#5-feature-store)
+6. [Chatbot/ RAG / Knowledge Base - Tier 2]
 7. [Cross-Cutting Themes](#7-cross-cutting-themes)
 
 ---
@@ -512,7 +525,7 @@ Fall: 10/4, ~10/11~, 10/18, 10/25, 11/1, 11/8, 11/15, 11/22, 11/29, 12/6, 12/13,
 
 ---
 
-## 6. Cross-Cutting Themes
+## 7. Cross-Cutting Themes
 
 - **Separate control plane from data plane** (serving, training scheduler, feature registry) so management failures don't take down live traffic.
 - **Backpressure, admission control, and load shedding** protect every shared resource (serving queues, tool calls, feature stores).
