@@ -10,7 +10,7 @@
 - Vacations, weeks with holidays, year ends are excluded
 
 
-# DATA STRUCTURE AND ALGORITHM (40%)
+# DATA STRUCTURE AND ALGORITHM (50%)
 
 | Day | Time | Plan |
 |---|---|---|
@@ -90,7 +90,7 @@
 | Project Deepdive - Tier 1 |
 
 
-# SYSTEM DESIGN (25%)
+# SYSTEM DESIGN (20%)
 
 | Day | Time | Plan |
 |---|---|---|
@@ -105,9 +105,9 @@
 
 ## Table of Contents
 
-1. [Distributed Job Scheduler / Message Queue - Tier 2](#1-distributed-job-scheduler)
-2. [Distributed Cache / KV Store - Tier 2](#2-distributed-cache)
-3. [Distributed Rate Limiter / API Gateway - Tier 1](#3-distributed-rate-limiter)
+1. [Distributed Job Scheduler & Message Queue - Tier 2](#1-distributed-job-scheduler)
+2. [Distributed Cache & KV Store - Tier 2](#2-distributed-cache)
+3. [Distributed Rate Limiter & API Gateway - Tier 1](#3-distributed-rate-limiter)
 4. [Metrics, Logging, and Monitoring Platform - Tier 1](#4-metrics-logging-and-monitoring-platform)
 5. [Cross-Cutting Themes](#5-cross-cutting-themes)
 
@@ -290,7 +290,7 @@
 
 
 
-# MACHINE LEARNING SYSTEM DESIGN (25%)
+# MACHINE LEARNING SYSTEM DESIGN (20%)
 
 | Day | Time | Plan |
 |---|---|---|
@@ -310,7 +310,7 @@
 3. [Agentic Platform - Tier 1](#3-agentic-platform)
 4. [Model Training - Tier 2](#4-model-training)
 5. [Feature Store - Tier 2](#5-feature-store)
-6. [Chatbot/ RAG / Knowledge Base - Tier 2]
+6. [Chatbot & RAG & Knowledge Base - Tier 2]
 7. [Cross-Cutting Themes](#7-cross-cutting-themes)
 
 ---
@@ -594,7 +594,7 @@ Same as the API gateway, plus LLM-specific concerns.
 
 ---
 
-## 6. Chatbot / RAG / Knowledge Base
+## 6. Chatbot & RAG & Knowledge Base
 
 **Core model:** An **ingestion pipeline** turns documents into searchable chunks. A **query path** retrieves relevant chunks, builds a prompt within a token budget, calls the LLM, and returns an answer with citations.
 
