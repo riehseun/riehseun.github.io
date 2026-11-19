@@ -174,6 +174,31 @@ Fall: 10/4, ~10/11~, 10/18, 10/25, 11/1, 11/8, 11/15, 11/22, 11/29, 12/6, 12/13,
 
 ---
 
+## 2. Distributed KV Store (Dynamo-style)
+
+**Core model:** Keys are partitioned across nodes with consistent hashing. Each key is replicated to N nodes. Reads and writes use tunable quorums. Conflicts are resolved with versioning. This is the AP-leaning design, and it contrasts with a Raft-based CP store (below).
+
+| Topic | Details |
+|---|---|
+| Partitioning | Consistent hashing with virtual nodes for even load and easy rebalancing. A coordinator (any node or a client library) routes by key. |
+| Replication | Each key lives on N successive nodes (the preference list), ideally across failure domains (racks, zones). |
+| Tunable quorums | W acknowledgements for writes, R for reads. `R + W > N` gives overlap (strong-ish). `W = 1` is fast and risks loss, `R = 1` is fast and risks staleness. |
+| Failure handling | **Sloppy quorum and hinted handoff:** if a replica is down, another node accepts the write and hands it back later. Improves availability, weakens consistency. |
+| Conflict resolution | Last-write-wins (simple, can lose writes, needs good clocks) vs. vector clocks (detect concurrent writes, push reconciliation to the app) vs. CRDTs (merge automatically). |
+| Anti-entropy | **Read repair** fixes stale replicas on reads. **Merkle trees** compare replicas efficiently in the background. |
+| Membership and failure detection | Gossip protocol for membership. Accrual failure detectors (e.g. phi accrual) avoid hard timeouts. |
+| Storage engine | **LSM tree:** write-ahead log, memtable, immutable SSTables, compaction, bloom filters to skip files. Good for writes. B-tree engines favor reads and in-place updates. |
+| Compaction and tombstones | Deletes write tombstones that must live long enough to reach all replicas, or deleted data reappears. Watch write and space amplification. |
+| TTL | Store expiry with the value, clean up in compaction. |
+| Hot keys and hot partitions | Split hot ranges, replicate more, add a front-line cache, salt keys. |
+| Rebalancing | Move virtual nodes gradually, throttle streaming to protect foreground traffic. |
+| Multi-region | Local quorums per region with async cross-region replication, or a globally consistent store (higher latency). Decide per dataset. |
+| Operations | Rolling upgrades, backups and snapshots, capacity monitoring, repair schedules. |
+
+**CP alternative (etcd / Spanner-style):** data is range-partitioned, each range is a Raft group with a leader, writes go through the leader and commit by majority, ranges split when large, and cross-range transactions need two-phase commit. Stronger consistency, higher write latency, and a minority partition becomes unavailable. State clearly which you choose and why.
+
+---
+
 ## 3. Distributed Rate Limiter
 
 ### Algorithms
@@ -198,6 +223,32 @@ Fall: 10/4, ~10/11~, 10/18, 10/25, 11/1, 11/8, 11/15, 11/22, 11/29, 12/6, 12/13,
 | Hot keys | One abusive key can overload a Redis shard. Mitigate with local pre-aggregation, key sharding with split counters, or edge-level blocking. |
 | Redis failover | Async replication can lose recent counts, causing brief over-admission (usually acceptable). Plan for reconnect storms; use Redis Cluster for scale. |
 | Burst handling | Tune bucket capacity vs. refill rate. Consider separate burst and sustained limits. Add queueing or load shedding for overflow. |
+
+---
+
+## 3. API Gateway
+
+**Core model:** A **data plane** (stateless proxies at the edge) handles every request. A **control plane** stores routes, policies, and keys and pushes configuration to the proxies. Keep them separate so a control-plane outage doesn't stop traffic.
+
+| Topic | Details |
+|---|---|
+| Routing | Match by host, path, method, headers. Version routing and weighted routing for canary and blue/green. |
+| Authentication | Validate JWTs locally (cached keys), API keys (hashed, looked up in a cache), mTLS for service-to-service. Check expiry, audience, and scopes. |
+| Authorization | Coarse checks at the gateway (scopes, tenant), fine-grained checks in the service. |
+| Rate limiting and quotas | Local counters plus a central store for global limits (see the rate limiter notes). Return `429` with `Retry-After`. |
+| TLS termination | Terminate at the edge, re-encrypt to backends if required. Automate certificate rotation. |
+| Load balancing and health checks | Round robin, least requests, consistent hashing. Active and passive health checks, outlier ejection. |
+| Retries and timeouts | Retry only idempotent calls, with a retry budget and jitter. Set per-route timeouts and propagate deadlines. Avoid retry amplification. |
+| Circuit breaking | Trip on error rate or latency, fail fast, probe to recover. |
+| Request and response transformation | Header rewrites, payload limits, protocol translation (REST to gRPC). Keep heavy logic out of the hot path. |
+| Caching | Cache idempotent GETs with correct keys, `Vary`, and TTL. Invalidate on writes where needed. |
+| Config distribution | Push updates (xDS-style) or poll. Roll out gradually, validate before applying, and support rollback. Proxies keep serving with last-known-good config if the control plane is down. |
+| Observability | Access logs, metrics (RED: rate, errors, duration), distributed tracing with propagated trace IDs. Sample logs at high volume. |
+| Security | WAF rules, DDoS protection at the edge, payload size limits, bot detection, secret handling. |
+| Multi-tenancy | Per-tenant limits, isolation of noisy tenants, per-tenant metrics and billing. |
+| Extensibility | Plugins or filters (Lua, WASM), sandboxed and time-limited so a bad plugin can't break the proxy. |
+| High availability | Stateless proxies across zones, health-checked by a load balancer or anycast/DNS, rolling updates with connection draining. |
+| Latency budget | The gateway should add a few milliseconds. Avoid synchronous calls to remote services on the hot path. |
 
 ---
 
@@ -362,6 +413,24 @@ Fall: 10/4, ~10/11~, 10/18, 10/25, 11/1, 11/8, 11/15, 11/22, 11/29, 12/6, 12/13,
 
 ---
 
+## 2. LLM Gateway (variant)
+
+Same as the API gateway, plus LLM-specific concerns.
+
+| Topic | Details |
+|---|---|
+| Token-based limits | Estimate input tokens before the call and reserve budget, then reconcile with actual usage afterward. Limits per tenant, key, and model, plus concurrency limits. |
+| Streaming | Pass through server-sent events without buffering. Handle client disconnects by cancelling upstream generation. |
+| Routing and failover | Route by model alias, cost, latency, or capacity. Fail over across providers or regions, with attention to output differences. |
+| Model aliases and versioning | Stable names that map to versions, with canary rollout and pinned versions for customers who need them. |
+| Caching | Exact-match response cache, prompt-prefix cache, optional semantic cache (with correctness caveats). Never cache across tenants unless safe. |
+| Budgets and cost attribution | Per-team and per-key spend caps, alerts, and usage reporting by model and feature. |
+| Logging | Log metadata always. Log prompts and responses only with consent, retention limits, and PII redaction. |
+| Safety | Input and output filters, provider-side moderation, abuse detection. |
+| Overload | Queue with priorities, shed low-priority traffic first, `429` with `Retry-After`, protect providers' rate limits. |
+
+---
+
 ## 3. Agentic Platform
 
 **Core model:** An agent loop (plan → call model → choose tool → execute → observe → repeat) runs inside a durable orchestration layer with tools, memory, evaluation, and guardrails around it.
@@ -522,6 +591,46 @@ Fall: 10/4, ~10/11~, 10/18, 10/25, 11/1, 11/8, 11/15, 11/22, 11/29, 12/6, 12/13,
 | Partitioning and replication | Partition by entity key for even distribution. Replicate for availability and read scaling, and weigh consistency vs. latency. |
 | Multi-tenant isolation | Namespaces, quotas, and access control per team. Protect shared stores from noisy tenants. |
 | Storage cost optimization | Tier hot and cold data, TTL for online features, compact and compress offline data, and drop unused features. |
+
+---
+
+## 6. Chatbot / RAG / Knowledge Base
+
+**Core model:** An **ingestion pipeline** turns documents into searchable chunks. A **query path** retrieves relevant chunks, builds a prompt within a token budget, calls the LLM, and returns an answer with citations.
+
+### Ingestion
+
+| Topic | Details |
+|---|---|
+| Parsing and cleaning | Extract text from PDFs, HTML, and office files. Preserve structure (headings, tables). Handle OCR and junk. |
+| Chunking | Fixed-size with overlap, or structure-aware (by heading or paragraph). Chunk size trades precision against context. Store metadata (source, section, ACLs, timestamps). |
+| Embedding | Batch embedding jobs, queue-based with retries. Version the embedding model. Changing it means **re-embedding everything**, so plan for dual indexes during migration. |
+| Indexing | Vector index plus a keyword index (BM25). Write path should be idempotent. |
+| Freshness | Incremental updates by change detection (hash or modified time), deletions via tombstones, and reindex on schedule or event. |
+
+### Retrieval and Generation
+
+| Topic | Details |
+|---|---|
+| Vector indexes | HNSW (high recall, memory-heavy), IVF-PQ (compressed, less accurate, scales cheaply). Tune recall vs. latency. |
+| Hybrid search | Combine vector and keyword results (for example reciprocal rank fusion) to cover exact terms and semantics. |
+| Reranking | A cross-encoder reranks the top 50-100 candidates down to a handful. Better quality, extra latency. |
+| Query processing | Query rewriting, expansion, and decomposition for multi-part questions. Conversation history for follow-ups. |
+| Access control | Enforce per-user document permissions at retrieval time. **Pre-filter** by ACL metadata is safest. Post-filtering can leak existence and wastes recall. Never rely on the prompt to hide data. |
+| Context assembly | Fit chunks into the token budget, order by relevance, dedupe near-duplicates, include citations and source IDs. |
+| Generation | Instruct the model to answer only from context and say when it doesn't know. Stream responses. |
+| Caching | Cache embeddings, retrieval results for frequent queries, and prompt prefixes. Respect ACLs in cache keys. |
+
+### Quality, Safety, and Scale
+
+| Topic | Details |
+|---|---|
+| Evaluation | Retrieval: recall@k, MRR. Generation: faithfulness (grounded in context), answer relevance, citation accuracy. Build a labeled dataset from real queries. Run on every change. |
+| Failure modes | Stale or conflicting documents, missed retrievals, over-long context, hallucinated citations, ambiguous queries. Add "no answer" behavior and fallbacks. |
+| Prompt injection | Documents are untrusted. Treat retrieved text as data, not instructions. Restrict tool use and sensitive actions after retrieval. |
+| Multi-tenancy | Per-tenant indexes (strong isolation, more overhead) or a shared index with tenant filters (cheaper, riskier). Per-tenant quotas. |
+| Feedback loop | Collect thumbs up/down and unanswered queries to improve content and ranking. |
+| Latency and cost | Budget per stage (embed, search, rerank, generate). Generation dominates. Use smaller models for rewriting and reranking. |
 
 ---
 
