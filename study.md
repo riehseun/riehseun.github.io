@@ -14,7 +14,7 @@
 
 | Day | Time | Plan |
 |---|---|---|
-| MRWRF | 7AM - 9AM | pick 3 Type 1 + 1 Type 2 per day |
+| MTWRF | 7AM - 9AM | pick 3 Type 1 + 1 Type 2 per day |
 
 ## Rules
 - If failed problems are in the backlog and due on that day, do them first
