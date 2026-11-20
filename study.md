@@ -20,7 +20,7 @@
 - If failed problems are in the backlog and due on that day, do them first
 - For new problems, pick a topic first (weighted by tier - 50/35/15/0), then randomly pick unsolved problem inside that row
 - Failed problems are backlogged and retried exactly a week later
-- Failed if the problem does not pass Leetcode submit or overtime (15 mins for easy, 30 mins for medium, 45 mins for hard)
+- Failed if the problem does not pass Leetcode submit or overtime (15 mins for easy/medium, 30 mins for hard)
 
 ## Type Ⅰ
 | Topic | Problems |
