@@ -14,7 +14,7 @@
 
 | Day | Time | Plan |
 |---|---|---|
-| MTWRF | 7AM - 9AM | pick 3 Type 1 + 1 Type 2 per day |
+| MTWRF | 7AM - 9AM | pick 3 Type Ⅰ + 1 Type II per day |
 
 ## Rules
 - If failed problems are in the backlog and due on that day, do them first
@@ -22,7 +22,7 @@
 - Failed problems are backlogged and retried exactly a week later
 - Failed if the problem does not pass Leetcode submit or overtime (15 mins for easy, 30 mins for medium, 45 mins for hard)
 
-## Type 1
+## Type Ⅰ
 | Topic | Problems |
 |---|---:|
 | Arrays & Hashing (Prefix Sum, String) | Tier 1 - Neet 250 |
@@ -44,7 +44,7 @@
 | Math & Geometry | Tier 4 / Out of Scope |
 | Bit Manipulation | Tier 4 / Out of Scope |
 
-## Type 2
+## Type II
 | Topic | Problems |
 |---|---:|
 | Rate limiter | Tier 1 - 359, 362, 933, 346, 1797 |
@@ -74,7 +74,7 @@
 - Use recent stories only Autodesk (2026.10-Presnet), TD Securities (2025.08-2026.09), Layer6 AI (2021.01-2025.07)
 
 ## Theme
-| Topic |
+| Theme |
 |---|
 | Ownership - Tier 1 |
 | Conflict - Tier 1 |
