@@ -1,13 +1,11 @@
 # Schedule 2027
 
-- Winter: 1/4, 1/11, 1/18, 1/25, 2/1, 2/8, 2/15, 2/22, ~3/1~, ~3/8~, ~3/15~, ~3/22~, ~3/29~ (7 weeks to work, 5 weeks vacation)
-- Spring: 4/5, 4/12, 4/19, 4/26, 5/3, 5/10, 5/17, ~5/24~, 5/31, 6/7, 6/14, 6/21, ~6/28~ (11 weeks to work, 2 weeks vacation)
-- Summer: 7/5, 7/12, 7/19, 7/26, ~8/2~, 8/9, 8/16, 8/23, 8/30, ~9/6~, 9/13, 9/20, 9/27 (11 weeks to work, 2 weeks vacation)
-- Fall: 10/4, ~10/11~, 10/18, 10/25, 11/1, 11/8, 11/15, 11/22, 11/29, 12/6, 12/13, ~12/20~, ~12/27~ (10 weeks to work, 3 week vacation)
-
-## Rules
-- Quarterly iteration
-- Vacations, weeks with holidays, year ends are excluded
+| Quarter | Weeks | Work weeks | Notes |
+|---|---|---|---|
+| Winter | 1/4, 1/11, 1/18, 1/25, 2/1, 2/8, 2/15, 2/22 | 8 | 3/1, 3/8, 3/15, 3/22, 3/29 off Vacation |
+| Spring | 4/5, 4/12, 4/19, 4/26, 5/3, 5/10, 5/17, 5/24, 5/31, 6/7, 6/14, 6/21, 6/28 | 13 | N/A |
+| Summer | 7/5, 7/12, 7/19, 7/26, 8/2, 8/9, 8/16, 8/23, 8/30, 9/6, 9/13, 9/20, 9/27 | 13 | N/A |
+| Fall | 10/4, 10/11, 10/18, 10/25, 11/1, 11/8, 11/15, 11/22, 11/29, 12/6, 12/13 | 11 | 12/20, 12/27 off Chrismas |
 
 
 # DATA STRUCTURE AND ALGORITHM (50%)
@@ -17,48 +15,49 @@
 | MTWRF | 7AM - 9AM | pick 3 Type Ⅰ + 1 Type II per day |
 
 ## Rules
+- Python is the choice of language
 - If failed problems are in the backlog and due on that day, do them first
 - For new problems, pick a topic first (weighted by tier - 50/35/15/0), then randomly pick unsolved problem inside that row
 - Failed problems are backlogged and retried exactly a week later
 - Failed if the problem does not pass Leetcode submit or overtime (15 mins for easy/medium, 30 mins for hard)
 
 ## Type Ⅰ
-| Topic | Problems |
-|---|---:|
-| Arrays & Hashing (Prefix Sum, String) | Tier 1 - Neet 250 |
-| Two Pointers | Tier 1 - Neet 250 |
-| Stack | Tier 2 - Neet 150 |
-| Binary Search | Tier 1 - Neet 250 |
-| Sliding Window | Tier 1 - Neet 250 |
-| Linked List | Tier 2 - Neet 150 |
-| Tree (DFS, BFS) | Tier 1 - Neet 250 |
-| Heap | Tier 1 - Neet 250 |
-| Graph (DFS, BFS, Topological Sort, Union Find) | Tier 1 - Neet 250 |
-| 1D DP | Tier 2 - Neet 150 |
-| Interval | Tier 1 - Neet 250 |
-| Greedy | Tier 2 - Neet 150 |
-| Advanced Graph (Dijkstra, Bellman-Ford, Prim, Hierholzer) | Tier 3 - Neet 150 |
-| 2D DP | Tier 3 - Neet 150 |
-| Trie | Tier 3 - Neet 150 |
-| Backtracking | Tier 3 - Neet 150 |
-| Math & Geometry | Tier 4 / Out of Scope |
-| Bit Manipulation | Tier 4 / Out of Scope |
+| Topic | Tier | Problems |
+|---|---|---:|
+| Arrays & Hashing (Prefix Sum, String) | 1 | Neet 250 |
+| Two Pointers | 1 | Neet 250 |
+| Stack | 2 | Neet 150 |
+| Binary Search | 1 | Neet 250 |
+| Sliding Window | 1 | Neet 250 |
+| Linked List | 2 | Neet 150 |
+| Tree (DFS, BFS) | 1 | Neet 250 |
+| Heap | 1 | Neet 250 |
+| Graph (DFS, BFS, Topological Sort, Union Find) | 1 | Neet 250 |
+| 1D DP | 2 | Neet 150 |
+| Interval | 1 | Neet 250 |
+| Greedy | 2 | Neet 150 |
+| Advanced Graph (Dijkstra, Bellman-Ford, Prim, Hierholzer) | 3 | Neet 150 |
+| 2D DP | 3 | Neet 150 |
+| Trie | 3 | Neet 150 |
+| Backtracking | 3 | Neet 150 |
+| Math & Geometry | 4 | Out of Scope |
+| Bit Manipulation | 4 | Out of Scope |
 
 ## Type II
-| Topic | Problems |
-|---|---:|
-| Rate limiter | Tier 1 - 359, 362, 933, 346, 1797 |
-| LRU cache with TTL, thread-safe | Tier 1 - 146, 460 |
-| Micro-batching collector | Tier 2 |
-| DAG task executor | Tier 1 - 207, 210, 1136, 2050, 2115, 269 |
-| Worker pool / bounded queue | Tier 1 - 1188, 1114, 1115, 1116, 1195, 1226, 1242 |
-| KV store with transactions | Tier 2 - 588, 1166, 2043, 380, 1146 |
-| Time-versioned KV store | Tier 2 - 981, 2034 |
-| Retry, backoff, circuit breaker | Tier 2 |
-| Request router / load balancer | Tier 2 - 1882, 1606, 528, 2402 |
-| Log / metrics aggregator | Tier 2 - 347, 692, 295, 480, 239, 1396, 636, 635 |
-| Job scheduler with priorities and resources | Tier 1 - 621, 1834, 253, 1235, 2365, 2502, 3408 |
-| Debug a broken codebase | Tier 2 |
+| Topic | Tier | Problems |
+|---|---|---:|
+| Rate limiter | 1 | 359, 362, 933, 346, 1797 |
+| LRU cache with TTL, thread-safe | 1 | 146, 460 |
+| Micro-batching collector | 2 | |
+| DAG task executor | 1 | 207, 210, 1136, 2050, 2115, 269 |
+| Worker pool / bounded queue | 1 | 1188, 1114, 1115, 1116, 1195, 1226, 1242 |
+| KV store with transactions | 2 | 588, 1166, 2043, 380, 1146 |
+| Time-versioned KV store | 2 | 981, 2034 |
+| Retry, backoff, circuit breaker | 2 |
+| Request router / load balancer | 2 | 1882, 1606, 528, 2402 |
+| Log / metrics aggregator | 2 | 347, 692, 295, 480, 239, 1396, 636, 635 |
+| Job scheduler with priorities and resources | 1 | 621, 1834, 253, 1235, 2365, 2502, 3408 |
+| Debug a broken codebase | 2 |
 
 
 # BEHAVIORAL (10%)
@@ -68,26 +67,28 @@
 | M | 5PM - 7PM | practice 4 themes per day |
 
 ## Rules
+- If Monday is a holiday, skip
 - Pick a topic (weighted by tier - 60/40)
 - Use max 10 stories to cover all topics
 - Use stories in different angle for different topics
 - Use recent stories only Autodesk (2026.10-Presnet), TD Securities (2025.08-2026.09), Layer6 AI (2021.01-2025.07)
 
 ## Theme
-| Theme |
-|---|
-| Ownership - Tier 1 |
-| Conflict - Tier 1 |
-| Leadership / Influence without authority - Tier 2 |
-| Mentorship - Tier 2 |
-| Ambiguity - Tier 1 |
-| Challenge - Tier 1 |
-| Impact - Tier 1 |
-| Failure - Tier 2 |
-| Risk - Tier 2 | 
-| Trade-off - Tier 2 |
-| Production Incident - Tier 2 |
-| Project Deepdive - Tier 1 |
+| Theme | Tier |
+|---|---|
+| Ownership | 1 |
+| Conflict | 1 |
+| Leadership / influence without authority | 1 |
+| Ambiguity | 1 |
+| Challenge | 1 |
+| Impact | 1 |
+| Failure | 1 |
+| Project deep dive | 1 |
+| Motivation (why looking, why this company, why AI infra) | 1 |
+| Mentorship | 2 |
+| Risk | 2 |
+| Trade-off | 2 |
+| Production incident and postmortem | 2 |
 
 
 # SYSTEM DESIGN (20%)

@@ -1,3 +1,13 @@
+# Schedule 2027
+
+| Quarter | Weeks | Work weeks | Notes |
+|---|---|---|---|
+| Winter | 1/4, 1/11, 1/18, 1/25, 2/1, 2/8, 2/22 | 7 | 2/15 off Holiday, 3/1, 3/8, 3/15, 3/22, 3/29 off Vacation |
+| Spring | 4/5, 4/12, 4/19, 4/26, 5/3, 5/10, 5/17, 5/31, 6/7, 6/14, 6/21 | 11 | 5/24, 6/28 off Holiday |
+| Summer | 7/5, 7/12, 7/19, 7/26, 8/9, 8/16, 8/23, 8/30, 9/13, 9/20, 9/27 | 11 | 8/2, 9/6 off Holiday |
+| Fall | 10/4, 10/18, 10/25, 11/1, 11/8, 11/15, 11/22, 11/29, 12/6, 12/13 | 10 | 10/11 off Holiday, 12/20, 12/27 off Christmas |
+
+
 # MACHINE LEARNING
 
 | Day | Time | Plan |
@@ -13,6 +23,7 @@
 | CME296 - Tier 2 |
 | CS224N - Tier 3 |
 | CS230 - Tier 3 |
+
 
 # ORGANIZE
 
