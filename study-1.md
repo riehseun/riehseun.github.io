@@ -21,19 +21,19 @@
 - Last quarter is reserved for previewing additional problems for the next year
 
 
-# DATA STRUCTURE AND ALGORITHM (50%)
+# DATA STRUCTURE AND ALGORITHM (40%)
 
 | Day | Time | Plan |
 |---|---|---|
-| MTWRF | 7AM - 9AM | pick 3 Type Ⅰ + 1 Type II per day |
+| TWRF | 7AM - 9AM | 3 problems per day |
 
 ## Progression
 | Year | Plan |
 |---|---|
-| 2027 | Neet 150 + Type II |
-| 2028 | Neet 150 + Type II |
-| 2029 | Neet 250 + Alphabet 75 + Type II |
-| 2030 | Neet 250 + Alphabet 150 + Type II |
+| 2027 | Neet 150 |
+| 2028 | Neet 250 |
+| 2029 | Neet 250 + Alphabet 75 |
+| 2030 | Neet 250 + Alphabet 150 |
 
 ## Rules
 - Python is the choice of language
@@ -45,7 +45,7 @@
 - Failed problems are reviewed and right solution is covered right after
 - Failed problems are backlogged and retried exactly a week later
 
-## Type Ⅰ
+## Topics
 | Topic | Tier | Problems |
 |---|---|---:|
 | Arrays & Hashing (Prefix Sum, String) | 1 | Blind 75 |
@@ -67,28 +67,55 @@
 | Math & Geometry | 4 | Out of Scope |
 | Bit Manipulation | 4 | Out of Scope |
 
-## Type II
+
+## SOFTWARE ENGINEERING (10%)
+
+| Day | Time | Plan |
+|---|---|---|
+| M | 7AM - 9AM | 2 problem per day |
+
+## Progression
+| Year | Plan |
+|---|---|
+| 2027 | 11 topics + debug broken codebase |
+| 2028 | 11 topics + debug broken codebase |
+| 2029 | 11 topics + debug broken codebase |
+| 2030 | 11 topics + debug broken codebase |
+
+## Rules
+- If Monday is a holiday, skip
+- Pick a topic (weighted by tier - 60/40)
+- Use max 10 stories to cover all topics
+- Use stories in different angle for different topics
+- Use recent stories only Autodesk (2026.10-Presnet), TD Securities (2025.08-2026.09), Layer6 AI (2021.01-2025.07)
+
+## Fails
+- Definition: if the problem does not pass Leetcode submit or overtime (15 mins for easy/medium, 30 mins for hard)
+- If failed problems are in the backlog and due on that day, do them first
+- Failed problems are reviewed and right solution is covered right after
+- Failed problems are backlogged and retried exactly a week later
+
+## Topics
 | Topic | Tier | Problems |
 |---|---|---:|
-| Rate limiter | 1 | 359, 362, 933, 346, 1797 |
-| LRU cache with TTL, thread-safe | 1 | 146, 460 |
+| Rate limiter | 1 | Leet 359, 362, 933, 346, 1797 |
+| LRU cache with TTL, thread-safe | 1 | Leet 146, 460 |
 | Micro-batching collector | 2 | |
-| DAG task executor | 1 | 207, 210, 1136, 2050, 2115, 269 |
-| Worker pool / bounded queue | 1 | 1188, 1114, 1115, 1116, 1195, 1226, 1242 |
-| KV store with transactions | 2 | 588, 1166, 2043, 380, 1146 |
-| Time-versioned KV store | 2 | 981, 2034 |
+| DAG task executor | 1 | Leet 207, 210, 1136, 2050, 2115, 269 |
+| Worker pool / bounded queue | 1 | Leet 1188, 1114, 1115, 1116, 1195, 1226, 1242 |
+| KV store with transactions | 2 | Leet 588, 1166, 2043, 380, 1146 |
+| Time-versioned KV store | 2 | Leet 981, 2034 |
 | Retry, backoff, circuit breaker | 2 |
-| Request router / load balancer | 2 | 1882, 1606, 528, 2402 |
-| Log / metrics aggregator | 2 | 347, 692, 295, 480, 239, 1396, 636, 635 |
-| Job scheduler with priorities and resources | 1 | 621, 1834, 253, 1235, 2365, 2502, 3408 |
-| Debug a broken codebase | 2 |
+| Request router / load balancer | 2 | Leet 1882, 1606, 528, 2402 |
+| Log / metrics aggregator | 2 | Leet 347, 692, 295, 480, 239, 1396, 636, 635 |
+| Job scheduler with priorities and resources | 1 | Leet 621, 1834, 253, 1235, 2365, 2502, 3408 |
 
 
 # BEHAVIORAL (10%)
 
 | Day | Time | Plan |
 |---|---|---|
-| M | 5PM - 7PM | practice 4 themes per day |
+| M | 5PM - 7PM | 4 themes per day |
 
 ## Progression
 | Year | Plan |
@@ -132,7 +159,7 @@
 
 | Day | Time | Plan |
 |---|---|---|
-| WF | 5PM - 7PM | practice 1 problem per day |
+| WF | 5PM - 7PM | 1 problem per day |
 
 ## Progression
 | Year | Plan |
@@ -151,7 +178,7 @@
 - Failed problems are reviewed and right solution is covered right after
 - Failed problems are backlogged and retried exactly a week later
 
-## Table of Contents
+## Topics
 
 1. [Distributed Job Scheduler & Message Queue - Tier 2](#1-distributed-job-scheduler)
 2. [Distributed Cache & KV Store - Tier 2](#2-distributed-cache)
@@ -341,7 +368,7 @@
 
 | Day | Time | Plan |
 |---|---|---|
-| TR | practice 1 problem per day |
+| TR | 1 problem per day |
 
 ## Progression
 | Year | Plan |
