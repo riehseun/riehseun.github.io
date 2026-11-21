@@ -1,4 +1,6 @@
-# Schedule 2027
+# Schedule 
+
+## 2027
 
 | Quarter | Weeks | Work weeks | Notes |
 |---|---|---|---|
@@ -7,17 +9,7 @@
 | Summer | 7/5, 7/12, 7/19, 7/26, 8/9, 8/16, 8/23, 8/30, 9/13, 9/20, 9/27 | 11 | 8/2, 9/6 off Holiday |
 | Fall | 10/4, 10/18, 10/25, 11/1, 11/8, 11/15, 11/22, 11/29, 12/6, 12/13 | 10 | 10/11 off Holiday, 12/20, 12/27 off Christmas |
 
-
-# Schedule 2028
-
-| Quarter | Weeks | Work weeks | Notes |
-|---|---|---|---|
-| Winter | TBD | TBD | N/A |
-| Spring | TBD | TBD | N/A |
-| Summer | TBD | TBD | N/A |
-| Fall | TBD | TBD | N/A |
-
-# Schedule 2029
+## 2028 - 2030
 
 | Quarter | Weeks | Work weeks | Notes |
 |---|---|---|---|
@@ -25,55 +17,6 @@
 | Spring | TBD | TBD | N/A |
 | Summer | TBD | TBD | N/A |
 | Fall | TBD | TBD | N/A |
-
-# Schedule 2030
-
-| Quarter | Weeks | Work weeks | Notes |
-|---|---|---|---|
-| Winter | TBD | TBD | N/A |
-| Spring | TBD | TBD | N/A |
-| Summer | TBD | TBD | N/A |
-| Fall | TBD | TBD | N/A |
-
-
-# DATA STRUCTURE AND ALGORITHM
-
-| Year | Plan |
-|---|---|
-| 2027 | Neet 150 + Type II |
-| 2028 | Neet 150 + Type II |
-| 2029 | Neet 250 + Alphabet 75 + Type II |
-| 2030 | Neet 250 + Alphabet 150 + Type II |
-
-
-# BEHAVIORAL
-
-| Year | Plan |
-|---|---|
-| 2027 | 12 Themes |
-| 2028 | 12 Themes |
-| 2029 | 12 Themes |
-| 2030 | 12 Themes |
-
-
-# SYSTEM DESIGN
-
-| Year | Plan |
-|---|---|
-| 2027 | Infra Design (4 problems) |
-| 2028 | Infra Design (6 problems) |
-| 2029 | Infra Design (6 problems) + Product Design (2 problems) |
-| 2030 | Infra Design (6 problems) + Product Design (4 problems) |
-
-
-# MACHINE LEARNING SYSTEM DESIGN
-
-| Year | Plan |
-|---|---|
-| 2027 | Infra Design (6 problems) |
-| 2028 | Infra Design (6 problems) + Product Design (2 problems) |
-| 2029 | Infra Design (6 problems) + Product Design (4 problems) |
-| 2030 | Infra Design (6 problems) + Product Design (6 problems) |
 
 
 # MACHINE LEARNING

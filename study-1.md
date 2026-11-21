@@ -1,5 +1,6 @@
-# Schedule 2027
+# SCHEDULE
 
+## 2027
 | Quarter | Weeks | Work weeks | Notes |
 |---|---|---|---|
 | Winter | 1/4, 1/11, 1/18, 1/25, 2/1, 2/8, 2/15, 2/22 | 8 | 3/1, 3/8, 3/15, 3/22, 3/29 off Vacation |
@@ -7,16 +8,36 @@
 | Summer | 7/5, 7/12, 7/19, 7/26, 8/2, 8/9, 8/16, 8/23, 8/30, 9/6, 9/13, 9/20, 9/27 | 13 | N/A |
 | Fall | 10/4, 10/11, 10/18, 10/25, 11/1, 11/8, 11/15, 11/22, 11/29, 12/6, 12/13 | 11 | 12/20, 12/27 off Chrismas |
 
+## 2028 - 2030
+| Quarter | Weeks | Work weeks | Notes |
+|---|---|---|---|
+| Winter | TBD | TBD | N/A |
+| Spring | TBD | TBD | N/A |
+| Summer | TBD | TBD | N/A |
+| Fall | TBD | TBD | N/A |
+
+## Rules
+- Cleared problems reset every quarter
+- Last quarter is reserved for previewing additional problems for the next year
+
+
 # DATA STRUCTURE AND ALGORITHM (50%)
 
 | Day | Time | Plan |
 |---|---|---|
 | MTWRF | 7AM - 9AM | pick 3 Type Ⅰ + 1 Type II per day |
 
+## Progression
+| Year | Plan |
+|---|---|
+| 2027 | Neet 150 + Type II |
+| 2028 | Neet 150 + Type II |
+| 2029 | Neet 250 + Alphabet 75 + Type II |
+| 2030 | Neet 250 + Alphabet 150 + Type II |
+
 ## Rules
 - Python is the choice of language
 - Pick a topic first (weighted by tier - 50/35/15/0), then randomly pick unsolved problem inside that row
-- Cleared problems reset every quarter
 
 ## Fails
 - Definition: if the problem does not pass Leetcode submit or overtime (15 mins for easy/medium, 30 mins for hard)
@@ -69,13 +90,20 @@
 |---|---|---|
 | M | 5PM - 7PM | practice 4 themes per day |
 
+## Progression
+| Year | Plan |
+|---|---|
+| 2027 | 12 Themes |
+| 2028 | 12 Themes |
+| 2029 | 12 Themes |
+| 2030 | 12 Themes |
+
 ## Rules
 - If Monday is a holiday, skip
 - Pick a topic (weighted by tier - 60/40)
 - Use max 10 stories to cover all topics
 - Use stories in different angle for different topics
 - Use recent stories only Autodesk (2026.10-Presnet), TD Securities (2025.08-2026.09), Layer6 AI (2021.01-2025.07)
-- Cleared problems reset every quarter
 
 ## Fails
 - Definition: if the problem does not pass Claude grading over 8/10
@@ -106,9 +134,16 @@
 |---|---|---|
 | WF | 5PM - 7PM | practice 1 problem per day |
 
+## Progression
+| Year | Plan |
+|---|---|
+| 2027 | Infra Design (4 problems) |
+| 2028 | Infra Design (6 problems) |
+| 2029 | Infra Design (6 problems) + Product Design (2 problems) |
+| 2030 | Infra Design (6 problems) + Product Design (4 problems) |
+
 ## Rules
 - Pick a topic by tier weight - 60/40
-- Cleared problems reset every quarter
 
 ## Fails
 - Definition: if the problem does not pass Claude grading over 8/10
@@ -308,9 +343,16 @@
 |---|---|---|
 | TR | practice 1 problem per day |
 
+## Progression
+| Year | Plan |
+|---|---|
+| 2027 | Infra Design (6 problems) |
+| 2028 | Infra Design (6 problems) + Product Design (2 problems) |
+| 2029 | Infra Design (6 problems) + Product Design (4 problems) |
+| 2030 | Infra Design (6 problems) + Product Design (6 problems) |
+
 ## Rules
 - Pick a topic by tier weight - 60/40
-- Cleared problems reset every quarter
 
 ## Fails
 - Definition: if the problem does not pass Claude grading over 8/10
