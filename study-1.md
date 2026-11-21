@@ -16,6 +16,7 @@
 ## Rules
 - Python is the choice of language
 - Pick a topic first (weighted by tier - 50/35/15/0), then randomly pick unsolved problem inside that row
+- Cleared problems reset every quarter
 
 ## Fails
 - Definition: if the problem does not pass Leetcode submit or overtime (15 mins for easy/medium, 30 mins for hard)
@@ -74,6 +75,7 @@
 - Use max 10 stories to cover all topics
 - Use stories in different angle for different topics
 - Use recent stories only Autodesk (2026.10-Presnet), TD Securities (2025.08-2026.09), Layer6 AI (2021.01-2025.07)
+- Cleared problems reset every quarter
 
 ## Fails
 - Definition: if the problem does not pass Claude grading over 8/10
@@ -106,6 +108,7 @@
 
 ## Rules
 - Pick a topic by tier weight - 60/40
+- Cleared problems reset every quarter
 
 ## Fails
 - Definition: if the problem does not pass Claude grading over 8/10
@@ -307,6 +310,7 @@
 
 ## Rules
 - Pick a topic by tier weight - 60/40
+- Cleared problems reset every quarter
 
 ## Fails
 - Definition: if the problem does not pass Claude grading over 8/10
