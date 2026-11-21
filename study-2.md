@@ -25,6 +25,15 @@
 |---|---|---|
 | SS | 1PM - 7AM | 3 courses |
 
+## Progression
+| Year | Plan |
+|---|---|
+| 2027 | CS336, CS329Z, CME295 |
+| 2028 | CS336, CS329Z, CME295 + CME296 |
+| 2029 | CS336, CS329Z, CME295 + CME296 + CS224N, CS230 |
+| 2030 | CS336, CS329Z, CME295 + CME296 + CS224N, CS230 + CS221 |
+
+# Courses
 | Course | Tier |
 |---|---|
 | CS336 | 1 |

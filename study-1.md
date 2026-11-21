@@ -730,3 +730,24 @@ Same as the API gateway, plus LLM-specific concerns.
 - **Multi-tenant fairness and isolation** need quotas, priorities, and noisy-neighbor controls throughout.
 - **Training/serving consistency** (features, tokenizers, preprocessing) prevents silent quality bugs.
 - **Measure the right things:** SLO metrics, cost attribution, quality evals, and drift detection.
+
+
+# SD and MLSD (score each 1-5)
+
+| Dimension | What a 5 looks like |
+|---|---|
+| Requirements and scope | Clarified scale, SLOs, and out-of-scope items before designing |
+| Estimation | Sensible numbers (QPS, storage, GPU or memory), stated assumptions, used to drive decisions |
+| Architecture | Clear components, data flow, and API. Control plane and data plane separated where it matters |
+| Deep dive | Handled the hard parts at senior depth (for example leases and fencing, KV-cache paging, point-in-time joins) |
+| Failure modes and operations | Covered failures, recovery, monitoring, rollout, and cost |
+| Trade-offs and communication | Named alternatives and why, stayed organized, adapted to follow-ups |
+
+**Pass:** total at least 24/30 (80%) with no dimension below 3, **and** you answered at least 8 of 10 follow-up questions at a senior level.
+**Fail:** otherwise. Retry exactly a week later. After 3 failures, record the gap in a note and revisit in the first week of the next quarter.
+
+**Grader prompt (reuse every time)**
+
+You are a strict interviewer grading a senior (L5/E5) system design answer for [topic]. Score these six dimensions from 1 to 5: requirements and scope, estimation, architecture, deep dive, failure modes and operations, trade-offs and communication. Justify each score in one sentence, list the three biggest gaps, then ask 10 follow-up questions one at a time. After my answers, rate each answer pass or fail and give the total. Be critical. Do not give credit for things I did not say.
+
+Run the grader twice and take the lower score
