@@ -49,7 +49,7 @@
 
 | Day | Time | Plan |
 |---|---|---|
-| SS | 7PM | Best effort based |
+| SS | After 7PM | Best effort based |
 
 | TODO | Tier |
 |---|---|
@@ -59,3 +59,15 @@
 | Address (Job, Banks - TD / CIBC / SIM / EQ / TG / WS / US, Service Ontario - Driver / Health / Car Ownership, CRA, Family Doctor, Car Insurance - N/A, Amazon) | 3 |
 | ID (Passport 2036-04-14, Driver 2030-04-06, Health 2030-04-06, Nexus 2030-04-06) | 3 |
 | Computer (Format big one, sell old one) | 3 |
+
+
+# EXERCISE
+
+| Day | Time | Plan |
+|---|---|---|
+| MTWRFSS | After 7PM | Best effort based |
+
+| TODO | Tier |
+|---|---|
+| GYM: walking between 2-3 miles per hour at 12-15% incline | 1 |
+| GYM: running between 2-3 miles per hour at 12-15% incline | 2 |
