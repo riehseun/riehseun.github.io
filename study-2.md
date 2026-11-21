@@ -40,9 +40,9 @@
 
 | Year | Plan |
 |---|---|
-| 2027 | Blind 75 + Type II |
+| 2027 | Neet 150 + Type II |
 | 2028 | Neet 150 + Type II |
-| 2029 | Neet 250 + Type II |
+| 2029 | Neet 250 + Alphabet 75 + Type II |
 | 2030 | Neet 250 + Alphabet 150 + Type II |
 
 
@@ -90,6 +90,7 @@
 | CME296 | 2 |
 | CS224N | 3 |
 | CS230 | 3 |
+| CS221 | 3 |
 
 
 # ORGANIZE
@@ -98,11 +99,11 @@
 |---|---|---|
 | SS | 7PM | Best effort based |
 
-| TODO |
-|---|
-| Data (Password, Sketch, Kakaotalk, SD Card, Portable Disk, Google Drive, ICloud) - Tier 1 |
-| Documents (Paper, Electronic) - Tier 2 |
-| SMS Pictures (LinkedIn, Instagram, Turo, Airbnb, Facebook, Meet Up) - Tier 3 |
-| Address (Job, Banks - TD / CIBC / SIM / EQ / TG / WS / US, Service Ontario - Driver / Health / Car Ownership, CRA, Family Doctor, Car Insurance - N/A, Amazon) - Tier 3 |
-| ID (Passport 2036-04-14, Driver 2030-04-06, Health 2030-04-06, Nexus 2030-04-06) - Tier 3 |
-| Computer (Format big one, sell old one) - Tier 3 |
+| TODO | Tier |
+|---|---|
+| Data (Password, Sketch, Kakaotalk, SD Card, Portable Disk, Google Drive, ICloud) | 1 |
+| Documents (Paper, Electronic) | 2 |
+| SMS Pictures (LinkedIn, Instagram, Turo, Airbnb, Facebook, Meet Up) | 3 |
+| Address (Job, Banks - TD / CIBC / SIM / EQ / TG / WS / US, Service Ontario - Driver / Health / Car Ownership, CRA, Family Doctor, Car Insurance - N/A, Amazon) | 3 |
+| ID (Passport 2036-04-14, Driver 2030-04-06, Health 2030-04-06, Nexus 2030-04-06) | 3 |
+| Computer (Format big one, sell old one) | 3 |
